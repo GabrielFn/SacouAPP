@@ -16,6 +16,8 @@
 
 **`pnpm build` = `turbo run build`.** Pacotes: `tsc` gera `dist/` (ESM + `.d.ts`), consumido via `exports`. App: `tsc --noEmit && expo export --platform android --output-dir dist`, que não exige conta Expo e prova que o Metro resolve os pacotes do workspace. Android basta aqui; `expo export` não substitui o build nativo.
 
+**Tsconfigs da raiz em `globalDependencies`.** O Turborepo só considera os arquivos da pasta de cada pacote, então `tsconfig.base.json` e `tsconfig.lib.json` precisam ser declarados no `turbo.json`; sem isso, mudar o rigor do TypeScript reaproveitaria o cache. Outra configuração compartilhada que afete build ou teste deve entrar na mesma lista.
+
 **API fora do Turborepo.** `apps/api` não tem `package.json` e não entra no workspace do pnpm, então `pnpm build` não exige .NET, o MSBuild usa seu próprio cache incremental e a CI pode separar os jobs. `Sacou.slnx` na raiz faz `dotnet build` e `dotnet test` funcionarem ali; `pnpm build:api` e `pnpm test:api` são atalhos.
 
 **Fim de linha LF em todo o repositório** (`.gitattributes`), para o clone se comportar igual em Windows e Ubuntu.
@@ -25,6 +27,7 @@
 ## Consequências
 
 - O app declara `@sacou/*` como `workspace:*`; os pacotes precisam ser compilados antes (`^build` no Turborepo).
-- `PACKAGE_NAME` nos pacotes é provisório: E1.1 e E2.1 removem.
+- `PACKAGE_NAME` nos pacotes é provisório. O app depende dele até E1.1 e E2.1 o substituírem por uso real: o `testID` em `apps/mobile/App.tsx` existe só para manter os imports no bundle.
+- O `CLAUDE.md` traz o `export` completo do ambiente local (PATH do .NET, `NUGET_PACKAGES`, `TEMP`, `TMP`), mais do que a nota do PATH prevista no plano, porque cada sessão começa do zero e o C: tem pouco espaço.
 - O build com Hermes só foi validado em Windows; a E0.4 confirma no Ubuntu e deve ler as versões de `packageManager`, `.nvmrc` e `global.json`, sem repetir.
 - Compatibilidade do Unistyles com o RN 0.88 não confirmada: a E4.1 valida cedo.
