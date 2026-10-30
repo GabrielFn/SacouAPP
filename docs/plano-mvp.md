@@ -125,7 +125,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E2.9 | Estatísticas por jogador (saldo +/− em quadra, vitórias, sequência) | Rodada simulada com números conferidos à mão | E2.6 |
 | E2.10 | Porte da função de estado para C# + testes golden compartilhados | TS e C# produzem o mesmo estado em todos os cenários | E2.9, E1.5 |
 
-### E3 · API (M3–M5)
+### E3 · API (M3–M6)
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
@@ -146,7 +146,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.15 | Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
 
-### E4 · App (M3–M5)
+### E4 · App (M3–M6)
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|

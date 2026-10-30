@@ -7,5 +7,5 @@
 4. Livre e 6x0: o `produto.md` e as telas tratam como opções separadas, mas nos dados de formações há uma entrada só. Opções: (1) um botão só na interface, "Livre / 6x0"; (2) dois botões com o mesmo comportamento. **Recomendação: opção 1.** Não bloqueia a E1.1, que só fixa os dados; a decisão vale para as telas de escalação e ajustes (E4.5, E4.8).
 
 ## Respondidas
-- **CI verde antes da E0.4:** a definição de pronto exige CI verde, mas a CI só nasce na E0.4. Até lá vale validação local em clone limpo. Decidida pelo orquestrador na E0.5, sem consulta ao Gabriel.
-- **Cadência das sessões:** o plano fala em "4 horas" (linha 10) e "diária" (E0.7), e `docs/decisoes.md` em "quando quiser". Vale sessão manual, com a E0.7 adiada. Decidida pelo Gabriel (`PROMPT-INICIAL.md`). O plano só muda quando a E0.7 for retomada.
+- **CI verde antes da E0.4:** ver [ADR 0003](../arquitetura/adr/0003-local-validation-before-ci.md).
+- **Cadência das sessões:** o plano fala em "4 horas" (linha 10) e "diária" (E0.7), e `docs/decisoes.md` em "quando quiser". O Gabriel decidiu: sessões manuais e E0.7 para depois (`PROMPT-INICIAL.md`). O orquestrador decidiu que o plano só muda quando a E0.7 for retomada.
