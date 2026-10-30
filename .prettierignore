@@ -1,0 +1,6 @@
+design/
+docs/
+.claude/
+**/*.md
+pnpm-lock.yaml
+apps/api/

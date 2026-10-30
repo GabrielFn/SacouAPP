@@ -1,0 +1,13 @@
+<Project>
+    <!-- docs/decisoes.md forbids these libraries. Runs on resolved references to catch transitive ones too. -->
+    <Target Name="BanForbiddenLibraries" AfterTargets="ResolveAssemblyReferences">
+        <ItemGroup>
+            <ForbiddenLibrary
+                Include="@(ReferencePath)"
+                Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)', '(?i)^(MediatR|AutoMapper)(\.|$)'))" />
+        </ItemGroup>
+        <Error
+            Condition="'@(ForbiddenLibrary)' != ''"
+            Text="Forbidden library referenced (MediatR and AutoMapper are banned, see docs/arquitetura/adr/0002-padroes-e-lint.md): @(ForbiddenLibrary->'%(Filename)')" />
+    </Target>
+</Project>

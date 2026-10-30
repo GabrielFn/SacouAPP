@@ -24,6 +24,8 @@
 
 **`allowBuilds`: nenhum pacote aprovado.** O pnpm 11+ falha a instalação diante de script não revisado (`strictDepBuilds`), mas nenhuma dependência atual tem script de instalação, então a chave não foi declarada. Dependência nova com script deve entrar em `allowBuilds` com `false`; `true` só se o build ou teste quebrar sem ele, com o motivo registrado aqui. Não desligar `strictDepBuilds` nem reduzir `minimumReleaseAge`.
 
+**Atualização (E0.3).** Os scripts novos de instalação trazidos pelo lint ficaram em `allowBuilds` com `false`; a lista e o motivo estão no [ADR 0002](0002-padroes-e-lint.md).
+
 ## Consequências
 
 - O app declara `@sacou/*` como `workspace:*`; os pacotes precisam ser compilados antes (`^build` no Turborepo).

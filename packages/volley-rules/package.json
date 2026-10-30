@@ -12,9 +12,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --dir src"
+    "test": "vitest run --dir src",
+    "lint": "eslint . --max-warnings 0"
   },
   "devDependencies": {
+    "eslint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"

@@ -1,8 +1,8 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="apps/api/src/Sacou.Api/Sacou.Api.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="apps/api/tests/Sacou.Api.Tests/Sacou.Api.Tests.csproj" />
-  </Folder>
+    <Folder Name="/src/">
+        <Project Path="apps/api/src/Sacou.Api/Sacou.Api.csproj" />
+    </Folder>
+    <Folder Name="/tests/">
+        <Project Path="apps/api/tests/Sacou.Api.Tests/Sacou.Api.Tests.csproj" />
+    </Folder>
 </Solution>
