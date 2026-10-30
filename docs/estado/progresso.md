@@ -4,7 +4,7 @@
 
 | Tarefa | Status | Observação |
 |---|---|---|
-| — | — | Nenhuma tarefa iniciada. Próxima: E0.1 (monorepo). |
+| E0.1 | Implementada, aguardando revisão e testes | Branch `task/E0.1-monorepo`. Plano em `docs/estado/tarefas/E0.1.md`; decisões no ADR 0001. |
 
 ## Bloqueadas
 Nenhuma.
