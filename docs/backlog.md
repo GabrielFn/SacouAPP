@@ -24,7 +24,8 @@ Este arquivo guarda só o mapa de marcos e a regra da próxima tarefa. Cada info
 
 1. **Retomar:** se alguma tarefa está "Em andamento" em `progresso.md` e nenhuma sessão ativa cuida dela, retomá-la; havendo mais de uma, por padrão a de menor ID. Uma sessão nova assume que não há sessão ativa, salvo aviso em contrário.
 2. **Escolher:** senão, pegar uma tarefa elegível do marco atual: não feita nem adiada, com todas as dependências feitas e sem acesso pendente. Por padrão, a de menor ID. Esse é só o padrão: a ordem dentro do marco é livre e tarefas independentes podem correr em paralelo (`CLAUDE.md`, seções "Autonomia" e "Ciclo de agentes por tarefa").
-3. **Nada elegível no marco:** aplicar o passo 2 ao marco seguinte, sem mudar o marco atual. Antes, anotar o motivo:
+3. **Tarefas do marco todas feitas (sem contar adiadas) e marco não concluído:** fazer a revisão de segurança geral e entregar o relatório, sem iniciar tarefa do marco seguinte.
+4. **Restam tarefas não feitas nem adiadas, mas nenhuma elegível:** aplicar o passo 2 ao marco seguinte, sem mudar o marco atual. Antes, anotar o motivo:
    - bloqueio de um dos casos de "Autonomia" do `CLAUDE.md` (como um acesso pendente) vai para `estado/perguntas.md`;
    - tarefa que apenas aguarda outra em andamento é anotada em `estado/progresso.md`.
 
