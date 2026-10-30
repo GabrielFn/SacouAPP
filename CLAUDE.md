@@ -83,4 +83,21 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 
 ## Comandos
 
-(Preencher na tarefa E0.1 quando o monorepo existir: build, lint, testes, rodar API e app.)
+Rodar na raiz do repositório. Lint entra na E0.3.
+
+```sh
+pnpm install --frozen-lockfile              # instala dependências JS
+pnpm build                                  # pacotes (tsc) e app (tsc + expo export Android)
+pnpm typecheck                              # TS strict em pacotes e app
+pnpm test                                   # Vitest dos pacotes
+dotnet build                                # solução Sacou.slnx (avisos como erro)
+dotnet test                                 # xUnit v3 da API
+dotnet run --project apps/api/src/Sacou.Api # sobe a API
+pnpm --filter @sacou/mobile start           # sobe o Metro do app
+```
+
+Ambiente local do Gabriel (Git Bash, sem admin; o C: tem pouco espaço, então caches ficam em D:):
+
+```sh
+export PATH="/d/tools/dotnet:$PATH" NUGET_PACKAGES=/d/tools/nuget-packages TEMP=/d/tmp TMP=/d/tmp
+```

@@ -9,3 +9,10 @@ dist/
 .turbo/
 *.log
 .DS_Store
+*.tsbuildinfo
+coverage/
+TestResults/
+.vs/
+apps/mobile/android/
+apps/mobile/ios/
+expo-env.d.ts
