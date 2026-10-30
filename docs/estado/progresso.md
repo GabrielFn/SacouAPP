@@ -6,7 +6,9 @@
 |---|---|---|
 | E0.1 | Feita | Plano em `docs/estado/tarefas/E0.1.md`; decisões no ADR 0001. Aprovada no ciclo 2 de revisão. Validação em Linux fica para a CI (E0.4). |
 | E0.3 | Em andamento | Implementação na branch `task/E0.3-code-standards`. |
-| E0.5 | Em andamento | Revisão e testes da branch `task/E0.5-knowledge-base`. |
+| E0.5 | Bloqueada | Branch `task/E0.5-knowledge-base`, sem merge. Ver "Bloqueadas". |
+| E0.2 | Em andamento | Análise. |
+| E1.1 | Em andamento | Análise. |
 
 ## Adiadas
 
@@ -19,4 +21,5 @@
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
 ## Bloqueadas
-Nenhuma.
+
+- E0.5: 3 revisões reprovadas seguidas; aguarda o Gabriel (`perguntas.md`, item 3). A E0.8 depende dela.
