@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Rodada · visão do jogador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.chip{height:30px;padding:0 11px;border-radius:15px;background:rgba(15,27,45,0.07);color:#4A5566;font-size:13px;font-weight:600;display:inline-flex;align-items:center}
+.av{width:34px;height:34px;border-radius:17px;border:2px solid #FFFFFF;background:#33496B;color:#F6F1E7;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-left:-8px;box-sizing:border-box}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center">
+    <a href="Inicio.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span style="font-size: 14px; color: #4A5566">Você é jogador</span>
+  </header>
+
+  <div style="padding: 2px 20px 0">
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 36px; line-height: 1">Vôlei de quinta</h1>
+    <p style="margin: 4px 0 0; font-size: 15px; color: #4A5566">Qui 5/11 · 19h · Arena Beira-Mar</p>
+  </div>
+
+  <div style="padding: 10px 20px 0; display: flex; flex-wrap: wrap; gap: 6px">
+    <span class="chip">6x6</span>
+    <span class="chip">25 pontos</span>
+    <span class="chip">Perde sai</span>
+    <span class="chip">R$ 10 avulso</span>
+  </div>
+
+  <section aria-label="Sua presença" style="margin: 14px 16px 0; background: #0F1B2D; color: #F6F1E7; border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 14px">
+    <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 24px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; flex: none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    </span>
+    <div style="flex: 1; min-width: 0">
+      <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; line-height: 1">Você vai</div>
+      <div style="font-size: 14px; color: rgba(246,241,231,0.82); margin-top: 3px">2º mensalista</div>
+    </div>
+    <div style="text-align: right">
+      <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums">12<span style="color: rgba(246,241,231,0.45)">/12</span></div>
+      <div style="font-size: 13px; color: #FFC83D">1 na espera</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="conf-title" style="margin: 14px 16px 0; background: #FFFFFF; border: 1.5px solid rgba(15,27,45,0.12); border-radius: 16px; padding: 12px 14px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h2 id="conf-title" style="margin: 0; font-size: 16px; font-weight: 700">Confirmados</h2>
+      <a href="#" style="height: 44px; display: inline-flex; align-items: center; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px">Ver os 12</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div aria-hidden="true" style="display: flex; padding-left: 8px">
+        <span class="av">A</span><span class="av" style="background: #1F5BFF">P</span><span class="av" style="background: #12A150">L</span><span class="av" style="background: #7B3FE4">M</span><span class="av" style="background: #FF5A1F; color: #0F1B2D">J</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.35; color: #4A5566">Ana, Pedro, Lia, Marcos, <b style="color: #0F1B2D">você</b> e mais 7</p>
+    </div>
+    <p style="margin: 10px 0 0; font-size: 13px; color: #4A5566">Espera: 1ª Clara</p>
+  </section>
+
+  <section aria-labelledby="pg-title" style="margin: 12px 16px 0; background: #FFFFFF; border: 1.5px solid rgba(15,27,45,0.12); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="flex: 1">
+        <h2 id="pg-title" style="margin: 0; font-size: 13px; font-weight: 500; color: #4A5566">Pagar como avulso</h2>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; line-height: 1">Pagar R$ 10</div>
+      </div>
+      <button style="height: 48px; padding: 0 14px; border-radius: 12px; border: 1.5px solid #0F1B2D; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>Copiar Pix copia e cola
+      </button>
+    </div>
+    <button aria-pressed="true" style="height: 50px; border-radius: 12px; background: #FFF3CF; border: 1.5px solid #E0A400; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Já paguei
+    </button>
+    <p role="status" style="margin: 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #8A5A00; font-weight: 600">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Aguardando confirmação do admin
+    </p>
+  </section>
+
+  <a href="#" style="margin: 6px 16px 0; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 600; color: #1F5BFF">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>Abrir no WhatsApp do grupo
+  </a>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 24px; background: #FFFFFF; border-top: 2px solid #0F1B2D; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box">
+    <button aria-describedby="aviso-sair" style="height: 54px; border-radius: 14px; border: 1.5px solid rgba(15,27,45,0.35); font-size: 16px; font-weight: 700">Não vou mais</button>
+    <p id="aviso-sair" style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: #4A5566">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h12"/><path d="M12 6l6 6-6 6"/></svg>Clara (1ª da espera) entra no seu lugar.
+    </p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

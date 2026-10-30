@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Corrigir pontos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.row{width:100%;height:44px;display:grid;grid-template-columns:62px 28px 1fr auto;align-items:center;column-gap:8px;padding:0 10px;border-radius:12px;text-align:left;box-sizing:border-box}
+.row+.row{margin-top:2px}
+.sc{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:23px;font-variant-numeric:tabular-nums;line-height:1}
+.tm{width:24px;height:24px;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center}
+.tm.a{background:#FF5A1F;color:#0F1B2D}
+.tm.b{background:#1F5BFF;color:#FFFFFF}
+.sv{font-size:14px;color:#4A5566}
+.sv b{color:#0F1B2D;font-weight:600}
+.so{height:26px;padding:0 8px;border-radius:13px;background:#FFFFFF;border:1.5px solid;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;box-sizing:border-box}
+.undo{opacity:0.5}
+.undo .sc{text-decoration:line-through;text-decoration-thickness:2px}
+.qa{flex:1;height:44px;border-radius:12px;border:1.5px solid #0F1B2D;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;box-sizing:border-box}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0F1B2D; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+  <svg aria-hidden="true" width="390" height="120" viewBox="0 0 390 120" style="position: absolute; left: 0; top: 0" fill="none" stroke="rgba(246,241,231,0.14)" stroke-width="2"><rect x="30" y="10" width="330" height="200"/><line x1="30" y1="60" x2="360" y2="60"/></svg>
+
+  <section aria-label="Corrigir pontos do 2º set" style="position: absolute; left: 0; right: 0; bottom: 0; top: 44px; background: #F6F1E7; border-radius: 24px 24px 0 0; padding: 10px 20px 0; display: flex; flex-direction: column; box-sizing: border-box">
+    <div aria-hidden="true" style="width: 40px; height: 4px; border-radius: 2px; background: rgba(15,27,45,0.25); align-self: center"></div>
+    <div style="display: flex; align-items: center; margin-top: 6px">
+      <div>
+        <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; line-height: 1">Corrigir</h1>
+        <p style="margin: 3px 0 0; font-size: 13px; color: #4A5566">2º set · Laranja 18–15 Azul · últimos 10 pontos</p>
+      </div>
+      <a href="MenuQuadra.dc.html" aria-label="Fechar" style="margin-left: auto; width: 48px; height: 48px; margin-right: -12px; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 10px">
+      <button class="qa">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3c-1.5 3-1.5 6 0 9s4.5 4.5 8.5 3.5M12 12c-3 .5-6 2.5-7.5 6"/></svg>Trocar sacador
+      </button>
+      <button class="qa">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4h-4"/></svg>Girar / desgirar time
+      </button>
+    </div>
+
+    <p style="margin: 12px 0 6px; font-size: 13px; font-weight: 600; color: #4A5566">Mais recente no topo · toque num ponto para voltar até ele</p>
+
+    <ol aria-label="Linha do tempo do 2º set" style="margin: 0; padding: 0; list-style: none">
+      <li><button class="row undo" aria-label="18 a 15, ponto do Laranja, saque do João. Será desfeito"><span class="sc">18–15</span><span class="tm a">A</span><span class="sv">Saque <b>João</b></span><span></span></button></li>
+      <li><button class="row undo" aria-label="17 a 15, ponto do Laranja, saque da Gabi. Side-out, Laranja gira para rotação 2. Será desfeito"><span class="sc">17–15</span><span class="tm a">A</span><span class="sv">Saque <b>Gabi</b></span><span class="so" style="border-color: #FF5A1F">Side-out · rot. 2</span></button></li>
+      <li><button class="row undo" aria-label="16 a 15, ponto do Azul, saque da Gabi. Será desfeito"><span class="sc">16–15</span><span class="tm b">B</span><span class="sv">Saque <b>Gabi</b></span><span></span></button></li>
+      <li><button class="row" aria-pressed="true" aria-label="16 a 14, ponto do Azul, saque da Bia. Side-out, Azul gira para rotação 1. Selecionado" style="background: #FFFFFF; box-shadow: inset 0 0 0 2px #0F1B2D"><span class="sc">16–14</span><span class="tm b">B</span><span class="sv">Saque <b>Bia</b></span><span class="so" style="border-color: #1F5BFF">Side-out · rot. 1</span></button></li>
+      <li><button class="row" aria-label="16 a 13, ponto do Laranja, saque da Bia"><span class="sc">16–13</span><span class="tm a">A</span><span class="sv">Saque <b>Bia</b></span><span></span></button></li>
+      <li><button class="row" aria-label="15 a 13, ponto do Laranja, saque do Léo. Side-out, Laranja gira para rotação 3"><span class="sc">15–13</span><span class="tm a">A</span><span class="sv">Saque <b>Léo</b></span><span class="so" style="border-color: #FF5A1F">Side-out · rot. 3</span></button></li>
+      <li><button class="row" aria-label="14 a 13, ponto do Azul, saque do Léo"><span class="sc">14–13</span><span class="tm b">B</span><span class="sv">Saque <b>Léo</b></span><span></span></button></li>
+      <li><button class="row" aria-label="14 a 12, ponto do Azul, saque do Marcos. Side-out, Azul gira para rotação 2"><span class="sc">14–12</span><span class="tm b">B</span><span class="sv">Saque <b>Marcos</b></span><span class="so" style="border-color: #1F5BFF">Side-out · rot. 2</span></button></li>
+      <li><button class="row" aria-label="14 a 11, ponto do Laranja, saque do Marcos"><span class="sc">14–11</span><span class="tm a">A</span><span class="sv">Saque <b>Marcos</b></span><span></span></button></li>
+      <li><button class="row" aria-label="13 a 11, ponto do Laranja, saque da Duda. Side-out, Laranja gira para rotação 4"><span class="sc">13–11</span><span class="tm a">A</span><span class="sv">Saque <b>Duda</b></span><span class="so" style="border-color: #FF5A1F">Side-out · rot. 4</span></button></li>
+    </ol>
+  </section>
+
+  <section role="dialog" aria-labelledby="voltar-titulo" style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1.5px solid rgba(15,27,45,0.12); border-radius: 22px 22px 0 0; box-shadow: 0 -8px 24px rgba(15,27,45,0.16); padding: 16px 20px 18px; box-sizing: border-box">
+    <h2 id="voltar-titulo" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; line-height: 1">Voltar o jogo para 16x14?</h2>
+    <ul style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 15px">
+      <li style="display: flex; align-items: center; gap: 8px"><span style="width: 72px; font-size: 13px; font-weight: 600; color: #4A5566">Placar</span><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums"><s style="color: #4A5566; text-decoration-thickness: 2px">18–15</s> → 16–14</span></li>
+      <li style="display: flex; align-items: center; gap: 8px"><span style="width: 72px; font-size: 13px; font-weight: 600; color: #4A5566">Saque</span><span>volta para o <b style="color: #1F5BFF">Azul</b> (Gabi)</span></li>
+      <li style="display: flex; align-items: center; gap: 8px"><span style="width: 72px; font-size: 13px; font-weight: 600; color: #4A5566">Rotação</span><span><b style="color: #C2410C">Laranja</b> volta para rotação 3</span></li>
+    </ul>
+    <p style="margin: 8px 0 0; font-size: 13px; color: #4A5566">3 pontos serão apagados.</p>
+    <div style="display: grid; grid-template-columns: 1fr 1.55fr; gap: 8px; margin-top: 12px">
+      <a href="QuadraSol.dc.html" style="height: 52px; border-radius: 14px; border: 1.5px solid #0F1B2D; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; box-sizing: border-box">Cancelar</a>
+      <a href="QuadraSol.dc.html" style="height: 52px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700">Voltar para este ponto</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

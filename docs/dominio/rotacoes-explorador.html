@@ -1,0 +1,288 @@
+<title>Rotações do Sacou</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: coluna de leitura + explorador interativo da quadra (meia quadra vista de cima, rede no topo) */
+:root{
+  --bg:#F6F1E7; --surface:#FFFFFF; --ink:#0F1B2D; --muted:#4A5566; --line:rgba(15,27,45,.14);
+  --accent:#FF5A1F; --ball:#FFC83D; --net:#1F5BFF; --ok:#0C6B35; --bad:#B3261E;
+  --court:#F3E7D3; --courtline:#0F1B2D;
+  --r-s:#FF5A1F; --r-opp:#1F5BFF; --r-oh:#12A150; --r-mb:#7B3FE4; --r-l:#FFC83D; --r-any:#5B6472;
+  --display:'Barlow Condensed',system-ui,sans-serif; --body:Inter,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1B2D; --surface:#17263C; --ink:#F6F1E7; --muted:#AEB8C6; --line:rgba(246,241,231,.16);
+  --court:#22344F; --courtline:#F6F1E7; --ok:#4CC27E; --bad:#FF7A70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1B2D; --surface:#17263C; --ink:#F6F1E7; --muted:#AEB8C6; --line:rgba(246,241,231,.16);
+  --court:#22344F; --courtline:#F6F1E7; --ok:#4CC27E; --bad:#FF7A70; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.02;margin:0;text-wrap:balance}
+h1{font-size:clamp(44px,8vw,72px)} h2{font-size:34px} h3{font-size:22px}
+p{margin:0;max-width:68ch}
+.lead{font-size:18px;color:var(--muted)}
+header{display:flex;flex-direction:column;gap:14px}
+.alert{border:2px solid var(--accent);border-radius:16px;padding:14px 16px;background:var(--surface);display:flex;flex-direction:column;gap:6px;max-width:760px}
+.alert b{font-family:var(--display);font-size:20px}
+section{display:flex;flex-direction:column;gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font-size:21px}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.ref{font-size:13px;color:var(--muted)}
+code{font-size:.9em;background:var(--line);padding:1px 5px;border-radius:5px}
+/* explorer */
+.explorer{background:var(--surface);border:1.5px solid var(--line);border-radius:20px;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:820px){.explorer{grid-template-columns:minmax(0,1fr)}}
+.controls{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ctl{display:flex;flex-direction:column;gap:6px}
+.ctl > span{font-size:13px;font-weight:700;color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:15px;font-weight:600;min-height:44px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg button:focus-visible{outline:3px solid var(--net);outline-offset:2px}
+.courtbox{display:flex;flex-direction:column;gap:10px;align-items:center;min-width:0}
+svg.court{width:100%;max-width:420px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:6px;display:inline-block}
+.checks{display:flex;flex-direction:column;gap:4px;font-size:14px;font-variant-numeric:tabular-nums}
+.checks div{display:flex;gap:8px;align-items:baseline}
+.ok{color:var(--ok);font-weight:700} .bad{color:var(--bad);font-weight:700}
+.note{font-size:15px;background:var(--bg);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:700}
+.scroll{overflow-x:auto}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
+.tag.err{background:var(--bad);color:#fff} .tag.warn{background:var(--ball);color:#0F1B2D}
+.sources{font-size:14px;display:flex;flex-direction:column;gap:6px}
+.sources a{color:var(--net);word-break:break-word}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sources a{color:#8FB0FF}}
+:root[data-theme="dark"] .sources a{color:#8FB0FF}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.pl{transition:transform .25s ease}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Rotações do Sacou</h1>
+    <p class="lead">Regras oficiais, sistemas de jogo e a posição de cada jogador no momento do saque. É a especificação do motor de rotação do app (quadra 6x6).</p>
+    <div class="alert" role="note">
+      <b>A regra mudou em 2025</b>
+      <p>Nas regras FIVB 2025–2028, só o time que recebe precisa respeitar a ordem de rotação na hora do saque. O time que saca pode estar em qualquer posição. Material antigo de treinador ainda mostra a regra antiga para os dois times, então o app tem um modo de regra configurável: <b style="font-family:var(--body);font-size:16px">FIVB 2025–28</b> (padrão) ou <b style="font-family:var(--body);font-size:16px">Clássico</b>.</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="exp-t">
+    <h2 id="exp-t">Explorar as formações</h2>
+    <p class="lead">Escolha o sistema, a rotação e se o time está recebendo ou sacando. A quadra é a metade do próprio time vista de cima, com a rede no topo.</p>
+    <div class="explorer">
+      <div class="controls">
+        <div class="ctl"><span id="l-sys">Sistema</span><div class="seg" role="group" aria-labelledby="l-sys" id="sys"></div></div>
+        <div class="ctl"><span id="l-rot">Rotação</span><div class="seg" role="group" aria-labelledby="l-rot" id="rot"></div></div>
+        <div class="ctl"><span id="l-ph">Situação</span><div class="seg" role="group" aria-labelledby="l-ph" id="ph"></div></div>
+        <div class="ctl"><span id="l-mode">Modo de regra</span><div class="seg" role="group" aria-labelledby="l-mode" id="mode"></div></div>
+        <div class="note" id="note" aria-live="polite"></div>
+        <div class="ctl"><span>Checagem de sobreposição</span><div class="checks" id="checks"></div></div>
+      </div>
+      <div class="courtbox">
+        <svg class="court" id="court" viewBox="0 0 360 400" role="img" aria-label="Meia quadra com as posições dos jogadores"></svg>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--r-s)"></i>Levantador</span>
+          <span><i class="dot" style="background:var(--r-opp)"></i>Oposto</span>
+          <span><i class="dot" style="background:var(--r-oh)"></i>Ponteiro</span>
+          <span><i class="dot" style="background:var(--r-mb)"></i>Central</span>
+          <span><i class="dot" style="background:var(--r-l)"></i>Líbero</span>
+          <span><i class="dot" style="background:var(--r-any)"></i>Sem função</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="regras-t">
+    <h2 id="regras-t">Regras oficiais que o motor segue</h2>
+    <div class="grid2">
+      <div class="card"><h3>Ordem e giro</h3><ul>
+        <li>Rede: posições 4, 3, 2 (esquerda → direita). Fundo: 5, 6, 1. A 1 é o fundo direito e é quem saca.</li>
+        <li>Só gira o time que estava recebendo e venceu o rali (side-out), no sentido horário: 2→1, 3→2, 4→3, 5→4, 6→5, 1→6.</li>
+        <li>Quem vence sacando não gira e o mesmo jogador saca de novo.</li>
+        <li>Cada time tem a sua rotação, independente da do outro.</li>
+      </ul><span class="ref">FIVB 7.4.1, 7.6, 12.2</span></div>
+      <div class="card"><h3>Sobreposição (falta de posição)</h3><ul>
+        <li>Vale só no momento do golpe do saque e, no FIVB 2025–28, só para o time que recebe.</li>
+        <li>Frente e fundo: 1 atrás de 2, 6 atrás de 3, 5 atrás de 4. Empate é permitido.</li>
+        <li>Lateral: 4 à esquerda de 3, 3 à esquerda de 2; 5 à esquerda de 6, 6 à esquerda de 1. Aqui não pode empatar.</li>
+        <li>Não existem outras relações (nada na diagonal). O sacador não conta. Mede-se pelos pés no chão.</li>
+        <li>Depois do saque, todo mundo pode se mexer.</li>
+      </ul><span class="ref">FIVB 7.4, 7.5</span></div>
+      <div class="card"><h3>Falta de rotação</h3><ul>
+        <li>Sacar fora da ordem: ponto e saque para o adversário, rotação corrigida.</li>
+        <li>Pontos feitos desde o erro são anulados, se der para saber quando foi.</li>
+      </ul><span class="ref">FIVB 7.7</span></div>
+      <div class="card"><h3>Líbero</h3><ul>
+        <li>Só joga no fundo (5, 6, 1). Não saca, não bloqueia, não ataca acima da rede.</li>
+        <li>Não entra na ordem de rotação: ocupa o lugar de quem substituiu e sai quando esse lugar vai para a posição 4.</li>
+        <li>Trocas ilimitadas, mas com um rali completo entre duas trocas. Só troca com quem substituiu.</li>
+        <li>Toque por cima dele na zona de ataque: o colega não pode atacar acima da rede.</li>
+      </ul><span class="ref">FIVB 19</span></div>
+      <div class="card"><h3>Jogador do fundo</h3><ul>
+        <li>Só ataca acima da rede se pular de trás da linha de 3 m.</li>
+        <li>Não bloqueia. Por isso o levantador no fundo (infiltrando) não pode bloquear.</li>
+      </ul><span class="ref">FIVB 13.2, 13.3.3, 14.6.2</span></div>
+      <div class="card"><h3>Substituições e sets</h3><ul>
+        <li>Oficial: 6 substituições por set, cada titular sai e volta uma vez. Na pelada o app desliga esse limite.</li>
+        <li>Tie-break: troca de quadra aos 8 pontos, sem girar e sem mudar quem saca.</li>
+        <li>Saque inicial: sorteio no 1º e no 5º set; nos outros, alterna.</li>
+      </ul><span class="ref">FIVB 15, 18.2.2, 12.1</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sist-t">
+    <h2 id="sist-t">Sistemas de jogo</h2>
+    <p>Escalação base, na ordem das posições 1 a 6 na rotação 1: <b>Levantador, Ponteiro 1, Central 1, Oposto, Ponteiro 2, Central 2</b>. Cada função fica na diagonal do seu par (três posições de distância). Isso é convenção de treinador, não regra.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Sistema</th><th>Composição</th><th>Quem levanta</th><th>Rotações que usa</th></tr></thead>
+      <tbody>
+        <tr><td><b>Livre / 6x0</b></td><td>6 jogadores sem função</td><td>Quem estiver na posição 3</td><td>Uma formação base</td></tr>
+        <tr><td><b>4x2</b></td><td>2 levantadores em diagonal, 2 ponteiros, 2 centrais</td><td>O levantador que está na rede</td><td>Levantador na rede (4, 3, 2), repetidas</td></tr>
+        <tr><td><b>6x2</b></td><td>2 levantadores-atacantes em diagonal, 2 ponteiros, 2 centrais</td><td>O levantador do fundo (infiltra); o da rede ataca</td><td>Levantador no fundo (1, 6, 5), repetidas</td></tr>
+        <tr><td><b>5x1</b></td><td>1 levantador, 1 oposto, 2 ponteiros, 2 centrais, líbero</td><td>Sempre o mesmo; infiltra quando está no fundo</td><td>As 6</td></tr>
+      </tbody></table></div>
+    <div class="two">
+      <div class="card"><h3>Como numeramos as rotações</h3>
+        <p>Existem duas convenções. O app guarda internamente a posição do levantador (<code>setterZone</code> de 1 a 6) e chama de “rotação N” o levantador na posição N.</p>
+        <p>Girando, a sequência é <b>1 → 6 → 5 → 4 → 3 → 2</b>. Treinadores americanos numeram em sequência (rotação 1 = levantador sacando, rotação 2 = levantador na 6…); as duas coincidem só na 1 e na 4.</p>
+      </div>
+      <div class="card"><h3>Recomendação para pelada</h3>
+        <p>Times sorteados: <b>Livre/6x0 ou 4x2</b> com recepção em W de 5 passadores. 5x1 com 3 passadores só para times fixos e com líbero.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="val-t">
+    <h2 id="val-t">O que o motor valida</h2>
+    <div class="two">
+      <div class="card"><h3><span class="tag err">Erro</span> bloqueia</h3><ul>
+        <li>Seis jogadores por time, cada posição ocupada uma vez.</li>
+        <li>Girar só quem venceu recebendo. Nunca girar quem venceu sacando.</li>
+        <li>Sacador é sempre quem está na posição 1 depois do giro.</li>
+        <li>Sobreposição só nas 6 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm).</li>
+        <li>Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.</li>
+        <li>Tie-break: troca de lado aos 8 sem girar.</li>
+      </ul></div>
+      <div class="card"><h3><span class="tag warn">Aviso</span> só informa</h3><ul>
+        <li>Levantador na rede (2, 3, 4): não infiltra; pode bloquear e atacar.</li>
+        <li>Levantador no fundo: não bloqueia nem ataca acima da rede na zona de frente.</li>
+        <li>Rotação 4 sem empilhar: corrida longa do levantador.</li>
+        <li>Rotação 1: infiltração mais longa (atrás do passador da 2).</li>
+        <li>Funções fora da diagonal (dois levantadores lado a lado).</li>
+        <li>Regras da casa (entra no saque, substituições livres) sempre como configuração, nunca como regra.</li>
+      </ul></div>
+    </div>
+    <div class="card"><h3>Erros comuns de implementação</h3><ul>
+      <li>Misturar as duas numerações de rotação.</li>
+      <li>Guardar o líbero dentro da ordem de rotação.</li>
+      <li>Checar relações que não existem (diagonais, rede contra fundo na lateral).</li>
+      <li>Espelhar coordenadas na troca de quadra: as coordenadas são do próprio time; só o desenho espelha.</li>
+      <li>Girar o time ao trocar de quadra.</li>
+    </ul></div>
+  </section>
+
+  <section aria-labelledby="src-t">
+    <h2 id="src-t">Fontes</h2>
+    <p class="ref">As coordenadas são proposta técnica dentro das convenções da Gold Medal Squared e da JVA, todas validadas contra as regras de sobreposição. Pesquisa de 30/10/2026.</p>
+    <div class="sources">
+      <a href="https://www.fivb.com/wp-content/uploads/2025/01/FIVB-Volleyball_Rules2025_2028-EN-v05.pdf">FIVB — Official Volleyball Rules 2025–2028 (PDF)</a>
+      <a href="https://www.fmvolei.org.br/_files/ugd/ad26ed_8edc8428ae624c93aa28e47421fddb15.pdf">Regras Oficiais de Voleibol 2025–2028 (tradução PT-BR)</a>
+      <a href="https://vbahk.org.hk/items/media/Refereeing/202528_Volleyball_Rules/VB/fivbvolleyball_rulesmodification20252028.pdf">FIVB — Alterações de regras 2025–2028</a>
+      <a href="https://www.volleyballengland.org/uploads/docs/FAQ%2025-26%20Season%20-%20Rules%20and%20Regulations%20v2%20Dec%2025.pdf">Volleyball England — FAQ 2025–26</a>
+      <a href="https://www.goldmedalsquared.com/post/volleyball-serve-receive-rotations-formations-and-systems">Gold Medal Squared — Serve receive</a>
+      <a href="https://jvavolleyball.org/education_resources/serve-receive-rotations/">JVA — Serve receive rotations</a>
+      <a href="https://coachingvb.com/libero-in-volleyball-rules-role-rotations-skills/">Coaching Volleyball — Líbero</a>
+      <a href="https://coachingvb.com/setting-starting-rotation-5-1/">Coaching Volleyball — Rotação inicial no 5-1</a>
+      <a href="https://visu.network/br/ferramentas/rodizio-volei/">visu.network — Rodízio de vôlei</a>
+      <a href="https://www.theartofcoachingvolleyball.com/passing-formations/">The Art of Coaching Volleyball — Formações de passe</a>
+      <a href="https://open.online.uga.edu/volleyball/?p=45">UGA — Volleyball (CC BY 4.0)</a>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const ROLE={S:'var(--r-s)',S1:'var(--r-s)',S2:'var(--r-s)',OPP:'var(--r-opp)',OH1:'var(--r-oh)',OH2:'var(--r-oh)',MB1:'var(--r-mb)',MB2:'var(--r-mb)',L:'var(--r-l)'};
+  const NAME={S:'Levantador',S1:'Levantador 1',S2:'Levantador 2',OPP:'Oposto',OH1:'Ponteiro 1',OH2:'Ponteiro 2',MB1:'Central 1',MB2:'Central 2',L:'Líbero'};
+  const BASE={4:[.20,.12],3:[.50,.12],2:[.80,.12],5:[.20,.70],6:[.50,.72],1:[.80,1.05]};
+  // pos: [jogador, x, y]
+  const R51={
+    1:{rec:{4:['OPP',.08,.12],3:['MB1',.45,.10],2:['OH1',.80,.55],5:['OH2',.18,.62],6:['L',.50,.68],1:['S',.95,.62]},lib:'MB2',note:'Levantador escondido atrás do ponteiro da posição 2: é a infiltração mais longa. Líbero no lugar do Central 2.'},
+    6:{rec:{4:['OH2',.18,.60],3:['OPP',.62,.05],2:['MB1',.85,.08],5:['L',.48,.68],6:['S',.65,.12],1:['OH1',.82,.62]},lib:'MB2',note:'Levantador colado atrás do oposto, pronto para infiltrar. Líbero no lugar do Central 2.'},
+    5:{rec:{4:['MB2',.12,.08],3:['OH2',.20,.60],2:['OPP',.85,.10],5:['S',.38,.30],6:['OH1',.52,.68],1:['L',.82,.65]},lib:'MB1',note:'Levantador perto da linha de 3 m, atrás do central. Líbero no lugar do Central 1. Ao sacar, o Central 1 saca e o líbero sai.',serveSub:{1:'MB1'}},
+    4:{rec:{4:['S',.06,.06],3:['MB2',.14,.10],2:['OH2',.22,.58],5:['OH1',.50,.66],6:['L',.80,.64],1:['OPP',.94,.76]},lib:'MB1',note:'Levantador na rede, no canto esquerdo: formação empilhada à esquerda. Ele corre pela rede até o alvo. Líbero no lugar do Central 1.'},
+    3:{rec:{4:['OH1',.18,.58],3:['S',.60,.05],2:['MB2',.80,.08],5:['L',.48,.66],6:['OPP',.70,.85],1:['OH2',.82,.64]},lib:'MB1',note:'Levantador na rede já no alvo. Oposto escondido no fundo. Líbero no lugar do Central 1.'},
+    2:{rec:{4:['MB1',.08,.08],3:['OH1',.20,.58],2:['S',.70,.05],5:['OPP',.10,.88],6:['OH2',.50,.68],1:['L',.80,.65]},lib:'MB2',note:'Levantador na rede, não infiltra. Só 2 atacantes na rede. Líbero no lugar do Central 2. Ao sacar, o Central 2 saca e o líbero sai.',serveSub:{1:'MB2'}}
+  };
+  const SYS={
+    '5x1':{label:'5x1',rots:[1,6,5,4,3,2],get:r=>R51[r]},
+    '6x2':{label:'6x2',rots:[1,6,5],get:r=>{const o=R51[r];const rec={};for(const p in o.rec){const v=o.rec[p];rec[p]=[v[0]==='S'?'S1':v[0]==='OPP'?'S2':v[0],v[1],v[2]];}return {rec,lib:o.lib,serveSub:o.serveSub,note:'Igual ao 5x1 com o levantador do fundo (S1) infiltrando; o levantador da rede (S2) ataca como oposto. Repete a cada 3 rotações.'};}},
+    '4x2':{label:'4x2',rots:[4,3,2],get:r=>({
+      4:{rec:{4:['S2',.06,.06],3:['MB1',.50,.48],2:['OH1',.80,.45],5:['OH2',.20,.45],6:['MB2',.33,.75],1:['S1',.67,.75]},note:'Levantador da rede no canto esquerdo. Recepção em W com 5 passadores. Sem líbero.'},
+      3:{rec:{4:['OH2',.20,.45],3:['S2',.55,.05],2:['MB1',.80,.45],5:['MB2',.33,.75],6:['S1',.50,.48],1:['OH1',.67,.75]},note:'Levantador da rede já no alvo. W com 5 passadores.'},
+      2:{rec:{4:['MB2',.20,.45],3:['OH2',.50,.48],2:['S2',.70,.05],5:['S1',.33,.75],6:['OH1',.67,.75],1:['MB1',.80,.45]},note:'Levantador da rede na posição 2. Depois de 3 rotações, os dois levantadores trocam de papel.'}
+    })[r]},
+    'livre':{label:'Livre / 6x0',rots:[0],get:()=>({rec:{4:['P4',.20,.45],3:['P3',.50,.08],2:['P2',.80,.45],5:['P5',.25,.78],6:['P6',.50,.50],1:['P1',.75,.78]},note:'Sem funções. Quem está na posição 3 levanta. Recepção em W com 5 passadores. A formação é a mesma em todas as rotações.'})}
+  };
+  const st={sys:'5x1',rot:1,ph:'rec',mode:'fivb'};
+  const $=id=>document.getElementById(id);
+  function btns(el,items,key){el.innerHTML='';items.forEach(([v,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.setAttribute('aria-pressed',String(st[key]===v));b.addEventListener('click',()=>{st[key]=v;if(key==='sys'){st.rot=SYS[v].rots[0];}render();});el.appendChild(b);});}
+  function formation(){
+    const d=SYS[st.sys].get(st.rot);
+    if(st.ph==='rec') return {pos:d.rec,d};
+    const pos={};
+    for(const p in d.rec){let who=d.rec[p][0];if(d.serveSub&&d.serveSub[p])who=d.serveSub[p];pos[p]=[who,BASE[p][0],BASE[p][1]];}
+    return {pos,d};
+  }
+  function checks(pos,serving){
+    const out=[];const T=0;
+    if(serving&&st.mode==='fivb'){out.push(['livre','O time que saca pode ocupar qualquer posição (FIVB 2025–28).',true]);return out;}
+    const y=p=>pos[p][2],x=p=>pos[p][1];
+    const ign=p=>serving&&p==1;
+    [[1,2],[6,3],[5,4]].forEach(([b,f])=>{if(ign(b))return;out.push([`${b} atrás de ${f}`,`${y(b).toFixed(2)} ≥ ${y(f).toFixed(2)}`,y(b)>=y(f)-T]);});
+    [[4,3],[3,2],[5,6],[6,1]].forEach(([a,b])=>{if(ign(a)||ign(b))return;out.push([`${a} à esquerda de ${b}`,`${x(a).toFixed(2)} < ${x(b).toFixed(2)}`,x(a)<x(b)]);});
+    if(serving)out.push(['sacador','fora da checagem',true]);
+    return out;
+  }
+  function render(){
+    btns($('sys'),Object.keys(SYS).map(k=>[k,SYS[k].label]),'sys');
+    btns($('rot'),SYS[st.sys].rots.map(r=>[r,r===0?'Única':'Rotação '+r]),'rot');
+    btns($('ph'),[['rec','Recebendo'],['srv','Sacando']],'ph');
+    btns($('mode'),[['fivb','FIVB 2025–28'],['classic','Clássico']],'mode');
+    const {pos,d}=formation();const serving=st.ph==='srv';
+    const W=300,ox=30,oy=24,S=v=>v*W;
+    const css=getComputedStyle(document.documentElement);
+    let s=`<rect x="${ox}" y="${oy}" width="${W}" height="${W}" fill="var(--court)" stroke="var(--courtline)" stroke-width="3"/>`;
+    s+=`<line x1="${ox-14}" y1="${oy}" x2="${ox+W+14}" y2="${oy}" stroke="var(--net)" stroke-width="6"/>`;
+    s+=`<text x="${ox+W/2}" y="${oy-8}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--muted)">rede</text>`;
+    s+=`<line x1="${ox}" y1="${oy+S(.333)}" x2="${ox+W}" y2="${oy+S(.333)}" stroke="var(--courtline)" stroke-width="1.5" stroke-dasharray="6 5" opacity=".6"/>`;
+    s+=`<text x="${ox+W-4}" y="${oy+S(.333)-6}" text-anchor="end" font-size="11" fill="var(--muted)">linha de 3 m</text>`;
+    s+=`<text x="${ox+W/2}" y="${oy+W+46}" text-anchor="middle" font-size="11" fill="var(--muted)">zona de saque</text>`;
+    for(const p in pos){const [who,x,y]=pos[p];const cx=ox+S(x),cy=oy+S(y);const col=ROLE[who]||'var(--r-any)';const isServer=serving&&p==1;
+      s+=`<g class="pl"><circle cx="${cx}" cy="${cy}" r="21" fill="${col}" stroke="${isServer?'var(--ink)':'var(--surface)'}" stroke-width="${isServer?4:3}"/>`;
+      s+=`<text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="800" font-size="16" fill="${who==='L'||who.startsWith('P')?'#0F1B2D':'#FFFFFF'}">${who.startsWith('P')?p:who}</text>`;
+      s+=`<text x="${cx}" y="${cy-27}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">pos ${p}${isServer?' · saca':''}</text></g>`;}
+    $('court').innerHTML=s;
+    const sysName=SYS[st.sys].label;const rotTxt=st.rot===0?'':` · rotação ${st.rot}`;
+    let note=`<b>${sysName}${rotTxt} · ${serving?'sacando':'recebendo'}</b><span>${d.note}</span>`;
+    if(serving)note+=`<span>${st.mode==='fivb'?'No FIVB 2025–28 o time que saca é livre; o desenho mostra a posição base, que é legal em qualquer modo.':'No modo clássico o time que saca também respeita a sobreposição; a posição base é sempre legal.'}</span>`;
+    const people=Object.entries(pos).sort((a,b)=>a[0]-b[0]).map(([p,v])=>`${p}: ${NAME[v[0]]||'Jogador '+p}`).join(' · ');
+    note+=`<span style="color:var(--muted);font-size:13px">${people}</span>`;
+    $('note').innerHTML=note;
+    $('checks').innerHTML=checks(pos,serving).map(([a,b,ok])=>`<div><span class="${ok?'ok':'bad'}">${ok?'✓':'✗'}</span><span>${a}</span><span style="color:var(--muted)">${b}</span></div>`).join('');
+  }
+  render();
+})();
+</script>

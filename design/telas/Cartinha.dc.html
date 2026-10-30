@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Compartilhar cartinha</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}
+.kc{position:relative;width:270px;height:378px;border-radius:24px;background:#0F1B2D;color:#F6F1E7;overflow:hidden;border:5px solid #FFC83D;box-sizing:border-box}
+.kmesh{position:absolute;left:0;right:0;top:0;height:178px;background-image:repeating-linear-gradient(45deg,rgba(246,241,231,0.09) 0 1.5px,transparent 1.5px 12px),repeating-linear-gradient(-45deg,rgba(246,241,231,0.09) 0 1.5px,transparent 1.5px 12px)}
+.klv{position:absolute;left:16px;top:12px;display:flex;flex-direction:column;align-items:flex-start}
+.kn{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:66px;line-height:0.9;font-variant-numeric:tabular-nums}
+.kp{font-size:15px;font-weight:700;color:#FFC83D}
+.kj{position:absolute;right:4px;top:4px}
+.kname{position:absolute;left:0;right:0;top:174px;height:56px;background:#FF5A1F;color:#0F1B2D;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:46px;letter-spacing:0.5px}
+.kst{position:absolute;left:12px;right:12px;top:242px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));row-gap:8px}
+.kst div{display:flex;flex-direction:column;align-items:center}
+.kst b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.kst span{font-size:12px;color:rgba(246,241,231,0.82)}
+.kft{position:absolute;left:14px;right:14px;bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.kbrand{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;color:#FF5A1F}
+.ktier{height:22px;padding:0 9px;border-radius:11px;background:#FFC83D;color:#0F1B2D;font-size:12px;font-weight:700;display:inline-flex;align-items:center}
+.opt{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:14px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.12);font-size:15px;font-weight:600}
+.sw{margin-left:auto;width:46px;height:28px;border-radius:14px;position:relative;flex:none}
+.sw span{position:absolute;top:3px;width:22px;height:22px;border-radius:11px;background:#FFFFFF}
+.sh{height:60px;border-radius:14px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:14px;font-weight:600}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center">
+    <a href="Perfil.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; line-height: 1">Sua cartinha</h1>
+    <a href="AjustarFoto.dc.html" style="margin-left: auto; height: 44px; padding: 0 12px; border-radius: 22px; border: 1.5px solid rgba(15,27,45,0.25); display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Trocar foto</a>
+  </header>
+
+  <div style="margin: 8px auto 0; width: 270px; height: 378px">
+    <div class="kc" role="img" aria-label="Cartinha de João: nível 3,8, ponteiro, 48 partidas, 62% de vitórias, saldo +112, maior sequência 7, 4 vezes MVP, 92% de presença">
+      <div class="kmesh"></div>
+      <div class="klv"><span class="kn">3,8</span><span class="kp">Ponteiro</span>
+        <svg width="34" height="22" viewBox="0 0 26 18" style="margin-top: 6px"><rect x="0" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="0" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="10" width="7" height="7" rx="1.5" fill="#FFC83D"/></svg>
+      </div>
+      <svg class="kj" width="150" height="170" viewBox="0 0 100 113" role="img" aria-label="Foto recortada do jogador"><g stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"><path d="M10 113C10 84 27 68 50 68C73 68 90 84 90 113Z" fill="#33496B"/><rect x="42" y="50" width="16" height="22" rx="6" fill="#3D5579"/><ellipse cx="50" cy="32" rx="19" ry="23" fill="#3D5579"/></g><path d="M31 28C31 14 40 8 50 8C61 8 70 15 69 29C65 21 58 18 50 19C42 19 35 22 31 28Z" fill="#1A2638"/><path d="M50 68L44 80L50 86L56 80Z" fill="#FF5A1F"/></svg>
+      <div class="kname">João</div>
+      <div class="kst">
+        <div><b>48</b><span>partidas</span></div>
+        <div><b>62%</b><span>vitórias</span></div>
+        <div><b>+112</b><span>saldo</span></div>
+        <div><b>7</b><span>maior seq.</span></div>
+        <div><b>4</b><span>vezes MVP</span></div>
+        <div><b>92%</b><span>presença</span></div>
+      </div>
+      <div class="kft"><span class="kbrand">Sacou</span><span class="ktier">Ouro · 2026</span></div>
+    </div>
+  </div>
+
+  <section aria-labelledby="mo-title" style="margin: 16px 16px 0">
+    <h2 id="mo-title" style="margin: 0 0 8px; font-size: 15px; font-weight: 700">O que aparece</h2>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div class="opt"><span id="sw-nivel">Mostrar meu nível (3,8)</span>
+        <button class="sw" role="switch" aria-checked="true" aria-labelledby="sw-nivel" style="background: #FF5A1F"><span style="right: 3px"></span></button>
+      </div>
+      <div class="opt"><span id="sw-stats">Mostrar estatísticas</span>
+        <button class="sw" role="switch" aria-checked="true" aria-labelledby="sw-stats" style="background: #FF5A1F"><span style="right: 3px"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin: 16px 16px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <button class="sh"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/></svg>Story</button>
+    <button class="sh"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l1.4-3.8A8 8 0 1 1 8.2 19z"/></svg>WhatsApp</button>
+    <button class="sh"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>Salvar</button>
+  </div>
+
+  <p style="margin: 14px 24px 0; font-size: 13px; color: #4A5566; text-align: center; line-height: 1.4">A cartinha atualiza a cada rodada. Os números vêm do placar, não de notas dos amigos.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

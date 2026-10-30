@@ -1,0 +1,553 @@
+{
+  "coordinateSystem": {
+    "note": "Meia quadra do próprio time vista de cima, rede no topo. x: 0 = esquerda, 1 = direita. y: 0 = rede, 1 = linha de fundo (>1 = atrás da linha, zona de saque).",
+    "basePositions": {
+      "1": [
+        0.8,
+        1.05
+      ],
+      "2": [
+        0.8,
+        0.12
+      ],
+      "3": [
+        0.5,
+        0.12
+      ],
+      "4": [
+        0.2,
+        0.12
+      ],
+      "5": [
+        0.2,
+        0.7
+      ],
+      "6": [
+        0.5,
+        0.72
+      ]
+    }
+  },
+  "roles": {
+    "S": "Setter",
+    "S1": "Setter 1",
+    "S2": "Setter 2",
+    "OPP": "Opposite",
+    "OH1": "Outside hitter 1",
+    "OH2": "Outside hitter 2",
+    "MB1": "Middle blocker 1",
+    "MB2": "Middle blocker 2",
+    "L": "Libero",
+    "P1": "Player (no role)"
+  },
+  "rotationKey": "setterZone (posição do levantador, 1–6); sequência ao girar 1→6→5→4→3→2",
+  "systems": {
+    "5x1": {
+      "label": "5x1",
+      "rotations": {
+        "1": {
+          "receive": {
+            "1": {
+              "role": "S",
+              "x": 0.95,
+              "y": 0.62
+            },
+            "2": {
+              "role": "OH1",
+              "x": 0.8,
+              "y": 0.55
+            },
+            "3": {
+              "role": "MB1",
+              "x": 0.45,
+              "y": 0.1
+            },
+            "4": {
+              "role": "OPP",
+              "x": 0.08,
+              "y": 0.12
+            },
+            "5": {
+              "role": "OH2",
+              "x": 0.18,
+              "y": 0.62
+            },
+            "6": {
+              "role": "L",
+              "x": 0.5,
+              "y": 0.68
+            }
+          },
+          "liberoReplaces": "MB2",
+          "serveSubstitution": null,
+          "note": "Levantador escondido atrás do ponteiro da posição 2: é a infiltração mais longa. Líbero no lugar do Central 2."
+        },
+        "2": {
+          "receive": {
+            "1": {
+              "role": "L",
+              "x": 0.8,
+              "y": 0.65
+            },
+            "2": {
+              "role": "S",
+              "x": 0.7,
+              "y": 0.05
+            },
+            "3": {
+              "role": "OH1",
+              "x": 0.2,
+              "y": 0.58
+            },
+            "4": {
+              "role": "MB1",
+              "x": 0.08,
+              "y": 0.08
+            },
+            "5": {
+              "role": "OPP",
+              "x": 0.1,
+              "y": 0.88
+            },
+            "6": {
+              "role": "OH2",
+              "x": 0.5,
+              "y": 0.68
+            }
+          },
+          "liberoReplaces": "MB2",
+          "serveSubstitution": {
+            "1": "MB2"
+          },
+          "note": "Levantador na rede, não infiltra. Só 2 atacantes na rede. Líbero no lugar do Central 2. Ao sacar, o Central 2 saca e o líbero sai."
+        },
+        "3": {
+          "receive": {
+            "1": {
+              "role": "OH2",
+              "x": 0.82,
+              "y": 0.64
+            },
+            "2": {
+              "role": "MB2",
+              "x": 0.8,
+              "y": 0.08
+            },
+            "3": {
+              "role": "S",
+              "x": 0.6,
+              "y": 0.05
+            },
+            "4": {
+              "role": "OH1",
+              "x": 0.18,
+              "y": 0.58
+            },
+            "5": {
+              "role": "L",
+              "x": 0.48,
+              "y": 0.66
+            },
+            "6": {
+              "role": "OPP",
+              "x": 0.7,
+              "y": 0.85
+            }
+          },
+          "liberoReplaces": "MB1",
+          "serveSubstitution": null,
+          "note": "Levantador na rede já no alvo. Oposto escondido no fundo. Líbero no lugar do Central 1."
+        },
+        "4": {
+          "receive": {
+            "1": {
+              "role": "OPP",
+              "x": 0.94,
+              "y": 0.76
+            },
+            "2": {
+              "role": "OH2",
+              "x": 0.22,
+              "y": 0.58
+            },
+            "3": {
+              "role": "MB2",
+              "x": 0.14,
+              "y": 0.1
+            },
+            "4": {
+              "role": "S",
+              "x": 0.06,
+              "y": 0.06
+            },
+            "5": {
+              "role": "OH1",
+              "x": 0.5,
+              "y": 0.66
+            },
+            "6": {
+              "role": "L",
+              "x": 0.8,
+              "y": 0.64
+            }
+          },
+          "liberoReplaces": "MB1",
+          "serveSubstitution": null,
+          "note": "Levantador na rede, no canto esquerdo: formação empilhada à esquerda. Ele corre pela rede até o alvo. Líbero no lugar do Central 1."
+        },
+        "5": {
+          "receive": {
+            "1": {
+              "role": "L",
+              "x": 0.82,
+              "y": 0.65
+            },
+            "2": {
+              "role": "OPP",
+              "x": 0.85,
+              "y": 0.1
+            },
+            "3": {
+              "role": "OH2",
+              "x": 0.2,
+              "y": 0.6
+            },
+            "4": {
+              "role": "MB2",
+              "x": 0.12,
+              "y": 0.08
+            },
+            "5": {
+              "role": "S",
+              "x": 0.38,
+              "y": 0.3
+            },
+            "6": {
+              "role": "OH1",
+              "x": 0.52,
+              "y": 0.68
+            }
+          },
+          "liberoReplaces": "MB1",
+          "serveSubstitution": {
+            "1": "MB1"
+          },
+          "note": "Levantador perto da linha de 3 m, atrás do central. Líbero no lugar do Central 1. Ao sacar, o Central 1 saca e o líbero sai."
+        },
+        "6": {
+          "receive": {
+            "1": {
+              "role": "OH1",
+              "x": 0.82,
+              "y": 0.62
+            },
+            "2": {
+              "role": "MB1",
+              "x": 0.85,
+              "y": 0.08
+            },
+            "3": {
+              "role": "OPP",
+              "x": 0.62,
+              "y": 0.05
+            },
+            "4": {
+              "role": "OH2",
+              "x": 0.18,
+              "y": 0.6
+            },
+            "5": {
+              "role": "L",
+              "x": 0.48,
+              "y": 0.68
+            },
+            "6": {
+              "role": "S",
+              "x": 0.65,
+              "y": 0.12
+            }
+          },
+          "liberoReplaces": "MB2",
+          "serveSubstitution": null,
+          "note": "Levantador colado atrás do oposto, pronto para infiltrar. Líbero no lugar do Central 2."
+        }
+      }
+    },
+    "6x2": {
+      "label": "6x2",
+      "rotations": {
+        "1": {
+          "receive": {
+            "1": {
+              "role": "S1",
+              "x": 0.95,
+              "y": 0.62
+            },
+            "2": {
+              "role": "OH1",
+              "x": 0.8,
+              "y": 0.55
+            },
+            "3": {
+              "role": "MB1",
+              "x": 0.45,
+              "y": 0.1
+            },
+            "4": {
+              "role": "S2",
+              "x": 0.08,
+              "y": 0.12
+            },
+            "5": {
+              "role": "OH2",
+              "x": 0.18,
+              "y": 0.62
+            },
+            "6": {
+              "role": "L",
+              "x": 0.5,
+              "y": 0.68
+            }
+          },
+          "liberoReplaces": "MB2",
+          "serveSubstitution": null,
+          "note": "Igual ao 5x1 com o levantador do fundo (S1) infiltrando; o levantador da rede (S2) ataca como oposto. Repete a cada 3 rotações."
+        },
+        "5": {
+          "receive": {
+            "1": {
+              "role": "L",
+              "x": 0.82,
+              "y": 0.65
+            },
+            "2": {
+              "role": "S2",
+              "x": 0.85,
+              "y": 0.1
+            },
+            "3": {
+              "role": "OH2",
+              "x": 0.2,
+              "y": 0.6
+            },
+            "4": {
+              "role": "MB2",
+              "x": 0.12,
+              "y": 0.08
+            },
+            "5": {
+              "role": "S1",
+              "x": 0.38,
+              "y": 0.3
+            },
+            "6": {
+              "role": "OH1",
+              "x": 0.52,
+              "y": 0.68
+            }
+          },
+          "liberoReplaces": "MB1",
+          "serveSubstitution": {
+            "1": "MB1"
+          },
+          "note": "Igual ao 5x1 com o levantador do fundo (S1) infiltrando; o levantador da rede (S2) ataca como oposto. Repete a cada 3 rotações."
+        },
+        "6": {
+          "receive": {
+            "1": {
+              "role": "OH1",
+              "x": 0.82,
+              "y": 0.62
+            },
+            "2": {
+              "role": "MB1",
+              "x": 0.85,
+              "y": 0.08
+            },
+            "3": {
+              "role": "S2",
+              "x": 0.62,
+              "y": 0.05
+            },
+            "4": {
+              "role": "OH2",
+              "x": 0.18,
+              "y": 0.6
+            },
+            "5": {
+              "role": "L",
+              "x": 0.48,
+              "y": 0.68
+            },
+            "6": {
+              "role": "S1",
+              "x": 0.65,
+              "y": 0.12
+            }
+          },
+          "liberoReplaces": "MB2",
+          "serveSubstitution": null,
+          "note": "Igual ao 5x1 com o levantador do fundo (S1) infiltrando; o levantador da rede (S2) ataca como oposto. Repete a cada 3 rotações."
+        }
+      }
+    },
+    "4x2": {
+      "label": "4x2",
+      "rotations": {
+        "2": {
+          "receive": {
+            "1": {
+              "role": "MB1",
+              "x": 0.8,
+              "y": 0.45
+            },
+            "2": {
+              "role": "S2",
+              "x": 0.7,
+              "y": 0.05
+            },
+            "3": {
+              "role": "OH2",
+              "x": 0.5,
+              "y": 0.48
+            },
+            "4": {
+              "role": "MB2",
+              "x": 0.2,
+              "y": 0.45
+            },
+            "5": {
+              "role": "S1",
+              "x": 0.33,
+              "y": 0.75
+            },
+            "6": {
+              "role": "OH1",
+              "x": 0.67,
+              "y": 0.75
+            }
+          },
+          "liberoReplaces": null,
+          "serveSubstitution": null,
+          "note": "Levantador da rede na posição 2. Depois de 3 rotações, os dois levantadores trocam de papel."
+        },
+        "3": {
+          "receive": {
+            "1": {
+              "role": "OH1",
+              "x": 0.67,
+              "y": 0.75
+            },
+            "2": {
+              "role": "MB1",
+              "x": 0.8,
+              "y": 0.45
+            },
+            "3": {
+              "role": "S2",
+              "x": 0.55,
+              "y": 0.05
+            },
+            "4": {
+              "role": "OH2",
+              "x": 0.2,
+              "y": 0.45
+            },
+            "5": {
+              "role": "MB2",
+              "x": 0.33,
+              "y": 0.75
+            },
+            "6": {
+              "role": "S1",
+              "x": 0.5,
+              "y": 0.48
+            }
+          },
+          "liberoReplaces": null,
+          "serveSubstitution": null,
+          "note": "Levantador da rede já no alvo. W com 5 passadores."
+        },
+        "4": {
+          "receive": {
+            "1": {
+              "role": "S1",
+              "x": 0.67,
+              "y": 0.75
+            },
+            "2": {
+              "role": "OH1",
+              "x": 0.8,
+              "y": 0.45
+            },
+            "3": {
+              "role": "MB1",
+              "x": 0.5,
+              "y": 0.48
+            },
+            "4": {
+              "role": "S2",
+              "x": 0.06,
+              "y": 0.06
+            },
+            "5": {
+              "role": "OH2",
+              "x": 0.2,
+              "y": 0.45
+            },
+            "6": {
+              "role": "MB2",
+              "x": 0.33,
+              "y": 0.75
+            }
+          },
+          "liberoReplaces": null,
+          "serveSubstitution": null,
+          "note": "Levantador da rede no canto esquerdo. Recepção em W com 5 passadores. Sem líbero."
+        }
+      }
+    },
+    "livre": {
+      "label": "Livre / 6x0",
+      "rotations": {
+        "0": {
+          "receive": {
+            "1": {
+              "role": "P1",
+              "x": 0.75,
+              "y": 0.78
+            },
+            "2": {
+              "role": "P2",
+              "x": 0.8,
+              "y": 0.45
+            },
+            "3": {
+              "role": "P3",
+              "x": 0.5,
+              "y": 0.08
+            },
+            "4": {
+              "role": "P4",
+              "x": 0.2,
+              "y": 0.45
+            },
+            "5": {
+              "role": "P5",
+              "x": 0.25,
+              "y": 0.78
+            },
+            "6": {
+              "role": "P6",
+              "x": 0.5,
+              "y": 0.5
+            }
+          },
+          "liberoReplaces": null,
+          "serveSubstitution": null,
+          "note": "Sem funções. Quem está na posição 3 levanta. Recepção em W com 5 passadores. A formação é a mesma em todas as rotações."
+        }
+      }
+    }
+  }
+}

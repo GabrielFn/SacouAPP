@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Escalação</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.seg{display:grid;padding:4px;border-radius:14px;background:rgba(15,27,45,0.08);gap:0}
+.seg button{height:44px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566}
+.seg button[aria-pressed="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+.rot{height:44px;border-radius:12px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.15);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;box-sizing:border-box}
+.rot[aria-checked="true"]{background:#0F1B2D;color:#F6F1E7;border-color:#0F1B2D}
+.p{position:absolute;transform:translate(-50%,-50%);height:44px;padding:0 12px;border-radius:22px;border:2.5px solid #000;background:#FFFFFF;display:inline-flex;align-items:center;gap:5px;font-size:15px;font-weight:700;color:#000;white-space:nowrap;box-sizing:border-box}
+.p small{font-size:13px;font-weight:600;color:#3A3A3A;font-variant-numeric:tabular-nums}
+.p.sv{background:#FFC83D}
+.p.sv small{color:#000}
+.st{position:absolute;right:-6px;top:-9px;width:20px;height:20px;border-radius:10px;background:#000;color:#FFF;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.wn{position:absolute;left:-6px;top:-9px;width:20px;height:20px;border-radius:10px;background:#FFC83D;color:#000;border:2px solid #000;box-sizing:border-box;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mesh{height:12px;background-color:#FFFFFF;background-image:repeating-linear-gradient(45deg,#000 0 1.2px,transparent 1.2px 7px),repeating-linear-gradient(-45deg,#000 0 1.2px,transparent 1.2px 7px);border-top:2.5px solid #000;border-bottom:2.5px solid #000}
+.oc{height:52px;border-radius:12px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;box-sizing:border-box}
+.oc b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;line-height:1;color:#4A5566}
+.oc span{font-size:13px;font-weight:700}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; display: flex; flex-direction: column; box-sizing: border-box">
+
+  <header style="padding: 12px 12px 0 8px; display: flex; align-items: center; gap: 4px; flex: none">
+    <a href="MenuQuadra.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div>
+      <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; line-height: 1">Escalação</h1>
+      <p style="margin: 2px 0 0; font-size: 13px; color: #4A5566">Partida 3 · 2º set · 18–15</p>
+    </div>
+    <span style="margin-left: auto; height: 30px; padding: 0 10px; border-radius: 15px; background: #FFFFFF; border: 1.5px solid rgba(15,27,45,0.12); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; box-sizing: border-box">5x1<span style="height: 20px; padding: 0 6px; border-radius: 6px; background: #FFC83D; color: #0F1B2D; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center">Pro</span></span>
+  </header>
+
+  <div style="padding: 10px 20px 0; flex: none">
+    <div class="seg" role="group" aria-label="Time" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+      <button aria-pressed="true" style="display: flex; align-items: center; justify-content: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 5px; background: #FF5A1F"></span>Laranja</button>
+      <button aria-pressed="false" style="display: flex; align-items: center; justify-content: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 5px; background: #1F5BFF"></span>Azul</button>
+    </div>
+  </div>
+
+  <div style="padding: 12px 20px 0; flex: none">
+    <div style="display: flex; align-items: baseline; margin-bottom: 6px">
+      <span style="font-size: 14px; font-weight: 700">Rotação</span>
+      <span style="margin-left: auto; font-size: 13px; font-weight: 600; color: #4A5566">Laranja sacando</span>
+    </div>
+    <div role="radiogroup" aria-label="Rotação do Laranja" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px">
+      <button class="rot" role="radio" aria-checked="false" aria-label="Rotação 1">1</button>
+      <button class="rot" role="radio" aria-checked="true" aria-label="Rotação 2">2</button>
+      <button class="rot" role="radio" aria-checked="false" aria-label="Rotação 3">3</button>
+      <button class="rot" role="radio" aria-checked="false" aria-label="Rotação 4">4</button>
+      <button class="rot" role="radio" aria-checked="false" aria-label="Rotação 5">5</button>
+      <button class="rot" role="radio" aria-checked="false" aria-label="Rotação 6">6</button>
+    </div>
+  </div>
+
+  <section aria-label="Meia quadra do Laranja no momento do saque" style="margin-top: 12px; flex: none; position: relative; height: 352px; background: #FFFFFF; border-top: 3px solid #000; border-bottom: 3px solid #000; box-sizing: border-box">
+    <span style="position: absolute; right: 16px; top: 14px; font-size: 13px; font-weight: 600; color: #3A3A3A">No saque</span>
+    <div style="position: absolute; left: 55px; top: 48px; width: 280px; height: 280px; border: 3px solid #FF5A1F; border-bottom: 0; box-sizing: border-box">
+      <span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 93px; border-top: 2px dashed #FF5A1F"></span>
+      <span aria-hidden="true" style="position: absolute; right: 6px; bottom: 97px; font-size: 13px; font-weight: 600; color: #3A3A3A">linha de 3 m</span>
+
+      <button class="p sv" aria-label="João, posição 1, sacando" style="left: 52px; top: -26px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF" stroke="#000" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3c-1.5 3-1.5 6 0 9s4.5 4.5 8.5 3.5M12 12c-3 .5-6 2.5-7.5 6" fill="none"/></svg>João <small>1</small></button>
+      <button class="p" aria-label="Bia, posição 6" style="left: 140px; top: 88px">Bia <small>6</small></button>
+      <button class="p" aria-label="Marcos, posição 5" style="left: 226px; top: 88px">Marcos <small>5</small></button>
+      <button class="p" aria-label="Pedro, posição 2, levantador" style="left: 50px; top: 236px">Pedro <small>2</small><span class="st" aria-hidden="true">L</span></button>
+      <button class="p" aria-label="Ana, posição 3, fora de ordem" style="left: 140px; top: 236px">Ana <small>3</small><span class="wn" aria-hidden="true">!</span></button>
+      <button class="p" aria-label="Lia, posição 4, fora de ordem" style="left: 228px; top: 236px">Lia <small>4</small><span class="wn" aria-hidden="true">!</span></button>
+    </div>
+    <div class="mesh" aria-hidden="true" style="position: absolute; left: 41px; width: 308px; top: 328px; box-sizing: border-box"></div>
+    <span style="position: absolute; left: 16px; top: 326px; font-size: 13px; font-weight: 700">Rede</span>
+  </section>
+
+  <p style="margin: 8px 20px 0; flex: none; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #4A5566">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h13"/><path d="M17 20l4-4-4-4"/><path d="M21 16H8"/></svg>Toque em dois jogadores para trocar
+  </p>
+
+  <div role="alert" style="margin: 8px 20px 0; flex: none; min-height: 52px; padding: 4px 4px 4px 12px; border-radius: 14px; background: #FFC83D; border: 1.5px solid #0F1B2D; display: flex; align-items: center; gap: 10px; box-sizing: border-box">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B2D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M12 3L2 20h20z"/><path d="M12 10v4"/><path d="M12 17v.5"/></svg>
+    <span style="flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3">Lia e Ana estão fora de ordem</span>
+    <button style="height: 44px; padding: 0 14px; border-radius: 11px; background: #0F1B2D; color: #F6F1E7; font-size: 14px; font-weight: 700">Corrigir</button>
+  </div>
+
+  <div style="padding: 12px 20px 0; flex: none">
+    <div style="display: flex; align-items: baseline; margin-bottom: 6px">
+      <span style="font-size: 14px; font-weight: 700">Ordem oficial</span>
+      <span style="margin-left: auto; font-size: 13px; font-weight: 600; color: #4A5566">Sem banco (6 jogadores)</span>
+    </div>
+    <ol aria-label="Ordem oficial de 1 a 6" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px">
+      <li class="oc" style="background: #FFF4D6; border-color: #0F1B2D"><b>1</b><span>João</span></li>
+      <li class="oc"><b>2</b><span>Pedro</span></li>
+      <li class="oc"><b>3</b><span>Ana</span></li>
+      <li class="oc"><b>4</b><span>Lia</span></li>
+      <li class="oc"><b>5</b><span>Marcos</span></li>
+      <li class="oc"><b>6</b><span>Bia</span></li>
+    </ol>
+  </div>
+
+  <div style="margin-top: auto; padding: 0 20px 18px; flex: none">
+    <button style="width: 100%; height: 56px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; font-size: 17px; font-weight: 700">Salvar escalação</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
