@@ -5,8 +5,12 @@
 | Tarefa | Status | Observação |
 |---|---|---|
 | E0.1 | Feita | Plano em `docs/estado/tarefas/E0.1.md`; decisões no ADR 0001. Aprovada no ciclo 2 de revisão. Validação em Linux fica para a CI (E0.4). |
-| E0.3 | Em andamento | Análise. |
-| E0.5 | Em andamento | Análise. |
+| E0.3 | Em andamento | Implementação na branch `task/E0.3-code-standards`. |
+| E0.5 | Em andamento | Revisão e testes da branch `task/E0.5-knowledge-base`. |
+
+## Adiadas
+
+- E0.7: tarefa agendada. Adiada pelo Gabriel em 30/10/2026: por enquanto as sessões são abertas manualmente.
 
 ## Pendências herdadas
 

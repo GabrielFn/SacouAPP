@@ -34,4 +34,4 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 
 - Agentes: analista → desenvolvedor → revisor (novo) → revisor de segurança (tarefas sensíveis) → testador (novo) → merge.
 - **Merge automático** na `main` quando revisão e testes passam.
-- Sessões contínuas (o plano previa uma tarefa agendada a cada 4 horas; no PC, rodar sessões quando quiser — ver README).
+- Sessões contínuas (o plano previa uma tarefa agendada a cada 4 horas; no PC, rodar sessões quando quiser — ver `LEIA-ME.md`).
