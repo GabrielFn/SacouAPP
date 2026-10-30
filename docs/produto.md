@@ -170,7 +170,7 @@ Antes de fechar: consultar o INPI (classes 9 e 41), registrar sacou.app e sacou.
 
 A Fase 1 leva o diferencial inteiro ao piloto: quadra com fila e saída parcial, rotação por time com posições no saque e a cartinha com foto recortada. São as 16 telas desenhadas mais 12 que faltam (ver a revisão do MVP).
 
-*[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — ver no doc original]*
+*[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — diagrama não incluído; vale o texto da seção]*
 
 No piloto o Pro fica liberado de graça para os grupos testarem o 5x1. O que exige cobrança pelas lojas ou densidade de usuários fica para as fases seguintes.
 
