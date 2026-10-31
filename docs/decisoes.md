@@ -32,6 +32,6 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 
 ## Processo
 
-- Agentes: analista → desenvolvedor → revisor (novo) → revisor de segurança (tarefas sensíveis) → testador (novo) → merge.
+- Agentes: analista → desenvolvedor → revisor (novo) → revisor de segurança (tarefas sensíveis) → testador (novo) → merge. No máximo 1 agente de cada função rodando por vez.
 - **Merge automático** na `main` quando revisão e testes passam. Repositório privado e grátis, sem proteção de branch: o orquestrador confere a CI verde antes do merge.
 - Sessões contínuas (o plano previa uma tarefa agendada a cada 4 horas; no PC, rodar sessões quando quiser — ver `LEIA-ME.md`).

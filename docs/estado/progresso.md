@@ -16,7 +16,7 @@
 
 ## Adiantadas do M2
 
-O Gabriel pediu mais agentes em paralelo. E1.2, E1.3, E1.4 e E2.1 estão em análise e podem ser implementadas em branches, mas só entram na `main` depois da revisão geral de segurança e do relatório do M1.
+E1.2, E1.3, E1.4 e E2.1 têm análise iniciada e interrompida; só contam os planos completos em `docs/estado/tarefas/`. Implementadas em branches, só entram na `main` depois da revisão geral de segurança e do relatório do M1. Retomar conforme houver vaga: **no máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
 
 ## Adiadas
 
