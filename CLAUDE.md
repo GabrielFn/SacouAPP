@@ -85,13 +85,19 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 
 ## Comandos
 
-Rodar na raiz do repositório. Lint entra na E0.3.
+Rodar na raiz do repositório. Regras de lint e exceções em `docs/padroes/codigo.md`.
 
 ```sh
 pnpm install --frozen-lockfile              # instala dependências JS
 pnpm build                                  # pacotes (tsc) e app (tsc + expo export Android)
 pnpm typecheck                              # TS strict em pacotes e app
 pnpm test                                   # Vitest dos pacotes
+pnpm lint                                   # ESLint em pacotes, app e scripts (avisos reprovam)
+pnpm lint:regression                        # confirma que o lint reprova os desvios conhecidos
+pnpm format                                 # Prettier: corrige (pnpm format:check só verifica)
+pnpm check:eol                              # falha com CRLF no índice do Git
+pnpm lint:api                               # dotnet build + dotnet format --verify-no-changes
+pnpm format:api                             # dotnet format
 dotnet build                                # solução Sacou.slnx (avisos como erro)
 dotnet test                                 # xUnit v3 da API
 dotnet run --project apps/api/src/Sacou.Api # sobe a API

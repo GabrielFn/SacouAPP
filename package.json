@@ -10,11 +10,26 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "lint": "turbo run lint && pnpm lint:tooling",
+    "lint:tooling": "eslint eslint.config.mjs scripts --max-warnings 0",
+    "lint:regression": "node scripts/lint-regression.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:eol": "node scripts/check-eol.mjs",
     "build:api": "dotnet build",
-    "test:api": "dotnet test"
+    "test:api": "dotnet test",
+    "lint:api": "dotnet build && dotnet format Sacou.slnx --verify-no-changes --no-restore",
+    "format:api": "dotnet format Sacou.slnx"
   },
   "devDependencies": {
+    "@eslint/js": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-expo": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-functional": "catalog:",
+    "prettier": "catalog:",
     "turbo": "2.11.10",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:"
   }
 }
