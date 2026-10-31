@@ -89,7 +89,7 @@ Tudo pode ser desligado: cobrança, limite de vagas, número de sets (livre, ún
 1. **Sistemas selecionáveis** por time: Livre, 6x0, 4x2, 5x1 e 6x2. O padrão vem do modelo: Livre na Pelada e na Areia, 6x0 no Racha organizado, 5x1 no Treino. Os três últimos são do Sacou Pro, com o rótulo "Avançado" e um mini-tutorial na primeira vez.
 2. **Pergunta só os papéis necessários:** 5x1 pede 1 levantador; 4x2 e 6x2 pedem 2 e o app os coloca opostos sozinho.
 3. **Escalação auto-preenchida** pelas posições declaradas; ajuste tocando em dois jogadores para trocar (sem arrastar).
-4. **Rotação automática no side-out**** e posições reais no momento do saque. Duas camadas: a ordem de rotação oficial (1–6), que define o sacador, quando gira e a regra de sobreposição; e a posição física de cada jogador no saque, que depende do sistema, da rotação e de o time estar sacando ou em recepção (ex.: no 5x1, levantador escondido para infiltrar). ****Regras e formações detalhadas no artefato "Rotações do Sacou" (pesquisa de 30/10/2026). Modo de regra configurável: FIVB 2025–28 (padrão; só o time que recebe precisa respeitar a sobreposição) ou Clássico (os dois times). A rotação é identificada internamente pela posição do levantador (setterZone). ****Cada time tem a própria rotação, independente: sistema, escalação, levantador, rotação atual e regra do banco são por time. ****A tela de quadra mostra só a posição no saque, não a troca depois dele. Cada sistema traz modelos de formação prontos; no Pro, o grupo ajusta as formações com validação de sobreposição**
+4. **Rotação automática no side-out**** e posições reais no momento do saque. Duas camadas: a ordem de rotação oficial (1–6), que define o sacador, quando gira e a regra de sobreposição; e a posição física de cada jogador no saque, que depende do sistema, da rotação e de o time estar sacando ou em recepção (ex.: no 5x1, levantador escondido para infiltrar). ****Regras e formações detalhadas em `docs/dominio/rotacoes.md` (pesquisa de 30/10/2026). Modo de regra configurável: FIVB 2025–28 (padrão; só o time que recebe precisa respeitar a sobreposição) ou Clássico (os dois times). A rotação é identificada internamente pela posição do levantador (setterZone). ****Cada time tem a própria rotação, independente: sistema, escalação, levantador, rotação atual e regra do banco são por time. ****A tela de quadra mostra só a posição no saque, não a troca depois dele. Cada sistema traz modelos de formação prontos; no Pro, o grupo ajusta as formações com validação de sobreposição**
 5. **Rodízio do banco:** "Sai quem saca" (padrão) e "Manual" no início; por pontos, por set e por tempo depois.
 6. **Líbero e limite de substituições:** em "Avançado", desligados por padrão.
 7. Violações viram aviso ("Levantadores não estão opostos — Corrigir?"), nunca bloqueio.
@@ -170,7 +170,7 @@ Antes de fechar: consultar o INPI (classes 9 e 41), registrar sacou.app e sacou.
 
 A Fase 1 leva o diferencial inteiro ao piloto: quadra com fila e saída parcial, rotação por time com posições no saque e a cartinha com foto recortada. São as 16 telas desenhadas mais 12 que faltam (ver a revisão do MVP).
 
-*[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — ver no doc original]*
+*[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — diagrama não incluído; vale o texto da seção]*
 
 No piloto o Pro fica liberado de graça para os grupos testarem o 5x1. O que exige cobrança pelas lojas ou densidade de usuários fica para as fases seguintes.
 

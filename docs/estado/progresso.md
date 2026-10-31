@@ -6,7 +6,8 @@
 |---|---|---|
 | E0.1 | Feita | Plano em `docs/estado/tarefas/E0.1.md`; decisões no ADR 0001. Aprovada no ciclo 2 de revisão. Validação em Linux fica para a CI (E0.4). |
 | E0.3 | Em andamento | Implementação na branch `task/E0.3-code-standards`. |
-| E0.5 | Em andamento | Branch `task/E0.5-knowledge-base`. O Gabriel decidiu enxugar o `backlog.md`; falta nova revisão. |
+| E0.5 | Feita | `docs/backlog.md` enxuto por decisão do Gabriel; ADR 0003. Aprovada na 4ª revisão. |
+| E0.8 | Em andamento | Análise. |
 | E0.2 | Em andamento | Implementação na branch `task/E0.2-dotnet-solution`, a partir da E0.3. |
 | E1.1 | Em andamento | Implementação na branch `task/E1.1-formations`, a partir da E0.3. |
 
@@ -22,4 +23,4 @@
 
 ## Bloqueadas
 
-Nenhuma. A E0.8 aguarda a E0.5.
+Nenhuma.

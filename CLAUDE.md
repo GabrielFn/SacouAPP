@@ -12,11 +12,13 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/produto.md` | Documento de produto completo |
 | `docs/revisao-mvp.md` | Revisão do MVP (correções nas telas e ajustes de arquitetura já decididos) |
 | `docs/plano-mvp.md` | Plano de execução: marcos M1–M7, backlog de 65 tarefas com critério de aceite, definição de pronto, riscos |
+| `docs/backlog.md` | Mapa marco → tarefas e regra para escolher a próxima tarefa |
 | `docs/dominio/rotacoes.md` | Especificação das regras de rotação e sobreposição (FIVB 2025–28) |
 | `docs/dominio/formacoes.json` | Coordenadas das formações (5x1, 6x2, 4x2, Livre) — semente de `packages/volley-rules` |
 | `docs/dominio/rotacoes-explorador.html` | Explorador interativo das formações (abrir no navegador) |
 | `design/telas/*.dc.html` | As 31 telas do app (fonte HTML). Títulos e ordem em `design/telas/canvas.json` |
 | `docs/estado/progresso.md` | Marco atual, tarefas feitas / em andamento / bloqueadas |
+| `docs/estado/tarefas/<ID>.md` | Plano detalhado de cada tarefa, escrito pelo analista |
 | `docs/estado/sessoes/AAAA-MM-DD.md` | Diário de cada sessão |
 | `docs/estado/perguntas.md` | Perguntas abertas para o Gabriel e respostas |
 | `docs/arquitetura/` | Visão geral e ADRs (`adr/NNNN-titulo.md`) |

@@ -140,7 +140,7 @@ A base aguenta o MVP; todas as funcionalidades novas cabem nela, mas 4 ajustes e
 
 O diferencial (quadra com fila, saída parcial e rotação por time) vai para a Fase 1; a cartinha com foto recortada também entra na Fase 1, por decisão do Gabriel; o que exige loja ou densidade de usuários fica para depois.
 
-*[Diagrama: roadmap revisado · 3 fases, 1 portão — ver no doc original]*
+*[Diagrama: roadmap revisado · 3 fases, 1 portão — diagrama não incluído; vale o texto da seção]*
 
 No piloto o Pro fica liberado de graça para os grupos testarem o 5x1. Este roadmap substitui o do documento de produto.
 

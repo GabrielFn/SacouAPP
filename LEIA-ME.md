@@ -26,14 +26,16 @@ gh auth login
 
 O Claude Code precisa de uma assinatura paga do Claude (Pro ou Max) ou de uma conta na Claude Console. No primeiro `claude`, ele abre o navegador para você entrar.
 
-Confira: `git --version`, `node -v` (22 ou mais), `pnpm -v`, `dotnet --version` (10.x), `docker --version`, `claude --version`.
+O projeto exige Node `>=22.13 <23` (`.nvmrc`: 22.20.0). O pacote LTS do winget e o `node` do Homebrew podem instalar outra versão principal; se isso acontecer, instale a 22.20.0 pelo site nodejs.org.
+
+Confira: `git --version`, `node -v` (`>=22.13 <23`), `pnpm -v`, `dotnet --version` (10.x), `docker --version`, `claude --version`.
 
 ## 2. Preparar a pasta
 
-1. Clone o repositório:
+1. Clone o repositório fora do C:, que tem pouco espaço:
 
 ```powershell
-cd C:\dev
+cd D:\projetos
 gh repo clone gabrielfn/SacouAPP
 ```
 
@@ -41,7 +43,7 @@ gh repo clone gabrielfn/SacouAPP
 3. No terminal:
 
 ```powershell
-cd C:\dev\SacouAPP
+cd D:\projetos\SacouAPP
 claude
 ```
 

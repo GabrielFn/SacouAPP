@@ -17,7 +17,7 @@ Documentos de referência para os agentes: Produto do app, Revisão do MVP, Rota
 
 Cada tarefa passa por quatro agentes diferentes antes de entrar no código principal; o revisor e o testador são sempre agentes novos, que não viram o trabalho do desenvolvedor.
 
-*[Diagrama: ciclo de agentes por tarefa · 5 etapas — ver no doc original]*
+*[Diagrama não incluído: as etapas do ciclo estão no `CLAUDE.md`, seção "Ciclo de agentes por tarefa"]*
 
 Tarefas independentes (por exemplo, motor da partida e base da API) rodam em paralelo, cada uma na sua branch. Se uma tarefa falha 3 ciclos seguidos, eu paro e te consulto.
 
@@ -79,7 +79,7 @@ São 7 marcos em sequência; cada um termina com algo que você pode ver ou test
 
 ## Backlog
 
-São 65 tarefas em 8 épicos. Cada tarefa vira um card no repositório (`docs/backlog.md`) com o critério de aceite abaixo; o analista detalha os sub-passos antes de começar.
+São 65 tarefas em 8 épicos. As tabelas abaixo são a fonte de ID, tarefa, aceite e dependências; `docs/backlog.md` traz o mapa marco → tarefas e a regra da próxima tarefa; o analista detalha os sub-passos em `docs/estado/tarefas/<ID>.md` antes de começar.
 
 ### E0 · Fundação (M1)
 
@@ -104,7 +104,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
-| E1.1 | Formações em JSON: 5x1 (6 rotações × recepção), 6x2, 4x2, Livre, posição base de saque | Dados iguais ao artefato Rotações do Sacou | E0.1 |
+| E1.1 | Formações em JSON: 5x1 (6 rotações × recepção), 6x2, 4x2, Livre, posição base de saque | Dados iguais a `docs/dominio/formacoes.json` | E0.1 |
 | E1.2 | Validador de sobreposição (modos FIVB 2025–28 e Clássico, tolerância) | Todas as formações prontas passam; casos inválidos falham | E1.1 |
 | E1.3 | Faixas da cartinha e conversão do rating para a nota 1–5 | Testes de borda (2,4 / 2,5 / 4,5) | E0.1 |
 | E1.4 | Gerador de Pix copia e cola (BR Code com CRC16) | Testes golden com códigos válidos | E0.1 |
@@ -125,7 +125,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E2.9 | Estatísticas por jogador (saldo +/− em quadra, vitórias, sequência) | Rodada simulada com números conferidos à mão | E2.6 |
 | E2.10 | Porte da função de estado para C# + testes golden compartilhados | TS e C# produzem o mesmo estado em todos os cenários | E2.9, E1.5 |
 
-### E3 · API (M3–M5)
+### E3 · API (M3–M6)
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
@@ -146,7 +146,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.15 | Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
 
-### E4 · App (M3–M5)
+### E4 · App (M3–M6)
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
