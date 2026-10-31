@@ -39,3 +39,13 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 - **NuGet:** nenhuma vulnerabilidade.
 - **npm:** dois High, ambos em ferramentas de desenvolvimento: `deepmerge-ts`, corrigido por override, e `zod`, exceção com validade.
 - **Análise estática:** `AnalysisModeSecurity=All` não gerou aviso no código atual.
+
+## Sondas (parcial)
+
+Valores fictícios, nunca registrados aqui. PRs fechados sem merge, branches apagadas.
+
+- **PR #9, run 41156493924:** `secrets` e `ci-ok` em `fail`, `verify` pulado. Três achados, com arquivo, commit e regra no log (`sacou-ci-probe`, inclusive na linha com `gitleaks:allow`, e `generic-api-key`); busca pelos valores no log: nada (T1, T2, T4, T5).
+- **PR #9, run 41156561140:** valores removidos da árvore, `secrets` e `ci-ok` em `fail` pelo histórico (T3). O diff vazio rodou o `verify`, que passou, com as auditorias, em Ubuntu.
+- **PR #10, run 41156576221:** só docs, com a branch da sonda ainda existente: `secrets` e `ci-ok` em `pass`, `verify` pulado (T7, parte de PR do T14).
+- **Local:** T10, T11, T12 e T13 (`CA5351` em MD5; `eval` em `lint:regression`).
+- **Pendentes:** T6, T8 e T9 (PRs #11 e #12 fechados sem leitura do resultado), T15 e o `push` do merge do T14.
