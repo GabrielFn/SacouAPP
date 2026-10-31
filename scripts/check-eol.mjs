@@ -2,7 +2,7 @@
 // The working tree state (w/) is ignored, so CRLF only on disk is never reported.
 import { execFileSync } from "node:child_process";
 
-const MAX_BUFFER_BYTES = 64 * 1024 * 1024;
+const MAX_BUFFER_BYTES = 67_108_864;
 const FORBIDDEN_INDEX_STATES = new Set(["i/crlf", "i/mixed"]);
 
 const output = execFileSync("git", ["ls-files", "--eol"], {

@@ -6,7 +6,8 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 
 | Comando | Faz |
 |---|---|
-| `pnpm lint` | ESLint em pacotes e app, `--max-warnings 0`. Compila os pacotes antes, porque o lint com tipos lê `dist/*.d.ts` |
+| `pnpm lint` | ESLint em pacotes, app, `scripts/` e `eslint.config.mjs`, `--max-warnings 0`. Compila os pacotes antes, porque o lint com tipos lê `dist/*.d.ts` |
+| `pnpm lint:regression` | Confirma que as regras ainda reprovam os desvios conhecidos e aceitam o código legítimo (`scripts/lint-regression.mjs`). Regra nova ou furo novo ganha um caso ali |
 | `pnpm format` / `pnpm format:check` | Prettier (corrige / só verifica) |
 | `pnpm check:eol` | Falha se houver arquivo de texto com CRLF **no índice do Git** |
 | `pnpm lint:api` | `dotnet build` (analisadores) e `dotnet format --verify-no-changes` |
@@ -16,10 +17,11 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 
 | Regra | Como | Exceções |
 |---|---|---|
-| Sem `any` | `strictTypeChecked`, `no-explicit-any`, `no-unsafe-*`. Diretiva `eslint-disable` sem uso reprova | Nenhuma |
-| Sem número mágico | `@typescript-eslint/no-magic-numbers`. Liberados `-1`, `0`, `1`, valor de `const` nomeado, enum, tipo literal, campo `readonly`, índice de array, valor em objeto | Testes, `**/golden/**`, `**/*.data.ts` |
+| Sem `any` | `strictTypeChecked`, `no-explicit-any`, `no-unsafe-*`, em `.ts`, `.tsx`, `.mts` e `.cts` | Nenhuma |
+| Sem número mágico | `@typescript-eslint/no-magic-numbers`. Liberados `-1`, `0`, `1`, valor de `const` nomeado, enum, tipo literal, campo `readonly`, índice de array, valor em objeto | Testes e `*.data.ts`, que não pode ter função |
+| Sem supressão no código | `noInlineConfig`: `eslint-disable` e `/* eslint regra: "off" */` não têm efeito e geram aviso, que reprova | Nenhuma. Ver "Supressões" |
 | Imutabilidade | `prefer-const`, `no-param-reassign`, `functional/no-let`, `functional/immutable-data`, `prefer-readonly` | Testes não usam `functional/*`. No app, `.current` e `.value` (refs, Reanimated) podem receber atribuição |
-| Pacotes puros | Em `packages/{match-engine,volley-rules}/src`: sem React, Expo, React Native, módulos do Node, `import()` nem `window`, `document`, `navigator`, `localStorage`, `fetch`, `process`, `Buffer`. `volley-rules` não importa `match-engine` | Testes podem usar `node:*` (golden lê JSON) |
+| Pacotes puros | Em `packages/{match-engine,volley-rules}/src`: sem React, Expo, React Native, `@react-native-community/*`, `@testing-library/*`, módulos do Node, caminho para `apps/`, `import()` (também em tipo), `/// <reference>` nem `window`, `document`, `navigator`, `localStorage`, `fetch`, `process`, `Buffer`. `volley-rules` não importa `match-engine`. Em `packages/*/src` só há TypeScript: `.js`, `.jsx`, `.cjs` e `.mjs` reprovam | Testes podem usar `node:*` (golden lê JSON) |
 | TS strict | `tsconfig.base.json` (`pnpm typecheck`) | Nenhuma |
 
 ## Imposto por ferramenta: C#
@@ -33,7 +35,7 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 
 ## Supressões
 
-Corrija a causa. Quando não der, a supressão fica na menor abrangência possível (uma linha, uma regra) e com o motivo no próprio comentário. Regra que gera ruído em código legítimo se ajusta na configuração, com registro no ADR 0002, em vez de `eslint-disable` espalhado. Nunca desligue uma categoria inteira de analisadores.
+Corrija a causa. Quando não der, a exceção legítima vai para o `eslint.config.mjs`, na menor abrangência possível (arquivo e regra), com o motivo em comentário e registro no ADR 0002. No TypeScript, comentário de supressão não funciona. No C#, `#pragma warning disable` funciona, e quem barra é o revisor. Nunca desligue uma categoria inteira de analisadores.
 
 ## Fim de linha e formatação
 
@@ -45,6 +47,8 @@ Corrija a causa. Quando não der, a supressão fica na menor abrangência possí
 ## Só o revisor confere
 
 - Número mágico em C#: não há regra nativa, e o S109 traria o SonarAnalyzer com muito ruído.
+- `#pragma warning disable` em C#.
+- Desvios aceitos no TypeScript: número solto em objeto fora de `*.data.ts` (`detectObjects: false`), `as unknown as` e `declare const require`.
 - Nomes do glossário, funções pequenas, DDD enxuto e fatias verticais; domínio sem infraestrutura no C#.
 - Result pattern em vez de exceção para regra de negócio.
 - Eventos sem dado pessoal; tudo aponta para `MemberId`.

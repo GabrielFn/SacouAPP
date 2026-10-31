@@ -90,7 +90,8 @@ pnpm install --frozen-lockfile              # instala dependências JS
 pnpm build                                  # pacotes (tsc) e app (tsc + expo export Android)
 pnpm typecheck                              # TS strict em pacotes e app
 pnpm test                                   # Vitest dos pacotes
-pnpm lint                                   # ESLint em pacotes e app (avisos reprovam)
+pnpm lint                                   # ESLint em pacotes, app e scripts (avisos reprovam)
+pnpm lint:regression                        # confirma que o lint reprova os desvios conhecidos
 pnpm format                                 # Prettier: corrige (pnpm format:check só verifica)
 pnpm check:eol                              # falha com CRLF no índice do Git
 pnpm lint:api                               # dotnet build + dotnet format --verify-no-changes

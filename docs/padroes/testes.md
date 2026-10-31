@@ -17,9 +17,10 @@
 
 Regras do vôlei e do motor sempre têm testes golden: os mesmos casos em JSON, executados pelas duas linguagens.
 
-- Os arquivos ficam em uma pasta `golden/` do pacote dono da regra; o lint não cobra número mágico ali nem em `*.data.ts`.
+- Os casos ficam em JSON ou em `*.data.ts`, que só pode ter dados: o lint não cobra número mágico ali, mas reprova função.
+- O executor dos casos é um `*.test.ts`. Outro arquivo em `golden/` segue as regras normais.
 - Vitest e xUnit leem os mesmos arquivos. Ninguém copia caso para o outro lado.
-- Mudar um caso golden é mudar a regra: exige registro em `docs/dominio/`.
+- Regra nova vai para `docs/dominio/`, como pede o `CLAUDE.md`.
 
 O formato dos casos é definido por quem escrever o primeiro golden (E1.x, E2.x). Essa tarefa também soma `@types/node` ao pacote, necessário para ler arquivos no teste; ver ADR 0002.
 
