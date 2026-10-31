@@ -124,3 +124,25 @@ jobs:
 
       - name: Test API
         run: dotnet test
+
+  # The only check the merge routine reads (docs/padroes/commits-e-prs.md).
+  ci-ok:
+    needs: [changes, verify]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require a passing result
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          CODE: ${{ needs.changes.outputs.code }}
+        run: |
+          echo "changes=$CHANGES_RESULT verify=$VERIFY_RESULT code=$CODE"
+          if [ "$CHANGES_RESULT" != "success" ]; then
+            exit 1
+          fi
+          case "$VERIFY_RESULT:$CODE" in
+            success:true | skipped:false) ;;
+            *) exit 1 ;;
+          esac

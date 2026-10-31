@@ -6,11 +6,11 @@
 
 ## Rotina de merge do orquestrador
 
-1. Esperar a CI: `gh pr checks <n> --watch`.
-2. Conferir o resultado: `gh pr checks <n> --json name,bucket`. A lista precisa vir **não vazia**, com tudo em `pass` ou `skipping`.
-   - `fail` e `cancel` reprovam.
-   - `skipping` só vale com `changes` em `pass`.
-   - Comando com erro ou sem checks (PR recém-aberto) não é aprovação: esperar e repetir.
-3. Fazer o merge fixando o commit conferido: `gh pr merge <n> --squash --subject "<título do PR>" --match-head-commit <sha conferido>`. O squash deixa um commit por tarefa na `main`, com o título em Conventional Commits, e o `--match-head-commit` barra commit chegado depois da conferência.
+1. Ler o SHA antes dos checks: `gh pr view <n> --json headRefOid`.
+2. Esperar a CI: `gh pr checks <n> --watch`.
+3. Conferir o resultado: `gh pr checks <n> --json name,bucket`. O check `ci-ok` precisa estar presente e em `pass`; é o único que a rotina olha, porque ele já resume `changes` e `verify`.
+   - Lista sem `ci-ok`, comando com erro ou sem checks (PR recém-aberto) não é aprovação: esperar e repetir.
+   - Qualquer outro estado de `ci-ok` (`fail`, `cancel`, `pending`, `skipping`) reprova.
+4. Fazer o merge fixando o SHA lido no passo 1: `gh pr merge <n> --squash --subject "<título do PR>" --match-head-commit <sha conferido>`. O squash deixa um commit por tarefa na `main`, com o título em Conventional Commits, e o `--match-head-commit` barra commit chegado depois da conferência.
 
 `main` vermelha depois de um merge passa à frente das demais tarefas.
