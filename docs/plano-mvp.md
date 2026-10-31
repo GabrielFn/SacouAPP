@@ -104,7 +104,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
-| E1.1 | Formações em JSON: 5x1 (6 rotações × recepção), 6x2, 4x2, Livre, posição base de saque | Dados iguais a `docs/dominio/formacoes.json` | E0.1 |
+| E1.1 | Formações em JSON: 5x1 (6 rotações × recepção), 6x2, 4x2, Livre, posição base de saque | Dados iguais ao explorador `docs/dominio/rotacoes-explorador.html` | E0.1 |
 | E1.2 | Validador de sobreposição (modos FIVB 2025–28 e Clássico, tolerância) | Todas as formações prontas passam; casos inválidos falham | E1.1 |
 | E1.3 | Faixas da cartinha e conversão do rating para a nota 1–5 | Testes de borda (2,4 / 2,5 / 4,5) | E0.1 |
 | E1.4 | Gerador de Pix copia e cola (BR Code com CRC16) | Testes golden com códigos válidos | E0.1 |
