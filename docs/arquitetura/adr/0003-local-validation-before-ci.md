@@ -1,6 +1,6 @@
 # ADR 0003 · Validação local em clone limpo até a CI existir
 
-**Status:** aceito (30/10/2026), temporário: vale até a E0.4 existir. **Tarefa:** E0.5. **Decidido por:** orquestrador, sem consulta ao Gabriel.
+**Status:** substituído pelo ADR 0004 (aceito em 30/10/2026, temporário: valia até a E0.4 existir). **Tarefa:** E0.5. **Decidido por:** orquestrador, sem consulta ao Gabriel.
 
 ## Contexto
 

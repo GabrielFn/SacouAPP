@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["tsconfig.base.json", "tsconfig.lib.json", "eslint.config.mjs"],
+  "globalDependencies": [".nvmrc", "tsconfig.base.json", "tsconfig.lib.json", "eslint.config.mjs"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
