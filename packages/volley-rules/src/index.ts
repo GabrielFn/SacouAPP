@@ -1,1 +1,1 @@
-export const PACKAGE_NAME = "@sacou/volley-rules";
+export * from "./formations/index.js";
