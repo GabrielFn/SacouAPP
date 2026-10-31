@@ -60,6 +60,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 ## Regras de código
 
 - **Código, nomes, commits e comentários em inglês. Interface (textos do app) em português do Brasil**, centralizados em arquivos de texto.
+- **Commits, merges e títulos de PR em Conventional Commits** (`feat:`, `fix:`, `docs:`, `ci:`...), por pedido do Gabriel. Detalhes em `docs/padroes/commits-e-prs.md`.
 - **Clean Code e DDD enxuto + Vertical Slice.** Domínio sem infraestrutura. Nomes do glossário (`docs/produto.md` e `docs/revisao-mvp.md`): PlayerCard, Formation, PartialExit, ServeAlignment, RotationIndex/`setterZone`, CourtSession, MemberId.
 - TS strict, sem `any`. C# com nullable ativado e avisos como erro. Sem números mágicos. Imutabilidade por padrão. Result pattern em vez de exceções para regra de negócio. Sem MediatR e sem AutoMapper.
 - Regras do vôlei e do motor sempre com **testes golden compartilhados entre TS e C#**.
