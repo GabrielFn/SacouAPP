@@ -68,6 +68,7 @@ const CASES = [
   [`${VOLLEY_RULES}script.js`, "export const value = 1;\n", NO_RESTRICTED_SYNTAX],
   [`${VOLLEY_RULES}script.mjs`, "export const value = 1;\n", NO_RESTRICTED_SYNTAX],
   [`${VOLLEY_RULES}script.cjs`, "module.exports = {};\n", NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}script.js`, "export const value = 1;\n", NO_RESTRICTED_SYNTAX],
 
   [`${VOLLEY_RULES}logic.data.ts`, MAGIC_FUNCTION, NO_RESTRICTED_SYNTAX],
   [`${VOLLEY_RULES}arrow.data.ts`, "export const f = (): number => 7;\n", NO_RESTRICTED_SYNTAX],

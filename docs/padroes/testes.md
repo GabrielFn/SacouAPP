@@ -9,15 +9,15 @@
 
 ## Regras
 
-- O teste entra junto com o código, no mesmo commit ou branch, e cobre a regra de negócio.
-- O nome diz o comportamento esperado. C#: `Metodo_Cenario_Resultado`, por isso `CA1707` fica desligada em `apps/api/tests`.
+- O teste entra junto com o código e cobre a regra de negócio.
+- O nome do teste descreve o comportamento. `CA1707` fica desligada em `apps/api/tests` por causa dos underscores.
 - Testes TS podem ter números soltos, `let`, mutação e `node:*`: são liberados no lint. `any` continua proibido.
 
 ## Golden compartilhado TS/C#
 
 Regras do vôlei e do motor sempre têm testes golden: os mesmos casos em JSON, executados pelas duas linguagens.
 
-- Os casos ficam em JSON ou em `*.data.ts`, que só pode ter dados: o lint não cobra número mágico ali, mas reprova função.
+- Os casos compartilhados ficam só em JSON. `*.data.ts` é para dados que não são golden compartilhado: o lint não cobra número mágico ali, mas reprova função.
 - O executor dos casos é um `*.test.ts`. Outro arquivo em `golden/` segue as regras normais.
 - Vitest e xUnit leem os mesmos arquivos. Ninguém copia caso para o outro lado.
 - Regra nova vai para `docs/dominio/`, como pede o `CLAUDE.md`.

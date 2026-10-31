@@ -36,9 +36,9 @@ O `CLAUDE.md` pede TS strict sem `any`, C# com nullable e avisos como erro, sem 
 
 **Sem supressão inline no ESLint (`noInlineConfig: true`).** Substitui o `reportUnusedDisableDirectives` do plano: a diretiva sem uso reprovava, mas `/* eslint-disable */` em uso passava, contradizendo "exceções: nenhuma". Agora a diretiva não tem efeito e gera aviso, que o `--max-warnings 0` reprova. Exceção legítima vai para a configuração, com comentário.
 
-**Exceção de número mágico só em testes e `*.data.{ts,mts,cts}`.** O plano também isentava `**/golden/**`, o que cobria o executor dos casos. Agora `*.data.*` reprova função, e o executor é um `*.test.ts`. Casos em JSON não passam pelo ESLint.
+**Exceção de número mágico só em testes e `*.data.{ts,mts,cts}`.** O plano também isentava `**/golden/**`, o que cobria o executor dos casos. Agora `*.data.*` reprova função, e o executor é um `*.test.ts`. Casos golden compartilhados TS/C# ficam só em JSON, que não passa pelo ESLint; `*.data.*` é para dados que não são golden compartilhado.
 
-**Regras em `.ts`, `.tsx`, `.mts` e `.cts`.** O plano só cobria `.ts` e `.tsx`, e a pureza só `.ts`. Em `packages/*/src`, `.js`, `.jsx`, `.cjs` e `.mjs` reprovam (`no-restricted-syntax` em `Program`). O `tsconfig.build.json` dos pacotes exclui `src/**/*.test.*`, para um teste `.mts`, isento da pureza, não ir para o `dist`.
+**Regras em `.ts`, `.tsx`, `.mts` e `.cts`.** O plano só cobria `.ts` e `.tsx`, e a pureza só `.ts`. Em `packages/*/src` e `apps/mobile/src`, `.js`, `.jsx`, `.cjs` e `.mjs` reprovam (`no-restricted-syntax` em `Program`). O `tsconfig.build.json` dos pacotes exclui `src/**/*.test.*`, para um teste `.mts`, isento da pureza, não ir para o `dist`.
 
 **Pureza mais ampla que a do plano.** Além da lista original: `import("x")` em tipo, `/// <reference>`, `@react-native-community/*`, `@testing-library/*`, `@sacou/mobile`, caminho relativo para `apps/` e, em `volley-rules`, para `match-engine`.
 

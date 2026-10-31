@@ -14,7 +14,7 @@ const TEST_FILES = [`**/*.test.${TS_EXTENSIONS}`];
 const PURE_PACKAGE_FILES = [`packages/{match-engine,volley-rules}/src/**/*.${TS_EXTENSIONS}`];
 const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
-const PACKAGE_JAVASCRIPT_FILES = ["packages/*/src/**/*.{js,jsx,cjs,mjs}"];
+const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile}/src/**/*.{js,jsx,cjs,mjs}"];
 const TOOLING_FILES = ["eslint.config.mjs", "scripts/**/*.{js,cjs,mjs}"];
 
 const MAGIC_NUMBER_OPTIONS = {
@@ -150,11 +150,11 @@ export default defineConfig([
   },
 
   {
-    files: PACKAGE_JAVASCRIPT_FILES,
+    files: FORBIDDEN_JAVASCRIPT_FILES,
     rules: {
       "no-restricted-syntax": [
         "error",
-        { selector: "Program", message: "Package sources must be TypeScript." },
+        { selector: "Program", message: "Sources must be TypeScript." },
       ],
     },
   },
