@@ -1,0 +1,3 @@
+Sonda E0.9: valor ficticio descartavel.
+
+SACOU_FAKE_CI_PROBE_158186C446DA5CDA6C850C8BFB5D62B0
