@@ -13,6 +13,8 @@
     "lint": "turbo run lint && pnpm lint:tooling",
     "lint:tooling": "eslint eslint.config.mjs scripts --max-warnings 0",
     "lint:regression": "node scripts/lint-regression.mjs",
+    "test:tooling": "node --test \"scripts/**/*.test.mjs\"",
+    "audit:api": "dotnet restore Sacou.slnx && dotnet list Sacou.slnx package --vulnerable --include-transitive --format json > .nuget-audit.json && node scripts/check-dotnet-audit.mjs .nuget-audit.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:eol": "node scripts/check-eol.mjs",

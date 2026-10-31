@@ -1,0 +1,12 @@
+# Decisions, exceptions and leak response: docs/seguranca/varredura-ci.md
+title = "Sacou secret scanning"
+
+[extend]
+useDefault = true
+
+# Deterministic rule for the CI probes, which never reach main. Holds the shape, never a value.
+[[rules]]
+id = "sacou-ci-probe"
+description = "Fake value used only to prove that the CI secret scan fails"
+regex = '''SACOU_FAKE_CI_PROBE_[A-F0-9]{32}'''
+keywords = ["sacou_fake_ci_probe_"]

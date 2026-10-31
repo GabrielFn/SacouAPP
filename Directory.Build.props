@@ -6,6 +6,10 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <!-- Pinned level: an SDK patch must not introduce new warnings. -->
         <AnalysisLevel>10.0-recommended</AnalysisLevel>
+        <AnalysisModeSecurity>All</AnalysisModeSecurity>
+        <!-- Same cut as `pnpm audit`. A NU190x at this level is an error (docs/seguranca/varredura-ci.md). -->
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>high</NuGetAuditLevel>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <!-- IDE0005 only runs on build with documentation generation on; CS1591 stays off. -->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>

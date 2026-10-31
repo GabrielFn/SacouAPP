@@ -5,6 +5,15 @@ packages:
 allowBuilds:
   unrs-resolver: false
 
+# Advisory fix, see docs/seguranca/varredura-ci.md.
+overrides:
+  deepmerge-ts: 8.0.2
+
+# Reason and expiry of each entry are in docs/seguranca/varredura-ci.md.
+audit:
+  ignore:
+    - GHSA-mrhx-c7xc-m3w5
+
 catalog:
   "@eslint/js": 9.39.5
   eslint: 9.39.5

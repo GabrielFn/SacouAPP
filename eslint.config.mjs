@@ -80,6 +80,9 @@ export default defineConfig([
 
   eslint.configs.recommended,
 
+  // Code built from strings cannot be analysed, in any file.
+  { rules: { "no-eval": "error", "no-new-func": "error" } },
+
   // The Expo preset carries the React and import rules, so it applies only to the app.
   { files: MOBILE_FILES, extends: [expo] },
 
@@ -95,6 +98,7 @@ export default defineConfig([
     plugins: { functional },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-implied-eval": "error",
       "@typescript-eslint/no-magic-numbers": [
         "error",
         {
