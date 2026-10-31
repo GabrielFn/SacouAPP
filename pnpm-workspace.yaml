@@ -7,9 +7,9 @@ allowBuilds:
 
 # Advisory fix, see docs/seguranca/varredura-ci.md.
 overrides:
-  deepmerge-ts: 8.0.2
+  eslint-plugin-functional>deepmerge-ts: 8.0.2
 
-# Reason and expiry of each entry are in docs/seguranca/varredura-ci.md.
+# Each entry needs a reason and an expiry in scripts/npm-audit-exceptions.json (test:tooling checks).
 audit:
   ignore:
     - GHSA-mrhx-c7xc-m3w5

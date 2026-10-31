@@ -17,4 +17,4 @@
 
 ## Leitura obrigatória do revisor
 
-Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde não prova nada sobre isso. O diff que tocar `.github/workflows/ci.yml`, `.gitleaks.toml`, `.gitleaksignore`, `audit.ignore` ou `overrides` em `pnpm-workspace.yaml`, `NuGetAuditSuppress` ou `scripts/nuget-audit-exceptions.json` exige leitura explícita do revisor, citada no parecer (`docs/seguranca/varredura-ci.md`).
+Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde não prova nada sobre isso. O diff que tocar `.github/workflows/ci.yml`, `.gitleaks.toml`, `.gitleaksignore`, `audit.ignore` ou `overrides` em `pnpm-workspace.yaml`, `NuGetAuditSuppress`, `scripts/nuget-audit-exceptions.json` ou `scripts/npm-audit-exceptions.json` exige leitura explícita do revisor, citada no parecer (`docs/seguranca/varredura-ci.md`).

@@ -157,11 +157,13 @@ jobs:
           tar --extract --gzip --file "$RUNNER_TEMP/$archive" --directory "$RUNNER_TEMP" gitleaks
 
       # HEAD, not --all: another branch must not fail this PR. On a PR, HEAD is the merge commit,
-      # so it covers main and the PR commits. --redact hides values; no report or artifact.
+      # so it covers main and the PR commits. -m: without it, git log shows no diff for a merge
+      # commit, and a value added only in a merge resolution would pass.
+      # --redact hides values; no report or artifact.
       - name: Scan history for secrets
         run: |
           "$RUNNER_TEMP/gitleaks" git . --config .gitleaks.toml --redact --no-banner --verbose \
-            --exit-code 1 --ignore-gitleaks-allow --log-opts="--full-history HEAD"
+            --exit-code 1 --ignore-gitleaks-allow --log-opts="--full-history -m HEAD"
 
   # The only check the merge routine reads (docs/padroes/commits-e-prs.md).
   ci-ok:

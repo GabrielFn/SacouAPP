@@ -10,7 +10,8 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 
 - **Segredos: job `secrets`, sem `needs` nem `if`,** para valer em PR só de docs. Roda o gitleaks sobre todo o histórico do `HEAD`, com `--redact`, sem relatório nem artefato. Entra no `needs` do `ci-ok`, que exige `success`.
 - **Binário fixado:** versão e SHA-256 no `env` do job, com `sha256sum --check --strict` antes de executar. Valor conferido entre `gitleaks_<versão>_checksums.txt` e o digest da API de releases.
-- **`HEAD`, não `--all`:** com `fetch-depth: 0`, varrer tudo faria uma branch alheia reprovar os outros PRs. No PR, o `HEAD` é o merge: cobre a `main` e os commits do PR.
+- **`HEAD`, não `--all`:** com `fetch-depth: 0`, varrer tudo faria uma branch alheia reprovar os outros PRs. No PR, o `HEAD` é o merge: alcança a `main` e os commits do PR.
+- **`-m` no `--log-opts`:** sem ele, `git log -p` não mostra o diff de commit de merge, e um valor colocado só na resolução de um merge passaria. Com ele, todo commit alcançável pelo `HEAD`, inclusive de merge, tem o diff varrido contra cada pai. Limite, que fica: o que nunca esteve num commit alcançável, como título e descrição de PR.
 - **`--ignore-gitleaks-allow`:** um comentário na linha não silencia o achado. Exceção só por fingerprint revisado.
 - **Regra `sacou-ci-probe`** em `.gitleaks.toml`, para a prova não depender de heurística. O arquivo guarda o formato, nunca um valor.
 - **Dependências no fim do `verify`,** com corte em High, inclusive `devDependencies`: `pnpm audit`, que reprova também em falha do registro, e `dotnet list package --vulnerable` lido por `scripts/check-dotnet-audit.mjs`. O comando sai com 0 mesmo com High (conferido em saída real), então o JSON decide, e o script reprova no que não entende.
@@ -28,9 +29,10 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 ## Consequências
 
 - Um CVE novo reprova PR sem relação com ele, e só no próximo run com código. Agendamento e alertas do Dependabot ficam fora desta tarefa.
-- `pnpm audit` não controla validade: a de `audit.ignore` depende de revisão. No NuGet, o script a aplica.
-- A exceção do `pnpm audit` vale por GHSA, não por caminho: pode esconder um novo uso do mesmo pacote (ver a linha do `zod` em `varredura-ci.md`).
-- `deepmerge-ts` fica forçado por override acima da faixa pedida pelo `eslint-plugin-functional`.
+- `pnpm audit` não controla validade. `pnpm test:tooling` faz esse papel: cada entrada de `audit.ignore` precisa de par em `scripts/npm-audit-exceptions.json`, e reprova depois de `expires`. A reprovação só aparece em execução com código. No NuGet, o script do gate aplica a validade.
+- A exceção do `pnpm audit` vale por GHSA, não por caminho: pode esconder um novo uso do mesmo pacote. Para o `zod`, `test:tooling` reprova declaração em `apps/` ou `packages/` abaixo de 4.6.6, inclusive por alias ou `catalog:`, e faixa que não consegue ler. Não cobre versão transitiva nem o `package.json` da raiz.
+- `eslint-plugin-functional>deepmerge-ts` fica forçado por override, restrito a esse caminho, acima da faixa pedida pelo plugin.
+- **Efeito do `-m` nos achados:** o mesmo valor aparece uma vez por pai do merge, com o mesmo fingerprint `commit:arquivo:regra:linha`, e a contagem de `leaks found` deixa de ser o número de valores. O que veio de um lado do merge também reaparece atribuído ao commit de merge. No PR, esse commit é refeito a cada execução, então fingerprint com commit não silencia de forma estável: exceção usa a forma global, `arquivo:regra:linha` (`detect/detect.go`, v8.30.1). Hoje não há achado no histórico nem exceção, logo nada a migrar.
 - O consumo cresce em 1 min cobrado por execução (ADR 0004).
 
 ## Primeira varredura
@@ -51,7 +53,7 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
   - **App e pacotes:** não alcançável. Nenhum importa `zod`, nem `@expo/cli`; o bundle exportado (`apps/mobile/dist`) não contém `ZodError` nem `ZodArray`.
   - **`@expo/cli`:** só dois módulos, ambos em `src/start/server`, importam `zod`, para metadados de plugins de dev tools e parâmetros das extensões de CLI/MCP. Roda só no servidor de desenvolvimento, na máquina de quem desenvolve, sobre pacotes já instalados.
   - **`eslint-plugin-react-hooks`:** roda no lint, sobre a configuração do próprio repositório.
-- **Risco restante:** travar um processo de desenvolvimento ou da CI, sem efeito em usuários. A exceção vale por GHSA, então esconderia um uso direto vulnerável: a tarefa que trouxer Zod para o app (`docs/decisoes.md`) precisa instalar versão ≥ 4.6.6 e rever a exceção. Validade proposta: 31/01/2027 (`varredura-ci.md`).
+- **Risco restante:** travar um processo de desenvolvimento ou da CI, sem efeito em usuários. A exceção vale por GHSA, então esconderia um uso direto vulnerável: a tarefa que trouxer Zod para o app (`docs/decisoes.md`) precisa instalar versão ≥ 4.6.6 e rever a exceção; `test:tooling` reprova a declaração abaixo disso. Validade proposta: 31/01/2027, cobrada também por `test:tooling`. A cobrança não equivale a aprovação: **a exceção segue dependendo do Gabriel.**
 
 ## Sondas
 
@@ -72,5 +74,7 @@ Valores fictícios, nunca registrados aqui. PRs fechados sem merge, branches apa
 | T14 (`push`) | Pendente | Só se prova depois do merge: conferir `secrets` e `ci-ok` na execução de `push` da `main` |
 
 Os runs de #11 e #12 terminaram antes do fechamento dos PRs, e o resultado foi lido depois nos logs, sem nova sonda. Em T8, o `ci-ok` reprovaria também por causa do `secrets`; o caminho `verify` em `failure` isolado está em T9.
+
+**Merge com valor só na resolução (revisão de segurança, ciclo 1):** o revisor reproduziu com o gitleaks 8.30.1. Prova local, com merge descartável e valor fictício: `git log -p -U0 --full-history` não mostra o valor (0 ocorrências) e, com `-m`, mostra duas, uma por pai. `gitleaks dir` sobre as duas saídas: nenhum achado e código 0 sem `-m`; dois achados de `sacou-ci-probe` e código 1 com `-m`. O resto do histórico segue limpo com `-m`. **Limite:** a trava do worktree recusa `gitleaks git` nesta máquina, então a prova é em duas etapas, sobre o log exportado. O `gitleaks git` com `-m` roda na CI, mas sem sonda com valor plantado: lá, só o caminho limpo foi exercitado.
 
 **Log:** no achado, o `--verbose` imprime autor e e-mail do commit, além de arquivo e regra. O repositório é privado, e não há outro dado pessoal no log.
