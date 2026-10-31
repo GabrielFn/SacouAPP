@@ -16,7 +16,9 @@ A arquitetura aprovada é um monólito modular em .NET 10 com DDD enxuto e fatia
 
 **Catálogo conferido em três fontes:** assemblies na saída do teste, `.csproj` em `Sacou.Modules/` e `Sacou.slnx`. Assim, módulo novo sem referência da API também reprova.
 
-**Namespace acompanha assembly e pasta.** Teste de reflexão: todo tipo de módulo e de `Shared` fica sob o nome do assembly; `InternalsVisibleTo` só para o próprio teste vale nos dois. Pasta e namespace: `IDE0130` como erro no build, o que fecha `Sessions/Domain/` com namespace `Sessions.Core`.
+**Namespace acompanha assembly e pasta.** Teste de reflexão: todo tipo de módulo e de `Shared` fica sob o nome do assembly; `InternalsVisibleTo` só para o próprio teste vale nos dois. Pasta e namespace: `IDE0130` como erro no build, como primeira barreira. A garantia é o teste `DomainFolders_DeclareTheNamespaceOfTheirPath`, que lê o repositório: todo `.cs` em pasta `Domain/` de módulo declara o namespace do seu caminho, o que fecha `Sessions/Domain/` com namespace `Sessions.Core`. A regra de `Domain` vale em qualquer nível do namespace do módulo (`Sessions.Foo.Domain`).
+
+**Por que a `IDE0130` não é a garantia.** Um teste relatou build com 0 erros com `Sessions/Domain/` em namespace `Sessions.Core`; não reproduzimos. Num clone limpo em `D:\tmp`, com `dotnet build` sem parâmetros, ela reprovou em build de solução, de projeto e via projeto de teste, em Debug e Release, incremental ou não, e também no `dotnet test` e no `dotnet format`. Ela só deixou de disparar com `-p:RunAnalyzers=false` ou `-p:EnforceCodeStyleInBuild=false`, e um build sem parâmetros logo depois voltou a reprovar. Não sabemos com quais comandos o caso foi obtido. Como o resultado depende de propriedades de build, a regra não pode ser a única barreira.
 
 **`Result` sem HTTP e sem texto de interface.** `Error.Code` é constante estável; o texto pt-BR fica centralizado fora, e o mapeamento para `ProblemDetails` vem com o primeiro endpoint. Exceção só para erro de programação: ler `Value` em falha, `Error` em sucesso, código vazio.
 
