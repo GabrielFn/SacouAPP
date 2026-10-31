@@ -9,7 +9,7 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 - **Padrão de partida:** 1 set, com opção de mudar.
 - **Membros:** mensalista x avulso. **Convidado é sempre avulso, nunca mensalista.** Papéis Admin, Co-admin, Placar.
 - **Fila "quem perde sai":** saída parcial. Se há menos gente esperando que um time, sai do perdedor só o número de quem espera, pelo critério configurável (padrão: mais partidas seguidas). Quem entra assume a posição de quem saiu. Ninguém esperando → ninguém sai. Avulsos que saíram e somam um time formam time por ordem de chegada.
-- **Rotação:** cada time tem a sua (sistema, escalação, levantador, rotação atual, banco). Gira só quem ganha o side-out. Livre/6x0 grátis; 4x2, 5x1 e 6x2 no Pro. Posições mostradas **no momento do saque**, nunca depois. Id interno da rotação: `setterZone`. Modo de regra: FIVB 2025–28 (padrão; só o time que recebe tem restrição de sobreposição) ou Clássico. Detalhes em `docs/dominio/rotacoes.md`.
+- **Rotação:** cada time tem a sua (sistema, escalação, levantador, rotação atual, banco). Gira só quem ganha o side-out. Livre/6x0 grátis, com um botão só na interface; 4x2, 5x1 e 6x2 no Pro. Posições mostradas **no momento do saque**, nunca depois. Id interno da rotação: `setterZone`. Modo de regra: FIVB 2025–28 (padrão; só o time que recebe tem restrição de sobreposição) ou Clássico. Detalhes em `docs/dominio/rotacoes.md`.
 - **Banco no MVP:** "sai quem saca" e manual.
 - **Ponto individual (Pro, opção do grupo):** "De quem foi?" fica aberto sem limite de tempo; o próximo ponto fecha. Sem resposta, o ponto fica sem autor e pode ser preenchido depois (Corrigir ou fim de set).
 - **MVP do dia:** padrão calculado por dados (saldo +/− em quadra, aproveitamento, sequência, ganho de rating). Votação = opção do grupo.
@@ -33,5 +33,5 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 ## Processo
 
 - Agentes: analista → desenvolvedor → revisor (novo) → revisor de segurança (tarefas sensíveis) → testador (novo) → merge.
-- **Merge automático** na `main` quando revisão e testes passam.
+- **Merge automático** na `main` quando revisão e testes passam. Repositório privado e grátis, sem proteção de branch: o orquestrador confere a CI verde antes do merge.
 - Sessões contínuas (o plano previa uma tarefa agendada a cada 4 horas; no PC, rodar sessões quando quiser — ver `LEIA-ME.md`).
