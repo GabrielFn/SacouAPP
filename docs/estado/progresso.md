@@ -12,7 +12,7 @@
 | E0.2 | Feita | PR #8; decisões no ADR 0005. Testes de arquitetura reprovam cada violação plantada. Aprovada no 3º ciclo de testes. |
 | E0.9 | Em andamento | PR #13 (`8b86966`), ADR 0007. Revisor, revisor de segurança e sonda de merge real aprovados. Falta a decisão do Gabriel sobre o `zod` (`perguntas.md`). Ver o diário de 31/10. |
 | E0.8 | Feita | PR #15; ADRs 0008–0019, glossário, ameaças, LGPD, segredos e checklist. O checklist segue todo pendente: não há código sensível ainda. |
-| E0.6 | Em andamento | Branch `task/E0.6-local-postgres`, ADR 0020. Implementação interrompida pela pausa. Ver o diário de 31/10. |
+| E0.6 | Em andamento | Branch `task/E0.6-local-postgres`, ainda sem código. ADR 0020. Parou antes de implementar, conferindo o hash do Postgres. Ver o diário de 31/10. |
 
 ## Adiantadas do M2
 
