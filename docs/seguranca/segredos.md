@@ -6,6 +6,8 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
+| `POSTGRES_PASSWORD` | Postgres local, só desenvolvimento e teste; sem segredo no GitHub Actions | `.env` | E0.6 |
+| `SACOU_TEST_POSTGRES_CONNECTION` | Postgres local, só desenvolvimento e teste; sem segredo no GitHub Actions | `.env` | E0.6 |
 | `SACOU_DATABASE_URL` | Postgres (Neon) | Railway; `.env` | E5.1 |
 | `SACOU_FIREBASE_SERVICE_ACCOUNT` | Firebase (FirebaseAdmin) | Railway; `.env` | E3.1 |
 | `SACOU_R2_ACCESS_KEY_ID` | Cloudflare R2 | Railway; `.env` | E3.14 |
@@ -25,5 +27,4 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 - **Provedor de IA do resumo:** nome depende de [`perguntas.md`](../estado/perguntas.md), item 4 (E3.13).
 - **Backups no R2:** se usam credencial própria (E5.3).
 - **Credenciais das lojas no EAS Submit:** quais e onde ficam (E5.4).
-- **`.env` local:** a E0.6 define o que o Postgres de desenvolvimento precisa, sem valor real no repositório.
 - **Rotação de segredos e resposta a vazamento:** o procedimento de vazamento na CI é escopo da E0.9, ainda sem merge; a rotação de cada segredo é da tarefa que o integra.

@@ -6,7 +6,7 @@
 
 ## Decisão
 
-- **Ciclo:** analista → desenvolvedor → revisor (novo) → revisor de segurança, nas tarefas sensíveis → testador (novo) → merge.
+- **Ciclo:** analista → desenvolvedor → revisor (novo) → revisor de segurança, nas tarefas sensíveis → testador (novo) → merge. No máximo 1 agente de cada função rodando por vez.
 - **Merge automático** na `main` quando revisão e testes passam. O repositório é privado e grátis, sem proteção de branch: o orquestrador confere a CI verde antes do merge.
 - **Sessões contínuas,** rodadas manualmente quando o Gabriel quiser.
 - **Commits e títulos de PR** em Conventional Commits (`commits-e-prs.md`).
