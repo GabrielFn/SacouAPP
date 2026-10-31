@@ -9,10 +9,14 @@
 | E0.4 | Feita | PR #1; decisões no ADR 0004. Aprovada no ciclo 2 de revisão. Sondas reais: `ci-ok` passa em PR só de docs e reprova com falha plantada. |
 | E0.5 | Feita | `docs/backlog.md` enxuto por decisão do Gabriel; ADR 0003. Aprovada na 4ª revisão. |
 | E1.1 | Feita | PR #7; decisões no ADR 0006. Comparação independente: 168 coordenadas, 0 diferenças do explorador. |
-| E0.2 | Em andamento | PR #8, branch `task/E0.2-dotnet-solution`, ADR 0005. Testes reprovaram 2 vezes; correção do ciclo 2 interrompida pela pausa. Ver o diário. **Mais uma reprovação = parar e perguntar ao Gabriel.** |
-| E0.9 | Em andamento | Branch `task/E0.9-ci-security`, ADR 0007. Implementação interrompida pela pausa. Ver o diário. |
-| E0.8 | Não iniciada | Plano em `docs/estado/tarefas/E0.8.md`. Começa depois do merge da E0.2. ADRs novos começam em 0008. |
-| E0.6 | Não iniciada | Depende da E0.2. |
+| E0.2 | Feita | PR #8; decisões no ADR 0005. Testes de arquitetura reprovam cada violação plantada. Aprovada no 3º ciclo de testes. |
+| E0.9 | Em andamento | PR #13, ADR 0007. Revisor aprovou e testador passou; faltam o revisor de segurança e a decisão do Gabriel sobre o `zod` (`perguntas.md`). |
+| E0.8 | Em andamento | Implementação na branch `task/E0.8-knowledge-base`. ADRs novos começam em 0008. |
+| E0.6 | Em andamento | Análise. |
+
+## Adiantadas do M2
+
+E1.2, E1.3, E1.4 e E2.1 têm análise iniciada e interrompida; só contam os planos completos em `docs/estado/tarefas/`. Implementadas em branches, só entram na `main` depois da revisão geral de segurança e do relatório do M1. Retomar conforme houver vaga: **no máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
 
 ## Adiadas
 
@@ -25,6 +29,10 @@
 - `.claude/agents/testador.md:9` cita `formacoes.json` sem o caminho novo depois da E1.1: atualizar a definição do agente com o Gabriel ciente.
 - E2.4: em `serving`, `liberoReplaces` não significa líbero em quadra (ADR 0006).
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
+
+## Lembretes para o Gabriel
+
+- Internacionalização: citar no relatório do marco, até ele decidir quando entra (`docs/ideias.md`).
 
 ## Bloqueadas
 

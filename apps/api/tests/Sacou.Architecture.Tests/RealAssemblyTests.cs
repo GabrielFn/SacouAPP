@@ -1,0 +1,84 @@
+using Xunit;
+
+namespace Sacou.Architecture.Tests;
+
+/// <summary>The rules applied to the real code. <see cref="PlantedViolationTests"/> proves the rules can fail.</summary>
+public sealed class RealAssemblyTests
+{
+    private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results"];
+
+    [Fact]
+    public void ModuleAssembliesInOutput_MatchTheCatalog()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.CatalogViolations(
+            Assemblies.ModuleNamesInOutput(), Assemblies.ModuleCatalog));
+    }
+
+    [Fact]
+    public void ModuleProjectsInFolders_MatchTheCatalog()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.CatalogViolations(
+            RepositoryFiles.ModuleNamesInDirectory(RepositoryFiles.ModulesDirectory), Assemblies.ModuleCatalog));
+    }
+
+    [Fact]
+    public void ModuleProjectsInSolution_MatchTheCatalog()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.CatalogViolations(
+            RepositoryFiles.ModuleNamesInSolution(RepositoryFiles.Solution), Assemblies.ModuleCatalog));
+    }
+
+    [Fact]
+    public void Domain_UsesOnlyAllowedDependencies()
+    {
+        ViolationAssert.None(ArchitectureDependencyRules.DomainViolations(Assemblies.RealArchitecture.Value));
+    }
+
+    [Fact]
+    public void DomainFolders_DeclareTheNamespaceOfTheirPath()
+    {
+        ViolationAssert.None(RepositoryFiles.DomainFolderViolations(RepositoryFiles.ModulesDirectory));
+    }
+
+    [Fact]
+    public void Modules_UseEachOtherOnlyThroughContracts()
+    {
+        ViolationAssert.None(ArchitectureDependencyRules.ModuleBoundaryViolations(Assemblies.RealArchitecture.Value));
+    }
+
+    [Fact]
+    public void Modules_ExposeOnlyContractsAndEntryClass()
+    {
+        ViolationAssert.None(Assemblies.RealModules.Value.SelectMany(ArchitectureReflectionRules.PublicSurfaceViolations));
+    }
+
+    [Fact]
+    public void ModulesAndShared_ShareInternalsOnlyWithOwnTests()
+    {
+        ViolationAssert.None(Assemblies.ModulesAndShared.Value.SelectMany(ArchitectureReflectionRules.InternalsVisibleToViolations));
+    }
+
+    [Fact]
+    public void ModulesAndShared_DeclareTypesUnderTheirAssemblyName()
+    {
+        ViolationAssert.None(Assemblies.ModulesAndShared.Value.SelectMany(ArchitectureReflectionRules.NamespaceViolations));
+    }
+
+    [Fact]
+    public void Shared_ExposesOnlyTheClosedNamespaceList()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.SharedNamespaceViolations(Assemblies.Shared, SharedPublicNamespaces));
+    }
+
+    [Fact]
+    public void Shared_ReferencesOnlyTheClosedAssemblyList()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.SharedReferenceViolations(Assemblies.Shared));
+    }
+
+    [Fact]
+    public void SharedProject_HasNoDependencies()
+    {
+        ViolationAssert.None(RepositoryFiles.ProjectDependencyViolations(RepositoryFiles.SharedProject));
+    }
+}
