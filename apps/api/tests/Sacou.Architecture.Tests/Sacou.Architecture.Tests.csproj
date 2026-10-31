@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="TngTech.ArchUnitNET" />
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Sacou.Api brings all modules to the output folder: that is what the catalog test inspects. -->
+        <ProjectReference Include="../../src/Sacou.Api/Sacou.Api.csproj" />
+        <ProjectReference Include="../../src/Sacou.Shared/Sacou.Shared.csproj" />
+        <ProjectReference Include="../Sacou.Architecture.Fixtures/Sacou.Architecture.Fixtures.csproj" />
+    </ItemGroup>
+</Project>
