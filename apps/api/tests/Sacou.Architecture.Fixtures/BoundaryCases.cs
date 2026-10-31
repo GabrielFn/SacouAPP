@@ -3,6 +3,29 @@ namespace Foo.Domain
     internal sealed class EscapedDomainType;
 }
 
+namespace Sacou.Modules.Alpha.Foo.Domain
+{
+    internal sealed class NestedDomainUsingHttpClient
+    {
+        internal HttpClient Create() => new();
+    }
+
+    internal sealed class AllowedNestedDomain
+    {
+        internal Guid Id { get; } = Guid.NewGuid();
+
+        internal AllowedNestedDomain Sibling() => new();
+    }
+}
+
+namespace Sacou.Modules.Alpha.DomainEvents
+{
+    internal sealed class NotInDomain
+    {
+        internal HttpClient Create() => new();
+    }
+}
+
 namespace Sacou.Api.Host
 {
     internal sealed class ApiType;

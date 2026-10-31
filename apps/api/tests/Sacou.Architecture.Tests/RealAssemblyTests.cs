@@ -35,6 +35,12 @@ public sealed class RealAssemblyTests
     }
 
     [Fact]
+    public void DomainFolders_DeclareTheNamespaceOfTheirPath()
+    {
+        ViolationAssert.None(RepositoryFiles.DomainFolderViolations(RepositoryFiles.ModulesDirectory));
+    }
+
+    [Fact]
     public void Modules_UseEachOtherOnlyThroughContracts()
     {
         ViolationAssert.None(ArchitectureDependencyRules.ModuleBoundaryViolations(Assemblies.RealArchitecture.Value));

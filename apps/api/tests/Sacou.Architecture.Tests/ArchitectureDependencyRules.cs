@@ -85,7 +85,8 @@ internal static partial class ArchitectureDependencyRules
     private static bool IsInNamespace(string fullName, string namespacePrefix) =>
         fullName.StartsWith(namespacePrefix + ".", StringComparison.Ordinal);
 
-    [GeneratedRegex(@"^Sacou\.Modules\.\w+\.Domain(?=\.)")]
+    /// <summary>Domain at any depth of the module namespace, up to its first occurrence.</summary>
+    [GeneratedRegex(@"^Sacou\.Modules\.\w+(\.\w+)*?\.Domain(?=\.)")]
     private static partial Regex DomainNamespacePattern();
 
     [GeneratedRegex(@"^Sacou\.Modules\.(\w+)\.")]

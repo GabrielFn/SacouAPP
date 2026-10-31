@@ -1,10 +1,13 @@
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace Sacou.Architecture.Tests;
 
 /// <summary>Rules and sources that need the repository itself, because the compiled output cannot answer them.</summary>
-internal static class RepositoryFiles
+internal static partial class RepositoryFiles
 {
+    private const string SourceFilePattern = "*.cs";
+    private const string DomainFolder = "Domain";
     private const string SolutionFileName = "Sacou.slnx";
     private const string ModuleProjectPrefix = "Sacou.Modules.";
     private const string ProjectFilePattern = "*.csproj";
@@ -24,6 +27,8 @@ internal static class RepositoryFiles
         "Reference",
         "Sdk",
     ];
+
+    private static readonly HashSet<string> GeneratedFolders = ["bin", "obj"];
 
     private static readonly Lazy<string> Root = new(FindRoot);
 
@@ -56,6 +61,25 @@ internal static class RepositoryFiles
         ];
     }
 
+    /// <summary>
+    /// Files in a Domain folder must declare the namespace their path spells. Without this, a wrong
+    /// namespace takes the file out of the Domain rule, which goes by namespace.
+    /// </summary>
+    internal static IReadOnlyList<string> DomainFolderViolations(string modulesDirectory) =>
+        [.. from path in Directory.GetFiles(modulesDirectory, SourceFilePattern, SearchOption.AllDirectories)
+            let folders = FoldersBelow(modulesDirectory, path)
+            where folders.Contains(DomainFolder) && !folders.Any(GeneratedFolders.Contains)
+            let expected = ModuleProjectPrefix + string.Join('.', folders)
+            let declared = DeclaredNamespaces(File.ReadAllText(path))
+            where declared.Count == 0 || declared.Any(name => name != expected)
+            select $"{Path.GetRelativePath(modulesDirectory, path)}: expected namespace {expected}, found [{string.Join(", ", declared)}]"];
+
+    private static string[] FoldersBelow(string root, string path) =>
+        Path.GetDirectoryName(Path.GetRelativePath(root, path))?.Split(Path.DirectorySeparatorChar) ?? [];
+
+    private static List<string> DeclaredNamespaces(string source) =>
+        [.. NamespaceDeclarationPattern().Matches(source).Select(match => match.Groups[1].Value)];
+
     private static string FindRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -67,4 +91,7 @@ internal static class RepositoryFiles
         return directory?.FullName
             ?? throw new InvalidOperationException($"{SolutionFileName} not found above {AppContext.BaseDirectory}.");
     }
+
+    [GeneratedRegex(@"^\s*namespace\s+([\w.]+)", RegexOptions.Multiline)]
+    private static partial Regex NamespaceDeclarationPattern();
 }

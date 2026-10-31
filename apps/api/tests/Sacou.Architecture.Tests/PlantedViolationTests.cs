@@ -45,6 +45,54 @@ public sealed class PlantedViolationTests
         Assert.Contains(details, detail => detail.Contains(dependency, StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void NestedDomain_WithForbiddenDependency_IsReported()
+    {
+        Assert.Contains(
+            DomainViolations.Value,
+            violation => violation.DeclaringType == "Sacou.Modules.Alpha.Foo.Domain.NestedDomainUsingHttpClient"
+                && violation.Detail.Contains("System.Net.Http.HttpClient", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void NestedDomain_WithAllowedDependency_IsNotReported()
+    {
+        Assert.DoesNotContain(
+            DomainViolations.Value,
+            violation => violation.DeclaringType == "Sacou.Modules.Alpha.Foo.Domain.AllowedNestedDomain");
+    }
+
+    [Fact]
+    public void NameThatOnlyStartsWithDomain_IsNotTreatedAsDomain()
+    {
+        Assert.DoesNotContain(
+            DomainViolations.Value,
+            violation => violation.DeclaringType == "Sacou.Modules.Alpha.DomainEvents.NotInDomain");
+    }
+
+    [Theory]
+    [InlineData("Sessions/Domain/Wrong.cs", "namespace Sacou.Modules.Sessions.Core;")]
+    [InlineData("Sessions/Foo/Domain/Wrong.cs", "namespace Sacou.Modules.Sessions.Foo.Core;")]
+    [InlineData("Sessions/Domain/Sub/Wrong.cs", "namespace Sacou.Modules.Sessions.Domain;")]
+    [InlineData("Sessions/Domain/Wrong.cs", "namespace Foo.Domain\n{\n}")]
+    [InlineData("Sessions/Domain/NoNamespace.cs", "internal static class NoNamespace;")]
+    [InlineData("Sessions/Domain/Second.cs", "namespace Sacou.Modules.Sessions.Domain\n{\n}\nnamespace Sacou.Modules.Sessions.Core\n{\n}")]
+    public void DomainFolder_WithNamespaceOtherThanItsPath_IsReported(string file, string source)
+    {
+        Assert.Single(DomainFolderViolationsOf(file, source));
+    }
+
+    [Theory]
+    [InlineData("Sessions/Domain/Right.cs", "namespace Sacou.Modules.Sessions.Domain;")]
+    [InlineData("Sessions/Foo/Domain/Right.cs", "namespace Sacou.Modules.Sessions.Foo.Domain;")]
+    [InlineData("Sessions/Domain/Sub/Right.cs", "namespace Sacou.Modules.Sessions.Domain.Sub;")]
+    [InlineData("Sessions/Slice/Handler.cs", "namespace Whatever;")]
+    [InlineData("Sessions/obj/Domain/Generated.cs", "namespace Whatever;")]
+    public void DomainFolder_WithNamespaceOfItsPath_IsNotReported(string file, string source)
+    {
+        Assert.Empty(DomainFolderViolationsOf(file, source));
+    }
+
     [Theory]
     [InlineData("AllowedBclAndShared")]
     [InlineData("AllowedGeneric`1")]
@@ -225,5 +273,21 @@ public sealed class PlantedViolationTests
     public void NoViolations_DoesNotFail()
     {
         ViolationAssert.None(Array.Empty<string>());
+    }
+
+    private static IReadOnlyList<string> DomainFolderViolationsOf(string file, string source)
+    {
+        var directory = Directory.CreateTempSubdirectory("sacou-domain-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, file);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, source);
+            return RepositoryFiles.DomainFolderViolations(directory.FullName);
+        }
+        finally
+        {
+            directory.Delete(recursive: true);
+        }
     }
 }
