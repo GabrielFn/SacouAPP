@@ -6,6 +6,7 @@
 |---|---|---|
 | `packages/*` | Vitest, arquivos `src/**/*.test.ts` junto do código | `pnpm test` |
 | `apps/api/tests/` | xUnit v3 sobre Microsoft Testing Platform | `dotnet test` |
+| `scripts/` | `node:test`, arquivos `*.test.mjs`, sem dependências | `pnpm test:tooling` |
 
 ## Regras
 

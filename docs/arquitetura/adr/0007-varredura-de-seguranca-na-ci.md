@@ -1,6 +1,6 @@
 # ADR 0007 · Varredura de segurança na CI
 
-**Status:** aceito (30/10/2026). **Tarefa:** E0.9. **Decidido por:** orquestrador, sem gasto, conta ou segredo novo. Ferramentas e exceções vigentes: `docs/seguranca/varredura-ci.md`.
+**Status:** aceito (30/10/2026). **Tarefa:** E0.9. **Decidido por:** orquestrador, sem gasto, conta ou segredo novo; a exceção do `zod` aguarda o Gabriel. Ferramentas e exceções vigentes: `docs/seguranca/varredura-ci.md`.
 
 ## Contexto
 
@@ -37,15 +37,40 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 
 - **Segredos:** nenhum achado no histórico nem na árvore.
 - **NuGet:** nenhuma vulnerabilidade.
-- **npm:** dois High, ambos em ferramentas de desenvolvimento: `deepmerge-ts`, corrigido por override, e `zod`, exceção com validade.
+- **npm:** dois High, ambos em ferramentas de desenvolvimento: `deepmerge-ts`, corrigido por override, e `zod`, mantido em `audit.ignore` (abaixo).
 - **Análise estática:** `AnalysisModeSecurity=All` não gerou aviso no código atual.
 
-## Sondas (parcial)
+## Análise do `zod` (GHSA-mrhx-c7xc-m3w5, CVE-2023-54404, High, CVSS 7,5)
 
-Valores fictícios, nunca registrados aqui. PRs fechados sem merge, branches apagadas.
+**A exceção é proposta do desenvolvedor e depende de decisão do Gabriel.** Sem ela, todo PR com código reprova.
 
-- **PR #9, run 41156493924:** `secrets` e `ci-ok` em `fail`, `verify` pulado. Três achados, com arquivo, commit e regra no log (`sacou-ci-probe`, inclusive na linha com `gitleaks:allow`, e `generic-api-key`); busca pelos valores no log: nada (T1, T2, T4, T5).
-- **PR #9, run 41156561140:** valores removidos da árvore, `secrets` e `ci-ok` em `fail` pelo histórico (T3). O diff vazio rodou o `verify`, que passou, com as auditorias, em Ubuntu.
-- **PR #10, run 41156576221:** só docs, com a branch da sonda ainda existente: `secrets` e `ci-ok` em `pass`, `verify` pulado (T7, parte de PR do T14).
-- **Local:** T10, T11, T12 e T13 (`CA5351` em MD5; `eval` em `lint:regression`).
-- **Pendentes:** T6, T8 e T9 (PRs #11 e #12 fechados sem leitura do resultado), T15 e o `push` do merge do T14.
+- **O advisory:** esgota a memória quando um array grande, de quem ataca, passa por um schema de array sem limite de tamanho. Marca toda versão abaixo de 4.6.6, inclusive a 3.x. A descrição cita a lógica do `$ZodArray`, do núcleo da v4; esta análise não conclui que a API 3.x usada aqui esteja livre dele.
+- **Quem traz:** `zod` 3.25.76, versão única, por dois caminhos: `expo` → `@expo/cli` e `eslint-config-expo` → `eslint-plugin-react-hooks` (direto e por `zod-validation-error`).
+- **Correção permitida pela árvore:** nenhuma. Não há 3.x corrigida, e `@expo/cli` pede `^3.25.76`, tanto na `latest` (58.1.17) quanto na `canary`. Só o `eslint-plugin-react-hooks` aceita a 4.x. Um override parcial tiraria um caminho, mas o GHSA seguiria no `@expo/cli`, e a exceção continuaria igual. Um override geral violaria a faixa declarada numa ferramenta de build.
+- **Alcance:**
+  - **App e pacotes:** não alcançável. Nenhum importa `zod`, nem `@expo/cli`; o bundle exportado (`apps/mobile/dist`) não contém `ZodError` nem `ZodArray`.
+  - **`@expo/cli`:** só dois módulos, ambos em `src/start/server`, importam `zod`, para metadados de plugins de dev tools e parâmetros das extensões de CLI/MCP. Roda só no servidor de desenvolvimento, na máquina de quem desenvolve, sobre pacotes já instalados.
+  - **`eslint-plugin-react-hooks`:** roda no lint, sobre a configuração do próprio repositório.
+- **Risco restante:** travar um processo de desenvolvimento ou da CI, sem efeito em usuários. A exceção vale por GHSA, então esconderia um uso direto vulnerável: a tarefa que trouxer Zod para o app (`docs/decisoes.md`) precisa instalar versão ≥ 4.6.6 e rever a exceção. Validade proposta: 31/01/2027 (`varredura-ci.md`).
+
+## Sondas
+
+Valores fictícios, nunca registrados aqui. PRs fechados sem merge, branches apagadas. Os PRs tiveram como base a branch da tarefa, para o diff mostrar só a sonda.
+
+| Teste | Onde | Resultado |
+|---|---|---|
+| T1, T2, T4, T5 | PR #9, run 41156493924 | `secrets` e `ci-ok` em `fail`, `verify` pulado. Três achados, com arquivo, commit e regra no log: `sacou-ci-probe`, inclusive na linha com `gitleaks:allow`, e `generic-api-key`. Busca pelos valores no log baixado: nada |
+| T3 | PR #9, run 41156561140 | Valores fora da árvore: `secrets` e `ci-ok` em `fail` pelo histórico. O diff vazio rodou o `verify`, que passou com as auditorias, em Ubuntu |
+| T6, T8 | PR #11, run 41156820987 | Checksum errado: `sha256sum` acusa `FAILED`, `Install gitleaks` falha e o passo de varredura fica `skipped`. `lodash` 4.17.20: `Audit npm dependencies` falha; `Audit NuGet` fica `skipped`. `ci-ok` em `fail` |
+| T9 | PR #12, run 41156886564 | `Newtonsoft.Json` 12.0.3: `NU1903` como erro em `Lint API`, antes do gate; `secrets` verde, `ci-ok` em `fail` |
+| T7, T14 (PR) | PR #10, run 41156576221 | Só docs, com a branch da sonda ainda existente: `secrets` e `ci-ok` em `pass`, `verify` pulado |
+| T10 | Local | Mesmo pacote em projeto fora do repositório: `dotnet list` sai com 0 e o script, com 1. No repositório, o `NU1903` já derruba a restauração, e `dotnet list` sai com 1 |
+| T11 | `pnpm test:tooling` | Casos do plano e mais: severidade desconhecida, transitivo, exceção de outro advisory, lista de exceções inválida |
+| T12 | Local | `pnpm audit --registry` inalcançável: código 1 |
+| T13 | Local, sem PR | `MD5.Create()` reprova o `dotnet build` com `CA5351`; `eval`, `new Function` e `setTimeout` com texto em `lint:regression`, que roda na CI |
+| T15 | Local, sem execução | O script real do `ci-ok`, lido do `ci.yml`, sai com 1 para `secrets` em `cancelled`, `failure`, `skipped` ou vazio. Não é prova em execução cancelada no GitHub |
+| T14 (`push`) | Pendente | Só se prova depois do merge: conferir `secrets` e `ci-ok` na execução de `push` da `main` |
+
+Os runs de #11 e #12 terminaram antes do fechamento dos PRs, e o resultado foi lido depois nos logs, sem nova sonda. Em T8, o `ci-ok` reprovaria também por causa do `secrets`; o caminho `verify` em `failure` isolado está em T9.
+
+**Log:** no achado, o `--verbose` imprime autor e e-mail do commit, além de arquivo e regra. O repositório é privado, e não há outro dado pessoal no log.

@@ -33,7 +33,7 @@ A definição de pronto exige CI verde. O repositório é privado, com cota limi
 
 Primeira execução, com cache frio, no PR da E0.4 (`changes` 6 s, `verify` 1 min 28 s; cerca de 1 min 40 s do início ao fim). Com o arredondamento por job e o `ci-ok`, acrescentado depois dessa medição, são **4 min cobrados** por execução com código; um PR só de docs gasta 2 min. Cada merge soma uma execução de `push` na `main`, então uma tarefa com um push no PR gasta cerca de 8 min. Para chegar a 2000 min/mês seriam 250 tarefas por mês.
 
-A E0.9 somou o job `secrets`, que arredonda para 1 min: **5 min cobrados** por execução com código e 3 min em PR só de docs. A mesma tarefa passa a cerca de 10 min, e o limite a 200 tarefas por mês.
+A E0.9 somou o job `secrets` e as auditorias ao `verify`. Medido nas sondas: `secrets` 8 s, `verify` 1 min 47 s, ou seja, **5 min cobrados** por execução com código e 3 min em PR só de docs. A mesma tarefa passa a cerca de 10 min, e o limite a 200 tarefas por mês.
 
 ## Prova em Linux
 
