@@ -1,11 +1,11 @@
-export const ROTATION_SLOTS = [1, 2, 3, 4, 5, 6] as const;
+export const ROTATION_SLOTS = Object.freeze([1, 2, 3, 4, 5, 6] as const);
 
 /** `0` is the single rotation of the Livre system, which has no setter. */
-export const ROTATION_KEYS = [0, ...ROTATION_SLOTS] as const;
+export const ROTATION_KEYS = Object.freeze([0, ...ROTATION_SLOTS] as const);
 
-export const FORMATION_SYSTEMS = ["5x1", "6x2", "4x2", "livre"] as const;
+export const FORMATION_SYSTEMS = Object.freeze(["5x1", "6x2", "4x2", "livre"] as const);
 
-export const PLAYER_ROLES = [
+export const PLAYER_ROLES = Object.freeze([
   "S",
   "S1",
   "S2",
@@ -21,4 +21,4 @@ export const PLAYER_ROLES = [
   "P4",
   "P5",
   "P6",
-] as const;
+] as const);

@@ -1,4 +1,4 @@
-# ADR 0004 · Formações em JSON e golden compartilhado
+# ADR 0006 · Formações em JSON e golden compartilhado
 
 **Status:** aceito (30/10/2026). **Tarefa:** E1.1. Plano e divergências entre as fontes em [`docs/estado/tarefas/E1.1.md`](../../estado/tarefas/E1.1.md).
 
@@ -30,6 +30,7 @@
 - Comparar por valor, nunca por bytes, com `double` em igualdade exata.
 - O golden é uma lista de 26 casos (13 formações × 2 fases): `{ system, rotation, phase, slots: { "1": { role, x, y }, … }, liberoReplaces }`. O `phase` é `receiving` ou `serving`.
 - Para atualizar: `pnpm --filter @sacou/volley-rules exec vitest run --dir src -u`. O golden é gerado do oráculo, não do JSON. Na CI, arquivo ausente reprova.
+- **Com o golden ausente, o `-u` escreve o arquivo, mas a mesma execução reprova 2 testes:** o Vitest só grava o snapshot ao fim do arquivo de teste, depois dos testes que leem o golden. Rode de novo: a segunda execução passa.
 - O build da API em produção precisa levar `packages/volley-rules/` no contexto (Docker/Railway).
 
 ## Consequências
@@ -37,4 +38,5 @@
 - O recorte do HTML no teste depende de `const BASE=` e `function checks(`. Reformatar o explorador pode exigir ajustar as âncoras; se sumirem, o teste reprova.
 - `note` e `label` em pt-BR ficam no JSON, apesar de "textos centralizados", porque são parte do aceite. A E4 decide se exibe `note` e se usa rótulos próprios.
 - 6x2 e 4x2 repetem com pares trocados (S1↔S2, OH1↔OH2, MB1↔MB2). `getFormation` não resolve isso de propósito: é da E2.4, junto com a regra do líbero desligado.
+- Para a E2.4: em `serving`, `liberoReplaces` continua preenchido nas rotações 2 e 5 do 5x1 e 5 do 6x2, em que o substituído saca. Não significa líbero em quadra: quem está na posição 1 é o papel de `slots`.
 - Para a E1.2: `rotacoes.md:65` diz "6 relações", mas a lista tem 7; a E1.2 corrige o texto.
