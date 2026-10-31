@@ -2,30 +2,12 @@
   "coordinateSystem": {
     "note": "Meia quadra do próprio time vista de cima, rede no topo. x: 0 = esquerda, 1 = direita. y: 0 = rede, 1 = linha de fundo (>1 = atrás da linha, zona de saque).",
     "basePositions": {
-      "1": [
-        0.8,
-        1.05
-      ],
-      "2": [
-        0.8,
-        0.12
-      ],
-      "3": [
-        0.5,
-        0.12
-      ],
-      "4": [
-        0.2,
-        0.12
-      ],
-      "5": [
-        0.2,
-        0.7
-      ],
-      "6": [
-        0.5,
-        0.72
-      ]
+      "1": [0.8, 1.05],
+      "2": [0.8, 0.12],
+      "3": [0.5, 0.12],
+      "4": [0.2, 0.12],
+      "5": [0.2, 0.7],
+      "6": [0.5, 0.72]
     }
   },
   "roles": {
@@ -38,12 +20,18 @@
     "MB1": "Middle blocker 1",
     "MB2": "Middle blocker 2",
     "L": "Libero",
-    "P1": "Player (no role)"
+    "P1": "Player (no role)",
+    "P2": "Player (no role)",
+    "P3": "Player (no role)",
+    "P4": "Player (no role)",
+    "P5": "Player (no role)",
+    "P6": "Player (no role)"
   },
   "rotationKey": "setterZone (posição do levantador, 1–6); sequência ao girar 1→6→5→4→3→2",
   "systems": {
     "5x1": {
       "label": "5x1",
+      "rotationOrder": [1, 6, 5, 4, 3, 2],
       "rotations": {
         "1": {
           "receive": {
@@ -275,6 +263,7 @@
     },
     "6x2": {
       "label": "6x2",
+      "rotationOrder": [1, 6, 5],
       "rotations": {
         "1": {
           "receive": {
@@ -393,6 +382,7 @@
     },
     "4x2": {
       "label": "4x2",
+      "rotationOrder": [4, 3, 2],
       "rotations": {
         "2": {
           "receive": {
@@ -509,6 +499,7 @@
     },
     "livre": {
       "label": "Livre / 6x0",
+      "rotationOrder": [0],
       "rotations": {
         "0": {
           "receive": {

@@ -1,6 +1,6 @@
 # Rotações do Sacou — especificação do motor (quadra 6x6)
 
-Pesquisa de 30/10/2026. Dados das formações em `formacoes.json`; explorador visual em `rotacoes-explorador.html`.
+Pesquisa de 30/10/2026. Dados das formações em [`packages/volley-rules/src/formations/formations.json`](../../packages/volley-rules/src/formations/formations.json); explorador visual em `rotacoes-explorador.html`.
 
 ## A regra mudou em 2025
 
@@ -80,7 +80,7 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Espelhar coordenadas na troca de quadra: as coordenadas são do próprio time; só o desenho espelha.
 - Girar o time ao trocar de quadra.
 
-## Coordenadas (`formacoes.json`)
+## Coordenadas (`packages/volley-rules/src/formations/formations.json`)
 
 Meia quadra do próprio time vista de cima, rede no topo. `x`: 0 = esquerda, 1 = direita. `y`: 0 = rede, 1 = linha de fundo (> 1 = zona de saque). As coordenadas são proposta técnica dentro das convenções da Gold Medal Squared e da JVA, todas validadas contra as regras de sobreposição. 6x2 = 5x1 com o levantador do fundo (S1) infiltrando e o da rede (S2) atacando como oposto.
 
