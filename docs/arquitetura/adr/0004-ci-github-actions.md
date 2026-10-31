@@ -1,0 +1,33 @@
+# ADR 0004 · CI no GitHub Actions
+
+**Status:** aceito (30/10/2026). Substitui o ADR 0003. **Tarefa:** E0.4. **Decidido por:** orquestrador; a ausência de proteção de branch é decisão do Gabriel.
+
+## Contexto
+
+A definição de pronto exige CI verde. O repositório é privado, com cota limitada de minutos, e sem proteção de branch. As tarefas até aqui só tinham sido validadas no Windows (ADR 0003).
+
+## Decisão
+
+- **Workflow único**, `.github/workflows/ci.yml`, em Ubuntu, com `permissions: contents: read`, sem segredos, actions fixadas por SHA de commit e versões lidas de `packageManager`, `.nvmrc` e `global.json`.
+- **Gatilhos:** `pull_request` e `push` na `main`. O push existe porque o cache de um PR só serve a ele mesmo: só o da `main` chega aos outros PRs. Ele também pega quebra causada por merges paralelos. Execução nova cancela a anterior só em PR.
+- **Filtro no job `changes`, sem `paths-ignore`,** que deixaria o PR sem check nenhum. O `verify` é pulado só se todos os arquivos estiverem em `docs/` e fora de `docs/dominio/`, porque testes leem arquivos de lá. Diff vazio ou com erro roda tudo. O `changes` roda `check:eol`, que também olha `docs/`.
+- **Job `verify` único e sequencial,** sem `continue-on-error`: `lint:regression` conflita com `tsc` e Vitest em paralelo.
+- **Rotina de merge em `docs/padroes/commits-e-prs.md`:** `gh pr checks` com lista não vazia e tudo em `pass` ou `skipping`, depois `gh pr merge --match-head-commit`.
+
+## Alternativas
+
+- **Proteção de branch:** recusada pelo Gabriel. O aceite "PR só entra com CI verde" é regra de processo.
+- **`paths-ignore`:** PR só de docs ficaria sem check, e a rotina não distinguiria isso de CI que não rodou.
+- **`cache: true` do `setup-dotnet`:** exige `packages.lock.json`, que o repositório não tem. O NuGet usa `actions/cache`.
+- **Jobs paralelos:** gastam mais minutos, porque cada job arredonda para cima, e reabrem o conflito do `lint:regression`.
+
+## Consequências
+
+- Push direto ou `gh pr merge` fora da rotina ainda entram na `main`; o `push` na `main` ao menos revela o erro depois.
+- O verde pode estar defasado se a `main` andou entre a execução e o merge; o `push` na `main` pega a quebra.
+- O cache do Turbo pode esconder falha quando um arquivo de fora do pacote não está declarado (ADR 0001). Em falha suspeita, reexecutar sem restaurar o cache.
+- Cada merge gera mais uma execução. Se o consumo passar de 2000 min/mês no ritmo atual, restringir o `push` na `main` e registrar aqui.
+
+## Consumo medido
+
+A preencher com a primeira execução.

@@ -1,0 +1,126 @@
+# Decisions and merge routine: docs/arquitetura/adr/0004-ci-github-actions.md
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # code=false only when every changed file is in docs/ and outside docs/dominio/.
+      # An empty or failed diff (zeroed SHA on a new ref, for example) runs the full job.
+      # --no-renames lists both sides, so moving code into docs/ still counts as code.
+      - name: Detect code changes
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          base="$PUSH_BEFORE"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            base="HEAD^1"
+          fi
+
+          code=true
+          if files="$(git diff --no-renames --name-only "$base" HEAD)" && [ -n "$files" ]; then
+            if ! printf '%s\n' "$files" | grep -qvE '^docs/' \
+              && ! printf '%s\n' "$files" | grep -qE '^docs/dominio/'; then
+              code=false
+            fi
+          fi
+
+          printf 'Changed files:\n%s\n' "${files:-<none>}"
+          echo "code=$code" | tee -a "$GITHUB_OUTPUT"
+
+      # Runs here too: check:eol covers docs/, and a CRLF there would fail every later PR.
+      - name: Check line endings
+        run: node scripts/check-eol.mjs
+
+  verify:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+
+      # An entry is never rewritten under the same key, so the key ends in the commit SHA.
+      - name: Cache Turbo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check line endings
+        run: pnpm check:eol
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Lint regression
+        run: pnpm lint:regression
+
+      - name: Lint API
+        run: pnpm lint:api
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build API
+        run: dotnet build
+
+      - name: Test API
+        run: dotnet test
