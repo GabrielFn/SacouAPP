@@ -6,6 +6,8 @@
 3. Encarregado de dados (LGPD): `docs/produto.md` exige o canal, mas não diz quem é nem qual o contato. Opções: (1) você mesmo, com um e-mail do domínio do Sacou; (2) terceirizar. **Recomendação: opção 1 no piloto.** Não bloqueia até o M6 (E6.1, política de privacidade).
 4. Provedor de IA do resumo: nenhum documento nomeia. Envolve conta e gasto, então a decisão é sua no M5 (E3.13). **Recomendação: decidir no início do M5.** Não bloqueia agora.
 
+5. Vulnerabilidade alta no `zod` 3.25.76 (GHSA-mrhx-c7xc-m3w5), achada na primeira varredura da E0.9, sem versão 3.x corrigida. Na branch da E0.9 ela está ignorada no audit até 31/01/2027, ainda sem merge. Falta analisar quem traz o pacote e se o código é alcançável. Opções: (1) analisar na retomada e manter a exceção só se não for alcançável; (2) atualizar para uma versão corrigida, se a árvore de dependências permitir; (3) aceitar a exceção sem análise. **Recomendação: opção 1.** Bloqueia só o merge da E0.9.
+
 ## Respondidas
 - **Proteção da `main` (30/10/2026):** repositório privado e grátis, sem bloqueio imposto pelo GitHub; o orquestrador só faz merge depois de conferir a CI verde.
 - **E0.5 travada (30/10/2026):** enxugar o `docs/backlog.md`: só o mapa de marcos e uma regra curta remetendo ao `CLAUDE.md`, com mais uma revisão.

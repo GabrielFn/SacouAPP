@@ -22,7 +22,7 @@ Regras do vôlei e do motor sempre têm testes golden: os mesmos casos em JSON, 
 - Vitest e xUnit leem os mesmos arquivos. Ninguém copia caso para o outro lado.
 - Regra nova vai para `docs/dominio/`, como pede o `CLAUDE.md`.
 
-O formato dos casos é definido por quem escrever o primeiro golden (E1.x, E2.x). Essa tarefa também soma `@types/node` ao pacote, necessário para ler arquivos no teste; ver ADR 0002.
+O primeiro golden é `packages/volley-rules/golden/formations.json`, e o contrato de leitura pelo C# está no [ADR 0006](../arquitetura/adr/0006-formacoes-em-json.md). Pacote com golden que lê arquivo declara `@types/node`, só para testes; ver ADR 0002.
 
 ## Definição de pronto
 
