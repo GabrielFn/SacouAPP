@@ -26,6 +26,10 @@
 - E2.4: em `serving`, `liberoReplaces` não significa líbero em quadra (ADR 0006).
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
+## Lembretes para o Gabriel
+
+- Internacionalização: citar no relatório do marco, até ele decidir quando entra (`docs/ideias.md`).
+
 ## Bloqueadas
 
 Nenhuma.
