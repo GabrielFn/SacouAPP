@@ -30,4 +30,10 @@ A definição de pronto exige CI verde. O repositório é privado, com cota limi
 
 ## Consumo medido
 
-A preencher com a primeira execução.
+Primeira execução, com cache frio, no PR da E0.4 (`changes` 6 s, `verify` 1 min 28 s; cerca de 1 min 40 s do início ao fim). Com o arredondamento por job, são **3 min cobrados** por execução com código; um PR só de docs gasta 1 min. Cada merge soma uma execução de `push` na `main`, então uma tarefa com um push no PR gasta cerca de 6 min. Para chegar a 2000 min/mês seriam mais de 300 tarefas por mês.
+
+## Prova em Linux
+
+A primeira execução em Ubuntu passou sem nenhum ajuste no código: `expo export` gerou o bundle Hermes (`.hbc`), e Vitest, `lint:regression`, `dotnet build`, `dotnet format` e `dotnet test` passaram.
+
+Sem checks ainda (PR recém-aberto), `gh pr checks` sai com código 1 e a mensagem `no checks reported`, mesmo com `--json`. A rotina trata isso como não aprovado.
