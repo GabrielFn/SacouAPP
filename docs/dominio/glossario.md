@@ -1,0 +1,74 @@
+# Glossário
+
+Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-301`, `revisao-mvp.md:95, 106-107`, `decisoes.md:12, 20, 26-28` e [ADR 0006](../arquitetura/adr/0006-formacoes-em-json.md). Quando um termo ainda não tem nome em nenhum documento, o nome fica **a definir** na tarefa indicada.
+
+## Organização
+
+| Termo no app | Nome no código | Nota |
+|---|---|---|
+| Grupo | `Group` | |
+| Membro do grupo | `GroupMember` (`MemberId`) | Tudo aponta para `MemberId`, nunca `UserId` |
+| Mensalista / avulso | `Regular` / `DropIn` | |
+| Convidado | A definir (E3.5) | Sempre avulso, nunca mensalista |
+| Ex-jogador | A definir (E3.16) | Como quem excluiu a conta aparece no histórico |
+| Admin / Co-admin / Placar (papéis) | `Admin` / `CoAdmin` / `Scorekeeper` | |
+| Rodada | `Session` | |
+| Presença | `Attendance` | |
+| Lista de espera | `Waitlist` | |
+| Sorteio | `TeamDraw` | |
+| Resumo da rodada | `SessionSummary` | |
+
+## Quadra e partida
+
+| Termo no app | Nome no código | Nota |
+|---|---|---|
+| Quadra da rodada | `CourtSession` | Stream de eventos, com as partidas dentro |
+| Partida | `Match` | |
+| Set | `Set` | |
+| Placar | `Score` | |
+| Configurações do jogo | `GameSettings` | Value object (`produto.md:272`) |
+| Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |
+| Saída parcial | `PartialExit` | |
+| Banco | `Bench` | |
+| Sacador | `ServingPlayer` | |
+| Side-out | `SideOut` | |
+| Desfazer (evento) | `RevertedTo` | Nunca apaga |
+| Versão do evento | `SchemaVersion` | |
+| Versão das regras da partida | `rulesVersion` | |
+
+## Rotação
+
+| Termo no app | Nome no código | Nota |
+|---|---|---|
+| Rotação / sistema de rotação | `Rotation` / `RotationSystem` | |
+| Rotação atual | `RotationIndex` | |
+| Id interno da rotação | `setterZone` | Zona do levantador |
+| Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
+| Estado do time | `TeamState` | Sistema, escalação, levantador, rotação atual e banco |
+| Posição na quadra (1–6) | `CourtPosition` | Ver a nota abaixo |
+| Posição na ordem de rotação (1–6) | `RotationSlot` | Ver a nota abaixo |
+| Coordenada na quadra (x, y) | `CourtPoint` | |
+| Posição no saque | `ServeAlignment` | |
+| Formação | `Formation` | Resultado por fase (ADR 0006) |
+| Modelo de formação | `FormationTemplate` | Entrada crua (ADR 0006) |
+| Validador de sobreposição | `OverlapValidator` | |
+| Modo de regra (FIVB 2025–28 / Clássico) | A definir (E1.2) | Padrão: FIVB 2025–28 |
+| Levantador / líbero | `Setter` / `Libero` | |
+| Função do jogador | `PlayerRole` | |
+
+**`CourtPosition` e `RotationSlot`:** ambos vão de 1 a 6 e aparecem em documentos diferentes (`produto.md:272, 296` e `revisao-mvp.md:107`). Este glossário não escolhe entre eles; a E1.2 define a relação por ADR.
+
+## Jogador
+
+| Termo no app | Nome no código | Nota |
+|---|---|---|
+| Nível | `SkillLevel` | 1–5, privado |
+| Cartinha | `PlayerCard` | |
+| Faixa da cartinha | A definir (E1.3) | Bronze, Prata, Ouro, Elite |
+
+## Planos
+
+| Termo no app | Nome no código | Nota |
+|---|---|---|
+| Pro do Grupo | `IGroupPlan` | Interface de controle de acesso |
+| Sacou+ do Jogador | `IUserPlan` | Interface de controle de acesso |
