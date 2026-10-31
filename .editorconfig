@@ -23,9 +23,19 @@ dotnet_diagnostic.IDE0052.severity = warning
 dotnet_diagnostic.IDE0055.severity = warning
 dotnet_diagnostic.IDE0059.severity = warning
 dotnet_diagnostic.IDE0161.severity = warning
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = warning
 dotnet_diagnostic.CA2227.severity = warning
 
 # xUnit test names use underscores and test classes must be public.
 [apps/api/tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1515.severity = none
+
+# Planted violations pretend to live in other modules; dotnet format ignores RunAnalyzers=false.
+[apps/api/tests/Sacou.Architecture.Fixtures/**.cs]
+dotnet_diagnostic.IDE0130.severity = none
+
+# "Shared" and "Error" are only VB keywords and the API is C#-only; the glossary names win.
+[apps/api/{src/Sacou.Shared,tests/Sacou.Shared.Tests}/**.cs]
+dotnet_diagnostic.CA1716.severity = none

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <!-- Planted violations for the architecture tests: unused and odd by design. -->
+        <RunAnalyzers>false</RunAnalyzers>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
+        <ProjectReference Include="../../src/Sacou.Shared/Sacou.Shared.csproj" />
+    </ItemGroup>
+</Project>
