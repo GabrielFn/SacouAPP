@@ -1,0 +1,92 @@
+[
+  {
+    "id": "floor-1000",
+    "rating": 1000,
+    "expected": { "levelTenths": 10, "tier": "bronze" }
+  },
+  {
+    "id": "floor-1100",
+    "rating": 1100,
+    "expected": { "levelTenths": 10, "tier": "bronze" }
+  },
+  {
+    "id": "ceiling-1900",
+    "rating": 1900,
+    "expected": { "levelTenths": 50, "tier": "elite" }
+  },
+  {
+    "id": "ceiling-2500",
+    "rating": 2500,
+    "expected": { "levelTenths": 50, "tier": "elite" }
+  },
+  {
+    "id": "level-2.4-1380",
+    "rating": 1380,
+    "expected": { "levelTenths": 24, "tier": "bronze" }
+  },
+  {
+    "id": "level-2.4-1389.75",
+    "rating": 1389.75,
+    "expected": { "levelTenths": 24, "tier": "bronze" }
+  },
+  {
+    "id": "level-2.5-1390",
+    "rating": 1390,
+    "expected": { "levelTenths": 25, "tier": "silver" }
+  },
+  {
+    "id": "level-2.5-1400",
+    "rating": 1400,
+    "expected": { "levelTenths": 25, "tier": "silver" }
+  },
+  {
+    "id": "level-3.4-1580",
+    "rating": 1580,
+    "expected": { "levelTenths": 34, "tier": "silver" }
+  },
+  {
+    "id": "level-3.4-1589.75",
+    "rating": 1589.75,
+    "expected": { "levelTenths": 34, "tier": "silver" }
+  },
+  {
+    "id": "level-3.5-1590",
+    "rating": 1590,
+    "expected": { "levelTenths": 35, "tier": "gold" }
+  },
+  {
+    "id": "level-3.5-1600",
+    "rating": 1600,
+    "expected": { "levelTenths": 35, "tier": "gold" }
+  },
+  {
+    "id": "level-4.4-1780",
+    "rating": 1780,
+    "expected": { "levelTenths": 44, "tier": "gold" }
+  },
+  {
+    "id": "level-4.4-1789.75",
+    "rating": 1789.75,
+    "expected": { "levelTenths": 44, "tier": "gold" }
+  },
+  {
+    "id": "level-4.5-1790",
+    "rating": 1790,
+    "expected": { "levelTenths": 45, "tier": "elite" }
+  },
+  {
+    "id": "level-4.5-1800",
+    "rating": 1800,
+    "expected": { "levelTenths": 45, "tier": "elite" }
+  },
+  {
+    "id": "anchor-1500",
+    "rating": 1500,
+    "expected": { "levelTenths": 30, "tier": "silver" }
+  },
+  {
+    "id": "card-screen-1660",
+    "rating": 1660,
+    "expected": { "levelTenths": 38, "tier": "gold" }
+  }
+]
