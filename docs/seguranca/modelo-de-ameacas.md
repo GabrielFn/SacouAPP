@@ -82,6 +82,8 @@ Sessão daquela quadra, conforme `decisoes.md:21` e [ADR 0013](../arquitetura/ad
 | T | Código copia e cola adulterado | CRC16 detecta erro, mas não prova origem (E1.4); proteção contra adulteração a definir na E3.10 |
 | R | Disputa sobre quem confirmou | Exibido como "pago (marcado por Fulano)" (`produto.md:65`) |
 | I | Chave Pix vazada do banco | Criptografada no banco (`produto.md:375`); algoritmo e gestão da chave a definir na E3.10 |
+| I | Chave Pix vazada por log, evento, telemetria ou URL | Gerador puro (E1.4): erro só com `code`, teste canário no golden. O código gerado contém a chave; a E3.10 não pode enviá-lo a esses destinos |
+| I | Pagador vê a chave do organizador no código | Inerente ao Pix; deve constar no aviso de privacidade (E3.10) |
 | I | Exposição de devedores | Lembrete neutro, nunca lista pública (`produto.md:65`) |
 | D | Geração abusiva de códigos | Limite de requisições (`decisoes.md:31`) |
 | E | Não admin confirma pagamento | Confirmação do admin (`produto.md:65`) com autorização por recurso (`decisoes.md:27`) |

@@ -33,6 +33,7 @@
 - **Com o golden ausente, o `-u` escreve o arquivo, mas a mesma execução reprova 2 testes:** o Vitest só grava o snapshot ao fim do arquivo de teste, depois dos testes que leem o golden. Rode de novo: a segunda execução passa.
 - O build da API em produção precisa levar `packages/volley-rules/` no contexto (Docker/Railway).
 - **Cartinha (E1.3):** `packages/volley-rules/golden/player-card-level.json` é escrito à mão, e não há dados para ler: a E1.5 precisa **portar a função** `playerCardLevelFromRating`, conforme [`docs/dominio/player-card.md`](../../dominio/player-card.md). O golden é uma lista de `{ id, rating, expected: { levelTenths, tier } }`.
+- **Pix (E1.4):** a E1.5 precisa ler `packages/volley-rules/golden/pix.json` e `packages/volley-rules/golden/pix-crc.json`, escritos à mão, sem o gerador. Se a geração ficar na API, porta também o gerador. Formato e cuidados no porte em [`docs/dominio/pix.md`](../../dominio/pix.md).
 
 ## Consequências
 

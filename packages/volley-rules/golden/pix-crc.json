@@ -1,0 +1,26 @@
+[
+  {
+    "id": "check-value-123456789",
+    "source": "crc-catalogue:reveng#CRC-16/IBM-3740",
+    "ascii": "123456789",
+    "expectedCrc": "29B1"
+  },
+  {
+    "id": "official-br-code-example",
+    "source": "official:br-code-manual-2.0.1",
+    "ascii": "00020104141234567890123426580014BR.GOV.BCB.PIX0136123e4567-e12b-12d1-a456-42665544000027300012BR.COM.OUTRO011001234567895204000053039865406123.455802BR5917NOME DO RECEBEDOR6008BRASILIA61087007490062190515RP12345678-201980390012BR.COM.OUTRO01190123.ABCD.3456.WXYZ6304",
+    "expectedCrc": "AD38"
+  },
+  {
+    "id": "official-pix-static",
+    "source": "official:pix-manual-2.10.0#2.6.3",
+    "ascii": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304",
+    "expectedCrc": "1D3D"
+  },
+  {
+    "id": "leading-zeros",
+    "source": "derived",
+    "ascii": "00020126330014br.gov.bcb.pix01111234567890052040000530398654041.875802BR5913Fulano de Tal6008BRASILIA62070503***6304",
+    "expectedCrc": "002C"
+  }
+]

@@ -1,0 +1,833 @@
+[
+  {
+    "id": "official-static-without-amount",
+    "source": "official:pix-manual-2.10.0#2.6.3",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
+  },
+  {
+    "id": "key-cpf",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "12345678900"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126330014br.gov.bcb.pix0111123456789005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304D3E6"
+  },
+  {
+    "id": "key-cnpj-alphanumeric",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cnpj",
+        "value": "12ABC34501DE35"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126360014br.gov.bcb.pix011412ABC34501DE355204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63047359"
+  },
+  {
+    "id": "key-phone",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "phone",
+        "value": "+5561912345678"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126360014br.gov.bcb.pix0114+55619123456785204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63040284"
+  },
+  {
+    "id": "key-email",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulano@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126400014br.gov.bcb.pix0118fulano@example.com5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63047F85"
+  },
+  {
+    "id": "key-email-77-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126990014br.gov.bcb.pix0177aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com5204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304A515"
+  },
+  {
+    "id": "key-email-78-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-with-punctuation",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "123.456.789-00"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-10-digits",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "1234567890"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-12-digits",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "123456789000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-empty",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": ""
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-trailing-newline",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "12345678900\n"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cpf-non-ascii-digits",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669\u0660\u0660"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cnpj-lowercase",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cnpj",
+        "value": "12abc34501de35"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cnpj-13-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cnpj",
+        "value": "12ABC34501DE3"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-cnpj-15-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cnpj",
+        "value": "12ABC34501DE355"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-phone-without-country-code",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "phone",
+        "value": "61912345678"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-phone-other-country-code",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "phone",
+        "value": "+5461912345678"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-phone-10-digits",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "phone",
+        "value": "+556191234567"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-phone-12-digits",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "phone",
+        "value": "+55619123456789"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-non-ascii",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulan\u00f3@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-without-at",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulano.example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-without-domain-dot",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulano@example"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-with-space",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "ful ano@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-two-at-signs",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulano@sicrano@example.com"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-email-trailing-newline",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "email",
+        "value": "fulano@example.com\n"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-random-uppercase",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123E4567-E12B-12D1-A456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-random-without-hyphens",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567e12b12d1a456426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-random-non-hex",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "g23e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "invalid-key-random-trailing-newline",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000\n"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "amount-1-cent",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 1
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654040.015802BR5913Fulano de Tal6008BRASILIA62070503***63046022"
+  },
+  {
+    "id": "amount-100-cents",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 100
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654041.005802BR5913Fulano de Tal6008BRASILIA62070503***6304B836"
+  },
+  {
+    "id": "amount-10050-cents",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 10050
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865406100.505802BR5913Fulano de Tal6008BRASILIA62070503***6304659E"
+  },
+  {
+    "id": "amount-maximum",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 999999999999
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-42665544000052040000530398654139999999999.995802BR5913Fulano de Tal6008BRASILIA62070503***6304603E"
+  },
+  {
+    "id": "invalid-amount-zero",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 0
+    },
+    "expectedError": "invalid-amount"
+  },
+  {
+    "id": "invalid-amount-negative",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": -1
+    },
+    "expectedError": "invalid-amount"
+  },
+  {
+    "id": "invalid-amount-fractional",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 10.5
+    },
+    "expectedError": "invalid-amount"
+  },
+  {
+    "id": "invalid-amount-above-maximum",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 1000000000000
+    },
+    "expectedError": "invalid-amount"
+  },
+  {
+    "id": "name-diacritics",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Concei\u00e7\u00e3o",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5909Conceicao6008BRASILIA62070503***63045D38"
+  },
+  {
+    "id": "name-already-decomposed",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Conceic\u0327a\u0303o",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5909Conceicao6008BRASILIA62070503***63045D38"
+  },
+  {
+    "id": "name-25-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5925ABCDEFGHIJKLMNOPQRSTUVWXY6008BRASILIA62070503***6304B8F6"
+  },
+  {
+    "id": "name-26-characters-cut",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5925ABCDEFGHIJKLMNOPQRSTUVWXY6008BRASILIA62070503***6304B8F6"
+  },
+  {
+    "id": "name-25-accented-characters-not-cut",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1\u00c1",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5925AAAAAAAAAAAAAAAAAAAAAAAAA6008BRASILIA62070503***63041AB3"
+  },
+  {
+    "id": "name-cut-on-a-space",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano Beltrano da Silva Junior",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5924Fulano Beltrano da Silva6008BRASILIA62070503***6304FFD4"
+  },
+  {
+    "id": "name-case-preserved",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "fulano DE tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913fulano DE tal6008BRASILIA62070503***630419DB"
+  },
+  {
+    "id": "name-spaces-collapsed-and-trimmed",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "  Fulano   de  Tal  ",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
+  },
+  {
+    "id": "name-emoji-removed",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano \ud83c\udfd0 de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
+  },
+  {
+    "id": "name-letter-without-decomposition-removed",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "S\u00f8ren",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5904Sren6008BRASILIA62070503***63046F5E"
+  },
+  {
+    "id": "name-tab-removed-not-turned-into-space",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano\tde Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5912Fulanode Tal6008BRASILIA62070503***6304E894"
+  },
+  {
+    "id": "name-printable-ascii-edges",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "A~B\u007f",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5903A~B6008BRASILIA62070503***63044AD4"
+  },
+  {
+    "id": "invalid-name-only-emoji",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "\ud83c\udfd0\ud83c\udfd0",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-merchant-name"
+  },
+  {
+    "id": "invalid-name-only-spaces",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "     ",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-merchant-name"
+  },
+  {
+    "id": "invalid-name-empty",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedError": "invalid-merchant-name"
+  },
+  {
+    "id": "city-long-with-diacritics",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "S\u00e3o Jo\u00e3o da Boa Vista"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6015Sao Joao da Boa62070503***6304CF9A"
+  },
+  {
+    "id": "city-cut-on-a-space",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "Itapecerica da Serra"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6014Itapecerica da62070503***63045EBE"
+  },
+  {
+    "id": "city-15-characters",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "ABCDEFGHIJKLMNO"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6015ABCDEFGHIJKLMNO62070503***6304173C"
+  },
+  {
+    "id": "city-16-characters-cut",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "ABCDEFGHIJKLMNOP"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6015ABCDEFGHIJKLMNO62070503***6304173C"
+  },
+  {
+    "id": "invalid-city-only-emoji",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "\ud83c\udfd0"
+    },
+    "expectedError": "invalid-merchant-city"
+  },
+  {
+    "id": "invalid-city-only-spaces",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "   "
+    },
+    "expectedError": "invalid-merchant-city"
+  },
+  {
+    "id": "error-order-key-first",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "1"
+      },
+      "merchantName": "",
+      "merchantCity": "",
+      "amountCents": 0
+    },
+    "expectedError": "invalid-key"
+  },
+  {
+    "id": "error-order-name-second",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "",
+      "merchantCity": "",
+      "amountCents": 0
+    },
+    "expectedError": "invalid-merchant-name"
+  },
+  {
+    "id": "error-order-city-third",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "",
+      "amountCents": 0
+    },
+    "expectedError": "invalid-merchant-city"
+  },
+  {
+    "id": "crc-with-leading-zeros",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "cpf",
+        "value": "12345678900"
+      },
+      "merchantName": "Fulano de Tal",
+      "merchantCity": "BRASILIA",
+      "amountCents": 187
+    },
+    "expectedPayload": "00020126330014br.gov.bcb.pix01111234567890052040000530398654041.875802BR5913Fulano de Tal6008BRASILIA62070503***6304002C"
+  }
+]
