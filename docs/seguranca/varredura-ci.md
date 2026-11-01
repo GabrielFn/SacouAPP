@@ -8,7 +8,7 @@ Decisões e alternativas: ADR 0007. Aqui ficam as ferramentas, as exceções vig
 |---|---|---|
 | Segredos: gitleaks, binário com SHA-256 fixado no `ci.yml` | Job `secrets`, em todo PR e em todo push na `main`, inclusive só de docs | Qualquer achado em todo o histórico do `HEAD`, inclusive no diff de commit de merge (`-m`) |
 | Dependências npm: `pnpm audit --audit-level high` | Fim do `verify` | High ou Critical não excetuado, ou falha do registro |
-| Dependências NuGet: `pnpm audit:api` (`dotnet list ... --vulnerable` lido por `scripts/check-dotnet-audit.mjs`) | Fim do `verify` | High ou Critical não excetuado, severidade desconhecida, JSON inválido, sem `projects` ou com `problems` |
+| Dependências NuGet: `pnpm audit:api` (`dotnet list ... --vulnerable` lido por `scripts/check-dotnet-audit.mjs`), sobre `Sacou.slnx` e, em segundo relatório, sobre `Sacou.Integration.Tests`, que fica fora da solução e traz `Npgsql` e o Testcontainers (ADR 0020) | Fim do `verify` | High ou Critical não excetuado, severidade desconhecida, JSON inválido, sem `projects` ou com `problems` |
 | NuGet na restauração: `NU1903` e `NU1904` viram erro (`NuGetAuditLevel=high`, avisos como erro) | Todo `dotnet restore` ou `build` | High ou Critical não suprimido |
 | Política npm: `pnpm test:tooling` (`scripts/lib/npm-audit-policy.mjs`) | `verify` | Entrada de `audit.ignore` vencida, sem par em `scripts/npm-audit-exceptions.json` ou par sem entrada; `zod` abaixo de 4.6.6 declarado em `apps/` ou `packages/` |
 | Análise estática C#: `AnalysisModeSecurity=All` | `lint:api` | Regra de segurança violada, como `CA5351` (MD5) |

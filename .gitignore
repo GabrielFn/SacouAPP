@@ -19,3 +19,4 @@ apps/mobile/ios/
 expo-env.d.ts
 __lint-regression__*
 .nuget-audit.json
+.nuget-audit-integration.json

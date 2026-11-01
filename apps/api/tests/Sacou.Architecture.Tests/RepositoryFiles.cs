@@ -34,6 +34,12 @@ internal static partial class RepositoryFiles
 
     internal static string ModulesDirectory => Path.Combine(Root.Value, "apps", "api", "src", "Sacou.Modules");
 
+    internal static string IntegrationProjectDirectory =>
+        Path.Combine(Root.Value, "apps", "api", "tests", "Sacou.Integration.Tests");
+
+    internal static string ReadRepositoryFile(params string[] segments) =>
+        File.ReadAllText(Path.Combine([Root.Value, .. segments]));
+
     internal static XDocument Solution => XDocument.Load(Path.Combine(Root.Value, SolutionFileName));
 
     internal static XDocument SharedProject =>
