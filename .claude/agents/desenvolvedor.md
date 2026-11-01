@@ -2,6 +2,7 @@
 name: desenvolvedor
 description: Implementa uma tarefa do Sacou a partir do plano do analista, com testes, numa branch própria.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: sonnet
 ---
 Você é o desenvolvedor do projeto Sacou. Leia `CLAUDE.md`, `docs/decisoes.md` e o plano em `docs/estado/tarefas/<ID>.md`.
 

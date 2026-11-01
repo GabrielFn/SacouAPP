@@ -5,10 +5,11 @@
 2. Retenção e base legal (LGPD): nenhum documento define por quanto tempo cada dado fica guardado nem a base legal, inclusive em backups. Pede orientação jurídica. Opções: (1) levar ao advogado ou contador na E6.2, com uma proposta minha para revisão; (2) definir antes. **Recomendação: opção 1.** Não bloqueia até o M6; o inventário fica "a definir".
 3. Encarregado de dados (LGPD): `docs/produto.md` exige o canal, mas não diz quem é nem qual o contato. Opções: (1) você mesmo, com um e-mail do domínio do Sacou; (2) terceirizar. **Recomendação: opção 1 no piloto.** Não bloqueia até o M6 (E6.1, política de privacidade).
 4. Provedor de IA do resumo: nenhum documento nomeia. Envolve conta e gasto, então a decisão é sua no M5 (E3.13). **Recomendação: decidir no início do M5.** Não bloqueia agora.
-
-5. Vulnerabilidade alta no `zod` 3.25.76 (GHSA-mrhx-c7xc-m3w5), achada na primeira varredura da E0.9, sem versão 3.x corrigida. Na branch da E0.9 ela está ignorada no audit até 31/01/2027, ainda sem merge. Análise (ADR 0007, conferida pelo revisor de segurança): vem do `@expo/cli`, que exige `^3.25.76`; o app e os pacotes não importam `zod` e ele não está no bundle; roda só no servidor de desenvolvimento e no lint. Um teste reprova a exceção vencida ou `zod` abaixo de 4.6.6 em `apps/` e `packages/`. Opções: (1) aceitar a exceção até 31/01/2027; (2) não aceitar: a varredura fica fora da CI até o Expo atualizar. **Recomendação: opção 1.** Bloqueia só o merge da E0.9.
+5. E0.6, Postgres local sem assinatura: `bin\postgres.exe` da EDB não é assinado, nem no 18.6-3 nem no 18.6-5; dos binários da própria EDB, só o `stackbuilder.exe` é. O SHA-256 do zip 18.6-3 bate com a referência de terceiros do plano. Opções: (1) aceitar o 18.6-3 sem assinatura, com hash fixado e servidor só em localhost; (2) Postgres só na CI, sem testes de integração locais por enquanto; (3) Docker Desktop, instalado por você. **Recomendação: opção 1.** Bloqueia a E0.6 e o fim do M1.
 
 ## Respondidas
+- **`zod` na E0.9 (01/11/2026):** exceção aceita até 31/01/2027 para GHSA-mrhx-c7xc-m3w5 no `zod` 3.25.76, que vem do `@expo/cli` e não entra no bundle. Análise no ADR 0007; um teste reprova a exceção vencida.
+- **`testador.md` (01/11/2026):** autorizada a correção do caminho das formações.
 - **Proteção da `main` (30/10/2026):** repositório privado e grátis, sem bloqueio imposto pelo GitHub; o orquestrador só faz merge depois de conferir a CI verde.
 - **E0.5 travada (30/10/2026):** enxugar o `docs/backlog.md`: só o mapa de marcos e uma regra curta remetendo ao `CLAUDE.md`, com mais uma revisão.
 - **Livre e 6x0 (30/10/2026):** um botão só na interface, "Livre / 6x0".
