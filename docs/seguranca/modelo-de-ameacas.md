@@ -140,7 +140,7 @@ Revisado em 01/11/2026 ([parecer](revisoes/M1-2026-11-01.md)). Aqui, "Mitigaçã
 
 | Ameaça | Mitigação | Lacuna |
 |---|---|---|
-| T: action comprometida ou movida | Pin por SHA | Nada obriga a fixar (`perguntas.md`, item 5) |
+| T: action comprometida ou movida | SHA obrigatório e lista de actions na configuração do repositório | Nenhuma: a configuração não muda por PR |
 | T: dependência npm maliciosa | Lockfile congelado e `allowBuilds` | `resolution` não é checada |
 | T: dependência NuGet alterada | Auditoria | Sem lockfile nem mapeamento de fontes |
 | T: binário do gitleaks trocado | SHA-256 fixado | Nenhuma |
