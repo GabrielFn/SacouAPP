@@ -52,6 +52,8 @@ Registra o que os documentos preveem; nada disso foi implementado. Decisões no 
 | Eventos de uso; identificador: a definir na E5.2 | PostHog | Medir o portão da Fase 2 (`revisao-mvp.md:132`) | `decisoes.md:31` | A definir na E5.2 e na E6.2 |
 | Dados enviados ao resumo com IA | Provedor a definir (`perguntas.md`, item 4) | Gerar o texto | `produto.md:70` | A definir na E3.13 |
 | Cópia do banco | Cloudflare R2 (backup diário) | Restauração | `decisoes.md:31` | A definir na E5.3 e na E6.2 (`perguntas.md`, item 2) |
+| IP e logs de acesso | API e Railway, limite de requisições, Firebase Auth, Sentry e o que Cloudflare e R2 registrarem | Segurança e operação | Revisão do M1 | Retenção e conteúdo a definir na E5.2 e na E6.2 (`perguntas.md`, item 2) |
+| Autor e e-mail em commits e logs da CI, só de desenvolvedores | GitHub, repositório privado | Histórico e auditoria | Revisão do M1 | Não se aplica a jogadores |
 
 ## Direitos do titular
 
