@@ -45,18 +45,18 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Id interno da rotação | `setterZone` | Zona do levantador |
 | Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
 | Estado do time | `TeamState` | Sistema, escalação, levantador, rotação atual e banco |
-| Posição na quadra (1–6) | `CourtPosition` | Ver a nota abaixo |
-| Posição na ordem de rotação (1–6) | `RotationSlot` | Ver a nota abaixo |
+| Posição na quadra / na ordem de rotação (1–6) | `RotationSlot` | Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
 | Posição no saque | `ServeAlignment` | |
 | Formação | `Formation` | Resultado por fase (ADR 0006) |
 | Modelo de formação | `FormationTemplate` | Entrada crua (ADR 0006) |
 | Validador de sobreposição | `OverlapValidator` | |
-| Modo de regra (FIVB 2025–28 / Clássico) | A definir (E1.2) | Padrão: FIVB 2025–28 |
+| Relação de sobreposição | `OverlapRelation` | As 7 de `rotacoes.md`, com id como `1-behind-2` (ADR 0021) |
+| Modo de regra (FIVB 2025–28 / Clássico) | `OverlapRuleMode` | `fivb-2025-28`, o padrão, e `classic` (ADR 0021) |
 | Levantador / líbero | `Setter` / `Libero` | |
 | Função do jogador | `PlayerRole` | |
 
-**`CourtPosition` e `RotationSlot`:** ambos vão de 1 a 6 e aparecem em documentos diferentes (`produto.md:272, 296` e `revisao-mvp.md:107`). Este glossário não escolhe entre eles; a E1.2 define a relação por ADR.
+**`RotationSlot` e `CourtPosition`:** são o mesmo conceito, o número oficial de 1 a 6. O nome no código é `RotationSlot`, e não há tipo `CourtPosition` ([ADR 0021](../arquitetura/adr/0021-overlap-validator.md)). O lugar físico do jogador é o `CourtPoint`.
 
 ## Jogador
 

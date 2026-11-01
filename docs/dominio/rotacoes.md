@@ -62,7 +62,7 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Seis jogadores por time, cada posição ocupada uma vez.
 - Girar só quem venceu recebendo; nunca quem venceu sacando.
 - Sacador é sempre quem está na posição 1 depois do giro.
-- Sobreposição só nas 6 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm).
+- Sobreposição só nas 7 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm). A tolerância só vale em frente/fundo: `atrás.y >= frente.y - tolerância`. Lateral é sempre `esquerda.x < direita.x`, sem tolerância, para não permitir o empate proibido. No modo Clássico, o time que saca segue 5 relações: `1-behind-2` e `6-left-of-1` ficam de fora, porque o sacador não conta. Contrato no [ADR 0021](../arquitetura/adr/0021-overlap-validator.md).
 - Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.
 - Tie-break: troca de lado aos 8 sem girar.
 

@@ -32,5 +32,5 @@ Sem alternativa documentada ao modo configurável: `rotacoes.md:7` só o justifi
 
 ## Consequências
 
-- **Sem escolha aqui:** `CourtPosition` (`produto.md:272, 296`) e `RotationSlot` (`revisao-mvp.md:107`) coexistem no [glossário](../../dominio/glossario.md), ambos de 1 a 6. A relação entre eles fica **a definir** por ADR na E1.2.
-- **A definir:** nome do modo de regra no código (E1.2); em que nível da configuração herdada ele fica (E3.3).
+- **Definido no [ADR 0021](0021-overlap-validator.md) (E1.2):** `CourtPosition` e `RotationSlot` são o mesmo conceito, e o nome no código é `RotationSlot`; o modo de regra no código é `OverlapRuleMode`.
+- **A definir:** em que nível da configuração herdada o modo de regra fica (E3.3).

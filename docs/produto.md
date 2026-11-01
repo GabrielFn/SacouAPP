@@ -269,7 +269,7 @@ Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a c
 
 1. **Linguagem do negócio no código, em inglês:** cada termo do vôlei tem um nome fixo no código (glossário abaixo). A interface do app continua em português.
 2. **Agregados protegem as regras:** a Session garante o limite de vagas e promove o primeiro da espera; o Match garante que a rotação só gira no side-out.
-3. **Value objects para conceitos com regra:** Score, CourtPosition (1–6), SkillLevel (1–5), GameSettings. Nada de int solto representando conceito de domínio.
+3. **Value objects para conceitos com regra:** Score, RotationSlot (1–6), SkillLevel (1–5), GameSettings. Nada de int solto representando conceito de domínio.
 4. **Eventos de domínio:** PlayerPromotedFromWaitlist, TeamsDrawn, MatchEnded.
 5. **Event sourcing só n**a quadra da rodada (CourtSession): um stream por quadra contém as partidas, a fila e as saídas parciais, porque esse estado atravessa partidas. Os eventos gravam o resultado das regras (quem saiu, quem entrou, nova posição), têm versão e trazem cópia congelada das configurações e formações. Nenhum dado pessoal nos eventos, só IDs (MemberId). O estado é recalculado a partir dos eventos. Isso torna Desfazer e Corrigir simples e permite o modo offline.
 6. **O domínio não conhece infraestrutura:** nenhuma referência a EF Core, HTTP ou Firebase dentro de `Domain/`.
@@ -293,7 +293,7 @@ Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a c
 | Side-out | SideOut |
 | Banco | Bench |
 | Levantador / líbero | Setter / Libero |
-| Posição na quadra (1–6) | CourtPosition |
+| Posição na quadra (1–6) | RotationSlot |
 | Função do jogador | PlayerRole |
 | Nível | SkillLevel |
 | Resumo da rodada | SessionSummary |

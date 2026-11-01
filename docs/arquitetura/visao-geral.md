@@ -97,6 +97,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0018](adr/0018-rating-and-mvp.md) | Rating, faixas, MVP do dia e ponto individual |
 | [0019](adr/0019-agent-process.md) | Processo de agentes e merge automático |
 | 0020 | Reservado à E0.6 |
+| [0021](adr/0021-overlap-validator.md) | Validador de sobreposição, `OverlapRuleMode` e `RotationSlot` |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -107,7 +108,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 9 | Padrão de partida | 0017 |
 | 10 | Membros e papéis | 0017 |
 | 11 | Fila e saída parcial | 0017 |
-| 12 | Rotação e modo de regra | 0010, 0006 |
+| 12 | Rotação e modo de regra | 0010, 0006, 0021 |
 | 13 | Banco no MVP | 0017 |
 | 14 | Ponto individual | 0018 |
 | 15 | MVP do dia | 0018 |
