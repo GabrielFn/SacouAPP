@@ -5,6 +5,8 @@
 2. Retenção e base legal (LGPD): nenhum documento define por quanto tempo cada dado fica guardado nem a base legal, inclusive em backups. Pede orientação jurídica. Opções: (1) levar ao advogado ou contador na E6.2, com uma proposta minha para revisão; (2) definir antes. **Recomendação: opção 1.** Não bloqueia até o M6; o inventário fica "a definir".
 3. Encarregado de dados (LGPD): `docs/produto.md` exige o canal, mas não diz quem é nem qual o contato. Opções: (1) você mesmo, com um e-mail do domínio do Sacou; (2) terceirizar. **Recomendação: opção 1 no piloto.** Não bloqueia até o M6 (E6.1, política de privacidade).
 4. Provedor de IA do resumo: nenhum documento nomeia. Envolve conta e gasto, então a decisão é sua no M5 (E3.13). **Recomendação: decidir no início do M5.** Não bloqueia agora.
+5. Configurações de Actions no GitHub (revisão do M1, A2): hoje qualquer action é permitida e nada exige SHA, e essa configuração não muda por PR. Opções: (1) exigir SHA e restringir as actions às usadas hoje, feito por mim via API com sua autorização; (2) você faz na tela; (3) deixar como está. **Recomendação: opção 1**, se o plano do GitHub permitir. Não bloqueia.
+6. Aviso de CVE novo entre execuções (revisão do M1, B2): hoje não há alertas do Dependabot nem execução agendada, e a validade do `zod` só é cobrada em execução com código. Opções: (1) ligar os alertas do Dependabot; (2) `schedule` semanal, com cerca de 5 min cobrados por semana; (3) os dois. **Recomendação: opção 3**, porque só o `schedule` cobra a validade da exceção. Não bloqueia.
 
 ## Respondidas
 - **Postgres local na E0.6 (01/11/2026):** Docker Desktop, instalado pelo Gabriel. Recusados os binários da EDB, porque `bin\postgres.exe` não tem assinatura, e o Postgres só na CI.
