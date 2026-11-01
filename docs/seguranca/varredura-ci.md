@@ -10,7 +10,9 @@ Decisões e alternativas: ADR 0007. Aqui ficam as ferramentas, as exceções vig
 | Dependências npm: `pnpm audit --audit-level high` | Fim do `verify` | High ou Critical não excetuado, ou falha do registro |
 | Dependências NuGet: `pnpm audit:api` (`dotnet list ... --vulnerable` lido por `scripts/check-dotnet-audit.mjs`), sobre `Sacou.slnx` e, em segundo relatório, sobre `Sacou.Integration.Tests`, que fica fora da solução e traz `Npgsql` e o Testcontainers (ADR 0020). `--vulnerable` lista só o que é vulnerável: relatório sem pacotes não é falta de cobertura, e o caminho do projeto no relatório prova que foi lido | Fim do `verify` | High ou Critical não excetuado, severidade desconhecida, JSON inválido, sem `projects` ou com `problems` |
 | NuGet na restauração: `NU1903` e `NU1904` viram erro (`NuGetAuditLevel=high`, avisos como erro) | Todo `dotnet restore` ou `build` | High ou Critical não suprimido |
-| Política npm: `pnpm test:tooling` (`scripts/lib/npm-audit-policy.mjs`) | `verify` | Entrada de `audit.ignore` vencida, sem par em `scripts/npm-audit-exceptions.json` ou par sem entrada; `zod` abaixo de 4.6.6 declarado em `apps/` ou `packages/` |
+| Política npm: `pnpm test:tooling` (`scripts/lib/npm-audit-policy.mjs`) | `verify` | O YAML é lido com parser (`js-yaml`, versão exata). Entrada de `audit.ignore` vencida, com validade acima de 180 dias contados da execução, sem par em `scripts/npm-audit-exceptions.json` ou par sem entrada; GHSA em outro ponto de `pnpm-workspace.yaml`; catálogo nomeado em qualquer dependência; `zod` abaixo de 4.6.6 declarado na raiz, em `apps/` ou `packages/`, inclusive por alias, catálogo, URL ou `github:`, ou travado nos `importers` do lockfile sob qualquer nome |
+| Origem dos pacotes npm: `pnpm test:tooling` (`scripts/lib/pnpm-lockfile.mjs`) | `verify` | `resolution` com `tarball:` fora de `https://registry.npmjs.org` em `pnpm-lock.yaml` |
+| Origem e travamento NuGet: `nuget.config` com `<clear/>` e `packageSourceMapping`, `packages.lock.json` por projeto, `RestoreLockedMode` com `CI=true` | Todo `dotnet restore`, `build` ou `test` na CI | `NU1004`: lockfile diferente do que os projetos pedem. Mudou pacote: rodar `dotnet restore` e fazer commit dos `packages.lock.json` |
 | Análise estática C#: `AnalysisModeSecurity=All` | `lint:api` | Regra de segurança violada, como `CA5351` (MD5) |
 | Análise estática TS/JS: `no-eval`, `no-new-func`, `@typescript-eslint/no-implied-eval` | `lint`, provado em `lint:regression` | Código montado a partir de texto |
 
@@ -28,7 +30,7 @@ Nenhuma existe por padrão. Toda exceção exige inspeção, motivo e revisor; a
 |---|---|
 | Falso positivo do gitleaks | Fingerprint global, `arquivo:regra:linha`, em `.gitleaksignore`: com `-m`, o mesmo achado volta no commit de merge, cujo SHA muda a cada execução de PR. `paths` em `.gitleaks.toml` só para arquivo específico, nunca pasta inteira |
 | `gitleaks:allow` na linha | Proibido: `--ignore-gitleaks-allow` faz a linha reprovar mesmo assim |
-| Advisory npm sem correção | `audit.ignore` com o GHSA em `pnpm-workspace.yaml`, par em `scripts/npm-audit-exceptions.json` (`advisory`, `reason`, `expires`) e entrada na tabela abaixo. O pnpm não controla a validade: `pnpm test:tooling` reprova a partir do dia seguinte a `expires`, em execução com código |
+| Advisory npm sem correção | `audit.ignore` com o GHSA em `pnpm-workspace.yaml`, par em `scripts/npm-audit-exceptions.json` (`advisory`, `reason`, `expires`) e entrada na tabela abaixo. O pnpm não controla a validade: `pnpm test:tooling` reprova a partir do dia seguinte a `expires` e quando `expires` passa de 180 dias contados da execução, em execução com código |
 | Advisory NuGet sem correção | `<NuGetAuditSuppress>` com a URL e entrada igual em `scripts/nuget-audit-exceptions.json` (`advisory`, `reason`, `expires`). O script controla a validade |
 | Sonda da CI | Nenhuma exceção: a regra `sacou-ci-probe` existe só para reprovar, e o valor nunca chega à `main` |
 
@@ -57,6 +59,7 @@ Abaixo de High, ficam só no relatório do `pnpm audit`, sem reprovar: `deepmerg
 - **Validade:** só é cobrada em execução com código. Sem execução agendada, uma exceção vencida não reprova nada até o próximo PR com código.
 - Sem proteção de branch, um PR pode editar o próprio workflow ou o `.gitleaks.toml`, pois o `pull_request` usa a versão do PR. A barreira é a leitura do revisor.
 - `refs/pull/<n>/head` das sondas continua no GitHub: por isso o valor delas é fictício, gerado na hora e descartado.
-- **Política do `audit.ignore` (até a SEC-M1):** aceita sem par nem validade as formas `audit: { ignore: [...] }`, linha em branco antes do item e GHSA em maiúsculas, que o `pnpm audit` respeita. `expires` não tem teto.
-- **Checagem do `zod` (até a SEC-M1):** alias (`npm:zod`), URL de tarball, `github:` e catálogo nomeado podem passar. A raiz segue fora do escopo.
+- **Teto de validade:** conta da data de execução, então uma exceção pode ser renovada a cada 180 dias, sempre com nova decisão do Gabriel. Vale só para o npm: `scripts/nuget-audit-exceptions.json` segue sem teto.
+- **Checagem do `zod`:** não cobre versão transitiva, nem `overrides` que forcem uma versão. Uma URL opaca, sem `zod` no texto, só é pega no lockfile. O formato de dependência git no lockfile segue o documentado para a versão 9.0: o pnpm 12.16.1 não conseguiu gravar esse lockfile (01/11/2026).
+- **Origem npm:** a checagem lê só `tarball:`. `resolution` do tipo `git` não é reprovada, e uma entrada só com `integrity` depende do registro configurado.
 - **Actions:** a configuração do repositório exige SHA e só aceita `actions/cache`, `actions/checkout`, `actions/setup-dotnet`, `actions/setup-node` e `pnpm/action-setup`. Action nova exige incluí-la na lista, fora do PR.
