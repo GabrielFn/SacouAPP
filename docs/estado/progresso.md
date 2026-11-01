@@ -16,10 +16,11 @@
 | Revisão geral de segurança do M1 | Feita | Aprovada com condições, inclusive o complemento da E0.6 ([parecer](../seguranca/revisoes/M1-2026-11-01.md)). |
 | SEC-M1 | Feita | PR #22 (`3458c06`). Revisor, revisor de segurança e testador aprovaram no ciclo 1. |
 | E1.2 | Feita | Decisões no ADR 0021. Aprovada no ciclo 2, com oráculo independente: 71 casos, 0 divergências. |
+| E1.3 | Feita | Decisão de arredondamento em `docs/dominio/player-card.md`: 1790 já é Elite. Citar no relatório do M2. Oráculo independente: 18 casos, 0 divergências. |
 
 ## Adiantadas do M2
 
-E1.3, E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. M1 fechado: podem entrar na `main`, uma por vez. **No máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
+E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. M1 fechado: podem entrar na `main`, uma por vez. **No máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
 
 ## Adiadas
 
