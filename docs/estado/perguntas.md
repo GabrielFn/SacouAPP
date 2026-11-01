@@ -5,8 +5,10 @@
 2. Retenção e base legal (LGPD): nenhum documento define por quanto tempo cada dado fica guardado nem a base legal, inclusive em backups. Pede orientação jurídica. Opções: (1) levar ao advogado ou contador na E6.2, com uma proposta minha para revisão; (2) definir antes. **Recomendação: opção 1.** Não bloqueia até o M6; o inventário fica "a definir".
 3. Encarregado de dados (LGPD): `docs/produto.md` exige o canal, mas não diz quem é nem qual o contato. Opções: (1) você mesmo, com um e-mail do domínio do Sacou; (2) terceirizar. **Recomendação: opção 1 no piloto.** Não bloqueia até o M6 (E6.1, política de privacidade).
 4. Provedor de IA do resumo: nenhum documento nomeia. Envolve conta e gasto, então a decisão é sua no M5 (E3.13). **Recomendação: decidir no início do M5.** Não bloqueia agora.
+5. Editor de formação do Pro: como a sobreposição é só aviso (ADR 0010), o editor deixa salvar uma formação inválida? Opções: (1) deixa salvar, mostrando o aviso; (2) não deixa. **Recomendação: opção 1**, coerente com "aviso, nunca bloqueio". Não bloqueia até a tarefa do editor.
 
 ## Respondidas
+- **Porta do Ryuk (01/11/2026):** risco aceito por ora, sem mudança na máquina (ADR 0020).
 - **Empate lateral (01/11/2026):** seguir a FIVB 2025-28, regra 7.4.3.2 ("level with"): empate lateral é permitido, como o frente/fundo. Corrige `rotacoes.md`, o explorador e o validador na E1.2. O texto de edições anteriores, para o modo Clássico, não foi conferido.
 - **Actions no GitHub (01/11/2026):** o orquestrador configurou, com autorização: SHA obrigatório e só as 5 actions usadas hoje.
 - **Aviso de CVE (01/11/2026):** só alertas do Dependabot, já ligados. Sem execução agendada: a validade do `zod` continua sendo cobrada só em execução com código.

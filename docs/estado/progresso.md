@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M1 · Fundação
+**Marco atual:** M2 · Motor da partida, aguardando o ok do Gabriel. M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -12,15 +12,15 @@
 | E0.2 | Feita | PR #8; decisões no ADR 0005. Testes de arquitetura reprovam cada violação plantada. Aprovada no 3º ciclo de testes. |
 | E0.9 | Feita | PR #13 (`6eb61cf`), ADR 0007. Revisor, revisor de segurança e sonda de merge real aprovados. Exceção do `zod` aprovada pelo Gabriel até 31/01/2027. |
 | E0.8 | Feita | PR #15; ADRs 0008–0019, glossário, ameaças, LGPD, segredos e checklist. O checklist segue todo pendente: não há código sensível ainda. |
-| E0.6 | Em andamento | Branch `task/E0.6-local-postgres`, plano revisado para Docker Desktop e Testcontainers. Falta implementar. |
-| Revisão geral de segurança do M1 | Feita | Aprovada com condições, sem a E0.6 ([parecer](../seguranca/revisoes/M1-2026-11-01.md)). Falta o complemento da E0.6. |
-| SEC-M1 | Planejada | Correções de A1, A2 (lockfile), A3 e B1. Entra antes das adiantadas do M2. |
+| E0.6 | Feita | PR #20; ADR 0020. Aprovada no ciclo 2. Testador passou em `9ed437d`. Falta só o caso de Docker desligado, com o Gabriel. |
+| Revisão geral de segurança do M1 | Feita | Aprovada com condições, inclusive o complemento da E0.6 ([parecer](../seguranca/revisoes/M1-2026-11-01.md)). |
+| SEC-M1 | Planejada | Correções de A1, A2 (lockfile), A3 e B1, mais lockfile do NuGet. Entra antes das adiantadas do M2. |
 
 ## Adiantadas do M2
 
 E1.2, E1.3, E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. Implementadas em branches, só entram na `main` depois da revisão geral de segurança e do relatório do M1. Retomar conforme houver vaga: **no máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
 
-E1.2 em andamento: branch `task/E1.2-overlap-validator`. Volta ao desenvolvedor para aceitar empate lateral (FIVB 7.4.3.2), decisão do Gabriel.
+E1.2 parada em `dd0b25f`, branch `task/E1.2-overlap-validator`: ciclo 2 implementado, com empate lateral e tolerância simétrica; revisão interrompida a pedido de contenção de custo. Falta revisor e testador, com escopo no diff do ciclo.
 
 ## Adiadas
 
@@ -34,11 +34,13 @@ E1.2 em andamento: branch `task/E1.2-overlap-validator`. Volta ao desenvolvedor 
 - Revisão do M1, A4: a E2.1 só entra na `main` com teste de esquema fechado do envelope e nomes proibidos; a regra em C#, por reflexão, fica na E2.10 ou E3.7.
 - Revisão do M1, B3 e B4: lockfile e mapeamento de fontes do NuGet antes do primeiro pacote de produção; estreitar os namespaces permitidos antes do primeiro código de domínio em C#.
 - Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
-- E1.2: incluir a relação `CourtPosition`/`RotationSlot` e o nome do modo de regra, delegados pelo ADR 0010 e pelo glossário.
+- E1.5: portar também o validador de sobreposição, com testes próprios de `NaN` e `Infinity` (ADR 0021).
+- E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
 ## Lembretes para o Gabriel
 
+- E0.6: rodar o passo 3 de `docs/operacao/postgres-local.md` (Docker desligado).
 - Internacionalização: citar no relatório do marco, até ele decidir quando entra (`docs/ideias.md`).
 
 ## Bloqueadas

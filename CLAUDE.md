@@ -112,6 +112,9 @@ pnpm lint:api                               # dotnet build + dotnet format --ver
 pnpm format:api                             # dotnet format
 dotnet build                                # solução Sacou.slnx (avisos como erro)
 dotnet test                                 # xUnit v3 da API
+dotnet test --project apps/api/tests/Sacou.Integration.Tests # integração com Postgres real (Docker ligado; fora do dotnet test da solução)
+docker compose up -d --wait                 # Postgres de desenvolvimento (copie .env.example para .env e troque a senha)
+docker compose down -v                      # derruba o Postgres de desenvolvimento e apaga o volume
 dotnet run --project apps/api/src/Sacou.Api # sobe a API
 pnpm --filter @sacou/mobile start           # sobe o Metro do app
 ```
