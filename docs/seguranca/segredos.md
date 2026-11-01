@@ -27,4 +27,4 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 - **Provedor de IA do resumo:** nome depende de [`perguntas.md`](../estado/perguntas.md), item 4 (E3.13).
 - **Backups no R2:** se usam credencial própria (E5.3).
 - **Credenciais das lojas no EAS Submit:** quais e onde ficam (E5.4).
-- **Rotação de segredos e resposta a vazamento:** o procedimento de vazamento na CI é escopo da E0.9, ainda sem merge; a rotação de cada segredo é da tarefa que o integra.
+- **Rotação de segredos e resposta a vazamento:** o procedimento de vazamento está em [`varredura-ci.md`](varredura-ci.md), seção "Resposta a vazamento"; a rotação de cada segredo é da tarefa que o integra.

@@ -2,7 +2,7 @@
 
 STRIDE por componente: **S**poofing, **T**ampering, **R**epudiation, **I**nformation disclosure, **D**enial of service, **E**levation of privilege.
 
-Ainda não há código nestes componentes. "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
+Só a CI (seção 11) já está implementada; os demais componentes ainda não têm código. Neles, "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
 
 ## 1. Login (Firebase Auth, E3.1)
 
@@ -132,4 +132,20 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | Resumo com IA (E3.13) | D: custo por uso abusivo | Cota por grupo (`revisao-mvp.md:116`) |
 | Sentry, PostHog e logs (E5.2) | I: dado pessoal enviado a terceiros | Logs sem e-mails nem tokens (`produto.md:375`); o que vai para Sentry e PostHog a definir na E5.2 |
 | Backups no R2 (E5.3) | I: cópia do banco exposta | Criptografia e acesso a definir na E5.3; retenção em `perguntas.md`, item 2 |
-| CI e repositório | I: segredo em commit | Varredura de segurança na CI (`decisoes.md:31`), escopo da E0.9, ainda sem merge |
+| CI e repositório | I: segredo em commit | Varredura de segurança na CI (`varredura-ci.md`) |
+
+## 11. CI e cadeia de suprimentos (E0.4, E0.9)
+
+Revisado em 01/11/2026 ([parecer](revisoes/M1-2026-11-01.md)). Aqui, "Mitigação" é o que já existe.
+
+| Ameaça | Mitigação | Lacuna |
+|---|---|---|
+| T: action comprometida ou movida | Pin por SHA | Nada obriga a fixar (`perguntas.md`, item 5) |
+| T: dependência npm maliciosa | Lockfile congelado e `allowBuilds` | `resolution` não é checada |
+| T: dependência NuGet alterada | Auditoria | Sem lockfile nem mapeamento de fontes |
+| T: binário do gitleaks trocado | SHA-256 fixado | Nenhuma |
+| T, E: PR edita a própria barreira ou adiciona workflow | Leitura do revisor e `contents: read`, sem segredos | Sem proteção de branch |
+| I: vazamento pelo log da CI | `--redact`, sem artefato | O e-mail do autor aparece no achado |
+| I: valor preso em `refs/pull` | Revogar o segredo; a sonda usa valor fictício | Nenhuma |
+| D: abuso de minutos ou cache | Timeouts, cancelamento em PR e cache isolado por ref | Nenhuma com um único colaborador |
+| R: exceção eterna do audit | `test:tooling` cobra a validade | Formas que escapam da política (SEC-M1) e cobrança só em execução com código |

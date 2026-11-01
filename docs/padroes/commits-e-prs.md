@@ -17,4 +17,11 @@
 
 ## Leitura obrigatória do revisor
 
-Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde não prova nada sobre isso. O diff que tocar `.github/workflows/ci.yml`, `.gitleaks.toml`, `.gitleaksignore`, `audit.ignore` ou `overrides` em `pnpm-workspace.yaml`, `NuGetAuditSuppress`, `scripts/nuget-audit-exceptions.json` ou `scripts/npm-audit-exceptions.json` exige leitura explícita do revisor, citada no parecer (`docs/seguranca/varredura-ci.md`).
+Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde não prova nada sobre isso. O diff que tocar qualquer item abaixo exige leitura explícita do revisor, citada no parecer (`docs/seguranca/varredura-ci.md`):
+
+- **CI:** qualquer arquivo em `.github/workflows/`, inclusive novo.
+- **Varredura:** `.gitleaks.toml`, `.gitleaksignore`, `scripts/check-dotnet-audit.mjs`, `scripts/lib/*` e os scripts `audit:api` e `test:tooling` do `package.json`.
+- **Exceções:** `scripts/nuget-audit-exceptions.json`, `scripts/npm-audit-exceptions.json` e `NuGetAuditSuppress`.
+- **Dependências:** `audit.ignore`, `overrides` e `allowBuilds` em `pnpm-workspace.yaml`; `pnpm-lock.yaml` (fonte dos pacotes), `.npmrc` e `nuget.config`.
+- **Build:** `NuGetAudit*`, `NoWarn`, `WarningsNotAsErrors` e `AnalysisMode*` em `Directory.Build.props` ou em `.csproj`.
+- **Ignorados:** `.gitignore`.
