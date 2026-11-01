@@ -1,7 +1,7 @@
 [
   {
     "advisory": "GHSA-mrhx-c7xc-m3w5",
-    "reason": "Proposed, awaiting the product owner's decision. No fixed zod the tree allows: @expo/cli requires ^3.25.76. See ADR 0007.",
+    "reason": "Approved by the product owner on 2026-11-01. No fixed zod the tree allows: @expo/cli requires ^3.25.76. See ADR 0007.",
     "expires": "2027-01-31"
   }
 ]

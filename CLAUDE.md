@@ -97,6 +97,9 @@ pnpm lint                                   # ESLint em pacotes, app e scripts (
 pnpm lint:regression                        # confirma que o lint reprova os desvios conhecidos
 pnpm format                                 # Prettier: corrige (pnpm format:check só verifica)
 pnpm check:eol                              # falha com CRLF no índice do Git
+pnpm test:tooling                           # testes dos scripts e da política de exceções do audit
+pnpm audit --audit-level high               # dependências JS vulneráveis (corte em High)
+pnpm audit:api                              # dependências .NET vulneráveis (corte em High)
 pnpm lint:api                               # dotnet build + dotnet format --verify-no-changes
 pnpm format:api                             # dotnet format
 dotnet build                                # solução Sacou.slnx (avisos como erro)

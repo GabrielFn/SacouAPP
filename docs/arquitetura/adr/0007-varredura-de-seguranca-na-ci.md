@@ -1,6 +1,6 @@
 # ADR 0007 · Varredura de segurança na CI
 
-**Status:** aceito (30/10/2026). **Tarefa:** E0.9. **Decidido por:** orquestrador, sem gasto, conta ou segredo novo; a exceção do `zod` aguarda o Gabriel. Ferramentas e exceções vigentes: `docs/seguranca/varredura-ci.md`.
+**Status:** aceito (30/10/2026). **Tarefa:** E0.9. **Decidido por:** orquestrador, sem gasto, conta ou segredo novo; a exceção do `zod` foi aprovada pelo Gabriel em 01/11/2026. Ferramentas e exceções vigentes: `docs/seguranca/varredura-ci.md`.
 
 ## Contexto
 
@@ -44,7 +44,7 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 
 ## Análise do `zod` (GHSA-mrhx-c7xc-m3w5, CVE-2023-54404, High, CVSS 7,5)
 
-**A exceção é proposta do desenvolvedor e depende de decisão do Gabriel.** Sem ela, todo PR com código reprova.
+**A exceção foi aprovada pelo Gabriel em 01/11/2026, até 31/01/2027.** Sem ela, todo PR com código reprova.
 
 - **O advisory:** esgota a memória quando um array grande, de quem ataca, passa por um schema de array sem limite de tamanho. Marca toda versão abaixo de 4.6.6, inclusive a 3.x. A descrição cita a lógica do `$ZodArray`, do núcleo da v4; esta análise não conclui que a API 3.x usada aqui esteja livre dele.
 - **Quem traz:** `zod` 3.25.76, versão única, por dois caminhos: `expo` → `@expo/cli` e `eslint-config-expo` → `eslint-plugin-react-hooks` (direto e por `zod-validation-error`).
@@ -53,7 +53,7 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
   - **App e pacotes:** não alcançável. Nenhum importa `zod`, nem `@expo/cli`; o bundle exportado (`apps/mobile/dist`) não contém `ZodError` nem `ZodArray`.
   - **`@expo/cli`:** só dois módulos, ambos em `src/start/server`, importam `zod`, para metadados de plugins de dev tools e parâmetros das extensões de CLI/MCP. Roda só no servidor de desenvolvimento, na máquina de quem desenvolve, sobre pacotes já instalados.
   - **`eslint-plugin-react-hooks`:** roda no lint, sobre a configuração do próprio repositório.
-- **Risco restante:** travar um processo de desenvolvimento ou da CI, sem efeito em usuários. A exceção vale por GHSA, então esconderia um uso direto vulnerável: a tarefa que trouxer Zod para o app (`docs/decisoes.md`) precisa instalar versão ≥ 4.6.6 e rever a exceção; `test:tooling` reprova a declaração abaixo disso. Validade proposta: 31/01/2027, cobrada também por `test:tooling`. A cobrança não equivale a aprovação: **a exceção segue dependendo do Gabriel.**
+- **Risco restante:** travar um processo de desenvolvimento ou da CI, sem efeito em usuários. A exceção vale por GHSA, então esconderia um uso direto vulnerável: a tarefa que trouxer Zod para o app (`docs/decisoes.md`) precisa instalar versão ≥ 4.6.6 e rever a exceção; `test:tooling` reprova a declaração abaixo disso. Validade: 31/01/2027, cobrada também por `test:tooling`. Renovar exige nova decisão do Gabriel.
 
 ## Sondas
 
