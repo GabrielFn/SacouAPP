@@ -43,6 +43,14 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 5. `testador` — agente **novo**. Roda build, lint e testes; escreve testes extras para os critérios de aceite; tenta quebrar.
 6. Se revisão e testes passam → merge na `main` (merge automático autorizado pelo Gabriel). Se falham → volta ao desenvolvedor com os achados. **3 ciclos falhando = parar e perguntar ao Gabriel.**
 
+**Modelo de cada agente** (pedido do Gabriel). Passe sempre o `model` na chamada e cite-o no diário. O `model:` em `.claude/agents/` é só o padrão:
+
+| Agente | Modelo |
+|---|---|
+| `analista`, `revisor`, `revisor-seguranca` | Opus |
+| `testador` | Sonnet |
+| `desenvolvedor` | Sonnet. **Opus** nas regras do vôlei e do motor (`volley-rules`, `match-engine`) e nas tarefas sensíveis |
+
 Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees).
 
 ## Autonomia
