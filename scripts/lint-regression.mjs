@@ -70,6 +70,15 @@ const CASES = [
   [`${VOLLEY_RULES}script.cjs`, "module.exports = {};\n", NO_RESTRICTED_SYNTAX],
   [`${MOBILE}script.js`, "export const value = 1;\n", NO_RESTRICTED_SYNTAX],
 
+  [`${MATCH_ENGINE}eval.ts`, 'export const value: unknown = eval("1");\n', "no-eval"],
+  [`${MATCH_ENGINE}new-func.ts`, 'export const value = new Function("return 1");\n', "no-new-func"],
+  [`${MOBILE}eval.tsx`, 'export const value: unknown = eval("1");\n', "no-eval"],
+  [
+    `${MATCH_ENGINE}implied-eval.ts`,
+    'export const id = setTimeout("run()");\n',
+    "@typescript-eslint/no-implied-eval",
+  ],
+
   [`${VOLLEY_RULES}logic.data.ts`, MAGIC_FUNCTION, NO_RESTRICTED_SYNTAX],
   [`${VOLLEY_RULES}arrow.data.ts`, "export const f = (): number => 7;\n", NO_RESTRICTED_SYNTAX],
   [`packages/volley-rules/src/golden/${PREFIX}runner.ts`, MAGIC_FUNCTION, NO_MAGIC_NUMBERS],

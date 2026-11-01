@@ -69,5 +69,5 @@ Passam no lint e ficam com o revisor:
 - `pnpm lint` compila os pacotes antes e levou de 27 s a 1min20s sem cache nesta máquina; com cache, menos de 1 s. Se pesar na CI, reavaliar na E0.4.
 - `react-hooks/refs` (do preset do Expo) reprova `ref.current =` durante o render, mesmo com a exceção do `functional/immutable-data`. Em efeito ou evento, passa.
 - A E0.2 precisa conferir o `lint:api` quando os módulos entrarem. Se `10.0-recommended` ficar barulhento, ajustar por regra no `.editorconfig`, com motivo; nunca desligar a categoria inteira.
-- Aviso `NU190x` de vulnerabilidade também quebra o build com avisos como erro: a E0.9 decide o tratamento.
+- Aviso `NU190x` de vulnerabilidade também quebra o build com avisos como erro: a E0.9 manteve assim, com corte em High (ADR 0007).
 - A E0.4 deve rodar `check:eol`, `format:check`, `lint`, `lint:regression` e `lint:api`, e confirmar o resultado no Ubuntu.
