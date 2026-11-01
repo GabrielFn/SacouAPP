@@ -45,7 +45,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Id interno da rotação | `setterZone` | Zona do levantador |
 | Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
 | Estado do time | `TeamState` | Sistema, escalação, levantador, rotação atual e banco |
-| Posição na quadra / na ordem de rotação (1–6) | `RotationSlot` | Ver a nota abaixo |
+| Posição atual na quadra (1–6) | `RotationSlot` | Muda a cada giro. Não é o índice fixo na escalação. Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
 | Posição no saque | `ServeAlignment` | |
 | Formação | `Formation` | Resultado por fase (ADR 0006) |
@@ -56,7 +56,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Levantador / líbero | `Setter` / `Libero` | |
 | Função do jogador | `PlayerRole` | |
 
-**`RotationSlot` e `CourtPosition`:** são o mesmo conceito, o número oficial de 1 a 6. O nome no código é `RotationSlot`, e não há tipo `CourtPosition` ([ADR 0021](../arquitetura/adr/0021-overlap-validator.md)). O lugar físico do jogador é o `CourtPoint`.
+**`RotationSlot` e `CourtPosition`:** são o mesmo conceito, a posição oficial atual de 1 a 6, que muda a cada giro. O índice fixo do jogador na escalação é outro conceito e não usa esse nome. O nome no código é `RotationSlot`, e não há tipo `CourtPosition` ([ADR 0021](../arquitetura/adr/0021-overlap-validator.md)). O lugar físico do jogador é o `CourtPoint`.
 
 ## Jogador
 

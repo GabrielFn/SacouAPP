@@ -4,9 +4,9 @@
 
 ## Decisões
 
-**7 relações, não 6.** 3 de frente/fundo e 4 laterais (`rotacoes.md:19-20`). O "6" de `rotacoes.md:65` e do explorador foi corrigido.
+**7 relações, não 6.** 3 de frente/fundo e 4 laterais (`rotacoes.md:19-20`). O "6" de `rotacoes.md` e do explorador foi corrigido.
 
-**Tolerância só em frente/fundo.** A fórmula é contrato: `back.y >= front.y - tolerance` e `left.x < right.x`. Na lateral, a tolerância permitiria o empate proibido. O padrão é `0,02`, configurável por chamada. A tolerância precisa ser finita e ≥ 0, e isso é conferido antes de tudo, mesmo quando nenhuma relação está em vigor.
+**Empate permitido nas 7 relações e tolerância simétrica.** A fórmula é contrato: `back.y >= front.y - tolerance` e `left.x <= right.x + tolerance`. O empate lateral é decisão do Gabriel de 01/11/2026, seguindo a FIVB 2025–28, regra 7.4.3.2 ("level with"); a 7.4.3.1 confirma o empate em frente/fundo. O orquestrador conferiu as duas no PDF oficial EN v05, página 25. A simetria da tolerância é decisão do orquestrador: a única razão para deixá-la fora da lateral era o empate proibido, que deixou de existir. O texto de edições anteriores, para o modo Clássico, não foi conferido: o Clássico usa a mesma comparação por decisão do orquestrador. O padrão é `0,02`, configurável por chamada. A tolerância precisa ser finita e ≥ 0, e isso é conferido antes de tudo, mesmo quando nenhuma relação está em vigor.
 
 **O que vale em cada caso:**
 
@@ -21,13 +21,13 @@
 
 **`Result` próprio do pacote.** `src/result.ts` traz `Result<T, E>`, `ok()` e `err()`, exportados. Regra de negócio devolve Result; catálogo corrompido continua lançando (ADR 0006). A E2.1 decide se reaproveita.
 
-**O validador só informa.** Ele devolve o que falhou, e não decide o que a interface faz. O ADR 0010 e `produto.md:95` dizem que violação vira aviso; `rotacoes.md:61-65` a lista sob "Erro (bloqueia)". Quem consome (E2.4 e o editor Pro) resolve esse ponto.
+**Sobreposição é aviso, nunca bloqueio** (ADR 0010, `produto.md:95`), e `rotacoes.md` passou a listá-la assim. O validador continua neutro: devolve o que falhou e não decide o que a interface faz. Se o editor Pro deixa ou não salvar formação inválida é pergunta ao Gabriel, registrada pelo orquestrador.
 
 ## Definições delegadas pelo ADR 0010
 
 **Nome do modo de regra: `OverlapRuleMode`,** com os valores `fivb-2025-28` e `classic`, em `OVERLAP_RULE_MODES`. Em que nível da configuração herdada ele fica continua com a E3.3.
 
-**`CourtPosition` e `RotationSlot` são o mesmo conceito; no código, o nome é `RotationSlot`.** Os dois designam o número oficial de 1 a 6 que define o sacador, o giro e a sobreposição (`rotacoes.md:12`, `produto.md:95`). Não há um segundo conceito de 1 a 6 a separar: o lugar físico de cada jogador, que é a outra camada, é o `CourtPoint`. Assim:
+**`CourtPosition` e `RotationSlot` são o mesmo conceito; no código, o nome é `RotationSlot`.** Os dois designam a posição oficial **atual** de 1 a 6, que define o sacador e a sobreposição e muda a cada giro (`rotacoes.md:12-13`, `produto.md:95`). O índice fixo de cada jogador na escalação **não** é `RotationSlot`: ele não muda com o giro, e o nome fica para quem o criar (E2.3 ou E2.4). O lugar físico de cada jogador é o `CourtPoint`. Assim:
 
 - `RotationSlot` é o tipo já usado em `Formation`, `SetterZone` e no golden; não haverá tipo `CourtPosition`.
 - O pedido de `produto.md:272` continua atendido: nada de `int` solto. No TS, `RotationSlot` é a união literal de 1 a 6; no C#, será value object.
@@ -52,5 +52,4 @@
 
 - `OverlapValidator`, do glossário, é o módulo `overlap-validator.ts`: `validateOverlap` recebe posições e fase, e `validateFormationOverlap` recebe uma `Formation`. No C#, a E1.5 pode dar à classe esse nome.
 - `validateFormationOverlap` ignora o papel: o líbero conta no lugar que ocupa.
-- O explorador segue com `T=0` e fica fora da decisão: é só a checagem visual dele (ADR 0006). As 13 formações passam nos dois valores.
-- **Empate em frente/fundo sem conferência no texto oficial:** vale `rotacoes.md:19`. O plano pede que o revisor confira a regra 7.4 no PDF da FIVB; se divergir, é pergunta ao Gabriel antes do merge, e a mudança fica restrita a uma comparação e aos casos T8.
+- O explorador segue com `T=0`, com as mesmas comparações: é só a checagem visual dele (ADR 0006). As 13 formações passam nos dois valores.
