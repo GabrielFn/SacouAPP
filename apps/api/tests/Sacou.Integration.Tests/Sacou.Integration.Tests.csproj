@@ -4,6 +4,8 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Npgsql" />
+        <!-- Testcontainers itself is pinned too: its version carries the Ryuk digest. -->
+        <PackageReference Include="Testcontainers" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="xunit.v3.mtp-v2" />
     </ItemGroup>

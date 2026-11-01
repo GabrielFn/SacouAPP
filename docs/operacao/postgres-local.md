@@ -10,7 +10,7 @@ dotnet test --project apps/api/tests/Sacou.Integration.Tests
 
 Não precisa de `.env`. O Testcontainers baixa a imagem na primeira vez, sobe um Postgres com senha aleatória e o remove no fim (o container auxiliar Ryuk remove restos se a execução for interrompida). `dotnet test` na raiz não roda esse projeto e não precisa de Docker.
 
-Se falhar com "Could not start Postgres in Docker", abra o Docker Desktop, espere o ícone indicar que está rodando e repita. Depois de reiniciar o computador o Docker pode não subir sozinho.
+Se falhar com "Could not start Postgres in Docker (…). Check that Docker is running and can pull the image", abra o Docker Desktop, espere o ícone indicar que está rodando e repita. O tipo entre parênteses ajuda a diferenciar: `DockerUnavailableException` é Docker fora do ar; `DockerApiException` é recusa da API, por exemplo falha ao baixar a imagem (sem internet, limite de pull ou digest inexistente). Depois de reiniciar o computador o Docker pode não subir sozinho.
 
 ## Banco de desenvolvimento
 
