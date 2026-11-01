@@ -39,7 +39,7 @@ cd D:\projetos
 gh repo clone gabrielfn/SacouAPP
 ```
 
-2. Abra o Docker Desktop (o Postgres local roda nele).
+2. Abra o Docker Desktop (o Postgres local roda nele; roteiro em `docs/operacao/postgres-local.md`).
 3. No terminal:
 
 ```powershell

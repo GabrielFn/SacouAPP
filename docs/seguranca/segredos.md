@@ -6,8 +6,7 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
-| `POSTGRES_PASSWORD` | Postgres local, só desenvolvimento e teste; sem segredo no GitHub Actions | `.env` | E0.6 |
-| `SACOU_TEST_POSTGRES_CONNECTION` | Postgres local, só desenvolvimento e teste; sem segredo no GitHub Actions | `.env` | E0.6 |
+| `POSTGRES_PASSWORD` | Postgres local do `docker-compose.yml`, só desenvolvimento; sem segredo no GitHub Actions (a CI usa o marcador de `.env.example`) | `.env` | E0.6 |
 | `SACOU_DATABASE_URL` | Postgres (Neon) | Railway; `.env` | E5.1 |
 | `SACOU_FIREBASE_SERVICE_ACCOUNT` | Firebase (FirebaseAdmin) | Railway; `.env` | E3.1 |
 | `SACOU_R2_ACCESS_KEY_ID` | Cloudflare R2 | Railway; `.env` | E3.14 |
@@ -21,6 +20,8 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 | `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |
 | `SACOU_PIX_ENCRYPTION_KEY` | Chave de criptografia do Pix | Railway; `.env` | E3.10 |
 | `SACOU_SCOREKEEPER_TOKEN_SIGNING_KEY` | Assinatura do token de placar; só se a E3.8 usar token assinado | Railway; `.env` | E3.8 |
+
+**Testes de integração:** não leem `.env` nem variável de ambiente. O Testcontainers gera uma senha aleatória a cada execução, só em memória, e nunca a registra (ADR 0020).
 
 ## A definir
 

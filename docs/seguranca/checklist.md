@@ -2,7 +2,7 @@
 
 Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app), por capítulo ou grupo de controles. A revisão de segurança de cada marco atualiza esta lista (`plano-mvp.md:225`) e detalha os requisitos do capítulo quando houver código.
 
-**Última revisão:** 01/11/2026, sobre `2242ad6` (M1, [parecer](revisoes/M1-2026-11-01.md)). "Parcial" vale só para CI, dependências e análise estática. O resto segue pendente, porque ainda não há código sensível. Nível do ASVS a seguir: a definir na E6.2.
+**Última revisão:** 01/11/2026, sobre `2242ad6` (M1, [parecer](revisoes/M1-2026-11-01.md)), com o [complemento da E0.6](revisoes/M1-2026-11-01.md#complemento-da-e06-commit-851916e) sobre `851916e`. "Parcial" vale só para CI, dependências e análise estática. O resto segue pendente, porque ainda não há código sensível. Nível do ASVS a seguir: a definir na E6.2.
 
 ## ASVS 5.0
 

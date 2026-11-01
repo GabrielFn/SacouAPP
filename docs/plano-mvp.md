@@ -171,7 +171,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
-| E5.1 | Deploy da API no Railway e banco no Neon (teste e produção) | Deploy automático a partir da branch principal | acesso Railway e Neon |
+| E5.1 | Deploy da API no Railway e banco no Neon (teste e produção) | Deploy automático a partir da branch principal. Criar o projeto Neon com `pg_version` 18, a mesma versão principal dos testes (ADR 0020) | acesso Railway e Neon |
 | E5.2 | Sentry, logs estruturados e PostHog | Erro proposital aparece no painel | acessos |
 | E5.3 | Backups diários, limite de requisições, feature flags e versão mínima | Restauração de backup testada | E5.1 |
 | E5.4 | Builds EAS e envio para TestFlight e teste interno | Instalável por convite | acessos das lojas |
@@ -246,7 +246,7 @@ O modelo autônomo funciona bem para código e testes; os limites estão no que 
 | Não tenho celular para testar | Recorte de foto, vibração, push e tela ligada só validam no aparelho | Build pronto + roteiro de teste de 10 minutos para você em cada marco |
 | Cada sessão começa do zero | Perda de contexto entre execuções | Todo estado no repositório: backlog, progresso, decisões e `CLAUDE.md` |
 | Acessos atrasam | Marcos M3 a M6 param | Aviso com uma semana de antecedência; sigo com tarefas sem dependência |
-| Testes de integração precisam de Postgres | Ambiente na nuvem pode não ter Docker | Postgres instalado direto no ambiente de teste |
+| Testes de integração precisam de Postgres | Ambiente na nuvem pode não ter Docker | Testcontainers com Postgres 18 fixado por digest, em Docker Desktop local e no runner da CI (ADR 0020) |
 | Bugs de regra na quadra derrubam a confiança | Piloto abandona o app | Motor isolado, testes golden e cenários reais antes do piloto |
 | Agentes concordando entre si | Erros passam pela revisão | Revisor e testador sempre novos, sem ver o raciocínio do desenvolvedor |
 | Escopo crescer | Atraso no piloto | Ideias novas vão para `docs/ideias.md` e só entram depois do M7 |
