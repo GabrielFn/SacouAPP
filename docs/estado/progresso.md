@@ -14,11 +14,13 @@
 | E0.8 | Feita | PR #15; ADRs 0008–0019, glossário, ameaças, LGPD, segredos e checklist. O checklist segue todo pendente: não há código sensível ainda. |
 | E0.6 | Em andamento | Branch `task/E0.6-local-postgres`, plano revisado para Docker Desktop e Testcontainers. Falta implementar. |
 | Revisão geral de segurança do M1 | Feita | Aprovada com condições, sem a E0.6 ([parecer](../seguranca/revisoes/M1-2026-11-01.md)). Falta o complemento da E0.6. |
-| SEC-M1 | Planejada | Correções de A1, A2, A3 e B1. Entra antes das adiantadas do M2. |
+| SEC-M1 | Planejada | Correções de A1, A2 (lockfile), A3 e B1. Entra antes das adiantadas do M2. |
 
 ## Adiantadas do M2
 
 E1.2, E1.3, E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. Implementadas em branches, só entram na `main` depois da revisão geral de segurança e do relatório do M1. Retomar conforme houver vaga: **no máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
+
+E1.2 em andamento: branch `task/E1.2-overlap-validator`. Volta ao desenvolvedor para aceitar empate lateral (FIVB 7.4.3.2), decisão do Gabriel.
 
 ## Adiadas
 
