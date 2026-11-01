@@ -16,7 +16,7 @@ A regra de sobreposição mudou em 2025 e material antigo ainda mostra a anterio
 
 **Posições no momento do saque,** nunca depois.
 
-**Modo de regra configurável:** FIVB 2025–28, o padrão, em que só o time que recebe tem restrição de sobreposição, ou Clássico, em que os dois têm. `OverlapValidator` com a regra oficial e tolerância configurável (`rotacoes.md:65`). Violação vira aviso, nunca bloqueio (`produto.md:95`).
+**Modo de regra configurável:** FIVB 2025–28, o padrão, em que só o time que recebe tem restrição de sobreposição, ou Clássico, em que os dois têm. `OverlapValidator` com a regra oficial e tolerância configurável (`rotacoes.md:69`). Violação vira aviso, nunca bloqueio (`produto.md:95`).
 
 **Sistemas.** Livre/6x0 grátis, com um botão só na interface; 4x2, 5x1 e 6x2 no Pro.
 
@@ -32,5 +32,5 @@ Sem alternativa documentada ao modo configurável: `rotacoes.md:7` só o justifi
 
 ## Consequências
 
-- **Sem escolha aqui:** `CourtPosition` (`produto.md:272, 296`) e `RotationSlot` (`revisao-mvp.md:107`) coexistem no [glossário](../../dominio/glossario.md), ambos de 1 a 6. A relação entre eles fica **a definir** por ADR na E1.2.
-- **A definir:** nome do modo de regra no código (E1.2); em que nível da configuração herdada ele fica (E3.3).
+- **Definido no [ADR 0021](0021-overlap-validator.md) (E1.2):** `CourtPosition` e `RotationSlot` são o mesmo conceito, e o nome no código é `RotationSlot`; o modo de regra no código é `OverlapRuleMode`.
+- **A definir:** em que nível da configuração herdada o modo de regra fica (E3.3).

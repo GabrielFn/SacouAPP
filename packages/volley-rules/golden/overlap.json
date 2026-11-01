@@ -1,0 +1,1318 @@
+[
+  {
+    "id": "T3-base-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T3-base-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T3-base-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+  {
+    "id": "T3-base-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+
+  {
+    "id": "T4-V1-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.125 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+  {
+    "id": "T4-V2-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.125 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-behind-3"] }
+  },
+  {
+    "id": "T4-V3-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.125 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-behind-4"] }
+  },
+  {
+    "id": "T4-V4-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+  {
+    "id": "T4-V5-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.375, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["3-left-of-2"] }
+  },
+  {
+    "id": "T4-V6-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-left-of-6"] }
+  },
+  {
+    "id": "T4-V7-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.375, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-left-of-1"] }
+  },
+
+  {
+    "id": "T4-V1-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.125 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+  {
+    "id": "T4-V2-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.125 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-behind-3"] }
+  },
+  {
+    "id": "T4-V3-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.125 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-behind-4"] }
+  },
+  {
+    "id": "T4-V4-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+  {
+    "id": "T4-V5-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.375, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["3-left-of-2"] }
+  },
+  {
+    "id": "T4-V6-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-left-of-6"] }
+  },
+  {
+    "id": "T4-V7-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.375, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-left-of-1"] }
+  },
+
+  {
+    "id": "T5-V2-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.125 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-behind-3"] }
+  },
+  {
+    "id": "T5-V3-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.125 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-behind-4"] }
+  },
+  {
+    "id": "T5-V4-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+  {
+    "id": "T5-V5-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.375, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["3-left-of-2"] }
+  },
+  {
+    "id": "T5-V6-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["5-left-of-6"] }
+  },
+
+  {
+    "id": "T6-V1-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.125 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+  {
+    "id": "T6-V7-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.375, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+
+  {
+    "id": "T7-V1-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.125 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V2-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.125 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V3-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.125 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V4-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V5-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.375, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V6-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+  {
+    "id": "T7-V7-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "slots": {
+      "1": { "x": 0.375, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": true, "checked": [] }
+  },
+
+  {
+    "id": "T8-depth-tie-1-2-tolerance-zero",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.25 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T8-depth-tie-1-2-default-tolerance",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.25 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T8-depth-tie-6-3-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.25 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+
+  {
+    "id": "T9-lateral-tie-allowed-tolerance-zero",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T9-lateral-tie-allowed-default-tolerance",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T9-lateral-tie-allowed-large-tolerance",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.5,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+
+  {
+    "id": "T10-default-tolerance-inside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.49 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T10-default-tolerance-outside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.47 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+
+  {
+    "id": "T11-explicit-zero-is-not-default",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.49 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+
+  {
+    "id": "T12-custom-tolerance-exact-limit",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.375 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T12-custom-tolerance-outside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.3125 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+
+  {
+    "id": "T13-tolerance-reaches-lateral",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.02,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.51, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+
+  {
+    "id": "T14-no-diagonal-relation",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.875, "y": 0.75 },
+      "2": { "x": 0.375, "y": 0.25 },
+      "3": { "x": 0.25, "y": 0.25 },
+      "4": { "x": 0.125, "y": 0.625 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.75, "y": 0.5 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+
+  {
+    "id": "T15-two-violations-in-fixed-order",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.625, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.125 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-behind-3", "5-left-of-6"] }
+  },
+
+  {
+    "id": "T16-outside-the-court-is-not-checked",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 1.05 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T16-negative-tolerance-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": -0.01,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "invalid-tolerance" }
+  },
+  {
+    "id": "T16-negative-tolerance-fivb-serving",
+    "mode": "fivb-2025-28",
+    "phase": "serving",
+    "tolerance": -0.01,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "invalid-tolerance" }
+  },
+
+  {
+    "id": "T13-zero-tolerance-lateral-outside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.51, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+
+  {
+    "id": "T19-lateral-limit-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T19-lateral-outside-fivb-receiving",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.6875, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+  {
+    "id": "T19-lateral-limit-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T19-lateral-outside-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.6875, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+  {
+    "id": "T19-lateral-limit-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.625, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+  {
+    "id": "T19-lateral-outside-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.6875, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+
+  {
+    "id": "T20-depth-limit-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.375 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T20-depth-outside-classic-receiving",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.3125 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+  {
+    "id": "T20-depth-limit-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.5 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.375 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+  {
+    "id": "T20-depth-outside-classic-serving",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0.125,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.5 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.3125 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["6-behind-3"] }
+  },
+  {
+    "id": "T20-depth-tie-classic-receiving-tolerance-zero",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.25 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T20-lateral-tie-classic-receiving-tolerance-zero",
+    "mode": "classic",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T20-lateral-tie-classic-serving-tolerance-zero",
+    "mode": "classic",
+    "phase": "serving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": ["6-behind-3", "5-behind-4", "4-left-of-3", "3-left-of-2", "5-left-of-6"]
+    }
+  },
+
+  {
+    "id": "T21-default-tolerance-pinned-depth-inside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.4805 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T21-default-tolerance-pinned-depth-outside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.4795 },
+      "2": { "x": 0.75, "y": 0.5 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+  {
+    "id": "T21-default-tolerance-pinned-lateral-inside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5195, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T21-default-tolerance-pinned-lateral-outside",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.5205, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
+  },
+
+  {
+    "id": "T22-exact-tie-5-behind-4",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.25 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T22-exact-tie-3-left-of-2",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.75, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T22-exact-tie-5-left-of-6",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.5, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  },
+  {
+    "id": "T22-exact-tie-6-left-of-1",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.75, "y": 0.75 }
+    },
+    "expected": {
+      "ok": true,
+      "checked": [
+        "1-behind-2",
+        "6-behind-3",
+        "5-behind-4",
+        "4-left-of-3",
+        "3-left-of-2",
+        "5-left-of-6",
+        "6-left-of-1"
+      ]
+    }
+  }
+]

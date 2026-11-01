@@ -116,7 +116,7 @@ th{font-size:13px;color:var(--muted);font-weight:700}
       <div class="card"><h3>Sobreposição (falta de posição)</h3><ul>
         <li>Vale só no momento do golpe do saque e, no FIVB 2025–28, só para o time que recebe.</li>
         <li>Frente e fundo: 1 atrás de 2, 6 atrás de 3, 5 atrás de 4. Empate é permitido.</li>
-        <li>Lateral: 4 à esquerda de 3, 3 à esquerda de 2; 5 à esquerda de 6, 6 à esquerda de 1. Aqui não pode empatar.</li>
+        <li>Lateral: 4 à esquerda de 3, 3 à esquerda de 2; 5 à esquerda de 6, 6 à esquerda de 1. Empate também é permitido (FIVB 7.4.3.2).</li>
         <li>Não existem outras relações (nada na diagonal). O sacador não conta. Mede-se pelos pés no chão.</li>
         <li>Depois do saque, todo mundo pode se mexer.</li>
       </ul><span class="ref">FIVB 7.4, 7.5</span></div>
@@ -171,11 +171,11 @@ th{font-size:13px;color:var(--muted);font-weight:700}
         <li>Seis jogadores por time, cada posição ocupada uma vez.</li>
         <li>Girar só quem venceu recebendo. Nunca girar quem venceu sacando.</li>
         <li>Sacador é sempre quem está na posição 1 depois do giro.</li>
-        <li>Sobreposição só nas 6 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm).</li>
         <li>Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.</li>
         <li>Tie-break: troca de lado aos 8 sem girar.</li>
       </ul></div>
       <div class="card"><h3><span class="tag warn">Aviso</span> só informa</h3><ul>
+        <li>Sobreposição só nas 7 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm).</li>
         <li>Levantador na rede (2, 3, 4): não infiltra; pode bloquear e atacar.</li>
         <li>Levantador no fundo: não bloqueia nem ataca acima da rede na zona de frente.</li>
         <li>Rotação 4 sem empilhar: corrida longa do levantador.</li>
@@ -252,7 +252,7 @@ th{font-size:13px;color:var(--muted);font-weight:700}
     const y=p=>pos[p][2],x=p=>pos[p][1];
     const ign=p=>serving&&p==1;
     [[1,2],[6,3],[5,4]].forEach(([b,f])=>{if(ign(b))return;out.push([`${b} atrás de ${f}`,`${y(b).toFixed(2)} ≥ ${y(f).toFixed(2)}`,y(b)>=y(f)-T]);});
-    [[4,3],[3,2],[5,6],[6,1]].forEach(([a,b])=>{if(ign(a)||ign(b))return;out.push([`${a} à esquerda de ${b}`,`${x(a).toFixed(2)} < ${x(b).toFixed(2)}`,x(a)<x(b)]);});
+    [[4,3],[3,2],[5,6],[6,1]].forEach(([a,b])=>{if(ign(a)||ign(b))return;out.push([`${a} à esquerda de ${b}`,`${x(a).toFixed(2)} ≤ ${x(b).toFixed(2)}`,x(a)<=x(b)+T]);});
     if(serving)out.push(['sacador','fora da checagem',true]);
     return out;
   }

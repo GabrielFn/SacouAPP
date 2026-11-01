@@ -17,7 +17,7 @@ Nas regras **FIVB 2025–2028**, só o time que **recebe** precisa respeitar a o
 ### Sobreposição — falta de posição (FIVB 7.4, 7.5)
 - Vale só no momento do golpe do saque e, no FIVB 2025–28, só para o time que recebe.
 - Frente e fundo: 1 atrás de 2, 6 atrás de 3, 5 atrás de 4. **Empate é permitido.**
-- Lateral: 4 à esquerda de 3, 3 à esquerda de 2; 5 à esquerda de 6, 6 à esquerda de 1. **Não pode empatar.**
+- Lateral: 4 à esquerda de 3, 3 à esquerda de 2; 5 à esquerda de 6, 6 à esquerda de 1. **Empate é permitido** (FIVB 2025–28, 7.4.3.2, "level with"; decisão do Gabriel de 01/11/2026). O texto de edições anteriores não foi conferido: o Clássico usa a mesma comparação.
 - Não existem outras relações (nada na diagonal). O sacador não conta. Mede-se pelos pés no chão.
 - Depois do saque, todo mundo pode se mexer.
 
@@ -62,11 +62,11 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Seis jogadores por time, cada posição ocupada uma vez.
 - Girar só quem venceu recebendo; nunca quem venceu sacando.
 - Sacador é sempre quem está na posição 1 depois do giro.
-- Sobreposição só nas 6 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm).
 - Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.
 - Tie-break: troca de lado aos 8 sem girar.
 
 **Aviso (só informa):**
+- Sobreposição só nas 7 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm). A tolerância é simétrica: `atrás.y >= frente.y - tolerância` e `esquerda.x <= direita.x + tolerância`. No modo Clássico, o time que saca segue 5 relações: `1-behind-2` e `6-left-of-1` ficam de fora, porque o sacador não conta. Violação vira aviso, nunca bloqueio ([ADR 0010](../arquitetura/adr/0010-rotation-and-rule-mode.md)); contrato no [ADR 0021](../arquitetura/adr/0021-overlap-validator.md).
 - Levantador na rede (2, 3, 4): não infiltra; pode bloquear e atacar.
 - Levantador no fundo: não bloqueia nem ataca acima da rede na zona de frente.
 - Rotação 4 sem empilhar: corrida longa do levantador. Rotação 1: infiltração mais longa.
