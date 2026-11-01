@@ -10,6 +10,9 @@
         <!-- Same cut as `pnpm audit`. A NU190x at this level is an error (docs/seguranca/varredura-ci.md). -->
         <NuGetAuditMode>all</NuGetAuditMode>
         <NuGetAuditLevel>high</NuGetAuditLevel>
+        <!-- Restore writes packages.lock.json; on CI (GitHub Actions sets CI=true) it fails when the file is out of date. -->
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <!-- IDE0005 only runs on build with documentation generation on; CS1591 stays off. -->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>

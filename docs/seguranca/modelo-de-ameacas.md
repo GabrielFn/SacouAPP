@@ -141,13 +141,13 @@ Revisado em 01/11/2026 ([parecer](revisoes/M1-2026-11-01.md)). Aqui, "Mitigaçã
 | Ameaça | Mitigação | Lacuna |
 |---|---|---|
 | T: action comprometida ou movida | SHA obrigatório e lista de actions na configuração do repositório | Nenhuma: a configuração não muda por PR |
-| T: dependência npm maliciosa | Lockfile congelado e `allowBuilds` | `resolution` não é checada |
-| T: dependência NuGet alterada | Auditoria | Sem lockfile nem mapeamento de fontes |
+| T: dependência npm maliciosa | Lockfile congelado, `allowBuilds` e `tarball:` só de `registry.npmjs.org` (`test:tooling`) | `resolution` do tipo `git` não é checada |
+| T: dependência NuGet alterada | Auditoria, `packages.lock.json` com `RestoreLockedMode` na CI e `nuget.config` com fonte única mapeada | Atualizar o lockfile localmente aceita o que a fonte entregar; a barreira é a leitura do diff |
 | T: binário do gitleaks trocado | SHA-256 fixado | Nenhuma |
 | T: imagem do `docker.io` trocada (E0.6) | Postgres e Ryuk fixados por digest; a CI confere o digest do Ryuk | Atualizar é decisão manual |
 | E: Ryuk privilegiado com acesso ao socket do Docker (E0.6) | Imagem fixada pelo pacote `Testcontainers` `[4.16.0]`; só em teste | Risco aceito |
 | T, D: porta do Ryuk sem autenticação, em todas as interfaces (E0.6) | Container dura só a execução | Risco aceito pelo Gabriel em 01/11/2026 |
-| T: árvore NuGet do Testcontainers com acesso ao Docker (E0.6) | Versão exata e auditoria do projeto | Sem lockfile: antecipado para a SEC-M1 |
+| T: árvore NuGet do Testcontainers com acesso ao Docker (E0.6) | Versão exata, auditoria do projeto, lockfile e mapeamento de fontes (SEC-M1) | A árvore segue acessando o Docker em teste |
 | T, E: PR edita a própria barreira ou adiciona workflow | Leitura do revisor e `contents: read`, sem segredos | Sem proteção de branch |
 | I: vazamento pelo log da CI | `--redact`, sem artefato | O e-mail do autor aparece no achado |
 | I: valor preso em `refs/pull` | Revogar o segredo; a sonda usa valor fictício | Nenhuma |

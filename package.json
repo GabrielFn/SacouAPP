@@ -29,6 +29,7 @@
     "eslint-config-expo": "catalog:",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-functional": "catalog:",
+    "js-yaml": "4.3.2",
     "prettier": "catalog:",
     "turbo": "2.11.10",
     "typescript": "catalog:",
