@@ -14,7 +14,8 @@ Branch `task/SEC-M1-audit-policy`.
 2. **A3, mesmo arquivo:** aceitar só `catalog:` exato, resolver o spec pelo catálogo antes de identificar o pacote e comparar com os `importers` do lockfile, inclusive a raiz. Conferir antes o formato do alias no lockfile. Casos: `catalog:legacy` e `catalog:nao-existe` com `zod` no catálogo padrão, `validator: npm:zod`, `validator: catalog:` apontando para `npm:zod@3.25.76`, URL de tarball, `github:colinhacks/zod`.
 3. **A2, `test:tooling`:** reprovar `resolution` com `tarball:` fora de `registry.npmjs.org` em `pnpm-lock.yaml`, com caso plantado. O SHA em action já é exigido pela configuração do repositório.
 4. **B1, `.gitignore`:** cobrir `service-account*.json`, `firebase-adminsdk*.json`, `appsettings.Development.json`, `secrets.json`, `credentials.json`, `*.pem`, `*.jks`, `*.keystore`, `*.p12`, `.npmrc` e `.claude/settings.local.json`. `google-services.json` e `GoogleService-Info.plist` ficam para a tarefa do Firebase decidir. Conferir com `git check-ignore` e garantir que nada rastreado passa a ser ignorado.
-5. **Docs:** retirar de `varredura-ci.md` os limites corrigidos e ajustar o ADR 0007.
+5. **NuGet (achado E0.6-B2):** lockfile do NuGet com `--locked-mode` na CI e `nuget.config` com `<clear/>` e `packageSourceMapping`, porque a árvore do Testcontainers acessa o Docker.
+6. **Docs:** retirar de `varredura-ci.md` os limites corrigidos e ajustar o ADR 0007.
 
 ## Riscos
 

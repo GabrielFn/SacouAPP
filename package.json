@@ -14,14 +14,14 @@
     "lint:tooling": "eslint eslint.config.mjs scripts --max-warnings 0",
     "lint:regression": "node scripts/lint-regression.mjs",
     "test:tooling": "node --test \"scripts/**/*.test.mjs\"",
-    "audit:api": "dotnet restore Sacou.slnx && dotnet list Sacou.slnx package --vulnerable --include-transitive --format json > .nuget-audit.json && node scripts/check-dotnet-audit.mjs .nuget-audit.json",
+    "audit:api": "dotnet restore Sacou.slnx && dotnet list Sacou.slnx package --vulnerable --include-transitive --format json > .nuget-audit.json && node scripts/check-dotnet-audit.mjs .nuget-audit.json && dotnet restore apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj && dotnet list apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj package --vulnerable --include-transitive --format json > .nuget-audit-integration.json && node scripts/check-dotnet-audit.mjs .nuget-audit-integration.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:eol": "node scripts/check-eol.mjs",
     "build:api": "dotnet build",
     "test:api": "dotnet test",
-    "lint:api": "dotnet build && dotnet format Sacou.slnx --verify-no-changes --no-restore",
-    "format:api": "dotnet format Sacou.slnx"
+    "lint:api": "dotnet build && dotnet restore apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj && dotnet format Sacou.slnx --verify-no-changes --no-restore && dotnet format apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj --verify-no-changes --no-restore",
+    "format:api": "dotnet format Sacou.slnx && dotnet format apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
@@ -29,6 +29,7 @@
     "eslint-config-expo": "catalog:",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-functional": "catalog:",
+    "js-yaml": "4.3.2",
     "prettier": "catalog:",
     "turbo": "2.11.10",
     "typescript": "catalog:",

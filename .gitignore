@@ -19,3 +19,15 @@ apps/mobile/ios/
 expo-env.d.ts
 __lint-regression__*
 .nuget-audit.json
+.nuget-audit-integration.json
+.claude/settings.local.json
+service-account*.json
+firebase-adminsdk*.json
+appsettings.Development.json
+secrets.json
+credentials.json
+*.pem
+*.jks
+*.keystore
+*.p12
+.npmrc

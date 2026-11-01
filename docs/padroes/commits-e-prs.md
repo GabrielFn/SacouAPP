@@ -22,6 +22,6 @@ Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde n
 - **CI:** qualquer arquivo em `.github/workflows/`, inclusive novo.
 - **Varredura:** `.gitleaks.toml`, `.gitleaksignore`, `scripts/check-dotnet-audit.mjs`, `scripts/lib/*` e os scripts `audit:api` e `test:tooling` do `package.json`.
 - **Exceções:** `scripts/nuget-audit-exceptions.json`, `scripts/npm-audit-exceptions.json` e `NuGetAuditSuppress`.
-- **Dependências:** `audit.ignore`, `overrides` e `allowBuilds` em `pnpm-workspace.yaml`; `pnpm-lock.yaml` (fonte dos pacotes), `.npmrc` e `nuget.config`.
-- **Build:** `NuGetAudit*`, `NoWarn`, `WarningsNotAsErrors` e `AnalysisMode*` em `Directory.Build.props` ou em `.csproj`.
+- **Dependências:** `audit.ignore`, `overrides` e `allowBuilds` em `pnpm-workspace.yaml`; `pnpm-lock.yaml` (fonte dos pacotes), `.npmrc`, `nuget.config` e `packages.lock.json`.
+- **Build:** `NuGetAudit*`, `RestoreLockedMode`, `RestorePackagesWithLockFile`, `NoWarn`, `WarningsNotAsErrors` e `AnalysisMode*` em `Directory.Build.props` ou em `.csproj`.
 - **Ignorados:** `.gitignore`.

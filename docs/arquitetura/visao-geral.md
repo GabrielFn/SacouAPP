@@ -96,7 +96,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0017](adr/0017-group-settings-queue-bench.md) | Configuração herdada, membros, fila e banco |
 | [0018](adr/0018-rating-and-mvp.md) | Rating, faixas, MVP do dia e ponto individual |
 | [0019](adr/0019-agent-process.md) | Processo de agentes e merge automático |
-| 0020 | Reservado à E0.6 |
+| [0020](adr/0020-postgres-local-e-testes-de-integracao.md) | Postgres local e testes de integração com Testcontainers |
 | [0021](adr/0021-overlap-validator.md) | Validador de sobreposição, `OverlapRuleMode` e `RotationSlot` |
 
 ## Matriz: `decisoes.md` → ADR

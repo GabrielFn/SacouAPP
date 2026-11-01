@@ -125,6 +125,29 @@ jobs:
       - name: Test API
         run: dotnet test
 
+      # Outside Sacou.slnx, so `dotnet test` above skips it. Needs Docker (the runner has it). Zero tests
+      # fail the step on purpose: no exit code is ignored. Decisions: docs/arquitetura/adr/0020-postgres-local-e-testes-de-integracao.md
+      - name: Test API integration
+        run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
+
+      # The Ryuk digest comes from the Testcontainers package (pinned at [4.16.0]); a different one means
+      # the package or the configuration changed it. Raising the package is a deliberate review.
+      - name: Check Ryuk image digest
+        run: |
+          docker image ls --digests --no-trunc \
+            | grep --fixed-strings 'testcontainers/ryuk' \
+            | grep --fixed-strings 'sha256:7c1a8a9a47c780ed0f983770a662f80deb115d95cce3e2daa3d12115b8cd28f0'
+
+      # --env-file on each command: ${POSTGRES_PASSWORD:?} is evaluated by all of them. The value in
+      # .env.example is a placeholder. `up --wait` fails when the healthcheck does not pass.
+      # Never run `docker compose config` without --quiet: it prints the password.
+      - name: Check Postgres compose
+        run: |
+          docker compose --env-file .env.example up -d --wait
+          docker compose --env-file .env.example exec -T postgres pg_isready -h 127.0.0.1
+          docker compose --env-file .env.example port postgres 5432 | grep --fixed-strings --line-regexp '127.0.0.1:5432'
+          docker compose --env-file .env.example down -v
+
       - name: Test tooling
         run: pnpm test:tooling
 
