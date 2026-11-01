@@ -1,0 +1,30 @@
+# ADR 0011 · Padrões de back-end, sem MediatR e AutoMapper
+
+**Status:** aceito (decidido em 30/10/2026, registrado em 31/10/2026). **Tarefa:** E0.8.
+
+**Fontes:** `decisoes.md:27`; `produto.md:303-315, 332-333, 348`. Estrutura, `Result` e testes de arquitetura no [ADR 0005](0005-estrutura-modular-api.md); lint no [ADR 0002](0002-padroes-e-lint.md).
+
+## Decisão
+
+| Padrão | Uso |
+|---|---|
+| Strategy | `IRotationSystem`, `IQueueExitCriterion`, `IBenchRule`, `ITeamBalancer` |
+| SettingsResolver | Mescla grupo → rodada → partida; cada nível é um record com campos anuláveis (null herda), em `jsonb` |
+| Outbox | Eventos gravados na mesma transação e enviados pelo Hangfire |
+| Idempotência | Eventos com ID gerado no celular; reenvio não duplica |
+| Concorrência otimista | `xmin` como versão, usada na disputa pela última vaga |
+| Result pattern | Erro de regra vira resultado e depois `ProblemDetails`, sem exceção |
+| Autorização por recurso | Policies verificam o papel no grupo (Admin, CoAdmin, Scorekeeper) |
+| CQRS leve | Comandos passam pelo domínio; leituras usam projeções com `AsNoTracking` |
+| Testes golden | JSONs rodados em C# e em TypeScript |
+
+**Sem MediatR e sem AutoMapper:** handlers injetados diretamente e mapeamento manual.
+
+## Alternativas
+
+MediatR e AutoMapper: recusados porque passaram a ter licença comercial em 2025 (`produto.md:333`).
+
+## Consequências
+
+- Em `Sacou.Shared` só entra namespace novo com ADR (ADR 0005). `produto.md:348` lista Outbox, SettingsResolver e Entitlements ali; cada um entra na tarefa que o implementa.
+- **A definir:** como separar a Outbox, que precisa de infraestrutura (E3.11, já aberto no ADR 0005).
