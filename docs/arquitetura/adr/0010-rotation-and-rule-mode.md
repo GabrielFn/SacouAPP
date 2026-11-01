@@ -16,7 +16,7 @@ A regra de sobreposição mudou em 2025 e material antigo ainda mostra a anterio
 
 **Posições no momento do saque,** nunca depois.
 
-**Modo de regra configurável:** FIVB 2025–28, o padrão, em que só o time que recebe tem restrição de sobreposição, ou Clássico, em que os dois têm. `OverlapValidator` com a regra oficial e tolerância configurável (`rotacoes.md:65`). Violação vira aviso, nunca bloqueio (`produto.md:95`).
+**Modo de regra configurável:** FIVB 2025–28, o padrão, em que só o time que recebe tem restrição de sobreposição, ou Clássico, em que os dois têm. `OverlapValidator` com a regra oficial e tolerância configurável (`rotacoes.md:69`). Violação vira aviso, nunca bloqueio (`produto.md:95`).
 
 **Sistemas.** Livre/6x0 grátis, com um botão só na interface; 4x2, 5x1 e 6x2 no Pro.
 
