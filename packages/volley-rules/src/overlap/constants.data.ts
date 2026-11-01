@@ -7,8 +7,8 @@ export const DEFAULT_OVERLAP_RULE_MODE = "fivb-2025-28";
 /** A fraction of the half court: 0.02 of its 9 m is about 18 cm. */
 export const DEFAULT_OVERLAP_TOLERANCE = 0.02;
 
-/** The server is the player in this slot, and stays out of the classic serving check. */
-export const SERVER_SLOT = 1;
+/** The `ServingPlayer` is the one in this slot, and stays out of the classic serving check. */
+export const SERVING_SLOT = 1;
 
 /** The official relations, in the fixed order of `checked` and `violations`. */
 export const OVERLAP_RELATIONS = deepFreeze([

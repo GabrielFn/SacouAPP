@@ -16,7 +16,7 @@ export type OverlapError =
 
 export interface FormationOverlapOptions {
   readonly mode: OverlapRuleMode;
-  /** Reaches the depth relations only. Defaults to `DEFAULT_OVERLAP_TOLERANCE`. */
+  /** Reaches the depth and lateral relations alike. Defaults to `DEFAULT_OVERLAP_TOLERANCE`. */
   readonly tolerance?: number;
 }
 

@@ -63,7 +63,18 @@ const ALL_RELATIONS = [
   "5-left-of-6",
   "6-left-of-1",
 ] as const satisfies readonly OverlapRelationId[];
-const WITHOUT_SERVER = [
+const RELATION_SLOTS: Readonly<
+  Record<OverlapRelationId, readonly [first: RotationSlot, second: RotationSlot]>
+> = {
+  "1-behind-2": [1, 2],
+  "6-behind-3": [6, 3],
+  "5-behind-4": [5, 4],
+  "4-left-of-3": [4, 3],
+  "3-left-of-2": [3, 2],
+  "5-left-of-6": [5, 6],
+  "6-left-of-1": [6, 1],
+};
+const WITHOUT_SERVING_PLAYER = [
   "6-behind-3",
   "5-behind-4",
   "4-left-of-3",
@@ -96,14 +107,15 @@ function toResult(expected: GoldenExpected): Result<OverlapCheck, OverlapError> 
     : err({ code: expected.code });
 }
 
-/** What the slots break geometrically, ignoring the exemptions of the mode and phase of the case. */
-function brokenRelations({ slots, tolerance }: OverlapGoldenCase): readonly OverlapRelationId[] {
-  const result = validateOverlap(slots, {
-    mode: "classic",
-    phase: "receiving",
-    ...(tolerance === undefined ? {} : { tolerance }),
-  });
-  return !result.ok && result.error.code === "overlap" ? result.error.violations : [];
+/** Plain geometry, independent of the validator and of the exemptions of each mode and phase. */
+function breaksRelation(
+  relation: OverlapRelationId,
+  { slots, tolerance = DEFAULT_OVERLAP_TOLERANCE }: OverlapGoldenCase,
+): boolean {
+  const [first, second] = RELATION_SLOTS[relation];
+  return relation.includes("behind")
+    ? slots[first].y < slots[second].y - tolerance
+    : slots[first].x > slots[second].x + tolerance;
 }
 
 function expectedChecked(
@@ -113,7 +125,7 @@ function expectedChecked(
   if (phase === "receiving") {
     return ALL_RELATIONS;
   }
-  return mode === "classic" ? WITHOUT_SERVER : [];
+  return mode === "classic" ? WITHOUT_SERVING_PLAYER : [];
 }
 
 function allFormations(): readonly Formation[] {
@@ -172,7 +184,7 @@ describe("golden/overlap.json coverage", () => {
       (goldenCase) =>
         goldenCase.mode === mode &&
         goldenCase.phase === phase &&
-        brokenRelations(goldenCase).includes(relation),
+        breaksRelation(relation, goldenCase),
     );
 
     expect(breaking).not.toHaveLength(0);
@@ -233,7 +245,7 @@ describe("validateFormationOverlap", () => {
   test("takes the phase from the formation", () => {
     expect(
       validateFormationOverlap(withLiberoAtTheNet("serving"), { mode: "classic" }),
-    ).toStrictEqual(ok({ checked: WITHOUT_SERVER }));
+    ).toStrictEqual(ok({ checked: WITHOUT_SERVING_PLAYER }));
   });
 
   test("rejects an invalid tolerance", () => {

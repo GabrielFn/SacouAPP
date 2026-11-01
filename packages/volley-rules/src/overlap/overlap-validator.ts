@@ -1,6 +1,6 @@
 import type { CourtPoint, Formation, FormationPhase, RotationSlot } from "../formations/index.js";
 import { err, ok, type Result } from "../result.js";
-import { DEFAULT_OVERLAP_TOLERANCE, OVERLAP_RELATIONS, SERVER_SLOT } from "./constants.data.js";
+import { DEFAULT_OVERLAP_TOLERANCE, OVERLAP_RELATIONS, SERVING_SLOT } from "./constants.data.js";
 import type {
   FormationOverlapOptions,
   OverlapCheck,
@@ -16,10 +16,10 @@ function isValidTolerance(tolerance: number): boolean {
   return Number.isFinite(tolerance) && tolerance >= 0;
 }
 
-function involvesServer(relation: OverlapRelation): boolean {
+function involvesServingPlayer(relation: OverlapRelation): boolean {
   const slots: readonly RotationSlot[] =
     relation.kind === "depth" ? [relation.back, relation.front] : [relation.left, relation.right];
-  return slots.includes(SERVER_SLOT);
+  return slots.includes(SERVING_SLOT);
 }
 
 function relationsInForce(
@@ -31,14 +31,14 @@ function relationsInForce(
   }
   return mode === "fivb-2025-28"
     ? []
-    : OVERLAP_RELATIONS.filter((relation) => !involvesServer(relation));
+    : OVERLAP_RELATIONS.filter((relation) => !involvesServingPlayer(relation));
 }
 
 /** Both comparisons are false for `NaN`, so a bad coordinate fails instead of passing. */
 function holds(relation: OverlapRelation, pointAt: PointAt, tolerance: number): boolean {
   return relation.kind === "depth"
     ? pointAt(relation.back).y >= pointAt(relation.front).y - tolerance
-    : pointAt(relation.left).x < pointAt(relation.right).x;
+    : pointAt(relation.left).x <= pointAt(relation.right).x + tolerance;
 }
 
 function checkRelations(
