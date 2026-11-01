@@ -14,7 +14,7 @@ Decisões e alternativas: ADR 0007. Aqui ficam as ferramentas, as exceções vig
 | Análise estática C#: `AnalysisModeSecurity=All` | `lint:api` | Regra de segurança violada, como `CA5351` (MD5) |
 | Análise estática TS/JS: `no-eval`, `no-new-func`, `@typescript-eslint/no-implied-eval` | `lint`, provado em `lint:regression` | Código montado a partir de texto |
 
-**Sem execução agendada:** um CVE novo só aparece no próximo run com código, e pode reprovar um PR sem relação com ele.
+**Sem execução agendada, por decisão do Gabriel:** os alertas do Dependabot avisam de CVE novo, mas a CI só reprova no próximo run com código, e pode reprovar um PR sem relação com ele.
 
 ## Rodar localmente
 
@@ -58,4 +58,4 @@ Abaixo de High, ficam só no relatório do `pnpm audit`, sem reprovar: `deepmerg
 - `refs/pull/<n>/head` das sondas continua no GitHub: por isso o valor delas é fictício, gerado na hora e descartado.
 - **Política do `audit.ignore` (até a SEC-M1):** aceita sem par nem validade as formas `audit: { ignore: [...] }`, linha em branco antes do item e GHSA em maiúsculas, que o `pnpm audit` respeita. `expires` não tem teto.
 - **Checagem do `zod` (até a SEC-M1):** alias (`npm:zod`), URL de tarball, `github:` e catálogo nomeado podem passar. A raiz segue fora do escopo.
-- **Fixação de actions:** nada obriga o uso de SHA em action nova (`perguntas.md`, item 5).
+- **Actions:** a configuração do repositório exige SHA e só aceita `actions/cache`, `actions/checkout`, `actions/setup-dotnet`, `actions/setup-node` e `pnpm/action-setup`. Action nova exige incluí-la na lista, fora do PR.
