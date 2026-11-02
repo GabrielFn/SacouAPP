@@ -33,4 +33,5 @@ Sem alternativa documentada ao modo configurável: `rotacoes.md:7` só o justifi
 ## Consequências
 
 - **Definido no [ADR 0021](0021-overlap-validator.md) (E1.2):** `CourtPosition` e `RotationSlot` são o mesmo conceito, e o nome no código é `RotationSlot`; o modo de regra no código é `OverlapRuleMode`.
+- **Definido no [ADR 0024](0024-saque-e-rotacao-derivados.md) (E2.3):** forma do setup por time no `MatchStarted`, side-out e `setterZone`. Sistema, funções e banco entram nas E2.4 e E2.5.
 - **A definir:** em que nível da configuração herdada o modo de regra fica (E3.3).

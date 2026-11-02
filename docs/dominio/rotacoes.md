@@ -37,7 +37,7 @@ Nas regras **FIVB 2025–2028**, só o time que **recebe** precisa respeitar a o
 ### Substituições e sets (FIVB 15, 18.2.2, 12.1)
 - Oficial: 6 substituições por set. Na pelada o app desliga esse limite.
 - Tie-break: troca de quadra aos 8 pontos, sem girar e sem mudar quem saca.
-- Saque inicial: sorteio no 1º e no 5º set; nos outros, alterna.
+- Saque inicial: sorteio no 1º set e no set decisivo de md3 e md5; nos outros, alterna em relação a quem sacou primeiro no set anterior, e não "quem perdeu saca" (decisão do Gabriel de 02/11/2026; a FIVB fala em 5º set, e o tie-break da md3 segue a mesma regra).
 
 ## Sistemas de jogo
 
@@ -72,6 +72,17 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Rotação 4 sem empilhar: corrida longa do levantador. Rotação 1: infiltração mais longa.
 - Funções fora da diagonal (dois levantadores lado a lado).
 - Regras da casa (entra no saque, substituições livres) sempre como configuração, nunca como regra.
+
+## Estado e eventos
+
+Implementado na E2.3 ([ADR 0024](../arquitetura/adr/0024-saque-e-rotacao-derivados.md)). Código em `packages/match-engine/src/score/`; casos em `packages/match-engine/golden/rotation-*.json`.
+
+- **Side-out derivado:** `PointScored` grava só quem marcou. Se esse time não estava sacando, é side-out: ele passa a sacar e só ele avança uma casa em `SETTER_ZONE_SEQUENCE`. Se estava, só o placar muda.
+- **`lineup` ancorado no levantador:** 6 `MemberId` do time, sem repetir. `lineup[0]` é o levantador, e os demais seguem a ordem crescente de posição. O giro só muda `setterZone`. O sacador é quem está na posição 1.
+- **`setterZone` em todos os sistemas:** a zona atual de `lineup[0]`. Na Livre, sem levantador, é a zona do primeiro da escalação, e a tela não mostra número.
+- **Rotação desligada:** `rotations.<lado>: null`, inclusive para time sem 6 jogadores (areia 2x2 e 4x4, pelada com 5). O app mostra só o time que saca, sem sacador nem posições (decisão do Gabriel de 02/11/2026). O saque continua sendo acompanhado.
+- **Virada de set:** `SetEnded.nextSet` grava `firstServer` e `setterZones`, aplicados sem recalcular. A rotação **continua de onde parou**, sem mexer em ninguém (decisão do Gabriel de 02/11/2026). O comando alterna o primeiro saque e, no set decisivo, recebe o sorteio de fora (`confirmSetEnd(state, { firstServer })`); a interface do sorteio é da E4.10.
+- **Lado da quadra:** fora do estado do motor. Virar set e chegar a 8 no tie-break não giram nem mudam quem saca; o desenho é da E4.10.
 
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.

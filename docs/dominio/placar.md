@@ -46,8 +46,10 @@ Chaves em ordem UTF-16 crescente, porque o golden compara o texto; sets e times 
 
 ```
 CourtSessionState { currentMatch: MatchScore | null, finishedMatches: FinishedMatch[] }  // inicial: null, []
-MatchScore { completedSets: [{ score, setNumber, winner }], currentSet: { score: { a, b }, setNumber, targetPoints } | null,
-             matchId, rulesVersion, scoring, setsWon: { a, b }, teams }
+MatchScore { completedSets: [{ score, setNumber, winner }],
+             currentSet: { firstServer, score: { a, b }, servingTeam, setNumber, targetPoints } | null,
+             matchId, rotations: { a: TeamState | null, b: TeamState | null }, rulesVersion, scoring, setsWon: { a, b }, teams }
+TeamState { lineup: MemberId[6], setterZone: 1..6 }  // regras em rotacoes.md; E2.4 e E2.5 acrescentam campos
 FinishedMatch: MatchScore + endReason (depois de currentSet) + winner (no fim)
 ```
 

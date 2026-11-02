@@ -9,6 +9,14 @@ export {
   parseSetEndedPayload,
 } from "./parse-payloads.js";
 export {
+  getCurrentServingPlayer,
+  getLineupBySlot,
+  getNextSetFirstServer,
+  getServingPlayer,
+  isSideOut,
+  nextSetterZone,
+} from "./rotation-rules.js";
+export {
   getMatchWinner,
   getSetPointTeams,
   getSetWinner,

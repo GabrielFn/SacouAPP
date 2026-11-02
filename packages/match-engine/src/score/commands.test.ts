@@ -8,10 +8,14 @@ import { INITIAL_COURT_SESSION_STATE } from "./appliers.js";
 import { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./commands.js";
 import { CURRENT_RULES_VERSION, MAX_FINISHED_MATCHES } from "./constants.data.js";
 import {
+  BLUE_LINEUP,
   MATCH_ID,
   matchInput,
   numberedMatchId,
+  ORANGE_LINEUP,
   replayAll,
+  rotationMatchInput,
+  type RotationSetup,
   toEnvelope,
 } from "./match-player.test.fixture.js";
 import type {
@@ -208,7 +212,11 @@ describe("confirmSetEnd", () => {
           type: "SetEnded",
           payload: {
             matchId: MATCH_ID,
-            nextSet: { targetPoints: 2 },
+            nextSet: {
+              firstServer: "b",
+              setterZones: { a: null, b: null },
+              targetPoints: 2,
+            },
             setNumber: 1,
             winner: "a",
           },
@@ -268,6 +276,7 @@ describe("confirmSetEnd", () => {
         completedSets: [],
         currentSet: null,
         matchId: MATCH_ID,
+        rotations: { a: null, b: null },
         rulesVersion: 1,
         scoring: MD3,
         setsWon: { a: 0, b: 0 },
@@ -277,6 +286,156 @@ describe("confirmSetEnd", () => {
     };
 
     expect(errorCode(confirmSetEnd(state))).toBe("no-open-set");
+  });
+});
+
+describe("confirmSetEnd, who serves first in the next set", () => {
+  const MD5: ScoringRules = { bestOf: 5, pointsPerSet: 1, tieBreakPoints: 1, winMargin: 1 };
+
+  function startedWith(scoring: ScoringRules, setup: RotationSetup = {}): MatchPlayer {
+    const player = createMatchPlayer();
+    player.run((state) => startMatch(state, rotationMatchInput(scoring, setup)));
+    return player;
+  }
+
+  function nextSetOf(result: ScoreCommandResult) {
+    const payload = result.ok ? result.value[0]?.payload : null;
+    return payload !== null && payload !== undefined && "nextSet" in payload
+      ? payload.nextSet
+      : null;
+  }
+
+  test.each([
+    ["a", "aa", "b"],
+    ["a", "bb", "b"],
+    ["b", "aa", "a"],
+    ["b", "bb", "a"],
+  ] as const)(
+    "%s served first and %s was played: alternates, whoever won the set",
+    (firstServer, rallies, expected) => {
+      const player = startedWith(MD3, { firstServer });
+      score(player, rallies);
+
+      expect(nextSetOf(confirmSetEnd(player.state()))?.firstServer).toBe(expected);
+    },
+  );
+
+  test("a whole best-of-5 goes a, b, a, b, a", () => {
+    const player = startedWith(MD5);
+    const firstServers = ["a", "b", "a", "b"].map((winner) => {
+      const server = player.state().currentMatch?.currentSet?.firstServer;
+      score(player, winner);
+      player.run(confirmSetEnd);
+      return server;
+    });
+
+    expect([...firstServers, player.state().currentMatch?.currentSet?.firstServer]).toStrictEqual([
+      "a",
+      "b",
+      "a",
+      "b",
+      "a",
+    ]);
+  });
+
+  test.each(["a", "b"] as const)("the toss of a deciding set records %s", (firstServer) => {
+    const player = startedWith(MD3);
+    score(player, "aa");
+    player.run(confirmSetEnd);
+    score(player, "bb");
+
+    const result = confirmSetEnd(player.state(), { firstServer });
+
+    expect(nextSetOf(result)).toStrictEqual({
+      firstServer,
+      setterZones: { a: 1, b: 1 },
+      targetPoints: 1,
+    });
+  });
+
+  test("an invalid toss is refused by the parser", () => {
+    const player = startedWith(MD3);
+    score(player, "aa");
+
+    expect(confirmSetEnd(player.state(), { firstServer: "c" as TeamSide })).toStrictEqual({
+      ok: false,
+      error: { code: "invalid-payload", field: "nextSet.firstServer" },
+    });
+  });
+
+  test("the toss has no effect when the set decides the match", () => {
+    const player = startedWith({ ...MD3, bestOf: 1 });
+    score(player, "aa");
+
+    const result = confirmSetEnd(player.state(), { firstServer: "b" });
+
+    expect(eventTypes(result)).toStrictEqual(["SetEnded", "MatchEnded"]);
+    expect(nextSetOf(result)).toBeNull();
+  });
+});
+
+describe("confirmSetEnd, the rotation of the next set", () => {
+  test("carries on from where each team stopped", () => {
+    const player = createMatchPlayer();
+    const toThree: ScoringRules = { ...MD3, pointsPerSet: 3 };
+    player.run((state) => startMatch(state, rotationMatchInput(toThree, { zones: [2, 5] })));
+    score(player, "baaa");
+
+    const result = confirmSetEnd(player.state());
+
+    // b takes the serve (5 to 4), then a takes it back (2 to 1).
+    expect(result.ok && result.value[0]?.payload).toMatchObject({
+      nextSet: { setterZones: { a: 1, b: 4 } },
+    });
+  });
+
+  test("records null for a team with the rotation off", () => {
+    const player = createMatchPlayer();
+    player.run((state) => startMatch(state, rotationMatchInput(MD3, { zones: [null, 3] })));
+    score(player, "aa");
+
+    const result = confirmSetEnd(player.state());
+
+    expect(result.ok && result.value[0]?.payload).toMatchObject({
+      nextSet: { setterZones: { a: null, b: 3 } },
+    });
+  });
+});
+
+describe("rotation through the commands", () => {
+  test("startMatch validates the lineup against the team", () => {
+    const input = rotationMatchInput(MD3);
+    const swapped = {
+      ...input,
+      rotations: { ...input.rotations, a: { lineup: BLUE_LINEUP, setterZone: 1 as const } },
+    };
+
+    expect(startMatch(INITIAL_COURT_SESSION_STATE, swapped)).toStrictEqual({
+      ok: false,
+      error: { code: "invalid-payload", field: "rotations.a.lineup" },
+    });
+  });
+
+  test("scorePoint emits only the three fields, even when the rally is a side-out", () => {
+    const player = createMatchPlayer();
+    player.run((state) => startMatch(state, rotationMatchInput(MD3)));
+
+    expect(scorePoint(player.state(), "b")).toStrictEqual({
+      ok: true,
+      value: [{ type: "PointScored", payload: { matchId: MATCH_ID, setNumber: 1, team: "b" } }],
+    });
+  });
+
+  test("the frozen copy of the teams does not follow the lineup", () => {
+    const player = createMatchPlayer();
+    player.run((state) => startMatch(state, rotationMatchInput(MD3, { teamSize: 8 })));
+    score(player, "b");
+
+    const match = player.state().currentMatch;
+
+    expect(match?.teams.a.memberIds).toHaveLength(8);
+    expect(match?.rotations.a?.lineup).toStrictEqual(ORANGE_LINEUP);
+    expect(match?.rotations.b?.lineup).toStrictEqual(BLUE_LINEUP);
   });
 });
 
@@ -339,6 +498,55 @@ describe("whole matches by commands", () => {
     playByCommands(goldenCase, player);
 
     expect(player.state()).toStrictEqual(goldenCase.expected.state);
+    expect(JSON.stringify(player.state())).toBe(JSON.stringify(goldenCase.expected.state));
+  });
+
+  const ROTATION_URL = new URL("../../golden/rotation-events.json", import.meta.url);
+  const ROTATION_CASES = JSON.parse(readFileSync(ROTATION_URL, "utf8")) as readonly GoldenCase[];
+
+  function rotationCase(id: string): GoldenCase {
+    const goldenCase = ROTATION_CASES.find((candidate) => candidate.id === id);
+    if (goldenCase === undefined) {
+      throw new Error(`missing golden case ${id}`);
+    }
+    return goldenCase;
+  }
+
+  test.each([
+    "s7-tie-break-at-8-server-does-not-rotate",
+    "s7-tie-break-at-8-only-the-side-out-rotates",
+    "s13-screen-25-set-1-25-22",
+    "s13-screen-25-azul-serves-the-next-set",
+    "s13-before-screen-24-12-11",
+    "s13-screen-09-18-15",
+    "s13-screen-10-24-21",
+  ])("reach the same state as %s, with the commands choosing serve and zones", (id) => {
+    const goldenCase = rotationCase(id);
+    const player = createMatchPlayer();
+
+    playByCommands(goldenCase, player);
+
+    expect(JSON.stringify(player.state())).toBe(JSON.stringify(goldenCase.expected.state));
+  });
+
+  test.each([
+    { id: "s8-toss-of-the-deciding-set-of-best-of-3", tossedSet: 2 },
+    { id: "s8-toss-of-the-deciding-set-of-best-of-5", tossedSet: 4 },
+  ])("reach the same state as $id, with the toss from outside", ({ id, tossedSet }) => {
+    const goldenCase = rotationCase(id);
+    const player = createMatchPlayer();
+    goldenCase.events.forEach(({ type, payload }) => {
+      if (type === "MatchStarted") {
+        player.run((state) => startMatch(state, payload as unknown as MatchStartedPayload));
+      } else if (type === "PointScored") {
+        player.run((state) => scorePoint(state, payload.team as TeamSide));
+      } else if (player.state().currentMatch?.currentSet?.setNumber === tossedSet) {
+        player.run((state) => confirmSetEnd(state, { firstServer: "b" }));
+      } else {
+        player.run(confirmSetEnd);
+      }
+    });
+
     expect(JSON.stringify(player.state())).toBe(JSON.stringify(goldenCase.expected.state));
   });
 });

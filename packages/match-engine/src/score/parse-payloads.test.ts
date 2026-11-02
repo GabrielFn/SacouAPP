@@ -19,7 +19,21 @@ const VALID_START = {
   rulesVersion: 1,
   scoring: { bestOf: 3, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 },
   teams: { a: { memberIds: [MEMBER_A] }, b: { memberIds: [MEMBER_B] } },
+  firstServer: "a",
+  rotations: { a: null, b: null },
 };
+const LINEUP_A = [1, 2, 3, 4, 5, 6].map((n) => `a0000000-0000-4000-8000-00000000000${String(n)}`);
+const WITH_LINEUP = {
+  ...VALID_START,
+  teams: { ...VALID_START.teams, a: { memberIds: LINEUP_A } },
+  rotations: { a: { lineup: LINEUP_A, setterZone: 2 }, b: null },
+};
+const VALID_NEXT_SET = {
+  targetPoints: 25,
+  firstServer: "b",
+  setterZones: { a: 1, b: null },
+};
+const VALID_SET_ENDED = { matchId: MATCH_ID, setNumber: 1, winner: "a", nextSet: VALID_NEXT_SET };
 
 function fieldOf(result: ReturnType<typeof parseScorePayload>) {
   return result.ok ? null : result.error.field;
@@ -47,6 +61,43 @@ describe("input that JSON cannot produce", () => {
     } finally {
       delete polluted["winMargin"];
     }
+  });
+
+  test.each(["a", "b"] as const)(
+    "a polluted Object.prototype does not make rotations.%s a missing null",
+    (side) => {
+      const other = side === "a" ? "b" : "a";
+      const polluted = Object.prototype as Record<string, unknown>;
+      polluted[side] = null;
+      try {
+        const input = { ...VALID_START, rotations: { [other]: null } };
+        expect(fieldOf(parseMatchStartedPayload(input))).toBe(`rotations.${side}`);
+      } finally {
+        Reflect.deleteProperty(polluted, side);
+      }
+    },
+  );
+
+  test("a polluted Object.prototype does not supply a missing zone of the next set", () => {
+    const polluted = Object.prototype as Record<string, unknown>;
+    polluted["b"] = 1;
+    try {
+      const input = {
+        ...VALID_SET_ENDED,
+        nextSet: { ...VALID_NEXT_SET, setterZones: { a: 1 } },
+      };
+      expect(fieldOf(parseSetEndedPayload(input))).toBe("nextSet.setterZones.b");
+    } finally {
+      Reflect.deleteProperty(polluted, "b");
+    }
+  });
+
+  test("holes in a sparse lineup are rejected", () => {
+    const lineup = new Array<string>(LINEUP_A.length);
+    lineup[0] = MEMBER_A;
+    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 1 }, b: null } };
+
+    expect(fieldOf(parseMatchStartedPayload(input))).toBe("rotations.a.lineup");
   });
 
   test("a symbol key is an unknown field", () => {
@@ -133,6 +184,39 @@ describe("the parsed value", () => {
     expect(parsed.ok && parsed.value.teams.a.memberIds).toStrictEqual([MEMBER_B, MEMBER_A]);
   });
 
+  test("has a lineup detached from the input, in the order it came", () => {
+    const lineup = [...LINEUP_A];
+    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 2 }, b: null } };
+
+    const parsed = parseMatchStartedPayload(input);
+    lineup.reverse();
+
+    expect(parsed.ok && parsed.value.rotations.a?.lineup).toStrictEqual(LINEUP_A);
+  });
+
+  test("has the keys of the new levels in UTF-16 order", () => {
+    const started = parseMatchStartedPayload(WITH_LINEUP);
+    const setEnded = parseSetEndedPayload(VALID_SET_ENDED);
+
+    expect(started.ok && Object.keys(started.value)).toStrictEqual([
+      "firstServer",
+      "matchId",
+      "rotations",
+      "rulesVersion",
+      "scoring",
+      "teams",
+    ]);
+    expect(started.ok && Object.keys(started.value.rotations.a ?? {})).toStrictEqual([
+      "lineup",
+      "setterZone",
+    ]);
+    expect(setEnded.ok && Object.keys(setEnded.value.nextSet ?? {})).toStrictEqual([
+      "firstServer",
+      "setterZones",
+      "targetPoints",
+    ]);
+  });
+
   test("has its keys in UTF-16 order, as the envelope copy does", () => {
     const setEnded = parseSetEndedPayload({
       winner: "a",
@@ -169,6 +253,22 @@ describe("errors do not echo what was received", () => {
       { ...VALID_START, teams: { ...VALID_START.teams, a: { memberIds: [CANARY] } } },
     ],
     ["MatchStarted", { ...VALID_START, teams: { ...VALID_START.teams, a: { [CANARY]: 1 } } }],
+    ["MatchStarted", { ...VALID_START, firstServer: CANARY }],
+    ["MatchStarted", { ...VALID_START, rotations: { a: CANARY, b: null } }],
+    [
+      "MatchStarted",
+      { ...WITH_LINEUP, rotations: { a: { lineup: [CANARY], setterZone: 1 }, b: null } },
+    ],
+    [
+      "MatchStarted",
+      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: CANARY }, b: null } },
+    ],
+    ["MatchStarted", { ...VALID_START, rotations: { a: null, b: null, [CANARY]: 1 } }],
+    ["SetEnded", { ...VALID_SET_ENDED, nextSet: { ...VALID_NEXT_SET, firstServer: CANARY } }],
+    [
+      "SetEnded",
+      { ...VALID_SET_ENDED, nextSet: { ...VALID_NEXT_SET, setterZones: { a: CANARY, b: 1 } } },
+    ],
     ["PointScored", { ...VALID_POINT, team: CANARY }],
     ["SetEnded", { matchId: MATCH_ID, setNumber: 1, winner: CANARY, nextSet: null }],
     ["MatchEnded", { matchId: MATCH_ID, endReason: CANARY, winner: null }],

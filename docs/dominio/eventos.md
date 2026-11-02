@@ -52,32 +52,33 @@ O resultado, inclusive o erro, não depende da ordem de chegada.
 
 ## Catálogo: placar (schema 1)
 
-Regras em [`placar.md`](placar.md), decisões no [ADR 0023](../arquitetura/adr/0023-placar-e-catalogo-de-eventos.md), código em `packages/match-engine/src/score/`. Saque, rotação, fila e os demais tipos entram nas E2.3 a E2.8.
+Regras em [`placar.md`](placar.md) e [`rotacoes.md`](rotacoes.md), decisões nos [ADR 0023](../arquitetura/adr/0023-placar-e-catalogo-de-eventos.md) e [ADR 0024](../arquitetura/adr/0024-saque-e-rotacao-derivados.md), código em `packages/match-engine/src/score/`. Fila e os demais tipos entram nas E2.4 a E2.8.
 
 | Tipo | Payload |
 |---|---|
-| `MatchStarted` | `{ matchId, rulesVersion, scoring: { bestOf, pointsPerSet, tieBreakPoints, winMargin }, teams: { a: { memberIds }, b: { memberIds } } }` |
+| `MatchStarted` | `{ matchId, rulesVersion, scoring: { bestOf, pointsPerSet, tieBreakPoints, winMargin }, teams: { a: { memberIds }, b: { memberIds } }, firstServer, rotations: { a: { lineup, setterZone } \| null, b: { lineup, setterZone } \| null } }` |
 | `PointScored` | `{ matchId, setNumber, team }` |
-| `SetEnded` | `{ matchId, setNumber, winner, nextSet: { targetPoints } \| null }` |
+| `SetEnded` | `{ matchId, setNumber, winner, nextSet: { targetPoints, firstServer, setterZones: { a, b } } \| null }` |
 | `MatchEnded` | `{ matchId, endReason: "sets-won" \| "manual", winner: "a" \| "b" \| null }` |
 
 - **Formato:** `matchId` e `memberIds` em UUID minúsculo. `memberIds`: de 1 a 24 por time, sem repetir dentro do time nem entre times, com a ordem preservada. `setNumber` de 1 a 5. `bestOf` 1, 3 ou 5; `pointsPerSet`, `tieBreakPoints` e `targetPoints` de 1 a 99 (`tieBreakPoints` aceita `null`); `winMargin` 1 ou 2; `rulesVersion` inteiro ≥ 1. Nenhum texto livre: nome e cor do time ficam fora do evento.
+- **Saque e rotação:** `firstServer` e `nextSet.firstServer` são `a` ou `b`. `setterZone` é inteiro de 1 a 6; `setterZones.a` e `.b` são inteiros de 1 a 6 ou `null`. `lineup` tem exatamente 6 `MemberId`, sem repetir, todos do próprio time. `null` é serializado, nunca omitido: ausente é `invalid-payload`. `rotations` vem depois de `teams` na ordem, porque confere o `lineup` contra ele.
 - **`MatchEnded`:** `sets-won` exige `winner` não nulo. `manual` aceita `null`, inclusive para placar desligado.
 - **Erro do parser:** `{ code: "invalid-payload", field }`. `field` é caminho do esquema (`scoring.bestOf`), `payload` ou `unknown-field`, nunca valor nem chave recebida. O desconhecido é conferido primeiro, em qualquer nível; depois, a ordem da tabela. Não objeto é `payload`. No replay, vira `event-rejected`.
 
-**Aplicadores: conferem a estrutura, sem recalcular regra.** `event-rejected` quando:
+**Aplicadores: conferem a estrutura, sem recalcular regra.** A exceção é o `PointScored`, que soma 1 e deriva o side-out do estado, sem nada gravado para conferir (ADR 0024). `event-rejected` quando:
 
 | Tipo | Rejeitado se |
 |---|---|
 | `MatchStarted` | Há partida aberta, o `matchId` já foi usado por partida terminada no stream, ou o stream já tem 200 partidas terminadas (`MAX_FINISHED_MATCHES`, limite técnico, não regra: as 200 podem existir, e a 201ª não abre) |
 | `PointScored` | Sem partida aberta com o `matchId`, ou sem set aberto com o `setNumber` |
-| `SetEnded` | Como o `PointScored`, ou `nextSet` não nulo em `setNumber >= bestOf`, porque esse set não existe |
+| `SetEnded` | Como o `PointScored`; `nextSet` não nulo em `setNumber >= bestOf`, porque esse set não existe; ou `setterZones` com zona em time sem rotação ou `null` em time com rotação. É estrutura: não olha placar nem alternância |
 | `MatchEnded` | Sem partida aberta com o `matchId`, ou `sets-won` com set aberto |
 
 ## Contrato para E2.2–E2.10
 
 - Cada tarefa só registra aplicadores no `ReadonlyMap`, sem mexer no núcleo.
-- Aplicador é puro, aplica o resultado gravado (sem recalcular regra) e não muta. Exceção dentro dele vira `event-rejected`.
+- Aplicador é puro, aplica o resultado gravado (sem recalcular regra) e não muta. Exceção dentro dele vira `event-rejected`. A única regra no replay é a transição do `PointScored`, que faz parte do significado do evento em `schemaVersion` 1: mudá-la com dados reais exige versão nova do esquema (ADR 0024).
 - Estado só com valores JSON (sem `Map`, `Set`, `undefined`), comparável com o C#, e números inteiros.
 - Conteúdo do payload: parser estrito por tipo, só IDs (`MemberId`), a cargo de cada tarefa. O esquema fechado da E2.1 cobre só o envelope; os 4 tipos do placar têm parser desde a E2.2.
 
