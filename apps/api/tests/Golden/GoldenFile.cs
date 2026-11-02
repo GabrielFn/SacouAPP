@@ -43,18 +43,15 @@ internal static class GoldenFile
     {
         var missing = literalIds.Except(idsInFile).ToList();
         var unlisted = idsInFile.Except(literalIds).ToList();
-        var duplicated = literalIds.Concat(idsInFile.Distinct())
-            .GroupBy(id => id)
-            .Where(group => group.Count() > (idsInFile.Contains(group.Key) ? 2 : 1))
-            .Select(group => group.Key)
-            .Concat(idsInFile.GroupBy(id => id).Where(group => group.Count() > 1).Select(group => group.Key))
-            .Distinct()
-            .ToList();
+        var duplicated = Repeated(literalIds).Union(Repeated(idsInFile)).ToList();
 
         Assert.True(
             missing.Count == 0 && unlisted.Count == 0 && duplicated.Count == 0,
             $"missing: [{string.Join(", ", missing)}]; unlisted: [{string.Join(", ", unlisted)}]; duplicated: [{string.Join(", ", duplicated)}]");
     }
+
+    private static IEnumerable<string> Repeated(IEnumerable<string> ids) =>
+        ids.GroupBy(id => id).Where(group => group.Count() > 1).Select(group => group.Key);
 
     public static void AssertOnlyFields(JsonElement record, IReadOnlySet<string> allowed, string context)
     {

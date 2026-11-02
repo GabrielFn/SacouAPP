@@ -42,7 +42,7 @@
 - `expected` é `{ ok: true, checked: [...] }` ou `{ ok: false, code, violations? }`. O `code` é `overlap`, com `violations`, ou `invalid-tolerance`, sem elas.
 - `checked` e `violations` seguem a ordem fixa de `OVERLAP_RELATIONS`, e a comparação considera a ordem.
 - `tolerance` omitida significa o padrão. `0` explícito é zero, não o padrão.
-- Casos no limite exato usam frações binárias (0,375; 0,125), para as linguagens não divergirem por arredondamento.
+- Casos no limite exato usam frações binárias (0,375; 0,125), para as linguagens não divergirem por arredondamento. **Exceção deliberada:** os dois casos `T23-binary-rounding-*` usam `0,7` e `0,8` para provar que os dois lados calculam em `double` ([ADR 0025](0025-json-compartilhado-no-csharp.md)).
 
 **O golden é escrito à mão, nunca gerado pelo validador,** e não tem `-u`: caso gerado confirmaria qualquer erro do próprio validador. Formatado pelo Prettier. Ao mudar uma regra, alguém decide o esperado de cada caso.
 

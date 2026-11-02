@@ -12,4 +12,7 @@
         <ProjectReference Include="../../src/Sacou.Shared/Sacou.Shared.csproj" />
         <ProjectReference Include="../Sacou.Architecture.Fixtures/Sacou.Architecture.Fixtures.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+    </ItemGroup>
 </Project>

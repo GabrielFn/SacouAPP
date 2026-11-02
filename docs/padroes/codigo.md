@@ -50,7 +50,7 @@ Corrija a causa. Quando não der, a exceção legítima vai para o `eslint.confi
 - Número mágico em C#: não há regra nativa, e o S109 traria o SonarAnalyzer com muito ruído.
 - `#pragma warning disable` em C#.
 - Desvios aceitos no TypeScript: número solto em objeto fora de `*.data.ts` (`detectObjects: false`), `as unknown as` e `declare const require`.
-- Nomes do glossário, funções pequenas, DDD enxuto e fatias verticais; domínio sem infraestrutura no C#.
+- Nomes do glossário, funções pequenas, DDD enxuto e fatias verticais. No domínio C#, os testes de arquitetura já barram `Environment`, `Console`, `Process`, `Marshal` e P/Invoke ([ADR 0025](../arquitetura/adr/0025-json-compartilhado-no-csharp.md)); determinismo e `System.Type` ficam com o revisor.
 - Result pattern em vez de exceção para regra de negócio.
 - Eventos sem dado pessoal; tudo aponta para `MemberId`.
 - Comentários e nomes em inglês; textos de interface em pt-BR, centralizados em `apps/mobile/src/strings/`.

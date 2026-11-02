@@ -153,6 +153,6 @@ public sealed class OverlapGoldenTests
         Assert.IsType<OverlapResult.InvalidTolerance>(result);
     }
 
-    private static List<string?> TextsOf(JsonElement items) =>
-        [.. items.EnumerateArray().Select(item => item.GetString())];
+    private static List<string> TextsOf(JsonElement items) =>
+        [.. items.EnumerateArray().Select(item => item.GetString()!)];
 }

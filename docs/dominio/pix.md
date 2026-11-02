@@ -92,11 +92,11 @@ Conferência feita no PDF: esse comando reproduz `1D3D` e `AD38` sobre os textos
 
 ## Contrato para a E1.5 (C#)
 
-- `golden/pix.json`: lista de `{ id, source, input: { key: { type, value }, merchantName, merchantCity, amountCents? }, expectedPayload | expectedError }`. Se a geração ficar na API (a E3.10 decide), a E1.5 porta o gerador; se não, basta ler o JSON.
+- `golden/pix.json`: lista de `{ id, source, input: { key: { type, value }, merchantName, merchantCity, amountCents? }, expectedPayload | expectedError }`. A E1.5 só lê o JSON e confere o formato. **Se a geração ficar na API, a E3.10 porta o gerador e executa os dois arquivos** ([ADR 0025](../arquitetura/adr/0025-json-compartilhado-no-csharp.md)).
 - `golden/pix-crc.json`: lista de `{ id, source, ascii, expectedCrc }`.
 - `amountCents` pode ser fracionário no golden (`10.5`, deve dar erro). Leia como número decimal antes de validar. `NaN` e `Infinity` só têm teste em TS, porque JSON não os representa.
 - Atenção no porte: `\d` do .NET aceita dígitos não ASCII, e `$` aceita `\n` no fim. Use `[0-9]` e `\z`; há casos no golden para os dois. `String.Normalize` em modo de globalização invariante precisa dar o mesmo resultado.
 
 ## Fora do escopo
 
-Criptografia e guarda da chave, "já paguei" (E3.10), imagem de QR, QR dinâmico, `infoAdicional`, `fss`, txid próprio, porte C# (E1.5). Antes do piloto, testar em apps de banco reais com chave de teste do Gabriel, fora do repositório (E3.10).
+Criptografia e guarda da chave, "já paguei" (E3.10), imagem de QR, QR dinâmico, `infoAdicional`, `fss`, txid próprio, porte C# do gerador (E3.10, se a geração ficar na API). Antes do piloto, testar em apps de banco reais com chave de teste do Gabriel, fora do repositório (E3.10).

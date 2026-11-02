@@ -34,6 +34,17 @@ public sealed class RealAssemblyTests
         ViolationAssert.None(ArchitectureDependencyRules.DomainViolations(Assemblies.RealArchitecture.Value));
     }
 
+    /// <summary>An empty rule proves nothing: this fails if the model stops reading the real Domain code.</summary>
+    [Theory]
+    [InlineData("Sacou.Modules.Matches.Domain.")]
+    [InlineData("Sacou.Modules.Stats.Domain.")]
+    public void RealDomain_IsInspected(string domainNamespace)
+    {
+        Assert.Contains(
+            Assemblies.RealArchitecture.Value.Types,
+            type => type.FullName.StartsWith(domainNamespace, StringComparison.Ordinal));
+    }
+
     [Fact]
     public void Domain_HasNoPInvoke()
     {
