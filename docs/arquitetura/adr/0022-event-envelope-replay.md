@@ -30,7 +30,7 @@
 
 Pontos de divergência para o porte:
 
-- **`$` na regex:** no .NET casa antes de uma quebra de linha final. Use `\z` e `RegexOptions.ECMAScript` ou classes explícitas; o golden tem casos de UUID com `\n`.
+- **`$` na regex:** no .NET casa antes de uma quebra de linha final. Use `\z`, e `[0-9a-f]` em vez de `\d`; o golden tem casos de UUID com `\n`.
 - **Chave repetida no JSON:** `JSON.parse` fica com a última; `JsonDocument` guarda as duas. O porte precisa decidir e não pode divergir na comparação de duplicatas.
 - **Número:** `1.0` e `1` são o mesmo em JS. O golden usa só inteiros, e a E2.2+ guarda só inteiros no estado. O limite é 2^53−1, com caso em `9007199254740992`.
 - **Ordem de texto:** UUID válido em minúsculas ordena igual por unidade UTF-16 e por `localeCompare`, então o golden não distingue os dois. O teste `compares text by UTF-16 code unit` pula o parser para isso, e o porte precisa de equivalente, ou usa `string.CompareOrdinal` sem exceção.
