@@ -2,7 +2,11 @@ import { parseEventEnvelope } from "../event-log/parse-envelope.js";
 import { replayEvents } from "../event-log/replay-events.js";
 import type { EventEnvelope } from "../event-log/types.js";
 import { INITIAL_COURT_SESSION_STATE, SCORE_APPLIERS } from "./appliers.js";
-import { FORMATION_CATALOG_VERSION, type FormationSystem, type SetterZone } from "@sacou/volley-rules";
+import {
+  FORMATION_CATALOG_VERSION,
+  type FormationSystem,
+  type SetterZone,
+} from "@sacou/volley-rules";
 
 import type {
   CourtSessionState,

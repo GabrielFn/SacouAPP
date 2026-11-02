@@ -130,6 +130,16 @@ const EXPECTED_EVENT_IDS: readonly string[] = [
   "s15-set-ended-in-the-e2-2-format-is-rejected",
   "s15-point-with-a-recorded-rotation-is-rejected",
   "s15-lineup-with-a-member-outside-the-team",
+  "s15-match-started-in-the-e2-3-format-is-rejected",
+  "s15-match-started-without-the-system-is-rejected",
+  "s15-match-started-without-formations-version-is-rejected",
+  "s15-system-outside-the-catalog-is-rejected",
+  "s15-formations-version-0-is-rejected",
+  "s16-each-team-keeps-its-own-system",
+  "s16-system-survives-the-next-set",
+  "s16-system-survives-the-undo",
+  "s16-system-survives-the-end-of-the-match",
+  "s16-unknown-formations-version-is-applied-as-recorded",
 ];
 
 function runEventCase({ courtSessionId, initialState, events }: EventCase) {

@@ -96,7 +96,10 @@ describe("input that JSON cannot produce", () => {
   test("holes in a sparse lineup are rejected", () => {
     const lineup = new Array<string>(LINEUP_A.length);
     lineup[0] = MEMBER_A;
-    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 1, system: "5x1" }, b: null } };
+    const input = {
+      ...WITH_LINEUP,
+      rotations: { a: { lineup, setterZone: 1, system: "5x1" }, b: null },
+    };
 
     expect(fieldOf(parseMatchStartedPayload(input))).toBe("rotations.a.lineup");
   });
@@ -187,7 +190,10 @@ describe("the parsed value", () => {
 
   test("has a lineup detached from the input, in the order it came", () => {
     const lineup = [...LINEUP_A];
-    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 2, system: "5x1" }, b: null } };
+    const input = {
+      ...WITH_LINEUP,
+      rotations: { a: { lineup, setterZone: 2, system: "5x1" }, b: null },
+    };
 
     const parsed = parseMatchStartedPayload(input);
     lineup.reverse();
@@ -260,16 +266,25 @@ describe("errors do not echo what was received", () => {
     ["MatchStarted", { ...VALID_START, rotations: { a: CANARY, b: null } }],
     [
       "MatchStarted",
-      { ...WITH_LINEUP, rotations: { a: { lineup: [CANARY], setterZone: 1, system: "5x1" }, b: null } },
+      {
+        ...WITH_LINEUP,
+        rotations: { a: { lineup: [CANARY], setterZone: 1, system: "5x1" }, b: null },
+      },
     ],
     [
       "MatchStarted",
-      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: CANARY, system: "5x1" }, b: null } },
+      {
+        ...WITH_LINEUP,
+        rotations: { a: { lineup: LINEUP_A, setterZone: CANARY, system: "5x1" }, b: null },
+      },
     ],
     ["MatchStarted", { ...VALID_START, rotations: { a: null, b: null, [CANARY]: 1 } }],
     [
       "MatchStarted",
-      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: 1, system: CANARY }, b: null } },
+      {
+        ...WITH_LINEUP,
+        rotations: { a: { lineup: LINEUP_A, setterZone: 1, system: CANARY }, b: null },
+      },
     ],
     ["MatchStarted", { ...VALID_START, formationsVersion: CANARY }],
     ["SetEnded", { ...VALID_SET_ENDED, nextSet: { ...VALID_NEXT_SET, firstServer: CANARY } }],
