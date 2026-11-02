@@ -10,6 +10,9 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 
 ## Respondidas
+- **Cópia das formações, E2.4 (02/11/2026):** número `formationsVersion` no evento e catálogo imutável por versão, em vez da cópia completa. Exceção a `decisoes.md:26`, já ajustado; a cópia real entra junto com o editor do Pro.
+- **Líbero ligado no MVP (02/11/2026):** entra, contra a recomendação. Vira a tarefa E2.11, no M2 e antes do porte em C#. Faltam o controle em "Avançado" e a tela: `produto.md:94` prevê, mas o design não tem.
+- **Toque em dois jogadores na tela 22 (02/11/2026):** troca a ordem oficial (`lineup`), e o alerta trata só de funções, como "Levantadores não estão opostos". O texto "Lia e Ana estão fora de ordem" (`Escalacao.dc.html:91`) muda na E4.8.
 - **Rotação do set seguinte, E2.3 (02/11/2026):** opção 1, continua de onde parou. Definitivo. O app só troca o lado do desenho; a escolha está isolada em `chooseNextSetZones` (ADR 0024).
 - **Primeiro saque do set decisivo, E2.3 (02/11/2026):** opção 2, sorteio no set decisivo de md3 e md5; nos demais sets, alterna. `confirmSetEnd` aceita `firstServer` de fora, e a interface do sorteio é da E4.10. `rotacoes.md:40` corrigido.
 - **Time sem 6 jogadores, E2.3 (02/11/2026):** opção 1, rotação desligada (`rotations.<lado>: null`), e o app mostra só o time que saca. Decide o que as E4.7 e E4.8 mostram.
