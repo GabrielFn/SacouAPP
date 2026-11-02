@@ -10,6 +10,7 @@ internal static partial class RepositoryFiles
     private const string DomainFolder = "Domain";
     private const string SolutionFileName = "Sacou.slnx";
     private const string ModuleProjectPrefix = "Sacou.Modules.";
+    private const string TestProjectsPathPrefix = "apps/api/tests/";
     private const string ProjectFilePattern = "*.csproj";
     private const string PlainSdk = "Microsoft.NET.Sdk";
     private const string SdkAttribute = "Sdk";
@@ -49,9 +50,12 @@ internal static partial class RepositoryFiles
         [.. Directory.GetFiles(directory, ProjectFilePattern, SearchOption.AllDirectories)
             .Select(path => Path.GetFileNameWithoutExtension(path))];
 
+    /// <summary>Goes by folder, not by a ".Tests" suffix, so that a fake module named like a test project still fails.</summary>
     internal static IReadOnlyList<string> ModuleNamesInSolution(XDocument solution) =>
         [.. solution.Descendants(SolutionProjectElement)
-            .Select(project => Path.GetFileNameWithoutExtension((string?)project.Attribute(PathAttribute) ?? string.Empty))
+            .Select(project => (string?)project.Attribute(PathAttribute) ?? string.Empty)
+            .Where(path => !path.StartsWith(TestProjectsPathPrefix, StringComparison.Ordinal))
+            .Select(path => Path.GetFileNameWithoutExtension(path))
             .Where(name => name.StartsWith(ModuleProjectPrefix, StringComparison.Ordinal))];
 
     /// <summary>A project with no dependencies: only the plain SDK and no references of any kind.</summary>

@@ -27,21 +27,38 @@ internal static partial class ArchitectureDependencyRules
         "System.Collections.Generic",
         "System.Collections.Immutable",
         "System.Collections.ObjectModel",
-        "System.Diagnostics",
         "System.Diagnostics.CodeAnalysis",
         "System.Globalization",
         "System.Linq",
         "System.Numerics",
         "System.Runtime.CompilerServices",
-        "System.Runtime.InteropServices",
         "System.Text",
         "System.Text.RegularExpressions",
         "System.Threading",
         "System.Threading.Tasks",
     ];
 
+    /// <summary>
+    /// What the compiler emits from namespaces that also hold Process or Marshal. Each entry is here
+    /// because Domain_WithAllowedDependency_IsNotReported fails without it, in Debug or in Release.
+    /// </summary>
+    private static readonly HashSet<string> AllowedDomainTypes = [];
+
+    /// <summary>A block list because System does not fit an allow list: records and closures use dozens of its types.</summary>
+    private static readonly HashSet<string> ForbiddenDomainTypes =
+    [
+        "System.Activator",
+        "System.AppContext",
+        "System.AppDomain",
+        "System.Console",
+        "System.Environment",
+        "System.GC",
+    ];
+
     internal static ArchUnitNET.Domain.Architecture Load(IEnumerable<System.Reflection.Assembly> assemblies) =>
         new ArchLoader().LoadAssemblies([.. assemblies]).Build();
+
+    internal static bool IsDomainType(string fullName) => DomainNamespacePattern().IsMatch(fullName);
 
     internal static IReadOnlyList<Violation> DomainViolations(ArchUnitNET.Domain.Architecture architecture) =>
         [.. from type in architecture.Types
@@ -66,8 +83,12 @@ internal static partial class ArchitectureDependencyRules
             || fullName.StartsWith(CompilerGeneratedPrefix, StringComparison.Ordinal)
             || IsInNamespace(fullName, ownDomainNamespace)
             || IsInNamespace(fullName, SharedNamespacePrefix)
-            || AllowedDomainNamespaces.Contains(dependency.Namespace.FullName);
+            || (!ForbiddenDomainTypes.Contains(TopLevelName(fullName))
+                && (AllowedDomainNamespaces.Contains(dependency.Namespace.FullName) || AllowedDomainTypes.Contains(fullName)));
     }
+
+    /// <summary>So that Environment+SpecialFolder falls with Environment.</summary>
+    private static string TopLevelName(string fullName) => fullName.Split('+', '/')[0];
 
     private static bool CrossesModuleBoundary(string dependency, string originModule)
     {

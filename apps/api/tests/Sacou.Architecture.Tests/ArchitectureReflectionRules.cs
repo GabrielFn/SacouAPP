@@ -21,6 +21,20 @@ internal static partial class ArchitectureReflectionRules
         "System.Threading",
     ];
 
+    private const BindingFlags EveryDeclaredMethod =
+        BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+
+    /// <summary>
+    /// DllImport is a pseudo-attribute: it becomes method metadata, with no type reference for the IL
+    /// rule to find, so a P/Invoke needs this rule of its own.
+    /// </summary>
+    internal static IReadOnlyList<string> DomainPInvokeViolations(Assembly assembly) =>
+        [.. from type in assembly.GetTypes()
+            where ArchitectureDependencyRules.IsDomainType(type.FullName ?? type.Name)
+            from method in type.GetMethods(EveryDeclaredMethod)
+            where method.Attributes.HasFlag(MethodAttributes.PinvokeImpl)
+            select $"{type.FullName}.{method.Name}"];
+
     /// <summary>Exported types outside Contracts, except the module's own entry class.</summary>
     internal static IReadOnlyList<string> PublicSurfaceViolations(Assembly assembly) =>
         [.. assembly.GetExportedTypes()

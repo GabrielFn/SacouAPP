@@ -35,6 +35,12 @@ public sealed class RealAssemblyTests
     }
 
     [Fact]
+    public void Domain_HasNoPInvoke()
+    {
+        ViolationAssert.None(Assemblies.RealModules.Value.SelectMany(ArchitectureReflectionRules.DomainPInvokeViolations));
+    }
+
+    [Fact]
     public void DomainFolders_DeclareTheNamespaceOfTheirPath()
     {
         ViolationAssert.None(RepositoryFiles.DomainFolderViolations(RepositoryFiles.ModulesDirectory));
