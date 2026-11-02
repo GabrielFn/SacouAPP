@@ -113,6 +113,11 @@ const CASES = [
     "for (let index = 0; index < 1; index += 1) {\n  void index;\n}\n",
     NO_LET,
   ],
+  [
+    `${MATCH_ENGINE}budget.ts`,
+    "export function spend(budget: { remaining: number }): void {\n  budget.remaining -= 1;\n}\n",
+    "functional/immutable-data",
+  ],
   [`${MATCH_ENGINE}clock.test.ts`, "export const now = Date.now();\n", CLEAN],
 
   [`${VOLLEY_RULES}const.ts`, "export const MAX_SETS = 5;\n", CLEAN],

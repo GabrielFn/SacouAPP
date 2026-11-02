@@ -65,7 +65,7 @@ function objectsEqual(left: JsonObject, right: JsonObject): boolean {
   );
 }
 
-/** Structural, regardless of key order. Bounded by the depth limit of the parser. */
+/** Structural, regardless of key order. Recursive: safe only on parser output, as replay requires. */
 function jsonEquals(left: JsonValue, right: JsonValue): boolean {
   if (isJsonArray(left)) {
     return isJsonArray(right) && arraysEqual(left, right);

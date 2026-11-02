@@ -26,3 +26,6 @@ export const MAX_EVENT_TYPE_LENGTH = 64;
 
 /** Levels of nested objects and arrays in a payload, counting the payload itself. */
 export const MAX_PAYLOAD_DEPTH = 32;
+
+/** JSON values in a payload, counting the payload itself and each visit to a shared reference. */
+export const MAX_PAYLOAD_NODES = 4096;

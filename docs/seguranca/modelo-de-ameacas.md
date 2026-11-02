@@ -37,14 +37,14 @@ Só a CI (seção 11) já está implementada; os demais componentes ainda não t
 |---|---|---|
 | S | Celular se passar por outro no envelope | O ID do celular não autentica. Quem pode escrever: a definir na E3.7, com o token de placar da seção 4 |
 | T | Evento inconsistente ou forjado: o servidor aplica o resultado sem reimplementar a lógica (`decisoes.md:26`) | Validação do que chega a definir na E3.7 |
-| T | Envelope malformado ou entrada não confiável, inclusive `__proto__`, `NaN` e objetos que não são JSON | Parser do envelope com esquema fechado e falha fechada (E2.1, TS). A E2.10 porta para o C#; a E3.7 usa no servidor. Conteúdo do payload: parser estrito por tipo, na E2.2+ |
+| T | Envelope malformado ou entrada não confiável, inclusive `__proto__` e `NaN` | Parser do envelope com esquema fechado e falha fechada (E2.1, só TS). A E2.10 porta para o C#; a E3.7 usa no servidor. `replayEvents` confia em quem chama: só aceita saída do parser. **Lacuna:** conteúdo do payload e `type` só com parser estrito por tipo, na E2.2+; até lá, `type` aceita texto livre de até 64 caracteres |
 | T | Reenvio duplicar pontos | Idempotência com ID gerado no celular (`produto.md:309`) |
 | R | Negar uma correção | Desfazer é evento e nunca apaga (`decisoes.md:26`); autoria a definir na E3.7 |
 | I | Dado pessoal gravado no stream | Eventos só com IDs (`decisoes.md:28`). Esquema fechado do envelope com teste de nomes proibidos (E2.1, achado A4). **Lacunas:** o payload é aberto até cada tipo ter parser (E2.2+), e a regra em C# fica na E2.10 ou E3.7 |
 | I | Valor recebido devolvido em erro | Erro só com `code` e `eventId` ou `field`; nome de campo desconhecido não volta; teste canário (E2.1) |
 | I | ID do celular rastreável | UUID aleatório por instalação, nunca de hardware (E4.9); autoria fora do evento ([inventário](dados-pessoais.md)) |
 | I | Log de eventos no aparelho (expo-sqlite) | A definir na E4.9 |
-| D | Lote grande ou volume alto de eventos | Limite de requisições (`decisoes.md:31`); tamanho do lote a definir na E3.7. O motor limita profundidade do payload e tamanho do `type` e aguenta 10 mil eventos sem estouro de pilha (E2.1); o tamanho total do payload é limitado no servidor (E3.7) |
+| D | Lote grande ou volume alto de eventos | Limite de requisições (`decisoes.md:31`); tamanho do lote a definir na E3.7. O parser limita o payload a 32 níveis e 4096 valores, com referência repetida contada a cada visita, e o `type` a 64 caracteres (E2.1). **Lacuna:** não limita o tamanho dos textos nem o total do payload, nem o número de eventos, a cargo do servidor (E3.7) |
 | D | Evento ruim gravado trava a quadra, porque a falha fechada impede recalcular o stream | A E3.7 simula o replay antes de persistir e rejeita ali; o mesmo no log local (E4.9) |
 | E | Escrever em stream de outra quadra | Token de placar só daquele stream (`produto.md:357`); autorização do admin por recurso (`decisoes.md:27`) |
 

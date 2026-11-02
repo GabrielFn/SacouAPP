@@ -12,7 +12,7 @@ Esquema fechado: só estes campos, e qualquer outro é erro.
 | `batch`, `sequence` | Inteiro de 1 a 2^53−1 |
 | `schemaVersion` | Inteiro ≥ 1, de 1 a 2^53−1 no parser; só as versões suportadas passam no replay |
 | `type` | Texto de 1 a 64 unidades UTF-16 |
-| `payload` | Objeto JSON com até 32 níveis, contando o próprio payload |
+| `payload` | Objeto JSON com até 32 níveis e 4096 valores, contando o próprio payload. As chaves ficam ordenadas por unidade UTF-16 na cópia |
 
 Não entram no envelope: `rulesVersion` e a cópia congelada de configurações e formações, que vão no evento de início de partida (E2.2+); relógio; autoria; nome, apelido, e-mail, telefone, Pix, foto ou `userId`.
 
@@ -22,7 +22,7 @@ Não entram no envelope: `rulesVersion` e a cópia congelada de configurações 
 | `sequence` | Cresce por celular no stream. Lacuna não é erro aqui (a E3.7 detecta o que falta) |
 | Ordem canônica | `batch`, `sequence`, `deviceId`, `eventId`: números por valor, textos por unidade UTF-16 (`<` no TS; `string.CompareOrdinal` no C#), nunca `localeCompare` |
 | Duplicata | Mesmo `eventId` e conteúdo igual, sem depender da ordem das chaves: ignora. Conteúdo diferente: `event-id-conflict` |
-| Falha | Fechada: erro devolve `err`, sem estado parcial e sem exceção. Leva só `code` e `eventId` ou `field`, nunca o valor recebido |
+| Falha | Fechada: erro devolve `err`, sem estado parcial. Leva só `code` e `eventId` ou `field`, nunca o valor recebido |
 
 Erro do parser é `invalid-envelope` com `field`: um campo do esquema; `envelope`, quando a entrada não é um objeto; ou `unknown-field`, quando há campo fora do esquema. O nome do campo desconhecido é dado recebido e não volta no erro. O campo desconhecido é conferido primeiro; depois, os campos na ordem da tabela.
 
@@ -33,9 +33,12 @@ Payload só com `{ targetEventId }`. O estado volta ao que era logo depois do al
 O alvo tem de estar ativo, vir antes na ordem canônica e não ser `RevertedTo`. Sem isso, ou com payload malformado, o erro é `invalid-revert-target`.
 
 - O `RevertedTo` não é listado em `activeEventIds`: a lista traz só os eventos cujo efeito está no estado.
-- Não há como voltar ao estado inicial, porque o alvo é sempre um evento. O primeiro evento do stream não se desfaz.
+- Não há como voltar ao estado inicial, porque o alvo é sempre um evento. Por isso **todo stream abre com um evento anterior a qualquer ponto**, para o desfazer do primeiro ponto funcionar. A E2.2 deve garantir isso.
+- **Dois `RevertedTo` offline** podem deixar o log em `invalid-revert-target`: o que vier depois na ordem canônica pode apontar para um alvo que o outro já deixou inativo. Com falha fechada, isso impede recalcular o stream. O tratamento fica na E3.7 e na E4.9.
 
 ## `replayEvents`
+
+Só aceita saída de `parseEventEnvelope`: é contrato, e o tipo sozinho não garante. Evento montado à mão com payload muito profundo pode lançar exceção.
 
 1. Ordena uma cópia na ordem canônica.
 2. Confere o log inteiro, inclusive eventos que ficariam inativos, nesta ordem de código e, dentro do código, na ordem canônica:

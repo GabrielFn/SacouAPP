@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { ENVELOPE_FIELDS, MAX_PAYLOAD_DEPTH } from "./constants.data.js";
+import { ENVELOPE_FIELDS, MAX_PAYLOAD_DEPTH, MAX_PAYLOAD_NODES } from "./constants.data.js";
 import { parseEventEnvelope } from "./parse-envelope.js";
 import type { EventEnvelope } from "./types.js";
 
@@ -157,6 +157,94 @@ describe("parseEventEnvelope with values JSON cannot carry", () => {
     });
     const parsed = parseEventEnvelope(raw);
     expect(parsed.ok && parsed.value.batch).toBe(1);
+  });
+});
+
+describe("payload node budget", () => {
+  const SHORT_TIME_MS = 1000;
+  const HUGE_LENGTH = 2 ** 32 - 1;
+  const WIDE_KEYS = 100_000;
+
+  function dag(levels: number): unknown {
+    return Array.from({ length: levels }).reduce<unknown>((inner) => [inner, inner], 0);
+  }
+
+  function selfReferencing(): unknown {
+    const node: Record<string, unknown> = {};
+    node["a"] = node;
+    node["b"] = node;
+    return node;
+  }
+
+  function wideSharedObjects(): unknown {
+    const wide = Object.fromEntries(
+      Array.from({ length: WIDE_KEYS }, (_, index) => [String(index), 0]),
+    );
+    return new Array<unknown>(MAX_PAYLOAD_NODES - 2).fill(wide);
+  }
+
+  test.each([
+    ["a DAG of 24 levels", () => dag(24)],
+    ["a DAG of 40 levels", () => dag(40)],
+    ["a self-referencing object", selfReferencing],
+    ["a huge empty array", () => new Array<unknown>(HUGE_LENGTH)],
+    ["a wide object shared many times", wideSharedObjects],
+  ])("rejects %s in a short time", (_label, build) => {
+    const raw = { ...VALID, payload: { value: build() } };
+
+    const startedAt = performance.now();
+    const result = parseEventEnvelope(raw);
+    const elapsed = performance.now() - startedAt;
+
+    expect(result).toStrictEqual({
+      ok: false,
+      error: { code: "invalid-envelope", field: "payload" },
+    });
+    expect(elapsed).toBeLessThan(SHORT_TIME_MS);
+  });
+
+  test("accepts a small DAG, which stays a plain copy", () => {
+    const payload = parsedPayload({ ...VALID, payload: { value: dag(2) } });
+
+    expect(payload).toStrictEqual({
+      value: [
+        [0, 0],
+        [0, 0],
+      ],
+    });
+  });
+
+  test("counts every value up to the exact limit", () => {
+    const items = (count: number) => new Array<number>(count).fill(0);
+    const atLimit = { value: items(MAX_PAYLOAD_NODES - 2) };
+    const overLimit = { value: items(MAX_PAYLOAD_NODES - 1) };
+
+    expect(parseEventEnvelope({ ...VALID, payload: atLimit }).ok).toBe(true);
+    expectInvalid({ ...VALID, payload: overLimit }, "payload");
+  });
+});
+
+describe("own fields only", () => {
+  test("a polluted Object.prototype does not supply a missing field", () => {
+    const { deviceId, ...withoutDevice } = VALID;
+    const polluted = Object.prototype as Record<string, unknown>;
+    polluted["deviceId"] = deviceId;
+    try {
+      expectInvalid(withoutDevice, "deviceId");
+    } finally {
+      delete polluted["deviceId"];
+    }
+  });
+});
+
+describe("key order", () => {
+  test("the copy sorts keys by UTF-16 code unit at every level", () => {
+    const payload = parsedPayload({
+      ...VALID,
+      payload: { b: 1, a: { d: 1, B: [{ z: 1, y: 2 }], c: 2 } },
+    });
+
+    expect(JSON.stringify(payload)).toBe('{"a":{"B":[{"y":2,"z":1}],"c":2,"d":1},"b":1}');
   });
 });
 

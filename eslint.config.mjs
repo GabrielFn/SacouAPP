@@ -180,6 +180,16 @@ export default defineConfig([
     rules: { "functional/no-let": ["error", { allowInForLoopInit: true }] },
   },
 
+  // The payload copy counts nodes in one pass; threading the count would make it quadratic.
+  // The counter is its only mutable value. Registered in ADR 0002.
+  {
+    files: ["packages/match-engine/src/event-log/parse-envelope.ts"],
+    rules: {
+      "functional/immutable-data": ["error", { ignoreAccessorPattern: ["budget.remaining"] }],
+      "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: ["budget"] }],
+    },
+  },
+
   {
     files: FORBIDDEN_JAVASCRIPT_FILES,
     rules: {

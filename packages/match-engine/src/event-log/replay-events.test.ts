@@ -120,6 +120,28 @@ describe("structural comparison of duplicates", () => {
   });
 });
 
+describe("resend with keys in another order", () => {
+  test("every arrival order gives the same state text", () => {
+    const parse = (value: string): EventEnvelope => {
+      const payload: unknown = JSON.parse(value);
+      const parsed = parseEventEnvelope({ ...event(1), payload });
+      if (!parsed.ok) {
+        throw new Error("expected a valid envelope");
+      }
+      return parsed.value;
+    };
+    const first = parse('{ "value": { "a": 1, "b": 2 } }');
+    const second = parse('{ "value": { "b": 2, "a": 1 } }');
+
+    [
+      [first, second],
+      [second, first],
+    ].forEach((order) => {
+      expect(JSON.stringify(replayEvents(CONFIG, order))).toContain('[{"a":1,"b":2}]');
+    });
+  });
+});
+
 describe("failing closed", () => {
   test("an applier that throws becomes event-rejected, without the message", () => {
     const appliers = new Map<string, EventApplier<FixtureState>>([

@@ -95,7 +95,11 @@ function foldTimeline<S>(
 
 /**
  * Recalculates the state of a stream deterministically: the outcome, errors included, depends only
- * on the set of events, never on their arrival order. Never throws and returns no partial state.
+ * on the set of events, never on their arrival order. Returns no partial state.
+ *
+ * Accepts only the output of parseEventEnvelope, whose limits make it safe to compare: the type
+ * alone does not prove that, and an event built by hand with a very deep payload can overflow the
+ * stack here. An exception inside an applier becomes event-rejected.
  */
 export function replayEvents<S>(
   config: ReplayConfig<S>,

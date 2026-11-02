@@ -52,6 +52,8 @@ Nenhum ajuste para reduzir ruído: `functional/*` e `no-magic-numbers` não gera
 
 **E2.1, exceção de `functional/no-let`:** `allowInForLoopInit` só em `packages/match-engine/src/event-log/replay-events.ts`. O replay percorre a lista ligada sem recursão, para os 10 mil eventos, e só a variável do laço é reatribuída ([ADR 0022](0022-event-envelope-replay.md)). Fora desse arquivo, `let` no `for` segue reprovando (caso em `lint-regression.mjs`).
 
+**E2.1, contador do orçamento de nós:** `functional/immutable-data` (`ignoreAccessorPattern`) e `no-param-reassign` (`ignorePropertyModificationsFor`) liberam só `budget.remaining`, só em `packages/match-engine/src/event-log/parse-envelope.ts`. Passar a contagem de forma imutável deixaria a cópia quadrática, o que seria ela mesma um custo explorável (ADR 0022). Fora desse arquivo segue reprovando (caso em `lint-regression.mjs`).
+
 ## Limitações aceitas
 
 Passam no lint e ficam com o revisor:

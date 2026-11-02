@@ -5,6 +5,7 @@ import {
   ENVELOPE_ROOT_FIELD,
   MAX_EVENT_TYPE_LENGTH,
   MAX_PAYLOAD_DEPTH,
+  MAX_PAYLOAD_NODES,
   UNKNOWN_ENVELOPE_FIELD,
 } from "./constants.data.js";
 import type {
@@ -21,6 +22,11 @@ const KNOWN_FIELDS: ReadonlySet<string | symbol> = new Set(ENVELOPE_FIELDS);
 
 type RawEnvelope = Readonly<Partial<Record<EnvelopeFieldName, unknown>>>;
 type JsonEntry = readonly [string, JsonValue];
+
+/** The one mutable value of the copy: threading it through would make the copy quadratic. */
+interface NodeBudget {
+  remaining: number;
+}
 
 function invalid(field: EnvelopeError["field"]): Result<never, EnvelopeError> {
   return err({ code: "invalid-envelope", field });
@@ -54,28 +60,46 @@ function isCompleteEntry(entry: readonly [string, JsonValue | undefined]): entry
   return entry[1] !== undefined;
 }
 
-function cloneArray(value: readonly unknown[], depth: number): readonly JsonValue[] | undefined {
+function spendNode(budget: NodeBudget): boolean {
+  if (budget.remaining <= 0) {
+    return false;
+  }
+  budget.remaining -= 1;
+  return true;
+}
+
+function cloneArray(
+  value: readonly unknown[],
+  depth: number,
+  budget: NodeBudget,
+): readonly JsonValue[] | undefined {
+  // Checked first: Array.from would walk every slot of a huge, empty array before any item counts.
+  if (value.length > budget.remaining) {
+    return undefined;
+  }
   // Array.from turns holes into undefined, so a sparse array is rejected.
-  const items = Array.from(value, (item) => cloneJsonValue(item, depth + 1));
+  const items = Array.from(value, (item) => cloneJsonValue(item, depth + 1, budget));
   return items.every(isDefined) ? Object.freeze(items) : undefined;
 }
 
 function cloneObject(
   value: Readonly<Record<string, unknown>>,
   depth: number,
+  budget: NodeBudget,
 ): JsonObject | undefined {
-  if (!Reflect.ownKeys(value).every((key) => typeof key === "string")) {
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.length > budget.remaining || !ownKeys.every((key) => typeof key === "string")) {
     return undefined;
   }
-  const entries = Object.entries(value).map(
-    ([key, item]) => [key, cloneJsonValue(item, depth + 1)] as const,
-  );
+  // Sorted by UTF-16 code unit, so a resend with its keys in another order yields the same text.
+  const entries = Object.keys(value)
+    .sort()
+    .map((key) => [key, cloneJsonValue(value[key], depth + 1, budget)] as const);
   // Object.fromEntries defines own properties, so a "__proto__" key cannot reach the prototype.
   return entries.every(isCompleteEntry) ? Object.freeze(Object.fromEntries(entries)) : undefined;
 }
 
-/** Returns a frozen copy, or undefined for anything that JSON cannot represent. */
-function cloneJsonValue(value: unknown, depth: number): JsonValue | undefined {
+function copyValue(value: unknown, depth: number, budget: NodeBudget): JsonValue | undefined {
   if (value === null || typeof value === "boolean" || typeof value === "string") {
     return value;
   }
@@ -86,26 +110,51 @@ function cloneJsonValue(value: unknown, depth: number): JsonValue | undefined {
     return undefined;
   }
   if (Array.isArray(value)) {
-    return cloneArray(value as readonly unknown[], depth);
+    return cloneArray(value as readonly unknown[], depth, budget);
   }
-  return isPlainObject(value) ? cloneObject(value, depth) : undefined;
+  return isPlainObject(value) ? cloneObject(value, depth, budget) : undefined;
+}
+
+/** Returns a frozen copy, or undefined for anything that JSON cannot represent or the limits bar. */
+function cloneJsonValue(value: unknown, depth: number, budget: NodeBudget): JsonValue | undefined {
+  if (!spendNode(budget)) {
+    return undefined;
+  }
+  const copy = copyValue(value, depth, budget);
+  if (copy === undefined) {
+    // Any failure ends the copy, so a rejected payload costs no further work on its siblings.
+    budget.remaining = 0;
+  }
+  return copy;
 }
 
 function clonePayload(value: unknown): JsonObject | undefined {
-  return isPlainObject(value) ? cloneObject(value, 1) : undefined;
+  const budget: NodeBudget = { remaining: MAX_PAYLOAD_NODES };
+  return isPlainObject(value) && spendNode(budget) ? cloneObject(value, 1, budget) : undefined;
+}
+
+/** Own properties only: with a polluted Object.prototype, a missing field must stay missing. */
+function readOwn(raw: RawEnvelope, field: EnvelopeFieldName): unknown {
+  return Object.hasOwn(raw, field) ? raw[field] : undefined;
 }
 
 function parseFields(raw: RawEnvelope): Result<EventEnvelope, EnvelopeError> {
   // Each field is read once here, so a getter cannot change the value after the check.
-  const { eventId, courtSessionId, deviceId, batch, sequence, schemaVersion, type } = raw;
+  const eventId = readOwn(raw, "eventId");
   if (!isUuid(eventId)) return invalid("eventId");
+  const courtSessionId = readOwn(raw, "courtSessionId");
   if (!isUuid(courtSessionId)) return invalid("courtSessionId");
+  const deviceId = readOwn(raw, "deviceId");
   if (!isUuid(deviceId)) return invalid("deviceId");
+  const batch = readOwn(raw, "batch");
   if (!isPositiveSafeInteger(batch)) return invalid("batch");
+  const sequence = readOwn(raw, "sequence");
   if (!isPositiveSafeInteger(sequence)) return invalid("sequence");
+  const schemaVersion = readOwn(raw, "schemaVersion");
   if (!isPositiveSafeInteger(schemaVersion)) return invalid("schemaVersion");
+  const type = readOwn(raw, "type");
   if (!isEventType(type)) return invalid("type");
-  const payload = clonePayload(raw.payload);
+  const payload = clonePayload(readOwn(raw, "payload"));
   if (payload === undefined) return invalid("payload");
   return ok(
     Object.freeze({
@@ -130,7 +179,7 @@ export function parseEventEnvelope(raw: unknown): Result<EventEnvelope, Envelope
     const hasOnlyKnownFields = Reflect.ownKeys(raw).every((key) => KNOWN_FIELDS.has(key));
     return hasOnlyKnownFields ? parseFields(raw) : invalid(UNKNOWN_ENVELOPE_FIELD);
   } catch {
-    // Only a getter or a proxy can throw here, and JSON.parse produces neither.
+    // Input that is not from JSON.parse can run code (getters, proxies, custom iterators).
     return invalid(ENVELOPE_ROOT_FIELD);
   }
 }

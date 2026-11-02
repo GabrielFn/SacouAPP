@@ -14,7 +14,15 @@
 
 **Linha do tempo em lista ligada imutável.** Voltar só move o ponteiro, sem copiar estados. Quem caminha é o `RevertedTo`, e cada nó percorrido sai da linha do tempo, então o replay inteiro segue linear. Sem recursão, para os 10 mil eventos, o laço precisa de `let` no `for`: a única exceção de `functional/no-let`, só em `replay-events.ts` (`allowInForLoopInit`, [ADR 0002](0002-padroes-e-lint.md)).
 
-**Payload copiado e congelado pelo parser.** A cópia separa o envelope da entrada, recusa o que JSON não representa e limita a profundidade a 32 níveis, com a recursão limitada por isso. `Object.fromEntries` define propriedades próprias, então `__proto__` no payload continua uma chave comum, sem contaminar nada. Por isso a comparação de duplicatas confere `Object.hasOwn`. O tamanho total do payload é limitado no servidor (E3.7).
+**Payload copiado e congelado pelo parser.** A cópia separa o envelope da entrada, recusa o que JSON não representa e limita a profundidade a 32 níveis, o que limita a recursão. `Object.fromEntries` define propriedades próprias, então `__proto__` no payload continua uma chave comum, sem contaminar nada. Por isso a comparação de duplicatas confere `Object.hasOwn`. O tamanho total do payload é limitado no servidor (E3.7).
+
+**Orçamento de 4096 nós no payload (`MAX_PAYLOAD_NODES`).** Profundidade não limita nós: `v=[v,v]` repetido 24 vezes esgotava a memória, porque a cópia desfaz o compartilhamento de referências. Cada valor JSON conta um, com o próprio payload, e referência repetida conta a cada visita. O catálogo inteiro de formações, medido em `formations.json`, tem 449 nós, e é o maior conteúdo previsto (a cópia congelada do início de partida); 4096 dá cerca de 9 vezes isso, com folga para as configurações, sem deixar um único evento custar caro. O `length` do array e o número de chaves são conferidos antes de percorrer, e qualquer falha encerra a cópia. O contador é o único valor mutável, com exceção de lint só em `parse-envelope.ts` ([ADR 0002](0002-padroes-e-lint.md)): passar a contagem de forma imutável deixaria a cópia quadrática.
+
+**Chaves ordenadas na cópia.** Por unidade UTF-16, em todos os níveis. Sem isso, um reenvio com `{a:1,b:2}` e `{b:2,a:1}` gerava estados com texto diferente, conforme a ordem de chegada. O golden compara também o texto. **Limite:** chave com forma de inteiro (`"10"`, `"9"`) o JS sempre lista primeiro e em ordem numérica, sem depender da chegada, mas fora da ordem UTF-16; os parsers por tipo não devem usar chaves assim.
+
+**`replayEvents` só aceita saída de `parseEventEnvelope`.** É contrato, sem tipo de marca. A comparação de duplicatas é recursiva e só é segura com os limites do parser: evento montado à mão com payload muito profundo pode estourar a pilha. Quem lê do log local ou do banco passa pelo parser antes.
+
+**Campos do envelope lidos com `Object.hasOwn`.** Com `Object.prototype` poluído, um campo ausente continua ausente.
 
 **Exceção de aplicador vira `event-rejected`.** Falha fechada: a mensagem da exceção não é repassada, porque pode carregar dado.
 
@@ -34,7 +42,10 @@ Pontos de divergência para o porte:
 - **Chave repetida no JSON:** `JSON.parse` fica com a última; `JsonDocument` guarda as duas. O porte precisa decidir e não pode divergir na comparação de duplicatas.
 - **Número:** `1.0` e `1` são o mesmo em JS. O golden usa só inteiros, e a E2.2+ guarda só inteiros no estado. O limite é 2^53−1, com caso em `9007199254740992`.
 - **Ordem de texto:** UUID válido em minúsculas ordena igual por unidade UTF-16 e por `localeCompare`, então o golden não distingue os dois. O teste `compares text by UTF-16 code unit` pula o parser para isso, e o porte precisa de equivalente, ou usa `string.CompareOrdinal` sem exceção.
-- **Casos só em TS,** porque JSON não os representa: `NaN`, `Infinity`, `undefined`, objetos que não são JSON, `__proto__`, profundidade, 720 permutações, 10 mil eventos e os testes de vazamento em erro.
+- **Ordem de chaves:** ordene com `StringComparer.Ordinal`. O golden compara o texto, e não tem chave com forma de inteiro.
+- **`__proto__`:** no C# é uma chave comum. O golden cobre.
+- **Casos no golden:** payload com 32 e 33 níveis, `__proto__`, `value: null` e os limites de 4096 e 4097 nós.
+- **Casos só em TS:** os que JSON não representa (`NaN`, `Infinity`, `undefined`, objetos que não são JSON, referência compartilhada, ciclo, array com buracos, getter, `Object.prototype` poluído), e também 720 permutações, 10 mil eventos e os testes de vazamento em erro. O porte precisa de equivalentes para o que existir em C#, como `MaxDepth` e limite de nós sobre `JsonElement`.
 
 ## Consequências
 

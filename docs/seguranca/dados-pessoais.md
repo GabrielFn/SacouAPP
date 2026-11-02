@@ -29,7 +29,7 @@ Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardad
 | Vínculo com o grupo, papel, mensalista ou avulso (`MemberId`) | Postgres (Neon) | Organização e autorização | `decisoes.md:10, 28` | Histórico como "Ex-jogador" (`decisoes.md:28`) |
 | Convidado sem conta (nome informado pelo admin) | Postgres (Neon) | Incluir quem não instalou | `produto.md:64, 224` | Sem conta para excluir: pedido e aviso a definir na E3.5 e na E6.2 |
 | Presença e lista de espera | Postgres (Neon) | Rodada | `produto.md:64` | Histórico como "Ex-jogador" |
-| Eventos da quadra | Postgres (Neon) e expo-sqlite no aparelho | Placar, fila, desfazer. **Só IDs, nenhum dado pessoal** | `decisoes.md:26, 28`; `decisoes.md:29` | Eventos ficam; apontam para `MemberId` |
+| Eventos da quadra | Postgres (Neon) e expo-sqlite no aparelho | Placar, fila, desfazer. **Objetivo: só IDs, nenhum dado pessoal.** Não é o que o código impõe hoje: o envelope é fechado, mas `payload` e `type` podem carregar dado pessoal até existirem os parsers por tipo (E2.2+) | `decisoes.md:26, 28`; `decisoes.md:29` | Eventos ficam; apontam para `MemberId` |
 | ID do celular no envelope do evento (`deviceId`): identificador online, tratado como potencialmente pessoal. UUID aleatório por instalação, gerado fora do motor (E4.9), nunca IMEI, Android ID, `identifierForVendor` ou token de push. Autoria não entra no evento | Postgres (Neon) e expo-sqlite | Ordem e sincronização | `decisoes.md:26`; ADR 0022 | A definir na E6.2 (se identifica a pessoa) |
 | Estatísticas, MVP e projeções | Postgres (Neon) | Cartinha, ranking e resumo | `revisao-mvp.md:111` | Histórico como "Ex-jogador" |
 | Resumo da rodada com IA | A definir na E3.13 | Compartilhar | `produto.md:70` | A definir na E3.13 |

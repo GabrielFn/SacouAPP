@@ -61,7 +61,11 @@ function runCase({ courtSessionId, initialState, events }: GoldenCase) {
 
 describe("event log golden", () => {
   test.each(GOLDEN_CASES)("$id", (goldenCase) => {
-    expect(runCase(goldenCase)).toStrictEqual(goldenCase.expected);
+    const outcome = runCase(goldenCase);
+
+    expect(outcome).toStrictEqual(goldenCase.expected);
+    // Key order is part of the contract: the state cannot depend on the order of a resend.
+    expect(JSON.stringify(outcome)).toBe(JSON.stringify(goldenCase.expected));
   });
 
   test("case ids are unique", () => {
