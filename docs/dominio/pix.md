@@ -77,7 +77,7 @@ Os dois arquivos foram escritos **sem usar o gerador**: os campos TLV foram digi
 | Chave | Origem | Conferido |
 |---|---|---|
 | `12345678900` | Exemplo do Manual do Pix | Dígito verificador inválido (o correto seria `09`), então não é CPF emitido |
-| `12ABC34501DE35` | Exemplo do Manual do Pix | **Dígito verificador válido** no cálculo do CNPJ alfanumérico: não dá para descartar que venha a existir. Fica por ser o exemplo oficial |
+| `12ABC34501DE36` | Derivada do exemplo do Manual do Pix (`...DE35`), trocando o último dígito | Dígito verificador inválido de propósito: o exemplo do manual tem dígito válido e poderia vir a existir |
 | `+5500900000000` | Inventado | DDD 00 não existe no plano de numeração. Trocou o exemplo do manual, cujo DDD 61 existe; os telefones inválidos do golden usam a mesma base |
 | `fulano@example.com` e variantes | Inventados | `example.com` é domínio reservado (RFC 2606) |
 | `123e4567-e12b-12d1-a456-426655440000` | Exemplo do Manual do Pix | Só o texto do manual; UUID não dá para conferir |

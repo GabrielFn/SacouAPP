@@ -31,12 +31,12 @@
     "input": {
       "key": {
         "type": "cnpj",
-        "value": "12ABC34501DE35"
+        "value": "12ABC34501DE36"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
     },
-    "expectedPayload": "00020126360014br.gov.bcb.pix011412ABC34501DE355204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63047359"
+    "expectedPayload": "00020126360014br.gov.bcb.pix011412ABC34501DE365204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***6304A6F8"
   },
   {
     "id": "key-phone",
@@ -200,7 +200,7 @@
     "input": {
       "key": {
         "type": "cnpj",
-        "value": "12ABC34501DE355"
+        "value": "12ABC34501DE365"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"

@@ -17,10 +17,11 @@
 | SEC-M1 | Feita | PR #22 (`3458c06`). Revisor, revisor de segurança e testador aprovaram no ciclo 1. |
 | E1.2 | Feita | Decisões no ADR 0021. Aprovada no ciclo 2, com oráculo independente: 71 casos, 0 divergências. |
 | E1.3 | Feita | Decisão de arredondamento em `docs/dominio/player-card.md`: 1790 já é Elite. Citar no relatório do M2. Oráculo independente: 18 casos, 0 divergências. |
+| E1.4 | Feita | Revisor, revisor de segurança e testador aprovaram em `8e84e71`; ajustes pontuais pedidos por eles lidos pelo orquestrador, com CI verde. Normalização em `docs/dominio/pix.md`: citar no relatório do M2. |
 
 ## Adiantadas do M2
 
-E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. M1 fechado: podem entrar na `main`, uma por vez. **No máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
+E2.1 tem plano pronto em `docs/estado/tarefas/`. M1 fechado: pode entrar na `main`. **No máximo 1 agente de cada função por vez**, decisão do Gabriel (`docs/decisoes.md`).
 
 ## Adiadas
 
@@ -36,6 +37,7 @@ E1.4 e E2.1 têm plano pronto em `docs/estado/tarefas/`. M1 fechado: podem entra
 - Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
 - E1.5: portar também o validador de sobreposição, com testes próprios de `NaN` e `Infinity` (ADR 0021).
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
+- E3.10: validar tipo e formato na fronteira, conferir o dígito verificador de CPF e CNPJ e mostrar tipo e chave para confirmação; confirmar se chave de e-mail aceita maiúsculas (Manual do DICT).
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
