@@ -12,11 +12,13 @@
 
 **`PointScored` sem placar absoluto.** Grava o time; o aplicador soma 1. Com placar absoluto e conferência, dois escritores intercalados travariam o stream, o que `eventos.md` proíbe. `matchId` e `setNumber` barram o ponto atrasado de outro set, em vez de contá-lo no set errado.
 
-**`rulesVersion` no `MatchStarted`, `scoring` por valor.** O replay aceita qualquer versão, porque o resultado está gravado; só os comandos recusam versão não suportada. O aplicador só calcula o alvo do set 1, a partir da cópia congelada do próprio evento; os alvos seguintes vêm do `SetEnded`. Formações só na E2.4.
+**`rulesVersion` no `MatchStarted`, `scoring` por valor.** O replay aceita qualquer versão, porque o resultado está gravado; só os comandos recusam versão não suportada. O alvo do set 1 é `scoring.pointsPerSet` da cópia congelada do próprio evento, porque o set 1 nunca é decisivo com `bestOf` 1, 3 ou 5: o aplicador não depende de `scoring-rules.ts`. Os alvos seguintes vêm do `SetEnded`. Formações só na E2.4.
 
 **Parsers à mão, sem biblioteca.** O pacote é puro e o C# precisa de equivalente simples. O esquema é uma árvore de chaves por tipo (`SCORE_PAYLOAD_SHAPES`). **O desconhecido é conferido antes de tudo, em qualquer nível**; depois, os campos na ordem da tabela de `eventos.md`. Inteiros com `Number.isSafeInteger`, chaves com `Object.hasOwn`. O erro leva só um caminho do esquema, `payload` ou `unknown-field`, nunca o valor nem a chave recebida. `parseScorePayload` com tipo fora do catálogo do placar devolve `payload`: quem precisa distinguir olha `SCORE_APPLIERS`.
 
 **`matchId` de partida terminada em `startMatch` é `invalid-payload` em `matchId`.** O plano não previa código para o caso, e o replay rejeitaria o evento. Não cria código novo, e o comando continua só emitindo o que o replay aceita.
+
+**Limite de 200 partidas terminadas por stream (`MAX_FINISHED_MATCHES`).** Limite técnico, não regra do vôlei: uma rodada real fica perto de 30. O estado copia e busca `finishedMatches` a cada partida, e o replay retém cada estado; sem limite, 40 mil eventos válidos esgotavam a memória com FATAL ERROR, que o `try/catch` não pega. **Fronteira:** 200 partidas terminadas podem existir; novo `MatchStarted` com 200 terminadas é `event-rejected`. O comando `startMatch` recusa antes, com `too-many-matches`, para só emitir o que o replay aceita. Os casos `g19-*` cobrem os dois lados.
 
 **Chaves só `a`, `b` e nomes do esquema; sets e times nunca em chave numérica ou por ID.** O parser fechado recusa `"1"`, e o estado monta as chaves em ordem UTF-16, porque o golden compara o texto.
 
@@ -47,11 +49,13 @@ Pontos de divergência para o porte, além dos do ADR 0022:
 - **`null` de `tieBreakPoints`, `nextSet` e `winner` é serializado, nunca omitido.** O golden compara o texto.
 - **`__proto__`, `constructor` e `"1"` no payload** são `unknown-field`. No C#, o primeiro e o segundo são chaves comuns.
 - **Set além de `bestOf`:** o aplicador rejeita; os casos `g15-next-set-past-the-format-*` cobrem.
-- **Casos só em TS:** comandos, `Object.prototype` poluído, símbolos, getters, proxies, array com buracos, canário de erro e 10 mil pontos.
+- **Limite de partidas:** o aplicador rejeita o `MatchStarted` com 200 terminadas; os casos `g19-*` cobrem. O custo de cópia de `List` em C# fica a conferir na E2.10.
+- **Casos só em TS:** comandos, `Object.prototype` poluído, símbolos, getters, proxies, array com buracos, canário de erro, 10 mil pontos e custo de log hostil.
 
 ## Consequências
 
-- **O evento prova formato, não verdade.** `SetEnded` falso passa no replay, e um `MemberId` em UUID válido pode não ser do grupo. A E3.7 confere membros contra o grupo e simula o replay antes de persistir; se validar `SetEnded` pela regra, usa as funções portadas. Quem tem token de placar já pode marcar qualquer ponto, então isso não dá poder novo.
+- **O evento prova formato, não verdade.** `SetEnded` falso passa no replay, e um `MemberId` em UUID válido pode não ser do grupo. Forjar evento vai além de marcar ponto: marcar pontos não permite vencedor contrário ao placar, trocar `teams` nem baixar `scoring`, mas o replay aceita `MatchEnded` `sets-won` com `winner` contrário aos sets, e fila e estatísticas dependem desses campos. A E3.7 precisa simular o replay antes de persistir e conferir membros contra o grupo, `teams` contra a escalação da rodada, `scoring` contra a configuração resolvida e `MatchEnded` pela regra, com as funções portadas. O módulo Stats não confia no evento sem isso.
+- **Custo do replay:** o limite de partidas segura o estado, não o tamanho do log. Simular o stream inteiro a cada lote soma custo; a E3.7 dimensiona lote e limite de requisições, ou usa snapshot.
 - **Ponto atrasado trava:** ponto de set já encerrado é `event-rejected`, e com falha fechada impede recalcular o stream. A E3.7 e a E4.9 rejeitam antes de persistir. Com a ordem por `batch`, um evento anterior ao `MatchStarted` também trava (para a E3.7).
 - **`MemberId` em UUID** presume que a E3.2 gere UUID minúsculo; se não, o parser muda.
 - **E2.3** acrescenta `firstServer` e o setup por time, e soma lógica ao `PointScored`: conflito esperado em `SCORE_APPLIERS` e no golden.

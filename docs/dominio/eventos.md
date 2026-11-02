@@ -69,7 +69,7 @@ Regras em [`placar.md`](placar.md), decisões no [ADR 0023](../arquitetura/adr/0
 
 | Tipo | Rejeitado se |
 |---|---|
-| `MatchStarted` | Há partida aberta, ou o `matchId` já foi usado por partida terminada no stream |
+| `MatchStarted` | Há partida aberta, o `matchId` já foi usado por partida terminada no stream, ou o stream já tem 200 partidas terminadas (`MAX_FINISHED_MATCHES`, limite técnico, não regra: as 200 podem existir, e a 201ª não abre) |
 | `PointScored` | Sem partida aberta com o `matchId`, ou sem set aberto com o `setNumber` |
 | `SetEnded` | Como o `PointScored`, ou `nextSet` não nulo em `setNumber >= bestOf`, porque esse set não existe |
 | `MatchEnded` | Sem partida aberta com o `matchId`, ou `sets-won` com set aberto |

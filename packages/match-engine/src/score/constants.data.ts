@@ -29,6 +29,13 @@ export const LAST_SET_NUMBER = 5;
 export const MIN_TEAM_MEMBERS = 1;
 export const MAX_TEAM_MEMBERS = 24;
 
+/**
+ * Technical limit, not a volleyball rule: a real round stays near 30 matches. The state copies and
+ * searches this list at each match, so a hostile log must not make it grow. 200 finished matches
+ * can exist; a new `MatchStarted` with 200 finished is rejected.
+ */
+export const MAX_FINISHED_MATCHES = 200;
+
 /** Reported when the input as a whole is not a payload object. */
 export const PAYLOAD_ROOT_FIELD = "payload";
 

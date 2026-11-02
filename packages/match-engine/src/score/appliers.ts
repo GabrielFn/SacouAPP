@@ -5,6 +5,7 @@ import {
   FIRST_SET_NUMBER,
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
+  MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
@@ -14,7 +15,6 @@ import {
   parsePointScoredPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import { targetPointsForSet } from "./scoring-rules.js";
 import type { CourtSessionState, MatchScore, MatchSet, NextSet } from "./types.js";
 
 export const INITIAL_COURT_SESSION_STATE: CourtSessionState = Object.freeze({
@@ -44,6 +44,14 @@ function isFinishedMatchId(state: CourtSessionState, matchId: string): boolean {
   return state.finishedMatches.some((match) => match.matchId === matchId);
 }
 
+function canOpenMatch(state: CourtSessionState, matchId: string): boolean {
+  return (
+    state.currentMatch === null &&
+    state.finishedMatches.length < MAX_FINISHED_MATCHES &&
+    !isFinishedMatchId(state, matchId)
+  );
+}
+
 function emptySet(setNumber: number, targetPoints: number): MatchSet {
   return { score: { a: 0, b: 0 }, setNumber, targetPoints };
 }
@@ -55,14 +63,15 @@ function opensSetPastTheFormat(match: MatchScore, setNumber: number, nextSet: Ne
 
 const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
   const parsed = parseMatchStartedPayload(event.payload);
-  if (!parsed.ok || state.currentMatch !== null || isFinishedMatchId(state, parsed.value.matchId)) {
+  if (!parsed.ok || !canOpenMatch(state, parsed.value.matchId)) {
     return rejected();
   }
   const { matchId, rulesVersion, scoring, teams } = parsed.value;
   return ok(
     withCurrentMatch(state, {
       completedSets: [],
-      currentSet: emptySet(FIRST_SET_NUMBER, targetPointsForSet(scoring, FIRST_SET_NUMBER)),
+      // Set 1 is never the deciding set of a series, so it always plays to `pointsPerSet`.
+      currentSet: emptySet(FIRST_SET_NUMBER, scoring.pointsPerSet),
       matchId,
       rulesVersion,
       scoring,

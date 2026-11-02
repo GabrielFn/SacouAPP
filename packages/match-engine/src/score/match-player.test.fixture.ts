@@ -27,6 +27,10 @@ export function matchInput(scoring: ScoringRules, matchId = MATCH_ID): MatchStar
   };
 }
 
+export function numberedMatchId(matchNumber: number): string {
+  return `f0000000-0000-4000-8000-${String(matchNumber).padStart(ID_DIGITS, "0")}`;
+}
+
 export function toEnvelope(draft: ScoreEventDraft, sequence: number): EventEnvelope {
   const parsed = parseEventEnvelope({
     eventId: `e0000000-0000-4000-8000-${String(sequence).padStart(ID_DIGITS, "0")}`,

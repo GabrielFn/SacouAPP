@@ -3,6 +3,7 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 import {
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
+  MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   SUPPORTED_RULES_VERSIONS,
@@ -61,6 +62,9 @@ export function startMatch(
   }
   if (state.currentMatch !== null) {
     return refuse("match-already-open");
+  }
+  if (state.finishedMatches.length >= MAX_FINISHED_MATCHES) {
+    return refuse("too-many-matches");
   }
   if (state.finishedMatches.some((match) => match.matchId === matchId)) {
     return err({ code: "invalid-payload", field: "matchId" });

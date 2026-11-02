@@ -7,6 +7,7 @@ import {
   FIXTURE_REJECTED,
   type FixtureState,
 } from "./append-fixture.test.fixture.js";
+import { VOLUME_TEST_TIMEOUT_MS } from "./volume-test-timeout.test.fixture.js";
 import { REVERTED_TO_EVENT_TYPE } from "./constants.data.js";
 import { parseEventEnvelope } from "./parse-envelope.js";
 import { replayEvents } from "./replay-events.js";
@@ -242,27 +243,39 @@ describe("purity", () => {
 });
 
 describe("volume", () => {
-  test(`${String(MANY_EVENTS)} events do not overflow the stack`, () => {
-    const log = Array.from({ length: MANY_EVENTS }, (_, index) => event(index + 1, { value: 0 }));
+  test(
+    `${String(MANY_EVENTS)} events do not overflow the stack`,
+    () => {
+      const log = Array.from({ length: MANY_EVENTS }, (_, index) => event(index + 1, { value: 0 }));
 
-    const replayed = replayEvents(CONFIG, log);
+      const replayed = replayEvents(CONFIG, log);
 
-    expect(replayed.ok && replayed.value.activeEventIds).toHaveLength(MANY_EVENTS);
-  });
+      expect(replayed.ok && replayed.value.activeEventIds).toHaveLength(MANY_EVENTS);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
 
-  test(`a revert over ${String(MANY_EVENTS)} events does not overflow the stack`, () => {
-    const log = Array.from({ length: MANY_EVENTS }, (_, index) => event(index + 1, { value: 0 }));
+  test(
+    `a revert over ${String(MANY_EVENTS)} events does not overflow the stack`,
+    () => {
+      const log = Array.from({ length: MANY_EVENTS }, (_, index) => event(index + 1, { value: 0 }));
 
-    const replayed = replayEvents(CONFIG, [...log, revert(MANY_EVENTS + 1, 1)]);
+      const replayed = replayEvents(CONFIG, [...log, revert(MANY_EVENTS + 1, 1)]);
 
-    expect(replayed.ok && replayed.value.activeEventIds).toStrictEqual([eventId(1)]);
-  });
+      expect(replayed.ok && replayed.value.activeEventIds).toStrictEqual([eventId(1)]);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
 
-  test("alternating events and reverts complete", () => {
-    const log = Array.from({ length: MANY_EVENTS }, (_, index) =>
-      index % 2 === 0 ? event(index + 1, { value: 0 }) : revert(index + 1, index),
-    );
+  test(
+    "alternating events and reverts complete",
+    () => {
+      const log = Array.from({ length: MANY_EVENTS }, (_, index) =>
+        index % 2 === 0 ? event(index + 1, { value: 0 }) : revert(index + 1, index),
+      );
 
-    expect(replayEvents(CONFIG, log).ok).toBe(true);
-  });
+      expect(replayEvents(CONFIG, log).ok).toBe(true);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
 });

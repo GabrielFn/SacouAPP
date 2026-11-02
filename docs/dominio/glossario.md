@@ -26,7 +26,11 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Partida | `Match` | |
 | Set | `MatchSet` | Para não colidir com o `Set` do JS (ADR 0023) |
 | Placar | `Score` | |
+| Placar da partida em andamento | `MatchScore` | Sets, set aberto e cópia congelada da configuração (ADR 0023) |
+| Partida terminada | `FinishedMatch` | `MatchScore` mais motivo do fim e vencedor (ADR 0023) |
+| Lado do time | `TeamSide` | `a` ou `b`, como as etiquetas das telas (ADR 0023) |
 | Configurações do jogo | `GameSettings` | Value object (`produto.md:272`) |
+| Regras de pontuação | `ScoringRules` | Sets, pontos, tie-break e vantagem, por valor no `MatchStarted` (ADR 0023) |
 | Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |
 | Saída parcial | `PartialExit` | |
 | Banco | `Bench` | |

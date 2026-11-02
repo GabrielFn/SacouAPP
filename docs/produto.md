@@ -281,7 +281,7 @@ Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a c
 | Grupo | Group |
 | Rodada | Session |
 | Partida | Match |
-| Set | Set |
+| Set | MatchSet |
 | Presença | Attendance |
 | Lista de espera | Waitlist |
 | Mensalista / avulso | Regular / DropIn |

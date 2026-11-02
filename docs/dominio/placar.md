@@ -23,6 +23,7 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 - **Fim de set é sempre confirmado** (`produto.md:69`; tela 25). A regra só detecta; `SetEnded` nasce da confirmação. Com o set decidido e sem confirmar, marcar ponto é recusado (`set-decided`), e desfazer o último ponto reabre o jogo normalmente.
 - **Fim de partida:** a confirmação do set decisivo gera dois eventos, `SetEnded` com `nextSet: null` e `MatchEnded`, gravados juntos pelo chamador. Se só o primeiro gravar, a partida fica sem set aberto e confirmar de novo emite o `MatchEnded` que falta.
 - **Encerrar partida antes do fim:** `MatchEnded` com `endReason: "manual"`. O vencedor (`a`, `b` ou `null`) vem de quem chama; o motor não decide (`perguntas.md`, item 7). O set em andamento fica em `currentSet` da partida terminada.
+- **Limite de partidas por stream:** 200 terminadas podem existir. Um novo `MatchStarted` com 200 terminadas é rejeitado no replay (`event-rejected`), e `startMatch` recusa antes (`too-many-matches`). É limite técnico contra log hostil, não regra do vôlei: uma rodada real fica perto de 30 partidas.
 
 ## Comandos
 
@@ -33,6 +34,7 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 | `invalid-payload` | Entrada fora do esquema, ou `matchId` de uma partida já terminada (o replay rejeitaria o evento) |
 | `unsupported-rules-version` | `rulesVersion` fora de `SUPPORTED_RULES_VERSIONS`. Só comandos recusam: o replay aceita qualquer versão |
 | `match-already-open` | `startMatch` com partida aberta |
+| `too-many-matches` | `startMatch` com 200 partidas terminadas no stream (`MAX_FINISHED_MATCHES`) |
 | `no-open-match` | Nenhuma partida aberta |
 | `no-open-set` | Partida sem set aberto e sem vencedor a concluir |
 | `set-decided` | Ponto com o set decidido e não confirmado |
@@ -49,4 +51,4 @@ MatchScore { completedSets: [{ score, setNumber, winner }], currentSet: { score:
 FinishedMatch: MatchScore + endReason (depois de currentSet) + winner (no fim)
 ```
 
-Decisões técnicas e reversíveis, para o relatório do M2: limites de 1 a 99 pontos e de 24 membros por time, `winMargin` 1 ou 2 com o mesmo valor no tie-break, sem teto de pontos.
+Decisões técnicas e reversíveis, para o relatório do M2: limites de 1 a 99 pontos e de 24 membros por time, `winMargin` 1 ou 2 com o mesmo valor no tie-break, sem teto de pontos, 200 partidas terminadas por stream.

@@ -164,6 +164,7 @@ export type ScoreRefusalCode =
   | "no-open-set"
   | "set-decided"
   | "set-not-decided"
+  | "too-many-matches"
   | "unsupported-rules-version";
 
 export type ScoreCommandError = ScorePayloadError | { readonly code: ScoreRefusalCode };

@@ -3,10 +3,17 @@ import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
 import type { EventEnvelope } from "../event-log/types.js";
+import { VOLUME_TEST_TIMEOUT_MS } from "../event-log/volume-test-timeout.test.fixture.js";
 import { INITIAL_COURT_SESSION_STATE } from "./appliers.js";
 import { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./commands.js";
-import { CURRENT_RULES_VERSION } from "./constants.data.js";
-import { MATCH_ID, matchInput, replayAll, toEnvelope } from "./match-player.test.fixture.js";
+import { CURRENT_RULES_VERSION, MAX_FINISHED_MATCHES } from "./constants.data.js";
+import {
+  MATCH_ID,
+  matchInput,
+  numberedMatchId,
+  replayAll,
+  toEnvelope,
+} from "./match-player.test.fixture.js";
 import type {
   CourtSessionState,
   MatchStartedPayload,
@@ -110,6 +117,22 @@ describe("startMatch", () => {
       error: { code: "invalid-payload", field: "matchId" },
     });
   });
+
+  test(
+    "goes up to the limit of finished matches through the replay, then refuses",
+    () => {
+      const player = createMatchPlayer();
+      Array.from({ length: MAX_FINISHED_MATCHES }, (_, index) => index + 1).forEach((number) => {
+        player.run((state) => startMatch(state, matchInput(MD1, numberedMatchId(number))));
+        player.run((state) => endMatchManually(state, null));
+      });
+      const next = matchInput(MD1, numberedMatchId(MAX_FINISHED_MATCHES + 1));
+
+      expect(player.state().finishedMatches).toHaveLength(MAX_FINISHED_MATCHES);
+      expect(errorCode(startMatch(player.state(), next))).toBe("too-many-matches");
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
 });
 
 describe("scorePoint", () => {
