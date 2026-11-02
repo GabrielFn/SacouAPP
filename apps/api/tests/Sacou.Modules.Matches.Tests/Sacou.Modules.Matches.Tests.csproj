@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Sacou.Modules/Matches/Sacou.Modules.Matches.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+        <EmbeddedResource Include="../../../../packages/volley-rules/golden/formations.json" LogicalName="golden/formations.json" />
+        <EmbeddedResource Include="../../../../packages/volley-rules/golden/overlap.json" LogicalName="golden/overlap.json" />
+    </ItemGroup>
+</Project>

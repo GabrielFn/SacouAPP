@@ -10,12 +10,32 @@ internal static partial class RepositoryFiles
     private const string DomainFolder = "Domain";
     private const string SolutionFileName = "Sacou.slnx";
     private const string ModuleProjectPrefix = "Sacou.Modules.";
+    private const string TestProjectsPathPrefix = "apps/api/tests/";
     private const string ProjectFilePattern = "*.csproj";
     private const string PlainSdk = "Microsoft.NET.Sdk";
     private const string SdkAttribute = "Sdk";
     private const string PathAttribute = "Path";
     private const string IncludeAttribute = "Include";
     private const string SolutionProjectElement = "Project";
+    private const string EmbeddedResourceElement = "EmbeddedResource";
+    private const string GoldenFromTestProject = "../../../../packages/volley-rules/golden/";
+    private const string CatalogAssembly = "Sacou.Modules.Matches";
+
+    internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
+    internal const string CatalogPath = "packages/volley-rules/src/formations/formations.json";
+
+    /// <summary>Written by hand: a file lost from the repository must fail, not vanish from the list.</summary>
+    internal static readonly IReadOnlyList<string> SharedJsonFiles =
+    [
+        CatalogPath,
+        "packages/volley-rules/golden/formations.json",
+        "packages/volley-rules/golden/overlap.json",
+        "packages/volley-rules/golden/player-card-level.json",
+        "packages/volley-rules/golden/pix.json",
+        "packages/volley-rules/golden/pix-crc.json",
+    ];
+
+    private static readonly HashSet<string> SharedJsonFileNames = [.. SharedJsonFiles.Select(path => path.Split('/')[^1])];
 
     /// <summary>Anything that brings code into a project, used or not. The compiled assembly hides unused ones.</summary>
     private static readonly HashSet<string> DependencyElements =
@@ -37,8 +57,13 @@ internal static partial class RepositoryFiles
     internal static string IntegrationProjectDirectory =>
         Path.Combine(Root.Value, "apps", "api", "tests", "Sacou.Integration.Tests");
 
+    internal static string ApiDirectory => Path.Combine(Root.Value, "apps", "api");
+
     internal static string ReadRepositoryFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([Root.Value, .. segments]));
+
+    internal static byte[] ReadRepositoryBytes(params string[] segments) =>
+        File.ReadAllBytes(Path.Combine([Root.Value, .. segments]));
 
     internal static XDocument Solution => XDocument.Load(Path.Combine(Root.Value, SolutionFileName));
 
@@ -49,9 +74,12 @@ internal static partial class RepositoryFiles
         [.. Directory.GetFiles(directory, ProjectFilePattern, SearchOption.AllDirectories)
             .Select(path => Path.GetFileNameWithoutExtension(path))];
 
+    /// <summary>Goes by folder, not by a ".Tests" suffix, so that a fake module named like a test project still fails.</summary>
     internal static IReadOnlyList<string> ModuleNamesInSolution(XDocument solution) =>
         [.. solution.Descendants(SolutionProjectElement)
-            .Select(project => Path.GetFileNameWithoutExtension((string?)project.Attribute(PathAttribute) ?? string.Empty))
+            .Select(project => (string?)project.Attribute(PathAttribute) ?? string.Empty)
+            .Where(path => !path.StartsWith(TestProjectsPathPrefix, StringComparison.Ordinal))
+            .Select(path => Path.GetFileNameWithoutExtension(path))
             .Where(name => name.StartsWith(ModuleProjectPrefix, StringComparison.Ordinal))];
 
     /// <summary>A project with no dependencies: only the plain SDK and no references of any kind.</summary>
@@ -79,6 +107,35 @@ internal static partial class RepositoryFiles
             let declared = DeclaredNamespaces(File.ReadAllText(path))
             where declared.Count == 0 || declared.Any(name => name != expected)
             select $"{Path.GetRelativePath(modulesDirectory, path)}: expected namespace {expected}, found [{string.Join(", ", declared)}]"];
+
+    /// <summary>Any file named like a shared JSON file, outside what the build generates: nobody copies a case.</summary>
+    internal static IReadOnlyList<string> CopiedSharedFileViolations(string directory) =>
+        [.. from path in Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories)
+            where SharedJsonFileNames.Contains(Path.GetFileName(path))
+            let relative = Path.GetRelativePath(directory, path)
+            where !relative.Split(Path.DirectorySeparatorChar).Any(GeneratedFolders.Contains)
+            select relative];
+
+    internal static IReadOnlyList<string> TestProjectFiles() =>
+        Directory.GetFiles(Path.Combine(ApiDirectory, "tests"), ProjectFilePattern, SearchOption.AllDirectories);
+
+    /// <summary>Test projects embed the golden files from their source, and nothing else.</summary>
+    internal static IReadOnlyList<string> TestResourceViolations(XDocument project) =>
+        [.. project.Descendants(EmbeddedResourceElement)
+            .Select(resource => (string?)resource.Attribute(IncludeAttribute) ?? string.Empty)
+            .Where(path => !path.StartsWith(GoldenFromTestProject, StringComparison.Ordinal))
+            .Select(path => $"EmbeddedResource outside the golden folder: {path}")];
+
+    /// <summary>The catalog in Matches and no other resource, in any production assembly: a golden file never ships.</summary>
+    internal static IReadOnlyList<string> ProductionResourceViolations(string assembly, IReadOnlyCollection<string> resources)
+    {
+        string[] expected = assembly == CatalogAssembly ? [CatalogResourceName] : [];
+        return
+        [
+            .. resources.Except(expected).Select(name => $"{assembly}: unexpected resource {name}"),
+            .. expected.Except(resources).Select(name => $"{assembly}: missing resource {name}"),
+        ];
+    }
 
     private static string[] FoldersBelow(string root, string path) =>
         Path.GetDirectoryName(Path.GetRelativePath(root, path))?.Split(Path.DirectorySeparatorChar) ?? [];

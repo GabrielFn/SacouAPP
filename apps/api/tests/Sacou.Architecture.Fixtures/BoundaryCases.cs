@@ -3,8 +3,23 @@ namespace Foo.Domain
     internal sealed class EscapedDomainType;
 }
 
+namespace Sacou.Modules.Alpha.NotDomain
+{
+    internal static class PInvokeOutsideDomain
+    {
+        [System.Runtime.InteropServices.DllImport("kernel32")]
+        internal static extern uint GetTickCount();
+    }
+}
+
 namespace Sacou.Modules.Alpha.Foo.Domain
 {
+    internal static class PInvokeInNestedDomain
+    {
+        [System.Runtime.InteropServices.DllImport("kernel32")]
+        internal static extern uint GetTickCount();
+    }
+
     internal sealed class NestedDomainUsingHttpClient
     {
         internal HttpClient Create() => new();

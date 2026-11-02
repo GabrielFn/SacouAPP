@@ -31,9 +31,9 @@
 - O golden é uma lista de 26 casos (13 formações × 2 fases): `{ system, rotation, phase, slots: { "1": { role, x, y }, … }, liberoReplaces }`. O `phase` é `receiving` ou `serving`.
 - Para atualizar: `pnpm --filter @sacou/volley-rules exec vitest run --dir src -u`. O golden é gerado do oráculo, não do JSON. Na CI, arquivo ausente reprova.
 - **Com o golden ausente, o `-u` escreve o arquivo, mas a mesma execução reprova 2 testes:** o Vitest só grava o snapshot ao fim do arquivo de teste, depois dos testes que leem o golden. Rode de novo: a segunda execução passa.
-- O build da API em produção precisa levar `packages/volley-rules/` no contexto (Docker/Railway).
+- O build da API em produção precisa levar `packages/volley-rules/` no contexto (Docker/Railway). A E5.1 herda essa condição; a DLL publicada já leva o catálogo ([ADR 0025](0025-json-compartilhado-no-csharp.md)).
 - **Cartinha (E1.3):** `packages/volley-rules/golden/player-card-level.json` é escrito à mão, e não há dados para ler: a E1.5 precisa **portar a função** `playerCardLevelFromRating`, conforme [`docs/dominio/player-card.md`](../../dominio/player-card.md). O golden é uma lista de `{ id, rating, expected: { levelTenths, tier } }`.
-- **Pix (E1.4):** a E1.5 precisa ler `packages/volley-rules/golden/pix.json` e `packages/volley-rules/golden/pix-crc.json`, escritos à mão, sem o gerador. Se a geração ficar na API, porta também o gerador. Formato e cuidados no porte em [`docs/dominio/pix.md`](../../dominio/pix.md).
+- **Pix (E1.4):** a E1.5 só lê `packages/volley-rules/golden/pix.json` e `packages/volley-rules/golden/pix-crc.json`, escritos à mão, sem o gerador. **Se a geração ficar na API, a E3.10 porta o gerador** ([ADR 0025](0025-json-compartilhado-no-csharp.md)). Formato e cuidados no porte em [`docs/dominio/pix.md`](../../dominio/pix.md).
 
 ## Consequências
 

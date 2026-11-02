@@ -1314,5 +1314,35 @@
         "6-left-of-1"
       ]
     }
+  },
+  {
+    "id": "T23-binary-rounding-depth",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.1,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.7 },
+      "2": { "x": 0.75, "y": 0.8 },
+      "3": { "x": 0.5, "y": 0.25 },
+      "4": { "x": 0.25, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["1-behind-2"] }
+  },
+  {
+    "id": "T23-binary-rounding-lateral",
+    "mode": "fivb-2025-28",
+    "phase": "receiving",
+    "tolerance": 0.1,
+    "slots": {
+      "1": { "x": 0.75, "y": 0.75 },
+      "2": { "x": 0.75, "y": 0.25 },
+      "3": { "x": 0.7, "y": 0.25 },
+      "4": { "x": 0.8, "y": 0.25 },
+      "5": { "x": 0.25, "y": 0.75 },
+      "6": { "x": 0.5, "y": 0.75 }
+    },
+    "expected": { "ok": false, "code": "overlap", "violations": ["4-left-of-3"] }
   }
 ]

@@ -5,4 +5,10 @@
     <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <!-- The single source of the catalog, shared with TypeScript. A missing file fails the build. -->
+        <EmbeddedResource Include="../../../../../packages/volley-rules/src/formations/formations.json"
+                          LogicalName="Sacou.Modules.Matches.formations.json" />
+        <InternalsVisibleTo Include="Sacou.Modules.Matches.Tests" />
+    </ItemGroup>
 </Project>

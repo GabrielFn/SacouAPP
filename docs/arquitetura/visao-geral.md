@@ -101,6 +101,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0022](adr/0022-event-envelope-replay.md) | Envelope de evento e função de estado |
 | [0023](adr/0023-placar-e-catalogo-de-eventos.md) | Placar e primeiros tipos do catálogo de eventos |
 | [0024](adr/0024-saque-e-rotacao-derivados.md) | Saque, side-out e rotação por time |
+| [0025](adr/0025-json-compartilhado-no-csharp.md) | Leitura dos JSON compartilhados no C# e barreira do domínio |
 
 ## Matriz: `decisoes.md` → ADR
 
