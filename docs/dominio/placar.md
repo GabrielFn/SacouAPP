@@ -33,6 +33,7 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 |---|---|
 | `invalid-payload` | Entrada fora do esquema, ou `matchId` de uma partida já terminada (o replay rejeitaria o evento) |
 | `unsupported-rules-version` | `rulesVersion` fora de `SUPPORTED_RULES_VERSIONS`. Só comandos recusam: o replay aceita qualquer versão |
+| `unsupported-formations-version` | `formationsVersion` diferente da versão atual do catálogo; o replay aceita, e `getTeamServeAlignment` devolve `null` (ADR 0026) |
 | `match-already-open` | `startMatch` com partida aberta |
 | `too-many-matches` | `startMatch` com 200 partidas terminadas no stream (`MAX_FINISHED_MATCHES`) |
 | `no-open-match` | Nenhuma partida aberta |
