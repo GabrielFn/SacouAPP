@@ -50,10 +50,12 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Rotação atual | `RotationIndex` | |
 | Id interno da rotação | `setterZone` | Zona do levantador. Na Livre, sem levantador, é a zona do primeiro da escalação (ADR 0024) |
 | Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
-| Estado do time | `TeamState` | Hoje `lineup` e `setterZone` (E2.3); sistema, funções e banco entram nas E2.4 e E2.5. `null` em `rotations` é rotação desligada (ADR 0024) |
+| Estado do time | `TeamState` | `lineup`, `setterZone` e `system` (E2.3 e E2.4). A função vem do índice no `lineup` (ADR 0026), e o banco entra na E2.5. `null` em `rotations` é rotação desligada (ADR 0024) |
 | Posição atual na quadra (1–6) | `RotationSlot` | Muda a cada giro. Não é o índice fixo na escalação. Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
-| Posição no saque | `ServeAlignment` | |
+| Posição no saque | `ServeAlignment` | Quem fica em cada `RotationSlot`, com função e `CourtPoint`, mais `actingSetter`. Com líbero desligado, nenhum slot tem `L` (ADR 0026) |
+| Quem levanta | `actingSetter` | `MemberId` de quem levanta naquela rotação: o único no 5x1, o do fundo no 6x2, o da rede no 4x2, quem está na posição 3 na Livre (ADR 0026) |
+| Versão do catálogo de formações | `formationsVersion` | Gravada no `MatchStarted`. O catálogo é imutável por versão (ADR 0026) |
 | Formação | `Formation` | Resultado por fase (ADR 0006) |
 | Modelo de formação | `FormationTemplate` | Entrada crua (ADR 0006) |
 | Validador de sobreposição | `OverlapValidator` | |
