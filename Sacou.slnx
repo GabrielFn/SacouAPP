@@ -14,6 +14,8 @@
         <Project Path="apps/api/tests/Sacou.Api.Tests/Sacou.Api.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Architecture.Fixtures/Sacou.Architecture.Fixtures.csproj" />
         <Project Path="apps/api/tests/Sacou.Architecture.Tests/Sacou.Architecture.Tests.csproj" />
+        <Project Path="apps/api/tests/Sacou.Modules.Matches.Tests/Sacou.Modules.Matches.Tests.csproj" />
+        <Project Path="apps/api/tests/Sacou.Modules.Stats.Tests/Sacou.Modules.Stats.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Shared.Tests/Sacou.Shared.Tests.csproj" />
     </Folder>
 </Solution>

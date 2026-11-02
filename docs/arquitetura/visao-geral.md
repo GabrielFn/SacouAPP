@@ -100,6 +100,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0021](adr/0021-overlap-validator.md) | Validador de sobreposição, `OverlapRuleMode` e `RotationSlot` |
 | [0022](adr/0022-event-envelope-replay.md) | Envelope de evento e função de estado |
 | [0023](adr/0023-placar-e-catalogo-de-eventos.md) | Placar e primeiros tipos do catálogo de eventos |
+| [0025](adr/0025-json-compartilhado-no-csharp.md) | Leitura dos JSON compartilhados no C# e barreira do domínio |
 
 ## Matriz: `decisoes.md` → ADR
 

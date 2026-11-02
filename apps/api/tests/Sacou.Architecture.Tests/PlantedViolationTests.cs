@@ -36,6 +36,17 @@ public sealed class PlantedViolationTests
     [InlineData("NetHttpClient", "System.Net.Http.HttpClient")]
     [InlineData("SystemData", "System.Data.DataTable")]
     [InlineData("FileAccess", "System.IO.File")]
+    [InlineData("EnvironmentAccess", "System.Environment")]
+    [InlineData("EnvironmentNestedType", "System.Environment+SpecialFolder")]
+    [InlineData("ConsoleAccess", "System.Console")]
+    [InlineData("AppContextAccess", "System.AppContext")]
+    [InlineData("AppDomainAccess", "System.AppDomain")]
+    [InlineData("ActivatorAccess", "System.Activator")]
+    [InlineData("GcAccess", "System.GC")]
+    [InlineData("ProcessAccess", "System.Diagnostics.Process")]
+    [InlineData("StopwatchAccess", "System.Diagnostics.Stopwatch")]
+    [InlineData("MarshalAccess", "System.Runtime.InteropServices.Marshal")]
+    [InlineData("NativeLibraryAccess", "System.Runtime.InteropServices.NativeLibrary")]
     public void Domain_WithForbiddenDependency_IsReportedForThatDependency(string type, string dependency)
     {
         var details = DomainViolations.Value
@@ -43,6 +54,33 @@ public sealed class PlantedViolationTests
             .Select(violation => violation.Detail);
 
         Assert.Contains(details, detail => detail.Contains(dependency, StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("Sacou.Modules.Alpha.Domain.PInvokeInStaticMethod.GetTickCount")]
+    [InlineData("Sacou.Modules.Alpha.Domain.PInvokeInNestedType+Native.GetTickCount")]
+    [InlineData("Sacou.Modules.Alpha.Foo.Domain.PInvokeInNestedDomain.GetTickCount")]
+    public void Domain_WithPInvoke_IsReported(string method)
+    {
+        Assert.Contains(method, ArchitectureReflectionRules.DomainPInvokeViolations(Assemblies.Fixtures));
+    }
+
+    [Fact]
+    public void PInvokeRule_ReportsOnlyTheDomain()
+    {
+        Assert.DoesNotContain(
+            ArchitectureReflectionRules.DomainPInvokeViolations(Assemblies.Fixtures),
+            violation => violation.Contains("PInvokeOutsideDomain", StringComparison.Ordinal));
+    }
+
+    /// <summary>Documents why the P/Invoke rule exists: if this ever fails, the IL rule learned to see it.</summary>
+    [Theory]
+    [InlineData("Sacou.Modules.Alpha.Domain.PInvokeInStaticMethod")]
+    [InlineData("Sacou.Modules.Alpha.Domain.PInvokeInNestedType")]
+    [InlineData("Sacou.Modules.Alpha.Foo.Domain.PInvokeInNestedDomain")]
+    public void DependencyRule_DoesNotSeeDllImport(string type)
+    {
+        Assert.DoesNotContain(DomainViolations.Value, violation => violation.DeclaringType == type);
     }
 
     [Fact]
@@ -97,6 +135,10 @@ public sealed class PlantedViolationTests
     [InlineData("AllowedBclAndShared")]
     [InlineData("AllowedGeneric`1")]
     [InlineData("AllowedSameDomainDependency")]
+    [InlineData("AllowedRecord")]
+    [InlineData("AllowedRecordStruct")]
+    [InlineData("AllowedClosedHierarchy")]
+    [InlineData("AllowedCollectionExpressions")]
     public void Domain_WithAllowedDependency_IsNotReported(string type)
     {
         Assert.DoesNotContain(DomainViolations.Value, violation => violation.DeclaringType == DomainNamespace + type);
@@ -257,6 +299,35 @@ public sealed class PlantedViolationTests
             RepositoryFiles.ModuleNamesInSolution(solution), []);
 
         Assert.Equal(["Module outside the catalog: Sacou.Modules.Foo"], violations);
+    }
+
+    [Fact]
+    public void ModuleProjectInTestsFolder_IsNotACatalogModule()
+    {
+        var solution = XDocument.Parse(
+            """
+            <Solution>
+                <Project Path="apps/api/tests/Sacou.Modules.Matches.Tests/Sacou.Modules.Matches.Tests.csproj" />
+            </Solution>
+            """);
+
+        Assert.Empty(RepositoryFiles.ModuleNamesInSolution(solution));
+    }
+
+    [Fact]
+    public void ProjectWithTestsSuffixOutsideTheTestsFolder_IsStillAModule()
+    {
+        var solution = XDocument.Parse(
+            """
+            <Solution>
+                <Project Path="apps/api/src/Sacou.Modules/Foo/Sacou.Modules.Foo.Tests.csproj" />
+            </Solution>
+            """);
+
+        var violations = ArchitectureReflectionRules.CatalogViolations(
+            RepositoryFiles.ModuleNamesInSolution(solution), []);
+
+        Assert.Equal(["Module outside the catalog: Sacou.Modules.Foo.Tests"], violations);
     }
 
     [Fact]

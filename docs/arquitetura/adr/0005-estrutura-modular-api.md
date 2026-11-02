@@ -52,4 +52,4 @@ A arquitetura aprovada é um monólito modular em .NET 10 com DDD enxuto e fatia
 
 - E3.2: onde fica `MemberId`, usado em vários domínios (`Shared` por ADR ou `Groups.Contracts`, o que mudaria a regra do `Domain`).
 - E3.11: como separar a Outbox, que precisa de infraestrutura, já que o domínio depende de `Shared`.
-- E1.5: leitura dos JSON em `Matches` ou em projeto próprio.
+- E1.5, **resolvido:** leitura dos JSON em `Matches`, sem projeto próprio ([ADR 0025](0025-json-compartilhado-no-csharp.md)).
