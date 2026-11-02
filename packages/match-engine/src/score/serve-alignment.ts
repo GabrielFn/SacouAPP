@@ -93,12 +93,15 @@ export function getTeamServeAlignment(
   match: MatchScore | null,
   team: TeamSide,
 ): ServeAlignment | null {
-  if (match?.currentSet == null || match.formationsVersion !== FORMATION_CATALOG_VERSION) {
+  const currentSet = match?.currentSet ?? null;
+  if (match === null || currentSet === null) {
     return null;
   }
   const teamState = match.rotations[team];
-  const phase = match.currentSet.servingTeam === team ? "serving" : "receiving";
-  return teamState === null ? null : getServeAlignment(teamState, phase);
+  if (teamState === null || match.formationsVersion !== FORMATION_CATALOG_VERSION) {
+    return null;
+  }
+  return getServeAlignment(teamState, currentSet.servingTeam === team ? "serving" : "receiving");
 }
 
 /** Tells the caller, who shows the warning: an overlap never blocks the match (ADR 0010). */
