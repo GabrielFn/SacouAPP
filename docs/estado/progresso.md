@@ -25,7 +25,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.4 (front); ver o diário de 02/11/2026.
+- E2.4 (front): branch `task/E2.4-serve-positions`, worktree `.claude/worktrees/e2-4`. Plano pronto na branch; desenvolvedor (Opus) em curso, com as respostas do Gabriel de 02/11/2026. Sensível em escala pequena: passa pelo `revisor-seguranca`.
 
 ## Adiadas
 
@@ -48,6 +48,8 @@ Nenhuma. Próxima: E2.4 (front); ver o diário de 02/11/2026.
 - E5.1: o contexto da imagem precisa levar `packages/volley-rules/`, porque o build embute o catálogo na DLL (ADR 0025).
 - E1.5, ressalvas não bloqueantes: `ModulesAndShared` (`Assemblies.cs:29`) não inclui `Sacou.Api`, então um golden embutido na API passaria; `TestResourceViolations` só olha o prefixo do `Include`, então `golden/../x.json` passaria. Não rodados pelo testador: tabela de `Infinity` em Node e sabotagem de renomear o catálogo.
 - E2.3, pendências: `commands.ts:125` não sabe qual é o set decisivo, então a E4.10 testa os dois casos (sem `firstServer` no decisivo, com ele num set comum); `appliers.ts:176`: ponto atrasado antes de um `SetEnded` perde o giro, registrar na E3.7 junto de "ponto atrasado" no ADR 0023; `rotation-rules.ts:38`: `getServingPlayer` e `getLineupBySlot` aceitam array de qualquer tamanho, rever na E2.5; `parse-payloads.ts:118-124`: `Proxy` que muda `length` passa `lineup` de 7, inalcançável por JSON; E2.10 e E3.7 repetem em C# a contenção de `lineup` e o esquema fechado.
+- E2.11 (nova, líbero ligado): o design não tem o controle em "Avançado" nem o líbero na tela 22; o analista aponta o que precisa de tela e pergunta ao Gabriel se for mudança visível fora do padrão das telas.
+- E4.8, lacuna do backlog: a tela 22 salva a escalação no meio da partida (`Escalacao.dc.html:41`, `:111`), e nenhum evento grava isso. O analista da E2.5 decide se fica na E2.5 ou na E2.7, antes da E4.8.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
