@@ -59,11 +59,11 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 ## O que o motor valida
 
 **Erro (bloqueia):**
-- Seis jogadores por time, cada posição ocupada uma vez.
+- Seis jogadores por time, cada posição ocupada uma vez. Time sem 6 jogadores fica com a rotação desligada (ADR 0024).
 - Girar só quem venceu recebendo; nunca quem venceu sacando.
 - Sacador é sempre quem está na posição 1 depois do giro.
 - Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.
-- Tie-break: troca de lado aos 8 sem girar.
+- Tie-break: troca de lado aos 8 sem girar. O lado da quadra fica fora do motor: é o app que troca o desenho (ADR 0024).
 
 **Aviso (só informa):**
 - Sobreposição só nas 7 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm). A tolerância é simétrica: `atrás.y >= frente.y - tolerância` e `esquerda.x <= direita.x + tolerância`. No modo Clássico, o time que saca segue 5 relações: `1-behind-2` e `6-left-of-1` ficam de fora, porque o sacador não conta. Violação vira aviso, nunca bloqueio ([ADR 0010](../arquitetura/adr/0010-rotation-and-rule-mode.md)); contrato no [ADR 0021](../arquitetura/adr/0021-overlap-validator.md).

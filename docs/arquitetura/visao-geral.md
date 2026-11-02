@@ -100,6 +100,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0021](adr/0021-overlap-validator.md) | Validador de sobreposição, `OverlapRuleMode` e `RotationSlot` |
 | [0022](adr/0022-event-envelope-replay.md) | Envelope de evento e função de estado |
 | [0023](adr/0023-placar-e-catalogo-de-eventos.md) | Placar e primeiros tipos do catálogo de eventos |
+| [0024](adr/0024-saque-e-rotacao-derivados.md) | Saque, side-out e rotação por time |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -121,7 +122,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
-| 26 | Event sourcing | 0009, 0022, 0023 |
+| 26 | Event sourcing | 0009, 0022, 0023, 0024 |
 | 27 | Padrões | 0011 |
 | 28 | Dados pessoais | 0012 |
 | 29 | App | 0008 |
