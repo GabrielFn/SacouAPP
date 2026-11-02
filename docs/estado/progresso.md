@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M2 · Motor da partida, aguardando o ok do Gabriel. M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M2 · Motor da partida, em andamento (ok do Gabriel em 02/11/2026). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -19,7 +19,7 @@
 | E1.3 | Feita | Decisão de arredondamento em `docs/dominio/player-card.md`: 1790 já é Elite. Citar no relatório do M2. Oráculo independente: 18 casos, 0 divergências. |
 | E1.4 | Feita | Revisor, revisor de segurança e testador aprovaram em `8e84e71`; ajustes pontuais pedidos por eles lidos pelo orquestrador, com CI verde. Normalização em `docs/dominio/pix.md`: citar no relatório do M2. |
 | E2.1 | Feita | ADR 0022. Revisor e testador aprovaram; a segurança reprovou um travamento, corrigido com `MAX_PAYLOAD_NODES` e reconferido em `8d179e3` (bateria incompleta: 3 casos sem rodar e 3 sem medição válida, ver pendências). Oráculo independente na primeira versão do golden. |
-| E2.2 | Em andamento | Implementada na branch `task/E2.2-score`, com ADR 0023 e `docs/dominio/placar.md`; aguarda revisões e testes. Citar no relatório do M2: limites de 1 a 99 e 24 membros, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
+| E2.2 | Feita | ADR 0023 e `docs/dominio/placar.md`. A segurança reprovou o ciclo 1 por falta de memória em log hostil, corrigida com `MAX_FINISHED_MATCHES` e reconferida com medição. Revisor com oráculo próprio: 377 casos, 0 divergências. Testador passou, com 766 testes no `match-engine`. Citar no relatório do M2: limites de 1 a 99, 24 membros e 200 partidas por stream, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
 
 ## Adiadas
 
@@ -37,7 +37,7 @@
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
 - E3.10: validar tipo e formato na fronteira, conferir o dígito verificador de CPF e CNPJ e mostrar tipo e chave para confirmação; confirmar se chave de e-mail aceita maiúsculas (Manual do DICT).
 - E2.1, pendências: o orçamento conta nós, não bytes, então o corpo precisa de limite antes do parser (E3.7); com referências compartilhadas, chaves muito longas chegam a 18,7 s de CPU, o que não ocorre por JSON; `cloneArray` deveria percorrer por índice, em vez de `Array.from`, por causa de iterador próprio; chaves com forma de inteiro saem em ordem numérica, então parsers por tipo não devem usá-las; a regra equivalente em C#, por reflexão, fica na E2.10 ou E3.7. Casos não medidos: iterador infinito, Proxy com `length` falso e getter que lança.
-- E2.2, pendências: `score/index.ts` usa `export *` e expõe `MAJORITY_DIVISOR` e `SCORE_PAYLOAD_SHAPES` (estreitar antes de a E3.7 consumir); E3.7: UUID sem conferência de versão deixa `matchId`, `eventId` e `deviceId` carregarem 16 bytes arbitrários; projeções e Stats usam `(courtSessionId, matchId)`, porque `matchId` só é único no stream; E4: placar sem teto chega a 300–0 num log hostil, e a tela mostra dois dígitos; E2.10: conferir o custo de cópia de `List` em C#, e Hermes não foi medido.
+- E2.2, pendências: `score/index.ts` usa `export *` e expõe `MAJORITY_DIVISOR` e `SCORE_PAYLOAD_SHAPES` (estreitar antes de a E3.7 consumir); E3.7: UUID sem conferência de versão deixa `matchId`, `eventId` e `deviceId` carregarem 16 bytes arbitrários; projeções e Stats usam `(courtSessionId, matchId)`, porque `matchId` só é único no stream; E4: placar sem teto chega a 300–0 num log hostil, e a tela mostra dois dígitos; E2.10: conferir o custo de cópia de `List` em C#, e Hermes não foi medido. Revisão do M2: atualizar o `checklist.md` com o motor e a frase da linha 5 de `modelo-de-ameacas.md`. E3.7: o critério em `plano-mvp.md:138` não cita as conferências novas, então o analista parte do ADR 0023 e da seção 3 do modelo de ameaças. `parse-envelope.test.ts` ainda confere `elapsed < 1000 ms`: não falhou sob carga, mas depende de tempo.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 

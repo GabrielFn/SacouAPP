@@ -1,6 +1,6 @@
 # Inventário de dados pessoais (LGPD)
 
-Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra; o parser do envelope (E2.1), que confere o formato do ID do celular e não o guarda nem registra; e o parser do placar (E2.2), que lê `MemberId` em `teams` e, com os aplicadores, só o mantém no estado em memória, sem gravar nem registrar. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
+Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra; o parser do envelope (E2.1), que confere o formato do ID do celular e não o guarda nem registra; e o parser do placar (E2.2), que lê `MemberId` em `teams` e, com os aplicadores e os comandos, só o mantém no estado em memória ou o devolve no evento emitido, sem gravar nem registrar. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
 
 **Pendências do Gabriel, em [`perguntas.md`](../estado/perguntas.md):**
 
