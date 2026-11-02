@@ -1,6 +1,6 @@
 # Inventário de dados pessoais (LGPD)
 
-Registra o que os documentos preveem; nada disso foi implementado. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
+Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
 
 **Pendências do Gabriel, em [`perguntas.md`](../estado/perguntas.md):**
 

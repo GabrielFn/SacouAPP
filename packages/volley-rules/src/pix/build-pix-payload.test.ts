@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 
 import { err, ok } from "../result.js";
 import { buildPixPayload } from "./build-pix-payload.js";
+import { PIX_KEY_TYPES } from "./constants.data.js";
 import type { PixPayloadError, PixPayloadInput } from "./types.js";
 
 interface GoldenCaseBase {
@@ -34,6 +35,16 @@ const VALID_INPUT: PixPayloadInput = {
   merchantCity: "BRASILIA",
 };
 
+/** A text that passes every check once coerced, so accepting a non-string would forge a field. */
+const FORGED_TEXT = "fulano@example.com";
+
+const NON_STRING_VALUES = [
+  { label: "array", value: [FORGED_TEXT] },
+  { label: "number", value: 12345678900 },
+  { label: "null", value: null },
+  { label: "object with toString", value: { toString: () => FORGED_TEXT } },
+] as const;
+
 describe("buildPixPayload", () => {
   test.each(GOLDEN_CASES)("golden $id", (goldenCase) => {
     const expected =
@@ -54,6 +65,41 @@ describe("buildPixPayload", () => {
 
   test("fails closed on a key type unknown at run time", () => {
     const key = { type: "constructor", value: "12345678900" } as unknown as PixPayloadInput["key"];
+    expect(buildPixPayload({ ...VALID_INPUT, key })).toEqual(err({ code: "invalid-key" }));
+  });
+
+  describe.each(NON_STRING_VALUES)("with the non-string value $label", ({ value }) => {
+    const untrusted = value as unknown as string;
+
+    test.each(PIX_KEY_TYPES)("rejects it as a key of type %s", (type) => {
+      const result = buildPixPayload({ ...VALID_INPUT, key: { type, value: untrusted } });
+      expect(result).toEqual(err({ code: "invalid-key" }));
+      expect(JSON.stringify(result)).not.toContain(FORGED_TEXT);
+    });
+
+    test("rejects it as a merchant name", () => {
+      const result = buildPixPayload({ ...VALID_INPUT, merchantName: untrusted });
+      expect(result).toEqual(err({ code: "invalid-merchant-name" }));
+      expect(JSON.stringify(result)).not.toContain(FORGED_TEXT);
+    });
+
+    test("rejects it as a merchant city", () => {
+      const result = buildPixPayload({ ...VALID_INPUT, merchantCity: untrusted });
+      expect(result).toEqual(err({ code: "invalid-merchant-city" }));
+      expect(JSON.stringify(result)).not.toContain(FORGED_TEXT);
+    });
+  });
+
+  test.each([null, undefined, "12345678900", 1])("rejects %s in place of the key", (key) => {
+    const result = buildPixPayload({
+      ...VALID_INPUT,
+      key: key as unknown as PixPayloadInput["key"],
+    });
+    expect(result).toEqual(err({ code: "invalid-key" }));
+  });
+
+  test("rejects a key whose type is not a string", () => {
+    const key = { type: ["cpf"], value: "12345678900" } as unknown as PixPayloadInput["key"];
     expect(buildPixPayload({ ...VALID_INPUT, key })).toEqual(err({ code: "invalid-key" }));
   });
 

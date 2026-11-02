@@ -56,5 +56,7 @@ export const KEY_PATTERNS = Object.freeze({
   random: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u,
 } as const);
 
+/** An explicit list, because `\s` differs between JS and .NET. */
+export const SPACE_LOOKALIKE = /[\t\u00A0]/gu;
 export const NON_PRINTABLE_ASCII = /[^\x20-\x7E]/gu;
 export const SPACE_RUN = / +/gu;

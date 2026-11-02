@@ -40,16 +40,16 @@
   },
   {
     "id": "key-phone",
-    "source": "derived",
+    "source": "derived:fictitious-area-code-00",
     "input": {
       "key": {
         "type": "phone",
-        "value": "+5561912345678"
+        "value": "+5500900000000"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
     },
-    "expectedPayload": "00020126360014br.gov.bcb.pix0114+55619123456785204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63040284"
+    "expectedPayload": "00020126360014br.gov.bcb.pix0114+55009000000005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63045032"
   },
   {
     "id": "key-email",
@@ -213,7 +213,7 @@
     "input": {
       "key": {
         "type": "phone",
-        "value": "61912345678"
+        "value": "00900000000"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
@@ -226,7 +226,7 @@
     "input": {
       "key": {
         "type": "phone",
-        "value": "+5461912345678"
+        "value": "+5400900000000"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
@@ -239,7 +239,7 @@
     "input": {
       "key": {
         "type": "phone",
-        "value": "+556191234567"
+        "value": "+550090000000"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
@@ -252,7 +252,7 @@
     "input": {
       "key": {
         "type": "phone",
-        "value": "+55619123456789"
+        "value": "+55009000000000"
       },
       "merchantName": "Fulano de Tal",
       "merchantCity": "BRASILIA"
@@ -632,7 +632,7 @@
     "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5904Sren6008BRASILIA62070503***63046F5E"
   },
   {
-    "id": "name-tab-removed-not-turned-into-space",
+    "id": "name-tab-turned-into-space",
     "source": "derived",
     "input": {
       "key": {
@@ -642,7 +642,20 @@
       "merchantName": "Fulano\tde Tal",
       "merchantCity": "BRASILIA"
     },
-    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5912Fulanode Tal6008BRASILIA62070503***6304E894"
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
+  },
+  {
+    "id": "name-no-break-space-turned-into-space",
+    "source": "derived",
+    "input": {
+      "key": {
+        "type": "random",
+        "value": "123e4567-e12b-12d1-a456-426655440000"
+      },
+      "merchantName": "Fulano\u00a0de Tal",
+      "merchantCity": "BRASILIA"
+    },
+    "expectedPayload": "00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913Fulano de Tal6008BRASILIA62070503***63041D3D"
   },
   {
     "id": "name-printable-ascii-edges",

@@ -52,21 +52,35 @@ Tipo explícito, só validação de formato, sem transformar. Quem normaliza a d
 O manual não normaliza, e o BR Code 2.0.0 tirou a restrição a alfanuméricos. Para o tamanho ser igual em bytes e caracteres e leitores antigos não divergirem, aplicamos, nesta ordem:
 
 1. NFD.
-2. Remover tudo fora de ASCII 0x20–0x7E. Saem diacríticos, emoji, tabulação, espaço não separável e letras sem decomposição (`ø`).
+2. Remover tudo fora de ASCII 0x20–0x7E. Saem diacríticos, emoji, outros caracteres de controle e letras sem decomposição (`ø`).
 3. Colapsar espaços e aparar.
 4. Cortar em 25 (nome) ou 15 (cidade) e aparar de novo, porque o corte pode terminar em espaço.
 
+Antes desses passos, tabulação (U+0009) e espaço não separável (U+00A0) viram espaço comum, porque costumam vir de texto colado e separam palavras.
+
 A caixa é preservada. Resultado vazio é erro. Risco baixo: o pagador vê o nome do DICT (nota 26 do Manual do Pix). Decisão pequena e reversível, a citar no relatório do marco.
 
-Consequência aceita: tabulação e espaço não separável são removidos, e não trocados por espaço, então `Fulano<TAB>de` vira `Fulanode`. Trocar exigiria definir "o que é espaço" igual em JS e .NET.
+A lista é explícita porque `\s` não é igual em JS e .NET. Qualquer outro separador Unicode é removido, sem virar espaço.
 
 ## Erros
 
 Só `code`, sem `cause` nem valor: `invalid-key`, `invalid-merchant-name`, `invalid-merchant-city`, `invalid-amount`. Com mais de um problema, vale essa ordem; o golden fixa isso.
 
+Chave, nome e cidade que não sejam string em tempo de execução dão o erro do campo. Sem isso, `{ type: "email", value: ["..."] }` passaria na regex por coerção e gravaria um subcampo `01` forjado com CRC válido. Esse caso só tem teste em TS: o golden não o inclui, porque no C# o tipo já vem da desserialização.
+
 ## Golden
 
-Os dois arquivos foram escritos **sem usar o gerador**: os campos TLV foram digitados à mão, um script Python só conferiu os tamanhos e calculou o CRC. Em `source`, `official:` é copiado do manual, `crc-catalogue:` vem do catálogo, e `derived` foi calculado à parte. As chaves são as fictícias dos manuais, em domínio reservado (`example.com`) ou preenchimento; nenhuma é de pessoa real.
+Os dois arquivos foram escritos **sem usar o gerador**: os campos TLV foram digitados à mão, um script Python só conferiu os tamanhos e calculou o CRC. Em `source`, `official:` é copiado do manual, `crc-catalogue:` vem do catálogo, e `derived` foi calculado à parte; `derived:fictitious-area-code-00` é o telefone inventado para o teste.
+
+**Chaves de teste: o que foi conferido.** Nenhuma foi consultada no DICT, que não é público, então não há como afirmar que nenhuma pertence a alguém. O que se sabe de cada uma:
+
+| Chave | Origem | Conferido |
+|---|---|---|
+| `12345678900` | Exemplo do Manual do Pix | Dígito verificador inválido (o correto seria `09`), então não é CPF emitido |
+| `12ABC34501DE35` | Exemplo do Manual do Pix | **Dígito verificador válido** no cálculo do CNPJ alfanumérico: não dá para descartar que venha a existir. Fica por ser o exemplo oficial |
+| `+5500900000000` | Inventado | DDD 00 não existe no plano de numeração. Trocou o exemplo do manual, cujo DDD 61 existe; os telefones inválidos do golden usam a mesma base |
+| `fulano@example.com` e variantes | Inventados | `example.com` é domínio reservado (RFC 2606) |
+| `123e4567-e12b-12d1-a456-426655440000` | Exemplo do Manual do Pix | Só o texto do manual; UUID não dá para conferir |
 
 Para conferir o CRC de um caso `derived`, passe o payload até `6304`, inclusive:
 
