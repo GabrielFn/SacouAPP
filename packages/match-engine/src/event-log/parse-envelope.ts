@@ -8,6 +8,7 @@ import {
   MAX_PAYLOAD_NODES,
   UNKNOWN_ENVELOPE_FIELD,
 } from "./constants.data.js";
+import { isUuid } from "./is-uuid.js";
 import type {
   EnvelopeError,
   EnvelopeFieldName,
@@ -15,8 +16,6 @@ import type {
   JsonObject,
   JsonValue,
 } from "./types.js";
-
-const LOWERCASE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const KNOWN_FIELDS: ReadonlySet<string | symbol> = new Set(ENVELOPE_FIELDS);
 
@@ -38,10 +37,6 @@ function isPlainObject(value: unknown): value is Readonly<Record<string, unknown
   }
   const prototype: unknown = Object.getPrototypeOf(value);
   return prototype === Object.prototype || prototype === null;
-}
-
-function isUuid(value: unknown): value is string {
-  return typeof value === "string" && LOWERCASE_UUID.test(value);
 }
 
 function isPositiveSafeInteger(value: unknown): value is number {

@@ -1,0 +1,1012 @@
+[
+  {
+    "id": "r1-0-0",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r1-24-22-set-point-a",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 24,
+      "b": 22
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r1-25-22-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 25,
+      "b": 22
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r1-25-23-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 25,
+      "b": 23
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r1-22-25-b-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 22,
+      "b": 25
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "b",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r1-22-24-set-point-b",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 22,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["b"]
+    }
+  },
+  {
+    "id": "r2-25-24-advantage-not-decided",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 25,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r2-24-24-no-set-point",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 24,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r2-26-24-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 26,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r2-29-28-set-point-a",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 29,
+      "b": 28
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r2-28-30-b-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 28,
+      "b": 30
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "b",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r3-no-advantage-25-24-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 25,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r3-no-advantage-24-25-b-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 24,
+      "b": 25
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": "b",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r3-no-advantage-24-24-both-set-point",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 24,
+      "b": 24
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a", "b"]
+    }
+  },
+  {
+    "id": "r3-no-advantage-24-23-set-point-a",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 24,
+      "b": 23
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r4-single-set-ignores-tie-break",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-single-set-15-0-does-not-end",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 15,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md3-set-1-regular",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md3-set-2-regular",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 2,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md3-set-3-tie-break",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md5-set-1-regular",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md5-set-2-regular",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 2,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md5-set-3-regular",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md5-set-4-regular",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 4,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md5-set-5-tie-break",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 5,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-md3-tie-break-off",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": null,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r4-tie-break-above-points",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 11,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r5-tie-break-15-13-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 15,
+      "b": 13
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r5-tie-break-15-14-set-point-a",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 15,
+      "b": 14
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r5-tie-break-14-14",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 14,
+      "b": 14
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r5-tie-break-16-14-a-wins",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 3,
+    "score": {
+      "a": 16,
+      "b": 14
+    },
+    "expected": {
+      "targetPoints": 15,
+      "setsToWin": 2,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r5-set-2-15-13-does-not-end",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 2,
+    "score": {
+      "a": 15,
+      "b": 13
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r6-target-1-m1-0-0-both-set-point",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": ["a", "b"]
+    }
+  },
+  {
+    "id": "r6-target-1-m1-1-0-a-wins",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 1
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 1,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r6-target-1-m2-0-0",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r6-target-1-m2-1-0-set-point-a",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 1,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": ["a"]
+    }
+  },
+  {
+    "id": "r6-target-1-m2-1-1",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 1,
+      "b": 1
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r6-target-1-m2-2-0-a-wins",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 1,
+      "tieBreakPoints": null,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 2,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 1,
+      "setsToWin": 1,
+      "setWinner": "a",
+      "setPointTeams": []
+    }
+  },
+  {
+    "id": "r7-md1-1-0-a",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 1,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "a"
+    }
+  },
+  {
+    "id": "r7-md1-0-1-b",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 0,
+      "b": 1
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "b"
+    }
+  },
+  {
+    "id": "r7-md1-0-0-none",
+    "scoring": {
+      "bestOf": 1,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 0,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 1,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": null
+    }
+  },
+  {
+    "id": "r7-md3-1-0-none",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 1,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": null
+    }
+  },
+  {
+    "id": "r7-md3-1-1-none",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 1,
+      "b": 1
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": null
+    }
+  },
+  {
+    "id": "r7-md3-2-0-a",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 2,
+      "b": 0
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "a"
+    }
+  },
+  {
+    "id": "r7-md3-1-2-b",
+    "scoring": {
+      "bestOf": 3,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 1,
+      "b": 2
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 2,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "b"
+    }
+  },
+  {
+    "id": "r7-md5-2-2-none",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 2,
+      "b": 2
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": null
+    }
+  },
+  {
+    "id": "r7-md5-3-2-a",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 3,
+      "b": 2
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "a"
+    }
+  },
+  {
+    "id": "r7-md5-2-3-b",
+    "scoring": {
+      "bestOf": 5,
+      "pointsPerSet": 25,
+      "tieBreakPoints": 15,
+      "winMargin": 2
+    },
+    "setNumber": 1,
+    "score": {
+      "a": 0,
+      "b": 0
+    },
+    "setsWon": {
+      "a": 2,
+      "b": 3
+    },
+    "expected": {
+      "targetPoints": 25,
+      "setsToWin": 3,
+      "setWinner": null,
+      "setPointTeams": [],
+      "matchWinner": "b"
+    }
+  }
+]

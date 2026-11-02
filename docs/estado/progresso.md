@@ -19,6 +19,7 @@
 | E1.3 | Feita | Decisão de arredondamento em `docs/dominio/player-card.md`: 1790 já é Elite. Citar no relatório do M2. Oráculo independente: 18 casos, 0 divergências. |
 | E1.4 | Feita | Revisor, revisor de segurança e testador aprovaram em `8e84e71`; ajustes pontuais pedidos por eles lidos pelo orquestrador, com CI verde. Normalização em `docs/dominio/pix.md`: citar no relatório do M2. |
 | E2.1 | Feita | ADR 0022. Revisor e testador aprovaram; a segurança reprovou um travamento, corrigido com `MAX_PAYLOAD_NODES` e reconferido em `8d179e3` (bateria incompleta: 3 casos sem rodar e 3 sem medição válida, ver pendências). Oráculo independente na primeira versão do golden. |
+| E2.2 | Em andamento | Implementada na branch `task/E2.2-score`, com ADR 0023 e `docs/dominio/placar.md`; aguarda revisões e testes. Citar no relatório do M2: limites de 1 a 99 e 24 membros, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
 
 ## Adiadas
 

@@ -1,0 +1,5497 @@
+[
+  {
+    "id": "MatchStarted-valid",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-missing-matchId",
+    "type": "MatchStarted",
+    "payload": {
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-rulesVersion",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-scoring.bestOf",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-scoring.pointsPerSet",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-scoring.tieBreakPoints",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-scoring.winMargin",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-teams.a.memberIds",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {},
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b"
+    }
+  },
+  {
+    "id": "MatchStarted-missing-teams.b.memberIds",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {}
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-extra-field",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "extra": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-name-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "name": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-email-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "email": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-nickname-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "nickname": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-phone-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "phone": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-pix-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "pix": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-photo-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "photo": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-userId-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "userId": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-__proto__-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "__proto__": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-constructor-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "constructor": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-1-at-root",
+    "type": "MatchStarted",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-name-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "name": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-email-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "email": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-nickname-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "nickname": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-phone-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "phone": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-pix-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "pix": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-photo-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "photo": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-userId-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "userId": "Canary"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-__proto__-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "__proto__": 1
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-constructor-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2,
+        "constructor": 1
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-1-at-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "1": 1,
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-name-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "name": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-email-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "email": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-nickname-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "nickname": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-phone-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "phone": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-pix-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "pix": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-photo-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "photo": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-userId-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "userId": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-__proto__-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "__proto__": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-constructor-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        },
+        "constructor": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-1-at-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "1": 1,
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-name-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "name": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-email-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "email": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-nickname-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "nickname": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-phone-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "phone": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-pix-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "pix": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-photo-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "photo": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-userId-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "userId": "Canary"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-__proto__-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "__proto__": 1
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-constructor-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"],
+          "constructor": 1
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-1-at-teams.a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "1": 1,
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-name-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "name": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-email-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "email": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-nickname-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "nickname": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-phone-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "phone": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-pix-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "pix": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-photo-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "photo": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-forbidden-userId-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "userId": "Canary"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-__proto__-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "__proto__": 1
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-constructor-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "constructor": 1
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-key-1-at-teams.b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "1": 1,
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-payload-is-null",
+    "type": "MatchStarted",
+    "payload": null,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchStarted-payload-is-array",
+    "type": "MatchStarted",
+    "payload": [],
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchStarted-payload-is-text",
+    "type": "MatchStarted",
+    "payload": "x",
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchStarted-payload-is-number",
+    "type": "MatchStarted",
+    "payload": 1,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-uppercase-uuid",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-email",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "player@example.com",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-name",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "Gabriel",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-uuid-with-newline",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-number",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": 1,
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-matchId-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": null,
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-valid",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "PointScored-missing-matchId",
+    "type": "PointScored",
+    "payload": {
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-missing-setNumber",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-missing-team",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "team"
+    }
+  },
+  {
+    "id": "PointScored-extra-field",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "extra": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-name-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "name": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-email-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "email": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-nickname-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "nickname": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-phone-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "phone": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-pix-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "pix": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-photo-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "photo": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-forbidden-userId-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "userId": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-key-__proto__-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "__proto__": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-key-constructor-at-root",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a",
+      "constructor": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-key-1-at-root",
+    "type": "PointScored",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "PointScored-payload-is-null",
+    "type": "PointScored",
+    "payload": null,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "PointScored-payload-is-array",
+    "type": "PointScored",
+    "payload": [],
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "PointScored-payload-is-text",
+    "type": "PointScored",
+    "payload": "x",
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "PointScored-payload-is-number",
+    "type": "PointScored",
+    "payload": 1,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "PointScored-matchId-uppercase-uuid",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-matchId-email",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "player@example.com",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-matchId-name",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "Gabriel",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-matchId-uuid-with-newline",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-matchId-number",
+    "type": "PointScored",
+    "payload": {
+      "matchId": 1,
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "PointScored-matchId-null",
+    "type": "PointScored",
+    "payload": {
+      "matchId": null,
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-valid",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-missing-matchId",
+    "type": "SetEnded",
+    "payload": {
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-missing-setNumber",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-missing-winner",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "SetEnded-missing-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet"
+    }
+  },
+  {
+    "id": "SetEnded-missing-nextSet.targetPoints",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {}
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-extra-field",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "extra": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-name-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "name": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-email-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "email": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-nickname-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "nickname": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-phone-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "phone": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-pix-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "pix": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-photo-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "photo": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-userId-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "userId": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-__proto__-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "__proto__": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-constructor-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      },
+      "constructor": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-1-at-root",
+    "type": "SetEnded",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-name-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "name": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-email-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "email": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-nickname-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "nickname": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-phone-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "phone": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-pix-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "pix": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-photo-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "photo": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-forbidden-userId-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "userId": "Canary"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-__proto__-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "__proto__": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-constructor-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25,
+        "constructor": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-key-1-at-nextSet",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "1": 1,
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "SetEnded-payload-is-null",
+    "type": "SetEnded",
+    "payload": null,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "SetEnded-payload-is-array",
+    "type": "SetEnded",
+    "payload": [],
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "SetEnded-payload-is-text",
+    "type": "SetEnded",
+    "payload": "x",
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "SetEnded-payload-is-number",
+    "type": "SetEnded",
+    "payload": 1,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-uppercase-uuid",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-email",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "player@example.com",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-name",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "Gabriel",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-uuid-with-newline",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-number",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": 1,
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "SetEnded-matchId-null",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": null,
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-valid",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchEnded-missing-matchId",
+    "type": "MatchEnded",
+    "payload": {
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-missing-endReason",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "endReason"
+    }
+  },
+  {
+    "id": "MatchEnded-missing-winner",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won"
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "MatchEnded-extra-field",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "extra": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-name-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "name": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-email-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "email": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-nickname-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "nickname": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-phone-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "phone": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-pix-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "pix": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-photo-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "photo": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-forbidden-userId-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "userId": "Canary"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-key-__proto__-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "__proto__": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-key-constructor-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a",
+      "constructor": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-key-1-at-root",
+    "type": "MatchEnded",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchEnded-payload-is-null",
+    "type": "MatchEnded",
+    "payload": null,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchEnded-payload-is-array",
+    "type": "MatchEnded",
+    "payload": [],
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchEnded-payload-is-text",
+    "type": "MatchEnded",
+    "payload": "x",
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchEnded-payload-is-number",
+    "type": "MatchEnded",
+    "payload": 1,
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-uppercase-uuid",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-email",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "player@example.com",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-name",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "Gabriel",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-uuid-with-newline",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-number",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": 1,
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchEnded-matchId-null",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": null,
+      "endReason": "sets-won",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-uppercase-uuid",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["A0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-uppercase-uuid",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["A0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-email",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["player@example.com"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-email",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["player@example.com"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-name",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["Gabriel"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-name",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["Gabriel"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-uuid-with-newline",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001\n"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-uuid-with-newline",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001\n"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-number",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": [7]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-number",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": [7]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-item-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": [null]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-b-item-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": [null]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-empty",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": []
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-25",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": [
+            "a0000000-0000-4000-8000-000000000001",
+            "a0000000-0000-4000-8000-000000000002",
+            "a0000000-0000-4000-8000-000000000003",
+            "a0000000-0000-4000-8000-000000000004",
+            "a0000000-0000-4000-8000-000000000005",
+            "a0000000-0000-4000-8000-000000000006",
+            "a0000000-0000-4000-8000-000000000007",
+            "a0000000-0000-4000-8000-000000000008",
+            "a0000000-0000-4000-8000-000000000009",
+            "a0000000-0000-4000-8000-000000000010",
+            "a0000000-0000-4000-8000-000000000011",
+            "a0000000-0000-4000-8000-000000000012",
+            "a0000000-0000-4000-8000-000000000013",
+            "a0000000-0000-4000-8000-000000000014",
+            "a0000000-0000-4000-8000-000000000015",
+            "a0000000-0000-4000-8000-000000000016",
+            "a0000000-0000-4000-8000-000000000017",
+            "a0000000-0000-4000-8000-000000000018",
+            "a0000000-0000-4000-8000-000000000019",
+            "a0000000-0000-4000-8000-000000000020",
+            "a0000000-0000-4000-8000-000000000021",
+            "a0000000-0000-4000-8000-000000000022",
+            "a0000000-0000-4000-8000-000000000023",
+            "a0000000-0000-4000-8000-000000000024",
+            "a0000000-0000-4000-8000-000000000025"
+          ]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-24",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": [
+            "a0000000-0000-4000-8000-000000000001",
+            "a0000000-0000-4000-8000-000000000002",
+            "a0000000-0000-4000-8000-000000000003",
+            "a0000000-0000-4000-8000-000000000004",
+            "a0000000-0000-4000-8000-000000000005",
+            "a0000000-0000-4000-8000-000000000006",
+            "a0000000-0000-4000-8000-000000000007",
+            "a0000000-0000-4000-8000-000000000008",
+            "a0000000-0000-4000-8000-000000000009",
+            "a0000000-0000-4000-8000-000000000010",
+            "a0000000-0000-4000-8000-000000000011",
+            "a0000000-0000-4000-8000-000000000012",
+            "a0000000-0000-4000-8000-000000000013",
+            "a0000000-0000-4000-8000-000000000014",
+            "a0000000-0000-4000-8000-000000000015",
+            "a0000000-0000-4000-8000-000000000016",
+            "a0000000-0000-4000-8000-000000000017",
+            "a0000000-0000-4000-8000-000000000018",
+            "a0000000-0000-4000-8000-000000000019",
+            "a0000000-0000-4000-8000-000000000020",
+            "a0000000-0000-4000-8000-000000000021",
+            "a0000000-0000-4000-8000-000000000022",
+            "a0000000-0000-4000-8000-000000000023",
+            "a0000000-0000-4000-8000-000000000024"
+          ]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-repeated-in-team-a",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": [
+            "a0000000-0000-4000-8000-000000000001",
+            "a0000000-0000-4000-8000-000000000001"
+          ]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-repeated-in-team-b",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": [
+            "b0000000-0000-4000-8000-000000000001",
+            "b0000000-0000-4000-8000-000000000001"
+          ]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-repeated-between-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-memberIds-not-an-array",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": "a0000000-0000-4000-8000-000000000001"
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a.memberIds"
+    }
+  },
+  {
+    "id": "MatchStarted-teams-is-an-array",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": [["a0000000-0000-4000-8000-000000000001"], ["b0000000-0000-4000-8000-000000000001"]]
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams"
+    }
+  },
+  {
+    "id": "MatchStarted-team-a-is-an-array",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": ["a0000000-0000-4000-8000-000000000001"],
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.a"
+    }
+  },
+  {
+    "id": "MatchStarted-team-b-is-an-array",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": ["b0000000-0000-4000-8000-000000000001"]
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "teams.b"
+    }
+  },
+  {
+    "id": "MatchStarted-scoring-is-an-array",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": [3, 25, 15, 2],
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-1",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-3",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-5",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 5,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 0,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-2",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 2,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-4",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 4,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-7",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 7,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-text-3",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": "3",
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-bestOf-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": null,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-1",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 1
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-2",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 0
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-3",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 3
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-text-2",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": "2"
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "MatchStarted-winMargin-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": null
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-1",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 1,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-99",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 99,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 0,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-100",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 100,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-1.5",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 1.5,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-negative",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": -1,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-text",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": "25",
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-1",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 1,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-99",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 99,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 0,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-100",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 100,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-1.5",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 1.5,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-negative",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": -1,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-text",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": "25",
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "MatchStarted-tieBreakPoints-null-is-off",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": null,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": null,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-2",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 2,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-max-safe",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 9007199254740991,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 0,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-1.5",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1.5,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-text",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": "1",
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-null",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": null,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-rulesVersion-above-safe",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 9007199254740992,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-written-25.0",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25.0,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-pointsPerSet-written-2.5e1",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 2.5e1,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchStarted-order-unknown-at-root-before-field",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "bad",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      },
+      "email": "x"
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-order-unknown-nested-before-field",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "bad",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"],
+          "email": "x"
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "MatchStarted-order-matchId-first",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "bad",
+      "rulesVersion": 0,
+      "scoring": {
+        "bestOf": 2,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "matchId"
+    }
+  },
+  {
+    "id": "MatchStarted-order-rulesVersion-before-scoring",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 0,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 0
+      },
+      "teams": {
+        "a": {
+          "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "rulesVersion"
+    }
+  },
+  {
+    "id": "MatchStarted-order-scoring-fields-before-teams",
+    "type": "MatchStarted",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "rulesVersion": 1,
+      "scoring": {
+        "bestOf": 2,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 0
+      },
+      "teams": {
+        "a": {
+          "memberIds": []
+        },
+        "b": {
+          "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "PointScored-setNumber-1",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "a"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "PointScored-setNumber-5",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 5,
+      "team": "a"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "PointScored-setNumber-0",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 0,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-setNumber-6",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 6,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-setNumber-1.5",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1.5,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-setNumber-text",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": "1",
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-setNumber-null",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": null,
+      "team": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-1",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-5",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 5,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-0",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 0,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-6",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 6,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-1.5",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1.5,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-text",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": "1",
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "SetEnded-setNumber-null",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": null,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "setNumber"
+    }
+  },
+  {
+    "id": "PointScored-team-b",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "b"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "PointScored-team-uppercase-A",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "A"
+    },
+    "expected": {
+      "ok": false,
+      "field": "team"
+    }
+  },
+  {
+    "id": "PointScored-team-c",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": "c"
+    },
+    "expected": {
+      "ok": false,
+      "field": "team"
+    }
+  },
+  {
+    "id": "PointScored-team-null",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": null
+    },
+    "expected": {
+      "ok": false,
+      "field": "team"
+    }
+  },
+  {
+    "id": "PointScored-team-number",
+    "type": "PointScored",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "team": 1
+    },
+    "expected": {
+      "ok": false,
+      "field": "team"
+    }
+  },
+  {
+    "id": "SetEnded-winner-b",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "b",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-winner-null",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": null,
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "SetEnded-winner-uppercase-A",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "A",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "SetEnded-winner-c",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "c",
+      "nextSet": {
+        "targetPoints": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "SetEnded-nextSet-null",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": null
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-nextSet-empty-object",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {}
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-nextSet-is-an-array",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": [25]
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet"
+    }
+  },
+  {
+    "id": "SetEnded-nextSet-is-a-number",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": 25
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet"
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-1",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-99",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 99
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-0",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-100",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 100
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-1.5",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": 1.5
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-text",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": "25"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "SetEnded-targetPoints-null",
+    "type": "SetEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "winner": "a",
+      "nextSet": {
+        "targetPoints": null
+      }
+    },
+    "expected": {
+      "ok": false,
+      "field": "nextSet.targetPoints"
+    }
+  },
+  {
+    "id": "MatchEnded-sets-won-without-a-winner",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": null
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "MatchEnded-sets-won-b",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "b"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchEnded-manual-with-a-winner",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "manual",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchEnded-manual-without-a-winner",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "manual",
+      "winner": null
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "MatchEnded-manual-without-the-winner-key",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "manual"
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "MatchEnded-endReason-other",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "abandoned",
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "endReason"
+    }
+  },
+  {
+    "id": "MatchEnded-endReason-null",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": null,
+      "winner": "a"
+    },
+    "expected": {
+      "ok": false,
+      "field": "endReason"
+    }
+  },
+  {
+    "id": "MatchEnded-winner-uppercase-A",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "A"
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "MatchEnded-winner-c",
+    "type": "MatchEnded",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "endReason": "sets-won",
+      "winner": "c"
+    },
+    "expected": {
+      "ok": false,
+      "field": "winner"
+    }
+  },
+  {
+    "id": "UnknownType-has-no-valid-payload",
+    "type": "RevertedTo",
+    "payload": {
+      "targetEventId": "e0000000-0000-4000-8000-000000000001"
+    },
+    "expected": {
+      "ok": false,
+      "field": "payload"
+    }
+  }
+]

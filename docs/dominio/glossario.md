@@ -24,7 +24,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 |---|---|---|
 | Quadra da rodada | `CourtSession` | Stream de eventos, com as partidas dentro |
 | Partida | `Match` | |
-| Set | `Set` | |
+| Set | `MatchSet` | Para não colidir com o `Set` do JS (ADR 0023) |
 | Placar | `Score` | |
 | Configurações do jogo | `GameSettings` | Value object (`produto.md:272`) |
 | Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |

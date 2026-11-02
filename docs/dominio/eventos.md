@@ -33,7 +33,7 @@ Payload só com `{ targetEventId }`. O estado volta ao que era logo depois do al
 O alvo tem de estar ativo, vir antes na ordem canônica e não ser `RevertedTo`. Sem isso, ou com payload malformado, o erro é `invalid-revert-target`.
 
 - O `RevertedTo` não é listado em `activeEventIds`: a lista traz só os eventos cujo efeito está no estado.
-- Não há como voltar ao estado inicial, porque o alvo é sempre um evento. Por isso **todo stream abre com um evento anterior a qualquer ponto**, para o desfazer do primeiro ponto funcionar. A E2.2 deve garantir isso.
+- Não há como voltar ao estado inicial, porque o alvo é sempre um evento. Por isso **todo stream abre com `MatchStarted`**, anterior a qualquer ponto, para o desfazer do primeiro ponto funcionar (E2.2). Qualquer outro evento sem partida aberta é `event-rejected`, e `RevertedTo` como primeiro evento é `invalid-revert-target`.
 - **Dois `RevertedTo` offline** podem deixar o log em `invalid-revert-target`: o que vier depois na ordem canônica pode apontar para um alvo que o outro já deixou inativo. Com falha fechada, isso impede recalcular o stream. O tratamento fica na E3.7 e na E4.9.
 
 ## `replayEvents`
@@ -50,12 +50,36 @@ Só aceita saída de `parseEventEnvelope`: é contrato, e o tipo sozinho não ga
 
 O resultado, inclusive o erro, não depende da ordem de chegada.
 
+## Catálogo: placar (schema 1)
+
+Regras em [`placar.md`](placar.md), decisões no [ADR 0023](../arquitetura/adr/0023-placar-e-catalogo-de-eventos.md), código em `packages/match-engine/src/score/`. Saque, rotação, fila e os demais tipos entram nas E2.3 a E2.8.
+
+| Tipo | Payload |
+|---|---|
+| `MatchStarted` | `{ matchId, rulesVersion, scoring: { bestOf, pointsPerSet, tieBreakPoints, winMargin }, teams: { a: { memberIds }, b: { memberIds } } }` |
+| `PointScored` | `{ matchId, setNumber, team }` |
+| `SetEnded` | `{ matchId, setNumber, winner, nextSet: { targetPoints } \| null }` |
+| `MatchEnded` | `{ matchId, endReason: "sets-won" \| "manual", winner: "a" \| "b" \| null }` |
+
+- **Formato:** `matchId` e `memberIds` em UUID minúsculo. `memberIds`: de 1 a 24 por time, sem repetir dentro do time nem entre times, com a ordem preservada. `setNumber` de 1 a 5. `bestOf` 1, 3 ou 5; `pointsPerSet`, `tieBreakPoints` e `targetPoints` de 1 a 99 (`tieBreakPoints` aceita `null`); `winMargin` 1 ou 2; `rulesVersion` inteiro ≥ 1. Nenhum texto livre: nome e cor do time ficam fora do evento.
+- **`MatchEnded`:** `sets-won` exige `winner` não nulo. `manual` aceita `null`, inclusive para placar desligado.
+- **Erro do parser:** `{ code: "invalid-payload", field }`. `field` é caminho do esquema (`scoring.bestOf`), `payload` ou `unknown-field`, nunca valor nem chave recebida. O desconhecido é conferido primeiro, em qualquer nível; depois, a ordem da tabela. Não objeto é `payload`. No replay, vira `event-rejected`.
+
+**Aplicadores: conferem a estrutura, sem recalcular regra.** `event-rejected` quando:
+
+| Tipo | Rejeitado se |
+|---|---|
+| `MatchStarted` | Há partida aberta, ou o `matchId` já foi usado por partida terminada no stream |
+| `PointScored` | Sem partida aberta com o `matchId`, ou sem set aberto com o `setNumber` |
+| `SetEnded` | Como o `PointScored`, ou `nextSet` não nulo em `setNumber >= bestOf`, porque esse set não existe |
+| `MatchEnded` | Sem partida aberta com o `matchId`, ou `sets-won` com set aberto |
+
 ## Contrato para E2.2–E2.10
 
 - Cada tarefa só registra aplicadores no `ReadonlyMap`, sem mexer no núcleo.
 - Aplicador é puro, aplica o resultado gravado (sem recalcular regra) e não muta. Exceção dentro dele vira `event-rejected`.
 - Estado só com valores JSON (sem `Map`, `Set`, `undefined`), comparável com o C#, e números inteiros.
-- Conteúdo do payload: parser estrito por tipo, só IDs (`MemberId`), a cargo de cada tarefa. O esquema fechado desta tarefa cobre só o envelope.
+- Conteúdo do payload: parser estrito por tipo, só IDs (`MemberId`), a cargo de cada tarefa. O esquema fechado da E2.1 cobre só o envelope; os 4 tipos do placar têm parser desde a E2.2.
 
 ## O que fica para depois
 
