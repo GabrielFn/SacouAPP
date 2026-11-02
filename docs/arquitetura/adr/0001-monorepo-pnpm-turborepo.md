@@ -29,7 +29,7 @@
 ## Consequências
 
 - O app declara `@sacou/*` como `workspace:*`; os pacotes precisam ser compilados antes (`^build` no Turborepo).
-- `PACKAGE_NAME` nos pacotes é provisório. O app depende dele até E1.1 e E2.1 o substituírem por uso real: o `testID` em `apps/mobile/App.tsx` existe só para manter os imports no bundle. A E1.1 já o removeu de `volley-rules`; falta `match-engine` (E2.1).
+- `PACKAGE_NAME` nos pacotes é provisório. O app depende dele até E1.1 e E2.1 o substituírem por uso real: o `testID` em `apps/mobile/App.tsx` existe só para manter os imports no bundle. **Resolvido:** a E1.1 o removeu de `volley-rules` e a E2.1, de `match-engine`; o `testID` usa `FORMATION_SYSTEMS` e `CURRENT_EVENT_SCHEMA_VERSION`.
 - O `CLAUDE.md` traz o `export` completo do ambiente local (PATH do .NET, `NUGET_PACKAGES`, `TEMP`, `TMP`), mais do que a nota do PATH prevista no plano, porque cada sessão começa do zero e o C: tem pouco espaço.
 - O build com Hermes só foi validado em Windows; a E0.4 confirma no Ubuntu e deve ler as versões de `packageManager`, `.nvmrc` e `global.json`, sem repetir.
 - Compatibilidade do Unistyles com o RN 0.88 não confirmada: a E4.1 valida cedo.

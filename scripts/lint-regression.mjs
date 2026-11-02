@@ -17,6 +17,7 @@ const NO_MAGIC_NUMBERS = "@typescript-eslint/no-magic-numbers";
 const NO_RESTRICTED_IMPORTS = "@typescript-eslint/no-restricted-imports";
 const NO_RESTRICTED_SYNTAX = "no-restricted-syntax";
 const NO_RESTRICTED_GLOBALS = "no-restricted-globals";
+const NO_RESTRICTED_PROPERTIES = "no-restricted-properties";
 const NO_LET = "functional/no-let";
 const CLEAN = "clean";
 
@@ -82,6 +83,42 @@ const CASES = [
   [`${VOLLEY_RULES}logic.data.ts`, MAGIC_FUNCTION, NO_RESTRICTED_SYNTAX],
   [`${VOLLEY_RULES}arrow.data.ts`, "export const f = (): number => 7;\n", NO_RESTRICTED_SYNTAX],
   [`packages/volley-rules/src/golden/${PREFIX}runner.ts`, MAGIC_FUNCTION, NO_MAGIC_NUMBERS],
+
+  [`${MATCH_ENGINE}date-now.ts`, "export const now = Date.now();\n", NO_RESTRICTED_GLOBALS],
+  [`${MATCH_ENGINE}new-date.ts`, "export const now = new Date();\n", NO_RESTRICTED_GLOBALS],
+  [`${MATCH_ENGINE}random.ts`, "export const value = Math.random();\n", NO_RESTRICTED_PROPERTIES],
+  [
+    `${MATCH_ENGINE}random-destructured.ts`,
+    "const { random } = Math;\nexport const value = random();\n",
+    NO_RESTRICTED_PROPERTIES,
+  ],
+  [`${MATCH_ENGINE}crypto.ts`, "export const id = crypto.randomUUID();\n", NO_RESTRICTED_GLOBALS],
+  [
+    `${MATCH_ENGINE}performance.ts`,
+    "export const now = performance.now();\n",
+    NO_RESTRICTED_GLOBALS,
+  ],
+  [
+    `${MATCH_ENGINE}intl.ts`,
+    "export const collator = new Intl.Collator();\n",
+    NO_RESTRICTED_GLOBALS,
+  ],
+  [
+    `${MATCH_ENGINE}set-timeout.ts`,
+    "export const id = setTimeout(() => undefined);\n",
+    NO_RESTRICTED_GLOBALS,
+  ],
+  [
+    `${MATCH_ENGINE}for-let.ts`,
+    "for (let index = 0; index < 1; index += 1) {\n  void index;\n}\n",
+    NO_LET,
+  ],
+  [
+    `${MATCH_ENGINE}budget.ts`,
+    "export function spend(budget: { remaining: number }): void {\n  budget.remaining -= 1;\n}\n",
+    "functional/immutable-data",
+  ],
+  [`${MATCH_ENGINE}clock.test.ts`, "export const now = Date.now();\n", CLEAN],
 
   [`${VOLLEY_RULES}const.ts`, "export const MAX_SETS = 5;\n", CLEAN],
   [`${VOLLEY_RULES}table.data.ts`, "export const POINTS = [25, 15] as const;\n", CLEAN],

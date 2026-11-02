@@ -115,13 +115,13 @@ Acrescentadas para a base de conhecimento e a segurança:
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
 | E2.1 | Envelope de evento (ID do celular, sequência, lote, versão) e função de estado | Estado recalculado de forma determinística | E0.1 |
-| E2.2 | Placar, sets, pontos configuráveis, tie-break, vantagem | Cenários de fim de set e partida | E2.1 |
+| E2.2 | Placar, sets, pontos configuráveis, tie-break, vantagem | Cenários de fim de set e partida. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.1 |
 | E2.3 | Saque, side-out e rotação por time (`setterZone`) | Nunca gira quem venceu sacando; sequência 1→6→5…4→3→2 | E2.2, E1.1 |
 | E2.4 | Posições no saque por sistema e fase | Bate com as formações e passa no validador | E2.3, E1.2 |
 | E2.5 | Banco: sai quem saca e manual | Cenários com 7 e 8 jogadores | E2.3 |
 | E2.6 | Fila da quadra da rodada com saída parcial e critérios | Cenário da revisão (2 reservas, Azul perde) | E2.3 |
 | E2.7 | Desfazer, voltar a um ponto, trocar sacador, girar e desgirar | Linha do tempo reverte placar, rotação e fila juntos | E2.6 |
-| E2.8 | Ponto individual (autor e tipo) e pontos sem autor | Preencher depois funciona | E2.2 |
+| E2.8 | Ponto individual (autor e tipo) e pontos sem autor | Preencher depois funciona. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.2 |
 | E2.9 | Estatísticas por jogador (saldo +/− em quadra, vitórias, sequência) | Rodada simulada com números conferidos à mão | E2.6 |
 | E2.10 | Porte da função de estado para C# + testes golden compartilhados | TS e C# produzem o mesmo estado em todos os cenários | E2.9, E1.5 |
 
