@@ -48,6 +48,8 @@ Só a CI (seção 11) já está implementada; os demais componentes ainda não t
 | D | Evento ruim gravado trava a quadra, porque a falha fechada impede recalcular o stream | A E3.7 simula o replay antes de persistir e rejeita ali; o mesmo no log local (E4.9) |
 | E | Escrever em stream de outra quadra | Token de placar só daquele stream (`produto.md:357`); autorização do admin por recurso (`decisoes.md:27`) |
 
+**Limite do parser (E2.1):** `MAX_PAYLOAD_NODES` conta nós, não bytes. O corpo da requisição precisa de limite de tamanho antes do parser (E3.7).
+
 ## 4. QR do placar (E3.8)
 
 Sessão daquela quadra, conforme `decisoes.md:21` e [ADR 0013](../arquitetura/adr/0013-scorekeeper-qr-token.md).
