@@ -50,6 +50,8 @@ O `CLAUDE.md` pede TS strict sem `any`, C# com nullable e avisos como erro, sem 
 
 Nenhum ajuste para reduzir ruído: `functional/*` e `no-magic-numbers` não geraram ruído no código atual.
 
+**E2.1, exceção de `functional/no-let`:** `allowInForLoopInit` só em `packages/match-engine/src/event-log/replay-events.ts`. O replay percorre a lista ligada sem recursão, para os 10 mil eventos, e só a variável do laço é reatribuída ([ADR 0022](0022-event-envelope-replay.md)). Fora desse arquivo, `let` no `for` segue reprovando (caso em `lint-regression.mjs`).
+
 ## Limitações aceitas
 
 Passam no lint e ficam com o revisor:

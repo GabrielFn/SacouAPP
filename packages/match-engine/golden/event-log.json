@@ -1,0 +1,4428 @@
+[
+  {
+    "id": "empty-log-returns-initial-state",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": []
+      },
+      "activeEventIds": []
+    }
+  },
+  {
+    "id": "empty-log-keeps-a-seeded-initial-state",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": ["seed"]
+    },
+    "events": [],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["seed"]
+      },
+      "activeEventIds": []
+    }
+  },
+  {
+    "id": "acceptance-reverted-to-in-the-middle",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "e"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "d", "e"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005"
+      ]
+    }
+  },
+  {
+    "id": "acceptance-reverted-to-in-the-middle-arriving-scrambled",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "e"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "d", "e"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005"
+      ]
+    }
+  },
+  {
+    "id": "order-batch-beats-sequence",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "second"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 9,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "first"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["first", "second"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "order-sequence-by-value-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 10,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "ten"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 9,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "nine"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["nine", "ten"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "order-batch-by-value-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 10,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "ten"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 9,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "nine"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["nine", "ten"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "order-tie-broken-by-device",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "second"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "first"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["first", "second"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "id": "order-device-beats-event-id",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 1,
+        "sequence": 7,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "from-d2"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000009",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 7,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "from-d1"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["from-d1", "from-d2"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000009",
+        "e0000000-0000-4000-8000-000000000001"
+      ]
+    }
+  },
+  {
+    "id": "order-gap-in-sequence-is-accepted",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 500,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "b"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "order-late-event-of-a-lower-batch-enters-first",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "y"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "z"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "x"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["x", "y", "z"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ]
+    }
+  },
+  {
+    "id": "order-limits-accepted-at-the-largest-integer",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 9007199254740991,
+        "sequence": 9007199254740991,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "last"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "first"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["first", "last"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "duplicate-resent-once-adjacent",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "b"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "duplicate-resent-three-times",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "b"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "duplicate-resent-from-a-distance",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "b", "c"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ]
+    }
+  },
+  {
+    "id": "duplicate-with-payload-keys-in-another-order",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a",
+          "note": {
+            "x": 1,
+            "y": [
+              1,
+              {
+                "p": true,
+                "q": null
+              }
+            ]
+          }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "note": {
+            "y": [
+              1,
+              {
+                "q": null,
+                "p": true
+              }
+            ],
+            "x": 1
+          },
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a"]
+      },
+      "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
+    }
+  },
+  {
+    "id": "duplicate-of-an-inactive-event-stays-inactive",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a"]
+      },
+      "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
+    }
+  },
+  {
+    "id": "conflict-payload-differs",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-payload-differs-other-arrival",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-array-order-matters",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": [1, 2]
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": [2, 1]
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-payload-with-extra-key",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a",
+          "extra": 1
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-batch-differs",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-batch-differs-other-arrival",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-type-differs",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureRejected",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "conflict-in-an-inactive-event",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "sequence-conflict-same-order-key-other-event-id",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "sequence-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "sequence-conflict-other-arrival",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "sequence-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "version-unknown-at-the-start",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "version-unknown-at-the-end",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "version-999",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 999,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "version-unknown-in-an-inactive-event",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "version-two-unknown-reports-the-first-canonical",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 999,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "version-zero",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 0,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "schemaVersion"
+    }
+  },
+  {
+    "id": "version-fractional",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1.5,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "schemaVersion"
+    }
+  },
+  {
+    "id": "version-as-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": "1",
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "schemaVersion"
+    }
+  },
+  {
+    "id": "revert-to-the-previous-event",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a"]
+      },
+      "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
+    }
+  },
+  {
+    "id": "revert-and-keep-playing",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "d"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004"
+      ]
+    }
+  },
+  {
+    "id": "revert-twice-in-a-row",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a"]
+      },
+      "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
+    }
+  },
+  {
+    "id": "revert-to-the-last-active-has-no-effect",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "b"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ]
+    }
+  },
+  {
+    "id": "revert-arriving-before-its-target",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a"]
+      },
+      "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
+    }
+  },
+  {
+    "id": "revert-resent",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "d"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004"
+      ]
+    }
+  },
+  {
+    "id": "revert-to-a-new-event-after-an-earlier-revert",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "e"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 6,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000004"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "values": ["a", "d"]
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004"
+      ]
+    }
+  },
+  {
+    "id": "revert-target-missing",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000099"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-with-no-events-before",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000099"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "revert-target-in-the-future",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000003"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-target-is-itself",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-target-inactive",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000004"
+    }
+  },
+  {
+    "id": "revert-target-inactive-after-playing-on",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "d"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000005"
+    }
+  },
+  {
+    "id": "revert-target-is-another-revert",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000003"
+    }
+  },
+  {
+    "id": "revert-payload-empty",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-payload-target-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": 1
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-payload-with-extra-field",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000001",
+          "extra": true
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "revert-payload-wrong-field",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "target": "e0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-revert-target",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "stream-mismatch",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000002",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "stream-mismatch",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "unknown-type",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "Mystery",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "unknown-type-constructor",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "constructor",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "unknown-type-proto",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "__proto__",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "unknown-type-to-string",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "toString",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "event-rejected-leaves-no-partial-state",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureRejected",
+        "payload": {}
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-rejected",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "event-rejected-by-a-malformed-payload",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-rejected",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "precedence-stream-mismatch-beats-id-conflict",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000002",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "stream-mismatch",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "precedence-id-conflict-beats-sequence-conflict",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000003"
+    }
+  },
+  {
+    "id": "precedence-id-conflict-beats-version",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "precedence-sequence-conflict-beats-version",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "c"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "sequence-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000003"
+    }
+  },
+  {
+    "id": "precedence-version-beats-unknown-type",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "Mystery",
+        "payload": {}
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 2,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unsupported-schema-version",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "precedence-fold-stops-at-the-first-canonical-failure",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000099"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "FixtureRejected",
+        "payload": {}
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "Mystery",
+        "payload": {}
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "precedence-conflict-reported-at-the-first-canonical-position",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000009",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 3,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "z"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000009",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 4,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "z"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "other"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-id-conflict",
+      "eventId": "e0000000-0000-4000-8000-000000000002"
+    }
+  },
+  {
+    "id": "envelope-missing-eventId",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "eventId"
+    }
+  },
+  {
+    "id": "envelope-missing-courtSessionId",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "courtSessionId"
+    }
+  },
+  {
+    "id": "envelope-missing-deviceId",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-missing-batch",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-missing-sequence",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-missing-schemaVersion",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "schemaVersion"
+    }
+  },
+  {
+    "id": "envelope-missing-type",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "type"
+    }
+  },
+  {
+    "id": "envelope-missing-payload",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "payload"
+    }
+  },
+  {
+    "id": "envelope-extra-field",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "memberName": "Fictional Player"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-email",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "email": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-name",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "name": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-nickname",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "nickname": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-phone",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "phone": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-pix",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "pix": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-photo",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "photo": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-forbidden-field-userId",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "userId": "fictional"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-unknown-field-wins-over-an-invalid-field",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "x",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        },
+        "email": "x"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "unknown-field"
+    }
+  },
+  {
+    "id": "envelope-fields-checked-in-schema-order",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 0,
+        "sequence": 0,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-eventId-uppercase",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "E0000000-0000-4000-8000-00000000000A",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "eventId"
+    }
+  },
+  {
+    "id": "envelope-eventId-not-a-uuid",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "not-a-uuid",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "eventId"
+    }
+  },
+  {
+    "id": "envelope-eventId-trailing-line-break",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001\n",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "eventId"
+    }
+  },
+  {
+    "id": "envelope-eventId-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": 1,
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "eventId"
+    }
+  },
+  {
+    "id": "envelope-courtSessionId-uppercase",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "E0000000-0000-4000-8000-00000000000A",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "courtSessionId"
+    }
+  },
+  {
+    "id": "envelope-courtSessionId-not-a-uuid",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "not-a-uuid",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "courtSessionId"
+    }
+  },
+  {
+    "id": "envelope-courtSessionId-trailing-line-break",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "e0000000-0000-4000-8000-000000000001\n",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "courtSessionId"
+    }
+  },
+  {
+    "id": "envelope-courtSessionId-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": 1,
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "courtSessionId"
+    }
+  },
+  {
+    "id": "envelope-deviceId-uppercase",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "E0000000-0000-4000-8000-00000000000A",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-deviceId-not-a-uuid",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "not-a-uuid",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-deviceId-trailing-line-break",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "e0000000-0000-4000-8000-000000000001\n",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-deviceId-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": 1,
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-device-id-hardware-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "SM-G991B-IMEI-356938035643809",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-device-id-email",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "fictional@example.com",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "deviceId"
+    }
+  },
+  {
+    "id": "envelope-batch-zero",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 0,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-batch-negative",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": -1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-batch-fractional",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1.5,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-batch-above-the-limit",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 9007199254740992,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-batch-as-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": "1",
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "batch"
+    }
+  },
+  {
+    "id": "envelope-sequence-zero",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 0,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-sequence-negative",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": -1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-sequence-fractional",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1.5,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-sequence-above-the-limit",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 9007199254740992,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-sequence-as-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": "1",
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "sequence"
+    }
+  },
+  {
+    "id": "envelope-type-empty",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "type"
+    }
+  },
+  {
+    "id": "envelope-type-too-long",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "type"
+    }
+  },
+  {
+    "id": "envelope-type-not-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": 1,
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "type"
+    }
+  },
+  {
+    "id": "envelope-type-at-the-limit-reaches-the-replay",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+        "payload": {
+          "value": "a"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "unknown-event-type",
+      "eventId": "e0000000-0000-4000-8000-000000000001"
+    }
+  },
+  {
+    "id": "envelope-payload-array",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": []
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "payload"
+    }
+  },
+  {
+    "id": "envelope-payload-text",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": "x"
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "payload"
+    }
+  },
+  {
+    "id": "envelope-payload-number",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": 1
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "payload"
+    }
+  },
+  {
+    "id": "envelope-payload-null",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "FixtureAppended",
+        "payload": null
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "payload"
+    }
+  },
+  {
+    "id": "envelope-not-an-object",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": ["x"],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "envelope"
+    }
+  },
+  {
+    "id": "envelope-null",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [null],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "envelope"
+    }
+  },
+  {
+    "id": "envelope-array",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "values": []
+    },
+    "events": [
+      [
+        {
+          "eventId": "e0000000-0000-4000-8000-000000000001",
+          "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+          "deviceId": "d0000000-0000-4000-8000-000000000001",
+          "batch": 1,
+          "sequence": 1,
+          "schemaVersion": 1,
+          "type": "FixtureAppended",
+          "payload": {
+            "value": "a"
+          }
+        }
+      ]
+    ],
+    "expected": {
+      "ok": false,
+      "code": "invalid-envelope",
+      "field": "envelope"
+    }
+  }
+]

@@ -98,6 +98,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0019](adr/0019-agent-process.md) | Processo de agentes e merge automático |
 | [0020](adr/0020-postgres-local-e-testes-de-integracao.md) | Postgres local e testes de integração com Testcontainers |
 | [0021](adr/0021-overlap-validator.md) | Validador de sobreposição, `OverlapRuleMode` e `RotationSlot` |
+| [0022](adr/0022-event-envelope-replay.md) | Envelope de evento e função de estado |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -119,7 +120,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
-| 26 | Event sourcing | 0009 |
+| 26 | Event sourcing | 0009, 0022 |
 | 27 | Padrões | 0011 |
 | 28 | Dados pessoais | 0012 |
 | 29 | App | 0008 |

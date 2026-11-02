@@ -20,8 +20,9 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Sem `any` | `strictTypeChecked`, `no-explicit-any`, `no-unsafe-*`, em `.ts`, `.tsx`, `.mts` e `.cts` | Nenhuma |
 | Sem número mágico | `@typescript-eslint/no-magic-numbers`. Liberados `-1`, `0`, `1`, valor de `const` nomeado, enum, tipo literal, campo `readonly`, índice de array, valor em objeto | Testes e `*.data.ts`, que não pode ter função |
 | Sem supressão no código | `noInlineConfig`: `eslint-disable` e `/* eslint regra: "off" */` não têm efeito e geram aviso, que reprova | Nenhuma. Ver "Supressões" |
-| Imutabilidade | `prefer-const`, `no-param-reassign`, `functional/no-let`, `functional/immutable-data`, `prefer-readonly` | Testes não usam `functional/*`. No app, `.current` e `.value` (refs, Reanimated) podem receber atribuição |
+| Imutabilidade | `prefer-const`, `no-param-reassign`, `functional/no-let`, `functional/immutable-data`, `prefer-readonly` | Testes não usam `functional/*`. No app, `.current` e `.value` (refs, Reanimated) podem receber atribuição. `let` no `for` só em `match-engine/src/event-log/replay-events.ts` (ADR 0022) |
 | Pacotes puros | Em `packages/{match-engine,volley-rules}/src`: sem React, Expo, React Native, `@react-native-community/*`, `@testing-library/*`, módulos do Node, caminho para `apps/`, `import()` (também em tipo), `/// <reference>` nem `window`, `document`, `navigator`, `localStorage`, `fetch`, `process`, `Buffer`. `volley-rules` não importa `match-engine`. Em `packages/*/src` e `apps/mobile/src` só há TypeScript: `.js`, `.jsx`, `.cjs` e `.mjs` reprovam | Testes podem usar `node:*` (golden lê JSON) |
+| Motor determinístico | Em `packages/match-engine/src`: sem `Date`, `crypto`, `performance`, `Intl`, `setTimeout` e `Math.random` | Testes |
 | TS strict | `tsconfig.base.json` (`pnpm typecheck`) | Nenhuma |
 
 ## Imposto por ferramenta: C#

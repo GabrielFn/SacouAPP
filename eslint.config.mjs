@@ -12,6 +12,7 @@ const TYPESCRIPT_FILES = [`**/*.${TS_EXTENSIONS}`];
 const MOBILE_FILES = [`apps/mobile/**/*.${TS_EXTENSIONS}`];
 const TEST_FILES = [`**/*.test.${TS_EXTENSIONS}`];
 const PURE_PACKAGE_FILES = [`packages/{match-engine,volley-rules}/src/**/*.${TS_EXTENSIONS}`];
+const MATCH_ENGINE_FILES = [`packages/match-engine/src/**/*.${TS_EXTENSIONS}`];
 const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
 const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile}/src/**/*.{js,jsx,cjs,mjs}"];
@@ -53,6 +54,12 @@ const FORBIDDEN_GLOBALS = [
   "process",
   "Buffer",
 ].map((name) => ({ name, message: "Pure packages cannot use platform globals." }));
+
+const NONDETERMINISTIC_MESSAGE = "The match engine must be deterministic: replay cannot vary.";
+
+const NONDETERMINISTIC_GLOBALS = ["Date", "crypto", "performance", "Intl", "setTimeout"].map(
+  (name) => ({ name, message: NONDETERMINISTIC_MESSAGE }),
+);
 
 const PURE_SYNTAX_RESTRICTIONS = [
   { selector: "ImportExpression", message: "Pure packages cannot use dynamic imports." },
@@ -151,6 +158,26 @@ export default defineConfig([
         { patterns: [...FORBIDDEN_IN_PURE_PACKAGES, FORBIDDEN_MATCH_ENGINE_IMPORT] },
       ],
     },
+  },
+
+  {
+    files: MATCH_ENGINE_FILES,
+    ignores: TEST_FILES,
+    rules: {
+      // A later block replaces the rule, so the list repeats the globals of the pure packages.
+      "no-restricted-globals": ["error", ...FORBIDDEN_GLOBALS, ...NONDETERMINISTIC_GLOBALS],
+      "no-restricted-properties": [
+        "error",
+        { object: "Math", property: "random", message: NONDETERMINISTIC_MESSAGE },
+      ],
+    },
+  },
+
+  // The replay walks a linked timeline without recursion (10 thousand events), and the loop
+  // variable is the only thing it reassigns. Registered in ADR 0002.
+  {
+    files: ["packages/match-engine/src/event-log/replay-events.ts"],
+    rules: { "functional/no-let": ["error", { allowInForLoopInit: true }] },
   },
 
   {

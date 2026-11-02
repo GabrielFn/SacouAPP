@@ -1,1 +1,1 @@
-export const PACKAGE_NAME = "@sacou/match-engine";
+export * from "./event-log/index.js";
