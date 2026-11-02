@@ -42,7 +42,13 @@ internal static partial class ArchitectureDependencyRules
     /// What the compiler emits from namespaces that also hold Process or Marshal. Each entry is here
     /// because Domain_WithAllowedDependency_IsNotReported fails without it, in Debug or in Release.
     /// </summary>
-    private static readonly HashSet<string> AllowedDomainTypes = [];
+    private static readonly HashSet<string> AllowedDomainTypes =
+    [
+        "System.Diagnostics.DebuggerStepThroughAttribute",
+        "System.Runtime.InteropServices.CollectionsMarshal",
+        "System.Runtime.InteropServices.ImmutableCollectionsMarshal",
+        "System.Runtime.InteropServices.MemoryMarshal",
+    ];
 
     /// <summary>A block list because System does not fit an allow list: records and closures use dozens of its types.</summary>
     private static readonly HashSet<string> ForbiddenDomainTypes =

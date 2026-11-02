@@ -121,7 +121,7 @@ public sealed partial class SharedGoldenFilesTests
 
     [Theory]
     [InlineData("""{ "a": 1, "a": 2 }""")]
-    [InlineData("""{ "a": 1, "a": 2 }""")]
+    [InlineData("""{ "a": 1, "\u0061": 2 }""")]
     [InlineData("""[{ "b": { "a": 1, "a": 2 } }]""")]
     public void StrictReading_RefusesARepeatedKey(string json)
     {
