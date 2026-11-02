@@ -1,6 +1,6 @@
 # Inventário de dados pessoais (LGPD)
 
-Registra o que os documentos preveem; nada disso foi implementado. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
+Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
 
 **Pendências do Gabriel, em [`perguntas.md`](../estado/perguntas.md):**
 
@@ -38,7 +38,7 @@ Registra o que os documentos preveem; nada disso foi implementado. Decisões no 
 
 | Dado | Onde fica | Por quê | Fonte | Na exclusão |
 |---|---|---|---|---|
-| Chave Pix do organizador, que pode ser um dado pessoal | Postgres (Neon), criptografada | Gerar o copia e cola | `produto.md:65, 375` | A definir na E3.16 |
+| Chave Pix do organizador, que pode ser um dado pessoal | Postgres (Neon), criptografada | Gerar o copia e cola (gerador puro na E1.4: não guarda nem registra a chave, e erro só leva código). O código gerado contém a chave: nunca vai para log, evento, telemetria ou URL, e quem o recebe vê a chave, o que é inerente ao Pix e deve constar no aviso de privacidade (E3.10) | `produto.md:65, 375` | A definir na E3.16 |
 | "Já paguei", confirmação e quem marcou | Postgres (Neon) | Controle do racha | `produto.md:65` | A definir na E3.16 |
 | Assinatura dos planos | RevenueCat e lojas | Cobrança | `decisoes.md:20` | A definir na E3.15 e na E3.16 |
 
