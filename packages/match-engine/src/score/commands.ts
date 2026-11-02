@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@sacou/volley-rules";
+import { err, FORMATION_CATALOG_VERSION, ok, type Result } from "@sacou/volley-rules";
 
 import {
   MATCH_ENDED_EVENT_TYPE,
@@ -60,9 +60,12 @@ export function startMatch(
   if (!parsed.ok) {
     return parsed;
   }
-  const { matchId, rulesVersion } = parsed.value;
+  const { formationsVersion, matchId, rulesVersion } = parsed.value;
   if (!SUPPORTED_RULES_VERSIONS.includes(rulesVersion)) {
     return refuse("unsupported-rules-version");
+  }
+  if (formationsVersion !== FORMATION_CATALOG_VERSION) {
+    return refuse("unsupported-formations-version");
   }
   if (state.currentMatch !== null) {
     return refuse("match-already-open");

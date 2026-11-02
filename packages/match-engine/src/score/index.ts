@@ -17,6 +17,11 @@ export {
   nextSetterZone,
 } from "./rotation-rules.js";
 export {
+  getServeAlignment,
+  getTeamServeAlignment,
+  validateServeAlignment,
+} from "./serve-alignment.js";
+export {
   getMatchWinner,
   getSetPointTeams,
   getSetWinner,

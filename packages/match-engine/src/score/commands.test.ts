@@ -275,6 +275,7 @@ describe("confirmSetEnd", () => {
       currentMatch: {
         completedSets: [],
         currentSet: null,
+        formationsVersion: 1,
         matchId: MATCH_ID,
         rotations: { a: null, b: null },
         rulesVersion: 1,
@@ -407,7 +408,7 @@ describe("rotation through the commands", () => {
     const input = rotationMatchInput(MD3);
     const swapped = {
       ...input,
-      rotations: { ...input.rotations, a: { lineup: BLUE_LINEUP, setterZone: 1 as const } },
+      rotations: { ...input.rotations, a: { lineup: BLUE_LINEUP, setterZone: 1 as const, system: "5x1" as const } },
     };
 
     expect(startMatch(INITIAL_COURT_SESSION_STATE, swapped)).toStrictEqual({

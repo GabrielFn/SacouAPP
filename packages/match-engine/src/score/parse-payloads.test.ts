@@ -17,6 +17,7 @@ const VALID_POINT = { matchId: MATCH_ID, setNumber: 1, team: "a" };
 const VALID_START = {
   matchId: MATCH_ID,
   rulesVersion: 1,
+  formationsVersion: 1,
   scoring: { bestOf: 3, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 },
   teams: { a: { memberIds: [MEMBER_A] }, b: { memberIds: [MEMBER_B] } },
   firstServer: "a",
@@ -26,7 +27,7 @@ const LINEUP_A = [1, 2, 3, 4, 5, 6].map((n) => `a0000000-0000-4000-8000-00000000
 const WITH_LINEUP = {
   ...VALID_START,
   teams: { ...VALID_START.teams, a: { memberIds: LINEUP_A } },
-  rotations: { a: { lineup: LINEUP_A, setterZone: 2 }, b: null },
+  rotations: { a: { lineup: LINEUP_A, setterZone: 2, system: "5x1" }, b: null },
 };
 const VALID_NEXT_SET = {
   targetPoints: 25,
@@ -95,7 +96,7 @@ describe("input that JSON cannot produce", () => {
   test("holes in a sparse lineup are rejected", () => {
     const lineup = new Array<string>(LINEUP_A.length);
     lineup[0] = MEMBER_A;
-    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 1 }, b: null } };
+    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 1, system: "5x1" }, b: null } };
 
     expect(fieldOf(parseMatchStartedPayload(input))).toBe("rotations.a.lineup");
   });
@@ -186,7 +187,7 @@ describe("the parsed value", () => {
 
   test("has a lineup detached from the input, in the order it came", () => {
     const lineup = [...LINEUP_A];
-    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 2 }, b: null } };
+    const input = { ...WITH_LINEUP, rotations: { a: { lineup, setterZone: 2, system: "5x1" }, b: null } };
 
     const parsed = parseMatchStartedPayload(input);
     lineup.reverse();
@@ -200,6 +201,7 @@ describe("the parsed value", () => {
 
     expect(started.ok && Object.keys(started.value)).toStrictEqual([
       "firstServer",
+      "formationsVersion",
       "matchId",
       "rotations",
       "rulesVersion",
@@ -209,6 +211,7 @@ describe("the parsed value", () => {
     expect(started.ok && Object.keys(started.value.rotations.a ?? {})).toStrictEqual([
       "lineup",
       "setterZone",
+      "system",
     ]);
     expect(setEnded.ok && Object.keys(setEnded.value.nextSet ?? {})).toStrictEqual([
       "firstServer",
@@ -257,13 +260,18 @@ describe("errors do not echo what was received", () => {
     ["MatchStarted", { ...VALID_START, rotations: { a: CANARY, b: null } }],
     [
       "MatchStarted",
-      { ...WITH_LINEUP, rotations: { a: { lineup: [CANARY], setterZone: 1 }, b: null } },
+      { ...WITH_LINEUP, rotations: { a: { lineup: [CANARY], setterZone: 1, system: "5x1" }, b: null } },
     ],
     [
       "MatchStarted",
-      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: CANARY }, b: null } },
+      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: CANARY, system: "5x1" }, b: null } },
     ],
     ["MatchStarted", { ...VALID_START, rotations: { a: null, b: null, [CANARY]: 1 } }],
+    [
+      "MatchStarted",
+      { ...WITH_LINEUP, rotations: { a: { lineup: LINEUP_A, setterZone: 1, system: CANARY }, b: null } },
+    ],
+    ["MatchStarted", { ...VALID_START, formationsVersion: CANARY }],
     ["SetEnded", { ...VALID_SET_ENDED, nextSet: { ...VALID_NEXT_SET, firstServer: CANARY } }],
     [
       "SetEnded",
