@@ -37,7 +37,7 @@ Nas regras **FIVB 2025–2028**, só o time que **recebe** precisa respeitar a o
 ### Substituições e sets (FIVB 15, 18.2.2, 12.1)
 - Oficial: 6 substituições por set. Na pelada o app desliga esse limite.
 - Tie-break: troca de quadra aos 8 pontos, sem girar e sem mudar quem saca.
-- Saque inicial: sorteio no 1º e no 5º set; nos outros, alterna.
+- Saque inicial: sorteio no 1º set e no set decisivo de md3 e md5; nos outros, alterna em relação a quem sacou primeiro no set anterior, e não "quem perdeu saca" (decisão do Gabriel de 02/11/2026; a FIVB fala em 5º set, e o tie-break da md3 segue a mesma regra).
 
 ## Sistemas de jogo
 
@@ -59,11 +59,11 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 ## O que o motor valida
 
 **Erro (bloqueia):**
-- Seis jogadores por time, cada posição ocupada uma vez.
+- Seis jogadores por time, cada posição ocupada uma vez. Time sem 6 jogadores fica com a rotação desligada (ADR 0024).
 - Girar só quem venceu recebendo; nunca quem venceu sacando.
 - Sacador é sempre quem está na posição 1 depois do giro.
 - Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.
-- Tie-break: troca de lado aos 8 sem girar.
+- Tie-break: troca de lado aos 8 sem girar. O lado da quadra fica fora do motor: é o app que troca o desenho (ADR 0024).
 
 **Aviso (só informa):**
 - Sobreposição só nas 7 relações oficiais, só no time que recebe (modo FIVB), com tolerância configurável (padrão 0,02 ≈ 18 cm). A tolerância é simétrica: `atrás.y >= frente.y - tolerância` e `esquerda.x <= direita.x + tolerância`. No modo Clássico, o time que saca segue 5 relações: `1-behind-2` e `6-left-of-1` ficam de fora, porque o sacador não conta. Violação vira aviso, nunca bloqueio ([ADR 0010](../arquitetura/adr/0010-rotation-and-rule-mode.md)); contrato no [ADR 0021](../arquitetura/adr/0021-overlap-validator.md).
@@ -72,6 +72,17 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Rotação 4 sem empilhar: corrida longa do levantador. Rotação 1: infiltração mais longa.
 - Funções fora da diagonal (dois levantadores lado a lado).
 - Regras da casa (entra no saque, substituições livres) sempre como configuração, nunca como regra.
+
+## Estado e eventos
+
+Implementado na E2.3 ([ADR 0024](../arquitetura/adr/0024-saque-e-rotacao-derivados.md)). Código em `packages/match-engine/src/score/`; casos em `packages/match-engine/golden/rotation-*.json`.
+
+- **Side-out derivado:** `PointScored` grava só quem marcou. Se esse time não estava sacando, é side-out: ele passa a sacar e só ele avança uma casa em `SETTER_ZONE_SEQUENCE`. Se estava, só o placar muda.
+- **`lineup` ancorado no levantador:** 6 `MemberId` do time, sem repetir. `lineup[0]` é o levantador, e os demais seguem a ordem crescente de posição. O giro só muda `setterZone`. O sacador é quem está na posição 1.
+- **`setterZone` em todos os sistemas:** a zona atual de `lineup[0]`. Na Livre, sem levantador, é a zona do primeiro da escalação, e a tela não mostra número.
+- **Rotação desligada:** `rotations.<lado>: null`, inclusive para time sem 6 jogadores (areia 2x2 e 4x4, pelada com 5). O app mostra só o time que saca, sem sacador nem posições (decisão do Gabriel de 02/11/2026). O saque continua sendo acompanhado.
+- **Virada de set:** `SetEnded.nextSet` grava `firstServer` e `setterZones`, aplicados sem recalcular. A rotação **continua de onde parou**, sem mexer em ninguém (decisão do Gabriel de 02/11/2026). O comando alterna o primeiro saque e, no set decisivo, recebe o sorteio de fora (`confirmSetEnd(state, { firstServer })`); a interface do sorteio é da E4.10.
+- **Lado da quadra:** fora do estado do motor. Virar set e chegar a 8 no tie-break não giram nem mudam quem saca; o desenho é da E4.10.
 
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.

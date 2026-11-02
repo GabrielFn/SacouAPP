@@ -27,4 +27,5 @@ A fila e as saídas parciais atravessam partidas, então um stream por partida n
 - Como o servidor aplica o resultado que recebe, a validação do que chega é um ponto aberto do [modelo de ameaças](../../seguranca/modelo-de-ameacas.md).
 - **Envelope e função de estado:** definidos no [ADR 0022](0022-event-envelope-replay.md).
 - **Catálogo de eventos:** placar no [ADR 0023](0023-placar-e-catalogo-de-eventos.md) e em [`eventos.md`](../../dominio/eventos.md) (E2.2).
-- **A definir:** o resto do catálogo (E2.3 a E2.8); tratamento de conflito na sincronização (E3.7).
+- **Saque e rotação:** [ADR 0024](0024-saque-e-rotacao-derivados.md) (E2.3), com a exceção consciente do side-out derivado do estado.
+- **A definir:** o resto do catálogo (E2.4 a E2.8); tratamento de conflito na sincronização (E3.7).

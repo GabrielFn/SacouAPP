@@ -58,4 +58,4 @@ Pontos de divergência para o porte, além dos do ADR 0022:
 - **Custo do replay:** o limite de partidas segura o estado, não o tamanho do log. Simular o stream inteiro a cada lote soma custo; a E3.7 dimensiona lote e limite de requisições, ou usa snapshot.
 - **Ponto atrasado trava:** ponto de set já encerrado é `event-rejected`, e com falha fechada impede recalcular o stream. A E3.7 e a E4.9 rejeitam antes de persistir. Com a ordem por `batch`, um evento anterior ao `MatchStarted` também trava (para a E3.7).
 - **`MemberId` em UUID** presume que a E3.2 gere UUID minúsculo; se não, o parser muda.
-- **E2.3** acrescenta `firstServer` e o setup por time, e soma lógica ao `PointScored`: conflito esperado em `SCORE_APPLIERS` e no golden.
+- **E2.3** acrescentou `firstServer` e o setup por time e somou lógica ao `PointScored`: ver o [ADR 0024](0024-saque-e-rotacao-derivados.md).

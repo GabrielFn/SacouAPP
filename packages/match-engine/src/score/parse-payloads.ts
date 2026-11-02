@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@sacou/volley-rules";
+import { err, ok, ROTATION_SLOTS, type Result, type SetterZone } from "@sacou/volley-rules";
 
 import { isUuid } from "../event-log/is-uuid.js";
 import {
@@ -16,6 +16,7 @@ import {
   POINT_SCORED_EVENT_TYPE,
   SCORE_PAYLOAD_SHAPES,
   SET_ENDED_EVENT_TYPE,
+  SETTER_ZONE_SEQUENCE,
   TEAM_SIDES,
   UNKNOWN_PAYLOAD_FIELD,
   WIN_MARGIN_VALUES,
@@ -24,6 +25,7 @@ import type {
   MatchEndedPayload,
   MatchStartedPayload,
   MatchTeams,
+  MemberId,
   NextSet,
   PayloadShape,
   PointScoredPayload,
@@ -32,8 +34,11 @@ import type {
   ScorePayloadField,
   ScoringRules,
   SetEndedPayload,
+  SetterZones,
   TeamRoster,
+  TeamRotations,
   TeamSide,
+  TeamState,
 } from "./types.js";
 
 type RawObject = Readonly<Record<string, unknown>>;
@@ -72,6 +77,10 @@ function isTeamSide(value: unknown): value is TeamSide {
   return isOneOf(TEAM_SIDES, value);
 }
 
+function isSetterZone(value: unknown): value is SetterZone {
+  return isOneOf(SETTER_ZONE_SEQUENCE, value);
+}
+
 /** Own properties only: with a polluted Object.prototype, a missing field must stay missing. */
 function readOwn(raw: RawObject, field: string): unknown {
   return Object.hasOwn(raw, field) ? raw[field] : undefined;
@@ -105,14 +114,18 @@ function parseScoring(raw: unknown): ParseResult<ScoringRules> {
 }
 
 /** The copy turns holes of a sparse array into undefined, which fails the UUID check. */
-function parseMemberIds(raw: unknown): readonly string[] | null {
-  if (!Array.isArray(raw) || !isIntegerInRange(raw.length, MIN_TEAM_MEMBERS, MAX_TEAM_MEMBERS)) {
+function parseUniqueMemberIds(raw: unknown, min: number, max: number): readonly MemberId[] | null {
+  if (!Array.isArray(raw) || !isIntegerInRange(raw.length, min, max)) {
     return null;
   }
   const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
   const memberIds = items.filter(isUuid);
   const isValid = memberIds.length === items.length && new Set(memberIds).size === items.length;
   return isValid ? memberIds : null;
+}
+
+function parseMemberIds(raw: unknown): readonly MemberId[] | null {
+  return parseUniqueMemberIds(raw, MIN_TEAM_MEMBERS, MAX_TEAM_MEMBERS);
 }
 
 function parseRoster(
@@ -135,11 +148,64 @@ function parseTeams(raw: unknown): ParseResult<MatchTeams> {
   return hasSharedMember ? invalid("teams.b.memberIds") : ok({ a: a.value, b: b.value });
 }
 
+/** Exactly one player per position, and all of them from the team of the frozen copy. */
+function parseLineup(raw: unknown, { memberIds }: TeamRoster): readonly MemberId[] | null {
+  const lineup = parseUniqueMemberIds(raw, ROTATION_SLOTS.length, ROTATION_SLOTS.length);
+  return lineup?.every((id) => memberIds.includes(id)) === true ? lineup : null;
+}
+
+function parseTeamState(
+  raw: unknown,
+  roster: TeamRoster,
+  fields: {
+    readonly team: ScorePayloadField;
+    readonly lineup: ScorePayloadField;
+    readonly setterZone: ScorePayloadField;
+  },
+): ParseResult<TeamState | null> {
+  if (raw === null) return ok(null);
+  if (!isPlainObject(raw)) return invalid(fields.team);
+  const lineup = parseLineup(readOwn(raw, "lineup"), roster);
+  if (lineup === null) return invalid(fields.lineup);
+  const setterZone = readOwn(raw, "setterZone");
+  return isSetterZone(setterZone) ? ok({ lineup, setterZone }) : invalid(fields.setterZone);
+}
+
+function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotations> {
+  if (!isPlainObject(raw)) return invalid("rotations");
+  const a = parseTeamState(readOwn(raw, "a"), teams.a, {
+    team: "rotations.a",
+    lineup: "rotations.a.lineup",
+    setterZone: "rotations.a.setterZone",
+  });
+  if (!a.ok) return a;
+  const b = parseTeamState(readOwn(raw, "b"), teams.b, {
+    team: "rotations.b",
+    lineup: "rotations.b.lineup",
+    setterZone: "rotations.b.setterZone",
+  });
+  return b.ok ? ok({ a: a.value, b: b.value }) : b;
+}
+
+function parseSetterZones(raw: unknown): ParseResult<SetterZones> {
+  if (!isPlainObject(raw)) return invalid("nextSet.setterZones");
+  const a = readOwn(raw, "a");
+  if (a !== null && !isSetterZone(a)) return invalid("nextSet.setterZones.a");
+  const b = readOwn(raw, "b");
+  if (b !== null && !isSetterZone(b)) return invalid("nextSet.setterZones.b");
+  return ok({ a, b });
+}
+
 function parseNextSet(raw: unknown): ParseResult<NextSet | null> {
   if (raw === null) return ok(null);
   if (!isPlainObject(raw)) return invalid("nextSet");
   const targetPoints = readOwn(raw, "targetPoints");
-  return isSetPoints(targetPoints) ? ok({ targetPoints }) : invalid("nextSet.targetPoints");
+  if (!isSetPoints(targetPoints)) return invalid("nextSet.targetPoints");
+  const firstServer = readOwn(raw, "firstServer");
+  if (!isTeamSide(firstServer)) return invalid("nextSet.firstServer");
+  const setterZones = parseSetterZones(readOwn(raw, "setterZones"));
+  if (!setterZones.ok) return setterZones;
+  return ok({ firstServer, setterZones: setterZones.value, targetPoints });
 }
 
 function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayload> {
@@ -151,7 +217,18 @@ function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayloa
   if (!scoring.ok) return scoring;
   const teams = parseTeams(readOwn(raw, "teams"));
   if (!teams.ok) return teams;
-  return ok({ matchId, rulesVersion, scoring: scoring.value, teams: teams.value });
+  const firstServer = readOwn(raw, "firstServer");
+  if (!isTeamSide(firstServer)) return invalid("firstServer");
+  const rotations = parseRotations(readOwn(raw, "rotations"), teams.value);
+  if (!rotations.ok) return rotations;
+  return ok({
+    firstServer,
+    matchId,
+    rotations: rotations.value,
+    rulesVersion,
+    scoring: scoring.value,
+    teams: teams.value,
+  });
 }
 
 function parsePointScoredFields(raw: RawObject): ParseResult<PointScoredPayload> {

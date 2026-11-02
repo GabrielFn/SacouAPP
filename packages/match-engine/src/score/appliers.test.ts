@@ -9,9 +9,11 @@ import { INITIAL_COURT_SESSION_STATE, SCORE_APPLIERS } from "./appliers.js";
 import { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./commands.js";
 import {
   COURT_SESSION_ID,
+  MATCH_ID,
   matchInput,
   numberedMatchId,
   replayAll,
+  rotationMatchInput,
   toEnvelope,
 } from "./match-player.test.fixture.js";
 import {
@@ -150,6 +152,117 @@ describe("appliers", () => {
       const state = replayAll(events);
 
       expect(state.currentMatch?.currentSet?.score).toStrictEqual({ a: TEN_THOUSAND, b: 0 });
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
+});
+
+describe("appliers with rotation", () => {
+  const LONG_SET: ScoringRules = {
+    bestOf: 1,
+    pointsPerSet: 99,
+    tieBreakPoints: null,
+    winMargin: 2,
+  };
+  const ONE_THOUSAND = 1000;
+  /** Alternating rallies: 500 to 5000 per team adds one digit to each side of the score. */
+  const SCORE_DIGITS_ADDED = 2;
+  const TEAM_MAX = 24;
+
+  function alternatingLog(pointCount: number): readonly EventEnvelope[] {
+    const start = {
+      type: MATCH_STARTED_EVENT_TYPE as ScoreEventType,
+      payload: rotationMatchInput(LONG_SET),
+    };
+    const points = Array.from({ length: pointCount }, (_, index) =>
+      toEnvelope(
+        {
+          type: POINT_SCORED_EVENT_TYPE,
+          payload: {
+            matchId: MATCH_ID,
+            setNumber: 1,
+            team: index % EVENTS_PER_MATCH === 0 ? "b" : "a",
+          },
+        },
+        index + 2,
+      ),
+    );
+    return [toEnvelope(start, 1), ...points];
+  }
+
+  test("never mutate a state frozen in depth, and it survives a JSON round trip", () => {
+    const steps: readonly ((state: CourtSessionState) => ScoreCommandResult)[] = [
+      (state) => startMatch(state, rotationMatchInput(MD3, { zones: [2, 5] })),
+      (state) => scorePoint(state, "b"),
+      (state) => scorePoint(state, "a"),
+      (state) => scorePoint(state, "a"),
+      (state) => scorePoint(state, "a"),
+      confirmSetEnd,
+      (state) => scorePoint(state, "a"),
+      (state) => endMatchManually(state, null),
+    ];
+
+    const final = steps.reduce((state, step) => {
+      const next = applyFrozen(state, step(state));
+      expect(JSON.parse(JSON.stringify(next))).toStrictEqual(next);
+      return next;
+    }, INITIAL_COURT_SESSION_STATE);
+
+    // b4 and a1 in set 1; set 2 was first served by b, so the point of a is a side-out to a6.
+    expect(final.finishedMatches[0]?.rotations.a?.setterZone).toBe(6);
+    expect(final.finishedMatches[0]?.rotations.b?.setterZone).toBe(4);
+  });
+
+  test(
+    "replays 10 thousand side-outs without overflowing",
+    () => {
+      const state = replayAll(alternatingLog(TEN_THOUSAND));
+
+      // 5000 rotations per team: 5000 mod 6 is 2, two steps from zone 1 down the sequence.
+      expect(state.currentMatch?.currentSet?.score).toStrictEqual({ a: 5000, b: 5000 });
+      expect(state.currentMatch?.currentSet?.servingTeam).toBe("a");
+      expect(state.currentMatch?.rotations.a?.setterZone).toBe(5);
+      expect(state.currentMatch?.rotations.b?.setterZone).toBe(5);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
+
+  test(
+    "the size of the state does not depend on the number of rallies",
+    () => {
+      const small = JSON.stringify(replayAll(alternatingLog(ONE_THOUSAND)));
+      const large = JSON.stringify(replayAll(alternatingLog(TEN_THOUSAND)));
+
+      expect(large.length - small.length).toBe(SCORE_DIGITS_ADDED);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
+
+  test(
+    "200 finished matches with full teams and rotations are accepted, and the 201st is rejected",
+    () => {
+      const started = (sequence: number, matchNumber: number) =>
+        toEnvelope(
+          {
+            type: MATCH_STARTED_EVENT_TYPE,
+            payload: rotationMatchInput(MD3, {
+              matchId: numberedMatchId(matchNumber),
+              teamSize: TEAM_MAX,
+            }),
+          },
+          sequence,
+        );
+      const finished = Array.from({ length: MAX_FINISHED_MATCHES }, (_, index) => [
+        started(EVENTS_PER_MATCH * index + 1, index + 1),
+        matchEndedAt(EVENTS_PER_MATCH * index + EVENTS_PER_MATCH, index + 1),
+      ]).flat();
+      const nextMatch = MAX_FINISHED_MATCHES + 1;
+      const over = started(finished.length + 1, nextMatch);
+
+      expect(replayAll(finished).finishedMatches).toHaveLength(MAX_FINISHED_MATCHES);
+      expect(replayEvents(REPLAY_CONFIG, [...finished, over])).toStrictEqual(
+        err({ code: "event-rejected", eventId: over.eventId }),
+      );
     },
     VOLUME_TEST_TIMEOUT_MS,
   );

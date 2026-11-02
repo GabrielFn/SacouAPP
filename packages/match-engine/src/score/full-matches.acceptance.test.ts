@@ -136,7 +136,9 @@ describe("a real best-of-5 with tie-break, played by commands to the end", () =>
     player.playSet("b", 30, 28);
     expect(player.state().currentMatch?.setsWon).toStrictEqual({ a: 2, b: 2 });
     expect(player.state().currentMatch?.currentSet).toStrictEqual({
+      firstServer: "a",
       score: { a: 0, b: 0 },
+      servingTeam: "a",
       setNumber: 5,
       targetPoints: 15,
     });

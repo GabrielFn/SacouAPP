@@ -2,11 +2,15 @@ import { parseEventEnvelope } from "../event-log/parse-envelope.js";
 import { replayEvents } from "../event-log/replay-events.js";
 import type { EventEnvelope } from "../event-log/types.js";
 import { INITIAL_COURT_SESSION_STATE, SCORE_APPLIERS } from "./appliers.js";
+import type { SetterZone } from "@sacou/volley-rules";
+
 import type {
   CourtSessionState,
   MatchStartedPayload,
+  MemberId,
   ScoreEventDraft,
   ScoringRules,
+  TeamSide,
 } from "./types.js";
 
 /** Test-only: builds envelopes and replays them through the parser, as the app will. */
@@ -14,15 +18,65 @@ export const COURT_SESSION_ID = "c0000000-0000-4000-8000-000000000001";
 export const MATCH_ID = "f0000000-0000-4000-8000-000000000001";
 const DEVICE_ID = "d0000000-0000-4000-8000-000000000001";
 const ID_DIGITS = 12;
+const LINEUP_SIZE = 6;
 
+function membersOf(side: TeamSide, teamSize: number): readonly MemberId[] {
+  return Array.from({ length: teamSize }, (_, index) => {
+    const memberNumber = String(index + 1).padStart(ID_DIGITS, "0");
+    return `${side}0000000-0000-4000-8000-${memberNumber}`;
+  });
+}
+
+/** Stand-ins for the team of the screens, setter first: Pedro, Ana, Lia, Marcos, Bia, João. */
+export const ORANGE_LINEUP = membersOf("a", LINEUP_SIZE);
+/** Stand-ins for the team of the screens, setter first: Gabi, Rafa, Caio, Nina, Duda, Léo. */
+export const BLUE_LINEUP = membersOf("b", LINEUP_SIZE);
+
+/** The teams of the score tests: one member each, with the rotation off and `a` serving first. */
 export function matchInput(scoring: ScoringRules, matchId = MATCH_ID): MatchStartedPayload {
   return {
+    firstServer: "a",
     matchId,
+    rotations: { a: null, b: null },
     rulesVersion: 1,
     scoring,
     teams: {
-      a: { memberIds: ["a0000000-0000-4000-8000-000000000001"] },
-      b: { memberIds: ["b0000000-0000-4000-8000-000000000001"] },
+      a: { memberIds: membersOf("a", 1) },
+      b: { memberIds: membersOf("b", 1) },
+    },
+  };
+}
+
+export interface RotationSetup {
+  readonly firstServer?: TeamSide;
+  readonly zones?: readonly [SetterZone | null, SetterZone | null];
+  readonly matchId?: string;
+  readonly teamSize?: number;
+}
+
+/** The teams of the screens, with their rotations: by default `a` serves and both are in zone 1. */
+export function rotationMatchInput(
+  scoring: ScoringRules,
+  {
+    firstServer = "a",
+    zones = [1, 1],
+    matchId = MATCH_ID,
+    teamSize = LINEUP_SIZE,
+  }: RotationSetup = {},
+): MatchStartedPayload {
+  const [zoneA, zoneB] = zones;
+  return {
+    firstServer,
+    matchId,
+    rotations: {
+      a: zoneA === null ? null : { lineup: ORANGE_LINEUP, setterZone: zoneA },
+      b: zoneB === null ? null : { lineup: BLUE_LINEUP, setterZone: zoneB },
+    },
+    rulesVersion: 1,
+    scoring,
+    teams: {
+      a: { memberIds: membersOf("a", teamSize) },
+      b: { memberIds: membersOf("b", teamSize) },
     },
   };
 }

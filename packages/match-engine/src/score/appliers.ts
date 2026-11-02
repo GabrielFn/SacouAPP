@@ -15,7 +15,17 @@ import {
   parsePointScoredPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import type { CourtSessionState, MatchScore, MatchSet, NextSet } from "./types.js";
+import { isSideOut, nextSetterZone } from "./rotation-rules.js";
+import type {
+  CourtSessionState,
+  MatchScore,
+  MatchSet,
+  NextSet,
+  SetterZones,
+  TeamRotations,
+  TeamSide,
+  TeamState,
+} from "./types.js";
 
 export const INITIAL_COURT_SESSION_STATE: CourtSessionState = Object.freeze({
   currentMatch: null,
@@ -52,8 +62,43 @@ function canOpenMatch(state: CourtSessionState, matchId: string): boolean {
   );
 }
 
-function emptySet(setNumber: number, targetPoints: number): MatchSet {
-  return { score: { a: 0, b: 0 }, setNumber, targetPoints };
+function emptySet(setNumber: number, targetPoints: number, firstServer: TeamSide): MatchSet {
+  return {
+    firstServer,
+    score: { a: 0, b: 0 },
+    servingTeam: firstServer,
+    setNumber,
+    targetPoints,
+  };
+}
+
+function rotateTeam(rotations: TeamRotations, team: TeamSide): TeamRotations {
+  const teamState = rotations[team];
+  return teamState === null
+    ? rotations
+    : { ...rotations, [team]: { ...teamState, setterZone: nextSetterZone(teamState.setterZone) } };
+}
+
+/** Structure, not a rule: a recorded zone must match whether the team has a rotation at all. */
+function hasZonesForTheRotations(rotations: TeamRotations, setterZones: SetterZones): boolean {
+  return (
+    (rotations.a === null) === (setterZones.a === null) &&
+    (rotations.b === null) === (setterZones.b === null)
+  );
+}
+
+function withRecordedZone(
+  teamState: TeamState | null,
+  setterZone: SetterZones["a"],
+): TeamState | null {
+  return teamState === null || setterZone === null ? null : { ...teamState, setterZone };
+}
+
+function withRecordedZones(rotations: TeamRotations, setterZones: SetterZones): TeamRotations {
+  return {
+    a: withRecordedZone(rotations.a, setterZones.a),
+    b: withRecordedZone(rotations.b, setterZones.b),
+  };
 }
 
 /** Structure, not a rule: the format has no set past `bestOf`, and no set number past the schema. */
@@ -66,13 +111,14 @@ const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
   if (!parsed.ok || !canOpenMatch(state, parsed.value.matchId)) {
     return rejected();
   }
-  const { matchId, rulesVersion, scoring, teams } = parsed.value;
+  const { firstServer, matchId, rotations, rulesVersion, scoring, teams } = parsed.value;
   return ok(
     withCurrentMatch(state, {
       completedSets: [],
       // Set 1 is never the deciding set of a series, so it always plays to `pointsPerSet`.
-      currentSet: emptySet(FIRST_SET_NUMBER, scoring.pointsPerSet),
+      currentSet: emptySet(FIRST_SET_NUMBER, scoring.pointsPerSet, firstServer),
       matchId,
+      rotations,
       rulesVersion,
       scoring,
       setsWon: { a: 0, b: 0 },
@@ -93,7 +139,16 @@ const applyPointScored: EventApplier<CourtSessionState> = (state, event) => {
     return rejected();
   }
   const score = { ...set.score, [team]: set.score[team] + 1 };
-  return ok(withCurrentMatch(state, { ...match, currentSet: { ...set, score } }));
+  if (!isSideOut(set.servingTeam, team)) {
+    return ok(withCurrentMatch(state, { ...match, currentSet: { ...set, score } }));
+  }
+  return ok(
+    withCurrentMatch(state, {
+      ...match,
+      currentSet: { ...set, score, servingTeam: team },
+      rotations: rotateTeam(match.rotations, team),
+    }),
+  );
 };
 
 const applySetEnded: EventApplier<CourtSessionState> = (state, event) => {
@@ -107,11 +162,21 @@ const applySetEnded: EventApplier<CourtSessionState> = (state, event) => {
   if (match === null || set === null || opensSetPastTheFormat(match, setNumber, nextSet)) {
     return rejected();
   }
+  if (nextSet !== null && !hasZonesForTheRotations(match.rotations, nextSet.setterZones)) {
+    return rejected();
+  }
   return ok(
     withCurrentMatch(state, {
       ...match,
       completedSets: [...match.completedSets, { score: set.score, setNumber, winner }],
-      currentSet: nextSet === null ? null : emptySet(setNumber + 1, nextSet.targetPoints),
+      currentSet:
+        nextSet === null
+          ? null
+          : emptySet(setNumber + 1, nextSet.targetPoints, nextSet.firstServer),
+      rotations:
+        nextSet === null
+          ? match.rotations
+          : withRecordedZones(match.rotations, nextSet.setterZones),
       setsWon: { ...match.setsWon, [winner]: match.setsWon[winner] + 1 },
     }),
   );
@@ -127,12 +192,13 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
   if (match === null || (endReason === "sets-won" && match.currentSet !== null)) {
     return rejected();
   }
-  const { completedSets, currentSet, rulesVersion, scoring, setsWon, teams } = match;
+  const { completedSets, currentSet, rotations, rulesVersion, scoring, setsWon, teams } = match;
   const finishedMatch = {
     completedSets,
     currentSet,
     endReason,
     matchId,
+    rotations,
     rulesVersion,
     scoring,
     setsWon,

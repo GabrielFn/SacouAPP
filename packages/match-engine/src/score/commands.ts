@@ -9,8 +9,10 @@ import {
   SUPPORTED_RULES_VERSIONS,
 } from "./constants.data.js";
 import { parseMatchStartedPayload, parseScorePayload } from "./parse-payloads.js";
+import { getNextSetFirstServer } from "./rotation-rules.js";
 import { getMatchWinner, getSetWinner, targetPointsForSet } from "./scoring-rules.js";
 import type {
+  ConfirmSetEndOptions,
   CourtSessionState,
   MatchScore,
   MatchSet,
@@ -20,6 +22,8 @@ import type {
   ScoreEventDraft,
   ScoreEventType,
   ScoreRefusalCode,
+  SetterZones,
+  TeamRotations,
   TeamSide,
 } from "./types.js";
 
@@ -97,12 +101,35 @@ function finishPendingMatch({ matchId, scoring, setsWon }: MatchScore): ScoreCom
   return matchEnded.ok ? ok([matchEnded.value]) : matchEnded;
 }
 
-function endSet(match: MatchScore, { setNumber }: MatchSet, winner: TeamSide): ScoreCommandResult {
-  const { matchId, scoring, setsWon } = match;
+/**
+ * The rotation each team starts the next set in: it carries on from where it stopped, by decision
+ * of the product owner (ADR 0024). This is the only place that chooses it; the event records the
+ * result.
+ */
+function chooseNextSetZones({ a, b }: TeamRotations): SetterZones {
+  return { a: a?.setterZone ?? null, b: b?.setterZone ?? null };
+}
+
+function endSet(
+  match: MatchScore,
+  { firstServer, setNumber }: MatchSet,
+  winner: TeamSide,
+  options: ConfirmSetEndOptions,
+): ScoreCommandResult {
+  const { matchId, rotations, scoring, setsWon } = match;
   const setsWonAfter = { ...setsWon, [winner]: setsWon[winner] + 1 };
   const matchWinner = getMatchWinner(setsWonAfter, scoring.bestOf);
   const nextSet =
-    matchWinner === null ? { targetPoints: targetPointsForSet(scoring, setNumber + 1) } : null;
+    matchWinner === null
+      ? {
+          firstServer:
+            options.firstServer === undefined
+              ? getNextSetFirstServer(firstServer)
+              : options.firstServer,
+          setterZones: chooseNextSetZones(rotations),
+          targetPoints: targetPointsForSet(scoring, setNumber + 1),
+        }
+      : null;
   const setEnded = draftEvent(SET_ENDED_EVENT_TYPE, { matchId, nextSet, setNumber, winner });
   if (!setEnded.ok || matchWinner === null) {
     return setEnded.ok ? ok([setEnded.value]) : setEnded;
@@ -111,8 +138,15 @@ function endSet(match: MatchScore, { setNumber }: MatchSet, winner: TeamSide): S
   return matchEnded.ok ? ok([setEnded.value, matchEnded.value]) : matchEnded;
 }
 
-/** The two events of a deciding confirmation are stored together by the caller. */
-export function confirmSetEnd(state: CourtSessionState): ScoreCommandResult {
+/**
+ * The two events of a deciding confirmation are stored together by the caller. The next set
+ * alternates who serves first, unless the caller brings `firstServer` from the toss of a deciding
+ * set: the screen that holds the toss decides when to bring it (E4.10).
+ */
+export function confirmSetEnd(
+  state: CourtSessionState,
+  options: ConfirmSetEndOptions = {},
+): ScoreCommandResult {
   const match = state.currentMatch;
   if (match === null) {
     return refuse("no-open-match");
@@ -122,7 +156,7 @@ export function confirmSetEnd(state: CourtSessionState): ScoreCommandResult {
     return finishPendingMatch(match);
   }
   const winner = getSetWinner(set.score, set.targetPoints, match.scoring.winMargin);
-  return winner === null ? refuse("set-not-decided") : endSet(match, set, winner);
+  return winner === null ? refuse("set-not-decided") : endSet(match, set, winner, options);
 }
 
 /** Records the winner the caller decided: who wins an unfinished match is not a rule here. */

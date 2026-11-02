@@ -34,8 +34,10 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |
 | Saída parcial | `PartialExit` | |
 | Banco | `Bench` | |
-| Sacador | `ServingPlayer` | |
-| Side-out | `SideOut` | |
+| Sacador | `ServingPlayer` | Quem está na posição 1 (`getServingPlayer`) |
+| Time que saca | `servingTeam` | Lado que saca agora, no set aberto (ADR 0024) |
+| Primeiro saque do set | `firstServer` | Lado que sacou primeiro no set; base da alternância (ADR 0024) |
+| Side-out | `SideOut` | Regra derivada do estado, `isSideOut`; não é tipo de evento (ADR 0024) |
 | Desfazer (evento) | `RevertedTo` | Nunca apaga |
 | Versão do evento | `SchemaVersion` | |
 | Versão das regras da partida | `rulesVersion` | |
@@ -46,9 +48,9 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 |---|---|---|
 | Rotação / sistema de rotação | `Rotation` / `RotationSystem` | |
 | Rotação atual | `RotationIndex` | |
-| Id interno da rotação | `setterZone` | Zona do levantador |
+| Id interno da rotação | `setterZone` | Zona do levantador. Na Livre, sem levantador, é a zona do primeiro da escalação (ADR 0024) |
 | Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
-| Estado do time | `TeamState` | Sistema, escalação, levantador, rotação atual e banco |
+| Estado do time | `TeamState` | Hoje `lineup` e `setterZone` (E2.3); sistema, funções e banco entram nas E2.4 e E2.5. `null` em `rotations` é rotação desligada (ADR 0024) |
 | Posição atual na quadra (1–6) | `RotationSlot` | Muda a cada giro. Não é o índice fixo na escalação. Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
 | Posição no saque | `ServeAlignment` | |

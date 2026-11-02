@@ -1,4 +1,4 @@
-import type { Result } from "@sacou/volley-rules";
+import type { Result, SetterZone } from "@sacou/volley-rules";
 
 import type {
   BEST_OF_VALUES,
@@ -57,14 +57,42 @@ export interface SetsWon {
   readonly b: number;
 }
 
+/**
+ * The part of a team that changes during a match; `teams` stays the frozen copy of the event.
+ * `lineup` has six members anchored on the setter: `lineup[0]` is the setter and the others follow
+ * in ascending position, so a rotation only changes `setterZone`. In the free system, which has no
+ * setter, `setterZone` is the zone of the first member of the lineup.
+ */
+export interface TeamState {
+  readonly lineup: readonly MemberId[];
+  readonly setterZone: SetterZone;
+}
+
+/** `null` turns the rotation off for that team: a team without six players has it off. */
+export interface TeamRotations {
+  readonly a: TeamState | null;
+  readonly b: TeamState | null;
+}
+
+export interface SetterZones {
+  readonly a: SetterZone | null;
+  readonly b: SetterZone | null;
+}
+
 export interface MatchStartedPayload {
+  readonly firstServer: TeamSide;
   readonly matchId: string;
+  readonly rotations: TeamRotations;
   readonly rulesVersion: number;
   readonly scoring: ScoringRules;
   readonly teams: MatchTeams;
 }
 
-/** Records no absolute score: two interleaved writers would otherwise lock the stream. */
+/**
+ * Records no absolute score and no rotation: two interleaved writers would otherwise lock the stream.
+ * The side-out is derived from the state, and that transition is part of what this event means in
+ * schema 1 (ADR 0024).
+ */
 export interface PointScoredPayload {
   readonly matchId: string;
   readonly setNumber: number;
@@ -72,6 +100,8 @@ export interface PointScoredPayload {
 }
 
 export interface NextSet {
+  readonly firstServer: TeamSide;
+  readonly setterZones: SetterZones;
   readonly targetPoints: number;
 }
 
@@ -93,7 +123,9 @@ export type ScorePayload =
 
 /** An open set. Named so it does not collide with the JavaScript `Set`. */
 export interface MatchSet {
+  readonly firstServer: TeamSide;
   readonly score: SetScore;
+  readonly servingTeam: TeamSide;
   readonly setNumber: number;
   readonly targetPoints: number;
 }
@@ -108,6 +140,7 @@ export interface MatchScore {
   readonly completedSets: readonly CompletedMatchSet[];
   readonly currentSet: MatchSet | null;
   readonly matchId: string;
+  readonly rotations: TeamRotations;
   readonly rulesVersion: number;
   readonly scoring: ScoringRules;
   readonly setsWon: SetsWon;
@@ -145,11 +178,23 @@ export type ScorePayloadField =
   | "teams.a.memberIds"
   | "teams.b"
   | "teams.b.memberIds"
+  | "firstServer"
+  | "rotations"
+  | "rotations.a"
+  | "rotations.a.lineup"
+  | "rotations.a.setterZone"
+  | "rotations.b"
+  | "rotations.b.lineup"
+  | "rotations.b.setterZone"
   | "setNumber"
   | "team"
   | "winner"
   | "nextSet"
   | "nextSet.targetPoints"
+  | "nextSet.firstServer"
+  | "nextSet.setterZones"
+  | "nextSet.setterZones.a"
+  | "nextSet.setterZones.b"
   | "endReason";
 
 /** Carries only a path from the schema, never a received key or value. */
@@ -173,6 +218,11 @@ export type ScoreCommandError = ScorePayloadError | { readonly code: ScoreRefusa
 export interface ScoreEventDraft {
   readonly type: ScoreEventType;
   readonly payload: ScorePayload;
+}
+
+/** `firstServer` is the toss of a deciding set: the pure engine has no randomness of its own. */
+export interface ConfirmSetEndOptions {
+  readonly firstServer?: TeamSide;
 }
 
 export type ScoreCommandResult = Result<readonly ScoreEventDraft[], ScoreCommandError>;
