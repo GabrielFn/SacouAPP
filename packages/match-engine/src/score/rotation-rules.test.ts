@@ -94,9 +94,7 @@ function allSequences(length: number): readonly (readonly TeamSide[])[] {
 
 describe("the sequence of zones", () => {
   test("is the rotation order of the 5x1 in the formations catalog", () => {
-    expect(FORMATION_CATALOG.systems["5x1"].rotationOrder).toStrictEqual([
-      ...SETTER_ZONE_SEQUENCE,
-    ]);
+    expect(FORMATION_CATALOG.systems["5x1"].rotationOrder).toStrictEqual([...SETTER_ZONE_SEQUENCE]);
   });
 });
 
