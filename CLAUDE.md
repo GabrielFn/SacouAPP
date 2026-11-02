@@ -29,7 +29,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 ## Ritual de sessão (obrigatório)
 
 1. **Início:** ler este arquivo, `docs/estado/progresso.md`, o último diário em `docs/estado/sessoes/` e `docs/estado/perguntas.md`. Só então escolher a próxima tarefa do backlog (`docs/plano-mvp.md`), respeitando as dependências.
-2. **Durante:** decisão técnica relevante vira ADR; regra nova vai para `docs/dominio/`; superfície de ataque nova atualiza `docs/seguranca/modelo-de-ameacas.md`; dado pessoal novo vai para `docs/seguranca/dados-pessoais.md`.
+2. **Durante:** decisão técnica relevante vira ADR; regra nova vai para `docs/dominio/`; superfície de ataque nova atualiza `docs/seguranca/modelo-de-ameacas.md`; dado pessoal novo vai para `docs/seguranca/dados-pessoais.md`. **Salvamento contínuo** (pedido do Gabriel): o trabalho precisa sobreviver a um desligamento do computador ou ao fim do limite do plano, sem parar a sessão. Desenvolvedores fazem commit e push da própria branch a cada etapa, no máximo a cada 20 minutos (`wip(...)` é aceito, pois o merge é squash). O orquestrador atualiza `progresso.md` e o diário com o próximo passo exato a cada marco de tarefa, e antes disso sempre que o uso do plano passar de 80%.
 3. **Fim:** escrever o diário da sessão com o **próximo passo exato**, atualizar `progresso.md` e fazer commit. Nenhuma sessão termina com trabalho fora do repositório.
 
 ## Ciclo de agentes por tarefa

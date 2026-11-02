@@ -21,6 +21,13 @@
 | E2.1 | Feita | ADR 0022. Revisor e testador aprovaram; a segurança reprovou um travamento, corrigido com `MAX_PAYLOAD_NODES` e reconferido em `8d179e3` (bateria incompleta: 3 casos sem rodar e 3 sem medição válida, ver pendências). Oráculo independente na primeira versão do golden. |
 | E2.2 | Feita | ADR 0023 e `docs/dominio/placar.md`. A segurança reprovou o ciclo 1 por falta de memória em log hostil, corrigida com `MAX_FINISHED_MATCHES` e reconferida com medição. Revisor com oráculo próprio: 377 casos, 0 divergências. Testador passou, com 766 testes no `match-engine`. Citar no relatório do M2: limites de 1 a 99, 24 membros e 200 partidas por stream, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
 
+## Em andamento
+
+- E2.3 (front): branch `task/E2.3-serve-rotation`, worktree `.claude/worktrees/agent-a8e5ea96aa7a9ad7e`. Plano em `docs/estado/tarefas/E2.3.md`, ADR 0024. Sensível: passa pelo `revisor-seguranca`.
+- E1.5 (back): branch `task/E1.5-shared-json-csharp`, worktree `.claude/worktrees/e1-5`. Plano em `docs/estado/tarefas/E1.5.md`, ADR 0025. Não sensível.
+
+Se a sessão cair, retome pelo último commit de cada branch; os passos estão no diário de 02/11/2026.
+
 ## Adiadas
 
 - E0.7: tarefa agendada. Adiada pelo Gabriel em 30/10/2026: por enquanto as sessões são abertas manualmente.
