@@ -20,11 +20,11 @@
 | E1.4 | Feita | Revisor, revisor de segurança e testador aprovaram em `8e84e71`; ajustes pontuais pedidos por eles lidos pelo orquestrador, com CI verde. Normalização em `docs/dominio/pix.md`: citar no relatório do M2. |
 | E2.1 | Feita | ADR 0022. Revisor e testador aprovaram; a segurança reprovou um travamento, corrigido com `MAX_PAYLOAD_NODES` e reconferido em `8d179e3` (bateria incompleta: 3 casos sem rodar e 3 sem medição válida, ver pendências). Oráculo independente na primeira versão do golden. |
 | E2.2 | Feita | ADR 0023 e `docs/dominio/placar.md`. A segurança reprovou o ciclo 1 por falta de memória em log hostil, corrigida com `MAX_FINISHED_MATCHES` e reconferida com medição. Revisor com oráculo próprio: 377 casos, 0 divergências. Testador passou, com 766 testes no `match-engine`. Citar no relatório do M2: limites de 1 a 99, 24 membros e 200 partidas por stream, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
+| E1.5 | Feita | ADR 0025. Formações, validador e cartinha em C#, com os mesmos golden. Revisor aprovou; o testador passou, com oráculo TS × C#: 291 linhas, 0 diferenças, e a API publicada lê o catálogo da DLL. O orquestrador fechou dois restos do desenvolvedor (`AllowedDomainTypes` e o caso da chave com escape), lidos pelo revisor. Fecha o B3 e o B4 da revisão do M1. |
 
 ## Em andamento
 
 - E2.3 (front): branch `task/E2.3-serve-rotation`, worktree `.claude/worktrees/agent-a8e5ea96aa7a9ad7e`. Plano em `docs/estado/tarefas/E2.3.md`, ADR 0024. Sensível: passa pelo `revisor-seguranca`.
-- E1.5 (back): branch `task/E1.5-shared-json-csharp`, worktree `.claude/worktrees/e1-5`. Plano em `docs/estado/tarefas/E1.5.md`, ADR 0025. Não sensível.
 
 Se a sessão cair, retome pelo último commit de cada branch; os passos estão no diário de 02/11/2026.
 
@@ -38,13 +38,14 @@ Se a sessão cair, retome pelo último commit de cada branch; os passos estão n
 - CI: rodar sempre `pnpm install --frozen-lockfile` antes do Turbo: editar o `pnpm-lock.yaml` sem reinstalar não invalida o cache.
 - E2.4: em `serving`, `liberoReplaces` não significa líbero em quadra (ADR 0006).
 - Revisão do M1, A4: a E2.1 só entra na `main` com teste de esquema fechado do envelope e nomes proibidos; a regra em C#, por reflexão, fica na E2.10 ou E3.7.
-- Revisão do M1, B3 e B4: lockfile e mapeamento de fontes do NuGet antes do primeiro pacote de produção; estreitar os namespaces permitidos antes do primeiro código de domínio em C#.
 - Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
-- E1.5: portar também o validador de sobreposição, com testes próprios de `NaN` e `Infinity` (ADR 0021).
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
 - E3.10: validar tipo e formato na fronteira, conferir o dígito verificador de CPF e CNPJ e mostrar tipo e chave para confirmação; confirmar se chave de e-mail aceita maiúsculas (Manual do DICT).
 - E2.1, pendências: o orçamento conta nós, não bytes, então o corpo precisa de limite antes do parser (E3.7); com referências compartilhadas, chaves muito longas chegam a 18,7 s de CPU, o que não ocorre por JSON; `cloneArray` deveria percorrer por índice, em vez de `Array.from`, por causa de iterador próprio; chaves com forma de inteiro saem em ordem numérica, então parsers por tipo não devem usá-las; a regra equivalente em C#, por reflexão, fica na E2.10 ou E3.7. Casos não medidos: iterador infinito, Proxy com `length` falso e getter que lança.
 - E2.2, pendências: `score/index.ts` usa `export *` e expõe `MAJORITY_DIVISOR` e `SCORE_PAYLOAD_SHAPES` (estreitar antes de a E3.7 consumir); E3.7: UUID sem conferência de versão deixa `matchId`, `eventId` e `deviceId` carregarem 16 bytes arbitrários; projeções e Stats usam `(courtSessionId, matchId)`, porque `matchId` só é único no stream; E4: placar sem teto chega a 300–0 num log hostil, e a tela mostra dois dígitos; E2.10: conferir o custo de cópia de `List` em C#, e Hermes não foi medido. Revisão do M2: atualizar o `checklist.md` com o motor e a frase da linha 5 de `modelo-de-ameacas.md`. E3.7: o critério em `plano-mvp.md:138` não cita as conferências novas, então o analista parte do ADR 0023 e da seção 3 do modelo de ameaças. `parse-envelope.test.ts` ainda confere `elapsed < 1000 ms`: não falhou sob carga, mas depende de tempo.
+- E3.10: se a geração do Pix ficar na API, portar o gerador e rodar `pix.json` e `pix-crc.json` em C# (ADR 0025).
+- E5.1: o contexto da imagem precisa levar `packages/volley-rules/`, porque o build embute o catálogo na DLL (ADR 0025).
+- E1.5, ressalvas não bloqueantes: `ModulesAndShared` (`Assemblies.cs:29`) não inclui `Sacou.Api`, então um golden embutido na API passaria; `TestResourceViolations` só olha o prefixo do `Include`, então `golden/../x.json` passaria. Não rodados pelo testador: tabela de `Infinity` em Node e sabotagem de renomear o catálogo.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 

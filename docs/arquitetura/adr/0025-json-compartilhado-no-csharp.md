@@ -24,7 +24,7 @@
 |---|---|
 | `25.0`, `2.5e1`, `1e0` | Sempre `TryGetDouble` e comparar com a lista permitida, nunca `GetInt32`. Vale para `rotationOrder` e, nos testes, para `rotation`, `levelTenths` e `rating` |
 | Número enorme | `ValueKind`, `TryGetDouble` e `double.IsFinite` juntos: `1e400` dá `Infinity`, como no JS, e é recusado |
-| Chave repetida | **O C# recusa, o JS fica com a última.** `AllowDuplicateProperties = false`, em produção e nos testes. Os dois leem o mesmo arquivo na mesma CI, então o resultado é reprovação, nunca divergência silenciosa. A detecção pega a chave escrita com escape (`"x"` e `"x"`), com teste. Vale só para estes arquivos confiáveis: **a E2.10 decide à parte para eventos recebidos** |
+| Chave repetida | **O C# recusa, o JS fica com a última.** `AllowDuplicateProperties = false`, em produção e nos testes. Os dois leem o mesmo arquivo na mesma CI, então o resultado é reprovação, nunca divergência silenciosa. A detecção pega a chave escrita com escape (`"x"` e `"\u0078"`), com teste. Vale só para estes arquivos confiáveis: **a E2.10 decide à parte para eventos recebidos** |
 | Ordem das chaves | A saída percorre listas fixas. `EnumerateObject` só detecta chave desconhecida, e o `ImmutableDictionary` nunca é enumerado para produzir saída |
 | Chave desconhecida | Recusada só em mapas e ignorada em objetos, nos mesmos lugares do TS. Por isso não há `JsonSerializer` |
 | Ponto flutuante | `double` em tudo, igualdade por bits. Nada de `decimal`, `float`, `Math.Round` ou precisão em `Assert.Equal` |
@@ -50,6 +50,7 @@ Comparar namespace exato não bastava, porque `System` contém tanto `Guid` quan
 
 ### Limites aceitos
 
+- `MemoryMarshal`, `CollectionsMarshal` e `ImmutableCollectionsMarshal` estão liberados por nome porque o compilador os emite em expressões de coleção. A regra de IL não distingue esse uso do escrito à mão: um uso manual no domínio poderia furar um `ImmutableArray`, e quem barra é o revisor.
 - `System.Type` segue liberado, porque os records o usam em `EqualityContract`, então `Type.GetType(...).InvokeMember` passa.
 - `Thread` e `Task.Run` em `System.Threading*`, `DateTime.Now`, `Random` e `Guid.NewGuid` seguem liberados. Determinismo no C# é assunto da E2.10.
 - O parser C# é uma segunda implementação de `parse-catalog.ts`. A CI reprova se os dois divergirem no arquivo real, mas não garante a mesma rejeição em arquivos corrompidos fora dos casos de teste.
