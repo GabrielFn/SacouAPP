@@ -1,6 +1,6 @@
 # Inventário de dados pessoais (LGPD)
 
-Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra, e o parser do envelope (E2.1), que confere o formato do ID do celular e não o guarda nem registra. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
+Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardado ainda; o único código que já toca um deles é o gerador puro do Pix (E1.4), que recebe a chave e não a guarda nem registra; o parser do envelope (E2.1), que confere o formato do ID do celular e não o guarda nem registra; e o parser do placar (E2.2), que lê `MemberId` em `teams` e, com os aplicadores e os comandos, só o mantém no estado em memória ou o devolve no evento emitido, sem gravar nem registrar. Decisões no [ADR 0012](../arquitetura/adr/0012-personal-data-member-id.md).
 
 **Pendências do Gabriel, em [`perguntas.md`](../estado/perguntas.md):**
 
@@ -29,7 +29,7 @@ Registra o que os documentos preveem. Nenhum desses dados é coletado ou guardad
 | Vínculo com o grupo, papel, mensalista ou avulso (`MemberId`) | Postgres (Neon) | Organização e autorização | `decisoes.md:10, 28` | Histórico como "Ex-jogador" (`decisoes.md:28`) |
 | Convidado sem conta (nome informado pelo admin) | Postgres (Neon) | Incluir quem não instalou | `produto.md:64, 224` | Sem conta para excluir: pedido e aviso a definir na E3.5 e na E6.2 |
 | Presença e lista de espera | Postgres (Neon) | Rodada | `produto.md:64` | Histórico como "Ex-jogador" |
-| Eventos da quadra | Postgres (Neon) e expo-sqlite no aparelho | Placar, fila, desfazer. **Objetivo: só IDs, nenhum dado pessoal.** Não é o que o código impõe hoje: o envelope é fechado, mas `payload` e `type` podem carregar dado pessoal até existirem os parsers por tipo (E2.2+) | `decisoes.md:26, 28`; `decisoes.md:29` | Eventos ficam; apontam para `MemberId` |
+| Eventos da quadra | Postgres (Neon) e expo-sqlite no aparelho | Placar, fila, desfazer. **Objetivo: só IDs, nenhum dado pessoal.** O código já impõe isso para `MatchStarted`, `PointScored`, `SetEnded` e `MatchEnded` (E2.2: esquema fechado, só UUID e valores fixos, com `MemberId` em `teams`). Ressalva: `rulesVersion` é inteiro livre até 2^53−1 no parser, e a E3.7 confere a versão na escrita. Para os tipos das E2.3+, ainda não: o envelope é fechado, mas `payload` e `type` podem carregar dado pessoal até cada tipo ter parser | `decisoes.md:26, 28`; `decisoes.md:29` | Eventos ficam; apontam para `MemberId` |
 | ID do celular no envelope do evento (`deviceId`): identificador online, tratado como potencialmente pessoal. UUID aleatório por instalação, gerado fora do motor (E4.9), nunca IMEI, Android ID, `identifierForVendor` ou token de push. Autoria não entra no evento | Postgres (Neon) e expo-sqlite | Ordem e sincronização | `decisoes.md:26`; ADR 0022 | A definir na E6.2 (se identifica a pessoa) |
 | Estatísticas, MVP e projeções | Postgres (Neon) | Cartinha, ranking e resumo | `revisao-mvp.md:111` | Histórico como "Ex-jogador" |
 | Resumo da rodada com IA | A definir na E3.13 | Compartilhar | `produto.md:70` | A definir na E3.13 |

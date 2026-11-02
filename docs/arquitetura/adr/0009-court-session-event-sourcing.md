@@ -26,4 +26,5 @@ A fila e as saídas parciais atravessam partidas, então um stream por partida n
 - Os testes golden compartilhados mantêm o estado igual em TS e C# (`produto.md:315`, E2.10).
 - Como o servidor aplica o resultado que recebe, a validação do que chega é um ponto aberto do [modelo de ameaças](../../seguranca/modelo-de-ameacas.md).
 - **Envelope e função de estado:** definidos no [ADR 0022](0022-event-envelope-replay.md).
-- **A definir:** catálogo de eventos (E2.2 a E2.8); tratamento de conflito na sincronização (E3.7).
+- **Catálogo de eventos:** placar no [ADR 0023](0023-placar-e-catalogo-de-eventos.md) e em [`eventos.md`](../../dominio/eventos.md) (E2.2).
+- **A definir:** o resto do catálogo (E2.3 a E2.8); tratamento de conflito na sincronização (E3.7).

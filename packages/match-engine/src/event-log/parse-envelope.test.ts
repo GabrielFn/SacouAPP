@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { ENVELOPE_FIELDS, MAX_PAYLOAD_DEPTH, MAX_PAYLOAD_NODES } from "./constants.data.js";
 import { parseEventEnvelope } from "./parse-envelope.js";
 import type { EventEnvelope } from "./types.js";
+import { VOLUME_TEST_TIMEOUT_MS } from "./volume-test-timeout.test.fixture.js";
 
 const VALID = {
   eventId: "e0000000-0000-4000-8000-000000000001",
@@ -189,19 +190,23 @@ describe("payload node budget", () => {
     ["a self-referencing object", selfReferencing],
     ["a huge empty array", () => new Array<unknown>(HUGE_LENGTH)],
     ["a wide object shared many times", wideSharedObjects],
-  ])("rejects %s in a short time", (_label, build) => {
-    const raw = { ...VALID, payload: { value: build() } };
+  ])(
+    "rejects %s in a short time",
+    (_label, build) => {
+      const raw = { ...VALID, payload: { value: build() } };
 
-    const startedAt = performance.now();
-    const result = parseEventEnvelope(raw);
-    const elapsed = performance.now() - startedAt;
+      const startedAt = performance.now();
+      const result = parseEventEnvelope(raw);
+      const elapsed = performance.now() - startedAt;
 
-    expect(result).toStrictEqual({
-      ok: false,
-      error: { code: "invalid-envelope", field: "payload" },
-    });
-    expect(elapsed).toBeLessThan(SHORT_TIME_MS);
-  });
+      expect(result).toStrictEqual({
+        ok: false,
+        error: { code: "invalid-envelope", field: "payload" },
+      });
+      expect(elapsed).toBeLessThan(SHORT_TIME_MS);
+    },
+    VOLUME_TEST_TIMEOUT_MS,
+  );
 
   test("accepts a small DAG, which stays a plain copy", () => {
     const payload = parsedPayload({ ...VALID, payload: { value: dag(2) } });
