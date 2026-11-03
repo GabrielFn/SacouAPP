@@ -20,7 +20,7 @@ import {
   SWAPPED_PAIR_ROLES,
   ZONE_FORMATIONS,
 } from "./constants.data.js";
-import { getLineupBySlot } from "./rotation-rules.js";
+import { getLiberoSlot, getLineupBySlot } from "./rotation-rules.js";
 import type {
   MatchScore,
   MemberId,
@@ -36,7 +36,10 @@ function fromSlots<T>(readSlot: (slot: RotationSlot, index: number) => T) {
   ) as Record<RotationSlot, T>;
 }
 
-/** With the libero off, the slot of the libero belongs to the member the libero would replace. */
+/**
+ * Where the libero is out, the slot of the libero in the catalog belongs to the member the libero
+ * would replace. Who is out is derived from the zone, never from `liberoReplaces` (ADR 0028).
+ */
 function roleWithLiberoOff({ liberoReplaces, slots }: Formation, slot: RotationSlot): PlayerRole {
   const { role } = slots[slot];
   // The catalog has a libero only in formations that say whom the libero replaces.
@@ -53,26 +56,36 @@ function findActingSetter(
   return lineupBySlot[index] as MemberId;
 }
 
+function roleInTheZone(formation: Formation, slot: RotationSlot, swapPairs: boolean): PlayerRole {
+  const role = roleWithLiberoOff(formation, slot);
+  return swapPairs ? (SWAPPED_PAIR_ROLES[role] ?? role) : role;
+}
+
 /**
  * The formation is chosen by the zone of the lineup, and the members stand where the lineup puts
- * them. Reads the current catalog: it is for a team state of this version of the app, and
- * `getTeamServeAlignment` is what checks the version of a recorded match.
+ * them; the libero takes the point of the member it covers. Reads the current catalog: it is for a
+ * team state of this version of the app, and `getTeamServeAlignment` is what checks the version of
+ * a recorded match.
  */
 export function getServeAlignment(
-  { lineup, setterZone, system }: Pick<TeamState, "lineup" | "setterZone" | "system">,
+  teamState: Pick<TeamState, "libero" | "lineup" | "setterZone" | "system">,
   phase: FormationPhase,
 ): ServeAlignment {
+  const { libero, lineup, setterZone, system } = teamState;
   const { formationKey, swapPairs } = ZONE_FORMATIONS[system][setterZone];
   // The table only has keys of the catalog, and a test holds it to `rotationOrder`.
   const formation = getFormation(system, formationKey, phase) as Formation;
   const lineupBySlot = getLineupBySlot(lineup, setterZone);
+  const liberoSlot = getLiberoSlot(teamState, phase);
   const slots = fromSlots<ServeAlignmentSlot>((slot, index) => {
-    const role = roleWithLiberoOff(formation, slot);
-    return {
-      memberId: lineupBySlot[index] as MemberId,
-      role: swapPairs ? (SWAPPED_PAIR_ROLES[role] ?? role) : role,
-      point: formation.slots[slot].point,
-    };
+    const { point } = formation.slots[slot];
+    return libero !== null && slot === liberoSlot
+      ? { memberId: libero.memberId, role: LIBERO_ROLE, point }
+      : {
+          memberId: lineupBySlot[index] as MemberId,
+          role: roleInTheZone(formation, slot, swapPairs),
+          point,
+        };
   });
   return {
     system,

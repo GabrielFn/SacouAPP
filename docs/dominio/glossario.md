@@ -54,7 +54,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Estado do time | `TeamState` | `bench`, `lineup`, `setterZone` e `system` (E2.3 a E2.5). A função vem do índice no `lineup` (ADR 0026). `null` em `rotations` é rotação desligada (ADR 0024) |
 | Posição atual na quadra (1–6) | `RotationSlot` | Muda a cada giro. Não é o índice fixo na escalação. Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
-| Posição no saque | `ServeAlignment` | Quem fica em cada `RotationSlot`, com função e `CourtPoint`, mais `actingSetter`. Com líbero desligado, nenhum slot tem `L` (ADR 0026) |
+| Posição no saque | `ServeAlignment` | Quem fica em cada `RotationSlot`, com função e `CourtPoint`, mais `actingSetter`. Só o slot em que o líbero está tem `L`; com o líbero desligado ou fora, nenhum (ADR 0026, ADR 0028) |
 | Quem levanta | `actingSetter` | `MemberId` de quem levanta naquela rotação: o único no 5x1, o do fundo no 6x2, o da rede no 4x2, quem está na posição 3 na Livre (ADR 0026) |
 | Versão do catálogo de formações | `formationsVersion` | Gravada no `MatchStarted`. O catálogo é imutável por versão (ADR 0026) |
 | Formação | `Formation` | Resultado por fase (ADR 0006) |

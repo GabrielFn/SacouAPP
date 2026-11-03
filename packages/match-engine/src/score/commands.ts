@@ -15,7 +15,7 @@ import {
   parseMatchStartedPayload,
   parseScorePayload,
 } from "./parse-payloads.js";
-import { getNextSetFirstServer, isRosterPartition } from "./rotation-rules.js";
+import { getNextSetFirstServer, isLiberoAllowed, isRosterPartition } from "./rotation-rules.js";
 import { getMatchWinner, getSetWinner, targetPointsForSet } from "./scoring-rules.js";
 import type {
   ConfirmSetEndOptions,
@@ -32,6 +32,8 @@ import type {
   ScorePayloadField,
   ScoreRefusalCode,
   SetterZones,
+  TeamLibero,
+  TeamRoster,
   TeamRotations,
   TeamSide,
   TeamState,
@@ -191,12 +193,35 @@ function isSameOrder(first: readonly MemberId[], second: readonly MemberId[]): b
   return first.length === second.length && first.every((id, index) => id === second[index]);
 }
 
+function isSameLibero(first: TeamLibero | null, second: TeamLibero | null): boolean {
+  if (first === null || second === null) {
+    return first === second;
+  }
+  return (
+    first.memberId === second.memberId &&
+    first.replacedIndexes.length === second.replacedIndexes.length &&
+    first.replacedIndexes.every((index, position) => index === second.replacedIndexes[position])
+  );
+}
+
 function isSameAllocation(teamState: TeamState, allocation: LineupAllocation): boolean {
   return (
     teamState.setterZone === allocation.setterZone &&
     isSameOrder(teamState.lineup, allocation.lineup) &&
-    isSameOrder(teamState.bench, allocation.bench)
+    isSameOrder(teamState.bench, allocation.bench) &&
+    isSameLibero(teamState.libero, allocation.libero)
   );
+}
+
+/** The field to blame when the allocation is not the team: lineup, then libero, then bench. */
+function partitionField(
+  { lineup, libero }: LineupAllocation,
+  { memberIds }: TeamRoster,
+): ScorePayloadField {
+  if (!lineup.every((id) => memberIds.includes(id))) {
+    return "lineup";
+  }
+  return libero === null || memberIds.includes(libero.memberId) ? "bench" : "libero";
 }
 
 function recordAllocation(
@@ -209,11 +234,13 @@ function recordAllocation(
   if (!parsed.ok) {
     return parsed;
   }
-  const { bench, lineup } = parsed.value;
+  const { bench, libero, lineup } = parsed.value;
   const roster = teams[team];
-  if (!isRosterPartition(lineup, bench, roster)) {
-    const isLineupOfTheTeam = lineup.every((id) => roster.memberIds.includes(id));
-    return invalidField(isLineupOfTheTeam ? "bench" : "lineup");
+  if (!isRosterPartition(lineup, bench, libero, roster)) {
+    return invalidField(partitionField(parsed.value, roster));
+  }
+  if (!isLiberoAllowed(teamState.system, libero)) {
+    return invalidField("libero");
   }
   return isSameAllocation(teamState, parsed.value)
     ? refuse("lineup-unchanged")
@@ -239,7 +266,8 @@ function withOpenTeam(
 
 /**
  * Saves the whole allocation of a team, as screen 22 has it: a swap between two members on the
- * court, the rotation selector or a new anchor of the setter. `system` does not change in a match.
+ * court, the rotation selector, a new anchor of the setter, or another libero, or none. `system` does
+ * not change in a match.
  */
 export function changeLineup(
   state: CourtSessionState,
@@ -253,7 +281,8 @@ export function changeLineup(
 
 /**
  * The member who comes in takes the position of the one who goes out, and the zone stays. The rest
- * of the bench keeps its order, and the member who goes out goes to the end of it.
+ * of the bench keeps its order, and the member who goes out goes to the end of it. The libero stays,
+ * and covers whoever comes into a position it covers, because it covers positions, not members.
  */
 export function substitutePlayer(
   state: CourtSessionState,
@@ -262,7 +291,7 @@ export function substitutePlayer(
   incoming: MemberId,
 ): ScoreCommandResult {
   return withOpenTeam(state, team, (match, teamState) => {
-    const { bench, lineup, setterZone } = teamState;
+    const { bench, libero, lineup, setterZone } = teamState;
     if (!lineup.includes(outgoing)) {
       return invalidField("lineup");
     }
@@ -271,6 +300,7 @@ export function substitutePlayer(
     }
     return recordAllocation(match, teamState, team, {
       bench: [...bench.filter((id) => id !== incoming), outgoing],
+      libero,
       lineup: lineup.map((id) => (id === outgoing ? incoming : id)),
       setterZone,
     });

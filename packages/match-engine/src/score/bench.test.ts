@@ -151,6 +151,7 @@ describe("substitutePlayer", () => {
 
     expect(player.team("a")).toStrictEqual({
       bench: [G, D],
+      libero: null,
       lineup: [A, B, C, H, E, F],
       setterZone: 4,
       system: "5x1",
@@ -257,7 +258,12 @@ describe("substitutePlayer", () => {
 describe("changeLineup", () => {
   test("screen 22: a swap of two on the court, with the bench untouched and a new zone", () => {
     const player = createPlayer({ teamSize: 7 });
-    const allocation = { bench: [G], lineup: [A, B, D, C, E, F], setterZone: 4 as const };
+    const allocation = {
+      bench: [G],
+      libero: null,
+      lineup: [A, B, D, C, E, F],
+      setterZone: 4 as const,
+    };
 
     expect(changeLineup(player.state(), "a", allocation)).toStrictEqual({
       ok: true,
@@ -273,7 +279,7 @@ describe("changeLineup", () => {
 
     const { bench, lineup } = player.team("a");
 
-    player.run((state) => changeLineup(state, "a", { bench, lineup, setterZone: 3 }));
+    player.run((state) => changeLineup(state, "a", { bench, libero: null, lineup, setterZone: 3 }));
 
     expect(player.team("a").setterZone).toBe(3);
   });
@@ -282,7 +288,9 @@ describe("changeLineup", () => {
     const player = createPlayer({ teamSize: 8 });
     const { lineup, setterZone } = player.team("a");
 
-    player.run((state) => changeLineup(state, "a", { bench: [H, G], lineup, setterZone }));
+    player.run((state) =>
+      changeLineup(state, "a", { bench: [H, G], libero: null, lineup, setterZone }),
+    );
 
     expect(player.team("a").bench).toStrictEqual([H, G]);
   });
@@ -301,30 +309,42 @@ describe("changeLineup", () => {
     const player = createPlayer({ teamSize: 8 });
     const { bench, lineup, setterZone } = player.team("a");
 
-    expect(refusal(changeLineup(player.state(), "a", { bench, lineup, setterZone }))).toStrictEqual(
-      { code: "lineup-unchanged" },
-    );
+    expect(
+      refusal(changeLineup(player.state(), "a", { bench, libero: null, lineup, setterZone })),
+    ).toStrictEqual({ code: "lineup-unchanged" });
   });
 
   test.each([
-    ["a member left out", { bench: [G], lineup: ORANGE_LINEUP, setterZone: 1 }, "bench"],
+    [
+      "a member left out",
+      { bench: [G], libero: null, lineup: ORANGE_LINEUP, setterZone: 1 },
+      "bench",
+    ],
     [
       "an outsider on the bench",
-      { bench: [G, OUTSIDER], lineup: ORANGE_LINEUP, setterZone: 1 },
+      { bench: [G, OUTSIDER], libero: null, lineup: ORANGE_LINEUP, setterZone: 1 },
       "bench",
     ],
     [
       "an outsider in the lineup",
-      { bench: [G, H], lineup: [OUTSIDER, B, C, D, E, F], setterZone: 1 },
+      { bench: [G, H], libero: null, lineup: [OUTSIDER, B, C, D, E, F], setterZone: 1 },
       "lineup",
     ],
     [
       "the bench overlaps the lineup",
-      { bench: [G, A], lineup: ORANGE_LINEUP, setterZone: 1 },
+      { bench: [G, A], libero: null, lineup: ORANGE_LINEUP, setterZone: 1 },
       "bench",
     ],
-    ["five in the lineup", { bench: [F, G, H], lineup: [A, B, C, D, E], setterZone: 1 }, "lineup"],
-    ["an invalid zone", { bench: [G, H], lineup: ORANGE_LINEUP, setterZone: 7 }, "setterZone"],
+    [
+      "five in the lineup",
+      { bench: [F, G, H], libero: null, lineup: [A, B, C, D, E], setterZone: 1 },
+      "lineup",
+    ],
+    [
+      "an invalid zone",
+      { bench: [G, H], libero: null, lineup: ORANGE_LINEUP, setterZone: 7 },
+      "setterZone",
+    ],
   ])("refuses %s", (_, allocation, field) => {
     const player = createPlayer({ teamSize: 8 });
 
@@ -334,7 +354,12 @@ describe("changeLineup", () => {
   });
 
   test("refuses without an open match, after the end, and with the rotation off", () => {
-    const allocation = { bench: [A], lineup: [G, B, C, D, E, F], setterZone: 1 as const };
+    const allocation = {
+      bench: [A],
+      libero: null,
+      lineup: [G, B, C, D, E, F],
+      setterZone: 1 as const,
+    };
     expect(refusal(changeLineup(INITIAL_COURT_SESSION_STATE, "a", allocation))).toStrictEqual({
       code: "no-open-match",
     });
@@ -356,7 +381,7 @@ describe("the rotation off has no bench", () => {
   test("the replay rejects the change, and the other team goes on", () => {
     const player = createPlayer({ teamSize: 7, zones: [null, 1] });
     const forged = toEnvelope(
-      lineupEvent("a", { bench: [A], lineup: [G, B, C, D, E, F], setterZone: 1 }),
+      lineupEvent("a", { bench: [A], libero: null, lineup: [G, B, C, D, E, F], setterZone: 1 }),
       player.events().length + 1,
     );
 
@@ -392,10 +417,13 @@ describe("the serve alignment after a substitution", () => {
   test.each(combinations)(
     "$system zone $setterZone $phase, out $outgoing",
     ({ system, setterZone, phase, outgoing }) => {
-      const before = getServeAlignment({ lineup: ORANGE_LINEUP, setterZone, system }, phase);
+      const before = getServeAlignment(
+        { libero: null, lineup: ORANGE_LINEUP, setterZone, system },
+        phase,
+      );
       const lineup = ORANGE_LINEUP.map((id) => (id === outgoing ? G : id));
 
-      const after = getServeAlignment({ lineup, setterZone, system }, phase);
+      const after = getServeAlignment({ libero: null, lineup, setterZone, system }, phase);
 
       expect(after.actingSetter).toBe(before.actingSetter === outgoing ? G : before.actingSetter);
       expect(after.formationKey).toBe(before.formationKey);
@@ -419,7 +447,9 @@ describe("the frozen copy and the state", () => {
     player.run((state) => substitutePlayer(state, "a", A, G));
 
     expect(player.match().teams).toStrictEqual(teams);
-    expect(isRosterPartition(player.team("a").lineup, player.team("a").bench, teams.a)).toBe(true);
+    expect(isRosterPartition(player.team("a").lineup, player.team("a").bench, null, teams.a)).toBe(
+      true,
+    );
   });
 
   test("turning the set keeps the bench and the lineup", () => {
@@ -477,13 +507,20 @@ describe("the frozen copy and the state", () => {
     const lineup = [G, B, C, D, E, F];
     const bench = [A];
 
-    const result = changeLineup(player.state(), "a", { bench, lineup, setterZone: 1 });
+    const result = changeLineup(player.state(), "a", {
+      bench,
+      libero: null,
+      lineup,
+      setterZone: 1,
+    });
     lineup.reverse();
     bench.pop();
 
     expect(result).toStrictEqual({
       ok: true,
-      value: [lineupEvent("a", { bench: [A], lineup: [G, B, C, D, E, F], setterZone: 1 })],
+      value: [
+        lineupEvent("a", { bench: [A], libero: null, lineup: [G, B, C, D, E, F], setterZone: 1 }),
+      ],
     });
   });
 });
@@ -547,10 +584,12 @@ describe("the parser of the bench", () => {
       matchId: MATCH_ID,
       lineup: ORANGE_LINEUP,
       bench: [],
+      libero: null,
     });
 
     expect(parsed.ok && Object.keys(parsed.value)).toStrictEqual([
       "bench",
+      "libero",
       "lineup",
       "matchId",
       "setterZone",

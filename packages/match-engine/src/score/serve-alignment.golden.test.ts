@@ -75,7 +75,7 @@ const EXPECTED_IDS: readonly string[] = [
 
 describe("serve alignment golden", () => {
   test.each(CASES)("$id", ({ input: { system, lineup, setterZone, phase }, expected }) => {
-    const alignment = getServeAlignment({ lineup, setterZone, system }, phase);
+    const alignment = getServeAlignment({ libero: null, lineup, setterZone, system }, phase);
     const { formationKey, actingSetter, slots } = alignment;
     const outcome = { formationKey, actingSetter, slots };
 
