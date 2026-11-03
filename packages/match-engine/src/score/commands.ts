@@ -6,6 +6,7 @@ import {
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
+  ROTATION_DIRECTIONS,
   SET_ENDED_EVENT_TYPE,
   SUPPORTED_RULES_VERSIONS,
   TEAM_SIDES,
@@ -15,7 +16,13 @@ import {
   parseMatchStartedPayload,
   parseScorePayload,
 } from "./parse-payloads.js";
-import { getNextSetFirstServer, isLiberoAllowed, isRosterPartition } from "./rotation-rules.js";
+import {
+  getNextSetFirstServer,
+  isLiberoAllowed,
+  isRosterPartition,
+  nextSetterZone,
+  previousSetterZone,
+} from "./rotation-rules.js";
 import { getMatchWinner, getSetWinner, targetPointsForSet } from "./scoring-rules.js";
 import type {
   ConfirmSetEndOptions,
@@ -25,6 +32,7 @@ import type {
   MatchSet,
   MatchStartedPayload,
   MemberId,
+  RotationDirection,
   ScoreCommandError,
   ScoreCommandResult,
   ScoreEventDraft,
@@ -303,6 +311,31 @@ export function substitutePlayer(
       libero,
       lineup: lineup.map((id) => (id === outgoing ? incoming : id)),
       setterZone,
+    });
+  });
+}
+
+/**
+ * Girar and desgirar on screen 24: the whole allocation is recorded with the zone next to the current
+ * one, never a step the applier would calculate, and bench and libero stay (ADR 0030).
+ */
+export function shiftRotation(
+  state: CourtSessionState,
+  team: TeamSide,
+  direction: RotationDirection,
+): ScoreCommandResult {
+  return withOpenTeam(state, team, (match, teamState) => {
+    if (!ROTATION_DIRECTIONS.includes(direction)) {
+      return refuse("invalid-rotation-direction");
+    }
+    const { bench, libero, lineup, setterZone } = teamState;
+    const shifted =
+      direction === "forward" ? nextSetterZone(setterZone) : previousSetterZone(setterZone);
+    return recordAllocation(match, teamState, team, {
+      bench,
+      libero,
+      lineup,
+      setterZone: shifted,
     });
   });
 }

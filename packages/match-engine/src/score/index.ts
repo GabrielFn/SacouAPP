@@ -4,6 +4,7 @@ export {
   confirmSetEnd,
   endMatchManually,
   scorePoint,
+  shiftRotation,
   startMatch,
   substitutePlayer,
 } from "./commands.js";
@@ -29,6 +30,7 @@ export {
   isLiberoCoverage,
   isSideOut,
   nextSetterZone,
+  previousSetterZone,
 } from "./rotation-rules.js";
 export {
   getServeAlignment,

@@ -27,6 +27,18 @@ export function nextSetterZone(zone: SetterZone): SetterZone {
   return SETTER_ZONE_SEQUENCE[index + 1] ?? FIRST_ZONE_OF_THE_SEQUENCE;
 }
 
+/** The sequence read backwards: undoing a rotation goes 1, 2, 3, 4, 5, 6 and back to 1. */
+const REVERSED_SETTER_ZONE_SEQUENCE: readonly SetterZone[] = [...SETTER_ZONE_SEQUENCE].reverse();
+const [FIRST_ZONE_OF_THE_REVERSED_SEQUENCE] = REVERSED_SETTER_ZONE_SEQUENCE;
+
+/** The zone a team was in before its last rotation, by the same table read backwards. */
+export function previousSetterZone(zone: SetterZone): SetterZone {
+  const index = REVERSED_SETTER_ZONE_SEQUENCE.indexOf(zone);
+  return (
+    REVERSED_SETTER_ZONE_SEQUENCE[index + 1] ?? (FIRST_ZONE_OF_THE_REVERSED_SEQUENCE as SetterZone)
+  );
+}
+
 /** Only the team that was receiving and won the rally rotates and takes the serve. */
 export function isSideOut(servingTeam: TeamSide, pointWinner: TeamSide): boolean {
   return servingTeam !== pointWinner;

@@ -31,6 +31,9 @@ export const END_REASONS = ["sets-won", "manual"] as const;
  */
 export const SETTER_ZONE_SEQUENCE = [1, 6, 5, 4, 3, 2] as const satisfies readonly SetterZone[];
 
+/** Girar moves a team to the next zone of the sequence; desgirar moves it back (ADR 0030). */
+export const ROTATION_DIRECTIONS = ["forward", "backward"] as const;
+
 /**
  * This table is the `IRotationSystem` of ADR 0011: the systems differ only in data, so there is no
  * class. The 6x2 and the 4x2 play three formations twice, with the pairs swapped (ADR 0026).

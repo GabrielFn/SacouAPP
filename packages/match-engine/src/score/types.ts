@@ -18,6 +18,7 @@ import type {
   PAYLOAD_ROOT_FIELD,
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
+  ROTATION_DIRECTIONS,
   SET_ENDED_EVENT_TYPE,
   TEAM_SIDES,
   UNKNOWN_PAYLOAD_FIELD,
@@ -39,6 +40,7 @@ export type TeamSide = (typeof TEAM_SIDES)[number];
 export type BestOf = (typeof BEST_OF_VALUES)[number];
 export type WinMargin = (typeof WIN_MARGIN_VALUES)[number];
 export type MatchEndReason = (typeof END_REASONS)[number];
+export type RotationDirection = (typeof ROTATION_DIRECTIONS)[number];
 
 export interface ScoringRules {
   readonly bestOf: BestOf;
@@ -289,6 +291,7 @@ export interface ScorePayloadError {
 }
 
 export type ScoreRefusalCode =
+  | "invalid-rotation-direction"
   | "lineup-unchanged"
   | "match-already-open"
   | "no-open-match"
