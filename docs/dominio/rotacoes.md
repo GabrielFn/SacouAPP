@@ -107,6 +107,14 @@ Banco manual implementado na E2.5 ([ADR 0027](../arquitetura/adr/0027-banco-manu
 - **Rotação desligada não tem banco,** com qualquer número de membros: a troca é recusada.
 - **Virada de set e fim de partida:** banco e escalação seguem como estão. `FinishedMatch.rotations` traz o banco no fim, e a partida seguinte chega em outro `MatchStarted`.
 
+Correções implementadas na E2.7 ([ADR 0030](../arquitetura/adr/0030-correcoes-da-linha-do-tempo.md)). Código em `packages/match-engine/src/corrections/` e `score/commands.ts`; casos em `packages/match-engine/golden/corrections-events.json`.
+
+- **Girar e desgirar (tela 24):** gravam a alocação inteira num `LineupChanged`, com a zona vizinha absoluta. Girar segue `1 → 6 → 5 → 4 → 3 → 2 → 1`; desgirar volta `1 → 2 → 3 → 4 → 5 → 6 → 1`. Banco, líbero e escalação ficam; o outro time e o placar não mudam. O próximo side-out parte da zona gravada.
+- **Trocar sacador:** troca só o time que saca, sem girar ninguém (decisão do Gabriel de 03/11/2026). No 0–0 também corrige quem começou o set, e o próximo set alterna a partir do corrigido; com pontos, quem começou fica. O próximo ponto de quem passou a sacar não gira. O líbero segue o saque corrigido, porque a fase sai do estado. Vale com a rotação desligada. Recusado com set decidido ou fechado.
+- **Desfazer:** volta a última ação, seja ela qual for (decisão do Gabriel de 03/11/2026). Voltar a um ponto volta placar, saque, zonas, banco, líbero e fila juntos, ao estado logo depois dele. Só na partida aberta.
+- **Linha do tempo da tela 24:** em cada ponto, o sacador é o de **antes** do ponto, e "rot. N" é a zona de quem venceu depois do side-out.
+- **Girar desatualizado:** um `LineupChanged` de outro celular, gravado depois de um side-out na ordem canônica, vale como veio e desfaz o giro (pendência da E3.7 e da E4.11).
+
 Líbero ligado implementado na E2.11 ([ADR 0028](../arquitetura/adr/0028-libero-ligado.md)). Código em `packages/match-engine/src/score/rotation-rules.ts` e `serve-alignment.ts`; casos em `packages/match-engine/golden/libero-*.json`.
 
 - **Só 5x1 e 6x2** (decisão do Gabriel de 03/11/2026). 4x2 e Livre recusam o líbero, e o catálogo não muda.

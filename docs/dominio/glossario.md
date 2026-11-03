@@ -39,7 +39,12 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Time que saca | `servingTeam` | Lado que saca agora, no set aberto (ADR 0024) |
 | Primeiro saque do set | `firstServer` | Lado que sacou primeiro no set; base da alternância (ADR 0024) |
 | Side-out | `SideOut` | Regra derivada do estado, `isSideOut`; não é tipo de evento (ADR 0024) |
-| Desfazer (evento) | `RevertedTo` | Nunca apaga |
+| Desfazer (evento) | `RevertedTo` | Nunca apaga. Emitido por `undoLastAction` e `revertToEvent` (ADR 0030) |
+| Trocar sacador | `ServingTeamChanged` | Evento com `servingTeam` e `firstServer` decididos pelo comando; ninguém gira (ADR 0030) |
+| Girar / desgirar | `shiftRotation` | Comando que grava um `LineupChanged` com a zona vizinha, `forward` ou `backward` (ADR 0030) |
+| Linha do tempo | `replayTimeline` | Eventos ativos com o estado logo depois de cada um (ADR 0030) |
+| Prévia do voltar | `RevertPreview` | O que muda ao voltar a um ponto: placar, saque, zonas e o que sai da linha do tempo; não grava nada (ADR 0030) |
+| Ponto da linha do tempo | `RecentPoint` | Linha da tela 24: placar depois, sacador antes, side-out e zona (ADR 0030) |
 | Versão do evento | `SchemaVersion` | |
 | Versão das regras da partida | `rulesVersion` | |
 
