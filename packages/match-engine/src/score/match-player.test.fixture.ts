@@ -83,6 +83,7 @@ export function rotationMatchInput(
           ? null
           : {
               bench: membersOf("a", teamSize).slice(LINEUP_SIZE),
+              libero: null,
               lineup: ORANGE_LINEUP,
               setterZone: zoneA,
               system: systemA,
@@ -92,6 +93,7 @@ export function rotationMatchInput(
           ? null
           : {
               bench: membersOf("b", teamSize).slice(LINEUP_SIZE),
+              libero: null,
               lineup: BLUE_LINEUP,
               setterZone: zoneB,
               system: systemB,

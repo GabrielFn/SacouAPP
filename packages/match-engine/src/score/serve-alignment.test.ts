@@ -71,7 +71,7 @@ const COMBINATIONS: readonly Combination[] = FORMATION_SYSTEMS.flatMap((system) 
 );
 
 function teamState({ system, setterZone }: Pick<Combination, "system" | "setterZone">): TeamState {
-  return { bench: [], lineup: ORANGE_LINEUP, setterZone, system };
+  return { bench: [], libero: null, lineup: ORANGE_LINEUP, setterZone, system };
 }
 
 function alignmentOf(combination: Combination): ServeAlignment {
@@ -195,7 +195,7 @@ describe("properties of the alignment", () => {
   test("does not touch the state it reads", () => {
     const lineup = [...ORANGE_LINEUP];
 
-    getServeAlignment({ lineup, setterZone: 4, system: "6x2" }, "receiving");
+    getServeAlignment({ libero: null, lineup, setterZone: 4, system: "6x2" }, "receiving");
 
     expect(lineup).toStrictEqual(ORANGE_LINEUP);
   });

@@ -17,12 +17,7 @@ import {
   parsePointScoredPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import {
-  isLiberoAllowed,
-  isRosterPartition,
-  isSideOut,
-  nextSetterZone,
-} from "./rotation-rules.js";
+import { isLiberoAllowed, isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
 import type {
   CourtSessionState,
   MatchScore,

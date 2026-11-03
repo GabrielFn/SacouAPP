@@ -17,14 +17,7 @@ import {
   SETTER_ZONE_SEQUENCE,
   TEAM_SIDES,
 } from "./constants.data.js";
-import type {
-  MatchScore,
-  MemberId,
-  TeamLibero,
-  TeamRoster,
-  TeamSide,
-  TeamState,
-} from "./types.js";
+import type { MatchScore, MemberId, TeamLibero, TeamRoster, TeamSide, TeamState } from "./types.js";
 
 const [FIRST_ZONE_OF_THE_SEQUENCE] = SETTER_ZONE_SEQUENCE;
 
@@ -68,7 +61,8 @@ export function isRosterPartition(
   libero: TeamLibero | null,
   { memberIds }: TeamRoster,
 ): boolean {
-  const allocated = libero === null ? [...lineup, ...bench] : [...lineup, ...bench, libero.memberId];
+  const allocated =
+    libero === null ? [...lineup, ...bench] : [...lineup, ...bench, libero.memberId];
   return (
     allocated.length === memberIds.length &&
     new Set(allocated).size === allocated.length &&
@@ -151,5 +145,7 @@ export function getOnCourtBySlot(
     return lineupBySlot;
   }
   const liberoIndex = ROTATION_SLOTS.indexOf(liberoSlot);
-  return lineupBySlot.map((memberId, index) => (index === liberoIndex ? libero.memberId : memberId));
+  return lineupBySlot.map((memberId, index) =>
+    index === liberoIndex ? libero.memberId : memberId,
+  );
 }
