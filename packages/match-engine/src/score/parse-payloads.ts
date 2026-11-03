@@ -1,4 +1,12 @@
-import { err, ok, ROTATION_SLOTS, type Result, type SetterZone } from "@sacou/volley-rules";
+import {
+  err,
+  FORMATION_SYSTEMS,
+  ok,
+  ROTATION_SLOTS,
+  type FormationSystem,
+  type Result,
+  type SetterZone,
+} from "@sacou/volley-rules";
 
 import { isUuid } from "../event-log/is-uuid.js";
 import {
@@ -81,6 +89,14 @@ function isSetterZone(value: unknown): value is SetterZone {
   return isOneOf(SETTER_ZONE_SEQUENCE, value);
 }
 
+function isFormationSystem(value: unknown): value is FormationSystem {
+  return isOneOf(FORMATION_SYSTEMS, value);
+}
+
+function isVersion(value: unknown): value is number {
+  return isIntegerInRange(value, 1, Number.MAX_SAFE_INTEGER);
+}
+
 /** Own properties only: with a polluted Object.prototype, a missing field must stay missing. */
 function readOwn(raw: RawObject, field: string): unknown {
   return Object.hasOwn(raw, field) ? raw[field] : undefined;
@@ -161,6 +177,7 @@ function parseTeamState(
     readonly team: ScorePayloadField;
     readonly lineup: ScorePayloadField;
     readonly setterZone: ScorePayloadField;
+    readonly system: ScorePayloadField;
   },
 ): ParseResult<TeamState | null> {
   if (raw === null) return ok(null);
@@ -168,7 +185,9 @@ function parseTeamState(
   const lineup = parseLineup(readOwn(raw, "lineup"), roster);
   if (lineup === null) return invalid(fields.lineup);
   const setterZone = readOwn(raw, "setterZone");
-  return isSetterZone(setterZone) ? ok({ lineup, setterZone }) : invalid(fields.setterZone);
+  if (!isSetterZone(setterZone)) return invalid(fields.setterZone);
+  const system = readOwn(raw, "system");
+  return isFormationSystem(system) ? ok({ lineup, setterZone, system }) : invalid(fields.system);
 }
 
 function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotations> {
@@ -177,12 +196,14 @@ function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotati
     team: "rotations.a",
     lineup: "rotations.a.lineup",
     setterZone: "rotations.a.setterZone",
+    system: "rotations.a.system",
   });
   if (!a.ok) return a;
   const b = parseTeamState(readOwn(raw, "b"), teams.b, {
     team: "rotations.b",
     lineup: "rotations.b.lineup",
     setterZone: "rotations.b.setterZone",
+    system: "rotations.b.system",
   });
   return b.ok ? ok({ a: a.value, b: b.value }) : b;
 }
@@ -212,7 +233,9 @@ function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayloa
   const matchId = readOwn(raw, "matchId");
   if (!isUuid(matchId)) return invalid("matchId");
   const rulesVersion = readOwn(raw, "rulesVersion");
-  if (!isIntegerInRange(rulesVersion, 1, Number.MAX_SAFE_INTEGER)) return invalid("rulesVersion");
+  if (!isVersion(rulesVersion)) return invalid("rulesVersion");
+  const formationsVersion = readOwn(raw, "formationsVersion");
+  if (!isVersion(formationsVersion)) return invalid("formationsVersion");
   const scoring = parseScoring(readOwn(raw, "scoring"));
   if (!scoring.ok) return scoring;
   const teams = parseTeams(readOwn(raw, "teams"));
@@ -223,6 +246,7 @@ function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayloa
   if (!rotations.ok) return rotations;
   return ok({
     firstServer,
+    formationsVersion,
     matchId,
     rotations: rotations.value,
     rulesVersion,

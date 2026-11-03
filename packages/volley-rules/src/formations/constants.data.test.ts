@@ -1,12 +1,28 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, expectTypeOf, test } from "vitest";
 
 import {
+  FORMATION_CATALOG_VERSION,
   FORMATION_SYSTEMS,
   PLAYER_ROLES,
   ROTATION_KEYS,
   ROTATION_SLOTS,
 } from "./constants.data.js";
+import { FORMATION_CATALOG } from "./get-formation.js";
 import type { FormationSystem, RotationKey, RotationSlot } from "./types.js";
+
+/** The catalog of version 1, by content, so line endings and formatting of the file do not count. */
+const CATALOG_V1_SHA256 = "f757ef1843eef9f70c9b96ee15c9d684a5322f750ad0672aaa2a05eb7ae4d8e9";
+
+describe("formation catalog version", () => {
+  test("a change to the catalog raises the version and keeps the previous catalog (ADR 0026)", () => {
+    const hash = createHash("sha256").update(JSON.stringify(FORMATION_CATALOG)).digest("hex");
+
+    expect(FORMATION_CATALOG_VERSION).toBe(1);
+    expect(hash).toBe(CATALOG_V1_SHA256);
+  });
+});
 
 describe("formation constants", () => {
   test.each<[string, readonly unknown[]]>([

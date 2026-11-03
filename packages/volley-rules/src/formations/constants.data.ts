@@ -1,3 +1,9 @@
+/**
+ * The version of the formation catalog. A recorded match keeps playing the catalog it started with,
+ * so a change to `formations.json` raises this number and keeps the previous catalog (ADR 0026).
+ */
+export const FORMATION_CATALOG_VERSION = 1;
+
 export const ROTATION_SLOTS = Object.freeze([1, 2, 3, 4, 5, 6] as const);
 
 /** `0` is the single rotation of the Livre system, which has no setter. */

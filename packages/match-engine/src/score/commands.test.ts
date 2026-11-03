@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { FORMATION_CATALOG_VERSION } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
 import type { EventEnvelope } from "../event-log/types.js";
@@ -90,6 +91,17 @@ describe("startMatch", () => {
     const other = matchInput(MD3, "f0000000-0000-4000-8000-000000000002");
 
     expect(errorCode(startMatch(player.state(), other))).toBe("match-already-open");
+  });
+
+  test("refuses a formation catalog it does not have, though the replay would accept it", () => {
+    const input: MatchStartedPayload = {
+      ...matchInput(MD3),
+      formationsVersion: FORMATION_CATALOG_VERSION + 1,
+    };
+
+    expect(errorCode(startMatch(INITIAL_COURT_SESSION_STATE, input))).toBe(
+      "unsupported-formations-version",
+    );
   });
 
   test("refuses a rules version it does not support, though the replay would accept it", () => {
@@ -275,6 +287,7 @@ describe("confirmSetEnd", () => {
       currentMatch: {
         completedSets: [],
         currentSet: null,
+        formationsVersion: 1,
         matchId: MATCH_ID,
         rotations: { a: null, b: null },
         rulesVersion: 1,
@@ -407,7 +420,10 @@ describe("rotation through the commands", () => {
     const input = rotationMatchInput(MD3);
     const swapped = {
       ...input,
-      rotations: { ...input.rotations, a: { lineup: BLUE_LINEUP, setterZone: 1 as const } },
+      rotations: {
+        ...input.rotations,
+        a: { lineup: BLUE_LINEUP, setterZone: 1 as const, system: "5x1" as const },
+      },
     };
 
     expect(startMatch(INITIAL_COURT_SESSION_STATE, swapped)).toStrictEqual({

@@ -111,12 +111,14 @@ const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
   if (!parsed.ok || !canOpenMatch(state, parsed.value.matchId)) {
     return rejected();
   }
-  const { firstServer, matchId, rotations, rulesVersion, scoring, teams } = parsed.value;
+  const { firstServer, formationsVersion, matchId, rotations, rulesVersion, scoring, teams } =
+    parsed.value;
   return ok(
     withCurrentMatch(state, {
       completedSets: [],
       // Set 1 is never the deciding set of a series, so it always plays to `pointsPerSet`.
       currentSet: emptySet(FIRST_SET_NUMBER, scoring.pointsPerSet, firstServer),
+      formationsVersion,
       matchId,
       rotations,
       rulesVersion,
@@ -192,11 +194,21 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
   if (match === null || (endReason === "sets-won" && match.currentSet !== null)) {
     return rejected();
   }
-  const { completedSets, currentSet, rotations, rulesVersion, scoring, setsWon, teams } = match;
+  const {
+    completedSets,
+    currentSet,
+    formationsVersion,
+    rotations,
+    rulesVersion,
+    scoring,
+    setsWon,
+    teams,
+  } = match;
   const finishedMatch = {
     completedSets,
     currentSet,
     endReason,
+    formationsVersion,
     matchId,
     rotations,
     rulesVersion,

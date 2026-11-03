@@ -22,10 +22,11 @@
 | E2.2 | Feita | ADR 0023 e `docs/dominio/placar.md`. A segurança reprovou o ciclo 1 por falta de memória em log hostil, corrigida com `MAX_FINISHED_MATCHES` e reconferida com medição. Revisor com oráculo próprio: 377 casos, 0 divergências. Testador passou, com 766 testes no `match-engine`. Citar no relatório do M2: limites de 1 a 99, 24 membros e 200 partidas por stream, `winMargin` 1 ou 2 também no tie-break, sem teto de pontos. |
 | E1.5 | Feita | ADR 0025. Formações, validador e cartinha em C#, com os mesmos golden. Revisor aprovou; o testador passou, com oráculo TS × C#: 291 linhas, 0 diferenças, e a API publicada lê o catálogo da DLL. O orquestrador fechou dois restos do desenvolvedor (`AllowedDomainTypes` e o caso da chave com escape), lidos pelo revisor. Fecha o B3 e o B4 da revisão do M1. |
 | E2.3 | Feita | ADR 0024 e `docs/dominio/rotacoes.md`. Revisor com oráculo próprio: 355.845 estados, 0 divergências; reprovou só por faltar o ADR 0024 na visão geral, corrigido pelo orquestrador. Segurança aprovou, com medição de 64 mil eventos. Testador passou: 1010 testes no `match-engine` e 11 mutações reprovadas, sem rodar as de número 7, 8, 10 a 16 e a variante da 17. Citar no relatório do M2: exceção a `decisoes.md:26` (side-out derivado), lado da quadra fora do motor, `lineup` ancorado no levantador. |
+| E2.4 | Feita | ADR 0026. Revisor com oráculo próprio: 48 combinações, 0 divergências; golden migrados só com acréscimos. Segurança aprovou. Testador passou: 1338 testes no `match-engine` e 21 mutações reprovadas. Citar no relatório do M2: `formationsVersion` no lugar da cópia congelada, decisão do Gabriel. |
 
 ## Em andamento
 
-- E2.4 (front): branch `task/E2.4-serve-positions`, worktree `.claude/worktrees/e2-4`. Plano pronto na branch; desenvolvedor (Opus) em curso, com as respostas do Gabriel de 02/11/2026. Sensível em escala pequena: passa pelo `revisor-seguranca`.
+Nenhuma. Próxima: E2.5 (front); ver o diário de 02/11/2026.
 
 ## Adiadas
 
@@ -35,7 +36,6 @@
 
 - Lint, lacunas que não violam o aceite da E0.3: `Reflect.get(globalThis, "fetch")` passa na pureza; `*.test.ts` importado por código de produção vai para o `dist`; `scripts/lint-regression.mjs` não tem casos para `functional/immutable-data`, `prefer-readonly` e `no-param-reassign` (as regras funcionam, só a regressão não as cobre).
 - CI: rodar sempre `pnpm install --frozen-lockfile` antes do Turbo: editar o `pnpm-lock.yaml` sem reinstalar não invalida o cache.
-- E2.4: em `serving`, `liberoReplaces` não significa líbero em quadra (ADR 0006).
 - Revisão do M1, A4: a E2.1 só entra na `main` com teste de esquema fechado do envelope e nomes proibidos; a regra em C#, por reflexão, fica na E2.10 ou E3.7.
 - Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
@@ -50,6 +50,7 @@
 - E2.3, pendências: `commands.ts:125` não sabe qual é o set decisivo, então a E4.10 testa os dois casos (sem `firstServer` no decisivo, com ele num set comum); `appliers.ts:176`: ponto atrasado antes de um `SetEnded` perde o giro, registrar na E3.7 junto de "ponto atrasado" no ADR 0023; `rotation-rules.ts:38`: `getServingPlayer` e `getLineupBySlot` aceitam array de qualquer tamanho, rever na E2.5; `parse-payloads.ts:118-124`: `Proxy` que muda `length` passa `lineup` de 7, inalcançável por JSON; E2.10 e E3.7 repetem em C# a contenção de `lineup` e o esquema fechado.
 - E2.11 (nova, líbero ligado): o design não tem o controle em "Avançado" nem o líbero na tela 22; o analista aponta o que precisa de tela e pergunta ao Gabriel se for mudança visível fora do padrão das telas.
 - E4.8, lacuna do backlog: a tela 22 salva a escalação no meio da partida (`Escalacao.dc.html:41`, `:111`), e nenhum evento grava isso. O analista da E2.5 decide se fica na E2.5 ou na E2.7, antes da E4.8.
+- E2.4, pendências: E2.11 decide quais sistemas aceitam líbero, porque o catálogo não tem slot `L` no 4x2 nem na Livre e `rotacoes.md:51` só cita o 5x1; se o catálogo mudar, o teste do hash reprova, e ela decide entre atualizar a v1 ou subir a versão. E3.7: `startMatch` compara com a versão atual, e com a v2 um app antigo offline ainda gera v1, então precisa de lista de versões suportadas. O hash também cobre `note` e `label`: tratar na primeira edição do catálogo. Com a v2, revisar a frase de `modelo-de-ameacas.md:39` sobre `formationsVersion` forjado. E2.10 e E3.7 repetem em C# o parser estrito de `system` e `formationsVersion`.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 

@@ -1,4 +1,13 @@
-import type { Result, SetterZone } from "@sacou/volley-rules";
+import type {
+  CourtPoint,
+  FormationPhase,
+  FormationSystem,
+  PlayerRole,
+  Result,
+  RotationKey,
+  RotationSlot,
+  SetterZone,
+} from "@sacou/volley-rules";
 
 import type {
   BEST_OF_VALUES,
@@ -61,11 +70,14 @@ export interface SetsWon {
  * The part of a team that changes during a match; `teams` stays the frozen copy of the event.
  * `lineup` has six members anchored on the setter: `lineup[0]` is the setter and the others follow
  * in ascending position, so a rotation only changes `setterZone`. In the free system, which has no
- * setter, `setterZone` is the zone of the first member of the lineup.
+ * setter, `setterZone` is the zone of the first member of the lineup. The order of the lineup also
+ * gives each member a role: `S, OH1, MB1, OPP, OH2, MB2` in the 5x1 and `S1, OH1, MB1, S2, OH2, MB2`
+ * in the 6x2 and the 4x2 (ADR 0026).
  */
 export interface TeamState {
   readonly lineup: readonly MemberId[];
   readonly setterZone: SetterZone;
+  readonly system: FormationSystem;
 }
 
 /** `null` turns the rotation off for that team: a team without six players has it off. */
@@ -81,6 +93,7 @@ export interface SetterZones {
 
 export interface MatchStartedPayload {
   readonly firstServer: TeamSide;
+  readonly formationsVersion: number;
   readonly matchId: string;
   readonly rotations: TeamRotations;
   readonly rulesVersion: number;
@@ -139,6 +152,7 @@ export interface CompletedMatchSet {
 export interface MatchScore {
   readonly completedSets: readonly CompletedMatchSet[];
   readonly currentSet: MatchSet | null;
+  readonly formationsVersion: number;
   readonly matchId: string;
   readonly rotations: TeamRotations;
   readonly rulesVersion: number;
@@ -168,6 +182,7 @@ export type ScorePayloadField =
   | typeof UNKNOWN_PAYLOAD_FIELD
   | "matchId"
   | "rulesVersion"
+  | "formationsVersion"
   | "scoring"
   | "scoring.bestOf"
   | "scoring.pointsPerSet"
@@ -183,9 +198,11 @@ export type ScorePayloadField =
   | "rotations.a"
   | "rotations.a.lineup"
   | "rotations.a.setterZone"
+  | "rotations.a.system"
   | "rotations.b"
   | "rotations.b.lineup"
   | "rotations.b.setterZone"
+  | "rotations.b.system"
   | "setNumber"
   | "team"
   | "winner"
@@ -210,6 +227,7 @@ export type ScoreRefusalCode =
   | "set-decided"
   | "set-not-decided"
   | "too-many-matches"
+  | "unsupported-formations-version"
   | "unsupported-rules-version";
 
 export type ScoreCommandError = ScorePayloadError | { readonly code: ScoreRefusalCode };
@@ -226,3 +244,25 @@ export interface ConfirmSetEndOptions {
 }
 
 export type ScoreCommandResult = Result<readonly ScoreEventDraft[], ScoreCommandError>;
+
+/** Which formation a zone of the lineup plays, and whether the pairs of that formation are swapped. */
+export interface ZoneFormation {
+  readonly formationKey: RotationKey;
+  readonly swapPairs: boolean;
+}
+
+export interface ServeAlignmentSlot {
+  readonly memberId: MemberId;
+  readonly role: PlayerRole;
+  readonly point: CourtPoint;
+}
+
+/** Where a team stands at the moment of the serve, with the libero off: no slot has the role `L`. */
+export interface ServeAlignment {
+  readonly system: FormationSystem;
+  readonly setterZone: SetterZone;
+  readonly formationKey: RotationKey;
+  readonly phase: FormationPhase;
+  readonly actingSetter: MemberId;
+  readonly slots: Readonly<Record<RotationSlot, ServeAlignmentSlot>>;
+}

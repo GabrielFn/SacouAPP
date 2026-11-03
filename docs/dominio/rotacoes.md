@@ -84,6 +84,18 @@ Implementado na E2.3 ([ADR 0024](../arquitetura/adr/0024-saque-e-rotacao-derivad
 - **Virada de set:** `SetEnded.nextSet` grava `firstServer` e `setterZones`, aplicados sem recalcular. A rotação **continua de onde parou**, sem mexer em ninguém (decisão do Gabriel de 02/11/2026). O comando alterna o primeiro saque e, no set decisivo, recebe o sorteio de fora (`confirmSetEnd(state, { firstServer })`); a interface do sorteio é da E4.10.
 - **Lado da quadra:** fora do estado do motor. Virar set e chegar a 8 no tie-break não giram nem mudam quem saca; o desenho é da E4.10.
 
+Posições no saque implementadas na E2.4 ([ADR 0026](../arquitetura/adr/0026-posicoes-no-saque.md)). Código em `packages/match-engine/src/score/serve-alignment.ts`; casos em `packages/match-engine/golden/serve-alignment.json`.
+
+- **`system` por time:** fica em `TeamState`, gravado no `MatchStarted`, e não muda ao virar o set.
+- **Função pela ordem do `lineup`:** no 5x1, `S, OH1, MB1, OPP, OH2, MB2`; no 6x2 e no 4x2, `S1, OH1, MB1, S2, OH2, MB2`. O 2º levantador fica no índice 3, em diagonal com o 1º.
+- **Da zona à formação:** o 5x1 usa a chave igual à zona. O 6x2 usa as chaves 1, 6, 5 e, nas zonas 4, 3, 2, as mesmas chaves com os pares trocados. O 4x2 usa as chaves 4, 3, 2 nas zonas 1, 6, 5 e as mesmas com os pares trocados nas zonas 4, 3, 2. A Livre usa sempre a chave `0`, com os membros girando, e a função é a posição (`P<slot>`).
+- **Troca de pares:** `S1↔S2`, `OH1↔OH2`, `MB1↔MB2`, só no rótulo; o ponto é o da formação.
+- **Quem levanta (`actingSetter`):** o único levantador no 5x1, o do fundo no 6x2, o da rede no 4x2, quem está na posição 3 na Livre.
+- **Líbero desligado:** o slot `L` da formação vira a função de quem ele substituiria, no mesmo ponto. O líbero ligado é da E2.11.
+- **Fase:** quem saca está em `serving`, o outro em `receiving`. Rotação desligada, sem set aberto ou catálogo desconhecido dão `null`.
+- **Sobreposição:** `validateServeAlignment` só informa, com o modo de regra de quem chama. Com pontos do catálogo, nunca há violação.
+- **Versão do catálogo:** o `MatchStarted` grava `formationsVersion`. Mudar uma formação exige versão nova, com a anterior preservada, para uma partida gravada não mudar de desenho.
+
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.
 - Guardar o líbero dentro da ordem de rotação.

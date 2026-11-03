@@ -2,7 +2,11 @@ import { parseEventEnvelope } from "../event-log/parse-envelope.js";
 import { replayEvents } from "../event-log/replay-events.js";
 import type { EventEnvelope } from "../event-log/types.js";
 import { INITIAL_COURT_SESSION_STATE, SCORE_APPLIERS } from "./appliers.js";
-import type { SetterZone } from "@sacou/volley-rules";
+import {
+  FORMATION_CATALOG_VERSION,
+  type FormationSystem,
+  type SetterZone,
+} from "@sacou/volley-rules";
 
 import type {
   CourtSessionState,
@@ -36,6 +40,7 @@ export const BLUE_LINEUP = membersOf("b", LINEUP_SIZE);
 export function matchInput(scoring: ScoringRules, matchId = MATCH_ID): MatchStartedPayload {
   return {
     firstServer: "a",
+    formationsVersion: FORMATION_CATALOG_VERSION,
     matchId,
     rotations: { a: null, b: null },
     rulesVersion: 1,
@@ -50,6 +55,7 @@ export function matchInput(scoring: ScoringRules, matchId = MATCH_ID): MatchStar
 export interface RotationSetup {
   readonly firstServer?: TeamSide;
   readonly zones?: readonly [SetterZone | null, SetterZone | null];
+  readonly systems?: readonly [FormationSystem, FormationSystem];
   readonly matchId?: string;
   readonly teamSize?: number;
 }
@@ -60,17 +66,20 @@ export function rotationMatchInput(
   {
     firstServer = "a",
     zones = [1, 1],
+    systems = ["5x1", "5x1"],
     matchId = MATCH_ID,
     teamSize = LINEUP_SIZE,
   }: RotationSetup = {},
 ): MatchStartedPayload {
   const [zoneA, zoneB] = zones;
+  const [systemA, systemB] = systems;
   return {
     firstServer,
+    formationsVersion: FORMATION_CATALOG_VERSION,
     matchId,
     rotations: {
-      a: zoneA === null ? null : { lineup: ORANGE_LINEUP, setterZone: zoneA },
-      b: zoneB === null ? null : { lineup: BLUE_LINEUP, setterZone: zoneB },
+      a: zoneA === null ? null : { lineup: ORANGE_LINEUP, setterZone: zoneA, system: systemA },
+      b: zoneB === null ? null : { lineup: BLUE_LINEUP, setterZone: zoneB, system: systemB },
     },
     rulesVersion: 1,
     scoring,
