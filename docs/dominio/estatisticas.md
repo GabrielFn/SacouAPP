@@ -38,7 +38,7 @@ Tudo é **calculado** da linha do tempo de uma `CourtSession` (`replayTimeline`)
 
 ## Rodada simulada (critério de aceite)
 
-A rodada do plano, com os números conferidos à mão, está no teste `stats.acceptance.test.ts` e no caso `s1` do golden. Conta de soma zero: 5×2 + 2 + 0 + 6×0 + 6×(−2) = 0.
+A rodada do plano, com os números conferidos à mão, está no teste `stats.acceptance.test.ts` e no caso `s1` do golden. Conta de soma zero: 5×2 + 2 + 0 + 6×0 + 6×(−2) = 0. A soma zero é propriedade desta rodada, com 6 contra 6 em quadra em todo ponto, e não regra geral: com rotação desligada e times de tamanhos diferentes, a soma dos saldos não fecha em zero, e o motor está certo. Não usar como checagem na E2.10 nem na E3.9.
 
 ## Fora daqui
 
