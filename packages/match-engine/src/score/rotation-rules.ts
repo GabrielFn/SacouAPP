@@ -114,7 +114,7 @@ export function isLiberoAllowed(system: FormationSystem, libero: TeamLibero | nu
  * A diagonal has one position in the back row and one in the front row, so there is one slot at most.
  */
 export function getLiberoSlot(
-  { libero, lineup, setterZone }: Pick<TeamState, "libero" | "lineup" | "setterZone">,
+  { libero, setterZone }: Pick<TeamState, "libero" | "setterZone">,
   phase: FormationPhase,
 ): RotationSlot | null {
   if (libero === null) {

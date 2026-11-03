@@ -15,6 +15,7 @@ import type {
   ScoreEventDraft,
   ScoringRules,
   TeamSide,
+  TeamState,
 } from "./types.js";
 
 /** Test-only: builds envelopes and replays them through the parser, as the app will. */
@@ -58,6 +59,29 @@ export interface RotationSetup {
   readonly systems?: readonly [FormationSystem, FormationSystem];
   readonly matchId?: string;
   readonly teamSize?: number;
+  /** The positions the libero covers; the libero is the first member after the lineup. */
+  readonly liberoIndexes?: readonly [readonly number[] | null, readonly number[] | null];
+}
+
+function teamStateOf(
+  side: TeamSide,
+  lineup: readonly MemberId[],
+  setterZone: SetterZone,
+  system: FormationSystem,
+  { teamSize, replacedIndexes }: { teamSize: number; replacedIndexes: readonly number[] | null },
+): TeamState {
+  const others = membersOf(side, teamSize).slice(LINEUP_SIZE);
+  const [liberoId, ...rest] = others;
+  if (replacedIndexes === null || liberoId === undefined) {
+    return { bench: others, libero: null, lineup, setterZone, system };
+  }
+  return {
+    bench: rest,
+    libero: { memberId: liberoId, replacedIndexes },
+    lineup,
+    setterZone,
+    system,
+  };
 }
 
 /** The teams of the screens, with their rotations: by default `a` serves and both are in zone 1. */
@@ -69,10 +93,12 @@ export function rotationMatchInput(
     systems = ["5x1", "5x1"],
     matchId = MATCH_ID,
     teamSize = LINEUP_SIZE,
+    liberoIndexes = [null, null],
   }: RotationSetup = {},
 ): MatchStartedPayload {
   const [zoneA, zoneB] = zones;
   const [systemA, systemB] = systems;
+  const [indexesA, indexesB] = liberoIndexes;
   return {
     firstServer,
     formationsVersion: FORMATION_CATALOG_VERSION,
@@ -81,23 +107,17 @@ export function rotationMatchInput(
       a:
         zoneA === null
           ? null
-          : {
-              bench: membersOf("a", teamSize).slice(LINEUP_SIZE),
-              libero: null,
-              lineup: ORANGE_LINEUP,
-              setterZone: zoneA,
-              system: systemA,
-            },
+          : teamStateOf("a", ORANGE_LINEUP, zoneA, systemA, {
+              teamSize,
+              replacedIndexes: indexesA,
+            }),
       b:
         zoneB === null
           ? null
-          : {
-              bench: membersOf("b", teamSize).slice(LINEUP_SIZE),
-              libero: null,
-              lineup: BLUE_LINEUP,
-              setterZone: zoneB,
-              system: systemB,
-            },
+          : teamStateOf("b", BLUE_LINEUP, zoneB, systemB, {
+              teamSize,
+              replacedIndexes: indexesB,
+            }),
     },
     rulesVersion: 1,
     scoring,
