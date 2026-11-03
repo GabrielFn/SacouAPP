@@ -32,7 +32,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.10 (back), a última do M2; ver o diário de 02/11/2026.
+- E2.10 (back): branch `task/E2.10-csharp-state`, worktree `.claude/worktrees/e2-10`. Plano em partes P1 a P5; desenvolvedor (Opus) na P1, depois revisão leve, depois P2 a P5. Sensível: passa pelo `revisor-seguranca` no fim.
 
 ## Adiadas
 
