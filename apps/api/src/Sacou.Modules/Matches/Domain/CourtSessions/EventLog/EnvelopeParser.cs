@@ -82,23 +82,11 @@ internal static class EnvelopeParser
             ? text.Value
             : null;
 
-    /// <summary>
-    /// Always through the double, as in JavaScript: <c>25.0</c> and <c>2.5e1</c> are 25, and
-    /// <c>9007199254740992</c> is refused, because a double no longer tells it from its neighbour.
-    /// </summary>
-    private static long? ReadPositiveSafeInteger(RawObject envelope, string field)
-    {
-        if (!envelope.TryGetMember(field, out var value) || value is not RawNumber number)
-        {
-            return null;
-        }
-
-        var isPositiveSafeInteger = double.IsFinite(number.Value)
-            && Math.Floor(number.Value) == number.Value
-            && number.Value >= MinPositiveInteger
-            && number.Value <= EventLogSchema.MaxSafeInteger;
-        return isPositiveSafeInteger ? (long)number.Value : null;
-    }
+    /// <summary>Through <see cref="SafeInteger"/>: <c>25.0</c> is 25, and <c>9007199254740992</c> is refused.</summary>
+    private static long? ReadPositiveSafeInteger(RawObject envelope, string field) =>
+        envelope.TryGetMember(field, out var value)
+            ? SafeInteger.Read(value, MinPositiveInteger, (long)EventLogSchema.MaxSafeInteger)
+            : null;
 
     private static string? ReadEventType(RawObject envelope) =>
         envelope.TryGetMember(EnvelopeFields.Type, out var value)
