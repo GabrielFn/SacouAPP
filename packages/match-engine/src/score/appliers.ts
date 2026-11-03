@@ -7,6 +7,7 @@ import {
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
+  POINT_ATTRIBUTED_EVENT_TYPE,
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
   SERVING_TEAM_CHANGED_EVENT_TYPE,
@@ -16,6 +17,7 @@ import {
   parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
+  parsePointAttributedPayload,
   parsePointScoredPayload,
   parseQueueChangedPayload,
   parseServingTeamChangedPayload,
@@ -27,6 +29,8 @@ import type {
   CourtSessionState,
   MatchScore,
   MatchSet,
+  MatchTeams,
+  MemberId,
   NextSet,
   SetterZones,
   TeamRotations,
@@ -311,6 +315,30 @@ const applyServingTeamChanged: EventApplier<CourtSessionState> = (state, event) 
   );
 };
 
+function isMatchMember({ a, b }: MatchTeams, memberId: MemberId): boolean {
+  return a.memberIds.includes(memberId) || b.memberIds.includes(memberId);
+}
+
+/**
+ * Changes nothing in the state, which therefore never grows with these events: who scored is read
+ * from the timeline by `resolvePointAttributions`. It checks only that the match is open and that the
+ * author plays in it, by the frozen `teams`, like the `LineupChanged`. Whether the target is an
+ * active point is for the resolver, because the point and its attribution may come from two writers
+ * in any order. Any set of the open match is accepted, the decided and the closed ones too (ADR 0031).
+ */
+const applyPointAttributed: EventApplier<CourtSessionState> = (state, event) => {
+  const parsed = parsePointAttributedPayload(event.payload);
+  if (!parsed.ok) {
+    return rejected();
+  }
+  const { author, matchId } = parsed.value;
+  const match = findOpenMatch(state, matchId);
+  if (match === null || (author !== null && !isMatchMember(match.teams, author))) {
+    return rejected();
+  }
+  return ok(state);
+};
+
 export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>> = new Map([
   [MATCH_STARTED_EVENT_TYPE, applyMatchStarted],
   [POINT_SCORED_EVENT_TYPE, applyPointScored],
@@ -319,4 +347,5 @@ export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>
   [LINEUP_CHANGED_EVENT_TYPE, applyLineupChanged],
   [QUEUE_CHANGED_EVENT_TYPE, applyQueueChanged],
   [SERVING_TEAM_CHANGED_EVENT_TYPE, applyServingTeamChanged],
+  [POINT_ATTRIBUTED_EVENT_TYPE, applyPointAttributed],
 ]);

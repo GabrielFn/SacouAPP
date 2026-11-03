@@ -6,7 +6,7 @@ import {
   type SetterZone,
 } from "@sacou/volley-rules";
 
-import type { PayloadShape, ScoreEventType, ZoneFormation } from "./types.js";
+import type { PayloadShape, PointKind, ScoreEventType, ZoneFormation } from "./types.js";
 
 export const MATCH_STARTED_EVENT_TYPE = "MatchStarted";
 export const POINT_SCORED_EVENT_TYPE = "PointScored";
@@ -15,6 +15,7 @@ export const MATCH_ENDED_EVENT_TYPE = "MatchEnded";
 export const LINEUP_CHANGED_EVENT_TYPE = "LineupChanged";
 export const QUEUE_CHANGED_EVENT_TYPE = "QueueChanged";
 export const SERVING_TEAM_CHANGED_EVENT_TYPE = "ServingTeamChanged";
+export const POINT_ATTRIBUTED_EVENT_TYPE = "PointAttributed";
 
 export const CURRENT_RULES_VERSION = 1;
 
@@ -25,6 +26,13 @@ export const TEAM_SIDES = ["a", "b"] as const;
 export const BEST_OF_VALUES = [1, 3, 5] as const;
 export const WIN_MARGIN_VALUES = [1, 2] as const;
 export const END_REASONS = ["sets-won", "manual"] as const;
+
+/**
+ * What "De quem foi?" records about a point, by allowed list. Only an error of the opponent has no
+ * author; the others always have one (ADR 0031).
+ */
+export const POINT_KINDS = ["attack", "block", "ace", "other", "opponent-error"] as const;
+export const AUTHORLESS_POINT_KINDS: readonly PointKind[] = ["opponent-error"];
 
 /**
  * The order a team goes through when it rotates. A literal, not read from the formations catalog:
@@ -213,4 +221,5 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     servingTeam: null,
     firstServer: null,
   },
+  [POINT_ATTRIBUTED_EVENT_TYPE]: { matchId: null, pointEventId: null, kind: null, author: null },
 };

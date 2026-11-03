@@ -10,6 +10,7 @@ import {
 
 import { isUuid } from "../event-log/is-uuid.js";
 import {
+  AUTHORLESS_POINT_KINDS,
   BEST_OF_VALUES,
   END_REASONS,
   FIRST_SET_NUMBER,
@@ -26,6 +27,8 @@ import {
   MIN_SET_POINTS,
   MIN_TEAM_MEMBERS,
   PAYLOAD_ROOT_FIELD,
+  POINT_ATTRIBUTED_EVENT_TYPE,
+  POINT_KINDS,
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
   SCORE_PAYLOAD_SHAPES,
@@ -47,6 +50,8 @@ import type {
   MemberId,
   NextSet,
   PayloadShape,
+  PointAttributedPayload,
+  PointKind,
   PointScoredPayload,
   QueueChangedPayload,
   ScorePayload,
@@ -458,6 +463,32 @@ function parseServingTeamChangedFields(raw: RawObject): ParseResult<ServingTeamC
   return ok({ firstServer, matchId, servingTeam, setNumber });
 }
 
+function isPointKind(value: unknown): value is PointKind {
+  return isOneOf(POINT_KINDS, value);
+}
+
+/** An error of the opponent has no author, and every other kind has one. */
+function isAuthorOfTheKind(kind: PointKind, author: MemberId | null): boolean {
+  return AUTHORLESS_POINT_KINDS.includes(kind) === (author === null);
+}
+
+/**
+ * Format only: whether the point exists and the author played it is for the applier and the
+ * resolver. A missing `author` is invalid: the absence of an answer is no event (ADR 0031).
+ */
+function parsePointAttributedFields(raw: RawObject): ParseResult<PointAttributedPayload> {
+  const matchId = readOwn(raw, "matchId");
+  if (!isUuid(matchId)) return invalid("matchId");
+  const pointEventId = readOwn(raw, "pointEventId");
+  if (!isUuid(pointEventId)) return invalid("pointEventId");
+  const kind = readOwn(raw, "kind");
+  if (!isPointKind(kind)) return invalid("kind");
+  const author = readOwn(raw, "author");
+  if (author !== null && !isUuid(author)) return invalid("author");
+  if (!isAuthorOfTheKind(kind, author)) return invalid("author");
+  return ok({ author, kind, matchId, pointEventId });
+}
+
 /** Unknown keys are checked first, at every level; then the fields, in the order of the schema. */
 function strictParser<T>(
   shape: PayloadShape,
@@ -511,6 +542,11 @@ export const parseServingTeamChangedPayload = strictParser(
   parseServingTeamChangedFields,
 );
 
+export const parsePointAttributedPayload = strictParser(
+  SCORE_PAYLOAD_SHAPES[POINT_ATTRIBUTED_EVENT_TYPE],
+  parsePointAttributedFields,
+);
+
 const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Map<
   string,
   PayloadParser<ScorePayload>
@@ -522,6 +558,7 @@ const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Ma
   [LINEUP_CHANGED_EVENT_TYPE, parseLineupChangedPayload],
   [QUEUE_CHANGED_EVENT_TYPE, parseQueueChangedPayload],
   [SERVING_TEAM_CHANGED_EVENT_TYPE, parseServingTeamChangedPayload],
+  [POINT_ATTRIBUTED_EVENT_TYPE, parsePointAttributedPayload],
 ]);
 
 /** Fails closed: a type outside the score catalog has no valid payload here. */
