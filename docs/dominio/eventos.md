@@ -100,6 +100,15 @@ Regras em [`placar.md`](placar.md) e [`rotacoes.md`](rotacoes.md), decisões nos
 - Estado só com valores JSON (sem `Map`, `Set`, `undefined`), comparável com o C#, e números inteiros.
 - Conteúdo do payload: parser estrito por tipo, só IDs (`MemberId`), a cargo de cada tarefa. O esquema fechado da E2.1 cobre só o envelope; os 4 tipos do placar têm parser desde a E2.2, `LineupChanged`, desde a E2.5, `QueueChanged`, desde a E2.6, `ServingTeamChanged`, desde a E2.7, e `PointAttributed`, desde a E2.8.
 
+## Porte C# (E2.10)
+
+O C# lê o mesmo log com as mesmas regras e produz o mesmo estado nos 14 golden de `packages/match-engine/golden/` ([ADR 0033](../arquitetura/adr/0033-porte-csharp-do-motor.md)). Diferenças deliberadas, que fecham mais que o TS:
+
+- **Chave repetida** num evento recebido é recusada: `invalid-envelope` com `field` `envelope` no nível do envelope e `payload` dentro dele, nunca com o nome. O JS fica com a última, mas o app grava com `JSON.stringify`, que nunca repete.
+- **Exceção dentro de um aplicador** não vira `event-rejected`: os aplicadores C# são totais e recusam por `Result`, com fuzz que exige zero exceção.
+- **Mais de 64 níveis** de JSON falham no leitor, antes do parser, como corpo inválido (E3.7).
+- **`NaN`** não vem de texto JSON no .NET: número enorme vira `Infinity` e é recusado como no JS.
+
 ## O que fica para depois
 
 - **E3.7:** simular o replay **antes** de persistir e rejeitar ali, porque com falha fechada um evento inválido gravado impede recalcular o stream (o mesmo vale para o log local na E4.9). `courtSessionId` e permissão vêm do token, não do envelope. Tamanho do payload limitado no servidor. Quem numera o lote e a regra de um celular por vez.

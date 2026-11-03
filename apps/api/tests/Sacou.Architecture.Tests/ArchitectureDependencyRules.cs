@@ -61,6 +61,27 @@ internal static partial class ArchitectureDependencyRules
         "System.GC",
     ];
 
+    /// <summary>
+    /// Clock, randomness, identity, threads and hash-ordered collections: the court session state must
+    /// depend only on the events (ADR 0033, D10). Other domains may still use them, so this is scoped.
+    /// </summary>
+    private static readonly HashSet<string> NonDeterministicTypes =
+    [
+        "System.DateTime",
+        "System.DateTimeOffset",
+        "System.TimeProvider",
+        "System.Random",
+        "System.Guid",
+        "System.Threading.Thread",
+        "System.Threading.Tasks.Task",
+        "System.Threading.Tasks.Task`1",
+        "System.Threading.Tasks.ValueTask",
+        "System.Threading.Tasks.ValueTask`1",
+        "System.Threading.Tasks.Parallel",
+        "System.Collections.Generic.HashSet`1",
+        "System.Collections.Generic.Dictionary`2",
+    ];
+
     internal static ArchUnitNET.Domain.Architecture Load(IEnumerable<System.Reflection.Assembly> assemblies) =>
         new ArchLoader().LoadAssemblies([.. assemblies]).Build();
 
@@ -73,6 +94,16 @@ internal static partial class ArchitectureDependencyRules
             from dependency in type.GetTypeDependencies()
             where !IsAllowedInDomain(dependency, domain.Value)
             select new Violation(type.FullName, $"Domain depends on {dependency.FullName}")];
+
+    /// <summary>Types under the namespace that depend on a clock, randomness, an identity, a thread or a hash-ordered collection.</summary>
+    internal static IReadOnlyList<Violation> DeterministicDomainViolations(
+        ArchUnitNET.Domain.Architecture architecture,
+        string namespacePrefix) =>
+        [.. from type in architecture.Types
+            where IsInNamespace(type.FullName, namespacePrefix)
+            from dependency in type.GetTypeDependencies()
+            where NonDeterministicTypes.Contains(OpenTypeName(dependency.FullName))
+            select new Violation(type.FullName, $"Court session domain depends on {dependency.FullName}")];
 
     internal static IReadOnlyList<Violation> ModuleBoundaryViolations(ArchUnitNET.Domain.Architecture architecture) =>
         [.. from type in architecture.Types
@@ -95,6 +126,9 @@ internal static partial class ArchitectureDependencyRules
 
     /// <summary>So that Environment+SpecialFolder falls with Environment.</summary>
     private static string TopLevelName(string fullName) => fullName.Split('+', '/')[0];
+
+    /// <summary>The top-level type without generic arguments, so <c>Dictionary`2+Enumerator</c> falls with <c>Dictionary`2</c>.</summary>
+    private static string OpenTypeName(string fullName) => TopLevelName(fullName).Split('[')[0];
 
     private static bool CrossesModuleBoundary(string dependency, string originModule)
     {

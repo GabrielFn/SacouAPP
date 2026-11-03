@@ -18,8 +18,9 @@ internal static partial class RepositoryFiles
     private const string IncludeAttribute = "Include";
     private const string SolutionProjectElement = "Project";
     private const string EmbeddedResourceElement = "EmbeddedResource";
-    private const string GoldenFromTestProject = "../../../../packages/volley-rules/golden/";
     private const string CatalogAssembly = "Sacou.Modules.Matches";
+    private const string LineCommentStart = "//";
+    private const string RemainderOperator = "%";
 
     internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
     internal const string CatalogPath = "packages/volley-rules/src/formations/formations.json";
@@ -33,6 +34,27 @@ internal static partial class RepositoryFiles
         "packages/volley-rules/golden/player-card-level.json",
         "packages/volley-rules/golden/pix.json",
         "packages/volley-rules/golden/pix-crc.json",
+        "packages/match-engine/golden/event-log.json",
+        "packages/match-engine/golden/score-rules.json",
+        "packages/match-engine/golden/score-payloads.json",
+        "packages/match-engine/golden/score-events.json",
+        "packages/match-engine/golden/rotation-rules.json",
+        "packages/match-engine/golden/rotation-events.json",
+        "packages/match-engine/golden/serve-alignment.json",
+        "packages/match-engine/golden/bench-events.json",
+        "packages/match-engine/golden/libero-alignment.json",
+        "packages/match-engine/golden/libero-events.json",
+        "packages/match-engine/golden/queue-events.json",
+        "packages/match-engine/golden/corrections-events.json",
+        "packages/match-engine/golden/attributions-events.json",
+        "packages/match-engine/golden/stats-events.json",
+    ];
+
+    /// <summary>The golden folders of the shared packages, as a test project path reaches them.</summary>
+    private static readonly string[] GoldenFromTestProject =
+    [
+        "../../../../packages/volley-rules/golden/",
+        "../../../../packages/match-engine/golden/",
     ];
 
     private static readonly HashSet<string> SharedJsonFileNames = [.. SharedJsonFiles.Select(path => path.Split('/')[^1])];
@@ -108,6 +130,22 @@ internal static partial class RepositoryFiles
             where declared.Count == 0 || declared.Any(name => name != expected)
             select $"{Path.GetRelativePath(modulesDirectory, path)}: expected namespace {expected}, found [{string.Join(", ", declared)}]"];
 
+    internal static string CourtSessionsDirectory =>
+        Path.Combine(ModulesDirectory, "Matches", "Domain", "CourtSessions");
+
+    /// <summary>
+    /// Lines of C# code that use the remainder operator, comments aside. Zones and slots move by
+    /// position in a table, never by arithmetic, so a wrong <c>%</c> cannot hide behind right answers
+    /// in the golden files (ADR 0033, D9).
+    /// </summary>
+    internal static IReadOnlyList<string> RemainderOperatorViolations(string directory) =>
+        [.. from path in Directory.GetFiles(directory, SourceFilePattern, SearchOption.AllDirectories)
+            let lines = File.ReadAllLines(path)
+            from index in Enumerable.Range(0, lines.Length)
+            let code = lines[index].Split(LineCommentStart)[0]
+            where code.Contains(RemainderOperator, StringComparison.Ordinal)
+            select $"{Path.GetRelativePath(directory, path)}:{index + 1}"];
+
     /// <summary>Any file named like a shared JSON file, outside what the build generates: nobody copies a case.</summary>
     internal static IReadOnlyList<string> CopiedSharedFileViolations(string directory) =>
         [.. from path in Directory.GetFiles(directory, "*.json", SearchOption.AllDirectories)
@@ -123,7 +161,7 @@ internal static partial class RepositoryFiles
     internal static IReadOnlyList<string> TestResourceViolations(XDocument project) =>
         [.. project.Descendants(EmbeddedResourceElement)
             .Select(resource => (string?)resource.Attribute(IncludeAttribute) ?? string.Empty)
-            .Where(path => !path.StartsWith(GoldenFromTestProject, StringComparison.Ordinal))
+            .Where(path => !GoldenFromTestProject.Any(folder => path.StartsWith(folder, StringComparison.Ordinal)))
             .Select(path => $"EmbeddedResource outside the golden folder: {path}")];
 
     /// <summary>The catalog in Matches and no other resource, in any production assembly: a golden file never ships.</summary>

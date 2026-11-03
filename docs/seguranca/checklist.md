@@ -9,7 +9,7 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | Capítulo | Status | Tarefas que cobrem |
 |---|---|---|
 | V1 Encoding and Sanitization | Pendente | E3.4, E3.12 |
-| V2 Validation and Business Logic | Pendente | E3.4, E3.7, E3.8, E3.10 |
+| V2 Validation and Business Logic | Pendente. Validação de entrada: UTF-8 estrito no leitor C# (feito na E2.10, ADR 0033); limite de bytes por evento antes do parser (E3.7) | E3.4, E3.7, E3.8, E3.10 |
 | V3 Web Frontend Security | Pendente | E3.12 |
 | V4 API and Web Service | Pendente | E3.1, E3.7 (SignalR), E3.15 |
 | V5 File Handling | Pendente | E3.14 |
