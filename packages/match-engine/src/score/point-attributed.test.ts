@@ -238,6 +238,30 @@ describe("applyPointAttributed", () => {
     expect(apply(closed, VALID).ok).toBe(true);
   });
 
+  test("accepts the last set between its SetEnded and the MatchEnded", () => {
+    const scoreA = (state: CourtSessionState) => scorePoint(state, "a");
+    const beforeConfirm = stateAfter(open, scoreA, scoreA, confirmSetEnd, scoreA, scoreA);
+    const confirmed = confirmSetEnd(beforeConfirm);
+    if (!confirmed.ok) {
+      throw new Error("refused");
+    }
+    const [setEnded] = confirmed.value;
+    if (setEnded === undefined) {
+      throw new Error("no SetEnded");
+    }
+    const events = [setEnded].map((draft) => toEnvelope(draft, 1));
+    const lastSetClosed = SCORE_APPLIERS.get(setEnded.type)?.(
+      beforeConfirm,
+      events[0] as EventEnvelope,
+    );
+
+    expect(lastSetClosed?.ok).toBe(true);
+    const state = lastSetClosed?.ok === true ? lastSetClosed.value : beforeConfirm;
+    expect(state.currentMatch).not.toBeNull();
+    expect(state.currentMatch?.currentSet).toBeNull();
+    expect(apply(state, VALID).ok).toBe(true);
+  });
+
   test("rejects without a match, for another match, after the end and for an outsider", () => {
     const rejected = { ok: false, error: { code: "event-rejected" } };
     const state = stateAfter(open);
