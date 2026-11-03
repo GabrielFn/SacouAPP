@@ -29,10 +29,11 @@
 | E2.7 | Feita | ADR 0030. Respostas do Gabriel de 03/11 em `perguntas.md`. Evento novo `ServingTeamChanged`; girar e desgirar por `LineupChanged`; `replayTimeline` para a tela 24. Revisor com oráculo próprio: 638.581 comparações, 0 falhas. Segurança aprovou, sem piora no replay. Testador passou: 11 mutações, uma sobrevivente (`firstServer` depois de pontos), morta com teste novo. |
 | E2.8 | Feita | ADR 0031. Respostas do Gabriel de 03/11 em `perguntas.md`. Evento novo `PointAttributed`, sem mudar o estado; `resolvePointAttributions` usa o último preenchimento válido. Revisor com oráculo próprio: 575.981 comparações, 0 divergências. Segurança aprovou, com medição. Testador passou: 20 mutações, uma sobrevivente (último set antes do `MatchEnded`), morta com teste novo. |
 | E2.9 | Feita | ADR 0032 e `docs/dominio/estatisticas.md`. Respostas do Gabriel de 03/11 em `perguntas.md`. Só cálculo, sem evento: `getPlayerStats` e `getSideStats`. Revisor com oráculo próprio: 7.937 linhas de jogador em 1.358 partidas, 0 divergências. Testador passou: 14 mutações, uma equivalente e uma sobrevivente (times trocando de lado), morta com teste novo. Não sensível. |
+| E2.10 | Feita | ADR 0033. Porte para C# em 5 partes, com os 14 golden do `match-engine`. Revisão leve da P1 e revisão completa aprovadas; diferencial TS × C# com 7.808 logs e 327.947 eventos, 0 diferenças e 0 exceções. Segurança aprovou, com fuzz de 40 mil logs; dois achados médios no leitor de JSON corrigidos. Testador passou: 2.798 testes .NET e 12 mutações reprovadas. |
 
 ## Em andamento
 
-- E2.10 (back): branch `task/E2.10-csharp-state`, worktree `.claude/worktrees/e2-10`. Plano em partes P1 a P5. P1 (`fadc39b`, revisão leve aprovada), P2 (`50b9a40`) e P3 (`e5065de`, `score-payloads.json` com 865 casos) prontas, com 2379 testes .NET. Falta P4a, P4b e P5, depois revisão completa, `revisor-seguranca` e testador. Pendências da revisão leve da P1 para a revisão final: alias `EveryDeclaredMember` em `ArchitectureReflectionRules.cs:34`; `EnvelopeParser` sem usar `SafeInteger` (lógica duplicada).
+Nenhuma. Tarefas do M2 todas feitas: falta a revisão geral de segurança e o relatório do M2.
 
 ## Adiadas
 
