@@ -27,7 +27,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.11 (front); ver o diário de 02/11/2026.
+- E2.11 (front): branch `task/E2.11-libero`, worktree `.claude/worktrees/e2-11`. Plano com as respostas do Gabriel; desenvolvedor (Opus) em curso. Sensível: passa pelo `revisor-seguranca`.
 
 ## Adiadas
 
@@ -49,7 +49,8 @@ Nenhuma. Próxima: E2.11 (front); ver o diário de 02/11/2026.
 - E5.1: o contexto da imagem precisa levar `packages/volley-rules/`, porque o build embute o catálogo na DLL (ADR 0025).
 - E1.5, ressalvas não bloqueantes: `ModulesAndShared` (`Assemblies.cs:29`) não inclui `Sacou.Api`, então um golden embutido na API passaria; `TestResourceViolations` só olha o prefixo do `Include`, então `golden/../x.json` passaria. Não rodados pelo testador: tabela de `Infinity` em Node e sabotagem de renomear o catálogo.
 - E2.3, pendências: `commands.ts:125` não sabe qual é o set decisivo, então a E4.10 testa os dois casos (sem `firstServer` no decisivo, com ele num set comum); `appliers.ts:176`: ponto atrasado antes de um `SetEnded` perde o giro, registrar na E3.7 junto de "ponto atrasado" no ADR 0023; `rotation-rules.ts:38`: `getServingPlayer` e `getLineupBySlot` aceitam array de qualquer tamanho, rever na E2.5; `parse-payloads.ts:118-124`: `Proxy` que muda `length` passa `lineup` de 7, inalcançável por JSON; E2.10 e E3.7 repetem em C# a contenção de `lineup` e o esquema fechado.
-- E2.11 (nova, líbero ligado): o design não tem o controle em "Avançado" nem o líbero na tela 22; o analista aponta o que precisa de tela e pergunta ao Gabriel se for mudança visível fora do padrão das telas.
+- Design do líbero (E2.11): faltam o controle em "Avançado", a escolha do líbero de cada time (telas 07 e 08) e como ele aparece nas telas 22, 09 e 10; nenhuma tarefa da E4 cobre isso hoje. Apontar ao Gabriel antes da E4.7.
+- E2.9: usar `getOnCourtBySlot` (E2.11) para não dar saldo a quem está fora de quadra.
 - E2.4, pendências: E2.11 decide quais sistemas aceitam líbero, porque o catálogo não tem slot `L` no 4x2 nem na Livre e `rotacoes.md:51` só cita o 5x1; se o catálogo mudar, o teste do hash reprova, e ela decide entre atualizar a v1 ou subir a versão. E3.7: `startMatch` compara com a versão atual, e com a v2 um app antigo offline ainda gera v1, então precisa de lista de versões suportadas. O hash também cobre `note` e `label`: tratar na primeira edição do catálogo. Com a v2, revisar a frase de `modelo-de-ameacas.md:39` sobre `formationsVersion` forjado. E2.10 e E3.7 repetem em C# o parser estrito de `system` e `formationsVersion`.
 - E2.5, pendências: E3.7 ou E4.11: `LineupChanged` desatualizado desfaz um giro e muda o sacador sem aviso, na sincronização offline, o que é determinístico mas precisa de aviso ou reconferência da zona. E2.6: `decisoes.md:11` diz que quem entra assume a posição de quem saiu, mas não diz se quem está no banco pode ser escolhido para sair nem como conta "mais partidas seguidas"; o analista decide, e pergunta ao Gabriel se mudar o que o usuário vê. E4.8: `changeLineup` recusa `TeamState` inteiro, então passa só `bench`, `lineup` e `setterZone`; o design não tem banco na tela 22 nem destino para "Trocar jogador".
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.

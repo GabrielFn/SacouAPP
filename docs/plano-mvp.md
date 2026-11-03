@@ -123,7 +123,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E2.7 | Desfazer, voltar a um ponto, trocar sacador, girar e desgirar | Linha do tempo reverte placar, rotação e fila juntos | E2.6 |
 | E2.8 | Ponto individual (autor e tipo) e pontos sem autor | Preencher depois funciona. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.2 |
 | E2.9 | Estatísticas por jogador (saldo +/− em quadra, vitórias, sequência) | Rodada simulada com números conferidos à mão | E2.6 |
-| E2.11 | Líbero ligado: configuração, 7º membro no evento e trocas | Só no fundo, nunca saca, sai ao chegar na 4, troca só com quem substituiu; golden | E2.4 |
+| E2.11 | Líbero ligado: configuração, 7º membro no evento e trocas | Só no fundo, nunca saca, sai ao chegar na 4, troca só com quem substituiu; golden | E2.4, E2.5 |
 | E2.10 | Porte da função de estado para C# + testes golden compartilhados | TS e C# produzem o mesmo estado em todos os cenários | E2.9, E2.11, E1.5 |
 
 ### E3 · API (M3–M6)
