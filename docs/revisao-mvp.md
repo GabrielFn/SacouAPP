@@ -51,7 +51,7 @@ São 12 telas essenciais para o MVP; quase todas as decisões de configuração 
 | Tela | MVP? | Por quê |
 |---|---|---|
 | Lista de grupos | Essencial | Destino da aba Grupo |
-| Ajustes do grupo "Como jogamos" | Essencial | Fila e saída parcial (critério e modo), sets, tie-break, rotação, banco, MVP, cobrança, recorrência, com herança e selos Pro |
+| Ajustes do grupo "Como jogamos" | Essencial | Fila e saída parcial (critério e modo), sets, tie-break, rotação, MVP, cobrança, recorrência, com herança e selos Pro |
 | Membros e papéis | Essencial | Admin, Co-admin, Placar; mensalista ou avulso; convite por link e QR |
 | Escalação em tela cheia, por time | Essencial | O botão "Escalação" do pré-jogo não leva a nada; ordem 1–6, levantador, formação e avisos de sobreposição |
 | Menu da quadra + Corrigir (linha do tempo) + Trocar jogador | Essencial | "Corrigir" existe sem destino; inclui confirmação de fim de set |

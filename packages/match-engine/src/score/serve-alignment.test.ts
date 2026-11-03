@@ -71,7 +71,7 @@ const COMBINATIONS: readonly Combination[] = FORMATION_SYSTEMS.flatMap((system) 
 );
 
 function teamState({ system, setterZone }: Pick<Combination, "system" | "setterZone">): TeamState {
-  return { lineup: ORANGE_LINEUP, setterZone, system };
+  return { bench: [], lineup: ORANGE_LINEUP, setterZone, system };
 }
 
 function alignmentOf(combination: Combination): ServeAlignment {

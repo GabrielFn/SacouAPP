@@ -10,6 +10,7 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 
 ## Respondidas
+- **Banco, E2.5 (02/11/2026):** só Manual no MVP. "Sai quem saca" não tinha definição nos documentos nem padrão na internet, e foi para `docs/ideias.md`. Isso dispensa as perguntas sobre o momento da troca, o levantador e a exceção a `decisoes.md:26`. A linha "Banco" saiu da tela `AjustesGrupo`.
 - **Cópia das formações, E2.4 (02/11/2026):** número `formationsVersion` no evento e catálogo imutável por versão, em vez da cópia completa. Exceção a `decisoes.md:26`, já ajustado; a cópia real entra junto com o editor do Pro.
 - **Líbero ligado no MVP (02/11/2026):** entra, contra a recomendação. Vira a tarefa E2.11, no M2 e antes do porte em C#. Faltam o controle em "Avançado" e a tela: `produto.md:94` prevê, mas o design não tem.
 - **Toque em dois jogadores na tela 22 (02/11/2026):** troca a ordem oficial (`lineup`), e o alerta trata só de funções, como "Levantadores não estão opostos". O texto "Lia e Ana estão fora de ordem" (`Escalacao.dc.html:91`) muda na E4.8.

@@ -27,7 +27,7 @@ const LINEUP_A = [1, 2, 3, 4, 5, 6].map((n) => `a0000000-0000-4000-8000-00000000
 const WITH_LINEUP = {
   ...VALID_START,
   teams: { ...VALID_START.teams, a: { memberIds: LINEUP_A } },
-  rotations: { a: { lineup: LINEUP_A, setterZone: 2, system: "5x1" }, b: null },
+  rotations: { a: { bench: [], lineup: LINEUP_A, setterZone: 2, system: "5x1" }, b: null },
 };
 const VALID_NEXT_SET = {
   targetPoints: 25,
@@ -98,7 +98,7 @@ describe("input that JSON cannot produce", () => {
     lineup[0] = MEMBER_A;
     const input = {
       ...WITH_LINEUP,
-      rotations: { a: { lineup, setterZone: 1, system: "5x1" }, b: null },
+      rotations: { a: { bench: [], lineup, setterZone: 1, system: "5x1" }, b: null },
     };
 
     expect(fieldOf(parseMatchStartedPayload(input))).toBe("rotations.a.lineup");
@@ -192,7 +192,7 @@ describe("the parsed value", () => {
     const lineup = [...LINEUP_A];
     const input = {
       ...WITH_LINEUP,
-      rotations: { a: { lineup, setterZone: 2, system: "5x1" }, b: null },
+      rotations: { a: { bench: [], lineup, setterZone: 2, system: "5x1" }, b: null },
     };
 
     const parsed = parseMatchStartedPayload(input);
@@ -215,6 +215,7 @@ describe("the parsed value", () => {
       "teams",
     ]);
     expect(started.ok && Object.keys(started.value.rotations.a ?? {})).toStrictEqual([
+      "bench",
       "lineup",
       "setterZone",
       "system",

@@ -17,12 +17,12 @@
 - Ninguém esperando, ninguém sai.
 - Avulsos que saíram e somam um time formam time por ordem de chegada.
 
-**Banco no MVP:** "sai quem saca" e manual.
+**Banco no MVP:** só manual, por decisão do Gabriel de 02/11/2026 ([ADR 0027](0027-banco-manual.md)). "Sai quem saca" foi para `docs/ideias.md`.
 
 ## Alternativas
 
 - **Time de avulsos por equilíbrio de nível:** não adotada no MVP (`revisao-mvp.md:155`).
-- **Banco por pontos, por set e por tempo:** ficam para depois (`produto.md:93`).
+- **Banco por "sai quem saca", por pontos, por set e por tempo:** ficam para depois (`produto.md:93`).
 
 ## Consequências
 

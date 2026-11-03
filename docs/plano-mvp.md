@@ -118,7 +118,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E2.2 | Placar, sets, pontos configuráveis, tie-break, vantagem | Cenários de fim de set e partida. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.1 |
 | E2.3 | Saque, side-out e rotação por time (`setterZone`) | Nunca gira quem venceu sacando; sequência 1→6→5…4→3→2 | E2.2, E1.1 |
 | E2.4 | Posições no saque por sistema e fase | Bate com as formações e passa no validador | E2.3, E1.2 |
-| E2.5 | Banco: sai quem saca e manual | Cenários com 7 e 8 jogadores | E2.3 |
+| E2.5 | Banco manual e alteração de escalação em partida | Cenários com 7 e 8 jogadores | E2.3 |
 | E2.6 | Fila da quadra da rodada com saída parcial e critérios | Cenário da revisão (2 reservas, Azul perde) | E2.3 |
 | E2.7 | Desfazer, voltar a um ponto, trocar sacador, girar e desgirar | Linha do tempo reverte placar, rotação e fila juntos | E2.6 |
 | E2.8 | Ponto individual (autor e tipo) e pontos sem autor | Preencher depois funciona. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.2 |
@@ -158,7 +158,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.5 | Criar grupo, ajustes "Como jogamos", membros | Telas 04, 05, 18, 19 | E3.3 |
 | E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador | Telas 06, 20, 21, 26 | E3.4 |
 | E4.7 | Sorteio e pré-jogo | Telas 07, 08 | E3.6 |
-| E4.8 | Escalação por time | Tela 22 | E2.4 |
+| E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |
 | E4.9 | Modo quadra offline (SQLite, tela ligada, vibração, trava) | Telas 09, 10; partida inteira em modo avião | E2.7 |
 | E4.10 | Menu, corrigir, fim de set e de partida, ponto individual | Telas 11, 23, 24, 25, 31 | E4.9 |
 | E4.11 | Sincronização e placar ao vivo | Volta da internet sem perder pontos | E3.7 |

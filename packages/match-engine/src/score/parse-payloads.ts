@@ -14,10 +14,13 @@ import {
   END_REASONS,
   FIRST_SET_NUMBER,
   LAST_SET_NUMBER,
+  LINEUP_CHANGED_EVENT_TYPE,
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
+  MAX_BENCH_MEMBERS,
   MAX_SET_POINTS,
   MAX_TEAM_MEMBERS,
+  MIN_BENCH_MEMBERS,
   MIN_SET_POINTS,
   MIN_TEAM_MEMBERS,
   PAYLOAD_ROOT_FIELD,
@@ -29,7 +32,9 @@ import {
   UNKNOWN_PAYLOAD_FIELD,
   WIN_MARGIN_VALUES,
 } from "./constants.data.js";
+import { isRosterPartition } from "./rotation-rules.js";
 import type {
+  LineupChangedPayload,
   MatchEndedPayload,
   MatchStartedPayload,
   MatchTeams,
@@ -164,10 +169,28 @@ function parseTeams(raw: unknown): ParseResult<MatchTeams> {
   return hasSharedMember ? invalid("teams.b.memberIds") : ok({ a: a.value, b: b.value });
 }
 
+function parseLineupMembers(raw: unknown): readonly MemberId[] | null {
+  return parseUniqueMemberIds(raw, ROTATION_SLOTS.length, ROTATION_SLOTS.length);
+}
+
 /** Exactly one player per position, and all of them from the team of the frozen copy. */
 function parseLineup(raw: unknown, { memberIds }: TeamRoster): readonly MemberId[] | null {
-  const lineup = parseUniqueMemberIds(raw, ROTATION_SLOTS.length, ROTATION_SLOTS.length);
+  const lineup = parseLineupMembers(raw);
   return lineup?.every((id) => memberIds.includes(id)) === true ? lineup : null;
+}
+
+function parseBenchMembers(raw: unknown): readonly MemberId[] | null {
+  return parseUniqueMemberIds(raw, MIN_BENCH_MEMBERS, MAX_BENCH_MEMBERS);
+}
+
+/** Whoever of the frozen copy is not in the lineup, each one once. Empty is `[]`, never absent. */
+function parseBench(
+  raw: unknown,
+  lineup: readonly MemberId[],
+  roster: TeamRoster,
+): readonly MemberId[] | null {
+  const bench = parseBenchMembers(raw);
+  return bench !== null && isRosterPartition(lineup, bench, roster) ? bench : null;
 }
 
 function parseTeamState(
@@ -178,6 +201,7 @@ function parseTeamState(
     readonly lineup: ScorePayloadField;
     readonly setterZone: ScorePayloadField;
     readonly system: ScorePayloadField;
+    readonly bench: ScorePayloadField;
   },
 ): ParseResult<TeamState | null> {
   if (raw === null) return ok(null);
@@ -187,7 +211,9 @@ function parseTeamState(
   const setterZone = readOwn(raw, "setterZone");
   if (!isSetterZone(setterZone)) return invalid(fields.setterZone);
   const system = readOwn(raw, "system");
-  return isFormationSystem(system) ? ok({ lineup, setterZone, system }) : invalid(fields.system);
+  if (!isFormationSystem(system)) return invalid(fields.system);
+  const bench = parseBench(readOwn(raw, "bench"), lineup, roster);
+  return bench === null ? invalid(fields.bench) : ok({ bench, lineup, setterZone, system });
 }
 
 function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotations> {
@@ -197,6 +223,7 @@ function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotati
     lineup: "rotations.a.lineup",
     setterZone: "rotations.a.setterZone",
     system: "rotations.a.system",
+    bench: "rotations.a.bench",
   });
   if (!a.ok) return a;
   const b = parseTeamState(readOwn(raw, "b"), teams.b, {
@@ -204,6 +231,7 @@ function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotati
     lineup: "rotations.b.lineup",
     setterZone: "rotations.b.setterZone",
     system: "rotations.b.system",
+    bench: "rotations.b.bench",
   });
   return b.ok ? ok({ a: a.value, b: b.value }) : b;
 }
@@ -288,6 +316,21 @@ function parseMatchEndedFields(raw: RawObject): ParseResult<MatchEndedPayload> {
   return ok({ endReason, matchId, winner });
 }
 
+/** Format only: whether these are the members of the team is for the applier, which has `teams`. */
+function parseLineupChangedFields(raw: RawObject): ParseResult<LineupChangedPayload> {
+  const matchId = readOwn(raw, "matchId");
+  if (!isUuid(matchId)) return invalid("matchId");
+  const team = readOwn(raw, "team");
+  if (!isTeamSide(team)) return invalid("team");
+  const lineup = parseLineupMembers(readOwn(raw, "lineup"));
+  if (lineup === null) return invalid("lineup");
+  const setterZone = readOwn(raw, "setterZone");
+  if (!isSetterZone(setterZone)) return invalid("setterZone");
+  const bench = parseBenchMembers(readOwn(raw, "bench"));
+  if (bench === null || bench.some((id) => lineup.includes(id))) return invalid("bench");
+  return ok({ bench, lineup, matchId, setterZone, team });
+}
+
 /** Unknown keys are checked first, at every level; then the fields, in the order of the schema. */
 function strictParser<T>(
   shape: PayloadShape,
@@ -326,6 +369,11 @@ export const parseMatchEndedPayload = strictParser(
   parseMatchEndedFields,
 );
 
+export const parseLineupChangedPayload = strictParser(
+  SCORE_PAYLOAD_SHAPES[LINEUP_CHANGED_EVENT_TYPE],
+  parseLineupChangedFields,
+);
+
 const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Map<
   string,
   PayloadParser<ScorePayload>
@@ -334,6 +382,7 @@ const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Ma
   [POINT_SCORED_EVENT_TYPE, parsePointScoredPayload],
   [SET_ENDED_EVENT_TYPE, parseSetEndedPayload],
   [MATCH_ENDED_EVENT_TYPE, parseMatchEndedPayload],
+  [LINEUP_CHANGED_EVENT_TYPE, parseLineupChangedPayload],
 ]);
 
 /** Fails closed: a type outside the score catalog has no valid payload here. */

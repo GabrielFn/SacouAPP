@@ -33,7 +33,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Regras de pontuação | `ScoringRules` | Sets, pontos, tie-break e vantagem, por valor no `MatchStarted` (ADR 0023) |
 | Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |
 | Saída parcial | `PartialExit` | |
-| Banco | `Bench` | |
+| Banco | `bench` | Quem é do time e não está em `lineup`, na ordem da fila. Só manual no MVP (ADR 0027) |
+| Alteração de escalação | `LineupChanged` | Evento com a alocação inteira do time: troca com o banco e tela 22 (ADR 0027) |
 | Sacador | `ServingPlayer` | Quem está na posição 1 (`getServingPlayer`) |
 | Time que saca | `servingTeam` | Lado que saca agora, no set aberto (ADR 0024) |
 | Primeiro saque do set | `firstServer` | Lado que sacou primeiro no set; base da alternância (ADR 0024) |
@@ -50,7 +51,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Rotação atual | `RotationIndex` | |
 | Id interno da rotação | `setterZone` | Zona do levantador. Na Livre, sem levantador, é a zona do primeiro da escalação (ADR 0024) |
 | Chave de rotação nas formações | `RotationKey` | `setterZone` ou `0`, na Livre (ADR 0006) |
-| Estado do time | `TeamState` | `lineup`, `setterZone` e `system` (E2.3 e E2.4). A função vem do índice no `lineup` (ADR 0026), e o banco entra na E2.5. `null` em `rotations` é rotação desligada (ADR 0024) |
+| Estado do time | `TeamState` | `bench`, `lineup`, `setterZone` e `system` (E2.3 a E2.5). A função vem do índice no `lineup` (ADR 0026). `null` em `rotations` é rotação desligada (ADR 0024) |
 | Posição atual na quadra (1–6) | `RotationSlot` | Muda a cada giro. Não é o índice fixo na escalação. Ver a nota abaixo |
 | Coordenada na quadra (x, y) | `CourtPoint` | |
 | Posição no saque | `ServeAlignment` | Quem fica em cada `RotationSlot`, com função e `CourtPoint`, mais `actingSetter`. Com líbero desligado, nenhum slot tem `L` (ADR 0026) |

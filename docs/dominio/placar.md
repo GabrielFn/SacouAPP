@@ -27,11 +27,11 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 
 ## Comandos
 
-`startMatch`, `scorePoint`, `confirmSetEnd` e `endMatchManually` decidem pelas regras acima e devolvem eventos sem envelope, porque `eventId` e `sequence` vêm de fora do motor.
+`startMatch`, `scorePoint`, `confirmSetEnd`, `endMatchManually`, `changeLineup` e `substitutePlayer` decidem pelas regras acima e devolvem eventos sem envelope, porque `eventId` e `sequence` vêm de fora do motor.
 
 | Recusa | Quando |
 |---|---|
-| `invalid-payload` | Entrada fora do esquema, ou `matchId` de uma partida já terminada (o replay rejeitaria o evento) |
+| `invalid-payload` | Entrada fora do esquema, `matchId` de uma partida já terminada (o replay rejeitaria o evento), ou troca com jogador ou partição errados (`field` `lineup` ou `bench`) |
 | `unsupported-rules-version` | `rulesVersion` fora de `SUPPORTED_RULES_VERSIONS`. Só comandos recusam: o replay aceita qualquer versão |
 | `unsupported-formations-version` | `formationsVersion` diferente da versão atual do catálogo; o replay aceita, e `getTeamServeAlignment` devolve `null` (ADR 0026) |
 | `match-already-open` | `startMatch` com partida aberta |
@@ -40,6 +40,8 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 | `no-open-set` | Partida sem set aberto e sem vencedor a concluir |
 | `set-decided` | Ponto com o set decidido e não confirmado |
 | `set-not-decided` | Confirmação com o set ainda sem vencedor |
+| `rotation-off` | `changeLineup` ou `substitutePlayer` em time com a rotação desligada, que não tem banco (ADR 0027) |
+| `lineup-unchanged` | `changeLineup` com a alocação idêntica à atual, inclusive a ordem do banco (ADR 0027) |
 
 ## Estado (`CourtSessionState`)
 
@@ -50,7 +52,7 @@ CourtSessionState { currentMatch: MatchScore | null, finishedMatches: FinishedMa
 MatchScore { completedSets: [{ score, setNumber, winner }],
              currentSet: { firstServer, score: { a, b }, servingTeam, setNumber, targetPoints } | null,
              formationsVersion, matchId, rotations: { a: TeamState | null, b: TeamState | null }, rulesVersion, scoring, setsWon: { a, b }, teams }
-TeamState { lineup: MemberId[6], setterZone: 1..6, system: "5x1" | "6x2" | "4x2" | "livre" }  // regras em rotacoes.md; E2.5 acrescenta campos
+TeamState { bench: MemberId[0..18], lineup: MemberId[6], setterZone: 1..6, system: "5x1" | "6x2" | "4x2" | "livre" }  // regras em rotacoes.md
 FinishedMatch: MatchScore + endReason (depois de currentSet) + winner (no fim)
 ```
 

@@ -89,8 +89,8 @@ Tudo pode ser desligado: cobrança, limite de vagas, número de sets (livre, ún
 1. **Sistemas selecionáveis** por time: Livre, 6x0, 4x2, 5x1 e 6x2. O padrão vem do modelo: Livre na Pelada e na Areia, 6x0 no Racha organizado, 5x1 no Treino. Os três últimos são do Sacou Pro, com o rótulo "Avançado" e um mini-tutorial na primeira vez.
 2. **Pergunta só os papéis necessários:** 5x1 pede 1 levantador; 4x2 e 6x2 pedem 2 e o app os coloca opostos sozinho.
 3. **Escalação auto-preenchida** pelas posições declaradas; ajuste tocando em dois jogadores para trocar (sem arrastar).
-4. **Rotação automática no side-out**** e posições reais no momento do saque. Duas camadas: a ordem de rotação oficial (1–6), que define o sacador, quando gira e a regra de sobreposição; e a posição física de cada jogador no saque, que depende do sistema, da rotação e de o time estar sacando ou em recepção (ex.: no 5x1, levantador escondido para infiltrar). ****Regras e formações detalhadas em `docs/dominio/rotacoes.md` (pesquisa de 30/10/2026). Modo de regra configurável: FIVB 2025–28 (padrão; só o time que recebe precisa respeitar a sobreposição) ou Clássico (os dois times). A rotação é identificada internamente pela posição do levantador (setterZone). ****Cada time tem a própria rotação, independente: sistema, escalação, levantador, rotação atual e regra do banco são por time. ****A tela de quadra mostra só a posição no saque, não a troca depois dele. Cada sistema traz modelos de formação prontos; no Pro, o grupo ajusta as formações com validação de sobreposição**
-5. **Rodízio do banco:** "Sai quem saca" (padrão) e "Manual" no início; por pontos, por set e por tempo depois.
+4. **Rotação automática no side-out**** e posições reais no momento do saque. Duas camadas: a ordem de rotação oficial (1–6), que define o sacador, quando gira e a regra de sobreposição; e a posição física de cada jogador no saque, que depende do sistema, da rotação e de o time estar sacando ou em recepção (ex.: no 5x1, levantador escondido para infiltrar). ****Regras e formações detalhadas em `docs/dominio/rotacoes.md` (pesquisa de 30/10/2026). Modo de regra configurável: FIVB 2025–28 (padrão; só o time que recebe precisa respeitar a sobreposição) ou Clássico (os dois times). A rotação é identificada internamente pela posição do levantador (setterZone). ****Cada time tem a própria rotação, independente: sistema, escalação, levantador, rotação atual e banco são por time. ****A tela de quadra mostra só a posição no saque, não a troca depois dele. Cada sistema traz modelos de formação prontos; no Pro, o grupo ajusta as formações com validação de sobreposição**
+5. **Rodízio do banco:** só "Manual" no MVP; regras automáticas ("sai quem saca", por pontos, por set e por tempo) depois (`docs/ideias.md`).
 6. **Líbero e limite de substituições:** em "Avançado", desligados por padrão.
 7. Violações viram aviso ("Levantadores não estão opostos — Corrigir?"), nunca bloqueio.
 
@@ -303,7 +303,7 @@ Termos acrescentados na revisão: Quadra da rodada → CourtSession, Cartinha �
 ### Padrões
 
 1. **Vertical Slice:** cada funcionalidade é uma pasta com endpoint, request, handler, validação e testes (ex.: `Sessions/ConfirmAttendance/`).
-2. **Strategy** para tudo que é selecionável: `IRotationSystem`, `IQueueExitCriterion`, `IBenchRule`, `ITeamBalancer`.
+2. **Strategy** para tudo que é selecionável: `IRotationSystem`, `IQueueExitCriterion`, `ITeamBalancer`; `IBenchRule` só quando houver regra automática de banco (ADR 0027).
 3. **SettingsResolver:** mescla grupo → rodada → partida; cada nível é um record com campos anuláveis (null herda), guardado em `jsonb`.
 4. **Outbox:** eventos gravados na mesma transação e enviados pelo Hangfire (push, e-mail).
 5. **Idempotência:** eventos da partida chegam com ID gerado no celular; reenviar não duplica.
