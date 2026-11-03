@@ -35,6 +35,7 @@ import {
   UNKNOWN_PAYLOAD_FIELD,
   WIN_MARGIN_VALUES,
 } from "./constants.data.js";
+import { isQueueOverlappingTeams, queueSize } from "./queue-rules.js";
 import { isLiberoAllowed, isLiberoCoverage, isRosterPartition } from "./rotation-rules.js";
 import type {
   CourtQueue,
@@ -329,22 +330,6 @@ function parseQueueTeams(raw: unknown): readonly TeamRoster[] | null {
   }
   const members = teams.flatMap(({ memberIds }) => memberIds);
   return new Set(members).size === members.length ? teams : null;
-}
-
-function queueSize({ players, teams }: CourtQueue): number {
-  return teams.reduce((total, { memberIds }) => total + memberIds.length, players.length);
-}
-
-function queueMembers({ players, teams }: CourtQueue): readonly MemberId[] {
-  return [...teams.flatMap(({ memberIds }) => memberIds), ...players];
-}
-
-/**
- * Whether anyone waiting is on the court: the queue is checked against the frozen `teams`, the
- * one of the payload or the one of the open match.
- */
-export function isQueueOverlappingTeams(queue: CourtQueue, { a, b }: MatchTeams): boolean {
-  return queueMembers(queue).some((id) => a.memberIds.includes(id) || b.memberIds.includes(id));
 }
 
 /** Format only: teams, then players, nobody twice, and at most `MAX_QUEUE_MEMBERS` in all. */

@@ -12,7 +12,6 @@ import {
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
 import {
-  isQueueOverlappingTeams,
   parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
@@ -20,6 +19,7 @@ import {
   parseQueueChangedPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
+import { isQueueOverlappingTeams } from "./queue-rules.js";
 import { isLiberoAllowed, isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
 import type {
   CourtSessionState,
