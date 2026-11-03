@@ -143,10 +143,10 @@ describe("bench events golden", () => {
 describe("who serves after a change", () => {
   const withServer = CASES.filter(({ servingPlayer }) => servingPlayer !== undefined);
 
-  test.each(withServer)("$id", ({ servingPlayer, ...goldenCase }) => {
-    const state = stateBefore({ ...goldenCase }, Number.MAX_SAFE_INTEGER);
+  test.each(withServer)("$id", (goldenCase) => {
+    const { currentMatch } = stateBefore(goldenCase, Number.MAX_SAFE_INTEGER);
 
-    expect(state.currentMatch && getCurrentServingPlayer(state.currentMatch)).toBe(servingPlayer);
+    expect(currentMatch && getCurrentServingPlayer(currentMatch)).toBe(goldenCase.servingPlayer);
   });
 
   test("the file checks the server in the cases that matter", () => {
