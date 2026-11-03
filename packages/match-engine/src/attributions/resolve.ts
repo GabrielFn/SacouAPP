@@ -28,7 +28,7 @@ function scoredPointOf({ event, state }: Entry): readonly ScoredPoint[] {
   }
   const parsed = parsePointScoredPayload(event.payload);
   const match = state.currentMatch;
-  if (!parsed.ok || match?.matchId !== parsed.value.matchId) {
+  if (!parsed.ok || match === null || match.matchId !== parsed.value.matchId) {
     return [];
   }
   const { matchId, setNumber, team } = parsed.value;

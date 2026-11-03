@@ -2,13 +2,7 @@ import type { Result, SetterZone } from "@sacou/volley-rules";
 
 import type { REVERTED_TO_EVENT_TYPE } from "../event-log/constants.data.js";
 import type { ReplayedTimeline } from "../event-log/types.js";
-import type {
-  CourtSessionState,
-  MemberId,
-  PointKind,
-  SetScore,
-  TeamSide,
-} from "../score/types.js";
+import type { CourtSessionState, MemberId, PointKind, SetScore, TeamSide } from "../score/types.js";
 
 /** The replayed log of a court session, with the state after each active event. */
 export type CourtSessionTimeline = ReplayedTimeline<CourtSessionState>;
@@ -64,12 +58,7 @@ export interface RotationChange {
 }
 
 export type RemovedActionKey =
-  | "points"
-  | "lineupChanges"
-  | "queueChanges"
-  | "servingChanges"
-  | "setEnds"
-  | "attributions";
+  "points" | "lineupChanges" | "queueChanges" | "servingChanges" | "setEnds" | "attributions";
 
 /** How many actions leave the timeline. Nothing is erased from the log: a revert only appends. */
 export type RemovedActions = Readonly<Record<RemovedActionKey, number>>;

@@ -85,15 +85,17 @@ export function getListedSetPoints(timeline: CourtSessionTimeline): readonly Rec
     return [];
   }
   const attributions: AttributionsByPoint = new Map(
-    resolvePointAttributions(timeline).map((attribution) => [attribution.pointEventId, attribution]),
+    resolvePointAttributions(timeline).map((attribution) => [
+      attribution.pointEventId,
+      attribution,
+    ]),
   );
   const listed = { matchId: match.matchId, setNumber };
   const { entries } = timeline;
   const start = getOpenMatchStartIndex(timeline);
   return entries.slice(start + 1).flatMap((entry, offset) => {
     const before = entries[start + offset]?.state;
-    const point =
-      before === undefined ? null : toRecentPoint(before, entry, listed, attributions);
+    const point = before === undefined ? null : toRecentPoint(before, entry, listed, attributions);
     return point === null ? [] : [point];
   });
 }

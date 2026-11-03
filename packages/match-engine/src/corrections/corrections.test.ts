@@ -69,6 +69,8 @@ function line(
     servingPlayer: servingPlayer ?? null,
     sideOut: setterZone !== null,
     setterZone,
+    author: null,
+    kind: null,
   };
 }
 
@@ -287,7 +289,14 @@ describe("previewRevert", () => {
         servingTeam: "b",
         servingPlayer: GABI,
         rotationChanges: [{ team: "a", from: 2, to: 3 }],
-        removed: { points: 3, lineupChanges: 0, queueChanges: 0, servingChanges: 0, setEnds: 0 },
+        removed: {
+          points: 3,
+          lineupChanges: 0,
+          queueChanges: 0,
+          servingChanges: 0,
+          setEnds: 0,
+          attributions: 0,
+        },
       },
     });
   });
@@ -309,6 +318,7 @@ describe("previewRevert", () => {
       queueChanges: 1,
       servingChanges: 1,
       setEnds: 1,
+      attributions: 0,
     });
     expect(preview.ok ? preview.value.current : null).toStrictEqual({
       setNumber: 2,

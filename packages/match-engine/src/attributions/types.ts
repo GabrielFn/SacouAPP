@@ -39,10 +39,7 @@ export interface Rally {
 }
 
 export type AttributionRefusalCode =
-  | "invalid-attribution-target"
-  | "invalid-point-author"
-  | "invalid-point-kind"
-  | "no-open-match";
+  "invalid-attribution-target" | "invalid-point-author" | "invalid-point-kind" | "no-open-match";
 
 /** Carries only a code, never the received event id, kind or author. */
 export type AttributionError = ScorePayloadError | { readonly code: AttributionRefusalCode };
