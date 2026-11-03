@@ -47,7 +47,7 @@ Escalação base, na ordem das posições 1 a 6 na rotação 1: Levantador, Pont
 |---|---|---|---|
 | Livre / 6x0 (grátis) | 6 jogadores sem função | Quem estiver na posição 3 | Uma formação base |
 | 4x2 (Pro) | 2 levantadores em diagonal, 2 ponteiros, 2 centrais | O levantador da rede | Levantador na rede (4, 3, 2), repetidas |
-| 6x2 (Pro) | 2 levantadores-atacantes em diagonal, 2 ponteiros, 2 centrais | O do fundo (infiltra); o da rede ataca | Levantador no fundo (1, 6, 5), repetidas |
+| 6x2 (Pro) | 2 levantadores-atacantes em diagonal, 2 ponteiros, 2 centrais, líbero | O do fundo (infiltra); o da rede ataca | Levantador no fundo (1, 6, 5), repetidas |
 | 5x1 (Pro) | 1 levantador, 1 oposto, 2 ponteiros, 2 centrais, líbero | Sempre o mesmo; infiltra no fundo | As 6 |
 
 ### Numeração das rotações
@@ -62,7 +62,7 @@ Times sorteados: Livre/6x0 ou 4x2 com recepção em W de 5 passadores. 5x1 com 3
 - Seis jogadores por time, cada posição ocupada uma vez. Time sem 6 jogadores fica com a rotação desligada (ADR 0024).
 - Girar só quem venceu recebendo; nunca quem venceu sacando.
 - Sacador é sempre quem está na posição 1 depois do giro.
-- Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu.
+- Líbero só no fundo, nunca sacando, sai ao chegar na 4, troca só com quem substituiu. O motor calcula a entrada e a saída a partir da zona e da fase, então não há troca de líbero gravada para validar (E2.11, ADR 0028).
 - Tie-break: troca de lado aos 8 sem girar. O lado da quadra fica fora do motor: é o app que troca o desenho (ADR 0024).
 
 **Aviso (só informa):**
@@ -91,7 +91,7 @@ Posições no saque implementadas na E2.4 ([ADR 0026](../arquitetura/adr/0026-po
 - **Da zona à formação:** o 5x1 usa a chave igual à zona. O 6x2 usa as chaves 1, 6, 5 e, nas zonas 4, 3, 2, as mesmas chaves com os pares trocados. O 4x2 usa as chaves 4, 3, 2 nas zonas 1, 6, 5 e as mesmas com os pares trocados nas zonas 4, 3, 2. A Livre usa sempre a chave `0`, com os membros girando, e a função é a posição (`P<slot>`).
 - **Troca de pares:** `S1↔S2`, `OH1↔OH2`, `MB1↔MB2`, só no rótulo; o ponto é o da formação.
 - **Quem levanta (`actingSetter`):** o único levantador no 5x1, o do fundo no 6x2, o da rede no 4x2, quem está na posição 3 na Livre.
-- **Líbero desligado:** o slot `L` da formação vira a função de quem ele substituiria, no mesmo ponto. O líbero ligado é da E2.11.
+- **Líbero desligado:** o slot `L` da formação vira a função de quem ele substituiria, no mesmo ponto. O líbero ligado é da E2.11 (abaixo).
 - **Fase:** quem saca está em `serving`, o outro em `receiving`. Rotação desligada, sem set aberto ou catálogo desconhecido dão `null`.
 - **Sobreposição:** `validateServeAlignment` só informa, com o modo de regra de quem chama. Com pontos do catálogo, nunca há violação.
 - **Versão do catálogo:** o `MatchStarted` grava `formationsVersion`. Mudar uma formação exige versão nova, com a anterior preservada, para uma partida gravada não mudar de desenho.
@@ -107,9 +107,27 @@ Banco manual implementado na E2.5 ([ADR 0027](../arquitetura/adr/0027-banco-manu
 - **Rotação desligada não tem banco,** com qualquer número de membros: a troca é recusada.
 - **Virada de set e fim de partida:** banco e escalação seguem como estão. `FinishedMatch.rotations` traz o banco no fim, e a partida seguinte chega em outro `MatchStarted`.
 
+Líbero ligado implementado na E2.11 ([ADR 0028](../arquitetura/adr/0028-libero-ligado.md)). Código em `packages/match-engine/src/score/rotation-rules.ts` e `serve-alignment.ts`; casos em `packages/match-engine/golden/libero-*.json`.
+
+- **Só 5x1 e 6x2** (decisão do Gabriel de 03/11/2026). 4x2 e Livre recusam o líbero, e o catálogo não muda.
+- **`libero` por time:** `{ memberId, replacedIndexes }` ou `null`, fora de `lineup` e de `bench`. `lineup`, `bench` e o líbero, sem repetir, são sempre exatamente `teams.<lado>.memberIds`.
+- **Vagas por índice de `lineup`:** uma, ou duas em diagonal (diferença 3), nunca de levantador (5x1: 0; 6x2: 0 e 3). No app, os dois centrais, `[2, 5]`, alternando, como no catálogo (decisão do Gabriel de 03/11/2026). Quem entra do banco numa vaga coberta passa a ser coberto.
+- **Entrada e saída calculadas, nunca gravadas** (decisão do Gabriel de 03/11/2026): o líbero está no slot do fundo (1, 5 ou 6) em que está uma vaga coberta. Com a vaga na rede, está fora, e por isso sai ao chegar na 4. Na posição 1 do time que saca, está fora: saca o titular.
+- **Tabela com os centrais `[2, 5]`** (`*`: o time que saca não tem líbero nesse slot, e saca o titular):
+
+| `setterZone` | 1 | 6 | 5 | 4 | 3 | 2 |
+|---|---|---|---|---|---|---|
+| Slot do líbero | 6 | 5 | 1* | 6 | 5 | 1* |
+| Índice coberto | 5 | 5 | 2 | 2 | 2 | 5 |
+
+- **Ordem de rotação intacta:** `getLineupBySlot` e o sacador seguem o `lineup`; `getOnCourtBySlot` mostra quem está em quadra, com o líbero no slot dele. `actingSetter` nunca muda, porque vaga de levantador é proibida.
+- **Um rali entre trocas:** só um ponto muda quem está em quadra, e a vaga coberta nunca muda num mesmo ponto.
+- **Trocar ou desligar o líbero em partida** é um `LineupChanged`, que grava o líbero junto com a alocação. O líbero não entra nem sai por troca com o banco.
+
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.
 - Guardar o líbero dentro da ordem de rotação.
+- Guardar a vaga do líbero por `MemberId`: quem entra do banco na vaga ficaria sem cobertura.
 - Checar relações que não existem (diagonais, rede contra fundo na lateral).
 - Espelhar coordenadas na troca de quadra: as coordenadas são do próprio time; só o desenho espelha.
 - Girar o time ao trocar de quadra.
