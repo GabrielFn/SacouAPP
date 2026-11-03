@@ -18,6 +18,7 @@ import {
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   MAX_BENCH_MEMBERS,
+  MAX_LIBERO_REPLACED_INDEXES,
   MAX_SET_POINTS,
   MAX_TEAM_MEMBERS,
   MIN_BENCH_MEMBERS,
@@ -32,7 +33,7 @@ import {
   UNKNOWN_PAYLOAD_FIELD,
   WIN_MARGIN_VALUES,
 } from "./constants.data.js";
-import { isRosterPartition } from "./rotation-rules.js";
+import { isLiberoAllowed, isLiberoCoverage, isRosterPartition } from "./rotation-rules.js";
 import type {
   LineupChangedPayload,
   MatchEndedPayload,
@@ -48,6 +49,7 @@ import type {
   ScoringRules,
   SetEndedPayload,
   SetterZones,
+  TeamLibero,
   TeamRoster,
   TeamRotations,
   TeamSide,
@@ -183,14 +185,31 @@ function parseBenchMembers(raw: unknown): readonly MemberId[] | null {
   return parseUniqueMemberIds(raw, MIN_BENCH_MEMBERS, MAX_BENCH_MEMBERS);
 }
 
-/** Whoever of the frozen copy is not in the lineup, each one once. Empty is `[]`, never absent. */
-function parseBench(
+/** A copy of the indexes, so that a sparse array or an item of another type fails the check. */
+function parseReplacedIndexes(raw: unknown): readonly number[] | null {
+  if (!Array.isArray(raw) || raw.length > MAX_LIBERO_REPLACED_INDEXES) {
+    return null;
+  }
+  const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
+  const indexes = items.filter((item): item is number => typeof item === "number");
+  return indexes.length === items.length && isLiberoCoverage(indexes) ? indexes : null;
+}
+
+/**
+ * Format only, and `null` turns the libero off: someone who is neither in the lineup nor on the
+ * bench, covering one position or a diagonal. Who the team has is for the partition.
+ */
+function parseLiberoFormat(
   raw: unknown,
   lineup: readonly MemberId[],
-  roster: TeamRoster,
-): readonly MemberId[] | null {
-  const bench = parseBenchMembers(raw);
-  return bench !== null && isRosterPartition(lineup, bench, roster) ? bench : null;
+  bench: readonly MemberId[],
+): TeamLibero | null | undefined {
+  if (raw === null) return null;
+  if (!isPlainObject(raw)) return undefined;
+  const memberId = readOwn(raw, "memberId");
+  if (!isUuid(memberId) || lineup.includes(memberId) || bench.includes(memberId)) return undefined;
+  const replacedIndexes = parseReplacedIndexes(readOwn(raw, "replacedIndexes"));
+  return replacedIndexes === null ? undefined : { memberId, replacedIndexes };
 }
 
 function parseTeamState(
@@ -202,6 +221,7 @@ function parseTeamState(
     readonly setterZone: ScorePayloadField;
     readonly system: ScorePayloadField;
     readonly bench: ScorePayloadField;
+    readonly libero: ScorePayloadField;
   },
 ): ParseResult<TeamState | null> {
   if (raw === null) return ok(null);
@@ -212,8 +232,14 @@ function parseTeamState(
   if (!isSetterZone(setterZone)) return invalid(fields.setterZone);
   const system = readOwn(raw, "system");
   if (!isFormationSystem(system)) return invalid(fields.system);
-  const bench = parseBench(readOwn(raw, "bench"), lineup, roster);
-  return bench === null ? invalid(fields.bench) : ok({ bench, lineup, setterZone, system });
+  const bench = parseBenchMembers(readOwn(raw, "bench"));
+  if (bench === null) return invalid(fields.bench);
+  const libero = parseLiberoFormat(readOwn(raw, "libero"), lineup, bench);
+  if (libero === undefined || !isLiberoAllowed(system, libero)) return invalid(fields.libero);
+  if (libero !== null && !roster.memberIds.includes(libero.memberId)) return invalid(fields.libero);
+  // Whoever of the frozen copy is not in the lineup nor the libero, each one once.
+  if (!isRosterPartition(lineup, bench, libero, roster)) return invalid(fields.bench);
+  return ok({ bench, libero, lineup, setterZone, system });
 }
 
 function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotations> {
@@ -224,6 +250,7 @@ function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotati
     setterZone: "rotations.a.setterZone",
     system: "rotations.a.system",
     bench: "rotations.a.bench",
+    libero: "rotations.a.libero",
   });
   if (!a.ok) return a;
   const b = parseTeamState(readOwn(raw, "b"), teams.b, {
@@ -232,6 +259,7 @@ function parseRotations(raw: unknown, teams: MatchTeams): ParseResult<TeamRotati
     setterZone: "rotations.b.setterZone",
     system: "rotations.b.system",
     bench: "rotations.b.bench",
+    libero: "rotations.b.libero",
   });
   return b.ok ? ok({ a: a.value, b: b.value }) : b;
 }
@@ -316,7 +344,10 @@ function parseMatchEndedFields(raw: RawObject): ParseResult<MatchEndedPayload> {
   return ok({ endReason, matchId, winner });
 }
 
-/** Format only: whether these are the members of the team is for the applier, which has `teams`. */
+/**
+ * Format only: whether these are the members of the team is for the applier, which has `teams`, and
+ * so is whether the system of the team plays with a libero.
+ */
 function parseLineupChangedFields(raw: RawObject): ParseResult<LineupChangedPayload> {
   const matchId = readOwn(raw, "matchId");
   if (!isUuid(matchId)) return invalid("matchId");
@@ -328,7 +359,9 @@ function parseLineupChangedFields(raw: RawObject): ParseResult<LineupChangedPayl
   if (!isSetterZone(setterZone)) return invalid("setterZone");
   const bench = parseBenchMembers(readOwn(raw, "bench"));
   if (bench === null || bench.some((id) => lineup.includes(id))) return invalid("bench");
-  return ok({ bench, lineup, matchId, setterZone, team });
+  const libero = parseLiberoFormat(readOwn(raw, "libero"), lineup, bench);
+  if (libero === undefined) return invalid("libero");
+  return ok({ bench, libero, lineup, matchId, setterZone, team });
 }
 
 /** Unknown keys are checked first, at every level; then the fields, in the order of the schema. */

@@ -69,16 +69,28 @@ export interface SetsWon {
 }
 
 /**
+ * The libero of a team and the positions it covers, by index of `lineup` and never by `MemberId`: one
+ * index, or two on a diagonal in ascending order, never of a setter. Who stands in the court at each
+ * moment is derived from `setterZone` and the phase, never recorded (ADR 0028).
+ */
+export interface TeamLibero {
+  readonly memberId: MemberId;
+  readonly replacedIndexes: readonly number[];
+}
+
+/**
  * The part of a team that changes during a match; `teams` stays the frozen copy of the event.
  * `lineup` has six members anchored on the setter: `lineup[0]` is the setter and the others follow
  * in ascending position, so a rotation only changes `setterZone`. In the free system, which has no
  * setter, `setterZone` is the zone of the first member of the lineup. The order of the lineup also
  * gives each member a role: `S, OH1, MB1, OPP, OH2, MB2` in the 5x1 and `S1, OH1, MB1, S2, OH2, MB2`
  * in the 6x2 and the 4x2 (ADR 0026). `bench` is whoever of the team is not in the lineup, in queue
- * order: only a recorded `LineupChanged` changes it, never a point (ADR 0027).
+ * order: only a recorded `LineupChanged` changes it, never a point (ADR 0027). `libero` is outside the
+ * lineup and the bench, and `null` turns it off (ADR 0028).
  */
 export interface TeamState {
   readonly bench: readonly MemberId[];
+  readonly libero: TeamLibero | null;
   readonly lineup: readonly MemberId[];
   readonly setterZone: SetterZone;
   readonly system: FormationSystem;
@@ -136,7 +148,7 @@ export interface MatchEndedPayload {
 }
 
 /** Who stands where in a team: what a change of lineup records. `system` does not change. */
-export type LineupAllocation = Pick<TeamState, "bench" | "lineup" | "setterZone">;
+export type LineupAllocation = Pick<TeamState, "bench" | "libero" | "lineup" | "setterZone">;
 
 /**
  * Records the whole allocation of the team, never the change: it has no `setNumber`, and it is
@@ -220,11 +232,13 @@ export type ScorePayloadField =
   | "rotations.a.setterZone"
   | "rotations.a.system"
   | "rotations.a.bench"
+  | "rotations.a.libero"
   | "rotations.b"
   | "rotations.b.lineup"
   | "rotations.b.setterZone"
   | "rotations.b.system"
   | "rotations.b.bench"
+  | "rotations.b.libero"
   | "setNumber"
   | "team"
   | "winner"
@@ -237,7 +251,8 @@ export type ScorePayloadField =
   | "endReason"
   | "lineup"
   | "setterZone"
-  | "bench";
+  | "bench"
+  | "libero";
 
 /** Carries only a path from the schema, never a received key or value. */
 export interface ScorePayloadError {
@@ -284,7 +299,10 @@ export interface ServeAlignmentSlot {
   readonly point: CourtPoint;
 }
 
-/** Where a team stands at the moment of the serve, with the libero off: no slot has the role `L`. */
+/**
+ * Where a team stands at the moment of the serve. Only the slot the libero is in has the role `L`,
+ * with the libero in it; with the libero off, or out of the court, no slot has it.
+ */
 export interface ServeAlignment {
   readonly system: FormationSystem;
   readonly setterZone: SetterZone;

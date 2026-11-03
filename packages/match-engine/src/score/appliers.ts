@@ -17,7 +17,12 @@ import {
   parsePointScoredPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import { isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
+import {
+  isLiberoAllowed,
+  isRosterPartition,
+  isSideOut,
+  nextSetterZone,
+} from "./rotation-rules.js";
 import type {
   CourtSessionState,
   MatchScore,
@@ -225,26 +230,30 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
 /**
  * Applies the recorded allocation. It checks the frozen `teams` and never the current lineup, so a
  * change that another writer interleaves with points is applied, and the last one in the order wins.
+ * Whether the libero is on the court is never checked here: it is derived from the zone (ADR 0028).
  */
 const applyLineupChanged: EventApplier<CourtSessionState> = (state, event) => {
   const parsed = parseLineupChangedPayload(event.payload);
   if (!parsed.ok) {
     return rejected();
   }
-  const { bench, lineup, matchId, setterZone, team } = parsed.value;
+  const { bench, libero, lineup, matchId, setterZone, team } = parsed.value;
   const match = findOpenMatch(state, matchId);
   const teamState = match?.rotations[team] ?? null;
   if (match === null || teamState === null) {
     return rejected();
   }
-  if (!isRosterPartition(lineup, bench, match.teams[team])) {
+  const { system } = teamState;
+  if (
+    !isRosterPartition(lineup, bench, libero, match.teams[team]) ||
+    !isLiberoAllowed(system, libero)
+  ) {
     return rejected();
   }
-  const { system } = teamState;
   return ok(
     withCurrentMatch(state, {
       ...match,
-      rotations: { ...match.rotations, [team]: { bench, lineup, setterZone, system } },
+      rotations: { ...match.rotations, [team]: { bench, libero, lineup, setterZone, system } },
     }),
   );
 };

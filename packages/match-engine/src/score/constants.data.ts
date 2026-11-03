@@ -2,6 +2,7 @@ import {
   ROTATION_SLOTS,
   type FormationSystem,
   type PlayerRole,
+  type RotationSlot,
   type SetterZone,
 } from "@sacou/volley-rules";
 
@@ -94,6 +95,29 @@ export const ACTING_SETTER_ROLES: Readonly<Record<FormationSystem, PlayerRole>> 
 /** The role of the libero in the formations, which a team with the libero off never shows. */
 export const LIBERO_ROLE: PlayerRole = "L";
 
+/** Only these systems play with a libero: the 4x2 and the free system reject it (ADR 0028). */
+export const LIBERO_SYSTEMS: readonly FormationSystem[] = ["5x1", "6x2"];
+
+/** The indexes of `lineup` a setter holds: the libero never covers them (ADR 0026). */
+export const SETTER_LINEUP_INDEXES: Readonly<Record<FormationSystem, readonly number[]>> = {
+  "5x1": [0],
+  "6x2": [0, 3],
+  "4x2": [0, 3],
+  livre: [],
+};
+
+/** The two middle blockers, `MB1` and `MB2`: what the libero covers in the app, alternating. */
+export const MIDDLE_BLOCKER_LINEUP_INDEXES: readonly number[] = [2, 5];
+
+/** The libero covers one position, or the two of a diagonal, which are this far apart. */
+export const MIN_LIBERO_REPLACED_INDEXES = 1;
+export const MAX_LIBERO_REPLACED_INDEXES = 2;
+export const DIAGONAL_INDEX_DISTANCE = ROTATION_SLOTS.length / MAX_LIBERO_REPLACED_INDEXES;
+
+/** The libero only plays in the back row, and never serves from slot 1. */
+export const BACK_ROW_SLOTS: readonly RotationSlot[] = [1, 5, 6];
+export const SERVING_SLOT: RotationSlot = 1;
+
 /** Half of the sets, rounded up, wins the match. */
 export const MAJORITY_DIVISOR = 2;
 
@@ -135,8 +159,20 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     teams: { a: { memberIds: null }, b: { memberIds: null } },
     firstServer: null,
     rotations: {
-      a: { lineup: null, setterZone: null, system: null, bench: null },
-      b: { lineup: null, setterZone: null, system: null, bench: null },
+      a: {
+        lineup: null,
+        setterZone: null,
+        system: null,
+        bench: null,
+        libero: { memberId: null, replacedIndexes: null },
+      },
+      b: {
+        lineup: null,
+        setterZone: null,
+        system: null,
+        bench: null,
+        libero: { memberId: null, replacedIndexes: null },
+      },
     },
   },
   [POINT_SCORED_EVENT_TYPE]: { matchId: null, setNumber: null, team: null },
@@ -153,5 +189,6 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     lineup: null,
     setterZone: null,
     bench: null,
+    libero: { memberId: null, replacedIndexes: null },
   },
 };
