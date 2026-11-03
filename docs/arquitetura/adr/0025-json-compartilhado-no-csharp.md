@@ -66,4 +66,4 @@ Comparar namespace exato não bastava, porque `System` contém tanto `Guid` quan
 
 - Mudar o formato de um JSON exige mudar o parser nas duas linguagens, no mesmo PR.
 - Cada golden tem lista literal de IDs no teste: acrescentar um caso exige listá-lo no C#.
-- **E2.10** avalia promover `OverlapResult` a `Result<T, E>`, decide chave repetida em eventos e define o determinismo do domínio C#.
+- **E2.10** avalia promover `OverlapResult` a `Result<T, E>`, decide chave repetida em eventos e define o determinismo do domínio C#. **Resolvido no [ADR 0033](0033-porte-csharp-do-motor.md):** `OverlapResult` fica; `Result<T, E>` local em `CourtSessions`; repetida recusada em evento recebido; regra de determinismo para `CourtSessions`.

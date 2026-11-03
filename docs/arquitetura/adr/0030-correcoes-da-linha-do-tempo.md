@@ -34,7 +34,7 @@
 
 ## Contrato para a E2.10 (C#)
 
-**A E2.10 porta** o parser e o aplicador de `ServingTeamChanged`, `previousSetterZone` e a constante `SERVING_TEAM_CHANGED_EVENT_TYPE`; `replayTimeline`, se a E3.9 precisar. Comandos, prévia e lista de pontos ficam só em TS.
+**A E2.10 porta** o parser e o aplicador de `ServingTeamChanged`, `previousSetterZone` e a constante `SERVING_TEAM_CHANGED_EVENT_TYPE`; `replayTimeline`, se a E3.9 precisar. Comandos, prévia e lista de pontos ficam só em TS. **Feito no [ADR 0033](0033-porte-csharp-do-motor.md):** `ReplayTimeline` e `previousSetterZone` portados, porque a E3.9 usa a linha do tempo.
 
 | Arquivo em `packages/match-engine/golden/` | O que tem |
 |---|---|
