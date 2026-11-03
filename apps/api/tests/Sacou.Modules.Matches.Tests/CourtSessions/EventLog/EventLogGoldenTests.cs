@@ -184,6 +184,38 @@ public sealed class EventLogGoldenTests
         OrderedJsonAssert.Equal(goldenCase.GetProperty("expected"), writer => EventLogPipeline.Write(writer, outcome), id);
     }
 
+    /// <summary>Like <c>replay-timeline.test.ts</c>: the timeline rebuilds what ReplayEvents returns.</summary>
+    [Theory]
+    [MemberData(nameof(CaseIds))]
+    public void Timeline_RebuildsReplayEvents(string id)
+    {
+        var goldenCase = GoldenFile.SingleCase(Cases, GoldenFile.IdOf, id);
+        var parsed = RawEventsOf(goldenCase).Select(rawEvent => EnvelopeParser.Parse(RawValueReader.Parse(rawEvent))).ToList();
+        if (parsed.Any(envelope => envelope.IsFailure))
+        {
+            return;
+        }
+
+        var config = AppendFixture.Config(
+            GoldenFile.Text(goldenCase, "courtSessionId"),
+            InitialStateOf(goldenCase.GetProperty("initialState")));
+        var envelopes = parsed.Select(envelope => envelope.Value).ToList();
+
+        var replayed = EventReplayer.ReplayEvents(config, envelopes);
+        var timeline = EventReplayer.ReplayTimeline(config, envelopes);
+
+        Assert.Equal(replayed.IsSuccess, timeline.IsSuccess);
+        if (replayed.IsFailure)
+        {
+            Assert.Equal(replayed.Error, timeline.Error);
+            return;
+        }
+
+        var entries = timeline.Value.Entries;
+        Assert.Equal(replayed.Value.ActiveEventIds, entries.Select(entry => entry.Event.EventId));
+        Assert.Equal(AppendFixture.Text(entries.IsEmpty ? config.InitialState : entries[^1].State), AppendFixture.Text(replayed.Value.State));
+    }
+
     [Fact]
     public void EveryReplayErrorCode_HasACase()
     {

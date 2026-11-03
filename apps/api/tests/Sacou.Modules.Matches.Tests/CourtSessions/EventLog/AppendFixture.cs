@@ -32,6 +32,9 @@ internal static class AppendFixture
             ? Result<FixtureState, EventRejection>.Success(new FixtureState(state.Values.Add(value)))
             : Rejected();
 
+    /// <summary>The values as JSON text: two replays build equal states, never the same instance.</summary>
+    public static string Text(FixtureState state) => EnvelopeParserTests.Write(new RawArray(state.Values));
+
     private static Result<FixtureState, EventRejection> Rejected() =>
         Result<FixtureState, EventRejection>.Failure(EventRejection.Instance);
 }
