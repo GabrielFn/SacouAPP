@@ -201,6 +201,26 @@ public sealed class PlantedViolationTests
     }
 
     [Theory]
+    [InlineData("var next = (index + 1) % 6;", 1)]
+    [InlineData("index %= 6;", 1)]
+    [InlineData("// a comment about 50 % of the zones", 0)]
+    [InlineData("var next = sequence[index + 1]; // not %", 0)]
+    public void RemainderOperator_IsReportedOnlyInCode(string line, int expected)
+    {
+        var directory = Directory.CreateTempSubdirectory("sacou-remainder-");
+        try
+        {
+            File.WriteAllText(Path.Combine(directory.FullName, "Rules.cs"), line);
+
+            Assert.Equal(expected, RepositoryFiles.RemainderOperatorViolations(directory.FullName).Count);
+        }
+        finally
+        {
+            directory.Delete(recursive: true);
+        }
+    }
+
+    [Theory]
     [InlineData("UsesBetaDomain")]
     [InlineData("UsesBetaModule")]
     [InlineData("UsesApi")]

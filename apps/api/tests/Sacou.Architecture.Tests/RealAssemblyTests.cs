@@ -57,6 +57,12 @@ public sealed class RealAssemblyTests
             Assemblies.RealArchitecture.Value, CourtSessionsNamespace));
     }
 
+    [Fact]
+    public void CourtSessions_NeverUseTheRemainderOperator()
+    {
+        ViolationAssert.None(RepositoryFiles.RemainderOperatorViolations(RepositoryFiles.CourtSessionsDirectory));
+    }
+
     [Theory]
     [InlineData(CourtSessionsNamespace)]
     [InlineData(CourtSessionJsonNamespace)]

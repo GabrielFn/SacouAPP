@@ -19,6 +19,8 @@ internal static partial class RepositoryFiles
     private const string SolutionProjectElement = "Project";
     private const string EmbeddedResourceElement = "EmbeddedResource";
     private const string CatalogAssembly = "Sacou.Modules.Matches";
+    private const string LineCommentStart = "//";
+    private const string RemainderOperator = "%";
 
     internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
     internal const string CatalogPath = "packages/volley-rules/src/formations/formations.json";
@@ -127,6 +129,22 @@ internal static partial class RepositoryFiles
             let declared = DeclaredNamespaces(File.ReadAllText(path))
             where declared.Count == 0 || declared.Any(name => name != expected)
             select $"{Path.GetRelativePath(modulesDirectory, path)}: expected namespace {expected}, found [{string.Join(", ", declared)}]"];
+
+    internal static string CourtSessionsDirectory =>
+        Path.Combine(ModulesDirectory, "Matches", "Domain", "CourtSessions");
+
+    /// <summary>
+    /// Lines of C# code that use the remainder operator, comments aside. Zones and slots move by
+    /// position in a table, never by arithmetic, so a wrong <c>%</c> cannot hide behind right answers
+    /// in the golden files (ADR 0033, D9).
+    /// </summary>
+    internal static IReadOnlyList<string> RemainderOperatorViolations(string directory) =>
+        [.. from path in Directory.GetFiles(directory, SourceFilePattern, SearchOption.AllDirectories)
+            let lines = File.ReadAllLines(path)
+            from index in Enumerable.Range(0, lines.Length)
+            let code = lines[index].Split(LineCommentStart)[0]
+            where code.Contains(RemainderOperator, StringComparison.Ordinal)
+            select $"{Path.GetRelativePath(directory, path)}:{index + 1}"];
 
     /// <summary>Any file named like a shared JSON file, outside what the build generates: nobody copies a case.</summary>
     internal static IReadOnlyList<string> CopiedSharedFileViolations(string directory) =>
