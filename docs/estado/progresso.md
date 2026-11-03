@@ -25,10 +25,11 @@
 | E2.4 | Feita | ADR 0026. Revisor com oráculo próprio: 48 combinações, 0 divergências; golden migrados só com acréscimos. Segurança aprovou. Testador passou: 1338 testes no `match-engine` e 21 mutações reprovadas. Citar no relatório do M2: `formationsVersion` no lugar da cópia congelada, decisão do Gabriel. |
 | E2.5 | Feita | ADR 0027. Só Manual no MVP, decisão do Gabriel; "sai quem saca" foi para `docs/ideias.md`. Plano refeito pelo orquestrador, sem analista. Revisor com oráculo próprio: 120.409 estados, 0 divergências. Segurança aprovou, com medição. Testador passou: 1838 testes no `match-engine` e 12 mutações reprovadas. Citar no relatório do M2: banco só manual e a linha "Banco" retirada de `AjustesGrupo`. |
 | E2.11 | Feita | ADR 0028. Líbero no 5x1 e no 6x2, cobrindo os dois centrais, com entrada e saída calculadas, sem evento (decisões do Gabriel). Revisor com oráculo próprio: 176.068 estados, 0 divergências. Segurança aprovou, com fuzz. Testador passou: 2237 testes no `match-engine`, 10 mutações reprovadas e 2 equivalentes. Citar no relatório do M2: segunda ampliação da exceção a `decisoes.md:26`, e o grátis sem líbero. |
+| E2.6 | Feita | ADR 0029 e `docs/dominio/fila.md`. Respostas do Gabriel de 03/11 em `perguntas.md`; o chip "Nível" e o interruptor de saída parcial saíram de `AjustesGrupo`. Revisor com oráculo próprio: 12.452 planos, 0 divergências. Segurança aprovou, com medição. Testador passou: 16 mutações, uma sobrevivente (critério herdado do protótipo), morta com teste novo. Citar no relatório do M2: `QueueChanged` é o evento mais caro por byte (262 MB em 64 mil). |
 
 ## Em andamento
 
-- E2.6 (front): branch `task/E2.6-court-queue`, worktree `.claude/worktrees/e2-6`. Plano com as respostas do Gabriel; desenvolvedor (Opus) em curso. Sensível: passa pelo `revisor-seguranca`.
+Nenhuma. Próxima: E2.7 (front); ver o diário de 02/11/2026.
 
 ## Adiadas
 
@@ -55,6 +56,7 @@
 - E2.11, pendências: logs gravados antes da E2.11 são recusados por falta de `libero` (sem produção, citar na E2.10 e na E4.9); `MIDDLE_BLOCKER_LINEUP_INDEXES` só é usado em testes, então a E4.7 usa ou ele sai; E2.10 porta as mesmas recusas e um fuzz equivalente.
 - E2.4, pendências: E2.11 decide quais sistemas aceitam líbero, porque o catálogo não tem slot `L` no 4x2 nem na Livre e `rotacoes.md:51` só cita o 5x1; se o catálogo mudar, o teste do hash reprova, e ela decide entre atualizar a v1 ou subir a versão. E3.7: `startMatch` compara com a versão atual, e com a v2 um app antigo offline ainda gera v1, então precisa de lista de versões suportadas. O hash também cobre `note` e `label`: tratar na primeira edição do catálogo. Com a v2, revisar a frase de `modelo-de-ameacas.md:39` sobre `formationsVersion` forjado. E2.10 e E3.7 repetem em C# o parser estrito de `system` e `formationsVersion`.
 - E2.5, pendências: E3.7 ou E4.11: `LineupChanged` desatualizado desfaz um giro e muda o sacador sem aviso, na sincronização offline, o que é determinístico mas precisa de aviso ou reconferência da zona. E2.6: `decisoes.md:11` diz que quem entra assume a posição de quem saiu, mas não diz se quem está no banco pode ser escolhido para sair nem como conta "mais partidas seguidas"; o analista decide, e pergunta ao Gabriel se mudar o que o usuário vê. E4.8: `changeLineup` recusa `TeamState` inteiro, então passa só `bench`, `lineup` e `setterZone`; o design não tem banco na tela 22 nem destino para "Trocar jogador".
+- E2.6, pendências: E4 converte `PartialExitPlace.index` (índice de `lineup`) em posição com `getLineupBySlot`, e testa com `setterZone` diferente de 6; a proposta entre o fim da partida e o "Confirmar" só existe na tela, e sorteio ou escolha manual se perde se o app fechar; o evento não tem identidade de time, e a E4 associa a cor pelo lado; E3.7: o aplicador aceita `QueueChanged` igual ao estado.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
 
