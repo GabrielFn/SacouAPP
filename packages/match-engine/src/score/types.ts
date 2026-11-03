@@ -12,6 +12,7 @@ import type {
 import type {
   BEST_OF_VALUES,
   END_REASONS,
+  LINEUP_CHANGED_EVENT_TYPE,
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   PAYLOAD_ROOT_FIELD,
@@ -26,7 +27,8 @@ export type ScoreEventType =
   | typeof MATCH_STARTED_EVENT_TYPE
   | typeof POINT_SCORED_EVENT_TYPE
   | typeof SET_ENDED_EVENT_TYPE
-  | typeof MATCH_ENDED_EVENT_TYPE;
+  | typeof MATCH_ENDED_EVENT_TYPE
+  | typeof LINEUP_CHANGED_EVENT_TYPE;
 
 /** A lowercase UUID. Where this type lives is decided in E3.2. */
 export type MemberId = string;
@@ -72,9 +74,11 @@ export interface SetsWon {
  * in ascending position, so a rotation only changes `setterZone`. In the free system, which has no
  * setter, `setterZone` is the zone of the first member of the lineup. The order of the lineup also
  * gives each member a role: `S, OH1, MB1, OPP, OH2, MB2` in the 5x1 and `S1, OH1, MB1, S2, OH2, MB2`
- * in the 6x2 and the 4x2 (ADR 0026).
+ * in the 6x2 and the 4x2 (ADR 0026). `bench` is whoever of the team is not in the lineup, in queue
+ * order: only a recorded `LineupChanged` changes it, never a point (ADR 0027).
  */
 export interface TeamState {
+  readonly bench: readonly MemberId[];
   readonly lineup: readonly MemberId[];
   readonly setterZone: SetterZone;
   readonly system: FormationSystem;
@@ -131,8 +135,24 @@ export interface MatchEndedPayload {
   readonly winner: TeamSide | null;
 }
 
+/** Who stands where in a team: what a change of lineup records. `system` does not change. */
+export type LineupAllocation = Pick<TeamState, "bench" | "lineup" | "setterZone">;
+
+/**
+ * Records the whole allocation of the team, never the change: it has no `setNumber`, and it is
+ * checked against the frozen `teams`, so points of another writer in between do not reject it.
+ */
+export interface LineupChangedPayload extends LineupAllocation {
+  readonly matchId: string;
+  readonly team: TeamSide;
+}
+
 export type ScorePayload =
-  MatchStartedPayload | PointScoredPayload | SetEndedPayload | MatchEndedPayload;
+  | MatchStartedPayload
+  | PointScoredPayload
+  | SetEndedPayload
+  | MatchEndedPayload
+  | LineupChangedPayload;
 
 /** An open set. Named so it does not collide with the JavaScript `Set`. */
 export interface MatchSet {
@@ -199,10 +219,12 @@ export type ScorePayloadField =
   | "rotations.a.lineup"
   | "rotations.a.setterZone"
   | "rotations.a.system"
+  | "rotations.a.bench"
   | "rotations.b"
   | "rotations.b.lineup"
   | "rotations.b.setterZone"
   | "rotations.b.system"
+  | "rotations.b.bench"
   | "setNumber"
   | "team"
   | "winner"
@@ -212,7 +234,10 @@ export type ScorePayloadField =
   | "nextSet.setterZones"
   | "nextSet.setterZones.a"
   | "nextSet.setterZones.b"
-  | "endReason";
+  | "endReason"
+  | "lineup"
+  | "setterZone"
+  | "bench";
 
 /** Carries only a path from the schema, never a received key or value. */
 export interface ScorePayloadError {
@@ -221,9 +246,11 @@ export interface ScorePayloadError {
 }
 
 export type ScoreRefusalCode =
+  | "lineup-unchanged"
   | "match-already-open"
   | "no-open-match"
   | "no-open-set"
+  | "rotation-off"
   | "set-decided"
   | "set-not-decided"
   | "too-many-matches"

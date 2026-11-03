@@ -1,4 +1,9 @@
-import type { FormationSystem, PlayerRole, SetterZone } from "@sacou/volley-rules";
+import {
+  ROTATION_SLOTS,
+  type FormationSystem,
+  type PlayerRole,
+  type SetterZone,
+} from "@sacou/volley-rules";
 
 import type { PayloadShape, ScoreEventType, ZoneFormation } from "./types.js";
 
@@ -6,6 +11,7 @@ export const MATCH_STARTED_EVENT_TYPE = "MatchStarted";
 export const POINT_SCORED_EVENT_TYPE = "PointScored";
 export const SET_ENDED_EVENT_TYPE = "SetEnded";
 export const MATCH_ENDED_EVENT_TYPE = "MatchEnded";
+export const LINEUP_CHANGED_EVENT_TYPE = "LineupChanged";
 
 export const CURRENT_RULES_VERSION = 1;
 
@@ -102,6 +108,10 @@ export const LAST_SET_NUMBER = 5;
 export const MIN_TEAM_MEMBERS = 1;
 export const MAX_TEAM_MEMBERS = 24;
 
+/** A team with its rotation on always has six in the lineup, and the bench holds the others. */
+export const MIN_BENCH_MEMBERS = 0;
+export const MAX_BENCH_MEMBERS = MAX_TEAM_MEMBERS - ROTATION_SLOTS.length;
+
 /**
  * Technical limit, not a volleyball rule: a real round stays near 30 matches. The state copies and
  * searches this list at each match, so a hostile log must not make it grow. 200 finished matches
@@ -125,8 +135,8 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     teams: { a: { memberIds: null }, b: { memberIds: null } },
     firstServer: null,
     rotations: {
-      a: { lineup: null, setterZone: null, system: null },
-      b: { lineup: null, setterZone: null, system: null },
+      a: { lineup: null, setterZone: null, system: null, bench: null },
+      b: { lineup: null, setterZone: null, system: null, bench: null },
     },
   },
   [POINT_SCORED_EVENT_TYPE]: { matchId: null, setNumber: null, team: null },
@@ -137,4 +147,11 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     nextSet: { targetPoints: null, firstServer: null, setterZones: { a: null, b: null } },
   },
   [MATCH_ENDED_EVENT_TYPE]: { matchId: null, endReason: null, winner: null },
+  [LINEUP_CHANGED_EVENT_TYPE]: {
+    matchId: null,
+    team: null,
+    lineup: null,
+    setterZone: null,
+    bench: null,
+  },
 };

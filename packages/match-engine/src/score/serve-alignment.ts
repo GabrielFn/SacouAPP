@@ -59,7 +59,7 @@ function findActingSetter(
  * `getTeamServeAlignment` is what checks the version of a recorded match.
  */
 export function getServeAlignment(
-  { lineup, setterZone, system }: TeamState,
+  { lineup, setterZone, system }: Pick<TeamState, "lineup" | "setterZone" | "system">,
   phase: FormationPhase,
 ): ServeAlignment {
   const { formationKey, swapPairs } = ZONE_FORMATIONS[system][setterZone];

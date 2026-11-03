@@ -3,6 +3,7 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 import type { EventApplier, EventRejection } from "../event-log/types.js";
 import {
   FIRST_SET_NUMBER,
+  LINEUP_CHANGED_EVENT_TYPE,
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
@@ -10,12 +11,13 @@ import {
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
 import {
+  parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
   parsePointScoredPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import { isSideOut, nextSetterZone } from "./rotation-rules.js";
+import { isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
 import type {
   CourtSessionState,
   MatchScore,
@@ -220,9 +222,37 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
   return ok({ currentMatch: null, finishedMatches: [...state.finishedMatches, finishedMatch] });
 };
 
+/**
+ * Applies the recorded allocation. It checks the frozen `teams` and never the current lineup, so a
+ * change that another writer interleaves with points is applied, and the last one in the order wins.
+ */
+const applyLineupChanged: EventApplier<CourtSessionState> = (state, event) => {
+  const parsed = parseLineupChangedPayload(event.payload);
+  if (!parsed.ok) {
+    return rejected();
+  }
+  const { bench, lineup, matchId, setterZone, team } = parsed.value;
+  const match = findOpenMatch(state, matchId);
+  const teamState = match?.rotations[team] ?? null;
+  if (match === null || teamState === null) {
+    return rejected();
+  }
+  if (!isRosterPartition(lineup, bench, match.teams[team])) {
+    return rejected();
+  }
+  const { system } = teamState;
+  return ok(
+    withCurrentMatch(state, {
+      ...match,
+      rotations: { ...match.rotations, [team]: { bench, lineup, setterZone, system } },
+    }),
+  );
+};
+
 export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>> = new Map([
   [MATCH_STARTED_EVENT_TYPE, applyMatchStarted],
   [POINT_SCORED_EVENT_TYPE, applyPointScored],
   [SET_ENDED_EVENT_TYPE, applySetEnded],
   [MATCH_ENDED_EVENT_TYPE, applyMatchEnded],
+  [LINEUP_CHANGED_EVENT_TYPE, applyLineupChanged],
 ]);

@@ -1,7 +1,7 @@
 import type { SetterZone } from "@sacou/volley-rules";
 
 import { SETTER_ZONE_SEQUENCE, TEAM_SIDES } from "./constants.data.js";
-import type { MatchScore, MemberId, TeamSide } from "./types.js";
+import type { MatchScore, MemberId, TeamRoster, TeamSide } from "./types.js";
 
 const [FIRST_ZONE_OF_THE_SEQUENCE] = SETTER_ZONE_SEQUENCE;
 
@@ -36,6 +36,20 @@ export function getLineupBySlot(
 /** Who is in slot 1. The lineup has six members by the parser, so the entry always exists. */
 export function getServingPlayer(lineup: readonly MemberId[], setterZone: SetterZone): MemberId {
   return lineup[SETTER_ZONE_SEQUENCE.indexOf(setterZone)] as MemberId;
+}
+
+/** Lineup and bench together hold each member of the team exactly once, and nobody else. */
+export function isRosterPartition(
+  lineup: readonly MemberId[],
+  bench: readonly MemberId[],
+  { memberIds }: TeamRoster,
+): boolean {
+  const allocated = [...lineup, ...bench];
+  return (
+    allocated.length === memberIds.length &&
+    new Set(allocated).size === allocated.length &&
+    allocated.every((id) => memberIds.includes(id))
+  );
 }
 
 /** `null` with no open set, or when the team that serves has its rotation off. */

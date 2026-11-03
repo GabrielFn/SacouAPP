@@ -78,8 +78,24 @@ export function rotationMatchInput(
     formationsVersion: FORMATION_CATALOG_VERSION,
     matchId,
     rotations: {
-      a: zoneA === null ? null : { lineup: ORANGE_LINEUP, setterZone: zoneA, system: systemA },
-      b: zoneB === null ? null : { lineup: BLUE_LINEUP, setterZone: zoneB, system: systemB },
+      a:
+        zoneA === null
+          ? null
+          : {
+              bench: membersOf("a", teamSize).slice(LINEUP_SIZE),
+              lineup: ORANGE_LINEUP,
+              setterZone: zoneA,
+              system: systemA,
+            },
+      b:
+        zoneB === null
+          ? null
+          : {
+              bench: membersOf("b", teamSize).slice(LINEUP_SIZE),
+              lineup: BLUE_LINEUP,
+              setterZone: zoneB,
+              system: systemB,
+            },
     },
     rulesVersion: 1,
     scoring,

@@ -422,7 +422,7 @@ describe("rotation through the commands", () => {
       ...input,
       rotations: {
         ...input.rotations,
-        a: { lineup: BLUE_LINEUP, setterZone: 1 as const, system: "5x1" as const },
+        a: { bench: [], lineup: BLUE_LINEUP, setterZone: 1 as const, system: "5x1" as const },
       },
     };
 

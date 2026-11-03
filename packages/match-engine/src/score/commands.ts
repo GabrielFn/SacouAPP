@@ -1,34 +1,48 @@
 import { err, FORMATION_CATALOG_VERSION, ok, type Result } from "@sacou/volley-rules";
 
 import {
+  LINEUP_CHANGED_EVENT_TYPE,
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   SUPPORTED_RULES_VERSIONS,
+  TEAM_SIDES,
 } from "./constants.data.js";
-import { parseMatchStartedPayload, parseScorePayload } from "./parse-payloads.js";
-import { getNextSetFirstServer } from "./rotation-rules.js";
+import {
+  parseLineupChangedPayload,
+  parseMatchStartedPayload,
+  parseScorePayload,
+} from "./parse-payloads.js";
+import { getNextSetFirstServer, isRosterPartition } from "./rotation-rules.js";
 import { getMatchWinner, getSetWinner, targetPointsForSet } from "./scoring-rules.js";
 import type {
   ConfirmSetEndOptions,
   CourtSessionState,
+  LineupAllocation,
   MatchScore,
   MatchSet,
   MatchStartedPayload,
+  MemberId,
   ScoreCommandError,
   ScoreCommandResult,
   ScoreEventDraft,
   ScoreEventType,
+  ScorePayloadField,
   ScoreRefusalCode,
   SetterZones,
   TeamRotations,
   TeamSide,
+  TeamState,
 } from "./types.js";
 
 function refuse(code: ScoreRefusalCode): ScoreCommandResult {
   return err({ code });
+}
+
+function invalidField(field: ScorePayloadField): ScoreCommandResult {
+  return err({ code: "invalid-payload", field });
 }
 
 /** Every command drafts through the parser, so what it returns is what the replay accepts. */
@@ -74,7 +88,7 @@ export function startMatch(
     return refuse("too-many-matches");
   }
   if (state.finishedMatches.some((match) => match.matchId === matchId)) {
-    return err({ code: "invalid-payload", field: "matchId" });
+    return invalidField("matchId");
   }
   return ok([{ type: MATCH_STARTED_EVENT_TYPE, payload: parsed.value }]);
 }
@@ -171,4 +185,94 @@ export function endMatchManually(
   return match === null
     ? refuse("no-open-match")
     : emit(MATCH_ENDED_EVENT_TYPE, { endReason: "manual", matchId: match.matchId, winner });
+}
+
+function isSameOrder(first: readonly MemberId[], second: readonly MemberId[]): boolean {
+  return first.length === second.length && first.every((id, index) => id === second[index]);
+}
+
+function isSameAllocation(teamState: TeamState, allocation: LineupAllocation): boolean {
+  return (
+    teamState.setterZone === allocation.setterZone &&
+    isSameOrder(teamState.lineup, allocation.lineup) &&
+    isSameOrder(teamState.bench, allocation.bench)
+  );
+}
+
+function recordAllocation(
+  { matchId, teams }: MatchScore,
+  teamState: TeamState,
+  team: TeamSide,
+  input: LineupAllocation,
+): ScoreCommandResult {
+  const parsed = parseLineupChangedPayload({ ...input, matchId, team });
+  if (!parsed.ok) {
+    return parsed;
+  }
+  const { bench, lineup } = parsed.value;
+  const roster = teams[team];
+  if (!isRosterPartition(lineup, bench, roster)) {
+    const isLineupOfTheTeam = lineup.every((id) => roster.memberIds.includes(id));
+    return invalidField(isLineupOfTheTeam ? "bench" : "lineup");
+  }
+  return isSameAllocation(teamState, parsed.value)
+    ? refuse("lineup-unchanged")
+    : ok([{ type: LINEUP_CHANGED_EVENT_TYPE, payload: parsed.value }]);
+}
+
+/** Whoever has no rotation has no bench, so there is nothing to change (ADR 0027). */
+function withOpenTeam(
+  state: CourtSessionState,
+  team: TeamSide,
+  run: (match: MatchScore, teamState: TeamState) => ScoreCommandResult,
+): ScoreCommandResult {
+  const match = state.currentMatch;
+  if (match === null) {
+    return refuse("no-open-match");
+  }
+  if (!TEAM_SIDES.includes(team)) {
+    return invalidField("team");
+  }
+  const teamState = match.rotations[team];
+  return teamState === null ? refuse("rotation-off") : run(match, teamState);
+}
+
+/**
+ * Saves the whole allocation of a team, as screen 22 has it: a swap between two members on the
+ * court, the rotation selector or a new anchor of the setter. `system` does not change in a match.
+ */
+export function changeLineup(
+  state: CourtSessionState,
+  team: TeamSide,
+  allocation: LineupAllocation,
+): ScoreCommandResult {
+  return withOpenTeam(state, team, (match, teamState) =>
+    recordAllocation(match, teamState, team, allocation),
+  );
+}
+
+/**
+ * The member who comes in takes the position of the one who goes out, and the zone stays. The rest
+ * of the bench keeps its order, and the member who goes out goes to the end of it.
+ */
+export function substitutePlayer(
+  state: CourtSessionState,
+  team: TeamSide,
+  outgoing: MemberId,
+  incoming: MemberId,
+): ScoreCommandResult {
+  return withOpenTeam(state, team, (match, teamState) => {
+    const { bench, lineup, setterZone } = teamState;
+    if (!lineup.includes(outgoing)) {
+      return invalidField("lineup");
+    }
+    if (!bench.includes(incoming)) {
+      return invalidField("bench");
+    }
+    return recordAllocation(match, teamState, team, {
+      bench: [...bench.filter((id) => id !== incoming), outgoing],
+      lineup: lineup.map((id) => (id === outgoing ? incoming : id)),
+      setterZone,
+    });
+  });
 }

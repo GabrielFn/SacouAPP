@@ -1,7 +1,15 @@
 export { INITIAL_COURT_SESSION_STATE, SCORE_APPLIERS } from "./appliers.js";
-export { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./commands.js";
+export {
+  changeLineup,
+  confirmSetEnd,
+  endMatchManually,
+  scorePoint,
+  startMatch,
+  substitutePlayer,
+} from "./commands.js";
 export * from "./constants.data.js";
 export {
+  parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
   parsePointScoredPayload,
