@@ -282,3 +282,14 @@ describe("ServingTeamChanged applier", () => {
     });
   });
 });
+
+describe("switchServingTeam after points", () => {
+  test("keeps who served first, so the next set still alternates from the original one", () => {
+    const recorder = rotationRecorder(SHORT_MD3);
+    const firstServer = recorder.state().currentMatch?.currentSet?.firstServer;
+    recorder.points("a", 1);
+    recorder.run(switchServingTeam);
+
+    expect(recorder.state().currentMatch?.currentSet).toMatchObject({ firstServer });
+  });
+});
