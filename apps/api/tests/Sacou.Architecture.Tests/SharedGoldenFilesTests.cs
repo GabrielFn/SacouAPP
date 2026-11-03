@@ -183,11 +183,13 @@ public sealed partial class SharedGoldenFilesTests
         Assert.Single(RepositoryFiles.TestResourceViolations(XDocument.Parse(project)));
     }
 
-    [Fact]
-    public void TestProject_EmbeddingAGoldenFile_IsNotReported()
+    [Theory]
+    [InlineData("../../../../packages/volley-rules/golden/overlap.json")]
+    [InlineData("../../../../packages/match-engine/golden/event-log.json")]
+    public void TestProject_EmbeddingAGoldenFile_IsNotReported(string path)
     {
         var project = XDocument.Parse(
-            """<Project><ItemGroup><EmbeddedResource Include="../../../../packages/volley-rules/golden/overlap.json" /></ItemGroup></Project>""");
+            $"""<Project><ItemGroup><EmbeddedResource Include="{path}" /></ItemGroup></Project>""");
 
         Assert.Empty(RepositoryFiles.TestResourceViolations(project));
     }

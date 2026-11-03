@@ -11,10 +11,14 @@ public sealed class PlantedViolationTests
 {
     private const string DomainNamespace = "Sacou.Modules.Alpha.Domain.";
     private const string BoundaryNamespace = "Sacou.Modules.Alpha.Boundary.";
+    private const string CourtSessionsNamespace = "Sacou.Modules.Alpha.Domain.CourtSessions";
     private const int ManyViolations = 200;
 
     private static readonly Lazy<IReadOnlyList<Violation>> DomainViolations = new(
         () => ArchitectureDependencyRules.DomainViolations(Assemblies.FixturesArchitecture.Value));
+
+    private static readonly Lazy<IReadOnlyList<Violation>> CourtSessionViolations = new(
+        () => ArchitectureDependencyRules.DeterministicDomainViolations(Assemblies.FixturesArchitecture.Value, CourtSessionsNamespace));
 
     private static readonly Lazy<HashSet<string>> BoundaryViolators = new(
         () => ArchitectureDependencyRules.ModuleBoundaryViolations(Assemblies.FixturesArchitecture.Value)
@@ -142,6 +146,58 @@ public sealed class PlantedViolationTests
     public void Domain_WithAllowedDependency_IsNotReported(string type)
     {
         Assert.DoesNotContain(DomainViolations.Value, violation => violation.DeclaringType == DomainNamespace + type);
+    }
+
+    [Theory]
+    [InlineData("UsesDateTime", "System.DateTime")]
+    [InlineData("UsesDateTimeOffset", "System.DateTimeOffset")]
+    [InlineData("UsesTimeProvider", "System.TimeProvider")]
+    [InlineData("UsesRandom", "System.Random")]
+    [InlineData("UsesGuid", "System.Guid")]
+    [InlineData("UsesThread", "System.Threading.Thread")]
+    [InlineData("UsesTask", "System.Threading.Tasks.Task")]
+    [InlineData("UsesParallel", "System.Threading.Tasks.Parallel")]
+    [InlineData("UsesHashSet", "System.Collections.Generic.HashSet`1")]
+    [InlineData("UsesDictionary", "System.Collections.Generic.Dictionary`2")]
+    public void CourtSessions_WithNonDeterministicDependency_IsReportedForThatDependency(string type, string dependency)
+    {
+        var details = CourtSessionViolations.Value
+            .Where(violation => violation.DeclaringType == CourtSessionsNamespace + "." + type)
+            .Select(violation => violation.Detail);
+
+        Assert.Contains(details, detail => detail.Contains(dependency, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void CourtSessions_WithImmutableCollections_IsNotReported()
+    {
+        Assert.DoesNotContain(
+            CourtSessionViolations.Value,
+            violation => violation.DeclaringType == CourtSessionsNamespace + ".AllowedImmutableCollections");
+    }
+
+    /// <summary>Other domains may use Guid and Task: AllowedBclAndShared does, one namespace up.</summary>
+    [Fact]
+    public void DeterminismRule_ReportsOnlyTheCourtSessions()
+    {
+        Assert.All(
+            CourtSessionViolations.Value,
+            violation => Assert.StartsWith(CourtSessionsNamespace + ".", violation.DeclaringType, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void PersonalDataNames_AreReported_WithoutCaseAndLeadingUnderscores()
+    {
+        var violations = ArchitectureReflectionRules.PersonalDataNameViolations(Assemblies.Fixtures, CourtSessionsNamespace);
+
+        Assert.Equal(
+            [
+                CourtSessionsNamespace + ".WithEmailField._email",
+                CourtSessionsNamespace + ".WithNickname.Nickname",
+                CourtSessionsNamespace + ".WithOwnerUserId.OwnerUserId",
+                CourtSessionsNamespace + ".WithUppercasePix.PIX",
+            ],
+            violations.Order(StringComparer.Ordinal));
     }
 
     [Theory]

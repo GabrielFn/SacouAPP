@@ -3,19 +3,18 @@ using System.Collections.Immutable;
 namespace Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 
 /// <summary>
-/// Pure: applies the recorded result without recalculating rules and never mutates the state. A
-/// rule refusal is a failed <see cref="Result{TValue, TError}"/>, never an exception (ADR 0033, D11).
+/// The appliers are a <c>Func</c> and not a delegate of their own, because a declared delegate
+/// implements ISerializable, which the domain rule refuses. An applier is pure: it applies the
+/// recorded result without recalculating rules and never mutates the state. A rule refusal is a
+/// failed <see cref="Result{TValue, TError}"/>, never an exception (ADR 0033, D11).
 /// </summary>
-internal delegate Result<TState, EventRejection> EventApplier<TState>(TState state, EventEnvelope envelope)
-    where TState : notnull;
-
 internal sealed class ReplayConfig<TState>
     where TState : notnull
 {
     public ReplayConfig(
         string courtSessionId,
         TState initialState,
-        ImmutableDictionary<string, EventApplier<TState>> appliers)
+        ImmutableDictionary<string, Func<TState, EventEnvelope, Result<TState, EventRejection>>> appliers)
     {
         CourtSessionId = courtSessionId;
         InitialState = initialState;
@@ -27,7 +26,7 @@ internal sealed class ReplayConfig<TState>
 
     public TState InitialState { get; }
 
-    public ImmutableDictionary<string, EventApplier<TState>> Appliers { get; }
+    public ImmutableDictionary<string, Func<TState, EventEnvelope, Result<TState, EventRejection>>> Appliers { get; }
 }
 
 /// <summary>The last state and the events whose effects are in it, in canonical order. Never lists a <c>RevertedTo</c>.</summary>

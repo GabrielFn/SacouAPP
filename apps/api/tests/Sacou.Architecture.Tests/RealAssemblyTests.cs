@@ -5,6 +5,9 @@ namespace Sacou.Architecture.Tests;
 /// <summary>The rules applied to the real code. <see cref="PlantedViolationTests"/> proves the rules can fail.</summary>
 public sealed class RealAssemblyTests
 {
+    private const string CourtSessionsNamespace = "Sacou.Modules.Matches.Domain.CourtSessions";
+    private const string CourtSessionJsonNamespace = "Sacou.Modules.Matches.CourtSessionJson";
+
     private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results"];
 
     [Fact]
@@ -38,11 +41,29 @@ public sealed class RealAssemblyTests
     [Theory]
     [InlineData("Sacou.Modules.Matches.Domain.")]
     [InlineData("Sacou.Modules.Stats.Domain.")]
+    [InlineData(CourtSessionsNamespace + ".")]
+    [InlineData(CourtSessionJsonNamespace + ".")]
     public void RealDomain_IsInspected(string domainNamespace)
     {
         Assert.Contains(
             Assemblies.RealArchitecture.Value.Types,
             type => type.FullName.StartsWith(domainNamespace, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void CourtSessions_DependOnlyOnTheEvents()
+    {
+        ViolationAssert.None(ArchitectureDependencyRules.DeterministicDomainViolations(
+            Assemblies.RealArchitecture.Value, CourtSessionsNamespace));
+    }
+
+    [Theory]
+    [InlineData(CourtSessionsNamespace)]
+    [InlineData(CourtSessionJsonNamespace)]
+    public void CourtSessions_HaveNoPersonalDataNames(string namespacePrefix)
+    {
+        ViolationAssert.None(Assemblies.RealModules.Value.SelectMany(
+            module => ArchitectureReflectionRules.PersonalDataNameViolations(module, namespacePrefix)));
     }
 
     [Fact]

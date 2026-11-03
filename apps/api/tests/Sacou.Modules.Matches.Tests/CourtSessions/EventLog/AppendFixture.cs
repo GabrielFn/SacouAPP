@@ -16,12 +16,12 @@ internal static class AppendFixture
     public const string FixtureRejected = "FixtureRejected";
     public const string ValueField = "value";
 
-    public static readonly ImmutableDictionary<string, EventApplier<FixtureState>> Appliers =
+    public static readonly ImmutableDictionary<string, Func<FixtureState, EventEnvelope, Result<FixtureState, EventRejection>>> Appliers =
         ImmutableDictionary.CreateRange(
             StringComparer.Ordinal,
             [
-                KeyValuePair.Create<string, EventApplier<FixtureState>>(FixtureAppended, AppendValue),
-                KeyValuePair.Create<string, EventApplier<FixtureState>>(FixtureRejected, (_, _) => Rejected()),
+                KeyValuePair.Create<string, Func<FixtureState, EventEnvelope, Result<FixtureState, EventRejection>>>(FixtureAppended, AppendValue),
+                KeyValuePair.Create<string, Func<FixtureState, EventEnvelope, Result<FixtureState, EventRejection>>>(FixtureRejected, (_, _) => Rejected()),
             ]);
 
     public static ReplayConfig<FixtureState> Config(string courtSessionId, FixtureState? initialState = null) =>

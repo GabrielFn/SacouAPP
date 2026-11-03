@@ -21,8 +21,17 @@ internal static partial class ArchitectureReflectionRules
         "System.Threading",
     ];
 
+    private const string UserIdSuffix = "UserId";
+
+    /// <summary>The names revision A4 forbids, compared without case.</summary>
+    private static readonly HashSet<string> PersonalDataNames = new(
+        ["email", "name", "nickname", "phone", "pix", "photo", "userId"],
+        StringComparer.OrdinalIgnoreCase);
+
     private const BindingFlags EveryDeclaredMethod =
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+
+    private const BindingFlags EveryDeclaredMember = EveryDeclaredMethod;
 
     /// <summary>
     /// DllImport is a pseudo-attribute: it becomes method metadata, with no type reference for the IL
@@ -34,6 +43,23 @@ internal static partial class ArchitectureReflectionRules
             from method in type.GetMethods(EveryDeclaredMethod)
             where method.Attributes.HasFlag(MethodAttributes.PinvokeImpl)
             select $"{type.FullName}.{method.Name}"];
+
+    /// <summary>
+    /// Properties and fields of types under the namespace whose name, ignoring case and leading
+    /// underscores, is personal data: events carry only ids (security review A4, ADR 0033 D12).
+    /// </summary>
+    internal static IReadOnlyList<string> PersonalDataNameViolations(Assembly assembly, string namespacePrefix) =>
+        [.. from type in assembly.GetTypes()
+            where (type.FullName ?? string.Empty).StartsWith(namespacePrefix + ".", StringComparison.Ordinal)
+            from member in type.GetProperties(EveryDeclaredMember).Cast<MemberInfo>()
+                .Concat(type.GetFields(EveryDeclaredMember))
+            where !member.Name.StartsWith(CompilerGeneratedPrefix, StringComparison.Ordinal)
+                && IsPersonalDataName(member.Name.TrimStart('_'))
+            select $"{type.FullName}.{member.Name}"];
+
+    private static bool IsPersonalDataName(string name) =>
+        PersonalDataNames.Contains(name)
+        || name.EndsWith(UserIdSuffix, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Exported types outside Contracts, except the module's own entry class.</summary>
     internal static IReadOnlyList<string> PublicSurfaceViolations(Assembly assembly) =>
@@ -99,8 +125,10 @@ internal static partial class ArchitectureReflectionRules
         type.Namespace == @namespace
         || (type.Namespace ?? string.Empty).StartsWith(@namespace + ".", StringComparison.Ordinal);
 
+    /// <summary>A nested type counts with its parent: a constant array emits <c>&lt;PrivateImplementationDetails&gt;+__StaticArrayInitTypeSize=16</c>.</summary>
     private static bool IsCompilerGenerated(Type type) =>
         type.Name.StartsWith(CompilerGeneratedPrefix, StringComparison.Ordinal)
+        || (type.DeclaringType is { } declaringType && IsCompilerGenerated(declaringType))
         || type.FullName == EmbeddedAttributeName
         || type.GetCustomAttributesData().Any(data => data.AttributeType.FullName == EmbeddedAttributeName);
 

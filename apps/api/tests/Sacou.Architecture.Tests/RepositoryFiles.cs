@@ -18,7 +18,6 @@ internal static partial class RepositoryFiles
     private const string IncludeAttribute = "Include";
     private const string SolutionProjectElement = "Project";
     private const string EmbeddedResourceElement = "EmbeddedResource";
-    private const string GoldenFromTestProject = "../../../../packages/volley-rules/golden/";
     private const string CatalogAssembly = "Sacou.Modules.Matches";
 
     internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
@@ -33,6 +32,27 @@ internal static partial class RepositoryFiles
         "packages/volley-rules/golden/player-card-level.json",
         "packages/volley-rules/golden/pix.json",
         "packages/volley-rules/golden/pix-crc.json",
+        "packages/match-engine/golden/event-log.json",
+        "packages/match-engine/golden/score-rules.json",
+        "packages/match-engine/golden/score-payloads.json",
+        "packages/match-engine/golden/score-events.json",
+        "packages/match-engine/golden/rotation-rules.json",
+        "packages/match-engine/golden/rotation-events.json",
+        "packages/match-engine/golden/serve-alignment.json",
+        "packages/match-engine/golden/bench-events.json",
+        "packages/match-engine/golden/libero-alignment.json",
+        "packages/match-engine/golden/libero-events.json",
+        "packages/match-engine/golden/queue-events.json",
+        "packages/match-engine/golden/corrections-events.json",
+        "packages/match-engine/golden/attributions-events.json",
+        "packages/match-engine/golden/stats-events.json",
+    ];
+
+    /// <summary>The golden folders of the shared packages, as a test project path reaches them.</summary>
+    private static readonly string[] GoldenFromTestProject =
+    [
+        "../../../../packages/volley-rules/golden/",
+        "../../../../packages/match-engine/golden/",
     ];
 
     private static readonly HashSet<string> SharedJsonFileNames = [.. SharedJsonFiles.Select(path => path.Split('/')[^1])];
@@ -123,7 +143,7 @@ internal static partial class RepositoryFiles
     internal static IReadOnlyList<string> TestResourceViolations(XDocument project) =>
         [.. project.Descendants(EmbeddedResourceElement)
             .Select(resource => (string?)resource.Attribute(IncludeAttribute) ?? string.Empty)
-            .Where(path => !path.StartsWith(GoldenFromTestProject, StringComparison.Ordinal))
+            .Where(path => !GoldenFromTestProject.Any(folder => path.StartsWith(folder, StringComparison.Ordinal)))
             .Select(path => $"EmbeddedResource outside the golden folder: {path}")];
 
     /// <summary>The catalog in Matches and no other resource, in any production assembly: a golden file never ships.</summary>
