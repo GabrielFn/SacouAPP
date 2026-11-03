@@ -43,6 +43,26 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 | `rotation-off` | `changeLineup` ou `substitutePlayer` em time com a rotação desligada, que não tem banco (ADR 0027) |
 | `lineup-unchanged` | `changeLineup` com a alocação idêntica à atual, inclusive a ordem do banco (ADR 0027) |
 
+## Ponto individual (autor e tipo)
+
+"De quem foi?" (tela 31) grava autor e tipo de um ponto **já marcado**, num evento à parte, `PointAttributed` ([ADR 0031](../arquitetura/adr/0031-ponto-individual.md)). O `PointScored` não muda: o ponto já está no placar antes da resposta. Código em `packages/match-engine/src/attributions/`.
+
+- **Tipos:** Ataque (`attack`), Bloqueio (`block`), Ace (`ace`), Outro (`other`) e Erro do adversário (`opponent-error`). Os quatro primeiros têm autor; o erro do adversário nunca tem.
+- **Sem resposta, sem evento:** "Pular" e o próximo ponto não gravam nada, e o ponto fica sem autor.
+- **Quando:** na hora ou depois, pelo Corrigir ou no fim do set, em qualquer set da partida aberta, inclusive o decidido e o já fechado. Com a partida terminada, não (P2).
+- **Quem pode ser o autor:** quem estava em quadra **no rali** pelo time que pontuou, no estado logo antes do ponto (fase de saque se o time sacava), com o líbero se estava em quadra e nunca o banco. Trocar alguém ou girar depois não muda isso. Com a rotação do time desligada, qualquer um do time. Só o comando confere a quadra.
+- **Combinações impossíveis (P1, só no comando):** Ace só do sacador do rali, então o time tinha de estar sacando e, com a rotação ligada, o autor estava na posição 1. O líbero nunca tem Ace nem Bloqueio.
+- **Trocar a resposta:** responder de novo grava outro evento, e o último válido na ordem canônica vale. Não há "sem autor" no Corrigir: só trocar por outro, ou DESFAZER se foi a última ação (P3).
+- **Correções:** DESFAZER logo depois de preencher tira só o preenchimento; o segundo tira o ponto. Voltar a um ponto anterior tira também os preenchimentos feitos depois dele, mesmo de pontos que ficam, e `previewRevert` conta isso em `removed.attributions`.
+- **Leitura:** `resolvePointAttributions(timeline)` devolve `[{ pointEventId, matchId, setNumber, team, kind, author }]`, só dos pontos com preenchimento válido, na ordem dos pontos. Ignora o preenchimento de ponto inativo, de evento que não é ponto, de outra partida ou com autor fora do time que pontuou, como se não existisse. `getRecentPoints` traz `author` e `kind` em cada linha; `getUnattributedPoints(timeline)` lista os pontos do set da tela 24 ainda sem resposta, do mais antigo.
+
+| Recusa de `attributePoint` | Quando |
+|---|---|
+| `no-open-match` | Nenhuma partida aberta |
+| `invalid-attribution-target` | O alvo não é `PointScored` ativo da partida aberta (o erro não leva o id) |
+| `invalid-point-kind` | `kind` fora de `POINT_KINDS` |
+| `invalid-point-author` | Autor ausente num tipo que pede autor, presente no erro do adversário, fora da quadra do rali, ou combinação impossível (P1) |
+
 ## Estado (`CourtSessionState`)
 
 Chaves em ordem UTF-16 crescente, porque o golden compara o texto; sets e times ficam em arrays ou em `a`/`b`, nunca em chave numérica ou por ID.
