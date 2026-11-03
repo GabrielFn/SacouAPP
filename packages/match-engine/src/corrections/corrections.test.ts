@@ -95,7 +95,7 @@ describe("undoLastAction", () => {
     let player = screenMatch();
     player = player.rallies("aabab");
     const scores = Array.from({ length: 5 }, () => {
-      player = player = player.correct(undoLastAction);
+      player = player.correct(undoLastAction);
       return player.state().currentMatch?.currentSet?.score;
     });
 
