@@ -15,7 +15,7 @@ internal sealed record TeamQueue(ImmutableArray<string> Players, ImmutableArray<
 /// <summary>Port of <c>score/queue-rules.ts</c>.</summary>
 internal static class QueueRules
 {
-    public const string QueueChangedEventType = "QueueChanged";
+    public const string QueueChangedEventType = ScoreEventTypes.QueueChanged;
 
     /// <summary>
     /// Technical limit, not a volleyball rule: four full teams of 24 waiting. It keeps a queue below
