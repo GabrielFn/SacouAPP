@@ -1,7 +1,7 @@
 import type { Result } from "@sacou/volley-rules";
 
 import type {
-  CourtQueue,
+  TeamQueue,
   CourtSessionState,
   MatchTeams,
   MemberId,
@@ -54,17 +54,17 @@ export interface QueueExitCriterion<I> {
  * Where the member who leaves was, and so where the one who comes in stands: an index of `lineup`
  * or of `bench`, the libero, or an index of `teams.<side>.memberIds` with the rotation off.
  */
-export type QueueExitPlace =
+export type PartialExitPlace =
   | { readonly area: "lineup"; readonly index: number }
   | { readonly area: "bench"; readonly index: number }
   | { readonly area: "libero" }
   | { readonly area: "team"; readonly index: number };
 
-export interface QueueExit {
+export interface PartialExit {
   readonly consecutiveMatches: number;
   readonly incoming: MemberId;
   readonly outgoing: MemberId;
-  readonly place: QueueExitPlace;
+  readonly place: PartialExitPlace;
 }
 
 /**
@@ -74,8 +74,8 @@ export interface QueueExit {
  */
 export interface NextMatchPlan {
   readonly enteringTeam: TeamSide | null;
-  readonly exits: readonly QueueExit[];
-  readonly queue: CourtQueue;
+  readonly exits: readonly PartialExit[];
+  readonly queue: TeamQueue;
   readonly rotations: TeamRotations;
   readonly teams: MatchTeams;
 }

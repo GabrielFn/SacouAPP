@@ -113,7 +113,7 @@ export interface SetterZones {
  * Who waits for the court, in order: whole teams first, then single players by arrival. A member is
  * in it once, and never in a team on the court (ADR 0029).
  */
-export interface CourtQueue {
+export interface TeamQueue {
   readonly players: readonly MemberId[];
   readonly teams: readonly TeamRoster[];
 }
@@ -123,7 +123,7 @@ export interface MatchStartedPayload {
   readonly formationsVersion: number;
   readonly matchId: string;
   /** The queue once this match starts: the result of the exit, recorded whole (ADR 0029). */
-  readonly queue: CourtQueue;
+  readonly queue: TeamQueue;
   readonly rotations: TeamRotations;
   readonly rulesVersion: number;
   readonly scoring: ScoringRules;
@@ -175,7 +175,7 @@ export interface LineupChangedPayload extends LineupAllocation {
 /** The whole queue, for whoever arrives or leaves during an open match; the last one wins. */
 export interface QueueChangedPayload {
   readonly matchId: string;
-  readonly queue: CourtQueue;
+  readonly queue: TeamQueue;
 }
 
 export type ScorePayload =
@@ -223,7 +223,7 @@ export interface FinishedMatch extends MatchScore {
 export interface CourtSessionState {
   readonly currentMatch: MatchScore | null;
   readonly finishedMatches: readonly FinishedMatch[];
-  readonly queue: CourtQueue;
+  readonly queue: TeamQueue;
 }
 
 /**

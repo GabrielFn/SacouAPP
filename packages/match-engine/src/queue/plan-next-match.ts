@@ -3,7 +3,7 @@ import { err, ok } from "@sacou/volley-rules";
 import { MAX_QUEUE_MEMBERS, MAX_TEAM_MEMBERS, TEAM_SIDES } from "../score/constants.data.js";
 import { queueSize } from "../score/queue-rules.js";
 import type {
-  CourtQueue,
+  TeamQueue,
   CourtSessionState,
   FinishedMatch,
   MatchTeams,
@@ -19,8 +19,8 @@ import type {
   NextMatchInput,
   NextMatchPlan,
   NextMatchResult,
-  QueueExit,
-  QueueExitPlace,
+  PartialExit,
+  PartialExitPlace,
   QueueRefusalCode,
 } from "./types.js";
 
@@ -46,7 +46,7 @@ function formTeams(
   teams: readonly TeamRoster[],
   players: readonly MemberId[],
   playersPerTeam: number,
-): CourtQueue {
+): TeamQueue {
   if (players.length < playersPerTeam) {
     return { players, teams };
   }
@@ -55,7 +55,7 @@ function formTeams(
 }
 
 /** The match as it ended: the winner, and the rotation where it stopped (ADR 0029). */
-function unchangedPlan(match: FinishedMatch, queue: CourtQueue): NextMatchPlan {
+function unchangedPlan(match: FinishedMatch, queue: TeamQueue): NextMatchPlan {
   return { enteringTeam: null, exits: [], queue, rotations: match.rotations, teams: match.teams };
 }
 
@@ -67,7 +67,7 @@ function withSide<T>(pair: Readonly<Record<TeamSide, T>>, side: TeamSide, value:
 function planWholeTeam(
   match: FinishedMatch,
   loser: TeamSide,
-  { players, teams }: CourtQueue,
+  { players, teams }: TeamQueue,
 ): NextMatchPlan {
   const [entering, ...waiting] = teams as readonly [TeamRoster, ...TeamRoster[]];
   return {
@@ -83,7 +83,7 @@ function placeOf(
   memberId: MemberId,
   memberIds: readonly MemberId[],
   teamState: TeamState | null,
-): QueueExitPlace {
+): PartialExitPlace {
   if (teamState === null) {
     return { area: "team", index: memberIds.indexOf(memberId) };
   }
@@ -133,7 +133,7 @@ function planPartialExit(
   const incoming = players.slice(0, count);
   const incomingFor = (id: MemberId) => incoming[outgoing.indexOf(id)] ?? id;
   const teamState = match.rotations[loser];
-  const exits: readonly QueueExit[] = outgoing.map((id, index) => ({
+  const exits: readonly PartialExit[] = outgoing.map((id, index) => ({
     consecutiveMatches: getConsecutiveMatches(state, id),
     incoming: incoming[index] as MemberId,
     outgoing: id,

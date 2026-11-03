@@ -38,7 +38,7 @@ import {
 import { isQueueOverlappingTeams, queueSize } from "./queue-rules.js";
 import { isLiberoAllowed, isLiberoCoverage, isRosterPartition } from "./rotation-rules.js";
 import type {
-  CourtQueue,
+  TeamQueue,
   LineupChangedPayload,
   MatchEndedPayload,
   MatchStartedPayload,
@@ -333,7 +333,7 @@ function parseQueueTeams(raw: unknown): readonly TeamRoster[] | null {
 }
 
 /** Format only: teams, then players, nobody twice, and at most `MAX_QUEUE_MEMBERS` in all. */
-function parseQueue(raw: unknown): ParseResult<CourtQueue> {
+function parseQueue(raw: unknown): ParseResult<TeamQueue> {
   if (!isPlainObject(raw)) return invalid("queue");
   const teams = parseQueueTeams(readOwn(raw, "teams"));
   if (teams === null) return invalid("queue.teams");
@@ -347,7 +347,7 @@ function parseQueue(raw: unknown): ParseResult<CourtQueue> {
 }
 
 /** Last, because it is checked against `teams`: nobody waiting is on the court. */
-function parseMatchQueue(raw: unknown, teams: MatchTeams): ParseResult<CourtQueue> {
+function parseMatchQueue(raw: unknown, teams: MatchTeams): ParseResult<TeamQueue> {
   const queue = parseQueue(raw);
   if (!queue.ok) return queue;
   return isQueueOverlappingTeams(queue.value, teams) ? invalid("queue") : queue;

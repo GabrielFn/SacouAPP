@@ -4,7 +4,7 @@ import { QUEUE_CHANGED_EVENT_TYPE } from "../score/constants.data.js";
 import { parseQueueChangedPayload } from "../score/parse-payloads.js";
 import { isQueueOverlappingTeams } from "../score/queue-rules.js";
 import type {
-  CourtQueue,
+  TeamQueue,
   MemberId,
   ScoreCommandResult,
   CourtSessionState,
@@ -22,7 +22,7 @@ function isSameTeams(first: readonly TeamRoster[], second: readonly TeamRoster[]
   );
 }
 
-function isSameQueue(first: CourtQueue, second: CourtQueue): boolean {
+function isSameQueue(first: TeamQueue, second: TeamQueue): boolean {
   return isSameMembers(first.players, second.players) && isSameTeams(first.teams, second.teams);
 }
 
@@ -30,7 +30,7 @@ function isSameQueue(first: CourtQueue, second: CourtQueue): boolean {
  * Records the whole queue during an open match, for whoever arrives or leaves: the order is the
  * caller's, and nobody waiting may be on the court (ADR 0029).
  */
-export function changeQueue(state: CourtSessionState, queue: CourtQueue): ScoreCommandResult {
+export function changeQueue(state: CourtSessionState, queue: TeamQueue): ScoreCommandResult {
   const match = state.currentMatch;
   if (match === null) {
     return err({ code: "no-open-match" });

@@ -9,7 +9,7 @@ import {
 } from "@sacou/volley-rules";
 
 import type {
-  CourtQueue,
+  TeamQueue,
   CourtSessionState,
   MatchStartedPayload,
   MemberId,
@@ -20,7 +20,7 @@ import type {
 } from "./types.js";
 
 /** Nobody waiting: the queue of the score tests, which play a single match. */
-export const EMPTY_QUEUE: CourtQueue = { players: [], teams: [] };
+export const EMPTY_QUEUE: TeamQueue = { players: [], teams: [] };
 
 /** Test-only: builds envelopes and replays them through the parser, as the app will. */
 export const COURT_SESSION_ID = "c0000000-0000-4000-8000-000000000001";

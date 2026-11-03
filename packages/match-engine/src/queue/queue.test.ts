@@ -8,7 +8,7 @@ import { MAX_QUEUE_MEMBERS } from "../score/constants.data.js";
 import { replayAll, toEnvelope } from "../score/match-player.test.fixture.js";
 import { getLineupBySlot } from "../score/rotation-rules.js";
 import type {
-  CourtQueue,
+  TeamQueue,
   CourtSessionState,
   MatchStartedPayload,
   MemberId,
@@ -33,7 +33,7 @@ const [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO] = [1, 2, 3, 4, 5, 6, 7, 8]
 ) as [MemberId, MemberId, MemberId, MemberId, MemberId, MemberId, MemberId, MemberId];
 const ARRIVAL_ORDER = [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO];
 const SCORING = { bestOf: 1, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 } as const;
-const NOBODY: CourtQueue = { players: [], teams: [] };
+const NOBODY: TeamQueue = { players: [], teams: [] };
 
 interface CourtPlayer {
   readonly state: () => CourtSessionState;
@@ -58,7 +58,7 @@ function createCourtPlayer(): CourtPlayer {
   };
 }
 
-function firstMatch(blue: readonly MemberId[], queue: CourtQueue): MatchStartedPayload {
+function firstMatch(blue: readonly MemberId[], queue: TeamQueue): MatchStartedPayload {
   const [setter, ...others] = blue;
   return {
     firstServer: "a",
@@ -191,7 +191,7 @@ describe("the review scenario: two reserves, Azul loses", () => {
 });
 
 describe("changeQueue", () => {
-  function opened(queue: CourtQueue): CourtSessionState {
+  function opened(queue: TeamQueue): CourtSessionState {
     const player = createCourtPlayer();
     player.run((state) =>
       startMatch(state, firstMatch([RAFA, DUDA, GIL, HUGO, DAVI, SOFIA], queue)),
