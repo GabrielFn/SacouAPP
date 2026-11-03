@@ -4,8 +4,10 @@ export {
   confirmSetEnd,
   endMatchManually,
   scorePoint,
+  shiftRotation,
   startMatch,
   substitutePlayer,
+  switchServingTeam,
 } from "./commands.js";
 export * from "./constants.data.js";
 export {
@@ -15,6 +17,7 @@ export {
   parsePointScoredPayload,
   parseQueueChangedPayload,
   parseScorePayload,
+  parseServingTeamChangedPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
 export { isQueueOverlappingTeams } from "./queue-rules.js";
@@ -24,11 +27,13 @@ export {
   getLineupBySlot,
   getNextSetFirstServer,
   getOnCourtBySlot,
+  getOpponent,
   getServingPlayer,
   isLiberoAllowed,
   isLiberoCoverage,
   isSideOut,
   nextSetterZone,
+  previousSetterZone,
 } from "./rotation-rules.js";
 export {
   getServeAlignment,

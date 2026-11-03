@@ -6,6 +6,8 @@ import {
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
+  ROTATION_DIRECTIONS,
+  SERVING_TEAM_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   SUPPORTED_RULES_VERSIONS,
   TEAM_SIDES,
@@ -15,7 +17,14 @@ import {
   parseMatchStartedPayload,
   parseScorePayload,
 } from "./parse-payloads.js";
-import { getNextSetFirstServer, isLiberoAllowed, isRosterPartition } from "./rotation-rules.js";
+import {
+  getNextSetFirstServer,
+  getOpponent,
+  isLiberoAllowed,
+  isRosterPartition,
+  nextSetterZone,
+  previousSetterZone,
+} from "./rotation-rules.js";
 import { getMatchWinner, getSetWinner, targetPointsForSet } from "./scoring-rules.js";
 import type {
   ConfirmSetEndOptions,
@@ -25,12 +34,14 @@ import type {
   MatchSet,
   MatchStartedPayload,
   MemberId,
+  RotationDirection,
   ScoreCommandError,
   ScoreCommandResult,
   ScoreEventDraft,
   ScoreEventType,
   ScorePayloadField,
   ScoreRefusalCode,
+  SetScore,
   SetterZones,
   TeamLibero,
   TeamRoster,
@@ -304,5 +315,60 @@ export function substitutePlayer(
       lineup: lineup.map((id) => (id === outgoing ? incoming : id)),
       setterZone,
     });
+  });
+}
+
+/**
+ * Girar and desgirar on screen 24: the whole allocation is recorded with the zone next to the current
+ * one, never a step the applier would calculate, and bench and libero stay (ADR 0030).
+ */
+export function shiftRotation(
+  state: CourtSessionState,
+  team: TeamSide,
+  direction: RotationDirection,
+): ScoreCommandResult {
+  return withOpenTeam(state, team, (match, teamState) => {
+    if (!ROTATION_DIRECTIONS.includes(direction)) {
+      return refuse("invalid-rotation-direction");
+    }
+    const { bench, libero, lineup, setterZone } = teamState;
+    const shifted =
+      direction === "forward" ? nextSetterZone(setterZone) : previousSetterZone(setterZone);
+    return recordAllocation(match, teamState, team, {
+      bench,
+      libero,
+      lineup,
+      setterZone: shifted,
+    });
+  });
+}
+
+function hasNoPoints({ a, b }: SetScore): boolean {
+  return a === 0 && b === 0;
+}
+
+/**
+ * "Trocar sacador" on screen 24: only the serve changes, and nobody rotates. At 0–0 it also corrects
+ * who served first, so the next set alternates from the corrected one; afterwards, who served first
+ * stays (ADR 0030).
+ */
+export function switchServingTeam(state: CourtSessionState): ScoreCommandResult {
+  const match = state.currentMatch;
+  if (match === null) {
+    return refuse("no-open-match");
+  }
+  const set = match.currentSet;
+  if (set === null) {
+    return refuse("no-open-set");
+  }
+  if (getSetWinner(set.score, set.targetPoints, match.scoring.winMargin) !== null) {
+    return refuse("set-decided");
+  }
+  const servingTeam = getOpponent(set.servingTeam);
+  return emit(SERVING_TEAM_CHANGED_EVENT_TYPE, {
+    firstServer: hasNoPoints(set.score) ? servingTeam : set.firstServer,
+    matchId: match.matchId,
+    servingTeam,
+    setNumber: set.setNumber,
   });
 }

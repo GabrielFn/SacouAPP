@@ -54,6 +54,17 @@ export interface ReplayedState<S> {
   readonly activeEventIds: readonly string[];
 }
 
+/** An active event and the state right after it. */
+export interface TimelineEntry<S> {
+  readonly event: EventEnvelope;
+  readonly state: S;
+}
+
+/** The active events in canonical order, each with its state. Never lists a `RevertedTo`. */
+export interface ReplayedTimeline<S> {
+  readonly entries: readonly TimelineEntry<S>[];
+}
+
 export type ReplayErrorCode =
   | "stream-mismatch"
   | "event-id-conflict"

@@ -9,6 +9,7 @@ import {
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
+  SERVING_TEAM_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
 import {
@@ -17,6 +18,7 @@ import {
   parseMatchStartedPayload,
   parsePointScoredPayload,
   parseQueueChangedPayload,
+  parseServingTeamChangedPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
 import { isQueueOverlappingTeams } from "./queue-rules.js";
@@ -288,6 +290,27 @@ const applyQueueChanged: EventApplier<CourtSessionState> = (state, event) => {
   return ok({ currentMatch: match, finishedMatches: state.finishedMatches, queue });
 };
 
+/**
+ * Records who serves and who served first in the open set, as the command decided: the score and
+ * the current values are never checked, nobody rotates, and the last one in the order wins. It also
+ * applies with the rotation off, because the serve is tracked anyway (ADR 0030).
+ */
+const applyServingTeamChanged: EventApplier<CourtSessionState> = (state, event) => {
+  const parsed = parseServingTeamChangedPayload(event.payload);
+  if (!parsed.ok) {
+    return rejected();
+  }
+  const { firstServer, matchId, servingTeam, setNumber } = parsed.value;
+  const match = findOpenMatch(state, matchId);
+  const set = findOpenSet(match, setNumber);
+  if (match === null || set === null) {
+    return rejected();
+  }
+  return ok(
+    withCurrentMatch(state, { ...match, currentSet: { ...set, firstServer, servingTeam } }),
+  );
+};
+
 export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>> = new Map([
   [MATCH_STARTED_EVENT_TYPE, applyMatchStarted],
   [POINT_SCORED_EVENT_TYPE, applyPointScored],
@@ -295,4 +318,5 @@ export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>
   [MATCH_ENDED_EVENT_TYPE, applyMatchEnded],
   [LINEUP_CHANGED_EVENT_TYPE, applyLineupChanged],
   [QUEUE_CHANGED_EVENT_TYPE, applyQueueChanged],
+  [SERVING_TEAM_CHANGED_EVENT_TYPE, applyServingTeamChanged],
 ]);

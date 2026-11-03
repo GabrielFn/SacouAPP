@@ -14,6 +14,7 @@ import {
   getServingPlayer,
   isSideOut,
   nextSetterZone,
+  previousSetterZone,
 } from "./rotation-rules.js";
 import type { CourtSessionState, MemberId, TeamSide } from "./types.js";
 
@@ -42,7 +43,14 @@ interface NextFirstServerCase {
   readonly expected: { readonly firstServer: TeamSide };
 }
 
-type RuleCase = ZoneCase | SideOutCase | NextFirstServerCase;
+interface PreviousZoneCase {
+  readonly id: string;
+  readonly rule: "previous-zone";
+  readonly input: { readonly setterZone: SetterZone };
+  readonly expected: { readonly previousSetterZone: SetterZone };
+}
+
+type RuleCase = ZoneCase | SideOutCase | NextFirstServerCase | PreviousZoneCase;
 
 interface EventCase {
   readonly id: string;
@@ -74,6 +82,12 @@ const EXPECTED_RULE_IDS: readonly string[] = [
   "no-side-out-b-serving-b-wins",
   "next-first-server-after-a",
   "next-first-server-after-b",
+  "zone-1-previous-2",
+  "zone-2-previous-3",
+  "zone-3-previous-4",
+  "zone-4-previous-5",
+  "zone-5-previous-6",
+  "zone-6-previous-1",
 ];
 
 /** Literal, never read from the file: a case that disappears must fail. */
@@ -171,6 +185,8 @@ function outcomeOfRule(goldenCase: RuleCase): unknown {
     }
     case "next-first-server":
       return { firstServer: getNextSetFirstServer(goldenCase.input.firstServer) };
+    case "previous-zone":
+      return { previousSetterZone: previousSetterZone(goldenCase.input.setterZone) };
   }
 }
 

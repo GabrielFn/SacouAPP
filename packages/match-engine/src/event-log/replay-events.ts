@@ -7,8 +7,10 @@ import type {
   JsonObject,
   ReplayConfig,
   ReplayedState,
+  ReplayedTimeline,
   ReplayError,
   ReplayErrorCode,
+  TimelineEntry,
 } from "./types.js";
 
 /**
@@ -16,7 +18,7 @@ import type {
  * walked by a revert leaves the timeline, which keeps the whole replay linear.
  */
 interface TimelineNode<S> {
-  readonly eventId: string;
+  readonly event: EventEnvelope;
   readonly state: S;
   readonly previous: TimelineNode<S> | null;
 }
@@ -35,7 +37,7 @@ function* walkTimeline<S>(head: Timeline<S>): Generator<TimelineNode<S>> {
 
 function findActiveNode<S>(head: Timeline<S>, eventId: string): Timeline<S> {
   for (const node of walkTimeline(head)) {
-    if (node.eventId === eventId) {
+    if (node.event.eventId === eventId) {
       return node;
     }
   }
@@ -71,7 +73,7 @@ function apply<S>(
   try {
     const applied = applier(head === null ? initialState : head.state, event);
     return applied.ok
-      ? ok({ eventId: event.eventId, state: applied.value, previous: head })
+      ? ok({ event, state: applied.value, previous: head })
       : failure("event-rejected", event);
   } catch {
     // Fails closed: the exception message could carry data, so it is not forwarded.
@@ -93,6 +95,27 @@ function foldTimeline<S>(
   }, ok(null));
 }
 
+function toEntries<S>(head: Timeline<S>): readonly TimelineEntry<S>[] {
+  return Array.from(walkTimeline(head), ({ event, state }) => ({ event, state })).reverse();
+}
+
+/**
+ * Replays a stream like `replayEvents`, keeping the state right after each active event, in canonical
+ * order. The states are the ones of the timeline, never copied, so it costs one reference per event.
+ * The same limits and errors as `replayEvents` apply.
+ */
+export function replayTimeline<S>(
+  config: ReplayConfig<S>,
+  events: readonly EventEnvelope[],
+): Result<ReplayedTimeline<S>, ReplayError> {
+  const normalized = normalizeLog(events, config.courtSessionId);
+  if (!normalized.ok) {
+    return normalized;
+  }
+  const timeline = foldTimeline(normalized.value, config);
+  return timeline.ok ? ok({ entries: toEntries(timeline.value) }) : timeline;
+}
+
 /**
  * Recalculates the state of a stream deterministically: the outcome, errors included, depends only
  * on the set of events, never on their arrival order. Returns no partial state.
@@ -105,17 +128,14 @@ export function replayEvents<S>(
   config: ReplayConfig<S>,
   events: readonly EventEnvelope[],
 ): Result<ReplayedState<S>, ReplayError> {
-  const normalized = normalizeLog(events, config.courtSessionId);
-  if (!normalized.ok) {
-    return normalized;
-  }
-  const timeline = foldTimeline(normalized.value, config);
+  const timeline = replayTimeline(config, events);
   if (!timeline.ok) {
     return timeline;
   }
-  const head = timeline.value;
+  const { entries } = timeline.value;
+  const last = entries[entries.length - 1];
   return ok({
-    state: head === null ? config.initialState : head.state,
-    activeEventIds: Array.from(walkTimeline(head), (node) => node.eventId).reverse(),
+    state: last === undefined ? config.initialState : last.state,
+    activeEventIds: entries.map(({ event }) => event.eventId),
   });
 }

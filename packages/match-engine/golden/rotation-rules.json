@@ -224,5 +224,65 @@
     "expected": {
       "firstServer": "a"
     }
+  },
+  {
+    "id": "zone-1-previous-2",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 1
+    },
+    "expected": {
+      "previousSetterZone": 2
+    }
+  },
+  {
+    "id": "zone-2-previous-3",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 2
+    },
+    "expected": {
+      "previousSetterZone": 3
+    }
+  },
+  {
+    "id": "zone-3-previous-4",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 3
+    },
+    "expected": {
+      "previousSetterZone": 4
+    }
+  },
+  {
+    "id": "zone-4-previous-5",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 4
+    },
+    "expected": {
+      "previousSetterZone": 5
+    }
+  },
+  {
+    "id": "zone-5-previous-6",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 5
+    },
+    "expected": {
+      "previousSetterZone": 6
+    }
+  },
+  {
+    "id": "zone-6-previous-1",
+    "rule": "previous-zone",
+    "input": {
+      "setterZone": 6
+    },
+    "expected": {
+      "previousSetterZone": 1
+    }
   }
 ]

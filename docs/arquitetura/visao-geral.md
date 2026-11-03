@@ -106,6 +106,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0027](adr/0027-banco-manual.md) | Banco manual e alteração de escalação em partida |
 | [0028](adr/0028-libero-ligado.md) | Líbero ligado: vagas por índice, entrada e saída calculadas |
 | [0029](adr/0029-fila-da-quadra.md) | Fila da quadra: gravada inteira, saída parcial calculada no comando |
+| [0030](adr/0030-correcoes-da-linha-do-tempo.md) | Correções: desfazer, voltar a um ponto, trocar sacador, girar e desgirar |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -116,7 +117,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 9 | Padrão de partida | 0017 |
 | 10 | Membros e papéis | 0017 |
 | 11 | Fila e saída parcial | 0017, 0029 |
-| 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028 |
+| 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028, 0030 |
 | 13 | Banco no MVP | 0017, 0027 |
 | 14 | Ponto individual | 0018 |
 | 15 | MVP do dia | 0018 |
@@ -127,7 +128,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
-| 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029 |
+| 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030 |
 | 27 | Padrões | 0011, 0029 |
 | 28 | Dados pessoais | 0012 |
 | 29 | App | 0008 |

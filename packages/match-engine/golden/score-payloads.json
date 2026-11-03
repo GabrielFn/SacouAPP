@@ -33503,5 +33503,527 @@
       "ok": false,
       "field": "unknown-field"
     }
+  },
+  {
+    "id": "ServingTeamChanged-valid",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-missing-matchId",
+    "type": "ServingTeamChanged",
+    "payload": { "setNumber": 1, "servingTeam": "b", "firstServer": "b" },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-missing-setNumber",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-missing-servingTeam",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "ServingTeamChanged-missing-firstServer",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b"
+    },
+    "expected": { "ok": false, "field": "firstServer" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-email-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "email": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-name-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "name": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-nickname-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "nickname": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-phone-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "phone": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-pix-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "pix": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-photo-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "photo": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-forbidden-userId-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "userId": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-key-__proto__-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "__proto__": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-key-constructor-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "constructor": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-key-1-at-root",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-extra-field",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "extra": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-score-is-unknown",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "score": { "a": 0, "b": 0 }
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-setterZone-is-unknown",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "setterZone": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-team-is-unknown",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b",
+      "team": "b"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-payload-is-null",
+    "type": "ServingTeamChanged",
+    "payload": null,
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "ServingTeamChanged-payload-is-array",
+    "type": "ServingTeamChanged",
+    "payload": [],
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "ServingTeamChanged-payload-is-text",
+    "type": "ServingTeamChanged",
+    "payload": "x",
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "ServingTeamChanged-payload-is-number",
+    "type": "ServingTeamChanged",
+    "payload": 1,
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-uppercase-uuid",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-email",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "player@example.com",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-name",
+    "type": "ServingTeamChanged",
+    "payload": { "matchId": "Gabriel", "setNumber": 1, "servingTeam": "b", "firstServer": "b" },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-uuid-with-newline",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-number",
+    "type": "ServingTeamChanged",
+    "payload": { "matchId": 1, "setNumber": 1, "servingTeam": "b", "firstServer": "b" },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-matchId-null",
+    "type": "ServingTeamChanged",
+    "payload": { "matchId": null, "setNumber": 1, "servingTeam": "b", "firstServer": "b" },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-1",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-5",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 5,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-0",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 0,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-6",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 6,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-1.5",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1.5,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-text",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": "1",
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-setNumber-null",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": null,
+      "servingTeam": "b",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-servingTeam-a",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "a",
+      "firstServer": "b"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-servingTeam-uppercase-A",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "A",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "ServingTeamChanged-servingTeam-c",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "c",
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "ServingTeamChanged-servingTeam-null",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": null,
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "ServingTeamChanged-servingTeam-number",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": 1,
+      "firstServer": "b"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "ServingTeamChanged-firstServer-a",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "a"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-firstServer-uppercase-A",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "A"
+    },
+    "expected": { "ok": false, "field": "firstServer" }
+  },
+  {
+    "id": "ServingTeamChanged-firstServer-c",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "c"
+    },
+    "expected": { "ok": false, "field": "firstServer" }
+  },
+  {
+    "id": "ServingTeamChanged-firstServer-null",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": null
+    },
+    "expected": { "ok": false, "field": "firstServer" }
+  },
+  {
+    "id": "ServingTeamChanged-firstServer-number",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": 1
+    },
+    "expected": { "ok": false, "field": "firstServer" }
+  },
+  {
+    "id": "ServingTeamChanged-serving-and-first-server-differ",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "b",
+      "firstServer": "a"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "ServingTeamChanged-order-unknown-before-matchId",
+    "type": "ServingTeamChanged",
+    "payload": { "matchId": 1, "setNumber": 0, "servingTeam": "c", "firstServer": "c", "extra": 1 },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "ServingTeamChanged-order-matchId-before-setNumber",
+    "type": "ServingTeamChanged",
+    "payload": { "matchId": 1, "setNumber": 0, "servingTeam": "c", "firstServer": "c" },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "ServingTeamChanged-order-setNumber-before-servingTeam",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 0,
+      "servingTeam": "c",
+      "firstServer": "c"
+    },
+    "expected": { "ok": false, "field": "setNumber" }
+  },
+  {
+    "id": "ServingTeamChanged-order-servingTeam-before-firstServer",
+    "type": "ServingTeamChanged",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "setNumber": 1,
+      "servingTeam": "c",
+      "firstServer": "c"
+    },
+    "expected": { "ok": false, "field": "servingTeam" }
   }
 ]

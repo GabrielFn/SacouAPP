@@ -14,6 +14,7 @@ export const SET_ENDED_EVENT_TYPE = "SetEnded";
 export const MATCH_ENDED_EVENT_TYPE = "MatchEnded";
 export const LINEUP_CHANGED_EVENT_TYPE = "LineupChanged";
 export const QUEUE_CHANGED_EVENT_TYPE = "QueueChanged";
+export const SERVING_TEAM_CHANGED_EVENT_TYPE = "ServingTeamChanged";
 
 export const CURRENT_RULES_VERSION = 1;
 
@@ -30,6 +31,9 @@ export const END_REASONS = ["sets-won", "manual"] as const;
  * editing a formation must never change the replay of a recorded match (ADR 0024).
  */
 export const SETTER_ZONE_SEQUENCE = [1, 6, 5, 4, 3, 2] as const satisfies readonly SetterZone[];
+
+/** Girar moves a team to the next zone of the sequence; desgirar moves it back (ADR 0030). */
+export const ROTATION_DIRECTIONS = ["forward", "backward"] as const;
 
 /**
  * This table is the `IRotationSystem` of ADR 0011: the systems differ only in data, so there is no
@@ -202,5 +206,11 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
   [QUEUE_CHANGED_EVENT_TYPE]: {
     matchId: null,
     queue: { teams: [{ memberIds: null }], players: null },
+  },
+  [SERVING_TEAM_CHANGED_EVENT_TYPE]: {
+    matchId: null,
+    setNumber: null,
+    servingTeam: null,
+    firstServer: null,
   },
 };

@@ -12,7 +12,13 @@ import {
   rotationMatchInput,
   toEnvelope,
 } from "./match-player.test.fixture.js";
-import { getCurrentServingPlayer, getLineupBySlot, getServingPlayer } from "./rotation-rules.js";
+import {
+  getCurrentServingPlayer,
+  getLineupBySlot,
+  getServingPlayer,
+  nextSetterZone,
+  previousSetterZone,
+} from "./rotation-rules.js";
 import type {
   CourtSessionState,
   MatchScore,
@@ -200,5 +206,27 @@ describe("getCurrentServingPlayer", () => {
 
     expect(getCurrentServingPlayer(current(pending))).toBeNull();
     expect(scorePoint(pending, "a").ok).toBe(false);
+  });
+});
+
+describe("previousSetterZone", () => {
+  test("is the zone before in the sequence, and zone 1 comes back from zone 2", () => {
+    SETTER_ZONE_SEQUENCE.forEach((zone, index) => {
+      const before =
+        SETTER_ZONE_SEQUENCE[index - 1] ?? SETTER_ZONE_SEQUENCE[SETTER_ZONE_SEQUENCE.length - 1];
+      expect(previousSetterZone(zone)).toBe(before);
+    });
+  });
+
+  test("undoes one rotation from every zone, and never leaves the zones 1 to 6", () => {
+    SETTER_ZONE_SEQUENCE.forEach((zone) => {
+      expect(previousSetterZone(nextSetterZone(zone))).toBe(zone);
+      expect(nextSetterZone(previousSetterZone(zone))).toBe(zone);
+      expect(SETTER_ZONE_SEQUENCE).toContain(previousSetterZone(zone));
+    });
+  });
+
+  test("is not the table of the forward rotation", () => {
+    expect(SETTER_ZONE_SEQUENCE.map(previousSetterZone)).toStrictEqual([2, 1, 6, 5, 4, 3]);
   });
 });
