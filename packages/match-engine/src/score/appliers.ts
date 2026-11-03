@@ -8,13 +8,16 @@ import {
   MATCH_STARTED_EVENT_TYPE,
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
+  QUEUE_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
 import {
+  isQueueOverlappingTeams,
   parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
   parsePointScoredPayload,
+  parseQueueChangedPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
 import { isLiberoAllowed, isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
@@ -32,6 +35,7 @@ import type {
 export const INITIAL_COURT_SESSION_STATE: CourtSessionState = Object.freeze({
   currentMatch: null,
   finishedMatches: Object.freeze([]),
+  queue: Object.freeze({ players: Object.freeze([]), teams: Object.freeze([]) }),
 });
 
 function rejected(): Result<never, EventRejection> {
@@ -49,7 +53,7 @@ function findOpenSet(match: MatchScore | null, setNumber: number): MatchSet | nu
 }
 
 function withCurrentMatch(state: CourtSessionState, match: MatchScore): CourtSessionState {
-  return { currentMatch: match, finishedMatches: state.finishedMatches };
+  return { currentMatch: match, finishedMatches: state.finishedMatches, queue: state.queue };
 }
 
 function isFinishedMatchId(state: CourtSessionState, matchId: string): boolean {
@@ -113,10 +117,10 @@ const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
   if (!parsed.ok || !canOpenMatch(state, parsed.value.matchId)) {
     return rejected();
   }
-  const { firstServer, formationsVersion, matchId, rotations, rulesVersion, scoring, teams } =
+  const { firstServer, formationsVersion, matchId, queue, rotations, rulesVersion, scoring, teams } =
     parsed.value;
-  return ok(
-    withCurrentMatch(state, {
+  return ok({
+    currentMatch: {
       completedSets: [],
       // Set 1 is never the deciding set of a series, so it always plays to `pointsPerSet`.
       currentSet: emptySet(FIRST_SET_NUMBER, scoring.pointsPerSet, firstServer),
@@ -127,8 +131,10 @@ const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
       scoring,
       setsWon: { a: 0, b: 0 },
       teams,
-    }),
-  );
+    },
+    finishedMatches: state.finishedMatches,
+    queue,
+  });
 };
 
 const applyPointScored: EventApplier<CourtSessionState> = (state, event) => {
@@ -219,7 +225,11 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
     teams,
     winner,
   };
-  return ok({ currentMatch: null, finishedMatches: [...state.finishedMatches, finishedMatch] });
+  return ok({
+    currentMatch: null,
+    finishedMatches: [...state.finishedMatches, finishedMatch],
+    queue: state.queue,
+  });
 };
 
 /**
@@ -253,10 +263,28 @@ const applyLineupChanged: EventApplier<CourtSessionState> = (state, event) => {
   );
 };
 
+/**
+ * Replaces the whole queue, checked against the frozen `teams` of the open match: nobody waiting is
+ * on the court. Like the `LineupChanged`, the last one in the canonical order wins (ADR 0029).
+ */
+const applyQueueChanged: EventApplier<CourtSessionState> = (state, event) => {
+  const parsed = parseQueueChangedPayload(event.payload);
+  if (!parsed.ok) {
+    return rejected();
+  }
+  const { matchId, queue } = parsed.value;
+  const match = findOpenMatch(state, matchId);
+  if (match === null || isQueueOverlappingTeams(queue, match.teams)) {
+    return rejected();
+  }
+  return ok({ currentMatch: match, finishedMatches: state.finishedMatches, queue });
+};
+
 export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>> = new Map([
   [MATCH_STARTED_EVENT_TYPE, applyMatchStarted],
   [POINT_SCORED_EVENT_TYPE, applyPointScored],
   [SET_ENDED_EVENT_TYPE, applySetEnded],
   [MATCH_ENDED_EVENT_TYPE, applyMatchEnded],
   [LINEUP_CHANGED_EVENT_TYPE, applyLineupChanged],
+  [QUEUE_CHANGED_EVENT_TYPE, applyQueueChanged],
 ]);

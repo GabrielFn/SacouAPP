@@ -10,6 +10,7 @@ import { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./comma
 import { CURRENT_RULES_VERSION, MAX_FINISHED_MATCHES } from "./constants.data.js";
 import {
   BLUE_LINEUP,
+  EMPTY_QUEUE,
   MATCH_ID,
   matchInput,
   numberedMatchId,
@@ -296,6 +297,7 @@ describe("confirmSetEnd", () => {
         teams: matchInput(MD3).teams,
       },
       finishedMatches: [],
+      queue: EMPTY_QUEUE,
     };
 
     expect(errorCode(confirmSetEnd(state))).toBe("no-open-set");

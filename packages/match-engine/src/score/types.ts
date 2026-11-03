@@ -17,6 +17,7 @@ import type {
   MATCH_STARTED_EVENT_TYPE,
   PAYLOAD_ROOT_FIELD,
   POINT_SCORED_EVENT_TYPE,
+  QUEUE_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   TEAM_SIDES,
   UNKNOWN_PAYLOAD_FIELD,
@@ -28,7 +29,8 @@ export type ScoreEventType =
   | typeof POINT_SCORED_EVENT_TYPE
   | typeof SET_ENDED_EVENT_TYPE
   | typeof MATCH_ENDED_EVENT_TYPE
-  | typeof LINEUP_CHANGED_EVENT_TYPE;
+  | typeof LINEUP_CHANGED_EVENT_TYPE
+  | typeof QUEUE_CHANGED_EVENT_TYPE;
 
 /** A lowercase UUID. Where this type lives is decided in E3.2. */
 export type MemberId = string;
@@ -107,10 +109,21 @@ export interface SetterZones {
   readonly b: SetterZone | null;
 }
 
+/**
+ * Who waits for the court, in order: whole teams first, then single players by arrival. A member is
+ * in it once, and never in a team on the court (ADR 0029).
+ */
+export interface CourtQueue {
+  readonly players: readonly MemberId[];
+  readonly teams: readonly TeamRoster[];
+}
+
 export interface MatchStartedPayload {
   readonly firstServer: TeamSide;
   readonly formationsVersion: number;
   readonly matchId: string;
+  /** The queue once this match starts: the result of the exit, recorded whole (ADR 0029). */
+  readonly queue: CourtQueue;
   readonly rotations: TeamRotations;
   readonly rulesVersion: number;
   readonly scoring: ScoringRules;
@@ -159,12 +172,19 @@ export interface LineupChangedPayload extends LineupAllocation {
   readonly team: TeamSide;
 }
 
+/** The whole queue, for whoever arrives or leaves during an open match; the last one wins. */
+export interface QueueChangedPayload {
+  readonly matchId: string;
+  readonly queue: CourtQueue;
+}
+
 export type ScorePayload =
   | MatchStartedPayload
   | PointScoredPayload
   | SetEndedPayload
   | MatchEndedPayload
-  | LineupChangedPayload;
+  | LineupChangedPayload
+  | QueueChangedPayload;
 
 /** An open set. Named so it does not collide with the JavaScript `Set`. */
 export interface MatchSet {
@@ -199,14 +219,19 @@ export interface FinishedMatch extends MatchScore {
   readonly winner: TeamSide | null;
 }
 
+/** `queue` is replaced by each event that records it, never accumulated (ADR 0029). */
 export interface CourtSessionState {
   readonly currentMatch: MatchScore | null;
   readonly finishedMatches: readonly FinishedMatch[];
+  readonly queue: CourtQueue;
 }
 
-/** The key tree of a closed payload schema; `null` marks a leaf. */
+/**
+ * The key tree of a closed payload schema: `null` marks a leaf, and a one-item tuple marks a list
+ * whose items all have that shape.
+ */
 export interface PayloadShape {
-  readonly [key: string]: PayloadShape | null;
+  readonly [key: string]: PayloadShape | readonly [PayloadShape] | null;
 }
 
 export type ScorePayloadField =
@@ -252,7 +277,10 @@ export type ScorePayloadField =
   | "lineup"
   | "setterZone"
   | "bench"
-  | "libero";
+  | "libero"
+  | "queue"
+  | "queue.teams"
+  | "queue.players";
 
 /** Carries only a path from the schema, never a received key or value. */
 export interface ScorePayloadError {
@@ -265,6 +293,7 @@ export type ScoreRefusalCode =
   | "match-already-open"
   | "no-open-match"
   | "no-open-set"
+  | "queue-unchanged"
   | "rotation-off"
   | "set-decided"
   | "set-not-decided"

@@ -19,6 +19,7 @@ import {
   MATCH_STARTED_EVENT_TYPE,
   MAX_BENCH_MEMBERS,
   MAX_LIBERO_REPLACED_INDEXES,
+  MAX_QUEUE_MEMBERS,
   MAX_SET_POINTS,
   MAX_TEAM_MEMBERS,
   MIN_BENCH_MEMBERS,
@@ -26,6 +27,7 @@ import {
   MIN_TEAM_MEMBERS,
   PAYLOAD_ROOT_FIELD,
   POINT_SCORED_EVENT_TYPE,
+  QUEUE_CHANGED_EVENT_TYPE,
   SCORE_PAYLOAD_SHAPES,
   SET_ENDED_EVENT_TYPE,
   SETTER_ZONE_SEQUENCE,
@@ -35,6 +37,7 @@ import {
 } from "./constants.data.js";
 import { isLiberoAllowed, isLiberoCoverage, isRosterPartition } from "./rotation-rules.js";
 import type {
+  CourtQueue,
   LineupChangedPayload,
   MatchEndedPayload,
   MatchStartedPayload,
@@ -43,6 +46,7 @@ import type {
   NextSet,
   PayloadShape,
   PointScoredPayload,
+  QueueChangedPayload,
   ScorePayload,
   ScorePayloadError,
   ScorePayloadField,
@@ -109,16 +113,38 @@ function readOwn(raw: RawObject, field: string): unknown {
   return Object.hasOwn(raw, field) ? raw[field] : undefined;
 }
 
+type ChildShape = PayloadShape[string];
+
+/** A child of the wrong type has no keys to report: its own field check rejects it. */
+function hasUnknownChildKey(child: unknown, childShape: ChildShape | undefined): boolean {
+  if (childShape === null || childShape === undefined) {
+    return false;
+  }
+  if (isPayloadListShape(childShape)) {
+    const [itemShape] = childShape;
+    return (
+      Array.isArray(child) &&
+      (child as readonly unknown[]).some(
+        (item) => isPlainObject(item) && hasUnknownKey(item, itemShape),
+      )
+    );
+  }
+  return isPlainObject(child) && hasUnknownKey(child, childShape);
+}
+
+function isPayloadListShape(shape: PayloadShape | readonly [PayloadShape]): shape is readonly [
+  PayloadShape,
+] {
+  return Array.isArray(shape);
+}
+
 function hasUnknownKey(raw: RawObject, shape: PayloadShape): boolean {
-  return Reflect.ownKeys(raw).some((key) => {
-    if (typeof key !== "string" || !Object.hasOwn(shape, key)) {
-      return true;
-    }
-    const childShape = shape[key] ?? null;
-    const child = raw[key];
-    // A child of the wrong type has no keys to report: its own field check rejects it.
-    return childShape !== null && isPlainObject(child) && hasUnknownKey(child, childShape);
-  });
+  return Reflect.ownKeys(raw).some(
+    (key) =>
+      typeof key !== "string" ||
+      !Object.hasOwn(shape, key) ||
+      hasUnknownChildKey(raw[key], shape[key]),
+  );
 }
 
 function parseScoring(raw: unknown): ParseResult<ScoringRules> {
@@ -285,6 +311,63 @@ function parseNextSet(raw: unknown): ParseResult<NextSet | null> {
   return ok({ firstServer, setterZones: setterZones.value, targetPoints });
 }
 
+function parseQueueTeam(raw: unknown): TeamRoster | null {
+  if (!isPlainObject(raw)) return null;
+  const memberIds = parseMemberIds(readOwn(raw, "memberIds"));
+  return memberIds === null ? null : { memberIds };
+}
+
+/** Each team from 1 to `MAX_TEAM_MEMBERS`, and nobody in two of them. */
+function parseQueueTeams(raw: unknown): readonly TeamRoster[] | null {
+  if (!Array.isArray(raw) || raw.length > MAX_QUEUE_MEMBERS) {
+    return null;
+  }
+  const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
+  const teams = items.map(parseQueueTeam).filter((team): team is TeamRoster => team !== null);
+  if (teams.length !== items.length) {
+    return null;
+  }
+  const members = teams.flatMap(({ memberIds }) => memberIds);
+  return new Set(members).size === members.length ? teams : null;
+}
+
+function queueSize({ players, teams }: CourtQueue): number {
+  return teams.reduce((total, { memberIds }) => total + memberIds.length, players.length);
+}
+
+function queueMembers({ players, teams }: CourtQueue): readonly MemberId[] {
+  return [...teams.flatMap(({ memberIds }) => memberIds), ...players];
+}
+
+/**
+ * Whether anyone waiting is on the court: the queue is checked against the frozen `teams`, the
+ * one of the payload or the one of the open match.
+ */
+export function isQueueOverlappingTeams(queue: CourtQueue, { a, b }: MatchTeams): boolean {
+  return queueMembers(queue).some((id) => a.memberIds.includes(id) || b.memberIds.includes(id));
+}
+
+/** Format only: teams, then players, nobody twice, and at most `MAX_QUEUE_MEMBERS` in all. */
+function parseQueue(raw: unknown): ParseResult<CourtQueue> {
+  if (!isPlainObject(raw)) return invalid("queue");
+  const teams = parseQueueTeams(readOwn(raw, "teams"));
+  if (teams === null) return invalid("queue.teams");
+  const players = parseUniqueMemberIds(readOwn(raw, "players"), 0, MAX_QUEUE_MEMBERS);
+  const inTeams = teams.flatMap(({ memberIds }) => memberIds);
+  if (players === null || players.some((id) => inTeams.includes(id))) {
+    return invalid("queue.players");
+  }
+  const queue = { players, teams };
+  return queueSize(queue) > MAX_QUEUE_MEMBERS ? invalid("queue") : ok(queue);
+}
+
+/** Last, because it is checked against `teams`: nobody waiting is on the court. */
+function parseMatchQueue(raw: unknown, teams: MatchTeams): ParseResult<CourtQueue> {
+  const queue = parseQueue(raw);
+  if (!queue.ok) return queue;
+  return isQueueOverlappingTeams(queue.value, teams) ? invalid("queue") : queue;
+}
+
 function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayload> {
   const matchId = readOwn(raw, "matchId");
   if (!isUuid(matchId)) return invalid("matchId");
@@ -300,10 +383,13 @@ function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayloa
   if (!isTeamSide(firstServer)) return invalid("firstServer");
   const rotations = parseRotations(readOwn(raw, "rotations"), teams.value);
   if (!rotations.ok) return rotations;
+  const queue = parseMatchQueue(readOwn(raw, "queue"), teams.value);
+  if (!queue.ok) return queue;
   return ok({
     firstServer,
     formationsVersion,
     matchId,
+    queue: queue.value,
     rotations: rotations.value,
     rulesVersion,
     scoring: scoring.value,
@@ -364,6 +450,14 @@ function parseLineupChangedFields(raw: RawObject): ParseResult<LineupChangedPayl
   return ok({ bench, libero, lineup, matchId, setterZone, team });
 }
 
+/** Format only: whether anyone waiting is on the court is for the applier, which has `teams`. */
+function parseQueueChangedFields(raw: RawObject): ParseResult<QueueChangedPayload> {
+  const matchId = readOwn(raw, "matchId");
+  if (!isUuid(matchId)) return invalid("matchId");
+  const queue = parseQueue(readOwn(raw, "queue"));
+  return queue.ok ? ok({ matchId, queue: queue.value }) : queue;
+}
+
 /** Unknown keys are checked first, at every level; then the fields, in the order of the schema. */
 function strictParser<T>(
   shape: PayloadShape,
@@ -407,6 +501,11 @@ export const parseLineupChangedPayload = strictParser(
   parseLineupChangedFields,
 );
 
+export const parseQueueChangedPayload = strictParser(
+  SCORE_PAYLOAD_SHAPES[QUEUE_CHANGED_EVENT_TYPE],
+  parseQueueChangedFields,
+);
+
 const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Map<
   string,
   PayloadParser<ScorePayload>
@@ -416,6 +515,7 @@ const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Ma
   [SET_ENDED_EVENT_TYPE, parseSetEndedPayload],
   [MATCH_ENDED_EVENT_TYPE, parseMatchEndedPayload],
   [LINEUP_CHANGED_EVENT_TYPE, parseLineupChangedPayload],
+  [QUEUE_CHANGED_EVENT_TYPE, parseQueueChangedPayload],
 ]);
 
 /** Fails closed: a type outside the score catalog has no valid payload here. */

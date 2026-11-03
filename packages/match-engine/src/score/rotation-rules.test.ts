@@ -6,6 +6,7 @@ import { confirmSetEnd, endMatchManually, scorePoint, startMatch } from "./comma
 import { SETTER_ZONE_SEQUENCE } from "./constants.data.js";
 import {
   BLUE_LINEUP,
+  EMPTY_QUEUE,
   MATCH_ID,
   ORANGE_LINEUP,
   rotationMatchInput,
@@ -118,7 +119,7 @@ describe("every sequence of rallies", () => {
         expect(servingTeam(after)).toBe(winner);
         expect(zoneOf(after, winner)).toBe(expectedZone);
         expect(zoneOf(after, loser)).toBe(zoneOf(before, loser));
-        return { currentMatch: after, finishedMatches: [] };
+        return { currentMatch: after, finishedMatches: [], queue: EMPTY_QUEUE };
       }, initial);
     });
   });

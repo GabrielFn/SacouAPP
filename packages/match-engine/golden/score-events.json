@@ -4,7 +4,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -43,7 +44,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -799,7 +801,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -861,7 +864,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -900,7 +904,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -2316,7 +2321,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -2424,7 +2430,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -2463,7 +2470,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -3845,7 +3853,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -3884,7 +3893,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4596,7 +4606,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -4654,7 +4665,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4693,7 +4705,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -6107,7 +6120,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -6214,7 +6228,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6253,7 +6268,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8091,7 +8107,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -8228,7 +8245,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8267,7 +8285,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8535,7 +8554,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -8559,7 +8579,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8598,7 +8619,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8938,7 +8960,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -8966,7 +8989,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -9005,7 +9029,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -9405,7 +9430,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -9437,7 +9463,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -9476,7 +9503,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -10260,7 +10288,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -10324,7 +10353,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -10363,7 +10393,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -11133,7 +11164,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -11196,7 +11228,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11235,7 +11268,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -11312,7 +11346,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -11322,7 +11357,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11351,7 +11387,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11381,7 +11418,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11410,7 +11448,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11437,7 +11476,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11476,7 +11516,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -11527,7 +11568,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -11537,14 +11579,16 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [],
     "expected": {
       "ok": true,
       "state": {
         "currentMatch": null,
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": []
     }
@@ -11554,7 +11598,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11593,7 +11638,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -11644,7 +11690,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -11654,7 +11701,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11693,7 +11741,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -11834,7 +11883,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -11849,7 +11899,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -11888,7 +11939,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -12029,7 +12081,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -12044,7 +12097,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -12083,7 +12137,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -12289,7 +12344,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -12309,7 +12365,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -12348,7 +12405,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -12555,7 +12613,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -12574,7 +12633,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -12613,7 +12673,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -13334,7 +13395,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -13392,7 +13454,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -13431,7 +13494,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -13527,7 +13591,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -13639,7 +13704,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -13657,7 +13723,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -13696,7 +13763,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -13792,7 +13860,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -13950,7 +14019,8 @@
             },
             "winner": "b"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -13971,7 +14041,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14010,7 +14081,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14106,7 +14178,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14187,7 +14260,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -14203,7 +14277,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14242,7 +14317,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14281,7 +14357,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -14296,7 +14373,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14335,7 +14413,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14374,7 +14453,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -14389,7 +14469,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14428,7 +14509,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14524,7 +14606,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -14539,7 +14622,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14578,7 +14662,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -14912,7 +14997,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -14943,7 +15029,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -14982,7 +15069,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -15316,7 +15404,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -15347,7 +15436,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -15386,7 +15476,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -15720,7 +15811,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -15751,7 +15843,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -15790,7 +15883,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16126,7 +16220,8 @@
             },
             "winner": "b"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -16158,7 +16253,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16197,7 +16293,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16226,7 +16323,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16265,7 +16363,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16294,7 +16393,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16333,7 +16433,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16384,7 +16485,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16423,7 +16525,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16460,7 +16563,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16499,7 +16603,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16536,7 +16641,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16575,7 +16681,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16619,7 +16726,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16658,7 +16766,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16703,7 +16812,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16742,7 +16852,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16771,7 +16882,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16810,7 +16922,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16839,7 +16952,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16878,7 +16992,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -16915,7 +17030,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -16954,7 +17070,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -17035,7 +17152,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -17074,7 +17192,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -17605,7 +17724,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -17651,7 +17771,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -17690,7 +17811,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18221,7 +18343,8 @@
             },
             "winner": null
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -18267,7 +18390,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18306,7 +18430,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18375,7 +18500,8 @@
             },
             "winner": null
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -18388,7 +18514,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18427,7 +18554,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18521,7 +18649,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -18536,7 +18665,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18575,7 +18705,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18647,7 +18778,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18686,7 +18818,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18798,7 +18931,8 @@
             },
             "winner": "a"
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -18814,7 +18948,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18853,7 +18988,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18910,7 +19046,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -18949,7 +19086,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -18979,7 +19117,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -19018,7 +19157,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19050,7 +19190,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -19089,7 +19230,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19249,7 +19391,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -19266,7 +19409,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -19305,7 +19449,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19332,7 +19477,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -19365,7 +19511,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19412,7 +19559,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19459,7 +19607,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19506,7 +19655,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19553,7 +19703,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19600,7 +19751,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19647,7 +19799,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19694,7 +19847,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19741,7 +19895,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19788,7 +19943,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19835,7 +19991,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19882,7 +20039,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19929,7 +20087,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -19976,7 +20135,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20023,7 +20183,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20070,7 +20231,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20117,7 +20279,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20164,7 +20327,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20211,7 +20375,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20258,7 +20423,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20305,7 +20471,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20352,7 +20519,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20399,7 +20567,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20446,7 +20615,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20493,7 +20663,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20540,7 +20711,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20587,7 +20759,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20634,7 +20807,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20681,7 +20855,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20728,7 +20903,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20775,7 +20951,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20822,7 +20999,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20869,7 +21047,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20916,7 +21095,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -20963,7 +21143,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21010,7 +21191,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21057,7 +21239,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21104,7 +21287,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21151,7 +21335,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21198,7 +21383,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21245,7 +21431,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21292,7 +21479,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21339,7 +21527,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21386,7 +21575,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21433,7 +21623,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21480,7 +21671,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21527,7 +21719,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21574,7 +21767,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21621,7 +21815,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21668,7 +21863,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21715,7 +21911,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21762,7 +21959,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21809,7 +22007,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21856,7 +22055,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21903,7 +22103,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21950,7 +22151,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -21997,7 +22199,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22044,7 +22247,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22091,7 +22295,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22138,7 +22343,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22185,7 +22391,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22232,7 +22439,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22279,7 +22487,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22326,7 +22535,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22373,7 +22583,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22420,7 +22631,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22467,7 +22679,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22514,7 +22727,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22561,7 +22775,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22608,7 +22823,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22655,7 +22871,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22702,7 +22919,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22749,7 +22967,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22796,7 +23015,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22843,7 +23063,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22890,7 +23111,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22937,7 +23159,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -22984,7 +23207,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23031,7 +23255,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23078,7 +23303,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23125,7 +23351,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23172,7 +23399,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23219,7 +23447,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23266,7 +23495,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23313,7 +23543,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23360,7 +23591,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23407,7 +23639,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23454,7 +23687,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23501,7 +23735,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23548,7 +23783,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23595,7 +23831,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23642,7 +23879,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23689,7 +23927,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23736,7 +23975,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23783,7 +24023,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23830,7 +24071,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23877,7 +24119,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23924,7 +24167,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -23971,7 +24215,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24018,7 +24263,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24065,7 +24311,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24112,7 +24359,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24159,7 +24407,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24206,7 +24455,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24253,7 +24503,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24300,7 +24551,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24347,7 +24599,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24394,7 +24647,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24441,7 +24695,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24488,7 +24743,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24535,7 +24791,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24582,7 +24839,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24629,7 +24887,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24676,7 +24935,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24723,7 +24983,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24770,7 +25031,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24817,7 +25079,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24864,7 +25127,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24911,7 +25175,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -24958,7 +25223,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25005,7 +25271,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25052,7 +25319,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25099,7 +25367,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25146,7 +25415,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25193,7 +25463,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25240,7 +25511,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25287,7 +25559,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25334,7 +25607,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25381,7 +25655,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25428,7 +25703,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25475,7 +25751,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25522,7 +25799,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25569,7 +25847,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25616,7 +25895,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25663,7 +25943,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25710,7 +25991,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25757,7 +26039,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25804,7 +26087,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25851,7 +26135,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25898,7 +26183,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25945,7 +26231,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -25992,7 +26279,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26039,7 +26327,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26086,7 +26375,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26133,7 +26423,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26180,7 +26471,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26227,7 +26519,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26274,7 +26567,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26321,7 +26615,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26368,7 +26663,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26415,7 +26711,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26462,7 +26759,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26509,7 +26807,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26556,7 +26855,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26603,7 +26903,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26650,7 +26951,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26697,7 +26999,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26744,7 +27047,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26791,7 +27095,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26838,7 +27143,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26885,7 +27191,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26932,7 +27239,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -26979,7 +27287,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27026,7 +27335,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27073,7 +27383,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27120,7 +27431,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27167,7 +27479,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27214,7 +27527,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27261,7 +27575,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27308,7 +27623,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27355,7 +27671,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27402,7 +27719,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27449,7 +27767,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27496,7 +27815,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27543,7 +27863,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27590,7 +27911,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27637,7 +27959,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27684,7 +28007,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27731,7 +28055,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27778,7 +28103,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27825,7 +28151,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27872,7 +28199,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27919,7 +28247,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -27966,7 +28295,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28013,7 +28343,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28060,7 +28391,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28107,7 +28439,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28154,7 +28487,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28201,7 +28535,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28248,7 +28583,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28295,7 +28631,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28342,7 +28679,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28389,7 +28727,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28436,7 +28775,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28483,7 +28823,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28530,7 +28871,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28577,7 +28919,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28624,7 +28967,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28671,7 +29015,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -28718,7 +29063,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -36741,7 +37087,8 @@
             },
             "winner": null
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -37152,7 +37499,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -37185,7 +37533,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37232,7 +37581,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37279,7 +37629,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37326,7 +37677,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37373,7 +37725,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37420,7 +37773,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37467,7 +37821,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37514,7 +37869,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37561,7 +37917,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37608,7 +37965,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37655,7 +38013,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37702,7 +38061,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37749,7 +38109,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37796,7 +38157,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37843,7 +38205,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37890,7 +38253,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37937,7 +38301,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -37984,7 +38349,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38031,7 +38397,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38078,7 +38445,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38125,7 +38493,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38172,7 +38541,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38219,7 +38589,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38266,7 +38637,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38313,7 +38685,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38360,7 +38733,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38407,7 +38781,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38454,7 +38829,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38501,7 +38877,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38548,7 +38925,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38595,7 +38973,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38642,7 +39021,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38689,7 +39069,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38736,7 +39117,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38783,7 +39165,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38830,7 +39213,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38877,7 +39261,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38924,7 +39309,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -38971,7 +39357,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39018,7 +39405,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39065,7 +39453,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39112,7 +39501,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39159,7 +39549,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39206,7 +39597,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39253,7 +39645,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39300,7 +39693,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39347,7 +39741,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39394,7 +39789,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39441,7 +39837,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39488,7 +39885,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39535,7 +39933,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39582,7 +39981,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39629,7 +40029,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39676,7 +40077,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39723,7 +40125,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39770,7 +40173,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39817,7 +40221,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39864,7 +40269,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39911,7 +40317,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -39958,7 +40365,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40005,7 +40413,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40052,7 +40461,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40099,7 +40509,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40146,7 +40557,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40193,7 +40605,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40240,7 +40653,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40287,7 +40701,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40334,7 +40749,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40381,7 +40797,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40428,7 +40845,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40475,7 +40893,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40522,7 +40941,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40569,7 +40989,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40616,7 +41037,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40663,7 +41085,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40710,7 +41133,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40757,7 +41181,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40804,7 +41229,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40851,7 +41277,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40898,7 +41325,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40945,7 +41373,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -40992,7 +41421,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41039,7 +41469,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41086,7 +41517,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41133,7 +41565,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41180,7 +41613,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41227,7 +41661,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41274,7 +41709,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41321,7 +41757,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41368,7 +41805,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41415,7 +41853,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41462,7 +41901,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41509,7 +41949,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41556,7 +41997,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41603,7 +42045,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41650,7 +42093,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41697,7 +42141,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41744,7 +42189,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41791,7 +42237,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41838,7 +42285,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41885,7 +42333,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41932,7 +42381,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -41979,7 +42429,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42026,7 +42477,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42073,7 +42525,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42120,7 +42573,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42167,7 +42621,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42214,7 +42669,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42261,7 +42717,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42308,7 +42765,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42355,7 +42813,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42402,7 +42861,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42449,7 +42909,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42496,7 +42957,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42543,7 +43005,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42590,7 +43053,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42637,7 +43101,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42684,7 +43149,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42731,7 +43197,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42778,7 +43245,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42825,7 +43293,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42872,7 +43341,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42919,7 +43389,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -42966,7 +43437,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43013,7 +43485,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43060,7 +43533,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43107,7 +43581,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43154,7 +43629,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43201,7 +43677,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43248,7 +43725,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43295,7 +43773,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43342,7 +43821,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43389,7 +43869,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43436,7 +43917,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43483,7 +43965,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43530,7 +44013,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43577,7 +44061,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43624,7 +44109,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43671,7 +44157,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43718,7 +44205,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43765,7 +44253,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43812,7 +44301,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43859,7 +44349,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43906,7 +44397,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -43953,7 +44445,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44000,7 +44493,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44047,7 +44541,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44094,7 +44589,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44141,7 +44637,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44188,7 +44685,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44235,7 +44733,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44282,7 +44781,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44329,7 +44829,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44376,7 +44877,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44423,7 +44925,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44470,7 +44973,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44517,7 +45021,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44564,7 +45069,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44611,7 +45117,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44658,7 +45165,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44705,7 +45213,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44752,7 +45261,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44799,7 +45309,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44846,7 +45357,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44893,7 +45405,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44940,7 +45453,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -44987,7 +45501,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45034,7 +45549,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45081,7 +45597,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45128,7 +45645,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45175,7 +45693,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45222,7 +45741,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45269,7 +45789,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45316,7 +45837,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45363,7 +45885,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45410,7 +45933,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45457,7 +45981,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45504,7 +46029,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45551,7 +46077,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45598,7 +46125,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45645,7 +46173,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45692,7 +46221,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45739,7 +46269,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45786,7 +46317,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45833,7 +46365,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45880,7 +46413,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45927,7 +46461,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -45974,7 +46509,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46021,7 +46557,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46068,7 +46605,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46115,7 +46653,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46162,7 +46701,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46209,7 +46749,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46256,7 +46797,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46303,7 +46845,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46350,7 +46893,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46397,7 +46941,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46444,7 +46989,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46491,7 +47037,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46538,7 +47085,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -46585,7 +47133,8 @@
           "rotations": {
             "a": null,
             "b": null
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],

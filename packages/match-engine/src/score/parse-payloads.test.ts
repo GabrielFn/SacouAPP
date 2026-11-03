@@ -22,6 +22,7 @@ const VALID_START = {
   teams: { a: { memberIds: [MEMBER_A] }, b: { memberIds: [MEMBER_B] } },
   firstServer: "a",
   rotations: { a: null, b: null },
+  queue: { teams: [], players: [] },
 };
 const LINEUP_A = [1, 2, 3, 4, 5, 6].map((n) => `a0000000-0000-4000-8000-00000000000${String(n)}`);
 const WITH_LINEUP = {
@@ -212,11 +213,13 @@ describe("the parsed value", () => {
       "firstServer",
       "formationsVersion",
       "matchId",
+      "queue",
       "rotations",
       "rulesVersion",
       "scoring",
       "teams",
     ]);
+    expect(started.ok && Object.keys(started.value.queue)).toStrictEqual(["players", "teams"]);
     expect(started.ok && Object.keys(started.value.rotations.a ?? {})).toStrictEqual([
       "bench",
       "libero",
