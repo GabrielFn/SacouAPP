@@ -56,6 +56,25 @@ internal static class ScoreEventsGolden
         return new ScoreEventsOutcome(null, EventReplayer.ReplayEvents(config, parsed));
     }
 
+    /// <summary>
+    /// The timeline of a case whose envelopes are all valid, as <c>replayCase</c> of the attribution
+    /// and stats tests; <c>null</c> when an envelope fails.
+    /// </summary>
+    public static Result<ReplayedTimeline<CourtSessionState>, ReplayError>? RunTimeline(
+        JsonElement goldenCase,
+        Func<EventEnvelope, bool>? keep = null)
+    {
+        var config = ScoreAppliers.Config(
+            GoldenFile.Text(goldenCase, "courtSessionId"),
+            CourtSessionStateReader.Read(goldenCase.GetProperty("initialState")));
+        var parsed = goldenCase.GetProperty("events").EnumerateArray()
+            .Select(rawEvent => EnvelopeParser.Parse(RawValueReader.Parse(rawEvent.GetRawText())))
+            .ToList();
+        return parsed.Any(envelope => envelope.IsFailure)
+            ? null
+            : EventReplayer.ReplayTimeline(config, parsed.Select(envelope => envelope.Value).Where(keep ?? (_ => true)));
+    }
+
     /// <summary>Checks one case; <paramref name="skippedKeys"/> are keys of <c>expected</c> checked elsewhere.</summary>
     public static void AssertCase(IReadOnlyList<JsonElement> cases, string id, params string[] skippedKeys)
     {
