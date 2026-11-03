@@ -96,6 +96,17 @@ Posições no saque implementadas na E2.4 ([ADR 0026](../arquitetura/adr/0026-po
 - **Sobreposição:** `validateServeAlignment` só informa, com o modo de regra de quem chama. Com pontos do catálogo, nunca há violação.
 - **Versão do catálogo:** o `MatchStarted` grava `formationsVersion`. Mudar uma formação exige versão nova, com a anterior preservada, para uma partida gravada não mudar de desenho.
 
+Banco manual implementado na E2.5 ([ADR 0027](../arquitetura/adr/0027-banco-manual.md)). Código em `packages/match-engine/src/score/`; casos em `packages/match-engine/golden/bench-events.json`.
+
+- **Só Manual no MVP:** nenhum ponto troca jogador (decisão do Gabriel de 02/11/2026). `PointScored` só soma e gira. "Sai quem saca" e as outras regras automáticas estão em `docs/ideias.md`.
+- **`bench` por time:** quem é do time e não está em `lineup`, na ordem da fila. `lineup` e `bench`, sem repetir, são sempre exatamente `teams.<lado>.memberIds`. A ordem inicial vem no `MatchStarted`. Banco vazio é `[]`, e `bench.length === 0` dá "sem banco" nas telas.
+- **Mesma posição, zona intacta:** quem entra assume o índice de quem saiu em `lineup`, e `setterZone` não muda.
+- **Ordem da fila:** quem entra sai da lista, sem mudar a ordem dos outros; quem sai vai para o fim. O admin escolhe quem entra, que não precisa ser o primeiro: a ordem só aparece com 2 ou mais no banco.
+- **Levantador ou sacador saindo:** nada especial. Quem entra em `lineup[0]` é o novo levantador, e quem entra no lugar do sacador saca na hora, porque o sacador vem da posição. Em `ServeAlignment`, muda só o `memberId` daquela posição e, se quem saiu levantava, o `actingSetter`.
+- **Alteração de escalação (`LineupChanged`):** grava a alocação inteira do time, para a troca com o banco e para a tela 22 (troca de dois em quadra, seletor de rotação, reancoragem). `system` não muda em partida.
+- **Rotação desligada não tem banco,** com qualquer número de membros: a troca é recusada.
+- **Virada de set e fim de partida:** banco e escalação seguem como estão. `FinishedMatch.rotations` traz o banco no fim, e a partida seguinte chega em outro `MatchStarted`.
+
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.
 - Guardar o líbero dentro da ordem de rotação.
