@@ -32,7 +32,7 @@
 
 ## Em andamento
 
-- E2.10 (back): branch `task/E2.10-csharp-state`, worktree `.claude/worktrees/e2-10`. Plano em partes P1 a P5; desenvolvedor (Opus) na P1, depois revisão leve, depois P2 a P5. Sensível: passa pelo `revisor-seguranca` no fim.
+- E2.10 (back): branch `task/E2.10-csharp-state`, worktree `.claude/worktrees/e2-10`. Plano em partes P1 a P5. P1 (`fadc39b`, revisão leve aprovada), P2 (`50b9a40`) e P3 (`e5065de`, `score-payloads.json` com 865 casos) prontas, com 2379 testes .NET. Falta P4a, P4b e P5, depois revisão completa, `revisor-seguranca` e testador. Pendências da revisão leve da P1 para a revisão final: alias `EveryDeclaredMember` em `ArchitectureReflectionRules.cs:34`; `EnvelopeParser` sem usar `SafeInteger` (lógica duplicada).
 
 ## Adiadas
 
