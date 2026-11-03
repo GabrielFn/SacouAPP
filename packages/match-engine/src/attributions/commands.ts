@@ -9,7 +9,7 @@ import {
   POINT_SCORED_EVENT_TYPE,
 } from "../score/constants.data.js";
 import { parsePointScoredPayload, parseScorePayload } from "../score/parse-payloads.js";
-import { getOnCourtBySlot } from "../score/rotation-rules.js";
+import { onCourtInTheRally } from "../score/on-court.js";
 import type { MemberId, PointKind } from "../score/types.js";
 import { isPlausibleAuthor } from "./plausibility.js";
 import type {
@@ -50,18 +50,6 @@ function findRally(
   return { match: before, team: parsed.value.team, servingTeam: set.servingTeam };
 }
 
-/**
- * Who stood on the court for the team that scored, in the rally: the libero included when it was
- * in, the bench never. With the rotation of that team off, anyone of the team.
- */
-function onCourtInTheRally({ match, servingTeam, team }: Rally): readonly MemberId[] {
-  const teamState = match.rotations[team];
-  if (teamState === null) {
-    return match.teams[team].memberIds;
-  }
-  return getOnCourtBySlot(teamState, servingTeam === team ? "serving" : "receiving");
-}
-
 function isPointKind(kind: unknown): kind is PointKind {
   return (POINT_KINDS as readonly unknown[]).includes(kind);
 }
@@ -72,7 +60,8 @@ function isValidAuthor(rally: Rally, kind: PointKind, author: MemberId | null): 
   }
   return (
     author === null ||
-    (onCourtInTheRally(rally).includes(author) && isPlausibleAuthor(rally, kind, author))
+    (onCourtInTheRally(rally.match, rally.servingTeam, rally.team).includes(author) &&
+      isPlausibleAuthor(rally, kind, author))
   );
 }
 
