@@ -13,5 +13,9 @@
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/formations.json" LogicalName="golden/formations.json" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/overlap.json" LogicalName="golden/overlap.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/event-log.json" LogicalName="golden/event-log.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/score-rules.json" LogicalName="golden/score-rules.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/rotation-rules.json" LogicalName="golden/rotation-rules.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/serve-alignment.json" LogicalName="golden/serve-alignment.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-alignment.json" LogicalName="golden/libero-alignment.json" />
     </ItemGroup>
 </Project>
