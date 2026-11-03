@@ -192,7 +192,7 @@ describe("the parsed value", () => {
     const lineup = [...LINEUP_A];
     const input = {
       ...WITH_LINEUP,
-      rotations: { a: { lineup, setterZone: 2, system: "5x1" }, b: null },
+      rotations: { a: { bench: [], lineup, setterZone: 2, system: "5x1" }, b: null },
     };
 
     const parsed = parseMatchStartedPayload(input);
