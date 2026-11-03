@@ -51,7 +51,9 @@ function inOrder(...comparators: readonly ExitComparator[]): ExitComparator {
  * The default: who has played the most matches in a row leaves first. A tie goes to whoever played
  * the most matches in the round, and then to whoever arrived first (decision of the product owner).
  */
-const consecutiveMatchesCriterion: QueueExitCriterion<QueueExitCriterionInputs["consecutive-matches"]> = {
+const consecutiveMatchesCriterion: QueueExitCriterion<
+  QueueExitCriterionInputs["consecutive-matches"]
+> = {
   choose: (candidates, { arrivalOrder }) => {
     const order = readArrivalOrder(arrivalOrder, candidates);
     if (order === null) {

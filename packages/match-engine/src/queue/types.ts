@@ -81,10 +81,7 @@ export interface NextMatchPlan {
 }
 
 export type QueueRefusalCode =
-  | "invalid-exit-choice"
-  | "invalid-players-per-team"
-  | "match-already-open"
-  | "no-finished-match";
+  "invalid-exit-choice" | "invalid-players-per-team" | "match-already-open" | "no-finished-match";
 
 export type QueueCommandError = ScorePayloadError | { readonly code: QueueRefusalCode };
 

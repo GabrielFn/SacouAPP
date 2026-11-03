@@ -133,9 +133,9 @@ function hasUnknownChildKey(child: unknown, childShape: ChildShape | undefined):
   return isPlainObject(child) && hasUnknownKey(child, childShape);
 }
 
-function isPayloadListShape(shape: PayloadShape | readonly [PayloadShape]): shape is readonly [
-  PayloadShape,
-] {
+function isPayloadListShape(
+  shape: PayloadShape | readonly [PayloadShape],
+): shape is readonly [PayloadShape] {
   return Array.isArray(shape);
 }
 

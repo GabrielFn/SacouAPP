@@ -117,8 +117,16 @@ const applyMatchStarted: EventApplier<CourtSessionState> = (state, event) => {
   if (!parsed.ok || !canOpenMatch(state, parsed.value.matchId)) {
     return rejected();
   }
-  const { firstServer, formationsVersion, matchId, queue, rotations, rulesVersion, scoring, teams } =
-    parsed.value;
+  const {
+    firstServer,
+    formationsVersion,
+    matchId,
+    queue,
+    rotations,
+    rulesVersion,
+    scoring,
+    teams,
+  } = parsed.value;
   return ok({
     currentMatch: {
       completedSets: [],
