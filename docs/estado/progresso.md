@@ -30,7 +30,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.8 (front); ver o diário de 02/11/2026.
+- E2.8 (front): branch `task/E2.8-individual-points`, worktree `.claude/worktrees/e2-8`. Plano com as respostas do Gabriel; desenvolvedor (Opus) em curso. Sensível: passa pelo `revisor-seguranca`.
 
 ## Adiadas
 
