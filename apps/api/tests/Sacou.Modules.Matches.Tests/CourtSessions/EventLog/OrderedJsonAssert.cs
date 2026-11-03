@@ -16,7 +16,14 @@ internal static class OrderedJsonAssert
 {
     private const string Root = "$";
 
-    public static void Equal(JsonElement expected, Action<Utf8JsonWriter> writeActual, string context)
+    public static void Equal(JsonElement expected, Action<Utf8JsonWriter> writeActual, string context) =>
+        Compare(expected, writeActual, context, ignoreKeyOrder: false);
+
+    /// <summary>Like <c>toStrictEqual</c> alone: the same tree, with keys in any order.</summary>
+    public static void EqualIgnoringKeyOrder(JsonElement expected, Action<Utf8JsonWriter> writeActual, string context) =>
+        Compare(expected, writeActual, context, ignoreKeyOrder: true);
+
+    private static void Compare(JsonElement expected, Action<Utf8JsonWriter> writeActual, string context, bool ignoreKeyOrder)
     {
         var buffer = new ArrayBufferWriter<byte>();
         using (var writer = new Utf8JsonWriter(buffer))
@@ -25,7 +32,7 @@ internal static class OrderedJsonAssert
         }
 
         using var actual = JsonDocument.Parse(buffer.WrittenMemory);
-        AssertNode(expected, actual.RootElement, $"{context}:{Root}");
+        AssertNode(expected, actual.RootElement, $"{context}:{Root}", ignoreKeyOrder);
     }
 
     public static void WriteRaw(Utf8JsonWriter writer, RawValue value)
@@ -68,16 +75,16 @@ internal static class OrderedJsonAssert
         }
     }
 
-    private static void AssertNode(JsonElement expected, JsonElement actual, string path)
+    private static void AssertNode(JsonElement expected, JsonElement actual, string path, bool ignoreKeyOrder)
     {
         Assert.True(expected.ValueKind == actual.ValueKind, $"{path}: expected {expected.ValueKind}, got {actual.ValueKind}.");
         switch (expected.ValueKind)
         {
             case JsonValueKind.Object:
-                AssertObject(expected, actual, path);
+                AssertObject(expected, actual, path, ignoreKeyOrder);
                 break;
             case JsonValueKind.Array:
-                AssertArray(expected, actual, path);
+                AssertArray(expected, actual, path, ignoreKeyOrder);
                 break;
             case JsonValueKind.String:
                 Assert.True(string.Equals(expected.GetString(), actual.GetString(), StringComparison.Ordinal), $"{path}: text differs.");
@@ -90,27 +97,32 @@ internal static class OrderedJsonAssert
         }
     }
 
-    private static void AssertObject(JsonElement expected, JsonElement actual, string path)
+    private static void AssertObject(JsonElement expected, JsonElement actual, string path, bool ignoreKeyOrder)
     {
-        var expectedMembers = expected.EnumerateObject().ToList();
-        var actualMembers = actual.EnumerateObject().ToList();
+        var expectedMembers = MembersOf(expected, ignoreKeyOrder);
+        var actualMembers = MembersOf(actual, ignoreKeyOrder);
         Assert.True(
             expectedMembers.Select(member => member.Name).SequenceEqual(actualMembers.Select(member => member.Name), StringComparer.Ordinal),
             $"{path}: keys differ, in name or order.");
         foreach (var (first, second) in expectedMembers.Zip(actualMembers))
         {
-            AssertNode(first.Value, second.Value, $"{path}.{first.Name}");
+            AssertNode(first.Value, second.Value, $"{path}.{first.Name}", ignoreKeyOrder);
         }
     }
 
-    private static void AssertArray(JsonElement expected, JsonElement actual, string path)
+    private static void AssertArray(JsonElement expected, JsonElement actual, string path, bool ignoreKeyOrder)
     {
         Assert.True(expected.GetArrayLength() == actual.GetArrayLength(), $"{path}: lengths differ.");
         var index = 0;
         foreach (var (first, second) in expected.EnumerateArray().Zip(actual.EnumerateArray()))
         {
-            AssertNode(first, second, $"{path}[{index.ToString(CultureInfo.InvariantCulture)}]");
+            AssertNode(first, second, $"{path}[{index.ToString(CultureInfo.InvariantCulture)}]", ignoreKeyOrder);
             index++;
         }
     }
+
+    private static List<JsonProperty> MembersOf(JsonElement record, bool ignoreKeyOrder) =>
+        ignoreKeyOrder
+            ? [.. record.EnumerateObject().OrderBy(member => member.Name, StringComparer.Ordinal)]
+            : [.. record.EnumerateObject()];
 }

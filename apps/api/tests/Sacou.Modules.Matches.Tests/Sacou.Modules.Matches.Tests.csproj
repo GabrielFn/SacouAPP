@@ -17,5 +17,6 @@
         <EmbeddedResource Include="../../../../packages/match-engine/golden/rotation-rules.json" LogicalName="golden/rotation-rules.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/serve-alignment.json" LogicalName="golden/serve-alignment.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-alignment.json" LogicalName="golden/libero-alignment.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/score-payloads.json" LogicalName="golden/score-payloads.json" />
     </ItemGroup>
 </Project>
