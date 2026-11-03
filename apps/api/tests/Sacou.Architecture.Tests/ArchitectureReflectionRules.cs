@@ -22,6 +22,8 @@ internal static partial class ArchitectureReflectionRules
     ];
 
     private const string UserIdSuffix = "UserId";
+    private const string ConstructorName = "ctor";
+    private const char MemberSeparator = ':';
 
     /// <summary>The names revision A4 forbids, compared without case.</summary>
     private static readonly HashSet<string> PersonalDataNames = new(
@@ -51,11 +53,21 @@ internal static partial class ArchitectureReflectionRules
     internal static IReadOnlyList<string> PersonalDataNameViolations(Assembly assembly, string namespacePrefix) =>
         [.. from type in assembly.GetTypes()
             where (type.FullName ?? string.Empty).StartsWith(namespacePrefix + ".", StringComparison.Ordinal)
-            from member in type.GetProperties(EveryDeclaredMember).Cast<MemberInfo>()
-                .Concat(type.GetFields(EveryDeclaredMember))
-            where !member.Name.StartsWith(CompilerGeneratedPrefix, StringComparison.Ordinal)
-                && IsPersonalDataName(member.Name.TrimStart('_'))
-            select $"{type.FullName}.{member.Name}"];
+            from name in MemberNames(type).Concat(ConstructorParameterNames(type))
+            where !name.Split(MemberSeparator)[^1].StartsWith(CompilerGeneratedPrefix, StringComparison.Ordinal)
+                && IsPersonalDataName(name.Split(MemberSeparator)[^1].TrimStart('_'))
+            select $"{type.FullName}.{name}"];
+
+    private static IEnumerable<string> MemberNames(Type type) =>
+        type.GetProperties(EveryDeclaredMember).Cast<MemberInfo>()
+            .Concat(type.GetFields(EveryDeclaredMember))
+            .Select(member => member.Name);
+
+    /// <summary>A constructor can take a name that no property keeps, such as a parameter used only to compute.</summary>
+    private static IEnumerable<string> ConstructorParameterNames(Type type) =>
+        from constructor in type.GetConstructors(EveryDeclaredMember)
+        from parameter in constructor.GetParameters()
+        select $"{ConstructorName}{MemberSeparator}{parameter.Name}";
 
     private static bool IsPersonalDataName(string name) =>
         PersonalDataNames.Contains(name)

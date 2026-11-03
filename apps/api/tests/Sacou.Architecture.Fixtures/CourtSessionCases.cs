@@ -75,3 +75,19 @@ internal sealed class WithEmailField
 }
 
 internal sealed record AllowedMemberIds(string MemberId, string Pixel, int NameCount);
+
+internal sealed class WithNicknameParameter(string nickname)
+{
+    internal int Length { get; } = nickname.Length;
+}
+
+// The general domain rule covers the court sessions too: these must be reported by it.
+internal sealed class UsesEnvironmentInCourtSessions
+{
+    internal string Host() => Environment.MachineName;
+}
+
+internal sealed class UsesStopwatchInCourtSessions
+{
+    internal long Now() => System.Diagnostics.Stopwatch.GetTimestamp();
+}

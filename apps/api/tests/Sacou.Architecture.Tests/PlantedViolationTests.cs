@@ -194,10 +194,27 @@ public sealed class PlantedViolationTests
             [
                 CourtSessionsNamespace + ".WithEmailField._email",
                 CourtSessionsNamespace + ".WithNickname.Nickname",
+                CourtSessionsNamespace + ".WithNickname.ctor:Nickname",
+                CourtSessionsNamespace + ".WithNicknameParameter.ctor:nickname",
                 CourtSessionsNamespace + ".WithOwnerUserId.OwnerUserId",
+                CourtSessionsNamespace + ".WithOwnerUserId.ctor:OwnerUserId",
                 CourtSessionsNamespace + ".WithUppercasePix.PIX",
+                CourtSessionsNamespace + ".WithUppercasePix.ctor:PIX",
             ],
             violations.Order(StringComparer.Ordinal));
+    }
+
+    /// <summary>The general domain rule reads Domain at any depth, so it bars these inside CourtSessions too.</summary>
+    [Theory]
+    [InlineData("UsesEnvironmentInCourtSessions", "System.Environment")]
+    [InlineData("UsesStopwatchInCourtSessions", "System.Diagnostics.Stopwatch")]
+    public void CourtSessions_WithForbiddenDomainDependency_IsReportedByTheGeneralRule(string type, string dependency)
+    {
+        var details = DomainViolations.Value
+            .Where(violation => violation.DeclaringType == CourtSessionsNamespace + "." + type)
+            .Select(violation => violation.Detail);
+
+        Assert.Contains(details, detail => detail.Contains(dependency, StringComparison.Ordinal));
     }
 
     [Theory]
