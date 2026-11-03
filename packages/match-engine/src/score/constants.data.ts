@@ -13,6 +13,7 @@ export const POINT_SCORED_EVENT_TYPE = "PointScored";
 export const SET_ENDED_EVENT_TYPE = "SetEnded";
 export const MATCH_ENDED_EVENT_TYPE = "MatchEnded";
 export const LINEUP_CHANGED_EVENT_TYPE = "LineupChanged";
+export const QUEUE_CHANGED_EVENT_TYPE = "QueueChanged";
 
 export const CURRENT_RULES_VERSION = 1;
 
@@ -137,6 +138,12 @@ export const MIN_BENCH_MEMBERS = 0;
 export const MAX_BENCH_MEMBERS = MAX_TEAM_MEMBERS - ROTATION_SLOTS.length;
 
 /**
+ * Technical limit, not a volleyball rule: four full teams of `MAX_TEAM_MEMBERS` waiting. It keeps a
+ * queue below 300 values, far from the 4096 of a payload (ADR 0029).
+ */
+export const MAX_QUEUE_MEMBERS = 96;
+
+/**
  * Technical limit, not a volleyball rule: a real round stays near 30 matches. The state copies and
  * searches this list at each match, so a hostile log must not make it grow. 200 finished matches
  * can exist; a new `MatchStarted` with 200 finished is rejected.
@@ -174,6 +181,7 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
         libero: { memberId: null, replacedIndexes: null },
       },
     },
+    queue: { teams: [{ memberIds: null }], players: null },
   },
   [POINT_SCORED_EVENT_TYPE]: { matchId: null, setNumber: null, team: null },
   [SET_ENDED_EVENT_TYPE]: {
@@ -190,5 +198,9 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
     setterZone: null,
     bench: null,
     libero: { memberId: null, replacedIndexes: null },
+  },
+  [QUEUE_CHANGED_EVENT_TYPE]: {
+    matchId: null,
+    queue: { teams: [{ memberIds: null }], players: null },
   },
 };

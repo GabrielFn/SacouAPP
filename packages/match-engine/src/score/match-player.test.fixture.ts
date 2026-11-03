@@ -9,6 +9,7 @@ import {
 } from "@sacou/volley-rules";
 
 import type {
+  TeamQueue,
   CourtSessionState,
   MatchStartedPayload,
   MemberId,
@@ -17,6 +18,9 @@ import type {
   TeamSide,
   TeamState,
 } from "./types.js";
+
+/** Nobody waiting: the queue of the score tests, which play a single match. */
+export const EMPTY_QUEUE: TeamQueue = { players: [], teams: [] };
 
 /** Test-only: builds envelopes and replays them through the parser, as the app will. */
 export const COURT_SESSION_ID = "c0000000-0000-4000-8000-000000000001";
@@ -43,6 +47,7 @@ export function matchInput(scoring: ScoringRules, matchId = MATCH_ID): MatchStar
     firstServer: "a",
     formationsVersion: FORMATION_CATALOG_VERSION,
     matchId,
+    queue: EMPTY_QUEUE,
     rotations: { a: null, b: null },
     rulesVersion: 1,
     scoring,
@@ -103,6 +108,7 @@ export function rotationMatchInput(
     firstServer,
     formationsVersion: FORMATION_CATALOG_VERSION,
     matchId,
+    queue: EMPTY_QUEUE,
     rotations: {
       a:
         zoneA === null

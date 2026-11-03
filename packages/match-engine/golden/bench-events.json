@@ -4,7 +4,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -78,7 +79,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -178,7 +180,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -192,7 +195,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -266,7 +270,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -390,7 +395,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -413,7 +419,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -487,7 +494,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -625,7 +633,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -641,7 +650,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -715,7 +725,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -867,7 +878,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -884,7 +896,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -958,7 +971,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -1134,7 +1148,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -1166,7 +1181,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -1244,7 +1260,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -1358,7 +1375,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -1380,7 +1398,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -1458,7 +1477,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -1624,7 +1644,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -1655,7 +1676,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -1733,7 +1755,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -1951,7 +1974,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -1991,7 +2015,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -2070,7 +2095,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -2185,7 +2211,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -2206,7 +2233,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -2285,7 +2313,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -2400,7 +2429,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -2421,7 +2451,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -2504,7 +2535,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -3271,7 +3303,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -3332,7 +3365,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -3405,7 +3439,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -3504,7 +3539,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -3517,7 +3553,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -3591,7 +3628,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -3701,7 +3739,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -3714,7 +3753,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -3787,7 +3827,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -3896,7 +3937,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -3909,7 +3951,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -3983,7 +4026,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4093,7 +4137,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -4106,7 +4151,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4167,7 +4213,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4206,7 +4253,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4272,7 +4320,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4388,7 +4437,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -4402,7 +4452,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4480,7 +4531,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4625,7 +4677,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -4639,7 +4692,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4717,7 +4771,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -4846,7 +4901,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -4860,7 +4916,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -4938,7 +4995,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -5070,7 +5128,8 @@
             },
             "winner": null
           }
-        ]
+        ],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -5084,7 +5143,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -5162,7 +5222,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -5302,7 +5363,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -5315,7 +5377,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -5389,7 +5452,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -5511,7 +5575,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -5521,7 +5586,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -5595,7 +5661,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -5731,7 +5798,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -5744,7 +5812,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -5822,7 +5891,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -5988,7 +6058,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -6004,7 +6075,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6078,7 +6150,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -6244,7 +6317,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -6262,7 +6336,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6334,7 +6409,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6349,7 +6425,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6424,7 +6501,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6439,7 +6517,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6514,7 +6593,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6529,7 +6609,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6604,7 +6685,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6619,7 +6701,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6697,7 +6780,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6712,7 +6796,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6790,7 +6875,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6805,7 +6891,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -6883,7 +6970,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -6898,7 +6986,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7008,7 +7097,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       }
     ],
@@ -7130,7 +7220,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -7140,7 +7231,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7214,7 +7306,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7254,7 +7347,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7328,7 +7422,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7365,7 +7460,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7439,7 +7535,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7478,7 +7575,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7556,7 +7654,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7595,7 +7694,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7669,7 +7769,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7708,7 +7809,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7747,7 +7849,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7821,7 +7924,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7860,7 +7964,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -7934,7 +8039,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -7987,7 +8093,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8061,7 +8168,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8100,7 +8208,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8174,7 +8283,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8213,7 +8323,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8291,7 +8402,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8330,7 +8442,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8404,7 +8517,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8443,7 +8557,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8517,7 +8632,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8642,7 +8758,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -8656,7 +8773,8 @@
     "courtSessionId": "c0000000-0000-4000-8000-000000000001",
     "initialState": {
       "currentMatch": null,
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -8730,7 +8848,8 @@
               "setterZone": 1,
               "system": "5x1"
             }
-          }
+          },
+          "queue": { "players": [], "teams": [] }
         }
       },
       {
@@ -8840,7 +8959,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": [
         "e0000000-0000-4000-8000-000000000001",
@@ -8931,7 +9051,8 @@
           }
         }
       },
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {
@@ -9041,7 +9162,8 @@
             }
           }
         },
-        "finishedMatches": []
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
       },
       "activeEventIds": ["e0000000-0000-4000-8000-000000000001"]
     }
@@ -9129,7 +9251,8 @@
           }
         }
       },
-      "finishedMatches": []
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
     },
     "events": [
       {

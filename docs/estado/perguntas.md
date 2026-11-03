@@ -10,6 +10,7 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 
 ## Respondidas
+- **Fila, E2.6 (03/11/2026):** todos do time podem sair, inclusive banco e líbero, e quem entra no lugar do líbero vai para o fim do banco; empate em "mais partidas seguidas" desempata por mais partidas na rodada e depois por ordem de chegada; "Nível" fora do MVP; só saída parcial automática no MVP, sem o interruptor, "N fixo" nem "vencedor sai após X vitórias".
 - **Líbero, E2.11 (03/11/2026):** entrada e saída calculadas, sem evento (amplia a exceção a `decisoes.md:26`, já anotada); cobre os dois centrais, alternando; só no 5x1 e no 6x2, então o grátis fica sem líbero.
 - **Banco, E2.5 (02/11/2026):** só Manual no MVP. "Sai quem saca" não tinha definição nos documentos nem padrão na internet, e foi para `docs/ideias.md`. Isso dispensa as perguntas sobre o momento da troca, o levantador e a exceção a `decisoes.md:26`. A linha "Banco" saiu da tela `AjustesGrupo`.
 - **Cópia das formações, E2.4 (02/11/2026):** número `formationsVersion` no evento e catálogo imutável por versão, em vez da cópia completa. Exceção a `decisoes.md:26`, já ajustado; a cópia real entra junto com o editor do Pro.

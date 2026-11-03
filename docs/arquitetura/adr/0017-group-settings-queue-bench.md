@@ -26,5 +26,5 @@
 
 ## Consequências
 
-- `produto.md:68` detalha outros critérios de saída e os modos da fila; `decisoes.md:11` fixa o critério configurável e o padrão.
+- `produto.md:68` detalha outros critérios de saída e os modos da fila (no MVP, só o modo automático e sem "nível", ADR 0029; banco só manual, ADR 0027); `decisoes.md:11` fixa o critério configurável e o padrão.
 - **A definir:** nome do convidado no código e efeitos do merge de membros (E3.5).

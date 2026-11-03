@@ -31,8 +31,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Lado do time | `TeamSide` | `a` ou `b`, como as etiquetas das telas (ADR 0023) |
 | Configurações do jogo | `GameSettings` | Value object (`produto.md:272`) |
 | Regras de pontuação | `ScoringRules` | Sets, pontos, tie-break e vantagem, por valor no `MatchStarted` (ADR 0023) |
-| Fila de times | `TeamQueue` | Mistura times e jogadores avulsos |
-| Saída parcial | `PartialExit` | |
+| Fila de times | `TeamQueue` | Mistura times e jogadores avulsos: `{ teams, players }`, no estado da `CourtSession`, gravada inteira no `MatchStarted` e no `QueueChanged` (ADR 0029) |
+| Saída parcial | `PartialExit` | Quem sai do perdedor, quem entra e o lugar herdado, calculado por `planNextMatch` com o critério (`QueueExitCriterion`); nunca gravado (ADR 0029) |
 | Banco | `bench` | Quem é do time e não está em `lineup`, na ordem da fila. Só manual no MVP (ADR 0027) |
 | Alteração de escalação | `LineupChanged` | Evento com a alocação inteira do time: troca com o banco e tela 22 (ADR 0027) |
 | Sacador | `ServingPlayer` | Quem está na posição 1 (`getServingPlayer`) |

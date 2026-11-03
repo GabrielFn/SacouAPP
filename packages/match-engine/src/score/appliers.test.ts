@@ -115,7 +115,11 @@ describe("appliers", () => {
       startMatch(INITIAL_COURT_SESSION_STATE, matchInput(MD3)),
     );
 
-    expect(INITIAL_COURT_SESSION_STATE).toStrictEqual({ currentMatch: null, finishedMatches: [] });
+    expect(INITIAL_COURT_SESSION_STATE).toStrictEqual({
+      currentMatch: null,
+      finishedMatches: [],
+      queue: { players: [], teams: [] },
+    });
   });
 
   test("the frozen copy is read from the event, not from a shared reference", () => {
