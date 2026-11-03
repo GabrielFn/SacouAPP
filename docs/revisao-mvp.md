@@ -51,7 +51,7 @@ São 12 telas essenciais para o MVP; quase todas as decisões de configuração 
 | Tela | MVP? | Por quê |
 |---|---|---|
 | Lista de grupos | Essencial | Destino da aba Grupo |
-| Ajustes do grupo "Como jogamos" | Essencial | Fila e saída parcial (critério e modo), sets, tie-break, rotação, MVP, cobrança, recorrência, com herança e selos Pro |
+| Ajustes do grupo "Como jogamos" | Essencial | Fila e saída parcial (critério; modo só automático no MVP, ADR 0029), sets, tie-break, rotação, MVP, cobrança, recorrência, com herança e selos Pro |
 | Membros e papéis | Essencial | Admin, Co-admin, Placar; mensalista ou avulso; convite por link e QR |
 | Escalação em tela cheia, por time | Essencial | O botão "Escalação" do pré-jogo não leva a nada; ordem 1–6, levantador, formação e avisos de sobreposição |
 | Menu da quadra + Corrigir (linha do tempo) + Trocar jogador | Essencial | "Corrigir" existe sem destino; inclui confirmação de fim de set |
@@ -89,7 +89,7 @@ O documento cobre bem o núcleo, mas ficou atrás das decisões das últimas hor
 1. Como o Pro é cobrado: assinatura pelas lojas (App Store e Google Play); o Pix é só para a mensalidade e a diária do racha, nunca para o Pro.
 2. Cartinha e perfil: estatísticas só do placar, opção de esconder nível e estatísticas, fluxo de foto (recorte, pincel, enquadramento).
 3. Fila: "ninguém esperando, ninguém sai" e o que acontece quando os avulsos que saíram somam um time completo.
-4. Rotação: o time que entra pela fila herda as posições de quem saiu; ajuste de formações no Pro.
+4. Rotação: na saída parcial, quem entra pela fila herda a posição de quem saiu; time inteiro entra com a escalação montada no pré-jogo (ADR 0029); ajuste de formações no Pro.
 5. Modelo "Do zero" na lista de modelos.
 6. Limites do plano grátis: 1 modelo salvo e 2 resumos de IA por mês.
 7. Glossário: Cartinha → PlayerCard, Formação → Formation, Saída parcial → PartialExit, Posição no saque → ServeAlignment, Rotação atual → RotationIndex, Quadra da rodada → CourtSession.

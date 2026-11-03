@@ -47,3 +47,5 @@ Laranja vence três vezes; o Azul perde e tem 2 reservas esperando. Na 1ª parti
 ## Fora do MVP
 
 "Vencedor sai após X vitórias", "sempre parcial com N fixo", "sempre time inteiro" e o critério por nível (`docs/ideias.md`, decisões do Gabriel em 03/11/2026).
+
+**Índice e posição:** `PartialExitPlace.index` é índice de `lineup`, não a posição da quadra. Para mostrar "posição N" (tela 11), a E4 converte com `getLineupBySlot`; no cenário da revisão os dois coincidem só porque `setterZone` é 6.
