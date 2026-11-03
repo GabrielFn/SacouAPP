@@ -18,5 +18,12 @@
         <EmbeddedResource Include="../../../../packages/match-engine/golden/serve-alignment.json" LogicalName="golden/serve-alignment.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-alignment.json" LogicalName="golden/libero-alignment.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/score-payloads.json" LogicalName="golden/score-payloads.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/attributions-events.json" LogicalName="golden/attributions-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/corrections-events.json" LogicalName="golden/corrections-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/queue-events.json" LogicalName="golden/queue-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-events.json" LogicalName="golden/libero-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/bench-events.json" LogicalName="golden/bench-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/rotation-events.json" LogicalName="golden/rotation-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/score-events.json" LogicalName="golden/score-events.json" />
     </ItemGroup>
 </Project>

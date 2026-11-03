@@ -53,6 +53,12 @@ internal static class CourtSessionGoldenReader
         writer.WriteStringValue(side.Code);
     }
 
+    public static void WriteTexts(Utf8JsonWriter writer, string key, IEnumerable<string> texts)
+    {
+        writer.WritePropertyName(key);
+        WriteTexts(writer, texts);
+    }
+
     public static void WriteTexts(Utf8JsonWriter writer, IEnumerable<string> texts)
     {
         writer.WriteStartArray();
