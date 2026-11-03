@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M2 · Motor da partida, em andamento (ok do Gabriel em 02/11/2026). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M2 · Motor da partida, fechado em 03/11/2026 ([relatório](relatorios/M2.md)). O M3 começa com o ok do Gabriel. M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -30,10 +30,11 @@
 | E2.8 | Feita | ADR 0031. Respostas do Gabriel de 03/11 em `perguntas.md`. Evento novo `PointAttributed`, sem mudar o estado; `resolvePointAttributions` usa o último preenchimento válido. Revisor com oráculo próprio: 575.981 comparações, 0 divergências. Segurança aprovou, com medição. Testador passou: 20 mutações, uma sobrevivente (último set antes do `MatchEnded`), morta com teste novo. |
 | E2.9 | Feita | ADR 0032 e `docs/dominio/estatisticas.md`. Respostas do Gabriel de 03/11 em `perguntas.md`. Só cálculo, sem evento: `getPlayerStats` e `getSideStats`. Revisor com oráculo próprio: 7.937 linhas de jogador em 1.358 partidas, 0 divergências. Testador passou: 14 mutações, uma equivalente e uma sobrevivente (times trocando de lado), morta com teste novo. Não sensível. |
 | E2.10 | Feita | ADR 0033. Porte para C# em 5 partes, com os 14 golden do `match-engine`. Revisão leve da P1 e revisão completa aprovadas; diferencial TS × C# com 7.808 logs e 327.947 eventos, 0 diferenças e 0 exceções. Segurança aprovou, com fuzz de 40 mil logs; dois achados médios no leitor de JSON corrigidos. Testador passou: 2.798 testes .NET e 12 mutações reprovadas. |
+| Revisão geral de segurança do M2 | Feita | Aprovada com condições ([parecer](../seguranca/revisoes/M2-2026-11-03.md)): a E3.7 e a E3.8 só entram com os itens da seção 3.1 de `modelo-de-ameacas.md` atendidos ou com risco aceito pelo Gabriel; pendências antigas sem dono passaram à E5.3. |
 
 ## Em andamento
 
-Nenhuma. Tarefas do M2 todas feitas: falta a revisão geral de segurança e o relatório do M2.
+Nenhuma. M2 fechado; aguardando o ok do Gabriel para o M3.
 
 ## Adiadas
 
@@ -45,6 +46,7 @@ Nenhuma. Tarefas do M2 todas feitas: falta a revisão geral de segurança e o re
 - CI: rodar sempre `pnpm install --frozen-lockfile` antes do Turbo: editar o `pnpm-lock.yaml` sem reinstalar não invalida o cache.
 - Revisão do M1, A4: a E2.1 só entra na `main` com teste de esquema fechado do envelope e nomes proibidos; a regra em C#, por reflexão, fica na E2.10 ou E3.7 (tratado na E2.10, ADR 0033).
 - Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
+- E5.3 (dono definido na revisão do M2, antes do primeiro deploy): as ressalvas do SEC-M1 abaixo e os "não verificados" do M1 (`NuGetAuditSuppress` e `allowBuilds`).
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
 - E3.10: validar tipo e formato na fronteira, conferir o dígito verificador de CPF e CNPJ e mostrar tipo e chave para confirmação; confirmar se chave de e-mail aceita maiúsculas (Manual do DICT).
 - E2.1, pendências: o orçamento conta nós, não bytes, então o corpo precisa de limite antes do parser (E3.7); com referências compartilhadas, chaves muito longas chegam a 18,7 s de CPU, o que não ocorre por JSON; `cloneArray` deveria percorrer por índice, em vez de `Array.from`, por causa de iterador próprio; chaves com forma de inteiro saem em ordem numérica, então parsers por tipo não devem usá-las; a regra equivalente em C#, por reflexão, fica na E2.10 ou E3.7 (tratado na E2.10, ADR 0033). Casos não medidos: iterador infinito, Proxy com `length` falso e getter que lança.
