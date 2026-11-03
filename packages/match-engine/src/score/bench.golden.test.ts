@@ -51,6 +51,7 @@ const EXPECTED_IDS: readonly string[] = [
   "c4-a-whole-set-only-moves-the-zones",
   "c5-six-players-have-an-empty-bench",
   "c6-screen-22-swap-on-the-court-and-new-zone",
+  "c6-screen-22-with-six-players-keeps-the-empty-bench",
   "c6-the-system-does-not-change",
   "c7-rotation-off-rejects-the-change",
   "c7-the-other-team-goes-on",

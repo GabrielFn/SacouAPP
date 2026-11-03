@@ -8,7 +8,7 @@
 
 | Padrão | Uso |
 |---|---|
-| Strategy | `IRotationSystem`, `IQueueExitCriterion`, `IBenchRule`, `ITeamBalancer` |
+| Strategy | `IRotationSystem`, `IQueueExitCriterion`, `ITeamBalancer`; `IBenchRule` só quando houver regra automática de banco (ADR 0027) |
 | SettingsResolver | Mescla grupo → rodada → partida; cada nível é um record com campos anuláveis (null herda), em `jsonb` |
 | Outbox | Eventos gravados na mesma transação e enviados pelo Hangfire |
 | Idempotência | Eventos com ID gerado no celular; reenvio não duplica |

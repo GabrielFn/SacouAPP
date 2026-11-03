@@ -36,7 +36,7 @@
 | `score-payloads.json` | Acrescenta os casos de `LineupChanged` e os de `bench` no `MatchStarted`, com `field` e ordem de validação |
 | `rotation-events.json` | Migrado só com o acréscimo de `bench` |
 
-Os esperados são decididos à mão, a partir das tabelas do plano, em um script descartável fora do repositório, que não importa o motor. Os casos `d4-*` usam um `initialState` em que o estado saiu de `teams`, porque só assim se distingue conferir `teams` de conferir o estado.
+Os esperados são decididos à mão, a partir das tabelas do plano, em um script descartável fora do repositório, que não importa o motor. Os casos `d4-*` usam um `initialState` em que o estado saiu de `teams`, porque só assim se distingue conferir `teams` de conferir o estado. Esse estado é inalcançável por replay: a E2.10 carrega o `initialState` do golden sem validar a partição.
 
 Pontos de divergência, além dos dos ADR 0022, 0023, 0024 e 0026:
 
