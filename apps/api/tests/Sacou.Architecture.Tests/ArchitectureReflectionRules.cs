@@ -30,10 +30,8 @@ internal static partial class ArchitectureReflectionRules
         ["email", "name", "nickname", "phone", "pix", "photo", "userId"],
         StringComparer.OrdinalIgnoreCase);
 
-    private const BindingFlags EveryDeclaredMethod =
+    private const BindingFlags EveryDeclaredMember =
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
-
-    private const BindingFlags EveryDeclaredMember = EveryDeclaredMethod;
 
     /// <summary>
     /// DllImport is a pseudo-attribute: it becomes method metadata, with no type reference for the IL
@@ -42,7 +40,7 @@ internal static partial class ArchitectureReflectionRules
     internal static IReadOnlyList<string> DomainPInvokeViolations(Assembly assembly) =>
         [.. from type in assembly.GetTypes()
             where ArchitectureDependencyRules.IsDomainType(type.FullName ?? type.Name)
-            from method in type.GetMethods(EveryDeclaredMethod)
+            from method in type.GetMethods(EveryDeclaredMember)
             where method.Attributes.HasFlag(MethodAttributes.PinvokeImpl)
             select $"{type.FullName}.{method.Name}"];
 

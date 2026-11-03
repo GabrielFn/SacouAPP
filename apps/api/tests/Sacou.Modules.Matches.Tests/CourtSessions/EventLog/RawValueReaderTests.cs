@@ -11,6 +11,8 @@ public sealed class RawValueReaderTests
     private const int HighSurrogate = 0xD800;
     private const int LowSurrogate = 0xDC00;
     private const int AcuteE = 0x00E9;
+    private const int GrinningFace = 0x1F600;
+    private const char ReplacementCharacter = (char)0xFFFD;
 
     [Fact]
     public void MaxDepth_IsReachedBeforeTheParser()
@@ -31,6 +33,43 @@ public sealed class RawValueReaderTests
     public void MalformedJson_Throws(string json)
     {
         Assert.ThrowsAny<JsonException>(() => RawValueReader.Parse(json));
+    }
+
+    /// <summary>
+    /// Overlong NUL, an encoded surrogate, a byte that is never UTF-8 and a cut sequence, in a value
+    /// and as a key: refused as malformed JSON, never turned into U+FFFD.
+    /// </summary>
+    [Theory]
+    [InlineData(new byte[] { 0x22, 0xC0, 0x80, 0x22 })]
+    [InlineData(new byte[] { 0x22, 0xED, 0xA0, 0x80, 0x22 })]
+    [InlineData(new byte[] { 0x22, 0xFF, 0x22 })]
+    [InlineData(new byte[] { 0x22, 0xE2, 0x82, 0x22 })]
+    [InlineData(new byte[] { 0x7B, 0x22, 0xFF, 0x22, 0x3A, 0x31, 0x7D })]
+    public void MalformedUtf8_Throws(byte[] utf8Json)
+    {
+        var failure = Assert.ThrowsAny<JsonException>(() => RawValueReader.Parse(utf8Json));
+
+        Assert.DoesNotContain(ReplacementCharacter.ToString(), failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ValidMultiByteUtf8_IsRead()
+    {
+        byte[] utf8Json = [0x22, 0xC3, 0xA9, 0xF0, 0x9F, 0x98, 0x80, 0x22];
+
+        Assert.Equal((char)AcuteE + char.ConvertFromUtf32(GrinningFace), Assert.IsType<RawString>(RawValueReader.Parse(utf8Json)).Value);
+    }
+
+    [Theory]
+    [InlineData(0xD800)]
+    [InlineData(0xDC00)]
+    public void RawLoneSurrogateInText_ThrowsAJsonException(int codeUnit)
+    {
+        var json = "\"a" + (char)codeUnit + "\"";
+
+        var failure = Assert.ThrowsAny<JsonException>(() => RawValueReader.Parse(json));
+
+        Assert.DoesNotContain(((char)codeUnit).ToString(), failure.Message, StringComparison.Ordinal);
     }
 
     [Fact]
