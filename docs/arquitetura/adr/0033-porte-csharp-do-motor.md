@@ -68,7 +68,7 @@ Teste `Explicit` `VolumeMeasurements`, fora da CI e sem asserção de tempo: `Sa
 | 64 mil `QueueChanged`, fila de 96 | 251,8 MB | 10,32 s | 6,83 s | 926,7 MB | `OutOfMemoryException` |
 | 200 partidas terminadas | 0,9 MB | 0,08 s | 0,14 s | 3,8 MB | passa |
 
-No .NET a falta de memória é `OutOfMemoryException` (o Node derruba o processo), mas a requisição falha do mesmo jeito: a E3.7 limita corpo e lote por bytes e conta eventos por partida, como já dizia o modelo de ameaças. O `QueueChanged` continua o evento mais caro por byte.
+No .NET a falta de memória é `OutOfMemoryException`, que pode derrubar a requisição ou o processo; a defesa é o limite por bytes: a E3.7 limita corpo e lote por bytes e conta eventos por partida, como já dizia o modelo de ameaças. O `RawValueReader` monta a árvore inteira antes do orçamento de 4096 nós do parser, cerca de 32 vezes o tamanho do corpo (corpo de 2 MB aloca 72,9 MB; de 8 MB, 253,8 MB): a E3.7 limita os bytes de cada envelope antes do leitor (16 a 64 KB cabem um `QueueChanged` máximo), além do corpo e do lote, ou usa um leitor com orçamento de nós. A E3.7 nunca registra `JsonException.Message` em log, porque ela ecoa o byte e a posição inválidos. O leitor decodifica UTF-8 de forma estrita: bytes malformados e surrogate solto cru viram `JsonException`, nunca U+FFFD. O `QueueChanged` continua o evento mais caro por byte.
 
 ## Consequências
 
