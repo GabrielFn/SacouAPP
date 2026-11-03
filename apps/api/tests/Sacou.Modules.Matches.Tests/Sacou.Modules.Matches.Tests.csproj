@@ -12,5 +12,6 @@
         <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/formations.json" LogicalName="golden/formations.json" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/overlap.json" LogicalName="golden/overlap.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/event-log.json" LogicalName="golden/event-log.json" />
     </ItemGroup>
 </Project>
