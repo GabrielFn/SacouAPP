@@ -29,6 +29,7 @@ import {
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
   SCORE_PAYLOAD_SHAPES,
+  SERVING_TEAM_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   SETTER_ZONE_SEQUENCE,
   TEAM_SIDES,
@@ -52,6 +53,7 @@ import type {
   ScorePayloadError,
   ScorePayloadField,
   ScoringRules,
+  ServingTeamChangedPayload,
   SetEndedPayload,
   SetterZones,
   TeamLibero,
@@ -443,6 +445,19 @@ function parseQueueChangedFields(raw: RawObject): ParseResult<QueueChangedPayloa
   return queue.ok ? ok({ matchId, queue: queue.value }) : queue;
 }
 
+/** Format only: whether the match and the set are open is for the applier, which has the state. */
+function parseServingTeamChangedFields(raw: RawObject): ParseResult<ServingTeamChangedPayload> {
+  const matchId = readOwn(raw, "matchId");
+  if (!isUuid(matchId)) return invalid("matchId");
+  const setNumber = readOwn(raw, "setNumber");
+  if (!isSetNumber(setNumber)) return invalid("setNumber");
+  const servingTeam = readOwn(raw, "servingTeam");
+  if (!isTeamSide(servingTeam)) return invalid("servingTeam");
+  const firstServer = readOwn(raw, "firstServer");
+  if (!isTeamSide(firstServer)) return invalid("firstServer");
+  return ok({ firstServer, matchId, servingTeam, setNumber });
+}
+
 /** Unknown keys are checked first, at every level; then the fields, in the order of the schema. */
 function strictParser<T>(
   shape: PayloadShape,
@@ -491,6 +506,11 @@ export const parseQueueChangedPayload = strictParser(
   parseQueueChangedFields,
 );
 
+export const parseServingTeamChangedPayload = strictParser(
+  SCORE_PAYLOAD_SHAPES[SERVING_TEAM_CHANGED_EVENT_TYPE],
+  parseServingTeamChangedFields,
+);
+
 const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Map<
   string,
   PayloadParser<ScorePayload>
@@ -501,6 +521,7 @@ const PARSERS_BY_TYPE: ReadonlyMap<string, PayloadParser<ScorePayload>> = new Ma
   [MATCH_ENDED_EVENT_TYPE, parseMatchEndedPayload],
   [LINEUP_CHANGED_EVENT_TYPE, parseLineupChangedPayload],
   [QUEUE_CHANGED_EVENT_TYPE, parseQueueChangedPayload],
+  [SERVING_TEAM_CHANGED_EVENT_TYPE, parseServingTeamChangedPayload],
 ]);
 
 /** Fails closed: a type outside the score catalog has no valid payload here. */

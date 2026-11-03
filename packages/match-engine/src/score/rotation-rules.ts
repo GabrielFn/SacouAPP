@@ -44,9 +44,14 @@ export function isSideOut(servingTeam: TeamSide, pointWinner: TeamSide): boolean
   return servingTeam !== pointWinner;
 }
 
+/** The other side of the net. */
+export function getOpponent(team: TeamSide): TeamSide {
+  return team === TEAM_SIDES[0] ? TEAM_SIDES[1] : TEAM_SIDES[0];
+}
+
 /** Alternates from who served first in the set: it is not "who lost serves". */
 export function getNextSetFirstServer(firstServer: TeamSide): TeamSide {
-  return firstServer === TEAM_SIDES[0] ? TEAM_SIDES[1] : TEAM_SIDES[0];
+  return getOpponent(firstServer);
 }
 
 /**

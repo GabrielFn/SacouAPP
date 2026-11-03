@@ -19,6 +19,7 @@ import type {
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
   ROTATION_DIRECTIONS,
+  SERVING_TEAM_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   TEAM_SIDES,
   UNKNOWN_PAYLOAD_FIELD,
@@ -31,7 +32,8 @@ export type ScoreEventType =
   | typeof SET_ENDED_EVENT_TYPE
   | typeof MATCH_ENDED_EVENT_TYPE
   | typeof LINEUP_CHANGED_EVENT_TYPE
-  | typeof QUEUE_CHANGED_EVENT_TYPE;
+  | typeof QUEUE_CHANGED_EVENT_TYPE
+  | typeof SERVING_TEAM_CHANGED_EVENT_TYPE;
 
 /** A lowercase UUID. Where this type lives is decided in E3.2. */
 export type MemberId = string;
@@ -180,13 +182,25 @@ export interface QueueChangedPayload {
   readonly queue: TeamQueue;
 }
 
+/**
+ * A correction of who serves in the open set, recorded whole: the command decides both fields, and
+ * nobody rotates. `firstServer` changes only when the set had no points yet (ADR 0030).
+ */
+export interface ServingTeamChangedPayload {
+  readonly firstServer: TeamSide;
+  readonly matchId: string;
+  readonly servingTeam: TeamSide;
+  readonly setNumber: number;
+}
+
 export type ScorePayload =
   | MatchStartedPayload
   | PointScoredPayload
   | SetEndedPayload
   | MatchEndedPayload
   | LineupChangedPayload
-  | QueueChangedPayload;
+  | QueueChangedPayload
+  | ServingTeamChangedPayload;
 
 /** An open set. Named so it does not collide with the JavaScript `Set`. */
 export interface MatchSet {
@@ -282,7 +296,8 @@ export type ScorePayloadField =
   | "libero"
   | "queue"
   | "queue.teams"
-  | "queue.players";
+  | "queue.players"
+  | "servingTeam";
 
 /** Carries only a path from the schema, never a received key or value. */
 export interface ScorePayloadError {

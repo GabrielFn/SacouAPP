@@ -14,6 +14,7 @@ export const SET_ENDED_EVENT_TYPE = "SetEnded";
 export const MATCH_ENDED_EVENT_TYPE = "MatchEnded";
 export const LINEUP_CHANGED_EVENT_TYPE = "LineupChanged";
 export const QUEUE_CHANGED_EVENT_TYPE = "QueueChanged";
+export const SERVING_TEAM_CHANGED_EVENT_TYPE = "ServingTeamChanged";
 
 export const CURRENT_RULES_VERSION = 1;
 
@@ -205,5 +206,11 @@ export const SCORE_PAYLOAD_SHAPES: Readonly<Record<ScoreEventType, PayloadShape>
   [QUEUE_CHANGED_EVENT_TYPE]: {
     matchId: null,
     queue: { teams: [{ memberIds: null }], players: null },
+  },
+  [SERVING_TEAM_CHANGED_EVENT_TYPE]: {
+    matchId: null,
+    setNumber: null,
+    servingTeam: null,
+    firstServer: null,
   },
 };

@@ -7,6 +7,7 @@ import {
   MAX_FINISHED_MATCHES,
   POINT_SCORED_EVENT_TYPE,
   ROTATION_DIRECTIONS,
+  SERVING_TEAM_CHANGED_EVENT_TYPE,
   SET_ENDED_EVENT_TYPE,
   SUPPORTED_RULES_VERSIONS,
   TEAM_SIDES,
@@ -18,6 +19,7 @@ import {
 } from "./parse-payloads.js";
 import {
   getNextSetFirstServer,
+  getOpponent,
   isLiberoAllowed,
   isRosterPartition,
   nextSetterZone,
@@ -32,6 +34,7 @@ import type {
   MatchSet,
   MatchStartedPayload,
   MemberId,
+  SetScore,
   RotationDirection,
   ScoreCommandError,
   ScoreCommandResult,
@@ -337,5 +340,35 @@ export function shiftRotation(
       lineup,
       setterZone: shifted,
     });
+  });
+}
+
+function hasNoPoints({ a, b }: SetScore): boolean {
+  return a === 0 && b === 0;
+}
+
+/**
+ * "Trocar sacador" on screen 24: only the serve changes, and nobody rotates. At 0–0 it also corrects
+ * who served first, so the next set alternates from the corrected one; afterwards, who served first
+ * stays (ADR 0030).
+ */
+export function switchServingTeam(state: CourtSessionState): ScoreCommandResult {
+  const match = state.currentMatch;
+  if (match === null) {
+    return refuse("no-open-match");
+  }
+  const set = match.currentSet;
+  if (set === null) {
+    return refuse("no-open-set");
+  }
+  if (getSetWinner(set.score, set.targetPoints, match.scoring.winMargin) !== null) {
+    return refuse("set-decided");
+  }
+  const servingTeam = getOpponent(set.servingTeam);
+  return emit(SERVING_TEAM_CHANGED_EVENT_TYPE, {
+    firstServer: hasNoPoints(set.score) ? servingTeam : set.firstServer,
+    matchId: match.matchId,
+    servingTeam,
+    setNumber: set.setNumber,
   });
 }
