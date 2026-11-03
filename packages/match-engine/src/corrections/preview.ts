@@ -21,6 +21,7 @@ const NO_REMOVED_ACTIONS: RemovedActions = {
   queueChanges: 0,
   servingChanges: 0,
   setEnds: 0,
+  attributions: 0,
 };
 
 function snapshotOf(match: MatchScore | null): SetSnapshot | null {

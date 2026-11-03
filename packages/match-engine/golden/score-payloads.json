@@ -34025,5 +34025,688 @@
       "firstServer": "c"
     },
     "expected": { "ok": false, "field": "servingTeam" }
+  },
+  {
+    "id": "PointAttributed-valid",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-missing-matchId",
+    "type": "PointAttributed",
+    "payload": {
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-missing-pointEventId",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-missing-kind",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-missing-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-forbidden-email-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "email": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-name-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "name": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-nickname-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "nickname": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-phone-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "phone": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-pix-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "pix": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-photo-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "photo": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-forbidden-userId-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "userId": "Canary"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-key-__proto__-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "__proto__": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-key-constructor-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "constructor": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-key-1-at-root",
+    "type": "PointAttributed",
+    "payload": {
+      "1": 1,
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-extra-field",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "extra": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-setNumber-is-unknown",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "setNumber": 1
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-team-is-unknown",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "team": "a"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-memberId-is-unknown",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001",
+      "memberId": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-payload-is-null",
+    "type": "PointAttributed",
+    "payload": null,
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "PointAttributed-payload-is-array",
+    "type": "PointAttributed",
+    "payload": [],
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "PointAttributed-payload-is-text",
+    "type": "PointAttributed",
+    "payload": "x",
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "PointAttributed-payload-is-number",
+    "type": "PointAttributed",
+    "payload": 1,
+    "expected": { "ok": false, "field": "payload" }
+  },
+  {
+    "id": "PointAttributed-matchId-uppercase-uuid",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "F0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-matchId-email",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "player@example.com",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-matchId-name",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "Gabriel",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-matchId-uuid-with-newline",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001\n",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-matchId-number",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": 1,
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-matchId-null",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": null,
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-uppercase-uuid",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "F0000000-0000-4000-8000-000000000001",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-email",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "player@example.com",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-name",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "Gabriel",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-uuid-with-newline",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "f0000000-0000-4000-8000-000000000001\n",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-number",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": 1,
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-pointEventId-null",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": null,
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-kind-attack",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-kind-block",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "block",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-kind-ace",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "ace",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-kind-other",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "other",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-kind-opponent-error",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "opponent-error",
+      "author": null
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-kind-uppercase-Ace",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "Ace",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-kind-serve",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "serve",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-kind-empty",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-kind-null",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": null,
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-kind-number",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": 1,
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-kind-array",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": ["ace"],
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-author-uppercase-uuid",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "A0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-email",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "player@example.com"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-name",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "Pedro"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-uuid-with-newline",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "a0000000-0000-4000-8000-000000000001\n"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-number",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": 1
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-array",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": ["a0000000-0000-4000-8000-000000000001"]
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-author-of-another-team-is-format-only",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": "b0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": true }
+  },
+  {
+    "id": "PointAttributed-attack-without-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "attack",
+      "author": null
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-block-without-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "block",
+      "author": null
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-ace-without-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "ace",
+      "author": null
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-other-without-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "other",
+      "author": null
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-opponent-error-with-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "opponent-error",
+      "author": "a0000000-0000-4000-8000-000000000001"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-opponent-error-missing-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "opponent-error"
+    },
+    "expected": { "ok": false, "field": "author" }
+  },
+  {
+    "id": "PointAttributed-order-unknown-before-matchId",
+    "type": "PointAttributed",
+    "payload": { "matchId": 1, "pointEventId": 1, "kind": "Ace", "author": 1, "extra": 1 },
+    "expected": { "ok": false, "field": "unknown-field" }
+  },
+  {
+    "id": "PointAttributed-order-matchId-before-pointEventId",
+    "type": "PointAttributed",
+    "payload": { "matchId": 1, "pointEventId": 1, "kind": "Ace", "author": 1 },
+    "expected": { "ok": false, "field": "matchId" }
+  },
+  {
+    "id": "PointAttributed-order-pointEventId-before-kind",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": 1,
+      "kind": "Ace",
+      "author": 1
+    },
+    "expected": { "ok": false, "field": "pointEventId" }
+  },
+  {
+    "id": "PointAttributed-order-kind-before-author",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "Ace",
+      "author": 1
+    },
+    "expected": { "ok": false, "field": "kind" }
+  },
+  {
+    "id": "PointAttributed-order-author-type-before-the-kind-check",
+    "type": "PointAttributed",
+    "payload": {
+      "matchId": "f0000000-0000-4000-8000-000000000001",
+      "pointEventId": "e0000000-0000-4000-8000-000000000002",
+      "kind": "opponent-error",
+      "author": 1
+    },
+    "expected": { "ok": false, "field": "author" }
   }
 ]

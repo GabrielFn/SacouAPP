@@ -14,6 +14,7 @@ export {
   parseLineupChangedPayload,
   parseMatchEndedPayload,
   parseMatchStartedPayload,
+  parsePointAttributedPayload,
   parsePointScoredPayload,
   parseQueueChangedPayload,
   parseScorePayload,

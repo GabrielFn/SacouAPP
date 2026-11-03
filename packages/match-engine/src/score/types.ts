@@ -16,6 +16,8 @@ import type {
   MATCH_ENDED_EVENT_TYPE,
   MATCH_STARTED_EVENT_TYPE,
   PAYLOAD_ROOT_FIELD,
+  POINT_ATTRIBUTED_EVENT_TYPE,
+  POINT_KINDS,
   POINT_SCORED_EVENT_TYPE,
   QUEUE_CHANGED_EVENT_TYPE,
   ROTATION_DIRECTIONS,
@@ -33,7 +35,8 @@ export type ScoreEventType =
   | typeof MATCH_ENDED_EVENT_TYPE
   | typeof LINEUP_CHANGED_EVENT_TYPE
   | typeof QUEUE_CHANGED_EVENT_TYPE
-  | typeof SERVING_TEAM_CHANGED_EVENT_TYPE;
+  | typeof SERVING_TEAM_CHANGED_EVENT_TYPE
+  | typeof POINT_ATTRIBUTED_EVENT_TYPE;
 
 /** A lowercase UUID. Where this type lives is decided in E3.2. */
 export type MemberId = string;
@@ -43,6 +46,7 @@ export type BestOf = (typeof BEST_OF_VALUES)[number];
 export type WinMargin = (typeof WIN_MARGIN_VALUES)[number];
 export type MatchEndReason = (typeof END_REASONS)[number];
 export type RotationDirection = (typeof ROTATION_DIRECTIONS)[number];
+export type PointKind = (typeof POINT_KINDS)[number];
 
 export interface ScoringRules {
   readonly bestOf: BestOf;
@@ -193,6 +197,18 @@ export interface ServingTeamChangedPayload {
   readonly setNumber: number;
 }
 
+/**
+ * Who scored a point already recorded, and how: "De quem foi?", at once or later. It records the
+ * choice as it came and nothing derived. `author` is `null` only for an error of the opponent; a
+ * point without any answer has no event at all (ADR 0031).
+ */
+export interface PointAttributedPayload {
+  readonly author: MemberId | null;
+  readonly kind: PointKind;
+  readonly matchId: string;
+  readonly pointEventId: string;
+}
+
 export type ScorePayload =
   | MatchStartedPayload
   | PointScoredPayload
@@ -200,7 +216,8 @@ export type ScorePayload =
   | MatchEndedPayload
   | LineupChangedPayload
   | QueueChangedPayload
-  | ServingTeamChangedPayload;
+  | ServingTeamChangedPayload
+  | PointAttributedPayload;
 
 /** An open set. Named so it does not collide with the JavaScript `Set`. */
 export interface MatchSet {
@@ -297,7 +314,10 @@ export type ScorePayloadField =
   | "queue"
   | "queue.teams"
   | "queue.players"
-  | "servingTeam";
+  | "servingTeam"
+  | "pointEventId"
+  | "kind"
+  | "author";
 
 /** Carries only a path from the schema, never a received key or value. */
 export interface ScorePayloadError {

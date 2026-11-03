@@ -1,0 +1,2110 @@
+[
+  {
+    "id": "a1-attributed-at-once",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a2-attributed-later",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000003",
+          "kind": "block",
+          "author": "b0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 2, "b": 1 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000003",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b",
+          "kind": "block",
+          "author": "b0000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a3-the-last-attribution-wins",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "ace",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "ace",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a4-opponent-error-has-no-author",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "opponent-error",
+          "author": null
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 0, "b": 1 },
+            "servingTeam": "b",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b",
+          "kind": "opponent-error",
+          "author": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "a5-undone-attribution-is-not-counted",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": { "targetEventId": "e0000000-0000-4000-8000-000000000002" }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002"
+      ],
+      "attributions": []
+    }
+  },
+  {
+    "id": "a6-attribution-of-a-reverted-point-is-ignored",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": { "targetEventId": "e0000000-0000-4000-8000-000000000001" }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "b0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 6,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000004",
+          "kind": "other",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005",
+        "e0000000-0000-4000-8000-000000000006"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000004",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "other",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a7-attribution-of-an-event-that-is-not-a-point-is-ignored",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000001",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ],
+      "attributions": []
+    }
+  },
+  {
+    "id": "a8-attribution-of-another-match-is-rejected",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000002",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-rejected",
+      "eventId": "e0000000-0000-4000-8000-000000000003"
+    }
+  },
+  {
+    "id": "a9-attribution-to-a-point-of-an-earlier-match-is-ignored",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "MatchEnded",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "endReason": "manual",
+          "winner": null
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000002",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000002",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 0, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000002",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [
+          {
+            "completedSets": [],
+            "currentSet": {
+              "firstServer": "a",
+              "score": { "a": 1, "b": 0 },
+              "servingTeam": "a",
+              "setNumber": 1,
+              "targetPoints": 3
+            },
+            "endReason": "manual",
+            "formationsVersion": 1,
+            "matchId": "f0000000-0000-4000-8000-000000000001",
+            "rotations": { "a": null, "b": null },
+            "rulesVersion": 1,
+            "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+            "setsWon": { "a": 0, "b": 0 },
+            "teams": {
+              "a": {
+                "memberIds": [
+                  "a0000000-0000-4000-8000-000000000001",
+                  "a0000000-0000-4000-8000-000000000002"
+                ]
+              },
+              "b": {
+                "memberIds": [
+                  "b0000000-0000-4000-8000-000000000001",
+                  "b0000000-0000-4000-8000-000000000002"
+                ]
+              }
+            },
+            "winner": null
+          }
+        ],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005"
+      ],
+      "attributions": []
+    }
+  },
+  {
+    "id": "a10-author-of-the-other-team-is-ignored",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "b0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003"
+      ],
+      "attributions": []
+    }
+  },
+  {
+    "id": "a11-an-ignored-attribution-does-not-erase-the-valid-one",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "block",
+          "author": "b0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a12-author-outside-the-match-is-rejected",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "90000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-rejected",
+      "eventId": "e0000000-0000-4000-8000-000000000003"
+    }
+  },
+  {
+    "id": "a13-attribution-before-the-point-in-the-canonical-order",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-0000000000aa",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "block",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 1, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-0000000000aa",
+        "e0000000-0000-4000-8000-000000000002"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "block",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a14-attribution-in-a-decided-set",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000004",
+          "kind": "ace",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [],
+          "currentSet": {
+            "firstServer": "a",
+            "score": { "a": 3, "b": 0 },
+            "servingTeam": "a",
+            "setNumber": 1,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 0, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000004",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "ace",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a15-attribution-in-a-closed-set",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "SetEnded",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "winner": "a",
+          "nextSet": {
+            "targetPoints": 3,
+            "firstServer": "b",
+            "setterZones": { "a": null, "b": null }
+          }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 6,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 2,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000007",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 7,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000003",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "state": {
+        "currentMatch": {
+          "completedSets": [{ "score": { "a": 3, "b": 0 }, "setNumber": 1, "winner": "a" }],
+          "currentSet": {
+            "firstServer": "b",
+            "score": { "a": 0, "b": 1 },
+            "servingTeam": "b",
+            "setNumber": 2,
+            "targetPoints": 3
+          },
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rotations": { "a": null, "b": null },
+          "rulesVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "setsWon": { "a": 1, "b": 0 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          }
+        },
+        "finishedMatches": [],
+        "queue": { "players": [], "teams": [] }
+      },
+      "activeEventIds": [
+        "e0000000-0000-4000-8000-000000000001",
+        "e0000000-0000-4000-8000-000000000002",
+        "e0000000-0000-4000-8000-000000000003",
+        "e0000000-0000-4000-8000-000000000004",
+        "e0000000-0000-4000-8000-000000000005",
+        "e0000000-0000-4000-8000-000000000006",
+        "e0000000-0000-4000-8000-000000000007"
+      ],
+      "attributions": [
+        {
+          "pointEventId": "e0000000-0000-4000-8000-000000000003",
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000002"
+        }
+      ]
+    }
+  },
+  {
+    "id": "a16-attribution-after-the-end-of-the-match-is-rejected",
+    "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+    "initialState": {
+      "currentMatch": null,
+      "finishedMatches": [],
+      "queue": { "players": [], "teams": [] }
+    },
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "rulesVersion": 1,
+          "formationsVersion": 1,
+          "scoring": { "bestOf": 3, "pointsPerSet": 3, "tieBreakPoints": null, "winMargin": 2 },
+          "teams": {
+            "a": {
+              "memberIds": [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002"
+              ]
+            },
+            "b": {
+              "memberIds": [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002"
+              ]
+            }
+          },
+          "firstServer": "a",
+          "rotations": { "a": null, "b": null },
+          "queue": { "players": [], "teams": [] }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "MatchEnded",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "endReason": "manual",
+          "winner": null
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointAttributed",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "pointEventId": "e0000000-0000-4000-8000-000000000002",
+          "kind": "attack",
+          "author": "a0000000-0000-4000-8000-000000000001"
+        }
+      }
+    ],
+    "expected": {
+      "ok": false,
+      "code": "event-rejected",
+      "eventId": "e0000000-0000-4000-8000-000000000004"
+    }
+  }
+]

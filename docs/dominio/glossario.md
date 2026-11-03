@@ -44,7 +44,10 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Girar / desgirar | `shiftRotation` | Comando que grava um `LineupChanged` com a zona vizinha, `forward` ou `backward` (ADR 0030) |
 | Linha do tempo | `replayTimeline` | Eventos ativos com o estado logo depois de cada um (ADR 0030) |
 | Prévia do voltar | `RevertPreview` | O que muda ao voltar a um ponto: placar, saque, zonas e o que sai da linha do tempo; não grava nada (ADR 0030) |
-| Ponto da linha do tempo | `RecentPoint` | Linha da tela 24: placar depois, sacador antes, side-out e zona (ADR 0030) |
+| Ponto da linha do tempo | `RecentPoint` | Linha da tela 24: placar depois, sacador antes, side-out, zona, autor e tipo (ADR 0030, ADR 0031) |
+| Ponto individual (de quem foi?) | `PointAttributed` | Evento com autor e tipo de um ponto já gravado, na hora ou depois; o último válido vale (ADR 0031) |
+| Tipo do ponto | `PointKind` | `attack` (Ataque), `block` (Bloqueio), `ace` (Ace), `other` (Outro) e `opponent-error` (Erro do adversário, sem autor) (ADR 0031) |
+| Autor do ponto | `PointAttribution` | Quem pontuou e como, por ponto ativo, lido da linha do tempo por `resolvePointAttributions` (ADR 0031) |
 | Versão do evento | `SchemaVersion` | |
 | Versão das regras da partida | `rulesVersion` | |
 

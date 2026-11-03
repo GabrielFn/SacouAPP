@@ -1,3 +1,5 @@
+import { resolvePointAttributions } from "../attributions/resolve.js";
+import type { PointAttribution } from "../attributions/types.js";
 import type { TimelineEntry } from "../event-log/types.js";
 import { MATCH_STARTED_EVENT_TYPE, POINT_SCORED_EVENT_TYPE } from "../score/constants.data.js";
 import { parsePointScoredPayload } from "../score/parse-payloads.js";
@@ -31,11 +33,13 @@ function listedSetNumber({ completedSets, currentSet }: MatchScore): number | nu
   return currentSet?.setNumber ?? completedSets.at(-1)?.setNumber ?? null;
 }
 
+type AttributionsByPoint = ReadonlyMap<string, PointAttribution>;
+
 function toRecentPoint(
   before: CourtSessionState,
   { event, state }: Entry,
-  matchId: string,
-  setNumber: number,
+  { matchId, setNumber }: { readonly matchId: string; readonly setNumber: number },
+  attributions: AttributionsByPoint,
 ): RecentPoint | null {
   if (event.type !== POINT_SCORED_EVENT_TYPE) {
     return null;
@@ -52,6 +56,7 @@ function toRecentPoint(
     return null;
   }
   const sideOut = isSideOut(setBefore.servingTeam, team);
+  const attribution = attributions.get(event.eventId);
   return {
     eventId: event.eventId,
     team,
@@ -60,6 +65,8 @@ function toRecentPoint(
     servingPlayer: getCurrentServingPlayer(matchBefore),
     sideOut,
     setterZone: sideOut ? (state.currentMatch?.rotations[team]?.setterZone ?? null) : null,
+    author: attribution?.author ?? null,
+    kind: attribution?.kind ?? null,
   };
 }
 
@@ -68,26 +75,38 @@ function isCount(value: number): boolean {
 }
 
 /**
- * The active points of the set of screen 24, most recent first, up to `limit`. A point that was
- * reverted is not on the timeline, so it is not listed. Without an open match, or with a `limit`
- * that is not a count, the list is empty.
+ * The active points of the listed set, oldest first, each with who scored it. A point that was
+ * reverted is not on the timeline, so it is not listed. Without an open match, the list is empty.
+ */
+export function getListedSetPoints(timeline: CourtSessionTimeline): readonly RecentPoint[] {
+  const match = getOpenMatch(timeline);
+  const setNumber = match === null ? null : listedSetNumber(match);
+  if (match === null || setNumber === null) {
+    return [];
+  }
+  const attributions: AttributionsByPoint = new Map(
+    resolvePointAttributions(timeline).map((attribution) => [
+      attribution.pointEventId,
+      attribution,
+    ]),
+  );
+  const listed = { matchId: match.matchId, setNumber };
+  const { entries } = timeline;
+  const start = getOpenMatchStartIndex(timeline);
+  return entries.slice(start + 1).flatMap((entry, offset) => {
+    const before = entries[start + offset]?.state;
+    const point = before === undefined ? null : toRecentPoint(before, entry, listed, attributions);
+    return point === null ? [] : [point];
+  });
+}
+
+/**
+ * The active points of the set of screen 24, most recent first, up to `limit`. Without an open
+ * match, or with a `limit` that is not a count, the list is empty.
  */
 export function getRecentPoints(
   timeline: CourtSessionTimeline,
   limit: number = CORRECTION_TIMELINE_POINTS,
 ): readonly RecentPoint[] {
-  const match = getOpenMatch(timeline);
-  const setNumber = match === null ? null : listedSetNumber(match);
-  if (match === null || setNumber === null || !isCount(limit)) {
-    return [];
-  }
-  const { entries } = timeline;
-  const start = getOpenMatchStartIndex(timeline);
-  const points = entries.slice(start + 1).flatMap((entry, offset) => {
-    const before = entries[start + offset]?.state;
-    const point =
-      before === undefined ? null : toRecentPoint(before, entry, match.matchId, setNumber);
-    return point === null ? [] : [point];
-  });
-  return [...points].reverse().slice(0, limit);
+  return isCount(limit) ? [...getListedSetPoints(timeline)].reverse().slice(0, limit) : [];
 }

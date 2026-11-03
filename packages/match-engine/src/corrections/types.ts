@@ -2,7 +2,7 @@ import type { Result, SetterZone } from "@sacou/volley-rules";
 
 import type { REVERTED_TO_EVENT_TYPE } from "../event-log/constants.data.js";
 import type { ReplayedTimeline } from "../event-log/types.js";
-import type { CourtSessionState, MemberId, SetScore, TeamSide } from "../score/types.js";
+import type { CourtSessionState, MemberId, PointKind, SetScore, TeamSide } from "../score/types.js";
 
 /** The replayed log of a court session, with the state after each active event. */
 export type CourtSessionTimeline = ReplayedTimeline<CourtSessionState>;
@@ -30,7 +30,8 @@ export type CorrectionCommandResult = Result<readonly RevertDraft[], CorrectionE
  * A line of screen 24. Who served and which team served are the ones **before** the point; the
  * score is the one after it. `setterZone` is the zone the winner rotated to on a side-out, and
  * `null` without a side-out or with its rotation off. `servingPlayer` is `null` with the rotation
- * of the serving team off.
+ * of the serving team off. `author` and `kind` are who scored it and how, by the last valid
+ * `PointAttributed`: both `null` without an answer, and only `author` for an error of the opponent.
  */
 export interface RecentPoint {
   readonly eventId: string;
@@ -40,6 +41,8 @@ export interface RecentPoint {
   readonly servingPlayer: MemberId | null;
   readonly sideOut: boolean;
   readonly setterZone: SetterZone | null;
+  readonly author: MemberId | null;
+  readonly kind: PointKind | null;
 }
 
 export interface SetSnapshot {
@@ -55,7 +58,7 @@ export interface RotationChange {
 }
 
 export type RemovedActionKey =
-  "points" | "lineupChanges" | "queueChanges" | "servingChanges" | "setEnds";
+  "points" | "lineupChanges" | "queueChanges" | "servingChanges" | "setEnds" | "attributions";
 
 /** How many actions leave the timeline. Nothing is erased from the log: a revert only appends. */
 export type RemovedActions = Readonly<Record<RemovedActionKey, number>>;
