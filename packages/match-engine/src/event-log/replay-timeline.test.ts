@@ -161,6 +161,7 @@ describe("replayEvents derives from replayTimeline with the same output", () => 
     ...readCases("bench-events.json"),
     ...readCases("libero-events.json"),
     ...readCases("queue-events.json"),
+    ...readCases("corrections-events.json"),
   ])(
     "score: $id",
     (goldenCase) => {
