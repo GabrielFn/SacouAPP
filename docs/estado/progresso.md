@@ -29,7 +29,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.7 (front); ver o diário de 02/11/2026.
+- E2.7 (front): branch `task/E2.7-undo-corrections`, worktree `.claude/worktrees/e2-7`. Plano com as respostas do Gabriel; desenvolvedor (Opus) em curso. Sensível: passa pelo `revisor-seguranca`.
 
 ## Adiadas
 
