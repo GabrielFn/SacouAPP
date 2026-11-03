@@ -31,7 +31,7 @@
 
 ## Em andamento
 
-Nenhuma. Próxima: E2.9 (front); ver o diário de 02/11/2026.
+- E2.9 (front): branch `task/E2.9-player-stats`, worktree `.claude/worktrees/e2-9`. Plano com as respostas do Gabriel; desenvolvedor (Opus) em curso. Não sensível.
 
 ## Adiadas
 
