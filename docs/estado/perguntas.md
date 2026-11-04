@@ -10,6 +10,7 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 
 ## Respondidas
+- **Padrões do app e métricas (03/11/2026):** seguir as recomendações (pastas por funcionalidade, fronteiras por lint, sem estilo e cor soltos, RNTL) e acrescentar duplicidade, complexidade ciclomática e tamanho de componentes e arquivos na CI, sem componente e subcomponente no mesmo arquivo. Ferramenta de duplicação: `jscpd`. Vira a tarefa E4.0.
 - **Estatísticas, E2.9 (03/11/2026):** sequência é vitórias seguidas; partida encerrada sem vencedor quebra a sequência; "time" no Resumo é a cor (lado A/B). Fecha a pendência de `revisao-mvp.md:43`.
 - **Ponto individual, E2.8 (03/11/2026):** o app barra combinações impossíveis (Ace só de quem sacou o rali; líbero nunca leva Ace nem Bloqueio); autor só preenchido com a partida aberta; sem apagar autor, só trocar ou DESFAZER.
 - **Correções, E2.7 (03/11/2026):** "Trocar sacador" troca só o time que saca, sem girar ninguém, e no 0–0 corrige também quem começou o set; DESFAZER desfaz a última ação, seja ela qual for.

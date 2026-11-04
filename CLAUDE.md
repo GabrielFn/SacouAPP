@@ -11,7 +11,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/decisoes.md` | Resumo de todas as decisões de produto e arquitetura. **Prevalece sobre os outros docs em caso de conflito.** |
 | `docs/produto.md` | Documento de produto completo |
 | `docs/revisao-mvp.md` | Revisão do MVP (correções nas telas e ajustes de arquitetura já decididos) |
-| `docs/plano-mvp.md` | Plano de execução: marcos M1–M7, backlog de 66 tarefas com critério de aceite, definição de pronto, riscos |
+| `docs/plano-mvp.md` | Plano de execução: marcos M1–M7, backlog de 67 tarefas com critério de aceite, definição de pronto, riscos |
 | `docs/backlog.md` | Mapa marco → tarefas e regra para escolher a próxima tarefa |
 | `docs/dominio/rotacoes.md` | Especificação das regras de rotação e sobreposição (FIVB 2025–28) |
 | `packages/volley-rules/src/formations/formations.json` | Coordenadas das formações (5x1, 6x2, 4x2, Livre) — fonte única, lida pelo TS e pelo C# |

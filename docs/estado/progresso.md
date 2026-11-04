@@ -34,7 +34,7 @@
 
 ## Em andamento
 
-Nenhuma. M2 fechado; aguardando o ok do Gabriel para o M3.
+- E4.0 (front): branch `task/E4.0-app-standards`, worktree `.claude/worktrees/e4-0`. Pedido do Gabriel antes do front; plano em `docs/estado/tarefas/E4.0.md`, escrito pelo orquestrador; desenvolvedor (Opus) em curso. Não sensível. O resto do M3 aguarda o ok do Gabriel.
 
 ## Adiadas
 

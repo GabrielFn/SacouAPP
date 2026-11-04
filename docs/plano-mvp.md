@@ -79,7 +79,7 @@ São 7 marcos em sequência; cada um termina com algo que você pode ver ou test
 
 ## Backlog
 
-São 66 tarefas em 8 épicos. As tabelas abaixo são a fonte de ID, tarefa, aceite e dependências; `docs/backlog.md` traz o mapa marco → tarefas e a regra da próxima tarefa; o analista detalha os sub-passos em `docs/estado/tarefas/<ID>.md` antes de começar.
+São 67 tarefas em 8 épicos. As tabelas abaixo são a fonte de ID, tarefa, aceite e dependências; `docs/backlog.md` traz o mapa marco → tarefas e a regra da próxima tarefa; o analista detalha os sub-passos em `docs/estado/tarefas/<ID>.md` antes de começar.
 
 ### E0 · Fundação (M1)
 
@@ -151,7 +151,8 @@ Acrescentadas para a base de conhecimento e a segurança:
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
-| E4.1 | Expo, Expo Router, Unistyles com tokens e temas Sol/Noite | Componentes base iguais ao canvas | E0.1 |
+| E4.0 | Padrões do app (pastas, fronteiras, componentes) e métricas na CI: complexidade, tamanho e duplicação | A CI reprova cada desvio, e o código atual passa sem exceção | E0.3, E0.4 |
+| E4.1 | Expo, Expo Router, Unistyles com tokens e temas Sol/Noite | Componentes base iguais ao canvas | E0.1, E4.0 |
 | E4.2 | Cliente da API gerado, TanStack Query, tratamento de erro e offline | Tipos sempre iguais aos da API | E3.1 |
 | E4.3 | Login, perfil rápido (onboarding) e conta | Telas 02, 27, 30 | E4.2 |
 | E4.4 | Início, lista de grupos, notificações | Telas 03, 17, 28 | E4.2 |
