@@ -25,7 +25,186 @@ const ANY = "export const value: any = 1;\n";
 const MAGIC_FUNCTION =
   "export function points(sets: number): number {\n  return sets * 7 + 13;\n}\n";
 
+// App boundaries, components and styles (ADR 0034). Folders with the prefix are removed at the end.
+const UI = `apps/mobile/src/ui/${PREFIX}`;
+const TOKENS = `apps/mobile/src/ui/tokens/${PREFIX}`;
+const ROUTES = `apps/mobile/src/app/${PREFIX}`;
+const FEATURE = `${PREFIX}court`;
+const FEATURE_ROOT = `apps/mobile/src/features/${FEATURE}`;
+
+const NO_MULTI_COMP = "react/no-multi-comp";
+const COMPLEXITY = "complexity";
+const MAX_LINES = "max-lines";
+const MAX_FUNCTION_LINES = "max-lines-per-function";
+
+const FILE_LIMIT = 300;
+const COMPONENT_FILE_LIMIT = 200;
+const TEST_FILE_LIMIT = 800;
+const FUNCTION_LIMIT = 50;
+const COMPONENT_FUNCTION_LIMIT = 80;
+const COMPLEXITY_LIMIT = 10;
+const DEPTH_LIMIT = 4;
+const PARAMS_LIMIT = 4;
+const CALLBACKS_LIMIT = 3;
+
+const range = (count) => Array.from({ length: count }, (_, index) => index);
+
+// Blank lines and comments do not count, so each file carries some of both.
+const fileOfLines = (count) =>
+  `// ${count} lines of code\n\n${range(count)
+    .map((index) => `export const v${index} = "${index}";`)
+    .join("\n")}\n`;
+
+// The header, `return [`, `];` and `}` are 4 of the lines.
+const FUNCTION_FRAME_LINES = 4;
+const functionOfLines = (count) =>
+  `export function long(): readonly string[] {\n  return [\n${range(count - FUNCTION_FRAME_LINES)
+    .map((index) => `    "${index}",`)
+    .join("\n")}\n  ];\n}\n`;
+
+// Each || adds one path to the one of the function.
+const functionOfComplexity = (complexity) =>
+  `export function isKnown(code: string): boolean {\n  return ${range(complexity)
+    .map((index) => `code === "${index}"`)
+    .join(" || ")};\n}\n`;
+
+const functionOfDepth = (depth) =>
+  `export function deep(code: string): string {\n${range(depth)
+    .map((index) => `if (code !== "${index}") {`)
+    .join("\n")}\nreturn code;\n${"}\n".repeat(depth)}return "";\n}\n`;
+
+const functionOfParams = (count) => {
+  const names = range(count).map((index) => `p${index}`);
+  return `export function join(${names.map((name) => `${name}: string`).join(", ")}): string {\n  return [${names.join(", ")}].join("");\n}\n`;
+};
+
+const callbacksOfDepth = (depth) => {
+  const names = range(depth).map((index) => `c${index}`);
+  const calls = names.reduceRight((inner, name) => `.map((${name}) => ${name}${inner})`, "");
+  return `export const nested = ${"[".repeat(depth)}"x"${"]".repeat(depth)}${calls};\n`;
+};
+
+const TWO_COMPONENTS =
+  'import { Text } from "react-native";\n\nexport function Title() {\n  return <Label />;\n}\n\nfunction Label() {\n  return <Text>Sacou</Text>;\n}\n';
+const ONE_COMPONENT =
+  'import { Text } from "react-native";\n\nexport function Title() {\n  return <Text>Sacou</Text>;\n}\n';
+const INLINE_STYLE_COMPONENT =
+  'import { View } from "react-native";\n\nexport function Box() {\n  return <View style={{ flex: 1 }} />;\n}\n';
+const INLINE_STYLE_IN_ARRAY =
+  'import { StyleSheet, View } from "react-native";\n\nconst styles = StyleSheet.create({ box: { flex: 1 } });\n\nexport function Box() {\n  return <View style={[styles.box, { flex: 1 }]} />;\n}\n';
+const SHEET_STYLE_COMPONENT =
+  'import { StyleSheet, View } from "react-native";\n\nconst styles = StyleSheet.create({ box: { flex: 1 } });\n\nexport function Box() {\n  return <View style={styles.box} />;\n}\n';
+
+const APP_CASES = [
+  [`${UI}feature.ts`, 'import "@/features/court/hooks/useScore";\n', NO_RESTRICTED_IMPORTS],
+  [`${UI}lib.ts`, 'import "@/lib/query";\n', NO_RESTRICTED_IMPORTS],
+  [`${UI}route.ts`, 'import "@/app/index";\n', NO_RESTRICTED_IMPORTS],
+  [
+    `${UI}clean.ts`,
+    'import "@/strings/pt-BR";\nexport { Pressable } from "react-native";\n',
+    CLEAN,
+  ],
+  [
+    `${FEATURE_ROOT}/hooks/other.ts`,
+    'import "@/features/queue/hooks/useQueue";\n',
+    NO_RESTRICTED_IMPORTS,
+  ],
+  [
+    `${FEATURE_ROOT}/hooks/parent.ts`,
+    'import "../../queue/hooks/useQueue";\n',
+    NO_RESTRICTED_IMPORTS,
+  ],
+  [`${FEATURE_ROOT}/hooks/dot-parent.ts`, 'import "./../state/store";\n', NO_RESTRICTED_IMPORTS],
+  [
+    `${FEATURE_ROOT}/hooks/own.ts`,
+    `import "@/features/${FEATURE}/api/client";\nimport "@/lib/query";\nimport "@/ui/Button";\n`,
+    CLEAN,
+  ],
+  [`${FEATURE_ROOT}/hooks/sibling.ts`, 'import "./own";\n', CLEAN],
+  [
+    `${FEATURE_ROOT}/screens/api.ts`,
+    `import "@/features/${FEATURE}/api/client";\n`,
+    NO_RESTRICTED_IMPORTS,
+  ],
+  [`${FEATURE_ROOT}/components/lib.ts`, 'import "@/lib/query";\n', NO_RESTRICTED_IMPORTS],
+  [
+    `${FEATURE_ROOT}/screens/hooks.ts`,
+    `import "@/features/${FEATURE}/hooks/useScore";\nimport "@/ui/Button";\n`,
+    CLEAN,
+  ],
+  [`${ROUTES}ui.tsx`, 'import "@/ui/Button";\n', NO_RESTRICTED_IMPORTS],
+  [`${ROUTES}hooks.tsx`, 'import "@/features/court/hooks/useScore";\n', NO_RESTRICTED_IMPORTS],
+  [`${ROUTES}screen.tsx`, 'import "@/features/court/screens/CourtScreen";\n', CLEAN],
+
+  [`${MOBILE}two.tsx`, TWO_COMPONENTS, NO_MULTI_COMP],
+  [`${MOBILE}one.tsx`, ONE_COMPONENT, CLEAN],
+
+  [`${MOBILE}inline.tsx`, INLINE_STYLE_COMPONENT, NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}inline-array.tsx`, INLINE_STYLE_IN_ARRAY, NO_RESTRICTED_SYNTAX],
+  [`${TOKENS}inline.tsx`, INLINE_STYLE_COMPONENT, NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}sheet.tsx`, SHEET_STYLE_COMPONENT, CLEAN],
+  [`${MOBILE}hex.ts`, 'export const accent = "#FF5A1F";\n', NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}hex-short.ts`, 'export const ink = "#fff";\n', NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}rgba.ts`, 'export const shade = "rgba(0, 0, 0, 0.5)";\n', NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}hsl.ts`, "export const tone = `hsl(20, 100%, 56%)`;\n", NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}hex.data.ts`, 'export const ACCENT = "#FF5A1F";\n', NO_RESTRICTED_SYNTAX],
+  [`${UI}hex.ts`, 'export const accent = "#FF5A1F";\n', NO_RESTRICTED_SYNTAX],
+  [`${MOBILE}text.ts`, 'export const label = "Rodada #12";\n', CLEAN],
+  [`${TOKENS}colors.ts`, 'export const ink = "#0F1B2D";\n', CLEAN],
+  [`${TOKENS}colors.data.ts`, 'export const SHADE = "rgba(15, 27, 45, 0.5)";\n', CLEAN],
+
+  [`${MOBILE}pressable.ts`, 'export { Pressable } from "react-native";\n', NO_RESTRICTED_IMPORTS],
+  [
+    `${MOBILE}touchable.ts`,
+    'export { TouchableOpacity } from "react-native-gesture-handler";\n',
+    NO_RESTRICTED_IMPORTS,
+  ],
+  [
+    `${MOBILE}namespace.ts`,
+    'import * as RN from "react-native";\nexport { RN };\n',
+    NO_RESTRICTED_IMPORTS,
+  ],
+  [`${ROUTES}pressable.tsx`, 'export { Pressable } from "react-native";\n', NO_RESTRICTED_IMPORTS],
+  [
+    `${FEATURE_ROOT}/screens/pressable.tsx`,
+    'export { Pressable } from "react-native";\n',
+    NO_RESTRICTED_IMPORTS,
+  ],
+];
+
+// Size and complexity (ADR 0034): the limit passes and one more fails.
+const METRIC_CASES = [
+  [`${MATCH_ENGINE}complex.ts`, functionOfComplexity(COMPLEXITY_LIMIT + 1), COMPLEXITY],
+  [`${MATCH_ENGINE}simple.ts`, functionOfComplexity(COMPLEXITY_LIMIT), CLEAN],
+  [`${MATCH_ENGINE}complex.test.ts`, functionOfComplexity(COMPLEXITY_LIMIT + 1), CLEAN],
+  [`${MOBILE}complex.tsx`, functionOfComplexity(COMPLEXITY_LIMIT + 1), COMPLEXITY],
+
+  [`${VOLLEY_RULES}long-file.ts`, fileOfLines(FILE_LIMIT + 1), MAX_LINES],
+  [`${VOLLEY_RULES}file.ts`, fileOfLines(FILE_LIMIT), CLEAN],
+  [`${VOLLEY_RULES}long-file.data.ts`, fileOfLines(FILE_LIMIT + 1), MAX_LINES],
+  [`${MOBILE}long-file.tsx`, fileOfLines(COMPONENT_FILE_LIMIT + 1), MAX_LINES],
+  [`${MOBILE}file.tsx`, fileOfLines(COMPONENT_FILE_LIMIT), CLEAN],
+  [`${VOLLEY_RULES}long-file.test.ts`, fileOfLines(TEST_FILE_LIMIT + 1), MAX_LINES],
+  [`${VOLLEY_RULES}file.test.ts`, fileOfLines(TEST_FILE_LIMIT), CLEAN],
+
+  [`${MATCH_ENGINE}long-function.ts`, functionOfLines(FUNCTION_LIMIT + 1), MAX_FUNCTION_LINES],
+  [`${MATCH_ENGINE}function.ts`, functionOfLines(FUNCTION_LIMIT), CLEAN],
+  [`${MOBILE}long-function.tsx`, functionOfLines(COMPONENT_FUNCTION_LIMIT + 1), MAX_FUNCTION_LINES],
+  [`${MOBILE}function.tsx`, functionOfLines(COMPONENT_FUNCTION_LIMIT), CLEAN],
+  [`${MATCH_ENGINE}long-function.test.ts`, functionOfLines(COMPONENT_FUNCTION_LIMIT + 1), CLEAN],
+
+  [`${MATCH_ENGINE}deep.ts`, functionOfDepth(DEPTH_LIMIT + 1), "max-depth"],
+  [`${MATCH_ENGINE}shallow.ts`, functionOfDepth(DEPTH_LIMIT), CLEAN],
+  [`${MATCH_ENGINE}params.ts`, functionOfParams(PARAMS_LIMIT + 1), "@typescript-eslint/max-params"],
+  [`${MATCH_ENGINE}few-params.ts`, functionOfParams(PARAMS_LIMIT), CLEAN],
+  [`${MATCH_ENGINE}callbacks.ts`, callbacksOfDepth(CALLBACKS_LIMIT + 1), "max-nested-callbacks"],
+  [`${MATCH_ENGINE}few-callbacks.ts`, callbacksOfDepth(CALLBACKS_LIMIT), CLEAN],
+  [`${MATCH_ENGINE}callbacks.test.ts`, callbacksOfDepth(CALLBACKS_LIMIT + 1), CLEAN],
+];
+
 const CASES = [
+  ...APP_CASES,
+  ...METRIC_CASES,
   [`${VOLLEY_RULES}any.mts`, ANY, NO_ANY],
   [`${VOLLEY_RULES}any.cts`, ANY, NO_ANY],
   [`${MATCH_ENGINE}magic.mts`, MAGIC_FUNCTION, NO_MAGIC_NUMBERS],

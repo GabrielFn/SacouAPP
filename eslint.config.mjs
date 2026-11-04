@@ -111,6 +111,8 @@ const MOBILE_SRC = "apps/mobile/src";
 const FEATURES_DIRECTORY = resolve(import.meta.dirname, MOBILE_SRC, "features");
 const mobileFolderFiles = (folder) => [`${MOBILE_SRC}/${folder}/**/*.${TS_EXTENSIONS}`];
 
+const ALIAS_IMPORT = "^@/";
+
 const PARENT_IMPORT = {
   regex: "(^|/)\\.\\.(/|$)",
   message: "Import from another folder through the @/ alias, not with ../.",
@@ -271,6 +273,9 @@ export default defineConfig([
   {
     files: MOBILE_FILES,
     rules: {
+      // The preset resolves imports with the Node resolver, which does not read the `@/` alias of
+      // apps/mobile/tsconfig.json; tsc checks those imports (typecheck and build). ADR 0034.
+      "import/no-unresolved": ["error", { ignore: [ALIAS_IMPORT] }],
       // React refs and Reanimated shared values are mutable by design.
       "functional/immutable-data": ["error", { ignoreAccessorPattern: ["**.current", "**.value"] }],
     },
