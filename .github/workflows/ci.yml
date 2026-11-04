@@ -107,6 +107,10 @@ jobs:
       - name: Lint regression
         run: pnpm lint:regression
 
+      # Threshold in .jscpd.json, a ratchet that only goes down (ADR 0034).
+      - name: Duplication
+        run: pnpm dup
+
       - name: Lint API
         run: pnpm lint:api
 

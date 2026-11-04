@@ -64,7 +64,11 @@ export function startMatch(
   return ok([{ type: MATCH_STARTED_EVENT_TYPE, payload: parsed.value }]);
 }
 
-export function scorePoint(state: CourtSessionState, team: TeamSide): ScoreCommandResult {
+/** Runs a command on the open set while it is not decided: points and the serve change only then. */
+function withSetInPlay(
+  state: CourtSessionState,
+  run: (match: MatchScore, set: MatchSet) => ScoreCommandResult,
+): ScoreCommandResult {
   const match = state.currentMatch;
   if (match === null) {
     return refuse("no-open-match");
@@ -76,7 +80,13 @@ export function scorePoint(state: CourtSessionState, team: TeamSide): ScoreComma
   if (getSetWinner(set.score, set.targetPoints, match.scoring.winMargin) !== null) {
     return refuse("set-decided");
   }
-  return emit(POINT_SCORED_EVENT_TYPE, { matchId: match.matchId, setNumber: set.setNumber, team });
+  return run(match, set);
+}
+
+export function scorePoint(state: CourtSessionState, team: TeamSide): ScoreCommandResult {
+  return withSetInPlay(state, (match, set) =>
+    emit(POINT_SCORED_EVENT_TYPE, { matchId: match.matchId, setNumber: set.setNumber, team }),
+  );
 }
 
 /** Only the first of the two events of a deciding confirmation was stored: emits the other one. */
@@ -168,22 +178,13 @@ function hasNoPoints({ a, b }: SetScore): boolean {
  * stays (ADR 0030).
  */
 export function switchServingTeam(state: CourtSessionState): ScoreCommandResult {
-  const match = state.currentMatch;
-  if (match === null) {
-    return refuse("no-open-match");
-  }
-  const set = match.currentSet;
-  if (set === null) {
-    return refuse("no-open-set");
-  }
-  if (getSetWinner(set.score, set.targetPoints, match.scoring.winMargin) !== null) {
-    return refuse("set-decided");
-  }
-  const servingTeam = getOpponent(set.servingTeam);
-  return emit(SERVING_TEAM_CHANGED_EVENT_TYPE, {
-    firstServer: hasNoPoints(set.score) ? servingTeam : set.firstServer,
-    matchId: match.matchId,
-    servingTeam,
-    setNumber: set.setNumber,
+  return withSetInPlay(state, (match, set) => {
+    const servingTeam = getOpponent(set.servingTeam);
+    return emit(SERVING_TEAM_CHANGED_EVENT_TYPE, {
+      firstServer: hasNoPoints(set.score) ? servingTeam : set.firstServer,
+      matchId: match.matchId,
+      servingTeam,
+      setNumber: set.setNumber,
+    });
   });
 }

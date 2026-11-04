@@ -1,4 +1,4 @@
-import { isUuid } from "../event-log/is-uuid.js";
+import { readUniqueMemberIds } from "../score/payload-reading.js";
 import type { MemberId } from "../score/types.js";
 import { getConsecutiveMatches, getMatchesPlayed } from "./consecutive-matches.js";
 import type {
@@ -11,13 +11,7 @@ import type {
 
 /** A list of members from outside the engine: UUIDs, each one once, or `null`. */
 function readMemberList(raw: unknown): readonly MemberId[] | null {
-  if (!Array.isArray(raw)) {
-    return null;
-  }
-  const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
-  const memberIds = items.filter(isUuid);
-  const isValid = memberIds.length === items.length && new Set(memberIds).size === items.length;
-  return isValid ? memberIds : null;
+  return Array.isArray(raw) ? readUniqueMemberIds(raw as readonly unknown[]) : null;
 }
 
 /** The arrival order of the candidates, which must all be in it; others are ignored. */

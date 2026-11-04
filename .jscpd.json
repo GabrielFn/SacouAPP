@@ -1,0 +1,14 @@
+{
+  "format": ["typescript", "tsx", "csharp"],
+  "ignore": [
+    "**/*.test.*",
+    "**/golden/**",
+    "**/dist/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/node_modules/**"
+  ],
+  "minTokens": 50,
+  "reporters": ["console"],
+  "threshold": 0.9
+}

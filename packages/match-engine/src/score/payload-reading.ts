@@ -17,7 +17,13 @@ import {
   SETTER_ZONE_SEQUENCE,
   TEAM_SIDES,
 } from "./constants.data.js";
-import type { MemberId, ScorePayloadError, ScorePayloadField, TeamSide } from "./types.js";
+import type {
+  MemberId,
+  PayloadShape,
+  ScorePayloadError,
+  ScorePayloadField,
+  TeamSide,
+} from "./types.js";
 
 export type RawObject = Readonly<Record<string, unknown>>;
 export type ParseResult<T> = Result<T, ScorePayloadError>;
@@ -72,7 +78,17 @@ export function readOwn(raw: RawObject, field: string): unknown {
   return Object.hasOwn(raw, field) ? raw[field] : undefined;
 }
 
-/** The copy turns holes of a sparse array into undefined, which fails the UUID check. */
+/**
+ * UUIDs, each one once, or `null`. The copy turns holes of a sparse array into undefined, which
+ * fails the UUID check.
+ */
+export function readUniqueMemberIds(raw: readonly unknown[]): readonly MemberId[] | null {
+  const items: readonly unknown[] = Array.from(raw);
+  const memberIds = items.filter(isUuid);
+  const isValid = memberIds.length === items.length && new Set(memberIds).size === items.length;
+  return isValid ? memberIds : null;
+}
+
 export function parseUniqueMemberIds(
   raw: unknown,
   min: number,
@@ -81,12 +97,43 @@ export function parseUniqueMemberIds(
   if (!Array.isArray(raw) || !isIntegerInRange(raw.length, min, max)) {
     return null;
   }
-  const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
-  const memberIds = items.filter(isUuid);
-  const isValid = memberIds.length === items.length && new Set(memberIds).size === items.length;
-  return isValid ? memberIds : null;
+  return readUniqueMemberIds(raw as readonly unknown[]);
 }
 
 export function parseMemberIds(raw: unknown): readonly MemberId[] | null {
   return parseUniqueMemberIds(raw, MIN_TEAM_MEMBERS, MAX_TEAM_MEMBERS);
+}
+
+type ChildShape = PayloadShape[string];
+
+/** A child of the wrong type has no keys to report: its own field check rejects it. */
+function hasUnknownChildKey(child: unknown, childShape: ChildShape | undefined): boolean {
+  if (childShape === null || childShape === undefined) {
+    return false;
+  }
+  if (isPayloadListShape(childShape)) {
+    const [itemShape] = childShape;
+    return (
+      Array.isArray(child) &&
+      (child as readonly unknown[]).some(
+        (item) => isPlainObject(item) && hasUnknownKey(item, itemShape),
+      )
+    );
+  }
+  return isPlainObject(child) && hasUnknownKey(child, childShape);
+}
+
+function isPayloadListShape(
+  shape: PayloadShape | readonly [PayloadShape],
+): shape is readonly [PayloadShape] {
+  return Array.isArray(shape);
+}
+
+export function hasUnknownKey(raw: RawObject, shape: PayloadShape): boolean {
+  return Reflect.ownKeys(raw).some(
+    (key) =>
+      typeof key !== "string" ||
+      !Object.hasOwn(shape, key) ||
+      hasUnknownChildKey(raw[key], shape[key]),
+  );
 }

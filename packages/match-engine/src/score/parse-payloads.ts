@@ -29,6 +29,7 @@ import {
   parseTeams,
 } from "./parse-team-payloads.js";
 import {
+  hasUnknownKey,
   invalid,
   isOneOf,
   isPlainObject,
@@ -59,40 +60,6 @@ import type {
   SetEndedPayload,
   SetterZones,
 } from "./types.js";
-
-type ChildShape = PayloadShape[string];
-
-/** A child of the wrong type has no keys to report: its own field check rejects it. */
-function hasUnknownChildKey(child: unknown, childShape: ChildShape | undefined): boolean {
-  if (childShape === null || childShape === undefined) {
-    return false;
-  }
-  if (isPayloadListShape(childShape)) {
-    const [itemShape] = childShape;
-    return (
-      Array.isArray(child) &&
-      (child as readonly unknown[]).some(
-        (item) => isPlainObject(item) && hasUnknownKey(item, itemShape),
-      )
-    );
-  }
-  return isPlainObject(child) && hasUnknownKey(child, childShape);
-}
-
-function isPayloadListShape(
-  shape: PayloadShape | readonly [PayloadShape],
-): shape is readonly [PayloadShape] {
-  return Array.isArray(shape);
-}
-
-function hasUnknownKey(raw: RawObject, shape: PayloadShape): boolean {
-  return Reflect.ownKeys(raw).some(
-    (key) =>
-      typeof key !== "string" ||
-      !Object.hasOwn(shape, key) ||
-      hasUnknownChildKey(raw[key], shape[key]),
-  );
-}
 
 function parseScoring(raw: unknown): ParseResult<ScoringRules> {
   if (!isPlainObject(raw)) return invalid("scoring");
@@ -159,25 +126,37 @@ function parseMatchStartedFields(raw: RawObject): ParseResult<MatchStartedPayloa
   });
 }
 
-function parsePointScoredFields(raw: RawObject): ParseResult<PointScoredPayload> {
+interface SetReference {
+  readonly matchId: string;
+  readonly setNumber: number;
+}
+
+/** `matchId`, then `setNumber`: the first fields of the events about a set. */
+function parseSetReference(raw: RawObject): ParseResult<SetReference> {
   const matchId = readOwn(raw, "matchId");
   if (!isUuid(matchId)) return invalid("matchId");
   const setNumber = readOwn(raw, "setNumber");
   if (!isSetNumber(setNumber)) return invalid("setNumber");
+  return ok({ matchId, setNumber });
+}
+
+function parsePointScoredFields(raw: RawObject): ParseResult<PointScoredPayload> {
+  const set = parseSetReference(raw);
+  if (!set.ok) return set;
   const team = readOwn(raw, "team");
   if (!isTeamSide(team)) return invalid("team");
+  const { matchId, setNumber } = set.value;
   return ok({ matchId, setNumber, team });
 }
 
 function parseSetEndedFields(raw: RawObject): ParseResult<SetEndedPayload> {
-  const matchId = readOwn(raw, "matchId");
-  if (!isUuid(matchId)) return invalid("matchId");
-  const setNumber = readOwn(raw, "setNumber");
-  if (!isSetNumber(setNumber)) return invalid("setNumber");
+  const set = parseSetReference(raw);
+  if (!set.ok) return set;
   const winner = readOwn(raw, "winner");
   if (!isTeamSide(winner)) return invalid("winner");
   const nextSet = parseNextSet(readOwn(raw, "nextSet"));
   if (!nextSet.ok) return nextSet;
+  const { matchId, setNumber } = set.value;
   return ok({ matchId, nextSet: nextSet.value, setNumber, winner });
 }
 
@@ -222,14 +201,13 @@ function parseQueueChangedFields(raw: RawObject): ParseResult<QueueChangedPayloa
 
 /** Format only: whether the match and the set are open is for the applier, which has the state. */
 function parseServingTeamChangedFields(raw: RawObject): ParseResult<ServingTeamChangedPayload> {
-  const matchId = readOwn(raw, "matchId");
-  if (!isUuid(matchId)) return invalid("matchId");
-  const setNumber = readOwn(raw, "setNumber");
-  if (!isSetNumber(setNumber)) return invalid("setNumber");
+  const set = parseSetReference(raw);
+  if (!set.ok) return set;
   const servingTeam = readOwn(raw, "servingTeam");
   if (!isTeamSide(servingTeam)) return invalid("servingTeam");
   const firstServer = readOwn(raw, "firstServer");
   if (!isTeamSide(firstServer)) return invalid("firstServer");
+  const { matchId, setNumber } = set.value;
   return ok({ firstServer, matchId, servingTeam, setNumber });
 }
 
