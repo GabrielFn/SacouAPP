@@ -22,6 +22,9 @@ internal static partial class RepositoryFiles
     private const string LineCommentStart = "//";
     private const string RemainderOperator = "%";
 
+    /// <summary>Same limit as `max-lines` in the TypeScript production code (ADR 0034).</summary>
+    internal const int MaxSourceFileLines = 300;
+
     internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
     internal const string CatalogPath = "packages/volley-rules/src/formations/formations.json";
 
@@ -80,6 +83,8 @@ internal static partial class RepositoryFiles
         Path.Combine(Root.Value, "apps", "api", "tests", "Sacou.Integration.Tests");
 
     internal static string ApiDirectory => Path.Combine(Root.Value, "apps", "api");
+
+    internal static string ApiSourceDirectory => Path.Combine(ApiDirectory, "src");
 
     internal static string ReadRepositoryFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([Root.Value, .. segments]));
@@ -153,6 +158,18 @@ internal static partial class RepositoryFiles
             let relative = Path.GetRelativePath(directory, path)
             where !relative.Split(Path.DirectorySeparatorChar).Any(GeneratedFolders.Contains)
             select relative];
+
+    /// <summary>
+    /// Production files longer than the limit, blank lines aside and outside what the build generates.
+    /// A long file is split by theme, never allowed (ADR 0034).
+    /// </summary>
+    internal static IReadOnlyList<string> OversizedSourceFileViolations(string directory) =>
+        [.. from path in Directory.GetFiles(directory, SourceFilePattern, SearchOption.AllDirectories)
+            let relative = Path.GetRelativePath(directory, path)
+            where !relative.Split(Path.DirectorySeparatorChar).Any(GeneratedFolders.Contains)
+            let lines = File.ReadLines(path).Count(line => !string.IsNullOrWhiteSpace(line))
+            where lines > MaxSourceFileLines
+            select $"{relative}: {lines} non-blank lines, limit {MaxSourceFileLines}"];
 
     internal static IReadOnlyList<string> TestProjectFiles() =>
         Directory.GetFiles(Path.Combine(ApiDirectory, "tests"), ProjectFilePattern, SearchOption.AllDirectories);

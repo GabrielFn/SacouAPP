@@ -1,0 +1,8 @@
+<Project>
+    <!-- A nested Directory.Build.props hides the root one, so it is imported first. -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+    <ItemGroup>
+        <!-- Cyclomatic complexity limit for CA1502, only on production code (ADR 0034). -->
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" Visible="false" />
+    </ItemGroup>
+</Project>
