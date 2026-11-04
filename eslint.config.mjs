@@ -135,8 +135,10 @@ const VIEW_IMPORTS = [
   },
 ];
 
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const otherFeatureImport = (feature) => ({
-  regex: `^@/features/(?!${feature}(/|$))`,
+  regex: `^@/features/(?!${escapeRegex(feature)}(/|$))`,
   message: "A feature cannot import another one. Move what they share to ui/ or lib/.",
 });
 
