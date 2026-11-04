@@ -6,10 +6,10 @@ import {
   AUTHORLESS_POINT_KINDS,
   POINT_ATTRIBUTED_EVENT_TYPE,
   POINT_KINDS,
-  POINT_SCORED_EVENT_TYPE,
 } from "../score/constants.data.js";
-import { parsePointScoredPayload, parseScorePayload } from "../score/parse-payloads.js";
 import { onCourtInTheRally } from "../score/on-court.js";
+import { parseScorePayload } from "../score/parse-payloads.js";
+import { readPointScored } from "../score/point-scored-event.js";
 import type { MemberId, PointKind } from "../score/types.js";
 import { isPlausibleAuthor } from "./plausibility.js";
 import type {
@@ -40,14 +40,12 @@ function findRally(
   if (entry === undefined || index <= getOpenMatchStartIndex(timeline) || before === null) {
     return null;
   }
-  const { event } = entry;
-  const parsed =
-    event.type === POINT_SCORED_EVENT_TYPE ? parsePointScoredPayload(event.payload) : null;
+  const point = readPointScored(entry.event);
   const set = before.currentSet;
-  if (parsed?.ok !== true || parsed.value.matchId !== matchId || set === null) {
+  if (point?.matchId !== matchId || set === null) {
     return null;
   }
-  return { match: before, team: parsed.value.team, servingTeam: set.servingTeam };
+  return { match: before, team: point.team, servingTeam: set.servingTeam };
 }
 
 function isPointKind(kind: unknown): kind is PointKind {

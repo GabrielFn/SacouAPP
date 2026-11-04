@@ -1,10 +1,10 @@
 import { resolvePointAttributions } from "../attributions/resolve.js";
 import type { PointAttribution } from "../attributions/types.js";
 import type { TimelineEntry } from "../event-log/types.js";
-import { MATCH_STARTED_EVENT_TYPE, POINT_SCORED_EVENT_TYPE } from "../score/constants.data.js";
-import { parsePointScoredPayload } from "../score/parse-payloads.js";
+import { MATCH_STARTED_EVENT_TYPE } from "../score/constants.data.js";
+import { readPointScored } from "../score/point-scored-event.js";
 import { getCurrentServingPlayer, isSideOut } from "../score/rotation-rules.js";
-import type { CourtSessionState, MatchScore } from "../score/types.js";
+import type { CourtSessionState, MatchScore, MatchSet } from "../score/types.js";
 import { CORRECTION_TIMELINE_POINTS } from "./constants.data.js";
 import type { CourtSessionTimeline, RecentPoint } from "./types.js";
 
@@ -35,28 +35,45 @@ function listedSetNumber({ completedSets, currentSet }: MatchScore): number | nu
 
 type AttributionsByPoint = ReadonlyMap<string, PointAttribution>;
 
+/** The match and the set around a point: before it, for who served, and after it, for the score. */
+interface PointRally {
+  readonly matchBefore: MatchScore;
+  readonly setBefore: MatchSet;
+  readonly setAfter: MatchSet;
+}
+
+function pointRally(before: CourtSessionState, after: CourtSessionState): PointRally | null {
+  const matchBefore = before.currentMatch;
+  const setBefore = matchBefore?.currentSet ?? null;
+  const setAfter = after.currentMatch?.currentSet ?? null;
+  return matchBefore === null || setBefore === null || setAfter === null
+    ? null
+    : { matchBefore, setBefore, setAfter };
+}
+
+function authorshipOf(
+  attribution: PointAttribution | undefined,
+): Pick<RecentPoint, "author" | "kind"> {
+  return { author: attribution?.author ?? null, kind: attribution?.kind ?? null };
+}
+
 function toRecentPoint(
   before: CourtSessionState,
   { event, state }: Entry,
   { matchId, setNumber }: { readonly matchId: string; readonly setNumber: number },
   attributions: AttributionsByPoint,
 ): RecentPoint | null {
-  if (event.type !== POINT_SCORED_EVENT_TYPE) {
+  const point = readPointScored(event);
+  const rally = pointRally(before, state);
+  if (point === null || rally === null) {
     return null;
   }
-  const parsed = parsePointScoredPayload(event.payload);
-  const matchBefore = before.currentMatch;
-  const setBefore = matchBefore?.currentSet ?? null;
-  const setAfter = state.currentMatch?.currentSet ?? null;
-  if (!parsed.ok || matchBefore === null || setBefore === null || setAfter === null) {
+  const { team } = point;
+  if (point.matchId !== matchId || point.setNumber !== setNumber) {
     return null;
   }
-  const { team } = parsed.value;
-  if (parsed.value.matchId !== matchId || parsed.value.setNumber !== setNumber) {
-    return null;
-  }
+  const { matchBefore, setBefore, setAfter } = rally;
   const sideOut = isSideOut(setBefore.servingTeam, team);
-  const attribution = attributions.get(event.eventId);
   return {
     eventId: event.eventId,
     team,
@@ -65,8 +82,7 @@ function toRecentPoint(
     servingPlayer: getCurrentServingPlayer(matchBefore),
     sideOut,
     setterZone: sideOut ? (state.currentMatch?.rotations[team]?.setterZone ?? null) : null,
-    author: attribution?.author ?? null,
-    kind: attribution?.kind ?? null,
+    ...authorshipOf(attributions.get(event.eventId)),
   };
 }
 

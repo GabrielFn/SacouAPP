@@ -71,9 +71,17 @@ export interface RotationSetup {
 function teamStateOf(
   side: TeamSide,
   lineup: readonly MemberId[],
-  setterZone: SetterZone,
-  system: FormationSystem,
-  { teamSize, replacedIndexes }: { teamSize: number; replacedIndexes: readonly number[] | null },
+  {
+    setterZone,
+    system,
+    teamSize,
+    replacedIndexes,
+  }: {
+    setterZone: SetterZone;
+    system: FormationSystem;
+    teamSize: number;
+    replacedIndexes: readonly number[] | null;
+  },
 ): TeamState {
   const others = membersOf(side, teamSize).slice(LINEUP_SIZE);
   const [liberoId, ...rest] = others;
@@ -113,14 +121,18 @@ export function rotationMatchInput(
       a:
         zoneA === null
           ? null
-          : teamStateOf("a", ORANGE_LINEUP, zoneA, systemA, {
+          : teamStateOf("a", ORANGE_LINEUP, {
+              setterZone: zoneA,
+              system: systemA,
               teamSize,
               replacedIndexes: indexesA,
             }),
       b:
         zoneB === null
           ? null
-          : teamStateOf("b", BLUE_LINEUP, zoneB, systemB, {
+          : teamStateOf("b", BLUE_LINEUP, {
+              setterZone: zoneB,
+              system: systemB,
               teamSize,
               replacedIndexes: indexesB,
             }),

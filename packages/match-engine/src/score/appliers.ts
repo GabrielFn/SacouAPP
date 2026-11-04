@@ -1,6 +1,7 @@
-import { err, ok, type Result } from "@sacou/volley-rules";
+import { ok } from "@sacou/volley-rules";
 
-import type { EventApplier, EventRejection } from "../event-log/types.js";
+import type { EventApplier } from "../event-log/types.js";
+import { findOpenMatch, findOpenSet, rejected, withCurrentMatch } from "./applier-lookups.js";
 import {
   FIRST_SET_NUMBER,
   LINEUP_CHANGED_EVENT_TYPE,
@@ -14,23 +15,22 @@ import {
   SET_ENDED_EVENT_TYPE,
 } from "./constants.data.js";
 import {
-  parseLineupChangedPayload,
+  applyLineupChanged,
+  applyPointAttributed,
+  applyQueueChanged,
+  applyServingTeamChanged,
+} from "./match-change-appliers.js";
+import {
   parseMatchEndedPayload,
   parseMatchStartedPayload,
-  parsePointAttributedPayload,
   parsePointScoredPayload,
-  parseQueueChangedPayload,
-  parseServingTeamChangedPayload,
   parseSetEndedPayload,
 } from "./parse-payloads.js";
-import { isQueueOverlappingTeams } from "./queue-rules.js";
-import { isLiberoAllowed, isRosterPartition, isSideOut, nextSetterZone } from "./rotation-rules.js";
+import { isSideOut, nextSetterZone } from "./rotation-rules.js";
 import type {
   CourtSessionState,
   MatchScore,
   MatchSet,
-  MatchTeams,
-  MemberId,
   NextSet,
   SetterZones,
   TeamRotations,
@@ -43,24 +43,6 @@ export const INITIAL_COURT_SESSION_STATE: CourtSessionState = Object.freeze({
   finishedMatches: Object.freeze([]),
   queue: Object.freeze({ players: Object.freeze([]), teams: Object.freeze([]) }),
 });
-
-function rejected(): Result<never, EventRejection> {
-  return err({ code: "event-rejected" });
-}
-
-function findOpenMatch(state: CourtSessionState, matchId: string): MatchScore | null {
-  const { currentMatch } = state;
-  return currentMatch?.matchId === matchId ? currentMatch : null;
-}
-
-function findOpenSet(match: MatchScore | null, setNumber: number): MatchSet | null {
-  const currentSet = match?.currentSet ?? null;
-  return currentSet?.setNumber === setNumber ? currentSet : null;
-}
-
-function withCurrentMatch(state: CourtSessionState, match: MatchScore): CourtSessionState {
-  return { currentMatch: match, finishedMatches: state.finishedMatches, queue: state.queue };
-}
 
 function isFinishedMatchId(state: CourtSessionState, matchId: string): boolean {
   return state.finishedMatches.some((match) => match.matchId === matchId);
@@ -244,99 +226,6 @@ const applyMatchEnded: EventApplier<CourtSessionState> = (state, event) => {
     finishedMatches: [...state.finishedMatches, finishedMatch],
     queue: state.queue,
   });
-};
-
-/**
- * Applies the recorded allocation. It checks the frozen `teams` and never the current lineup, so a
- * change that another writer interleaves with points is applied, and the last one in the order wins.
- * Whether the libero is on the court is never checked here: it is derived from the zone (ADR 0028).
- */
-const applyLineupChanged: EventApplier<CourtSessionState> = (state, event) => {
-  const parsed = parseLineupChangedPayload(event.payload);
-  if (!parsed.ok) {
-    return rejected();
-  }
-  const { bench, libero, lineup, matchId, setterZone, team } = parsed.value;
-  const match = findOpenMatch(state, matchId);
-  const teamState = match?.rotations[team] ?? null;
-  if (match === null || teamState === null) {
-    return rejected();
-  }
-  const { system } = teamState;
-  if (
-    !isRosterPartition(lineup, bench, libero, match.teams[team]) ||
-    !isLiberoAllowed(system, libero)
-  ) {
-    return rejected();
-  }
-  return ok(
-    withCurrentMatch(state, {
-      ...match,
-      rotations: { ...match.rotations, [team]: { bench, libero, lineup, setterZone, system } },
-    }),
-  );
-};
-
-/**
- * Replaces the whole queue, checked against the frozen `teams` of the open match: nobody waiting is
- * on the court. Like the `LineupChanged`, the last one in the canonical order wins (ADR 0029).
- */
-const applyQueueChanged: EventApplier<CourtSessionState> = (state, event) => {
-  const parsed = parseQueueChangedPayload(event.payload);
-  if (!parsed.ok) {
-    return rejected();
-  }
-  const { matchId, queue } = parsed.value;
-  const match = findOpenMatch(state, matchId);
-  if (match === null || isQueueOverlappingTeams(queue, match.teams)) {
-    return rejected();
-  }
-  return ok({ currentMatch: match, finishedMatches: state.finishedMatches, queue });
-};
-
-/**
- * Records who serves and who served first in the open set, as the command decided: the score and
- * the current values are never checked, nobody rotates, and the last one in the order wins. It also
- * applies with the rotation off, because the serve is tracked anyway (ADR 0030).
- */
-const applyServingTeamChanged: EventApplier<CourtSessionState> = (state, event) => {
-  const parsed = parseServingTeamChangedPayload(event.payload);
-  if (!parsed.ok) {
-    return rejected();
-  }
-  const { firstServer, matchId, servingTeam, setNumber } = parsed.value;
-  const match = findOpenMatch(state, matchId);
-  const set = findOpenSet(match, setNumber);
-  if (match === null || set === null) {
-    return rejected();
-  }
-  return ok(
-    withCurrentMatch(state, { ...match, currentSet: { ...set, firstServer, servingTeam } }),
-  );
-};
-
-function isMatchMember({ a, b }: MatchTeams, memberId: MemberId): boolean {
-  return a.memberIds.includes(memberId) || b.memberIds.includes(memberId);
-}
-
-/**
- * Changes nothing in the state, which therefore never grows with these events: who scored is read
- * from the timeline by `resolvePointAttributions`. It checks only that the match is open and that the
- * author plays in it, by the frozen `teams`, like the `LineupChanged`. Whether the target is an
- * active point is for the resolver, because the point and its attribution may come from two writers
- * in any order. Any set of the open match is accepted, the decided and the closed ones too (ADR 0031).
- */
-const applyPointAttributed: EventApplier<CourtSessionState> = (state, event) => {
-  const parsed = parsePointAttributedPayload(event.payload);
-  if (!parsed.ok) {
-    return rejected();
-  }
-  const { author, matchId } = parsed.value;
-  const match = findOpenMatch(state, matchId);
-  if (match === null || (author !== null && !isMatchMember(match.teams, author))) {
-    return rejected();
-  }
-  return ok(state);
 };
 
 export const SCORE_APPLIERS: ReadonlyMap<string, EventApplier<CourtSessionState>> = new Map([

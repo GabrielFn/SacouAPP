@@ -1,4 +1,6 @@
+import { existsSync, readdirSync } from "node:fs";
 import { builtinModules } from "node:module";
+import { resolve } from "node:path";
 
 import eslint from "@eslint/js";
 import prettier from "eslint-config-prettier";
@@ -70,6 +72,148 @@ const NO_FUNCTIONS_IN_DATA = {
   selector: ":function",
   message: "Data files hold data only. Move the logic to a regular file.",
 };
+
+// Size and complexity of production code (ADR 0034). Tests only have a file size limit.
+const MAX_COMPLEXITY = 10;
+const MAX_FILE_LINES = 300;
+const MAX_COMPONENT_FILE_LINES = 200;
+const MAX_TEST_FILE_LINES = 800;
+const MAX_FUNCTION_LINES = 50;
+const MAX_COMPONENT_FUNCTION_LINES = 80;
+const MAX_DEPTH = 4;
+const MAX_PARAMS = 4;
+const MAX_NESTED_CALLBACKS = 3;
+const COMPONENT_FILES = ["**/*.tsx"];
+
+const linesLimit = (max) => ({ max, skipBlankLines: true, skipComments: true });
+
+const PRODUCTION_METRICS = {
+  complexity: ["error", MAX_COMPLEXITY],
+  "max-lines": ["error", linesLimit(MAX_FILE_LINES)],
+  "max-lines-per-function": ["error", linesLimit(MAX_FUNCTION_LINES)],
+  "max-depth": ["error", MAX_DEPTH],
+  "@typescript-eslint/max-params": ["error", { max: MAX_PARAMS }],
+  "max-nested-callbacks": ["error", MAX_NESTED_CALLBACKS],
+};
+
+const TEST_METRICS = {
+  complexity: "off",
+  "max-lines": ["error", linesLimit(MAX_TEST_FILE_LINES)],
+  "max-lines-per-function": "off",
+  "max-depth": "off",
+  "@typescript-eslint/max-params": "off",
+  "max-nested-callbacks": "off",
+};
+
+// App architecture (ADR 0034, docs/padroes/app.md). Imports out of the current folder go
+// through the `@/` alias, so the folder an import reaches is spelled in it.
+const MOBILE_SRC = "apps/mobile/src";
+const FEATURES_DIRECTORY = resolve(import.meta.dirname, MOBILE_SRC, "features");
+const mobileFolderFiles = (folder) => [`${MOBILE_SRC}/${folder}/**/*.${TS_EXTENSIONS}`];
+
+const PARENT_IMPORT = {
+  regex: "(^|/)\\.\\.(/|$)",
+  message: "Import from another folder through the @/ alias, not with ../.",
+};
+
+const UI_IMPORT = {
+  regex: "^@/(features|lib|app)(/|$)",
+  message: "ui/ is the design system: it cannot import features/, lib/ or app/.",
+};
+
+const ROUTE_IMPORT = {
+  regex: "^@/(?!features/[^/]+/screens(/|$))",
+  message: "Routes in app/ only mount a screen: import from features/<feature>/screens.",
+};
+
+const VIEW_IMPORTS = [
+  {
+    regex: "^@/(lib(/|$)|features/[^/]+/api(/|$))",
+    message: "Screens and components reach api/ and lib/ only through the hooks of their feature.",
+  },
+];
+
+const otherFeatureImport = (feature) => ({
+  regex: `^@/features/(?!${feature}(/|$))`,
+  message: "A feature cannot import another one. Move what they share to ui/ or lib/.",
+});
+
+const RAW_TOUCHABLES = [
+  "Pressable",
+  "TouchableHighlight",
+  "TouchableOpacity",
+  "TouchableWithoutFeedback",
+];
+
+const RAW_TOUCHABLE_PATHS = ["react-native", "react-native-gesture-handler"].map((name) => ({
+  name,
+  importNames: RAW_TOUCHABLES,
+  message: "Use the touchable components of ui/: they keep 44 px and the accessibility label.",
+}));
+
+const restrictImports = (patterns, paths = RAW_TOUCHABLE_PATHS) => ({
+  "@typescript-eslint/no-restricted-imports": ["error", { patterns, paths }],
+});
+
+const FEATURES = existsSync(FEATURES_DIRECTORY)
+  ? readdirSync(FEATURES_DIRECTORY, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+  : [];
+
+const featureBlocks = (feature) => [
+  {
+    files: mobileFolderFiles(`features/${feature}`),
+    rules: restrictImports([PARENT_IMPORT, otherFeatureImport(feature)]),
+  },
+  {
+    files: [
+      ...mobileFolderFiles(`features/${feature}/screens`),
+      ...mobileFolderFiles(`features/${feature}/components`),
+    ],
+    rules: restrictImports([PARENT_IMPORT, otherFeatureImport(feature), ...VIEW_IMPORTS]),
+  },
+];
+
+// Any object literal in a style prop, except the arguments of a call (Unistyles variants and
+// dynamic styles take one) and the objects nested in one already reported.
+const INLINE_STYLE = {
+  selector:
+    "JSXAttribute[name.name=/^style$|Style$/] ObjectExpression:not(CallExpression > ObjectExpression, Property > ObjectExpression)",
+  message: "No inline style: use a Unistyles stylesheet with the theme tokens.",
+};
+
+const COLOR_PATTERN = "/#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\\b|(rgba?|hsla?)\\(/i";
+const COLOR_MESSAGE = "Colors live in ui/tokens/: use the theme.";
+
+const LITERAL_COLORS = [
+  { selector: `Literal[value=${COLOR_PATTERN}]`, message: COLOR_MESSAGE },
+  { selector: `TemplateElement[value.raw=${COLOR_PATTERN}]`, message: COLOR_MESSAGE },
+];
+
+const TOKEN_FILES = mobileFolderFiles("ui/tokens");
+const MOBILE_SOURCE_FILES = mobileFolderFiles("**");
+
+// no-restricted-syntax is one list per file, so a mobile data file repeats the data restrictions.
+const mobileSyntaxBlocks = (files, restrictions, ignores = []) => [
+  {
+    files,
+    ignores: [...ignores, ...DATA_FILES],
+    rules: { "no-restricted-syntax": ["error", ...restrictions] },
+  },
+  {
+    files: files.map((pattern) => pattern.replace(`*.${TS_EXTENSIONS}`, "*.data.{ts,mts,cts}")),
+    ignores,
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...PURE_SYNTAX_RESTRICTIONS,
+        NO_FUNCTIONS_IN_DATA,
+        ...restrictions,
+      ],
+    },
+  },
+];
 
 export default defineConfig([
   globalIgnores([
@@ -190,6 +334,18 @@ export default defineConfig([
     },
   },
 
+  // App boundaries (ADR 0034). The rule is one list per file, so each block repeats what applies.
+  { files: MOBILE_SOURCE_FILES, rules: restrictImports([PARENT_IMPORT]) },
+  { files: mobileFolderFiles("ui"), rules: restrictImports([PARENT_IMPORT, UI_IMPORT], []) },
+  { files: mobileFolderFiles("app"), rules: restrictImports([PARENT_IMPORT, ROUTE_IMPORT]) },
+  ...FEATURES.flatMap(featureBlocks),
+
+  // One component per file; a subcomponent goes to its own file in the same folder.
+  {
+    files: MOBILE_SOURCE_FILES,
+    rules: { "react/no-multi-comp": ["error", { ignoreStateless: false }] },
+  },
+
   {
     files: FORBIDDEN_JAVASCRIPT_FILES,
     rules: {
@@ -209,9 +365,24 @@ export default defineConfig([
     },
   },
 
+  // Colors only in ui/tokens/, and no inline style anywhere in the app (ADR 0034).
+  ...mobileSyntaxBlocks(MOBILE_SOURCE_FILES, [INLINE_STYLE, ...LITERAL_COLORS], TOKEN_FILES),
+  ...mobileSyntaxBlocks(TOKEN_FILES, [INLINE_STYLE]),
+
+  { files: TYPESCRIPT_FILES, rules: PRODUCTION_METRICS },
+
+  {
+    files: COMPONENT_FILES,
+    rules: {
+      "max-lines": ["error", linesLimit(MAX_COMPONENT_FILE_LINES)],
+      "max-lines-per-function": ["error", linesLimit(MAX_COMPONENT_FUNCTION_LINES)],
+    },
+  },
+
   {
     files: TEST_FILES,
     rules: {
+      ...TEST_METRICS,
       "@typescript-eslint/no-magic-numbers": "off",
       "functional/no-let": "off",
       "functional/immutable-data": "off",
