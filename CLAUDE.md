@@ -103,6 +103,7 @@ pnpm typecheck                              # TS strict em pacotes e app
 pnpm test                                   # Vitest dos pacotes
 pnpm lint                                   # ESLint em pacotes, app e scripts (avisos reprovam)
 pnpm lint:regression                        # confirma que o lint reprova os desvios conhecidos
+pnpm dup                                    # duplicação (jscpd); limite em .jscpd.json, que só desce
 pnpm format                                 # Prettier: corrige (pnpm format:check só verifica)
 pnpm check:eol                              # falha com CRLF no índice do Git
 pnpm test:tooling                           # testes dos scripts e da política de exceções do audit

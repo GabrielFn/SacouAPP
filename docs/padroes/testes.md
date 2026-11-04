@@ -7,12 +7,15 @@
 | `packages/*` | Vitest, arquivos `src/**/*.test.ts` junto do código | `pnpm test` |
 | `apps/api/tests/` | xUnit v3 sobre Microsoft Testing Platform | `dotnet test` |
 | `scripts/` | `node:test`, arquivos `*.test.mjs`, sem dependências | `pnpm test:tooling` |
+| `apps/mobile/src` | React Native Testing Library, arquivos `*.test.tsx` junto do componente. Entra na E4.1, com os primeiros componentes | a definir na E4.1 |
 
 ## Regras
 
 - O teste entra junto com o código e cobre a regra de negócio.
 - O nome do teste descreve o comportamento. `CA1707` fica desligada em `apps/api/tests` por causa dos underscores.
 - Testes TS podem ter números soltos, `let`, mutação e `node:*`: são liberados no lint. `any` continua proibido.
+- Testes TS não têm limite de complexidade, de linhas por função, de aninhamento nem de parâmetros; o arquivo tem até 800 linhas de código. Passou, divide por tema, mantendo os mesmos testes ([ADR 0034](../arquitetura/adr/0034-arquitetura-do-app-e-metricas.md)). `*.test.fixture.ts` segue as regras de produção.
+- No app, o teste usa a RNTL pelo que o usuário vê (texto, rótulo de acessibilidade, papel), nunca por estrutura interna nem `testID` quando houver alternativa.
 
 ## Golden compartilhado TS/C#
 

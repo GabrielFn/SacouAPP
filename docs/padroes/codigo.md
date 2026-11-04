@@ -1,6 +1,6 @@
 # Padrões de código
 
-Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o revisor confere. Decisões e motivos no [ADR 0002](../arquitetura/adr/0002-padroes-e-lint.md).
+Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o revisor confere. Decisões e motivos no [ADR 0002](../arquitetura/adr/0002-padroes-e-lint.md); métricas e regras do app no [ADR 0034](../arquitetura/adr/0034-arquitetura-do-app-e-metricas.md), com o guia do app em [`app.md`](app.md).
 
 ## Comandos
 
@@ -8,6 +8,7 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 |---|---|
 | `pnpm lint` | ESLint em pacotes, app, `scripts/` e `eslint.config.mjs`, `--max-warnings 0`. Compila os pacotes antes, porque o lint com tipos lê `dist/*.d.ts` |
 | `pnpm lint:regression` | Confirma que as regras ainda reprovam os desvios conhecidos e aceitam o código legítimo (`scripts/lint-regression.mjs`). Regra nova ou furo novo ganha um caso ali |
+| `pnpm dup` | Duplicação com `jscpd` em `packages/*/src`, `apps/mobile/src` e `apps/api/src`, sem testes, golden, `dist`, `bin` e `obj`. Reprova acima do `threshold` do `.jscpd.json`, que só desce |
 | `pnpm format` / `pnpm format:check` | Prettier (corrige / só verifica) |
 | `pnpm check:eol` | Falha se houver arquivo de texto com CRLF **no índice do Git** |
 | `pnpm lint:api` | `dotnet build` (analisadores) e `dotnet format --verify-no-changes` |
@@ -24,6 +25,13 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Pacotes puros | Em `packages/{match-engine,volley-rules}/src`: sem React, Expo, React Native, `@react-native-community/*`, `@testing-library/*`, módulos do Node, caminho para `apps/`, `import()` (também em tipo), `/// <reference>` nem `window`, `document`, `navigator`, `localStorage`, `fetch`, `process`, `Buffer`. `volley-rules` não importa `match-engine`. Em `packages/*/src` e `apps/mobile/src` só há TypeScript: `.js`, `.jsx`, `.cjs` e `.mjs` reprovam | Testes podem usar `node:*` (golden lê JSON) |
 | Motor determinístico | Em `packages/match-engine/src`: sem `Date`, `crypto`, `performance`, `Intl`, `setTimeout` e `Math.random` | Testes |
 | TS strict | `tsconfig.base.json` (`pnpm typecheck`) | Nenhuma |
+| Complexidade | `complexity` 10 por função | Testes (`*.test.*`) |
+| Tamanho de arquivo | `max-lines` sem brancos e comentários: 300 em `.ts` (também `*.data.ts`), 200 em `.tsx` | Testes têm 800 |
+| Tamanho de função | `max-lines-per-function` sem brancos e comentários: 50 em `.ts`, 80 em `.tsx` | Testes |
+| Aninhamento e parâmetros | `max-depth` 4, `@typescript-eslint/max-params` 4, `max-nested-callbacks` 3 | Testes |
+| Fronteiras do app | Em `apps/mobile/src`: `../` reprova (use `@/`); `ui/` não importa `features/`, `lib/` nem `app/`; feature não importa outra; `app/` só importa `features/*/screens`; `screens/` e `components/` não importam `lib/` nem `api/` ([app.md](app.md)) | Nenhuma |
+| Componentes do app | `react/no-multi-comp` (um componente por arquivo); sem objeto literal em `style`; sem `#hex`, `rgb(`, `rgba(`, `hsl(` e `hsla(` fora de `ui/tokens/`; `Pressable` e `Touchable*` só em `ui/` | Nenhuma |
+| Alias `@/` no app | `import/no-unresolved` ignora `^@/`, que o `tsc` confere: o resolvedor do preset não lê o `paths` do `tsconfig` (ADR 0034) | — |
 
 ## Imposto por ferramenta: C#
 
@@ -32,6 +40,8 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Nullable e avisos como erro | `Directory.Build.props` | Nenhuma |
 | Analisadores | `AnalysisLevel=10.0-recommended`, fixo para patch do SDK não criar aviso novo | `CA1707` e `CA1515` desligadas só em `apps/api/tests` |
 | Estilo no build | `EnforceCodeStyleInBuild` com IDE0005, IDE0044, IDE0051, IDE0052, IDE0055, IDE0059, IDE0161 e CA2227 como `warning` | Nenhuma |
+| Complexidade | CA1502 com limite 10 (`apps/api/src/CodeMetricsConfig.txt`), como erro, só em `apps/api/src` | Testes |
+| Tamanho de arquivo | 300 linhas não brancas por `.cs` de `apps/api/src`, fora de `bin/` e `obj/` (`CodeMetricsTests`) | Testes |
 | Sem MediatR e AutoMapper | `Directory.Build.targets` reprova o build se a referência resolvida, direta ou transitiva, tiver esses nomes | Nenhuma |
 
 ## Supressões
@@ -55,4 +65,6 @@ Corrija a causa. Quando não der, a exceção legítima vai para o `eslint.confi
 - Eventos sem dado pessoal; tudo aponta para `MemberId`.
 - Comentários e nomes em inglês; textos de interface em pt-BR, centralizados em `apps/mobile/src/strings/`.
 - Telas iguais ao design, toque ≥ 44 px, contraste AA.
+- No app: nome do arquivo igual ao do componente, cor por nome (`"red"`) e onde fica cada estado ([app.md](app.md)).
+- Duplicação abaixo de 50 tokens e em testes, que o `pnpm dup` não mede.
 - Imutabilidade no C# além de IDE0044 e CA2227 (por exemplo, `record` e coleções somente leitura no domínio).
