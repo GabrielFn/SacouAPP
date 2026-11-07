@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M2 · Motor da partida, fechado em 03/11/2026 ([relatório](relatorios/M2.md)). O M3 começa com o ok do Gabriel. M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M3 · Base da API e do app, iniciado em 07/11/2026 com o ok do Gabriel. M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -34,7 +34,7 @@
 
 ## Em andamento
 
-Nenhuma. M2 fechado; aguardando o ok do Gabriel para o M3.
+- E4.1: analista (Opus) escrevendo `docs/estado/tarefas/E4.1.md`.
 
 ## Adiadas
 
@@ -75,4 +75,4 @@ Nenhuma. M2 fechado; aguardando o ok do Gabriel para o M3.
 
 ## Bloqueadas
 
-Nenhuma.
+- E3.1 (e, por dependência, E3.2–E3.5, E4.2–E4.6): falta o acesso ao Firebase (pergunta 8 em `perguntas.md`).
