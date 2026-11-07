@@ -13,6 +13,7 @@
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
 
 ## Respondidas
+- **Reducer pattern no app (07/11/2026):** vira a regra 4 de `docs/padroes/frontend.md`: `useReducer` com ações tipadas e reducer puro para estado com transições; modo quadra só com o reducer do motor; dados do servidor no TanStack Query.
 - **Regras do front-end (07/11/2026):** estado com registro único, layout só com unidades relativas e programação orientada a interfaces (`docs/padroes/frontend.md`). Ele concordou com a única exceção: pisos de acessibilidade em dp (toque ≥ 44 e linha fina), que a escala nunca reduz.
 - **Estatísticas, E2.9 (03/11/2026):** sequência é vitórias seguidas; partida encerrada sem vencedor quebra a sequência; "time" no Resumo é a cor (lado A/B). Fecha a pendência de `revisao-mvp.md:43`.
 - **Ponto individual, E2.8 (03/11/2026):** o app barra combinações impossíveis (Ace só de quem sacou o rali; líbero nunca leva Ace nem Bloqueio); autor só preenchido com a partida aberta; sem apagar autor, só trocar ou DESFAZER.

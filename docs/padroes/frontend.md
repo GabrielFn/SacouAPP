@@ -30,3 +30,15 @@ Quem usa depende de um **contrato** (`interface` ou tipo em TS), nunca de uma im
 - Cada serviço tem uma implementação real e uma falsa para teste, ambas cumprindo a mesma interface.
 - Props de componente são declaradas como `interface` com nome (`ButtonProps`), exportada junto do componente.
 - A interface fica junto de quem a consome (na fatia ou em `src/ui`), e a implementação fica num adaptador separado.
+
+## 4. Reducer pattern para estado com transições
+
+Definida pelo Gabriel em 07/11/2026.
+
+- Todo estado de tela com mais de um campo que muda junto, ou com transições (formulário de várias etapas, fluxo de sorteio, edição com confirmar e cancelar), usa `useReducer` com **ações tipadas** (união discriminada por `type`) e um **reducer puro**, num arquivo próprio e testado sem React.
+- O reducer não tem efeito colateral: chamada à API, armazenamento, vibração e navegação ficam fora dele, nos serviços da regra 3, disparados pelo componente ou hook.
+- O reducer é exaustivo: o `switch` cobre todas as ações, e o TS reprova ação nova sem tratamento.
+- O estado do reducer segue a regra 1: guarda só o que não pode ser derivado.
+- **Modo quadra:** usa só o reducer do motor (`EventApplier` e `replayEvents` do `match-engine`). A tela despacha eventos e mostra o estado do replay, sem um reducer próprio que repita as regras.
+- **Dados do servidor:** ficam no TanStack Query, nunca copiados para um reducer.
+- Estado simples, de um campo isolado (como um interruptor ou um texto de busca), pode usar `useState`.

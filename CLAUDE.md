@@ -23,7 +23,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/estado/perguntas.md` | Perguntas abertas para o Gabriel e respostas |
 | `docs/arquitetura/` | Visão geral e ADRs (`adr/NNNN-titulo.md`) |
 | `docs/seguranca/` | Modelo de ameaças, checklist (ASVS/MASVS), inventário LGPD, lista de segredos (só nomes) |
-| `docs/padroes/frontend.md` | Regras obrigatórias do app: estado com registro único, layout só com unidades relativas, programação orientada a interfaces |
+| `docs/padroes/frontend.md` | Regras obrigatórias do app: estado com registro único, layout só com unidades relativas, programação orientada a interfaces, reducer pattern |
 | `docs/operacao/`, `docs/padroes/` | Ambientes, deploy, backup; convenções de código, testes, commits |
 | `docs/ideias.md` | Ideias fora do escopo do MVP |
 
@@ -74,7 +74,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 - TS strict, sem `any`. C# com nullable ativado e avisos como erro. Sem números mágicos. Imutabilidade por padrão. Result pattern em vez de exceções para regra de negócio. Sem MediatR e sem AutoMapper.
 - Regras do vôlei e do motor sempre com **testes golden compartilhados entre TS e C#**.
 - Eventos nunca carregam dado pessoal (só IDs). Tudo aponta para `MemberId`, nunca `UserId`.
-- **App (`apps/mobile`):** seguir `docs/padroes/frontend.md` (estado com registro único, layout só com unidades relativas, orientado a interfaces).
+- **App (`apps/mobile`):** seguir `docs/padroes/frontend.md` (estado com registro único, layout só com unidades relativas, orientado a interfaces, reducer pattern).
 - Telas iguais a `design/telas/`, alvos de toque ≥ 44 px, contraste AA.
 
 ## Segredos
