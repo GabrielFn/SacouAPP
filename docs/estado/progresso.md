@@ -34,7 +34,7 @@
 
 ## Em andamento
 
-- E4.1: analista (Opus) escrevendo `docs/estado/tarefas/E4.1.md`.
+- E4.1: plano em `docs/estado/tarefas/E4.1.md`; desenvolvedor (Sonnet) na branch `task/E4.1-design-system`. Perguntas 9 e 10 seguem a recomendação até a resposta.
 
 ## Adiadas
 
