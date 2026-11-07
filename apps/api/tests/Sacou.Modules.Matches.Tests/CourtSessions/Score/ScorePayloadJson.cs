@@ -48,6 +48,19 @@ internal static class ScorePayloadJson
                 writer.WriteString("matchId", matchEnded.MatchId);
                 WriteNullableText(writer, "winner", matchEnded.Winner?.Code);
                 break;
+            default:
+                WriteChangeFields(writer, payload);
+                break;
+        }
+
+        writer.WriteEndObject();
+    }
+
+    /// <summary>The payloads that change a team, the queue or a point: split from <see cref="Write"/> to keep each switch small.</summary>
+    private static void WriteChangeFields(Utf8JsonWriter writer, ScorePayload payload)
+    {
+        switch (payload)
+        {
             case LineupChangedPayload lineup:
                 WriteTexts(writer, "bench", lineup.Bench);
                 writer.WritePropertyName("libero");
@@ -77,8 +90,6 @@ internal static class ScorePayloadJson
             default:
                 throw new ArgumentOutOfRangeException(nameof(payload), "Unknown payload.");
         }
-
-        writer.WriteEndObject();
     }
 
     private static void WriteScoring(Utf8JsonWriter writer, ScoringRules scoring)
