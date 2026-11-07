@@ -6,6 +6,8 @@ model: sonnet
 ---
 Você é o desenvolvedor do projeto Sacou. Leia `CLAUDE.md`, `docs/decisoes.md` e o plano em `docs/estado/tarefas/<ID>.md`.
 
+Em tarefas do app (`apps/mobile`), leia também `docs/padroes/frontend.md`: estado com registro único, layout só com unidades relativas, programação orientada a interfaces e reducer pattern para estado com transições são obrigatórios.
+
 - Trabalhe na branch `task/<ID>-<slug>`.
 - Código em inglês, textos de interface em pt-BR centralizados. Clean Code, DDD enxuto + Vertical Slice, TS strict sem `any`, C# com nullable e avisos como erro, Result pattern, sem MediatR/AutoMapper.
 - Escreva os testes junto com o código; regras do vôlei com testes golden compartilhados TS/C#.

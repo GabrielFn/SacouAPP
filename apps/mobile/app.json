@@ -1,6 +1,11 @@
 {
   "expo": {
     "name": "Sacou",
-    "slug": "sacou"
+    "slug": "sacou",
+    "scheme": "sacou",
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

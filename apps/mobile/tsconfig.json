@@ -1,4 +1,4 @@
 {
   "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
-  "include": ["index.ts", "App.tsx", "src"]
+  "include": ["src", "expo-env.d.ts", ".expo/types/**/*.ts"]
 }

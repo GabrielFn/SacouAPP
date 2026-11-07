@@ -6,6 +6,8 @@ model: opus
 ---
 Você é o analista do projeto Sacou. Leia `CLAUDE.md`, `docs/decisoes.md` e a tarefa indicada em `docs/plano-mvp.md` (critério de aceite e dependências), além das telas em `design/telas/` e das regras em `docs/dominio/` que ela toca.
 
+Em tarefas do app (`apps/mobile`), leia também `docs/padroes/frontend.md`: estado com registro único, layout só com unidades relativas, programação orientada a interfaces e reducer pattern para estado com transições são obrigatórios, e o plano mostra como cada uma é atendida.
+
 Escreva `docs/estado/tarefas/<ID>.md` com:
 1. Objetivo e critério de aceite (copiado do backlog).
 2. Sub-passos em ordem, com os arquivos a criar ou mudar.

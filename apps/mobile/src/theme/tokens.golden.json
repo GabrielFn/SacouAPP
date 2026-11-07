@@ -1,0 +1,91 @@
+{
+  "_comment": "Values read from design/telas/*.dc.html. If the canvas changes, change this file and tokens.data.ts together.",
+  "colors": {
+    "sand": {
+      "hex": "#F6F1E7",
+      "source": "Inicio.dc.html:20"
+    },
+    "night": {
+      "hex": "#0F1B2D",
+      "source": "Inicio.dc.html:38"
+    },
+    "serveOrange": {
+      "hex": "#FF5A1F",
+      "source": "Inicio.dc.html:89"
+    },
+    "ballYellow": {
+      "hex": "#FFC83D",
+      "source": "Inicio.dc.html:56"
+    },
+    "netBlue": {
+      "hex": "#1F5BFF",
+      "source": "Onboarding.dc.html:16"
+    },
+    "textSecondary": {
+      "hex": "#4A5566",
+      "source": "Inicio.dc.html:82"
+    },
+    "waitingFill": {
+      "hex": "#FFF3CF",
+      "source": "Inicio.dc.html:65"
+    },
+    "waitingBorder": {
+      "hex": "#E0A400",
+      "source": "Inicio.dc.html:65"
+    }
+  },
+  "court": {
+    "sun": {
+      "background": "#FFFFFF",
+      "foreground": "#000000",
+      "muted": "#3A3A3A"
+    },
+    "night": {
+      "background": "#000000",
+      "foreground": "#FFFFFF",
+      "muted": "#C8C8C8"
+    }
+  },
+  "sizes": {
+    "primaryButton": 56,
+    "iconButton": 48,
+    "field": 48,
+    "chip": 44,
+    "statusPill": 30,
+    "logo": 26,
+    "plusIcon": 22
+  },
+  "radii": {
+    "field": 12,
+    "button": 14,
+    "card": 18,
+    "pill": 22,
+    "statusPill": 15
+  },
+  "borderWidths": {
+    "thin": 1.5,
+    "thick": 2
+  },
+  "nightAlpha": {
+    "card": 0.12,
+    "divider": 0.14,
+    "chip": 0.18,
+    "field": 0.25,
+    "dashed": 0.4
+  },
+  "fontSizes": {
+    "displayBrand": 24,
+    "statusPill": 14,
+    "link": 16,
+    "button": 17
+  },
+  "iconStroke": {
+    "plus": 2.2
+  },
+  "sources": {
+    "sizes": "Inicio.dc.html:24,25,26,47; Onboarding.dc.html:20,47,91",
+    "radii": "Inicio.dc.html:37,47,65,81; Onboarding.dc.html:20,91",
+    "fontSizes": "Inicio.dc.html:24,41,47; Onboarding.dc.html:91",
+    "iconStroke": "Inicio.dc.html:26"
+  }
+}
