@@ -56,3 +56,7 @@ Corrija a causa. Quando não der, a exceção legítima vai para o `eslint.confi
 - Comentários e nomes em inglês; textos de interface em pt-BR, centralizados em `apps/mobile/src/strings/`.
 - Telas iguais ao design, toque ≥ 44 px, contraste AA.
 - Imutabilidade no C# além de IDE0044 e CA2227 (por exemplo, `record` e coleções somente leitura no domínio).
+
+## Front-end do app (E4.1)
+
+Regras do Gabriel em `docs/padroes/frontend.md`. Onde fica cada coisa: tokens em `apps/mobile/src/theme/tokens.data.ts` (única fonte de números e hex), escala por janela em `scale.ts`, temas em `themes.ts`, componentes base em `src/ui/` (um por arquivo, props em `interface` exportada), serviços em `src/services` e adaptadores em `src/adapters`, textos em `src/strings/pt-BR.ts`. Componente não escreve hex nem pixel: lê `useTheme()`. Ver ADR 0034.

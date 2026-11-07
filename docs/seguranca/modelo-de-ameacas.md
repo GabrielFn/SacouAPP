@@ -180,3 +180,4 @@ Revisado em 01/11/2026 ([parecer](revisoes/M1-2026-11-01.md)). Aqui, "Mitigaçã
 | I: valor preso em `refs/pull` | Revogar o segredo; a sonda usa valor fictício | Nenhuma |
 | D: abuso de minutos ou cache | Timeouts, cancelamento em PR e cache isolado por ref | Nenhuma com um único colaborador |
 | R: exceção eterna do audit | `test:tooling` cobra a validade | Formas que escapam da política (SEC-M1) e cobrança só em execução com código |
+| T: fonte do app adulterada (E4.1) | TTF versionados no repositório, de repositórios oficiais, com SHA-256 no ADR 0034; sem download em execução | Conferir o hash exige comparar com a fonte oficial |

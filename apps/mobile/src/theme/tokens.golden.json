@@ -1,0 +1,21 @@
+{
+  "_comment": "Values read from design/telas/*.dc.html. If the canvas changes, change this file and tokens.data.ts together.",
+  "colors": {
+    "sand": { "hex": "#F6F1E7", "source": "produto.md:148" },
+    "night": { "hex": "#0F1B2D", "source": "produto.md:148" },
+    "serveOrange": { "hex": "#FF5A1F", "source": "Inicio.dc.html:88" },
+    "ballYellow": { "hex": "#FFC83D", "source": "produto.md:148" },
+    "netBlue": { "hex": "#1F5BFF", "source": "produto.md:148" },
+    "textSecondary": { "hex": "#4A5566", "source": "Inicio.dc.html" },
+    "waitingFill": { "hex": "#FFF3CF", "source": "Inicio.dc.html:65" },
+    "waitingBorder": { "hex": "#E0A400", "source": "Inicio.dc.html:65" }
+  },
+  "court": {
+    "sun": { "background": "#FFFFFF", "foreground": "#000000", "muted": "#3A3A3A" },
+    "night": { "background": "#000000", "foreground": "#FFFFFF", "muted": "#C8C8C8" }
+  },
+  "sizes": { "primaryButton": 56, "iconButton": 48, "field": 48, "chip": 44, "statusPill": 30 },
+  "radii": { "field": 12, "button": 14, "card": 18, "pill": 22 },
+  "borderWidths": { "thin": 1.5, "thick": 2 },
+  "nightAlpha": { "card": 0.12, "divider": 0.14, "chip": 0.18, "field": 0.25, "dashed": 0.4 }
+}

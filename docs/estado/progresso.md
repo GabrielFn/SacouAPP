@@ -66,7 +66,7 @@
 - E2.8, pendências: `attributions/commands.ts:65-71` repete `isPointKind` e a regra tipo × autor de `score/parse-payloads.ts:466-473` (exportar e reutilizar); `getUnattributedPoints` só lista o set exibido, então a E4.10 chama antes de confirmar o fim do set ou ganha filtro por set; o resolvedor não reaplica a plausibilidade, e um Ace forjado conta (E3.7); E3.7: um `PointAttributed` com autor de fora ou partida fechada derruba o replay do stream, então o servidor simula antes de gravar; sem limite de preenchimentos por ponto (E3.7 conta eventos por partida).
 - E2.9, pendências: `groupByMatch` (`stats/by-match.ts`) supõe que cada partida ocupa um trecho contíguo da linha do tempo, o que vale por haver uma partida aberta por vez; travar com teste se o modelo mudar. `entries.at(-1)?.state.finishedMatches` repetido em `player-stats.ts` e `side-stats.ts`. Mutação não rodada: ponto revertido contado.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
-- E4.1: validar cedo o Unistyles com React Native 0.88 (sem confirmação nas fontes).
+- E4.1: Unistyles descartado na prova (peers nativos incluindo pacote deprecated); plano B no ADR 0034. Falta confirmar o catálogo no primeiro dev build.
 
 ## Lembretes para o Gabriel
 
