@@ -31,10 +31,11 @@
 | E2.9 | Feita | ADR 0032 e `docs/dominio/estatisticas.md`. Respostas do Gabriel de 03/11 em `perguntas.md`. Só cálculo, sem evento: `getPlayerStats` e `getSideStats`. Revisor com oráculo próprio: 7.937 linhas de jogador em 1.358 partidas, 0 divergências. Testador passou: 14 mutações, uma equivalente e uma sobrevivente (times trocando de lado), morta com teste novo. Não sensível. |
 | E2.10 | Feita | ADR 0033. Porte para C# em 5 partes, com os 14 golden do `match-engine`. Revisão leve da P1 e revisão completa aprovadas; diferencial TS × C# com 7.808 logs e 327.947 eventos, 0 diferenças e 0 exceções. Segurança aprovou, com fuzz de 40 mil logs; dois achados médios no leitor de JSON corrigidos. Testador passou: 2.798 testes .NET e 12 mutações reprovadas. |
 | Revisão geral de segurança do M2 | Feita | Aprovada com condições ([parecer](../seguranca/revisoes/M2-2026-11-03.md)): a E3.7 e a E3.8 só entram com os itens da seção 3.1 de `modelo-de-ameacas.md` atendidos ou com risco aceito pelo Gabriel; pendências antigas sem dono passaram à E5.3. |
+| E4.1 | Feita | PR #41, ADR 0034: Unistyles descartado na prova, `StyleSheet` com `ThemeProvider` próprio. Regras de `docs/padroes/frontend.md` (Gabriel, 07/11) aplicadas. Revisor reprovou o ciclo 1 por tipografia fora do canvas e aprovou o ciclo 2; testador passou, com 84 testes no app e a lacuna dos pisos de acessibilidade fechada. Orquestrador corrigiu as linhas citadas no golden das cores. |
 
 ## Em andamento
 
-- E4.1: PR #41 com CI verde, ADR 0034 (Unistyles descartado, StyleSheet com ThemeProvider próprio). Revisor (Opus) e testador (Sonnet) em paralelo. Perguntas 9 e 10 seguem a recomendação até a resposta.
+Nenhuma.
 
 ## Adiadas
 
@@ -66,7 +67,7 @@
 - E2.8, pendências: `attributions/commands.ts:65-71` repete `isPointKind` e a regra tipo × autor de `score/parse-payloads.ts:466-473` (exportar e reutilizar); `getUnattributedPoints` só lista o set exibido, então a E4.10 chama antes de confirmar o fim do set ou ganha filtro por set; o resolvedor não reaplica a plausibilidade, e um Ace forjado conta (E3.7); E3.7: um `PointAttributed` com autor de fora ou partida fechada derruba o replay do stream, então o servidor simula antes de gravar; sem limite de preenchimentos por ponto (E3.7 conta eventos por partida).
 - E2.9, pendências: `groupByMatch` (`stats/by-match.ts`) supõe que cada partida ocupa um trecho contíguo da linha do tempo, o que vale por haver uma partida aberta por vez; travar com teste se o modelo mudar. `entries.at(-1)?.state.finishedMatches` repetido em `player-stats.ts` e `side-stats.ts`. Mutação não rodada: ponto revertido contado.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
-- E4.1: Unistyles descartado na prova (peers nativos incluindo pacote deprecated); plano B no ADR 0034. Falta confirmar o catálogo no primeiro dev build.
+- E4.1, pendências: confirmar a compilação nativa e o catálogo no primeiro dev build (roteiro do fim do M3); check na pílula "Vou"; `text-underline-offset` sem suporte no `Text` do RN (ADR 0034); `StatusPill.tsx:20` usa `palette.night` direto no texto da espera, trocar por papel de tema.
 
 ## Lembretes para o Gabriel
 
