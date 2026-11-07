@@ -34,7 +34,7 @@
 
 ## Em andamento
 
-- E4.1: plano em `docs/estado/tarefas/E4.1.md`; desenvolvedor (Sonnet) na branch `task/E4.1-design-system`. Perguntas 9 e 10 seguem a recomendação até a resposta.
+- E4.1: PR #41 com CI verde, ADR 0034 (Unistyles descartado, StyleSheet com ThemeProvider próprio). Revisor (Opus) e testador (Sonnet) em paralelo. Perguntas 9 e 10 seguem a recomendação até a resposta.
 
 ## Adiadas
 
