@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
-import { palette } from "../theme/tokens.data";
+import { fontFamilies, palette } from "../theme/tokens.data";
 
 import { Text } from "./Text";
 
@@ -17,14 +17,14 @@ export function StatusPill({ label, status }: StatusPillProps) {
   const { colors, tokens } = useTheme();
   const look = {
     confirmed: { fill: colors.text, border: colors.text, text: colors.background },
-    waiting: { fill: palette.waitingFill, border: palette.waitingBorder, text: palette.night },
+    waiting: { fill: colors.waitingFill, border: colors.waitingBorder, text: palette.night },
     pay: { fill: colors.primary, border: colors.primary, text: colors.onPrimary },
   }[status];
   return (
     <View
       style={{
         minHeight: tokens.sizes.statusPill,
-        borderRadius: tokens.radii.pill,
+        borderRadius: tokens.radii.statusPill,
         borderWidth: tokens.borderWidths.thin,
         borderColor: look.border,
         backgroundColor: look.fill,
@@ -34,7 +34,13 @@ export function StatusPill({ label, status }: StatusPillProps) {
         alignSelf: "flex-start",
       }}
     >
-      <Text variant="caption" style={{ color: look.text }}>
+      <Text
+        style={{
+          color: look.text,
+          fontFamily: status === "pay" ? fontFamilies.body700 : fontFamilies.body600,
+          fontSize: tokens.fontSizes.statusPill,
+        }}
+      >
         {label}
       </Text>
     </View>

@@ -45,7 +45,10 @@ export const fontSizes = {
   field: 16,
   button: 17,
   displayBlock: 18,
+  displayBrand: 24,
   displayMedium: 32,
+  statusPill: 14,
+  link: 16,
   displayTitleSmall: 36,
   displayTitle: 40,
   displayTitleLarge: 44,
@@ -72,9 +75,13 @@ export const radii = {
   tile: 16,
   card: 18,
   pill: 22,
+  statusPill: 15,
 } as const;
 
 export const borderWidths = { thin: 1.5, thick: 2 } as const;
+
+// Icon stroke in viewBox units (Inicio.dc.html:26).
+export const iconStroke = { plus: 2.2, check: 2.5 } as const;
 
 export const sizes = {
   minTouchTarget: 44,
@@ -83,7 +90,8 @@ export const sizes = {
   field: 48,
   chip: 44,
   statusPill: 30,
-  logo: 32,
+  logo: 26,
+  plusIcon: 22,
   checkIcon: 16,
 } as const;
 

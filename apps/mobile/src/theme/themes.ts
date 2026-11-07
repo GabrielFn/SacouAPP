@@ -14,6 +14,8 @@ export const THEME_ROLES = [
   "borderChip",
   "borderField",
   "borderDashed",
+  "waitingFill",
+  "waitingBorder",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -37,6 +39,8 @@ export const appTheme = {
   borderChip: nightWithAlpha(nightAlpha.chip),
   borderField: nightWithAlpha(nightAlpha.field),
   borderDashed: nightWithAlpha(nightAlpha.dashed),
+  waitingFill: palette.waitingFill,
+  waitingBorder: palette.waitingBorder,
 } as const satisfies Theme;
 
 function courtTheme(colors: { background: string; foreground: string; muted: string }): Theme {
@@ -54,6 +58,8 @@ function courtTheme(colors: { background: string; foreground: string; muted: str
     borderChip: colors.muted,
     borderField: colors.muted,
     borderDashed: colors.muted,
+    waitingFill: palette.waitingFill,
+    waitingBorder: palette.waitingBorder,
   };
 }
 

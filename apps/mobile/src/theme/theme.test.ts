@@ -9,6 +9,8 @@ import {
   borderWidths,
   canvasWidth,
   courtPalette,
+  fontSizes,
+  iconStroke,
   interactiveHeights,
   nightAlpha,
   palette,
@@ -41,6 +43,10 @@ describe("tokens match the canvas golden", () => {
     for (const [name, value] of Object.entries(golden.radii)) {
       expect(radii[name as keyof typeof radii]).toBe(value);
     }
+    for (const [name, value] of Object.entries(golden.fontSizes)) {
+      expect(fontSizes[name as keyof typeof fontSizes]).toBe(value);
+    }
+    expect(iconStroke.plus).toBe(golden.iconStroke.plus);
     expect(borderWidths).toEqual(golden.borderWidths);
     expect(nightAlpha).toEqual(golden.nightAlpha);
   });

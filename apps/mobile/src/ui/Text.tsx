@@ -6,6 +6,7 @@ import { fontFamilies } from "../theme/tokens.data";
 export type TextVariant = "display" | "title" | "body" | "bodyStrong" | "caption" | "muted";
 export type DisplaySize =
   | "displayBlock"
+  | "displayBrand"
   | "displayMedium"
   | "displayTitleSmall"
   | "displayTitle"
@@ -34,7 +35,7 @@ export function Text({
     },
     title: {
       fontFamily: fontFamilies.body700,
-      fontSize: tokens.fontSizes.field,
+      fontSize: tokens.fontSizes.button,
       color: colors.text,
     },
     bodyStrong: {

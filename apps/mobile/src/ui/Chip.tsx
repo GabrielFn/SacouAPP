@@ -25,11 +25,11 @@ export function Chip({ label, selected, onPress, kind = "radio" }: ChipProps) {
         borderWidth: tokens.borderWidths.thin,
         borderColor: selected ? colors.text : colors.borderChip,
         backgroundColor: selected ? colors.text : colors.surface,
-        paddingHorizontal: tokens.spacing.l,
+        paddingHorizontal: tokens.spacing.s14,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        gap: tokens.spacing.s,
+        gap: tokens.spacing.s6,
       }}
     >
       {kind === "toggle" && selected ? <CheckIcon color={colors.background} /> : null}

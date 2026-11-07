@@ -20,7 +20,7 @@ export function AppHeader({ action }: AppHeaderProps) {
         accessibilityLabel={strings.a11y.logo}
       >
         <Logo size={tokens.sizes.logo} />
-        <Text variant="display" displaySize="displayMedium">
+        <Text variant="display" displaySize="displayBrand">
           {strings.appName}
         </Text>
       </View>

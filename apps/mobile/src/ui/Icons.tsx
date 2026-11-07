@@ -1,6 +1,7 @@
 import Svg, { Path } from "react-native-svg";
 
 import { LOGO_ASPECT, LOGO_CELLS, LOGO_VIEW_BOX } from "../theme/logo.data";
+import { iconStroke } from "../theme/tokens.data";
 import { useTheme } from "../theme/theme-context";
 
 export interface IconProps {
@@ -14,21 +15,20 @@ export interface LogoProps {
 const VIEW_BOX = "0 0 24 24";
 const PLUS_PATH = "M12 5v14M5 12h14";
 const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
-const STROKE_WIDTH = 2.5;
 
 export function PlusIcon({ color }: IconProps) {
   const { colors, tokens } = useTheme();
   return (
     <Svg
-      width={tokens.sizes.checkIcon}
-      height={tokens.sizes.checkIcon}
+      width={tokens.sizes.plusIcon}
+      height={tokens.sizes.plusIcon}
       viewBox={VIEW_BOX}
       fill="none"
     >
       <Path
         d={PLUS_PATH}
         stroke={color ?? colors.text}
-        strokeWidth={STROKE_WIDTH}
+        strokeWidth={iconStroke.plus}
         strokeLinecap="round"
       />
     </Svg>
@@ -47,7 +47,7 @@ export function CheckIcon({ color }: IconProps) {
       <Path
         d={CHECK_PATH}
         stroke={color ?? colors.text}
-        strokeWidth={STROKE_WIDTH}
+        strokeWidth={iconStroke.check}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

@@ -39,7 +39,7 @@ export function Button({
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: look.background,
-        minHeight: isLink ? tokens.sizes.minTouchTarget : tokens.sizes.primaryButton,
+        minHeight: tokens.sizes.primaryButton,
         borderRadius: tokens.radii.button,
         paddingHorizontal: tokens.spacing.xl,
       }}
@@ -47,8 +47,8 @@ export function Button({
       <Text
         style={{
           color: look.foreground,
-          fontFamily: fontFamilies.body700,
-          fontSize: tokens.fontSizes.button,
+          fontFamily: isLink ? fontFamilies.body600 : fontFamilies.body700,
+          fontSize: isLink ? tokens.fontSizes.link : tokens.fontSizes.button,
           textDecorationLine: isLink ? "underline" : "none",
         }}
       >

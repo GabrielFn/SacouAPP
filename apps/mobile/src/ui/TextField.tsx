@@ -18,7 +18,7 @@ export function TextField({ label, help, ...inputProps }: TextFieldProps) {
   const { colors, tokens } = useTheme();
   const helpId = useId();
   return (
-    <View style={{ gap: tokens.spacing.s6 }}>
+    <View style={{ gap: tokens.spacing.xs }}>
       <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small }}>
         {label}
       </Text>

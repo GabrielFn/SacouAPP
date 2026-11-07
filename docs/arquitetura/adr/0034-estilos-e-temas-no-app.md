@@ -42,3 +42,7 @@ Inter 4.1 (rsms/inter, `extras/ttf`) e Barlow Condensed (jpt/barlow), TTF estát
 
 - Sem teste de render nesta tarefa; "iguais ao canvas" fica em tokens golden, contraste e revisão. O catálogo (`/dev/catalog`, só em `__DEV__`) é conferido no primeiro dev build.
 - `decisoes.md` e `adr/0001` ganham a referência a este ADR.
+
+## Nota (ciclo 2)
+
+As fontes são carregadas em execução por `useFonts` (adaptador `expo-font-loader`), a partir dos TTF do bundle, e não pelo plugin de config do `expo-font`; não há rede em nenhum caso. Pendências: ícone de check na pílula "Vou" e deslocamento do sublinhado do botão `link` (4 no canvas; o React Native não o suporta em `Text`).
