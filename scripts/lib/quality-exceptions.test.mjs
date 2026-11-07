@@ -68,3 +68,14 @@ describe("scripts/quality-exceptions.json", () => {
     assert.doesNotThrow(() => loadQualityExceptions());
   });
 });
+
+describe("expired exception in a gate", () => {
+  it("frees nothing, so the size gate still fails the file", () => {
+    const { exceptions, failures } = readQualityExceptions(
+      JSON.stringify([{ ...VALID, expires: "2026-01-01" }]),
+      TODAY,
+    );
+    assert.equal(failures.length, 1);
+    assert.deepEqual(exceptedPaths(exceptions, "max-lines"), []);
+  });
+});

@@ -26,6 +26,8 @@ dotnet_diagnostic.IDE0161.severity = warning
 dotnet_style_namespace_match_folder = true
 dotnet_diagnostic.IDE0130.severity = warning
 dotnet_diagnostic.CA2227.severity = warning
+# Cyclomatic complexity over CodeMetricsConfig.txt (10) fails the build (ADR 0035).
+dotnet_diagnostic.CA1502.severity = warning
 
 # xUnit test names use underscores and test classes must be public.
 [apps/api/tests/**.cs]

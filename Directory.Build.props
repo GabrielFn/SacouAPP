@@ -18,4 +18,8 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
+    <ItemGroup>
+        <!-- CA1502 threshold (ADR 0035). No exceptions in C#: refactor instead. -->
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
+    </ItemGroup>
 </Project>
