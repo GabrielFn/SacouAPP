@@ -35,7 +35,7 @@
 
 ## Em andamento
 
-Nenhuma.
+- E0.10: pedida pelo Gabriel em 07/11 (regras do front-end na CI, duplicação, complexidade e tamanho de arquivo). Analista (Opus) na branch `task/E0.10-quality-gates`.
 
 ## Adiadas
 

@@ -99,6 +99,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 |---|---|---|---|
 | E0.8 | Base de conhecimento: estrutura de `docs/`, ADRs iniciais (stack, monorepo, event sourcing por quadra, modo de regra), glossário, modelo de ameaças, inventário LGPD, lista de segredos | Todas as decisões já tomadas registradas como ADR | E0.5 |
 | E0.9 | Segurança na CI: varredura de segredos, dependências vulneráveis e análise estática | CI falha com um segredo de teste plantado | E0.4 |
+| E0.10 | Portões de qualidade na CI: regras do front-end (`docs/padroes/frontend.md`) no ESLint, duplicação de código, complexidade ciclomática e tamanho máximo de arquivo, em TS e C# | CI reprova cada violação plantada; código atual dentro dos limites ou com exceção justificada e com prazo | E0.4, E4.1 |
 
 ### E1 · Regras do vôlei (`volley-rules`) (M1–M2)
 
