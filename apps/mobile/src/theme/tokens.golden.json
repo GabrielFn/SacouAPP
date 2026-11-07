@@ -3,23 +3,23 @@
   "colors": {
     "sand": {
       "hex": "#F6F1E7",
-      "source": "Inicio.dc.html:22"
+      "source": "Inicio.dc.html:20"
     },
     "night": {
       "hex": "#0F1B2D",
-      "source": "Inicio.dc.html:41"
+      "source": "Inicio.dc.html:38"
     },
     "serveOrange": {
       "hex": "#FF5A1F",
-      "source": "Inicio.dc.html:88"
+      "source": "Inicio.dc.html:89"
     },
     "ballYellow": {
       "hex": "#FFC83D",
-      "source": "Inicio.dc.html:25"
+      "source": "Inicio.dc.html:56"
     },
     "netBlue": {
       "hex": "#1F5BFF",
-      "source": "Onboarding.dc.html:91"
+      "source": "Onboarding.dc.html:16"
     },
     "textSecondary": {
       "hex": "#4A5566",
