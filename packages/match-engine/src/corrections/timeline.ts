@@ -1,10 +1,12 @@
+import type { SetterZone } from "@sacou/volley-rules";
+
 import { resolvePointAttributions } from "../attributions/resolve.js";
 import type { PointAttribution } from "../attributions/types.js";
 import type { TimelineEntry } from "../event-log/types.js";
 import { MATCH_STARTED_EVENT_TYPE, POINT_SCORED_EVENT_TYPE } from "../score/constants.data.js";
 import { parsePointScoredPayload } from "../score/parse-payloads.js";
 import { getCurrentServingPlayer, isSideOut } from "../score/rotation-rules.js";
-import type { CourtSessionState, MatchScore } from "../score/types.js";
+import type { CourtSessionState, MatchScore, MatchSet, TeamSide } from "../score/types.js";
 import { CORRECTION_TIMELINE_POINTS } from "./constants.data.js";
 import type { CourtSessionTimeline, RecentPoint } from "./types.js";
 
@@ -35,28 +37,66 @@ function listedSetNumber({ completedSets, currentSet }: MatchScore): number | nu
 
 type AttributionsByPoint = ReadonlyMap<string, PointAttribution>;
 
-function toRecentPoint(
-  before: CourtSessionState,
-  { event, state }: Entry,
-  { matchId, setNumber }: { readonly matchId: string; readonly setNumber: number },
-  attributions: AttributionsByPoint,
-): RecentPoint | null {
+interface ListedSet {
+  readonly matchId: string;
+  readonly setNumber: number;
+}
+
+/** The team that scored the event, when it is a point of the listed set; otherwise `null`. */
+function readListedPointTeam(
+  event: Entry["event"],
+  { matchId, setNumber }: ListedSet,
+): TeamSide | null {
   if (event.type !== POINT_SCORED_EVENT_TYPE) {
     return null;
   }
   const parsed = parsePointScoredPayload(event.payload);
+  if (!parsed.ok) {
+    return null;
+  }
+  const isListed = parsed.value.matchId === matchId && parsed.value.setNumber === setNumber;
+  return isListed ? parsed.value.team : null;
+}
+
+interface PointSets {
+  readonly matchBefore: MatchScore;
+  readonly setBefore: MatchSet;
+  readonly setAfter: MatchSet;
+}
+
+/** The match and set before the point and the set after it, when all of them are open. */
+function readPointSets(before: CourtSessionState, after: CourtSessionState): PointSets | null {
   const matchBefore = before.currentMatch;
   const setBefore = matchBefore?.currentSet ?? null;
-  const setAfter = state.currentMatch?.currentSet ?? null;
-  if (!parsed.ok || matchBefore === null || setBefore === null || setAfter === null) {
+  const setAfter = after.currentMatch?.currentSet ?? null;
+  return matchBefore === null || setBefore === null || setAfter === null
+    ? null
+    : { matchBefore, setBefore, setAfter };
+}
+
+function setterZoneAfter(state: CourtSessionState, team: TeamSide): SetterZone | null {
+  return state.currentMatch?.rotations[team]?.setterZone ?? null;
+}
+
+function authorshipOf(
+  attribution: PointAttribution | undefined,
+): Pick<RecentPoint, "author" | "kind"> {
+  return { author: attribution?.author ?? null, kind: attribution?.kind ?? null };
+}
+
+function toRecentPoint(
+  before: CourtSessionState,
+  { event, state }: Entry,
+  listed: ListedSet,
+  attributions: AttributionsByPoint,
+): RecentPoint | null {
+  const team = readListedPointTeam(event, listed);
+  const sets = readPointSets(before, state);
+  if (team === null || sets === null) {
     return null;
   }
-  const { team } = parsed.value;
-  if (parsed.value.matchId !== matchId || parsed.value.setNumber !== setNumber) {
-    return null;
-  }
+  const { matchBefore, setBefore, setAfter } = sets;
   const sideOut = isSideOut(setBefore.servingTeam, team);
-  const attribution = attributions.get(event.eventId);
   return {
     eventId: event.eventId,
     team,
@@ -64,9 +104,8 @@ function toRecentPoint(
     servingTeam: setBefore.servingTeam,
     servingPlayer: getCurrentServingPlayer(matchBefore),
     sideOut,
-    setterZone: sideOut ? (state.currentMatch?.rotations[team]?.setterZone ?? null) : null,
-    author: attribution?.author ?? null,
-    kind: attribution?.kind ?? null,
+    setterZone: sideOut ? setterZoneAfter(state, team) : null,
+    ...authorshipOf(attributions.get(event.eventId)),
   };
 }
 
