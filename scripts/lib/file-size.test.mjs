@@ -12,10 +12,13 @@ function violations(files, exceptedPaths = []) {
 
 describe("countLines", () => {
   it("counts physical lines like wc -l", () => {
-    assert.equal(countLines(""), 0);
-    assert.equal(countLines("a\n"), 1);
-    assert.equal(countLines("a\n\nb\n"), 3);
-    assert.equal(countLines("a\nb"), 2);
+    const cases = [
+      { text: "", lines: 0 },
+      { text: "a\n", lines: 1 },
+      { text: "a\n\nb\n", lines: 3 },
+      { text: "a\nb", lines: 2 },
+    ];
+    cases.forEach(({ text, lines }) => assert.equal(countLines(text), lines));
   });
 });
 
