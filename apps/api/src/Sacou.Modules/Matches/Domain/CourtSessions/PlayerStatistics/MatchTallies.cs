@@ -80,16 +80,10 @@ internal static class MatchTallies
     /// <summary>The rally of an active point, from the state right before it: the court and the serve of that moment.</summary>
     private static IEnumerable<PlayedRally> PlayedRallyOf(TimelineEntry<CourtSessionState> before, TimelineEntry<CourtSessionState> entry)
     {
-        if (!string.Equals(entry.Event.Type, ScoreEventTypes.PointScored, StringComparison.Ordinal))
-        {
-            return [];
-        }
-
-        var parsed = ScorePayloadParser.Parse(entry.Event.Payload, ScorePayloadShapes.PointScored, PointScoredParser.ParseFields);
         var match = before.State.CurrentMatch;
-        if (parsed.IsFailure
+        if (PointScoredParser.ReadStored(entry.Event) is not { } point
             || match?.CurrentSet is not { } set
-            || !string.Equals(match.MatchId, parsed.Value.MatchId, StringComparison.Ordinal))
+            || !string.Equals(match.MatchId, point.MatchId, StringComparison.Ordinal))
         {
             return [];
         }
@@ -98,7 +92,7 @@ internal static class MatchTallies
         [
             new PlayedRally(
                 match.MatchId,
-                parsed.Value.Team,
+                point.Team,
                 new BySide<ImmutableArray<string>>(
                     OnCourtInTheRally(match, set.ServingTeam, TeamSide.A),
                     OnCourtInTheRally(match, set.ServingTeam, TeamSide.B))),
