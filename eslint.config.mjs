@@ -7,6 +7,9 @@ import functional from "eslint-plugin-functional";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
+import { mobileFrontendBlocks } from "./scripts/lib/eslint-mobile-rules.mjs";
+import { exceptedPaths, loadQualityExceptions } from "./scripts/lib/quality-exceptions.mjs";
+
 const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
 const TYPESCRIPT_FILES = [`**/*.${TS_EXTENSIONS}`];
 const MOBILE_FILES = [`apps/mobile/**/*.${TS_EXTENSIONS}`];
@@ -17,6 +20,13 @@ const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
 const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile}/src/**/*.{js,jsx,cjs,mjs}"];
 const TOOLING_FILES = ["eslint.config.mjs", "scripts/**/*.{js,cjs,mjs}"];
+const LONG_FILES = ["**/*.test.*", "**/*.test.fixture.ts"];
+
+// Quality gates (ADR 0035). Thresholds live here; exceptions only in scripts/quality-exceptions.json.
+const MAX_COMPLEXITY = 10;
+const MAX_LINES = 300;
+const MAX_LINES_IN_TESTS = 600;
+const QUALITY_EXCEPTIONS = loadQualityExceptions();
 
 const MAGIC_NUMBER_OPTIONS = {
   ignore: [-1, 0, 1],
@@ -70,6 +80,12 @@ const NO_FUNCTIONS_IN_DATA = {
   selector: ":function",
   message: "Data files hold data only. Move the logic to a regular file.",
 };
+const DATA_RESTRICTIONS = [...PURE_SYNTAX_RESTRICTIONS, NO_FUNCTIONS_IN_DATA];
+
+function exceptionBlock(gate, rules) {
+  const files = exceptedPaths(QUALITY_EXCEPTIONS, gate);
+  return files.length === 0 ? [] : [{ files, rules }];
+}
 
 export default defineConfig([
   globalIgnores([
@@ -205,7 +221,7 @@ export default defineConfig([
     files: DATA_FILES,
     rules: {
       "@typescript-eslint/no-magic-numbers": "off",
-      "no-restricted-syntax": ["error", ...PURE_SYNTAX_RESTRICTIONS, NO_FUNCTIONS_IN_DATA],
+      "no-restricted-syntax": ["error", ...DATA_RESTRICTIONS],
     },
   },
 
@@ -230,6 +246,30 @@ export default defineConfig([
       "functional/no-let": "error",
     },
   },
+
+  // Quality gates: complexity in production code and size everywhere (tests may be longer).
+  {
+    files: [...TYPESCRIPT_FILES, ...TOOLING_FILES],
+    rules: {
+      complexity: ["error", MAX_COMPLEXITY],
+      "max-lines": ["error", { max: MAX_LINES, skipBlankLines: false, skipComments: false }],
+    },
+  },
+  {
+    files: LONG_FILES,
+    rules: {
+      complexity: "off",
+      "max-lines": [
+        "error",
+        { max: MAX_LINES_IN_TESTS, skipBlankLines: false, skipComments: false },
+      ],
+    },
+  },
+  ...exceptionBlock("complexity", { complexity: "off" }),
+  ...exceptionBlock("max-lines", { "max-lines": "off" }),
+
+  // docs/padroes/frontend.md made automatic, in its own module.
+  ...mobileFrontendBlocks({ testFiles: TEST_FILES, dataRestrictions: DATA_RESTRICTIONS }),
 
   // Stylistic rules are Prettier's job, so this must stay last.
   prettier,

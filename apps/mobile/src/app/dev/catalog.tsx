@@ -26,7 +26,11 @@ function noop() {
   return undefined;
 }
 
-function ThemeSection({ title }: { readonly title: string }) {
+export interface ThemeSectionProps {
+  readonly title: string;
+}
+
+function ThemeSection({ title }: ThemeSectionProps) {
   const { colors, tokens } = useTheme();
   const [text, setText] = useState("");
   const [radio, setRadio] = useState(true);

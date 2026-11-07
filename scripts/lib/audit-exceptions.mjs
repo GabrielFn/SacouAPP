@@ -12,7 +12,9 @@ export function isCalendarDate(value) {
     return false;
   }
   const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, ISO_DATE_LENGTH) === value;
+  return (
+    !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, ISO_DATE_LENGTH) === value
+  );
 }
 
 function hasDatedFields(entry, keyField) {
