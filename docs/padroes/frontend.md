@@ -2,6 +2,8 @@
 
 Restrições definidas pelo Gabriel em 07/11/2026. Valem para todo código em `apps/mobile` e são conferidas pelo analista no plano, pelo revisor e pelo testador. Desvio só com ADR aprovado pelo Gabriel.
 
+**O que a CI confere sozinha** (ESLint, [ADR 0035](../arquitetura/adr/0035-portoes-de-qualidade.md), detalhes em `docs/padroes/codigo.md`): hex e `rgb()` fora de `src/theme/`; número em estilo (`StyleSheet.create`, atributo `style`, variável com tipo `*Style`), exceto `flex`, `flexGrow`, `flexShrink`, `opacity`, `aspectRatio` e `zIndex`; props como `interface` exportada; SDK de dispositivo ou serviço só em `src/adapters/`; e, em `*.reducer.ts`, `switch` exaustivo sem `default`. **O resto é do revisor:** registro único (regra 1), reducer sem efeito colateral, interface junto do consumidor, implementação falsa de cada serviço e medidas fixas que não sejam literais.
+
 ## 1. Estado com registro único
 
 Cada informação tem **um único lugar** onde é guardada. Ninguém mantém uma cópia dela.

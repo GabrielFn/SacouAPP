@@ -110,6 +110,8 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0031](adr/0031-ponto-individual.md) | Ponto individual: autor e tipo num evento à parte, lidos da linha do tempo |
 | [0032](adr/0032-estatisticas-por-jogador.md) | Estatísticas por jogador: calculadas da linha do tempo, só das partidas terminadas |
 | [0033](adr/0033-porte-csharp-do-motor.md) | Porte C# da função de estado: árvore própria de entrada, chave repetida recusada, golden compartilhados |
+| [0034](adr/0034-estilos-e-temas-no-app.md) | Estilos, temas e escala no app: `StyleSheet` com `ThemeProvider` próprio, tokens escalados pela janela |
+| [0035](adr/0035-portoes-de-qualidade.md) | Portões de qualidade: complexidade, tamanho, duplicação e regras do front na CI, exceções em `scripts/quality-exceptions.json` |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -132,7 +134,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
 | 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033 |
-| 27 | Padrões | 0011, 0029 |
+| 27 | Padrões | 0011, 0029, 0035 |
 | 28 | Dados pessoais | 0012 |
 | 29 | App | 0008 |
 | 30 | Monorepo | 0001 |

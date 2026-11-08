@@ -90,7 +90,9 @@ export function qualityLintCases(prefix) {
       NO_RESTRICTED_IMPORTS,
     ],
     [`${ui}expo.ts`, 'import "expo/fetch";\n', NO_RESTRICTED_IMPORTS],
-    [`apps/mobile/src/adapters/${prefix}haptics.ts`, 'import "expo-haptics";\n', CLEAN],
+    [`${ui}font.ts`, 'import "expo-font";\n', NO_RESTRICTED_IMPORTS],
+    // An installed SDK, so import/no-unresolved stays quiet: the adapters are free.
+    [`apps/mobile/src/adapters/${prefix}font.ts`, 'import "expo-font";\n', CLEAN],
     [`apps/mobile/src/app/${prefix}screen.ts`, 'export { Stack } from "expo-router";\n', CLEAN],
     [
       `${ui}type-props.ts`,
@@ -126,11 +128,13 @@ function writeFiles(directory, files) {
   Object.entries(files).forEach(([name, code]) => writeFileSync(join(directory, name), code));
 }
 
+// No shell: it would split a node path with spaces ("C:\Program Files\...") and fail every case.
 function run(command, args, cwd) {
-  return spawnSync(command, args, { cwd, encoding: "utf8", shell: process.platform === "win32" });
+  return spawnSync(command, args, { cwd, encoding: "utf8" });
 }
 
-// A filter and a reduction: about 60 tokens in TypeScript and in C#; the short one has about 40.
+// A filter and a reduction: 71 tokens in TypeScript and 65 in C# (jscpd 5.4.2), above the limit
+// of 50; the short ones stay under it.
 const TS_LONG = (
   name,
 ) => `export function ${name}(values: readonly number[], limit: number): number {
@@ -158,6 +162,17 @@ internal static class ${name}
 }
 `;
 
+const CS_SHORT = (name) => `namespace Probe;
+
+internal static class ${name}
+{
+    public static int Count(int[] values, int limit)
+    {
+        return values.Count(value => value > limit);
+    }
+}
+`;
+
 const DUPLICATION_CASES = [
   {
     name: "TypeScript, 60 tokens",
@@ -174,6 +189,11 @@ const DUPLICATION_CASES = [
     files: { "A.cs": CS_LONG("First"), "B.cs": CS_LONG("Second") },
     fails: true,
   },
+  {
+    name: "C#, 40 tokens",
+    files: { "A.cs": CS_SHORT("First"), "B.cs": CS_SHORT("Second") },
+    fails: false,
+  },
 ];
 
 /** Runs check-duplication.mjs on planted clones; returns the failures. */
@@ -183,7 +203,9 @@ export function runDuplicationCases(root, prefix) {
     try {
       writeFiles(directory, files);
       const result = run(process.execPath, ["scripts/check-duplication.mjs", directory], root);
-      return (result.status !== 0) === fails
+      // A failure only counts when jscpd reported the clone, not when the command broke.
+      const reported = result.status === 1 && (result.stderr ?? "").includes(" clone of ");
+      return (fails ? reported : result.status === 0)
         ? []
         : [
             `duplication (${name}): expected ${fails ? "a failure" : "a pass"}, got ${result.status}`,

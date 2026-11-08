@@ -54,6 +54,8 @@ Nenhum ajuste para reduzir ruído: `functional/*` e `no-magic-numbers` não gera
 
 **E2.1, contador do orçamento de nós:** `functional/immutable-data` (`ignoreAccessorPattern`) e `no-param-reassign` (`ignorePropertyModificationsFor`) liberam só `budget.remaining`, só em `packages/match-engine/src/event-log/parse-envelope.ts`. Passar a contagem de forma imutável deixaria a cópia quadrática, o que seria ela mesma um custo explorável (ADR 0022). Fora desse arquivo segue reprovando (caso em `lint-regression.mjs`).
 
+**E0.10, portões de qualidade:** complexidade, tamanho de arquivo, duplicação e regras do front ([ADR 0035](0035-portoes-de-qualidade.md)). Exceção a esses portões não vai para o `eslint.config.mjs`: fica só em `scripts/quality-exceptions.json`, com motivo e prazo, e o config gera os overrides a partir dele. Entrada vencida ou malformada reprova.
+
 ## Limitações aceitas
 
 Passam no lint e ficam com o revisor:
