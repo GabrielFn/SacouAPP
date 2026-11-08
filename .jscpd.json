@@ -1,5 +1,6 @@
 {
   "minTokens": 50,
+  "minLines": 1,
   "format": ["typescript", "tsx", "csharp"],
   "path": [
     "packages/match-engine/src",
