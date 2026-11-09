@@ -1,7 +1,7 @@
 import {
-  getOpenMatchStartIndex,
   getRecentPoints,
   parseEventEnvelope,
+  undoLastAction,
   type CourtSessionTimeline,
   type EventEnvelope,
 } from "@sacou/match-engine";
@@ -16,6 +16,7 @@ import {
   BENCHMARK_LIMIT_TAPS,
   BENCHMARK_REPETITIONS,
   BENCHMARK_START_INDEX_CALLS,
+  BENCHMARK_TAP_CYCLE as TAP_CYCLE,
   BENCHMARK_TAPS,
   BENCHMARK_WARMUPS,
 } from "./benchmark.data";
@@ -95,10 +96,13 @@ function replayOrFail(
   return replayed.value;
 }
 
-/** (d) the work of the screen of corrections (screen 24) on a timeline. */
+/**
+ * (d) the work of the screen of corrections (screen 24). `getOpenMatchStartIndex` is not public: it
+ * runs inside `undoLastAction`, which the court asks for on every draw (`canUndo`), so it is asked 10 times.
+ */
 function askCorrections(timeline: CourtSessionTimeline): void {
   range(BENCHMARK_START_INDEX_CALLS).forEach(() => {
-    getOpenMatchStartIndex(timeline);
+    undoLastAction(timeline);
   });
   getRecentPoints(timeline);
 }
@@ -122,7 +126,11 @@ async function storeScenario(
 }
 
 /** (e) a tap through the whole path: the command, the simulation, the write and the replay. */
-async function timeTaps(deps: BenchmarkDeps, courtSessionId: string, taps: number): Promise<Summary> {
+async function timeTaps(
+  deps: BenchmarkDeps,
+  courtSessionId: string,
+  taps: number,
+): Promise<Summary> {
   const { runtime, clock, pause } = deps;
   const controller = createCourtSessionController({
     ...runtime,
@@ -134,11 +142,11 @@ async function timeTaps(deps: BenchmarkDeps, courtSessionId: string, taps: numbe
   for (const index of range(taps)) {
     const started = clock.now();
     const result = await controller.dispatch(
-      index % 2 === 0 ? { type: "score-point", team: "a" } : { type: "undo" },
+      index % TAP_CYCLE === 0 ? { type: "score-point", team: "a" } : { type: "undo" },
     );
     samples.value = [...samples.value, clock.now() - started];
     if (!result.ok) {
-      throw new Error("the benchmark tap was refused");
+      throw new Error(`the benchmark tap was refused: ${JSON.stringify(result.error)}`);
     }
     await pause();
   }

@@ -12,7 +12,7 @@ import {
   LONG_MATCH_SETS,
   OPEN_MATCH_RALLIES,
   TYPICAL_ROUND_FINISHED_MATCHES,
-  UNDO_COUNT,
+  UNDO_PER_SET,
   UNDO_EVERY_POINTS,
 } from "./benchmark.data";
 import { relabelEvents } from "./relabel-events";
@@ -40,12 +40,12 @@ const BEST_OF_FIVE: MatchStartedPayload = {
 /** Tokens: `a` or `b` scores, `u` undoes, `c` confirms a set, `A` confirms it with Laranja serving next. */
 export type ScriptToken = "a" | "b" | "u" | "c" | "A";
 
-/** After the n-th point of the list, one undo and the same point again, up to `UNDO_COUNT` times. */
+/** After the n-th point of the list, one undo and the same point again, up to `UNDO_PER_SET` times. */
 export function withUndos(rallies: string): string {
   const undone = { value: 0 };
-  return [...rallies]
+  return Array.from(rallies)
     .map((point, index) => {
-      const due = (index + 1) % UNDO_EVERY_POINTS === 0 && undone.value < UNDO_COUNT;
+      const due = (index + 1) % UNDO_EVERY_POINTS === 0 && undone.value < UNDO_PER_SET;
       undone.value += due ? 1 : 0;
       return due ? `${point}u${point}` : point;
     })
@@ -59,7 +59,7 @@ async function play(
   for (const token of script) {
     const result = await controller.dispatch(commandOf(token as ScriptToken));
     if (!result.ok) {
-      throw new Error(`benchmark script refused ${token}: ${result.error.code}`);
+      throw new Error(`benchmark script refused ${token}: ${JSON.stringify(result.error)}`);
     }
   }
 }

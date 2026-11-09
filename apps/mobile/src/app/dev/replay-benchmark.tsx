@@ -83,9 +83,11 @@ export default function ReplayBenchmarkScreen() {
         {state.status === "running" ? <Text>{benchmark.running(state.scenario)}</Text> : null}
         {state.status === "done" ? <Text>{benchmark.done}</Text> : null}
         {state.status === "failed" ? <Text>{benchmark.failed}</Text> : null}
-        {results.length === 0 ? null : <Text selectable>{`${environmentLine()}
+        {results.length === 0 ? null : (
+          <Text selectable>{`${environmentLine()}
 
-${formatReport(results)}`}</Text>}
+${formatReport(results)}`}</Text>
+        )}
       </ScrollView>
     </Screen>
   );

@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest";
 
 import { createFakeClock } from "../../../adapters/fake-clock";
 import { createFakeCourtRuntime } from "../../../adapters/fake-court-runtime-opener";
-import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { budgetLines, formatReport } from "./benchmark-report";
 import { buildBenchmarkScenario } from "./benchmark-scenarios";
 import { summarize } from "./benchmark-stats";
@@ -56,8 +55,9 @@ describe("the statistics", () => {
 
 describe("running a scenario", () => {
   test("S1 measures every step: parse, replay, screen, corrections, load, reopen and tap", async () => {
-    const scenario = await buildBenchmarkScenario("S1", createSequentialIdGenerator());
-    const result = await runScenario(depsFor(), scenario);
+    const deps = depsFor();
+    const scenario = await buildBenchmarkScenario("S1", deps.runtime.ids);
+    const result = await runScenario(deps, scenario);
     expect(result.scenario).toBe("S1");
     expect(result.events).toBe(scenario.events.length);
     expect(result.steps.map(({ id }) => id)).toEqual(ALL_STEPS);
@@ -68,7 +68,7 @@ describe("running a scenario", () => {
 
   test("the taps of the benchmark leave the log where it was (a point and its undo)", async () => {
     const deps = depsFor();
-    const scenario = await buildBenchmarkScenario("S1", createSequentialIdGenerator());
+    const scenario = await buildBenchmarkScenario("S1", deps.runtime.ids);
     await runScenario(deps, scenario);
     // The session of the run is closed at the end; the matches database is never touched.
     expect(await deps.runtime.log.findActiveSession()).toEqual({ ok: true, value: null });
@@ -77,7 +77,8 @@ describe("running a scenario", () => {
 
 describe("the report", () => {
   test("a block per scenario with a line per step, and the budget at the end", async () => {
-    const results = [await runScenario(depsFor(), await buildBenchmarkScenario("S1", createSequentialIdGenerator()))];
+    const deps = depsFor();
+    const results = [await runScenario(deps, await buildBenchmarkScenario("S1", deps.runtime.ids))];
     const text = formatReport(results);
     expect(text).toContain("S1 · ");
     expect(text).toContain("(b) replay: mediana");

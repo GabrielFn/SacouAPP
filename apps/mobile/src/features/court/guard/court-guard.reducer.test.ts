@@ -56,7 +56,10 @@ describe("the wait after a point (700 ms)", () => {
 });
 
 describe("the toast (1500 ms)", () => {
-  const recorded = run([{ type: "point-accepted", at: 1000 }, { type: "point-recorded", at: 1010 }]);
+  const recorded = run([
+    { type: "point-accepted", at: 1000 },
+    { type: "point-recorded", at: 1010 },
+  ]);
 
   test("it shows from the moment the point is stored for 1500 ms", () => {
     expect(isToastVisible(recorded, 1010)).toBe(true);
@@ -69,7 +72,9 @@ describe("the toast (1500 ms)", () => {
   });
 
   test("an undo takes it away", () => {
-    expect(isToastVisible(courtGuardReducer(recorded, { type: "undo-accepted" }), 1100)).toBe(false);
+    expect(isToastVisible(courtGuardReducer(recorded, { type: "undo-accepted" }), 1100)).toBe(
+      false,
+    );
   });
 
   test("a new point takes the old toast away until it is stored", () => {
@@ -80,7 +85,10 @@ describe("the toast (1500 ms)", () => {
 
 describe("time passing", () => {
   test("tick clears what has expired and nothing else", () => {
-    const state = run([{ type: "point-accepted", at: 0 }, { type: "point-recorded", at: 0 }]);
+    const state = run([
+      { type: "point-accepted", at: 0 },
+      { type: "point-recorded", at: 0 },
+    ]);
     const afterWait = courtGuardReducer(state, { type: "tick", at: 700 });
     expect(afterWait).toEqual({ locked: true, cooldownUntil: null, toastUntil: 1500 });
     expect(courtGuardReducer(afterWait, { type: "tick", at: 1500 })).toEqual(INITIAL_COURT_GUARD);
@@ -93,7 +101,10 @@ describe("time passing", () => {
 
   test("the next deadline is the nearest one, or none", () => {
     expect(nextDeadline(INITIAL_COURT_GUARD)).toBeNull();
-    const state = run([{ type: "point-accepted", at: 0 }, { type: "point-recorded", at: 0 }]);
+    const state = run([
+      { type: "point-accepted", at: 0 },
+      { type: "point-recorded", at: 0 },
+    ]);
     expect(nextDeadline(state)).toBe(700);
   });
 });

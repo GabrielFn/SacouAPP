@@ -30,6 +30,8 @@ export function relabelEvents(
   return events.map((event) => ({
     ...event,
     eventId: ids.newId(),
-    payload: JSON.parse(JSON.stringify(event.payload).split(from).join(to)) as EventEnvelope["payload"],
+    payload: JSON.parse(
+      JSON.stringify(event.payload).split(from).join(to),
+    ) as EventEnvelope["payload"],
   }));
 }

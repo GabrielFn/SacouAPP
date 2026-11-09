@@ -7,11 +7,11 @@ const CHANGE_EVENT = "reduceMotionChanged";
 /** Follows the "remove animations" setting of the phone; until it answers, motion is allowed. */
 export function createReactNativeReducedMotion(): ReducedMotion {
   const state = { value: false };
-  const listeners = new Set<() => void>();
+  const listeners = { value: [] as readonly (() => void)[] };
   const update = (reduced: boolean) => {
     if (reduced !== state.value) {
       state.value = reduced;
-      listeners.forEach((listener) => {
+      listeners.value.forEach((listener) => {
         listener();
       });
     }
@@ -21,9 +21,9 @@ export function createReactNativeReducedMotion(): ReducedMotion {
   return {
     getSnapshot: () => state.value,
     subscribe(listener) {
-      listeners.add(listener);
+      listeners.value = [...listeners.value, listener];
       return () => {
-        listeners.delete(listener);
+        listeners.value = listeners.value.filter((known) => known !== listener);
       };
     },
   };

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, Easing } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
@@ -19,7 +19,7 @@ export function SetPointTag() {
   const { colors, tokens } = useTheme();
   const { sizes, fontSizes } = tokens.court;
   const reduced = useReducedMotion();
-  const pulse = useRef(new Animated.Value(PULSE_FROM)).current;
+  const [pulse] = useState(() => new Animated.Value(PULSE_FROM));
 
   useEffect(() => {
     if (reduced) {
@@ -30,13 +30,11 @@ export function SetPointTag() {
         Animated.timing(pulse, {
           toValue: PULSE_TO,
           duration: SET_POINT_PULSE_MS,
-          easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }),
         Animated.timing(pulse, {
           toValue: PULSE_FROM,
           duration: SET_POINT_PULSE_MS,
-          easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }),
       ]),

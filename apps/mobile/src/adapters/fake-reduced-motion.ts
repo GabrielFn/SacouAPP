@@ -6,18 +6,18 @@ export interface FakeReducedMotion extends ReducedMotion {
 
 export function createFakeReducedMotion(reduced = false): FakeReducedMotion {
   const state = { value: reduced };
-  const listeners = new Set<() => void>();
+  const listeners = { value: [] as readonly (() => void)[] };
   return {
     getSnapshot: () => state.value,
     subscribe(listener) {
-      listeners.add(listener);
+      listeners.value = [...listeners.value, listener];
       return () => {
-        listeners.delete(listener);
+        listeners.value = listeners.value.filter((known) => known !== listener);
       };
     },
     set(next) {
       state.value = next;
-      listeners.forEach((listener) => {
+      listeners.value.forEach((listener) => {
         listener();
       });
     },
