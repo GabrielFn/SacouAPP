@@ -5,6 +5,16 @@ using Xunit;
 
 namespace Sacou.Modules.Identity.Tests.Http;
 
+/// <summary>
+/// The matrix shares one host and reads its log by slices, so its cases must never run in parallel,
+/// even when the runner is told to parallelize everything.
+/// </summary>
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class RefusalMatrixSequence
+{
+    public const string Name = "Refusal matrix";
+}
+
 /// <summary>One host for the whole matrix: starting a host per case was most of the run time.</summary>
 public sealed class RefusalHost : IAsyncLifetime
 {
@@ -21,6 +31,7 @@ public sealed class RefusalHost : IAsyncLifetime
 /// logged. Each case first sends the valid token it was built from, which must pass: the refusal comes
 /// from the rule, not the setup. The cases of one class run one after another, so log slices are theirs.
 /// </summary>
+[Collection(RefusalMatrixSequence.Name)]
 public sealed partial class RefusalMatrixTests(RefusalHost fixture) : IClassFixture<RefusalHost>
 {
     private const string RefusalMarker = "ID token refused";

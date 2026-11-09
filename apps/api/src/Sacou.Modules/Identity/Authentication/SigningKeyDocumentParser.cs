@@ -8,7 +8,8 @@ namespace Sacou.Modules.Identity.Authentication;
 
 /// <summary>
 /// Reads the Google document <c>{ "kid": "-----BEGIN CERTIFICATE-----..." }</c>. One bad entry refuses
-/// the whole document, so the keys already cached stay (ADR 0036).
+/// the whole document, so the keys already cached stay, and every certificate read from a refused
+/// document is released. A bad certificate never throws out of here (ADR 0036).
 /// </summary>
 internal static class SigningKeyDocumentParser
 {
@@ -29,15 +30,31 @@ internal static class SigningKeyDocumentParser
 
     private static FrozenDictionary<string, X509SecurityKey>? ReadKeys(JsonElement root)
     {
-        var keys = root.EnumerateObject().Select(ReadKey).ToList();
-        if (keys.Count > 0 && keys.All(key => key is not null))
+        var keys = new List<X509SecurityKey>();
+        var accepted = false;
+        try
         {
-            return keys.ToFrozenDictionary(key => key!.KeyId, key => key!, StringComparer.Ordinal);
-        }
+            foreach (var entry in root.EnumerateObject())
+            {
+                if (ReadKey(entry) is not { } key)
+                {
+                    return null;
+                }
 
-        // The document is refused whole, so the certificates read before the bad entry are released.
-        keys.ForEach(key => key?.Certificate.Dispose());
-        return null;
+                keys.Add(key);
+            }
+
+            accepted = keys.Count > 0;
+            return accepted ? keys.ToFrozenDictionary(key => key.KeyId, key => key, StringComparer.Ordinal) : null;
+        }
+        finally
+        {
+            if (!accepted)
+            {
+                // Refused whole (or failed midway): the certificates read so far are released.
+                keys.ForEach(key => key.Certificate.Dispose());
+            }
+        }
     }
 
     private static X509SecurityKey? ReadKey(JsonProperty entry)
@@ -49,24 +66,24 @@ internal static class SigningKeyDocumentParser
             return null;
         }
 
-        X509Certificate2 certificate;
+        X509Certificate2? certificate = null;
         try
         {
             certificate = X509Certificate2.CreateFromPem(pem);
+            // Inside the try: a key field that says RSA over invalid bytes throws here, not in CreateFromPem.
+            using var rsa = certificate.GetRSAPublicKey();
+            if (rsa is null)
+            {
+                certificate.Dispose();
+                return null;
+            }
+
+            return new X509SecurityKey(certificate, entry.Name);
         }
-        catch (CryptographicException)
+        catch (Exception exception) when (exception is CryptographicException or ArgumentException)
         {
+            certificate?.Dispose();
             return null;
         }
-
-        using var rsa = certificate.GetRSAPublicKey();
-        if (rsa is null)
-        {
-            // Not an RSA certificate: refused, and released here because no key keeps it.
-            certificate.Dispose();
-            return null;
-        }
-
-        return new X509SecurityKey(certificate, entry.Name);
     }
 }

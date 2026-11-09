@@ -52,6 +52,11 @@ internal static partial class AuthenticationGuardRules
                 Path.GetRelativePath(sourceDirectory, path).Replace(Path.DirectorySeparatorChar, '/'), File.ReadAllText(path))
             select violation];
 
+    /// <summary>
+    /// Known limitation, accepted: this cuts at <c>//</c> even inside a string literal, so a forbidden
+    /// fragment after <c>"https://"</c> on the same line would be missed. The guard is an alarm, not a
+    /// C# parser; the reviewer reads the authentication code anyway.
+    /// </summary>
     private static string WithoutLineComments(string source) =>
         string.Join('\n', source.Split('\n').Select(line => line.Split("//")[0]));
 

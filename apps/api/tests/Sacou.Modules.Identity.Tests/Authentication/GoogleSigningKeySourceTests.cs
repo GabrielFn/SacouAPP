@@ -1,4 +1,6 @@
 using System.Net;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -95,7 +97,7 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
     }
 
     [Fact]
-    public async Task CachedKeyWithAnExpiredCertificate_IsNotUsed()
+    public async Task CachedKeyWithAnExpiredCertificateAfterAFailedFetch_IsUnavailableNotUnknown()
     {
         using var expiring = TestSigningKey.Create("expiring", clock.GetUtcNow() + TimeSpan.FromMinutes(30));
         var fail = false;
@@ -107,7 +109,7 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
 
         clock.Advance(OneHour);
 
-        Assert.Equal(SigningKeyStatus.Unknown, (await FindAsync(source, "expiring")).Status);
+        Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "expiring")).Status);
     }
 
     [Fact]
@@ -237,6 +239,69 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
         Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "first")).Status);
         clock.Advance(GoogleSigningKeySource.MinTimeBetweenColdFetches);
         Assert.Equal(SigningKeyStatus.Found, (await FindAsync(source, "first")).Status);
+    }
+
+    /// <summary>The attempt is recorded in a finally: a fetch that throws something unexpected still counts.</summary>
+    [Fact]
+    public async Task FetchThatThrowsUnexpectedly_StillCountsAsAnAttempt()
+    {
+        using var source = Source(_ => throw new InvalidOperationException("unexpected"), out var stub);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => FindAsync(source, "first"));
+        Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "first")).Status);
+
+        Assert.Equal(1, stub.RequestCount);
+    }
+
+    /// <summary>A key field that says RSA over invalid bytes: refused as a document, never an exception.</summary>
+    [Fact]
+    public async Task CertificateWithABrokenRsaKey_IsAnInvalidDocument()
+    {
+        var document = $$"""{"first":{{TestIdToken.Json(first.CertificatePem)}},"broken":{{TestIdToken.Json(BrokenRsaCertificatePem())}}}""";
+        using var source = Source(_ => StubHttpHandler.Json(document, OneHour), out _);
+
+        Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "first")).Status);
+        Assert.Contains(logs.Entries, entry => entry.Contains("failed: invalid-document", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CertificateWithABrokenRsaKeyWithCache_KeepsTheOldKeys()
+    {
+        var broken = false;
+        var document = $$"""{"broken":{{TestIdToken.Json(BrokenRsaCertificatePem())}}}""";
+        using var source = Source(
+            _ => StubHttpHandler.Json(broken ? document : TestSigningKeys.Document(first), TimeSpan.FromMinutes(5)), out var stub);
+        await FindAsync(source, "first");
+        broken = true;
+
+        clock.Advance(TimeSpan.FromMinutes(6));
+
+        Assert.Equal(SigningKeyStatus.Found, (await FindAsync(source, "first")).Status);
+        Assert.Equal(2, stub.RequestCount);
+    }
+
+    [Fact]
+    public void Parser_RefusesTheBrokenRsaKeyWithoutThrowing()
+    {
+        var document = $$"""{"first":{{TestIdToken.Json(first.CertificatePem)}},"broken":{{TestIdToken.Json(BrokenRsaCertificatePem())}}}""";
+
+        Assert.Null(SigningKeyDocumentParser.Parse(System.Text.Encoding.UTF8.GetBytes(document)));
+    }
+
+    /// <summary>A certificate whose public key says RSA but holds bytes that are not an RSA key, signed by a real RSA key.</summary>
+    private static string BrokenRsaCertificatePem()
+    {
+        using var issuer = RSA.Create(2048);
+        var brokenKey = new PublicKey(new Oid("1.2.840.113549.1.1.1"), new AsnEncodedData([0x05, 0x00]), new AsnEncodedData([0x01, 0x02, 0x03]));
+        var request = new CertificateRequest(new X500DistinguishedName("CN=broken"), brokenKey, HashAlgorithmName.SHA256);
+        var now = DateTimeOffset.UtcNow;
+        using var certificate = request.Create(
+            new X500DistinguishedName("CN=issuer"),
+            X509SignatureGenerator.CreateForRSA(issuer, RSASignaturePadding.Pkcs1),
+            now.AddDays(-1),
+            now.AddDays(7),
+            [1, 2, 3, 4]);
+        return certificate.ExportCertificatePem();
     }
 
     private static HttpResponseMessage BodyOf(Stream body) =>

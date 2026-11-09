@@ -7,7 +7,8 @@ namespace Sacou.Modules.Identity.Authentication;
 /// <summary>
 /// Caches the Google signing keys for the <c>Cache-Control: max-age</c> of the response, clamped to
 /// 5 min..24 h. One fetch at a time; an unknown <c>kid</c> forces at most one fetch every 5 min. When a
-/// fetch fails, the cached keys keep working until each certificate expires. With no keys at all, a
+/// fetch fails, the cached keys keep working until each certificate expires, and an expired one answers
+/// "unavailable", never "unknown". With no keys at all, a
 /// failed fetch is retried at most every 10 s, and callers get "unavailable" (503) meanwhile (ADR 0036).
 /// </summary>
 internal sealed partial class GoogleSigningKeySource(
@@ -112,9 +113,12 @@ internal sealed partial class GoogleSigningKeySource(
     {
         public bool Contains(string keyId) => Keys.ContainsKey(keyId);
 
-        public SigningKeyLookup Find(string keyId, DateTimeOffset now) =>
-            Keys.TryGetValue(keyId, out var key) && key.Certificate.NotAfter.ToUniversalTime() > now.UtcDateTime
-                ? SigningKeyLookup.Found(key)
-                : SigningKeyLookup.Unknown;
+        /// <summary>
+        /// A known <c>kid</c> whose certificate expired means the keys are out of date (the refresh failed),
+        /// not that the token is bad: "unavailable" (503), so the app keeps the person signed in.
+        /// </summary>
+        public SigningKeyLookup Find(string keyId, DateTimeOffset now) => Keys.TryGetValue(keyId, out var key)
+            ? key.Certificate.NotAfter.ToUniversalTime() > now.UtcDateTime ? SigningKeyLookup.Found(key) : SigningKeyLookup.Unavailable
+            : SigningKeyLookup.Unknown;
     }
 }

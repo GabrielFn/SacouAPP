@@ -66,7 +66,7 @@ internal sealed partial class GoogleSigningKeyFetcher(
         }
 
         var body = await ReadLimitedAsync(response.Content, cancellationToken).ConfigureAwait(false);
-        var keys = body is null ? null : SigningKeyDocumentParser.Parse(body);
+        var keys = body is null ? null : ParseSafely(body);
         if (keys is null)
         {
             LogFetchFailed(logger, body is null ? "too-large" : "invalid-document");
@@ -74,6 +74,19 @@ internal sealed partial class GoogleSigningKeyFetcher(
         }
 
         return new FetchedSigningKeys(keys, response.Headers.CacheControl?.MaxAge);
+    }
+
+    /// <summary>Defence in depth: whatever the parser throws is a refused document, never a 500.</summary>
+    private static FrozenDictionary<string, X509SecurityKey>? ParseSafely(byte[] body)
+    {
+        try
+        {
+            return SigningKeyDocumentParser.Parse(body);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return null;
+        }
     }
 
     private static async Task<byte[]?> ReadLimitedAsync(HttpContent content, CancellationToken cancellationToken)
