@@ -50,6 +50,11 @@ internal sealed class TestSigningKey : IDisposable
 
 internal static class TestSigningKeys
 {
+    private static readonly Lazy<TestSigningKey> SharedKey = new(() => TestSigningKey.Create("shared-key"));
+
+    /// <summary>One key for tests that only need a valid signature: RSA generation is slow. Never disposed.</summary>
+    public static TestSigningKey Shared => SharedKey.Value;
+
     /// <summary>The Google document format: <c>{ "kid": "PEM" }</c>.</summary>
     public static string Document(params TestSigningKey[] keys) =>
         JsonSerializer.Serialize(keys.ToDictionary(key => key.KeyId, key => key.CertificatePem));

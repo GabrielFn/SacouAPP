@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
@@ -29,23 +30,46 @@ public sealed class CompositionTests
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
-    /// <summary>C3: the API refuses to start, naming the key and never the value.</summary>
+    /// <summary>
+    /// C3: the API refuses to start, naming the key and never the value. Runs the same start-up validator
+    /// the host runs (<c>ValidateOnStart</c>), on the module composition, so no host races its disposal.
+    /// </summary>
     [Theory]
     [InlineData("")]
     [InlineData("Sacou")]
     [InlineData("ab")]
     [InlineData("with_underscore")]
-    public async Task InvalidProjectId_StopsTheStart(string projectId)
+    [InlineData("SET-THE-PROJECT-ID")]
+    public void InvalidProjectId_StopsTheStart(string projectId)
     {
-        await using var factory = new SacouApiFactory { ProjectId = projectId };
+        using var services = Composition(projectId);
 
-        var failure = Assert.Throws<OptionsValidationException>(() => factory.CreateClient());
+        var failure = Assert.Throws<OptionsValidationException>(() => services.GetRequiredService<IStartupValidator>().Validate());
 
         Assert.Contains("Firebase:ProjectId", failure.Message, StringComparison.Ordinal);
         if (projectId.Length > 0)
         {
             Assert.DoesNotContain(projectId, failure.Message, StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public void ValidProjectId_PassesTheStartUpValidation()
+    {
+        using var services = Composition(SacouApiFactory.TestProjectId);
+
+        services.GetRequiredService<IStartupValidator>().Validate();
+    }
+
+    [Fact]
+    public void RealAppSettings_HoldAValidProjectId()
+    {
+        var settings = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        Assert.Equal("sacou-79493", settings["Firebase:ProjectId"]);
     }
 
     /// <summary>C4: an endpoint without its own policy still needs a signed-in user.</summary>
@@ -101,6 +125,14 @@ public sealed class CompositionTests
         Assert.DoesNotContain("Host=", body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Npgsql", body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Exception", body, StringComparison.Ordinal);
+    }
+
+    private static ServiceProvider Composition(string projectId)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Firebase:ProjectId"] = projectId })
+            .Build();
+        return new ServiceCollection().AddLogging().AddIdentityModule(configuration).BuildServiceProvider();
     }
 
     /// <summary>Signs every request in as a fixed subject, so the request reaches the database.</summary>

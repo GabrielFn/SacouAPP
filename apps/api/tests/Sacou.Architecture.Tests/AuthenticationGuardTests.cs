@@ -50,7 +50,16 @@ public sealed class AuthenticationGuardTests
     public void AllowAnonymousInProgram_IsNotReported()
     {
         Assert.Empty(AuthenticationGuardRules.SourceViolations(
-            AuthenticationGuardRules.ProgramFileName, "app.MapHealthChecks(\"/health\").AllowAnonymous();"));
+            AuthenticationGuardRules.ProgramPath, "app.MapHealthChecks(\"/health\").AllowAnonymous();"));
+    }
+
+    [Theory]
+    [InlineData("Sacou.Modules/X/Program.cs")]
+    [InlineData("Program.cs")]
+    [InlineData("Sacou.Api/Endpoints/Program.cs")]
+    public void AllowAnonymousInAnotherProgram_IsReported(string path)
+    {
+        Assert.NotEmpty(AuthenticationGuardRules.SourceViolations(path, "app.MapGet(\"/open\", () => 1).AllowAnonymous();"));
     }
 
     [Fact]

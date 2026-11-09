@@ -166,6 +166,82 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
         Assert.False(handler.AllowAutoRedirect);
     }
 
+    /// <summary>S1: the deadline covers the body, so a body that never ends cannot hold the refresh lock.</summary>
+    [Fact]
+    public async Task BodyThatNeverEnds_IsATimedOutFetch()
+    {
+        var shortDeadline = TimeSpan.FromMilliseconds(300);
+        using var source = Source(_ => BodyOf(new BrokenBodyStream()), out _, shortDeadline);
+
+        var lookup = source.FindAsync("first", TestContext.Current.CancellationToken);
+
+        var finished = await Task.WhenAny(lookup, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+        Assert.Same(lookup, finished);
+        Assert.Equal(SigningKeyStatus.Unavailable, (await lookup).Status);
+        Assert.Contains(logs.Entries, entry => entry.Contains("failed: timeout", StringComparison.Ordinal));
+    }
+
+    /// <summary>S2: a body cut in the middle is a network failure, never an exception that becomes a 500.</summary>
+    [Fact]
+    public async Task BodyCutInTheMiddle_IsANetworkFailure()
+    {
+        using var source = Source(_ => BodyOf(new BrokenBodyStream(new IOException("connection reset"))), out _);
+
+        Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "first")).Status);
+        Assert.Contains(logs.Entries, entry => entry.Contains("failed: network", StringComparison.Ordinal));
+        Assert.DoesNotContain(logs.Entries, entry => entry.Contains("connection reset", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task BodyCutInTheMiddleWithCache_KeepsTheOldKeys()
+    {
+        var cut = false;
+        using var source = Source(
+            _ => cut ? BodyOf(new BrokenBodyStream(new IOException("reset"))) : StubHttpHandler.Json(TestSigningKeys.Document(first), null),
+            out _);
+        await FindAsync(source, "first");
+        cut = true;
+
+        clock.Advance(TimeSpan.FromMinutes(10));
+
+        Assert.Equal(SigningKeyStatus.Found, (await FindAsync(source, "first")).Status);
+    }
+
+    /// <summary>S3: with no keys and Google failing, callers get 503 at once, and Google sees one fetch per 10 s.</summary>
+    [Fact]
+    public async Task ColdFailures_FetchAtMostOncePerTenSeconds()
+    {
+        using var source = Source(_ => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable), out var stub);
+
+        for (var index = 0; index < 20; index++)
+        {
+            Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, $"kid-{index}")).Status);
+        }
+
+        Assert.Equal(1, stub.RequestCount);
+        clock.Advance(GoogleSigningKeySource.MinTimeBetweenColdFetches);
+        await FindAsync(source, "kid-again");
+        Assert.Equal(2, stub.RequestCount);
+    }
+
+    [Fact]
+    public async Task ColdFailureThenRecovery_FindsTheKeysAfterTheInterval()
+    {
+        var down = true;
+        using var source = Source(
+            _ => down ? new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) : StubHttpHandler.Json(TestSigningKeys.Document(first), OneHour),
+            out _);
+        await FindAsync(source, "first");
+        down = false;
+
+        Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "first")).Status);
+        clock.Advance(GoogleSigningKeySource.MinTimeBetweenColdFetches);
+        Assert.Equal(SigningKeyStatus.Found, (await FindAsync(source, "first")).Status);
+    }
+
+    private static HttpResponseMessage BodyOf(Stream body) =>
+        new(HttpStatusCode.OK) { Content = new StreamContent(body) };
+
     public void Dispose()
     {
         first.Dispose();
@@ -179,7 +255,11 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
         source.FindAsync(keyId, TestContext.Current.CancellationToken);
 
     private GoogleSigningKeySource Source(
-        Func<HttpRequestMessage, HttpResponseMessage> respond, out StubHttpHandler stub, TimeSpan delay = default)
+        Func<HttpRequestMessage, HttpResponseMessage> respond, out StubHttpHandler stub, TimeSpan delay = default) =>
+        Source(respond, out stub, GoogleSigningKeyFetcher.Timeout, delay);
+
+    private GoogleSigningKeySource Source(
+        Func<HttpRequestMessage, HttpResponseMessage> respond, out StubHttpHandler stub, TimeSpan fetchTimeout, TimeSpan delay = default)
     {
         var handler = new StubHttpHandler(respond) { Delay = delay };
         stub = handler;
@@ -188,7 +268,7 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
         var provider = services.BuildServiceProvider();
         providers.Add(provider);
         var factory = provider.GetRequiredService<IHttpClientFactory>();
-        var fetcher = new GoogleSigningKeyFetcher(factory, loggers.CreateLogger<GoogleSigningKeyFetcher>());
+        var fetcher = new GoogleSigningKeyFetcher(factory, loggers.CreateLogger<GoogleSigningKeyFetcher>()) { FetchTimeout = fetchTimeout };
         return new GoogleSigningKeySource(fetcher, clock, loggers.CreateLogger<GoogleSigningKeySource>());
     }
 

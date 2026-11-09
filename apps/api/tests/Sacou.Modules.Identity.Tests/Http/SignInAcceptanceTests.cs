@@ -14,7 +14,7 @@ public sealed class SignInAcceptanceTests
     [Fact]
     public async Task PasswordWithUnverifiedEmail_CreatesThenFindsTheSameUser()
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
         var token = TestIdToken.Valid(key, FixedTimeProvider.WholeSecondNow()).With("email_verified", false).Sign();
 
@@ -32,7 +32,7 @@ public sealed class SignInAcceptanceTests
     [InlineData("apple.com")]
     public async Task GoogleAndApple_AreAccepted(string provider)
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
 
         using var response = await host.SignInAsync(TestIdToken.Valid(key, FixedTimeProvider.WholeSecondNow(), provider).Sign());
@@ -51,7 +51,7 @@ public sealed class SignInAcceptanceTests
     [InlineData("auth_time", 30)]
     public async Task TimesWithinTheMargins_AreAccepted(string claim, int secondsFromNow)
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
         var now = FixedTimeProvider.WholeSecondNow();
 
@@ -64,7 +64,7 @@ public sealed class SignInAcceptanceTests
     [Fact]
     public async Task SubjectOf128VisibleCharacters_IsAccepted()
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
         var subject = string.Concat(Enumerable.Range('!', '~' - '!' + 1).Select(code => (char)code)).PadRight(128, 'z');
 
@@ -77,7 +77,7 @@ public sealed class SignInAcceptanceTests
     [Fact]
     public async Task EmailNameAndPicture_NeverReachTheStoreTheResponseOrTheLogs()
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
         var token = TestIdToken.Valid(key, FixedTimeProvider.WholeSecondNow()).Sign();
 
@@ -94,7 +94,7 @@ public sealed class SignInAcceptanceTests
     [Fact]
     public async Task SigningKeysUnreachable_AnswerServiceUnavailableWithRetryAfter()
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(_ => new HttpResponseMessage(HttpStatusCode.InternalServerError));
 
         using var response = await host.SignInAsync(TestIdToken.Valid(key, FixedTimeProvider.WholeSecondNow()).Sign());
@@ -108,7 +108,7 @@ public sealed class SignInAcceptanceTests
     [Fact]
     public async Task AfterComposition_IdentityModelNeverLogsPersonalData()
     {
-        using var key = TestSigningKey.Create("key-1");
+        var key = TestSigningKeys.Shared;
         await using var host = await IdentityTestHost.StartAsync(key);
 
         Assert.False(IdentityModelEventSource.ShowPII);

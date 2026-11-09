@@ -8,7 +8,8 @@ namespace Sacou.Architecture.Tests;
 /// </summary>
 internal static partial class AuthenticationGuardRules
 {
-    internal const string ProgramFileName = "Program.cs";
+    /// <summary>The one file allowed to open endpoints, as a path relative to <c>apps/api/src</c>.</summary>
+    internal const string ProgramPath = "Sacou.Api/Program.cs";
 
     private const string SourceFilePattern = "*.cs";
 
@@ -28,24 +29,27 @@ internal static partial class AuthenticationGuardRules
 
     private static readonly HashSet<string> GeneratedFolders = ["bin", "obj"];
 
-    internal static IReadOnlyList<string> SourceViolations(string fileName, string source)
+    /// <param name="relativePath">The path below <c>apps/api/src</c>, with forward slashes.</param>
+    /// <param name="source">The C# text of that file.</param>
+    internal static IReadOnlyList<string> SourceViolations(string relativePath, string source)
     {
         var code = WithoutLineComments(source);
         return
         [
             .. ForbiddenPatterns
                 .Where(rule => Regex.IsMatch(code, rule.Pattern))
-                .Select(rule => $"{fileName}: {rule.Pattern} ({rule.Reason})"),
-            .. fileName == ProgramFileName || !AllowAnonymousPattern().IsMatch(code)
+                .Select(rule => $"{relativePath}: {rule.Pattern} ({rule.Reason})"),
+            .. relativePath == ProgramPath || !AllowAnonymousPattern().IsMatch(code)
                 ? Array.Empty<string>()
-                : [$"{fileName}: AllowAnonymous outside {ProgramFileName} (every exception to the fallback policy is listed there)"],
+                : [$"{relativePath}: AllowAnonymous outside {ProgramPath} (every exception to the fallback policy is listed there)"],
         ];
     }
 
     internal static IReadOnlyList<string> DirectoryViolations(string sourceDirectory) =>
         [.. from path in Directory.GetFiles(sourceDirectory, SourceFilePattern, SearchOption.AllDirectories)
             where !Path.GetRelativePath(sourceDirectory, path).Split(Path.DirectorySeparatorChar).Any(GeneratedFolders.Contains)
-            from violation in SourceViolations(Path.GetFileName(path), File.ReadAllText(path))
+            from violation in SourceViolations(
+                Path.GetRelativePath(sourceDirectory, path).Replace(Path.DirectorySeparatorChar, '/'), File.ReadAllText(path))
             select violation];
 
     private static string WithoutLineComments(string source) =>

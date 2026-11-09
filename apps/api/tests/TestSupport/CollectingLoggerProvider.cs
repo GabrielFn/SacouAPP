@@ -10,6 +10,11 @@ internal sealed class CollectingLoggerProvider : ILoggerProvider
 
     public IReadOnlyList<string> Entries => [.. entries];
 
+    public int Count => entries.Count;
+
+    /// <summary>The entries written after <paramref name="start"/> entries, for a host shared by several tests.</summary>
+    public IReadOnlyList<string> EntriesSince(int start) => [.. entries.Skip(start)];
+
     public ILogger CreateLogger(string categoryName) => new CollectingLogger(categoryName, entries);
 
     public void Dispose()

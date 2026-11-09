@@ -25,18 +25,28 @@ internal sealed partial class GoogleSigningKeyFetcher(
     /// <summary>The handler behind the named client. A redirect would leave the fixed URL.</summary>
     public static SocketsHttpHandler CreatePrimaryHandler() => new() { AllowAutoRedirect = false };
 
-    /// <summary>Never takes the caller's token: one request cancelled must not cancel the refresh others wait for.</summary>
+    /// <summary>The whole fetch, headers and body, must end within this. Tests shorten it.</summary>
+    internal TimeSpan FetchTimeout { get; init; } = Timeout;
+
+    /// <summary>
+    /// Never takes the caller's token: one request cancelled must not cancel the refresh others wait for.
+    /// One deadline covers sending and reading, so a body that never ends cannot hold the refresh lock.
+    /// </summary>
     public async Task<FetchedSigningKeys?> FetchAsync()
     {
+        using var deadline = new CancellationTokenSource(FetchTimeout);
         try
         {
             using var client = clients.CreateClient(IdentityModule.SigningKeysHttpClientName);
             using var request = new HttpRequestMessage(HttpMethod.Get, KeysUri);
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-            return await ReadAsync(response).ConfigureAwait(false);
+            using var response = await client
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token)
+                .ConfigureAwait(false);
+            return await ReadAsync(response, deadline.Token).ConfigureAwait(false);
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (exception is HttpRequestException or IOException)
         {
+            // HttpIOException (a body cut in the middle) is an IOException. Never log the message.
             LogFetchFailed(logger, "network");
             return null;
         }
@@ -47,7 +57,7 @@ internal sealed partial class GoogleSigningKeyFetcher(
         }
     }
 
-    private async Task<FetchedSigningKeys?> ReadAsync(HttpResponseMessage response)
+    private async Task<FetchedSigningKeys?> ReadAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         if (response.StatusCode != HttpStatusCode.OK)
         {
@@ -55,7 +65,7 @@ internal sealed partial class GoogleSigningKeyFetcher(
             return null;
         }
 
-        var body = await ReadLimitedAsync(response.Content).ConfigureAwait(false);
+        var body = await ReadLimitedAsync(response.Content, cancellationToken).ConfigureAwait(false);
         var keys = body is null ? null : SigningKeyDocumentParser.Parse(body);
         if (keys is null)
         {
@@ -66,7 +76,7 @@ internal sealed partial class GoogleSigningKeyFetcher(
         return new FetchedSigningKeys(keys, response.Headers.CacheControl?.MaxAge);
     }
 
-    private static async Task<byte[]?> ReadLimitedAsync(HttpContent content)
+    private static async Task<byte[]?> ReadLimitedAsync(HttpContent content, CancellationToken cancellationToken)
     {
         if (content.Headers.ContentLength > MaxDocumentBytes)
         {
@@ -74,10 +84,12 @@ internal sealed partial class GoogleSigningKeyFetcher(
         }
 
         var buffer = new byte[MaxDocumentBytes + 1];
-        var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+        var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         await using (stream.ConfigureAwait(false))
         {
-            var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false).ConfigureAwait(false);
+            var read = await stream
+                .ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, cancellationToken)
+                .ConfigureAwait(false);
             return read > MaxDocumentBytes ? null : buffer[..read];
         }
     }

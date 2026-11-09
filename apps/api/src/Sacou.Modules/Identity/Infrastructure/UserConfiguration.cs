@@ -14,6 +14,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
     public const string IdColumn = "id";
     public const string SubjectColumn = "firebase_uid";
     public const string CreatedAtColumn = "created_at";
+    public const string PrimaryKey = "pk_users";
     public const string SubjectIndex = "ux_users_firebase_uid";
     public const string SubjectLengthCheck = "ck_users_firebase_uid_length";
 
@@ -21,7 +22,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable(Table, table => table.HasCheckConstraint(
             SubjectLengthCheck, $"char_length({SubjectColumn}) BETWEEN 1 AND {AuthSubject.MaxLength}"));
-        builder.HasKey(user => user.Id).HasName("pk_users");
+        builder.HasKey(user => user.Id).HasName(PrimaryKey);
 
         builder.Property(user => user.Id)
             .HasColumnName(IdColumn)

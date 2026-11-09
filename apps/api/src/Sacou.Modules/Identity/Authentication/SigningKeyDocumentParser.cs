@@ -30,9 +30,14 @@ internal static class SigningKeyDocumentParser
     private static FrozenDictionary<string, X509SecurityKey>? ReadKeys(JsonElement root)
     {
         var keys = root.EnumerateObject().Select(ReadKey).ToList();
-        return keys.Count > 0 && keys.All(key => key is not null)
-            ? keys.ToFrozenDictionary(key => key!.KeyId, key => key!, StringComparer.Ordinal)
-            : null;
+        if (keys.Count > 0 && keys.All(key => key is not null))
+        {
+            return keys.ToFrozenDictionary(key => key!.KeyId, key => key!, StringComparer.Ordinal);
+        }
+
+        // The document is refused whole, so the certificates read before the bad entry are released.
+        keys.ForEach(key => key?.Certificate.Dispose());
+        return null;
     }
 
     private static X509SecurityKey? ReadKey(JsonProperty entry)
@@ -44,15 +49,24 @@ internal static class SigningKeyDocumentParser
             return null;
         }
 
+        X509Certificate2 certificate;
         try
         {
-            var certificate = X509Certificate2.CreateFromPem(pem);
-            using var rsa = certificate.GetRSAPublicKey();
-            return rsa is null ? null : new X509SecurityKey(certificate, entry.Name);
+            certificate = X509Certificate2.CreateFromPem(pem);
         }
         catch (CryptographicException)
         {
             return null;
         }
+
+        using var rsa = certificate.GetRSAPublicKey();
+        if (rsa is null)
+        {
+            // Not an RSA certificate: refused, and released here because no key keeps it.
+            certificate.Dispose();
+            return null;
+        }
+
+        return new X509SecurityKey(certificate, entry.Name);
     }
 }
