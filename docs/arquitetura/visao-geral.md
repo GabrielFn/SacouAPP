@@ -63,7 +63,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 
 **Confirmar presença pelo link.** Prévia no WhatsApp → página da rodada (Razor) → VOU → login via Firebase, uma vez → Sessions grava a presença e controla as vagas com `xmin` → Pix, se a cobrança estiver ligada. Promoção da espera sai pela Outbox e pelo Hangfire, em push (`produto.md:115, 308, 310`).
 
-**Jogo na quadra.** O app aplica as regras em `match-engine` e grava os eventos em expo-sqlite, mesmo sem internet → sincroniza em lote, com reenvio idempotente → Matches aplica os eventos ao stream `CourtSession`, sem reimplementar a lógica → SignalR leva ao espectador → Stats recalcula as projeções ([ADR 0009](adr/0009-court-session-event-sourcing.md)).
+**Jogo na quadra.** O app aplica as regras em `match-engine` e grava os eventos em expo-sqlite, mesmo sem internet (`apps/mobile/src/features/court/`: o controlador simula o replay e só então grava; o estado da partida é o replay do log persistido, [ADR 0038](adr/0038-log-local-da-quadra.md)) → sincroniza em lote, com reenvio idempotente → Matches aplica os eventos ao stream `CourtSession`, sem reimplementar a lógica → SignalR leva ao espectador → Stats recalcula as projeções ([ADR 0009](adr/0009-court-session-event-sourcing.md)).
 
 **Entregar o placar.** QR na tela do admin → código de uso único troca por token só daquele stream → um celular escreve por vez → o admin pode retomar ([ADR 0013](adr/0013-scorekeeper-qr-token.md)).
 
@@ -112,6 +112,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0033](adr/0033-porte-csharp-do-motor.md) | Porte C# da função de estado: árvore própria de entrada, chave repetida recusada, golden compartilhados |
 | [0034](adr/0034-estilos-e-temas-no-app.md) | Estilos, temas e escala no app: `StyleSheet` com `ThemeProvider` próprio, tokens escalados pela janela |
 | [0035](adr/0035-portoes-de-qualidade.md) | Portões de qualidade: complexidade, tamanho, duplicação e regras do front na CI, exceções em `scripts/quality-exceptions.json` |
+| [0038](adr/0038-log-local-da-quadra.md) | Log local da quadra: SQLite, esquema, `deviceId`, simular antes de gravar |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -133,7 +134,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
-| 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033 |
+| 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0038 |
 | 27 | Padrões | 0011, 0029, 0035 |
 | 28 | Dados pessoais | 0012 |
 | 29 | App | 0008 |

@@ -4,6 +4,7 @@ const MOBILE_SOURCE_FILES = [`apps/mobile/src/**/*.${TS_EXTENSIONS}`];
 const MOBILE_THEME_FILES = ["apps/mobile/src/theme/**"];
 const MOBILE_ADAPTER_FILES = ["apps/mobile/src/adapters/**"];
 const MOBILE_DATA_FILES = ["apps/mobile/src/**/*.data.{ts,mts,cts}"];
+const COURT_FILES = [`apps/mobile/src/features/court/**/*.${TS_EXTENSIONS}`];
 const REDUCER_FILES = [`apps/mobile/src/**/*.reducer.${TS_EXTENSIONS}`];
 
 // Selector regexes avoid backslashes, which esquery drops.
@@ -83,6 +84,14 @@ const SDK_DYNAMIC_RESTRICTIONS = [
   },
 ];
 
+// The court mode works with the plane in airplane mode (E4.9): the slice has no way to reach a network.
+const NETWORK_MESSAGE = "The court slice is offline by design: no network access (E4.9).";
+const NETWORK_GLOBALS = ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map((name) => ({
+  name,
+  message: NETWORK_MESSAGE,
+}));
+const NETWORK_IMPORTS = { regex: "^@tanstack/", message: NETWORK_MESSAGE };
+
 function syntaxRule(restrictions) {
   return { "no-restricted-syntax": ["error", ...restrictions] };
 }
@@ -143,6 +152,17 @@ export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
       files: MOBILE_SOURCE_FILES,
       ignores: [...MOBILE_ADAPTER_FILES, ...testFiles],
       rules: { "@typescript-eslint/no-restricted-imports": ["error", { patterns: [SDK_IMPORTS] }] },
+    },
+    { files: COURT_FILES, rules: { "no-restricted-globals": ["error", ...NETWORK_GLOBALS] } },
+    {
+      files: COURT_FILES,
+      ignores: testFiles,
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          { patterns: [SDK_IMPORTS, NETWORK_IMPORTS] },
+        ],
+      },
     },
   ];
 }
