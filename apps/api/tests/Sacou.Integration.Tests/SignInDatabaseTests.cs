@@ -65,14 +65,17 @@ public sealed class SignInDatabaseTests(IntegrationDatabase database) : IAsyncLi
         for (var round = 0; round < RaceRounds; round++)
         {
             var subject = NewSubject();
-            using var barrier = new Barrier(ConcurrentSignIns);
-            var responses = await Task.WhenAll(Enumerable.Range(0, ConcurrentSignIns).Select(_ => Task.Run(
-                () =>
+            // An async gate, not a Barrier: 16 blocked pool threads would starve the server side of the test.
+            var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var pending = Enumerable.Range(0, ConcurrentSignIns)
+                .Select(async _ =>
                 {
-                    barrier.SignalAndWait(TestContext.Current.CancellationToken);
-                    return SignInAsync(client, subject);
-                },
-                TestContext.Current.CancellationToken)));
+                    await gate.Task;
+                    return await SignInAsync(client, subject);
+                })
+                .ToList();
+            gate.SetResult();
+            var responses = await Task.WhenAll(pending);
 
             Assert.Equal(1, responses.Count(response => response.StatusCode == HttpStatusCode.Created));
             Assert.Equal(ConcurrentSignIns - 1, responses.Count(response => response.StatusCode == HttpStatusCode.OK));
