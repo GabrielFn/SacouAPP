@@ -2,7 +2,7 @@ import type { CourtSessionState } from "@sacou/match-engine";
 import { useEffect, useRef } from "react";
 
 import { useServices } from "../../../services/services-context";
-import { deriveFeedback, strongestFeedback } from "../model/feedback";
+import { feedbackOnChange } from "../model/feedback";
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import { useCourtSession } from "./use-court-session";
 
@@ -23,11 +23,9 @@ export function useCourtFeedback(): void {
     const after = stateOfTimeline(timeline);
     const before = seen.current;
     seen.current = after;
-    if (before !== null && before !== after) {
-      const kind = strongestFeedback(deriveFeedback(before, after));
-      if (kind !== null) {
-        courtFeedback.play(kind);
-      }
+    const kind = feedbackOnChange(before, after);
+    if (kind !== null) {
+      courtFeedback.play(kind);
     }
   }, [timeline, courtFeedback]);
 }

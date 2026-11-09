@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import { stateOfTimeline } from "./court-screen.selectors";
-import { deriveFeedback, strongestFeedback } from "./feedback";
+import { deriveFeedback, feedbackOnChange, strongestFeedback } from "./feedback";
 import { confirmSet, score, startScenario, type Scenario } from "./screen-scenarios.test.fixture";
 
 function stateOf(scenario: Scenario): CourtSessionState {
@@ -85,5 +85,12 @@ describe("what the phone does between two states", () => {
     expect(strongestFeedback(["point", "side-out", "set-point"])).toBe("set-point");
     expect(strongestFeedback(["point"])).toBe("point");
     expect(strongestFeedback([])).toBeNull();
+  });
+
+  test("the first state seen plays nothing, a change plays the strongest, the same state nothing", async () => {
+    const [before, after] = await around("", (scenario) => score(scenario, "a"));
+    expect(feedbackOnChange(null, after)).toBeNull();
+    expect(feedbackOnChange(before, before)).toBeNull();
+    expect(feedbackOnChange(before, after)).toBe("point");
   });
 });

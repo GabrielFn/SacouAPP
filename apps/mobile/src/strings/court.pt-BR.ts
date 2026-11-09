@@ -22,7 +22,7 @@ export const courtStrings = {
     menu: "Menu",
     menuLabelLocked: "Menu. Segure para abrir o menu",
     menuLabelUnlocked: "Menu",
-    lockLabelLocked: "Tela travada. Segure para sair",
+    lockLabelLocked: "Tela travada. Segure para destravar",
     lockLabelUnlocked: "Tela destravada. Toque para travar",
     setsLabel: (firstTeam: string, firstSets: number, secondTeam: string, secondSets: number) =>
       `Sets: ${firstTeam} ${String(firstSets)}, ${secondTeam} ${String(secondSets)}`,

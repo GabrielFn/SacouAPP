@@ -8,12 +8,14 @@ Pré-requisito: conta grátis em https://expo.dev (perguntas.md, pergunta 15). N
 
 ```sh
 cd apps/mobile
-npx eas-cli@latest login                              # pede e-mail e senha da Expo, direto no terminal
-npx eas-cli@latest init                               # liga o projeto à conta e grava o projectId no app.json (commitar)
-npx eas-cli@latest build --platform android --profile preview
+npx eas-cli@27.5.0 login                              # pede e-mail e senha da Expo, direto no terminal
+npx eas-cli@27.5.0 init                               # liga o projeto à conta e grava o projectId no app.json (commitar)
+npx eas-cli@27.5.0 build --platform android --profile preview
 ```
 
 O build roda na nuvem (fila grátis, 10 a 30 minutos). No fim, o terminal mostra um link e um QR code: abra o link no celular Android, baixe o APK e instale (o Android pede para permitir "fontes desconhecidas" uma vez). Ficha: pacote `com.sacou.app`, sem backup automático, só em retrato.
+
+Depois do build, confira as permissões do APK (o `aapt` vem no Android SDK build-tools): `aapt dump permissions <apk>`. O esperado é `com.sacou.app` com `android.permission.VIBRATE` (e as que o Expo adiciona sozinho, como `INTERNET`), sem `SYSTEM_ALERT_WINDOW`, `READ_EXTERNAL_STORAGE` nem `WRITE_EXTERNAL_STORAGE`.
 
 Se o build falhar, mande o link da página do build (ou a última tela de erro) para o orquestrador.
 

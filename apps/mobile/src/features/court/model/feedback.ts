@@ -72,3 +72,14 @@ export function deriveFeedback(
 export function strongestFeedback(kinds: readonly FeedbackKind[]): FeedbackKind | null {
   return kinds.at(-1) ?? null;
 }
+
+/** What to play when the log goes from `before` to `after`; the first state seen (`null`) plays nothing. */
+export function feedbackOnChange(
+  before: CourtSessionState | null,
+  after: CourtSessionState,
+): FeedbackKind | null {
+  if (before === null || before === after) {
+    return null;
+  }
+  return strongestFeedback(deriveFeedback(before, after));
+}

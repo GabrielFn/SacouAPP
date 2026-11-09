@@ -38,7 +38,7 @@ export default function CourtRoute() {
   const { push, replace } = route;
   const focused = useIsFocused();
   // While locked, the back button of Android stays where it is (only on the court, not on its menu).
-  useBackGuard(guard.backBlocked(focused));
+  useBackGuard(view.status === "ready" && guard.backBlocked(focused));
   const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
     if (step === "open-set-end") {
