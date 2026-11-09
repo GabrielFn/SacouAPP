@@ -35,13 +35,29 @@ export default function HomeScreen() {
         <Text variant="muted">{strings.home.placeholder}</Text>
       </View>
       {DEV_TOOLS_ENABLED ? (
-        <Button
-          label={strings.court.dev.title}
-          variant="secondary"
-          onPress={() => {
-            router.push("/dev/court");
-          }}
-        />
+        <>
+          <Button
+            label={strings.court.dev.title}
+            variant="secondary"
+            onPress={() => {
+              router.push("/dev/court");
+            }}
+          />
+          <Button
+            label={strings.court.dev.catalogLink}
+            variant="secondary"
+            onPress={() => {
+              router.push("/dev/catalog");
+            }}
+          />
+          <Button
+            label={strings.court.dev.benchmarkLink}
+            variant="secondary"
+            onPress={() => {
+              router.push("/dev/replay-benchmark");
+            }}
+          />
+        </>
       ) : null}
     </Screen>
   );

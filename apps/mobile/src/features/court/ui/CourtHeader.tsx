@@ -5,8 +5,8 @@ import { useTheme } from "../../../theme/theme-context";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COURT_FLEX_WEIGHTS, HOLD_TO_OPEN_MENU_MS } from "../court.data";
-import { CloudOffIcon, LockIcon, MenuDotsIcon } from "./CourtIcons";
+import { COURT_FLEX_WEIGHTS, HOLD_TO_OPEN_MENU_MS, HOLD_TO_UNLOCK_MS } from "../court.data";
+import { CloudOffIcon, LockIcon, MenuDotsIcon, UnlockIcon } from "./CourtIcons";
 import { SetDots } from "./SetDots";
 
 export interface CourtHeaderProps {
@@ -14,12 +14,25 @@ export interface CourtHeaderProps {
   /** Empty for a single set: the dots are hidden. */
   readonly sets: readonly (TeamColorName | null)[];
   readonly setsLabel: string;
-  /** Held on the Menu button: the menu sits behind the lock (revisao-mvp.md:40). */
+  readonly locked: boolean;
+  /** Held on the Menu button while locked, tapped while unlocked (revisao-mvp.md:40). */
   readonly onOpenMenu: () => void;
+  /** Held on the lock while locked. */
+  readonly onUnlock: () => void;
+  /** Tapped on the open lock. */
+  readonly onLock: () => void;
 }
 
 /** The bar on top: set, sets won, "saved on the phone", the Menu button and the lock. */
-export function CourtHeader({ setNumber, sets, setsLabel, onOpenMenu }: CourtHeaderProps) {
+export function CourtHeader({
+  setNumber,
+  sets,
+  setsLabel,
+  locked,
+  onOpenMenu,
+  onUnlock,
+  onLock,
+}: CourtHeaderProps) {
   const { colors, tokens } = useTheme();
   const { sizes, fontSizes } = tokens.court;
   return (
@@ -60,9 +73,12 @@ export function CourtHeader({ setNumber, sets, setsLabel, onOpenMenu }: CourtHea
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={strings.court.header.menuLabelLocked}
+        accessibilityLabel={
+          locked ? strings.court.header.menuLabelLocked : strings.court.header.menuLabelUnlocked
+        }
         delayLongPress={HOLD_TO_OPEN_MENU_MS}
-        onLongPress={onOpenMenu}
+        onPress={locked ? undefined : onOpenMenu}
+        onLongPress={locked ? onOpenMenu : undefined}
         style={{
           minHeight: sizes.menuButton,
           minWidth: sizes.menuButton,
@@ -86,9 +102,14 @@ export function CourtHeader({ setNumber, sets, setsLabel, onOpenMenu }: CourtHea
           {strings.court.header.menu}
         </Text>
       </Pressable>
-      <View
-        accessible
-        accessibilityLabel={strings.court.header.lockLabelLocked}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          locked ? strings.court.header.lockLabelLocked : strings.court.header.lockLabelUnlocked
+        }
+        delayLongPress={HOLD_TO_UNLOCK_MS}
+        onPress={locked ? undefined : onLock}
+        onLongPress={locked ? onUnlock : undefined}
         style={{
           minHeight: sizes.lockButton,
           minWidth: sizes.lockButton,
@@ -96,8 +117,8 @@ export function CourtHeader({ setNumber, sets, setsLabel, onOpenMenu }: CourtHea
           justifyContent: "center",
         }}
       >
-        <LockIcon />
-      </View>
+        {locked ? <LockIcon /> : <UnlockIcon />}
+      </Pressable>
     </View>
   );
 }

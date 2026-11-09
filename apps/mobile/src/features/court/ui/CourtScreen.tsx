@@ -14,10 +14,15 @@ import { TeamZone } from "./TeamZone";
 
 export interface CourtScreenProps {
   readonly model: CourtScreenModel;
+  /** The toast of the last point; it takes the place of the line of the strip while it shows. */
+  readonly toast: string | null;
+  readonly locked: boolean;
   readonly onPoint: (team: TeamSide) => void;
   readonly onUndo: () => void;
   readonly onCorrect: () => void;
   readonly onOpenMenu: () => void;
+  readonly onUnlock: () => void;
+  readonly onLock: () => void;
 }
 
 function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
@@ -25,7 +30,17 @@ function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
 }
 
 /** Screens 09 (sun) and 10 (night): the whole court, drawn from the model and nothing else. */
-export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: CourtScreenProps) {
+export function CourtScreen({
+  model,
+  toast,
+  locked,
+  onPoint,
+  onUndo,
+  onCorrect,
+  onOpenMenu,
+  onUnlock,
+  onLock,
+}: CourtScreenProps) {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -48,7 +63,10 @@ export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: C
         setNumber={model.setNumber}
         sets={dotColors(model)}
         setsLabel={setsLabel(model)}
+        locked={locked}
         onOpenMenu={onOpenMenu}
+        onUnlock={onUnlock}
+        onLock={onLock}
       />
       <TeamZone
         panel={model.teams.a}
@@ -59,7 +77,7 @@ export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: C
         }}
       />
       <CenterStrip
-        hint={hintText(model)}
+        hint={toast ?? hintText(model)}
         canUndo={model.canUndo}
         onUndo={onUndo}
         onCorrect={onCorrect}

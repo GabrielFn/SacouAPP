@@ -3,7 +3,12 @@
     "name": "Sacou",
     "slug": "sacou",
     "scheme": "sacou",
+    "orientation": "portrait",
     "plugins": ["expo-router"],
+    "android": {
+      "package": "com.sacou.app",
+      "allowBackup": false
+    },
     "experiments": {
       "typedRoutes": true
     }

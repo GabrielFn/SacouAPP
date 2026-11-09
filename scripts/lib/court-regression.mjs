@@ -5,6 +5,10 @@ const NO_RESTRICTED_IMPORTS = "@typescript-eslint/no-restricted-imports";
 const NO_RESTRICTED_SYNTAX = "no-restricted-syntax";
 const CLEAN = "clean";
 
+function deviceImport(name) {
+  return `import { ${name} } from "react-native";\nexport const used = ${name};\n`;
+}
+
 const NODE_GLOBAL_CASES = [
   ["buffer", "export const value: unknown = Buffer;\n"],
   ["immediate", "export const value: unknown = setImmediate;\n"],
@@ -45,6 +49,12 @@ export function courtLintCases(prefix) {
     ],
     [`${court}sqlite.ts`, 'import "expo-sqlite";\n', NO_RESTRICTED_IMPORTS],
     [`${court}clean.ts`, "export const value = 1;\n", CLEAN],
+    // The device APIs of react-native live in adapters; the rest of react-native stays free.
+    [`${court}back-handler.ts`, deviceImport("BackHandler"), NO_RESTRICTED_IMPORTS],
+    [`${ui}vibration.ts`, deviceImport("Vibration"), NO_RESTRICTED_IMPORTS],
+    [`${ui}accessibility-info.ts`, deviceImport("AccessibilityInfo"), NO_RESTRICTED_IMPORTS],
+    [`${ui}view.ts`, deviceImport("View"), CLEAN],
+    [`apps/mobile/src/adapters/${prefix}back-handler.ts`, deviceImport("BackHandler"), CLEAN],
     [`${ui}fetch.ts`, 'export const call = fetch("/");\n', CLEAN],
     // Node.js is for tests only, everywhere in the app.
     [`${ui}node.ts`, 'import "node:fs";\n', NO_RESTRICTED_IMPORTS],

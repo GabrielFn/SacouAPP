@@ -75,6 +75,16 @@ const SDK_IMPORTS = {
   message: "Device and service SDKs are used only in src/adapters/, behind an interface.",
 };
 
+// react-native itself is free, but its device APIs are not: they have an adapter and an interface.
+const DEVICE_API_NAMES = ["BackHandler", "Vibration", "AccessibilityInfo"];
+const DEVICE_API_PATHS = [
+  {
+    name: "react-native",
+    importNames: DEVICE_API_NAMES,
+    message: "Device APIs of react-native are used only in src/adapters/, behind an interface.",
+  },
+];
+
 // The same SDK rule for import() and require(), which no-restricted-imports does not see.
 // esquery ends a regex at "/", so the selector spells it as "[/]".
 const SDK_SELECTOR_REGEX = SDK_IMPORTS.regex.replaceAll("/", "[/]");
@@ -186,7 +196,7 @@ export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
       rules: {
         "@typescript-eslint/no-restricted-imports": [
           "error",
-          { patterns: [SDK_IMPORTS, NODE_IMPORTS] },
+          { patterns: [SDK_IMPORTS, NODE_IMPORTS], paths: DEVICE_API_PATHS },
         ],
       },
     },
@@ -237,7 +247,7 @@ function courtBlocks({ testFiles, dataRestrictions }) {
         "no-restricted-globals": ["error", ...NETWORK_GLOBALS, ...NODE_GLOBALS],
         "@typescript-eslint/no-restricted-imports": [
           "error",
-          { patterns: [SDK_IMPORTS, NODE_IMPORTS, NETWORK_IMPORTS] },
+          { patterns: [SDK_IMPORTS, NODE_IMPORTS, NETWORK_IMPORTS], paths: DEVICE_API_PATHS },
         ],
       },
     },

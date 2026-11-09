@@ -126,3 +126,19 @@ export function BallIcon() {
     </Svg>
   );
 }
+
+/** The lock with the shackle open: the screen is unlocked. */
+export function UnlockIcon({ color }: CourtIconProps) {
+  const { colors, tokens } = useTheme();
+  const size = tokens.court.sizes.lockIcon;
+  const stroke = color ?? colors.text;
+  return (
+    <Svg width={size} height={size} viewBox={VIEW_BOX} fill="none" stroke={stroke}>
+      <Path
+        d="M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z"
+        strokeWidth={STROKE_ICON}
+      />
+      <Path d="M8 11V8a4 4 0 0 1 7.6-1.7" strokeWidth={STROKE_ICON} />
+    </Svg>
+  );
+}
