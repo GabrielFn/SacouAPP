@@ -17,7 +17,7 @@ internal static class ListMyGroupsEndpoint
 
     public static IEndpointRouteBuilder MapListMyGroups(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name);
+        endpoints.MapGet(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
         return endpoints;
     }
 

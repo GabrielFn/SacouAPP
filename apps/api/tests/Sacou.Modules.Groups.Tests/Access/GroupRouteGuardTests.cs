@@ -39,6 +39,24 @@ public sealed class GroupRouteGuardTests
         Assert.Equal(GroupRouteGuard.RoutesOutsideTheGroupFilter.Order(StringComparer.Ordinal), outside.Order(StringComparer.Ordinal));
     }
 
+    /// <summary>
+    /// Every Groups route that takes a body caps it at 4 KB. Kestrel applies the metadata; the TestServer of the
+    /// integration tests does not, so the 413 itself is tested with Kestrel in part 2 (M8).
+    /// </summary>
+    [Fact]
+    public async Task RealApi_GroupRoutesCapTheBody()
+    {
+        await using var api = new ClosedDatabaseApi();
+        var groupRoutes = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
+            .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal))
+            .ToList();
+
+        Assert.NotEmpty(groupRoutes);
+        Assert.All(groupRoutes, endpoint => Assert.Equal(
+            GroupRouteExtensions.MaxBodyBytes,
+            endpoint.Metadata.GetMetadata<Microsoft.AspNetCore.Http.Metadata.IRequestSizeLimitMetadata>()?.MaxRequestBodySize));
+    }
+
     [Fact]
     public void GroupRouteWithOnePermission_IsNotReported()
     {
