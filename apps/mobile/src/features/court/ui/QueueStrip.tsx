@@ -4,9 +4,9 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COURT_FLEX_WEIGHTS } from "../court.data";
+import { COURT_FLEX_WEIGHTS, MAX_QUEUE_PILLS } from "../court.data";
 import type { QueueModel } from "../model/court-screen.types";
-import { queueExitText, queueLabel } from "../model/screen-texts";
+import { queueExitText, queueLabel, queuePills } from "../model/screen-texts";
 import { FlameIcon } from "./CourtIcons";
 import { QueuePill } from "./QueuePill";
 
@@ -17,11 +17,21 @@ export interface QueueStripProps {
 }
 
 /** Who is waiting, the streak of the team that stays, and the rule of the exit. */
+/** Whole teams first, then the reserves; past the limit the rest is a "+k". */
+function visiblePills(queue: QueueModel | null) {
+  const entries = queue === null ? [] : queuePills(queue);
+  return {
+    shown: entries.slice(0, MAX_QUEUE_PILLS),
+    hidden: Math.max(0, entries.length - MAX_QUEUE_PILLS),
+  };
+}
+
 export function QueueStrip({ queue, streak }: QueueStripProps) {
   const { colors, tokens } = useTheme();
   const textStyle: TextStyle = { color: colors.text, fontSize: tokens.fontSizes.small };
   const mutedStyle: TextStyle = { color: colors.textMuted, fontSize: tokens.fontSizes.caption };
   const exit = queueExitText(queue);
+  const { shown, hidden } = visiblePills(queue);
   return (
     <View
       style={{
@@ -36,7 +46,7 @@ export function QueueStrip({ queue, streak }: QueueStripProps) {
       }}
     >
       <View
-        accessible
+        accessible={queue !== null}
         accessibilityLabel={queue === null ? undefined : queueLabel(queue)}
         style={{
           flexDirection: "row",
@@ -50,16 +60,14 @@ export function QueueStrip({ queue, streak }: QueueStripProps) {
             <Text style={{ ...textStyle, fontFamily: fontFamilies.body700 }}>
               {strings.court.queue.title}
             </Text>
-            {queue.teams.map((team, index) => (
-              <QueuePill
-                key={team.key}
-                position={index + 1}
-                label={strings.court.queue.team(index + 1)}
-              />
+            {shown.map(({ key, label }, index) => (
+              <QueuePill key={key} position={index + 1} label={label} />
             ))}
-            {queue.players.map(({ memberId, name }, index) => (
-              <QueuePill key={memberId} position={queue.teams.length + index + 1} label={name} />
-            ))}
+            {hidden === 0 ? null : (
+              <Text style={{ ...textStyle, fontFamily: fontFamilies.body700 }}>
+                {strings.court.queue.more(hidden)}
+              </Text>
+            )}
             {queue.players.length === 0 ? null : (
               <Text style={{ ...mutedStyle, fontFamily: fontFamilies.body600 }}>
                 {strings.court.queue.reserves}

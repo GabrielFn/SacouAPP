@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import catalog from "../../../../../../packages/volley-rules/src/formations/formations.json";
 import { anchorAt, placeOnHalfCourt, ratioToPercentText, toPercentText } from "./court-geometry";
 import { selectCourtScreen } from "./court-screen.selectors";
 import { ROSTER, screen09 } from "./screen-scenarios.test.fixture";
@@ -7,13 +8,8 @@ import { ROSTER, screen09 } from "./screen-scenarios.test.fixture";
 const HALF_COURT_PX = 210;
 /** Laranja is drawn from the catalog and matches the design to a few percent on both axes. */
 const TOLERANCE_ORANGE = 0.07;
-/**
- * The design draws Azul by hand: its depth (the y axis) is up to 0.4 away from the catalog, where
- * the receiving formation puts the front row deeper (screens 08, 09 and 25 do not agree among
- * themselves, E2.3). The catalog is the source, so only the width is held for Azul.
- */
-const TOLERANCE_BLUE_WIDTH = 0.25;
-const NO_DEPTH_CHECK = Number.POSITIVE_INFINITY;
+/** Azul is held to the catalog itself (the design draws it by hand, E2.3 pendency). */
+const TOLERANCE_CATALOG = 0.01;
 
 /** Screen 09 (QuadraSol.dc.html), the left and top of each chip in pixels, by zone of the team. */
 const DESIGN_ORANGE: Readonly<Record<number, readonly [number, number]>> = {
@@ -24,15 +20,6 @@ const DESIGN_ORANGE: Readonly<Record<number, readonly [number, number]>> = {
   5: [170, 62],
   6: [96, 62],
 };
-const DESIGN_BLUE: Readonly<Record<number, readonly [number, number]>> = {
-  1: [172, 84],
-  2: [166, 32],
-  3: [104, 32],
-  4: [40, 32],
-  5: [46, 150],
-  6: [112, 160],
-};
-
 describe("placing a point on the half court", () => {
   test("the team at the bottom is drawn as it is in the catalog", () => {
     expect(placeOnHalfCourt({ x: 0.25, y: 0.4 }, "bottom")).toEqual({ x: 25, y: 40 });
@@ -70,14 +57,21 @@ describe("the chips of screen 09 against the design", () => {
     }));
   }
 
-  test.each([
-    ["a", DESIGN_ORANGE, TOLERANCE_ORANGE, TOLERANCE_ORANGE],
-    ["b", DESIGN_BLUE, TOLERANCE_BLUE_WIDTH, NO_DEPTH_CHECK],
-  ] as const)("team %s", async (side, design, widthTolerance, depthTolerance) => {
-    for (const { zone, place } of await placed(side)) {
-      const [left, top] = design[zone] ?? [0, 0];
-      expect(Math.abs(place.x / 100 - left / HALF_COURT_PX)).toBeLessThanOrEqual(widthTolerance);
-      expect(Math.abs(place.y / 100 - top / HALF_COURT_PX)).toBeLessThanOrEqual(depthTolerance);
+  test("Laranja, on top, is where the design draws it", async () => {
+    for (const { zone, place } of await placed("a")) {
+      const [left, top] = DESIGN_ORANGE[zone] ?? [0, 0];
+      expect(Math.abs(place.x / 100 - left / HALF_COURT_PX)).toBeLessThanOrEqual(TOLERANCE_ORANGE);
+      expect(Math.abs(place.y / 100 - top / HALF_COURT_PX)).toBeLessThanOrEqual(TOLERANCE_ORANGE);
+    }
+  });
+
+  /** Azul receives in rotation 1 on screen 09: the points of formations.json, unmirrored, by zone. */
+  test("Azul, at the bottom, is where formations.json puts it", async () => {
+    const receive = catalog.systems["5x1"].rotations["1"].receive;
+    for (const { zone, place } of await placed("b")) {
+      const point = receive[String(zone) as keyof typeof receive];
+      expect(Math.abs(place.x / 100 - point.x)).toBeLessThanOrEqual(TOLERANCE_CATALOG);
+      expect(Math.abs(place.y / 100 - point.y)).toBeLessThanOrEqual(TOLERANCE_CATALOG);
     }
   });
 

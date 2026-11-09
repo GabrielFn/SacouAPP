@@ -12,7 +12,7 @@ export default function CourtLayout() {
   const params = useGlobalSearchParams<{ courtSessionId: string; theme?: string }>();
   return (
     <ThemeProvider name={themeNameOf(parseCourtTheme(params.theme))}>
-      <CourtSessionProvider courtSessionId={params.courtSessionId}>
+      <CourtSessionProvider key={params.courtSessionId} courtSessionId={params.courtSessionId}>
         <Stack screenOptions={{ headerShown: false, gestureEnabled: false }} />
       </CourtSessionProvider>
     </ThemeProvider>

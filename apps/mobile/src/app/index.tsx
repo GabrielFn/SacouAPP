@@ -1,12 +1,11 @@
 import { CURRENT_EVENT_SCHEMA_VERSION } from "@sacou/match-engine";
 import { FORMATION_SYSTEMS } from "@sacou/volley-rules";
-import { Redirect, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { View } from "react-native";
 
-import { useCourtRuntime } from "../features/court/hooks/court-runtime-context";
+import { useResumeOnce } from "../features/court/hooks/resume-context";
 import { courtHref } from "../features/court/navigation";
-import { findResumableCourtSession } from "../features/court/session/resume-court";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { strings } from "../strings/pt-BR";
 import { AppHeader } from "../ui/AppHeader";
@@ -19,15 +18,15 @@ const WORKSPACE_EXPORTS = [...FORMATION_SYSTEMS, CURRENT_EVENT_SCHEMA_VERSION] a
 
 /** A match in progress brings the user back to the court after the app was closed (E4.9). */
 export default function HomeScreen() {
-  const runtime = useCourtRuntime();
   const router = useRouter();
-  const [resumable, setResumable] = useState<string | null>(null);
+  const resume = useResumeOnce();
+  // The court is resumed once per opening of the app: leaving it for the home must not bring it back.
   useEffect(() => {
-    void findResumableCourtSession(runtime).then(setResumable);
-  }, [runtime]);
-  if (resumable !== null) {
-    return <Redirect href={courtHref("court", { courtSessionId: resumable, theme: "sun" })} />;
-  }
+    const courtSessionId = resume.take();
+    if (courtSessionId !== null) {
+      router.replace(courtHref("court", { courtSessionId, theme: "sun" }));
+    }
+  }, [resume, router]);
   return (
     <Screen>
       <AppHeader />

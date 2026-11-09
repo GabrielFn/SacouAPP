@@ -45,3 +45,16 @@ export function queueLabel(queue: QueueModel): string {
     queue.teams.length === 0,
   );
 }
+
+export interface QueuePillText {
+  readonly key: string;
+  readonly label: string;
+}
+
+/** The pills of the queue in order: whole teams first (as "Time n"), then the reserves by name. */
+export function queuePills(queue: QueueModel): readonly QueuePillText[] {
+  return [
+    ...queue.teams.map(({ key }, index) => ({ key, label: strings.court.queue.team(index + 1) })),
+    ...queue.players.map(({ memberId, name }) => ({ key: memberId, label: name })),
+  ];
+}

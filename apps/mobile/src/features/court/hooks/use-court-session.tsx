@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -48,13 +49,11 @@ export interface CourtSessionProviderProps {
  */
 export function CourtSessionProvider({ courtSessionId, children }: CourtSessionProviderProps) {
   const runtime = useCourtRuntime();
-  const handle = useMemo<SessionHandle>(
-    () => ({
-      courtSessionId,
-      controller: createCourtSessionController({ courtSessionId, ...runtime }),
-    }),
-    [courtSessionId, runtime],
-  );
+  // Created once per mount; the layout keys the provider by session, so another session remounts it.
+  const [handle] = useState<SessionHandle>(() => ({
+    courtSessionId,
+    controller: createCourtSessionController({ courtSessionId, ...runtime }),
+  }));
   return <CourtSessionContext.Provider value={handle}>{children}</CourtSessionContext.Provider>;
 }
 

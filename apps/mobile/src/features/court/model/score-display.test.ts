@@ -43,9 +43,18 @@ describe("the score has no ceiling", () => {
     }
   });
 
-  test.each(SCREENS)("two digits fit the width of the side column at %o", (screen) => {
-    const { layout, text } = sizeOf(99, screen);
-    expect(text.fontSize * 2 * DIGIT_WIDTH_EM).toBeLessThanOrEqual(layout.sideWidth + 1);
+  /**
+   * Written by hand for the canvas (390 x 844): 132 up to two digits, 70% of it (92.4) with three,
+   * 50% (66) with four, and past that the width of the column (140) divided by the digits. The 0.46
+   * em of a digit in the code is an estimate of Barlow Condensed that only the device confirms.
+   */
+  test.each([
+    [99, 132],
+    [100, 92.4],
+    [1000, 66],
+    [Number.MAX_SAFE_INTEGER, 19.02],
+  ])("on the canvas %s is drawn at %s", (score, expected) => {
+    expect(sizeOf(score, SCREENS[1]).text.fontSize).toBeCloseTo(expected, 1);
   });
 
   test.each(SCREENS)(

@@ -1,3 +1,4 @@
+import { useIsFocused } from "expo-router";
 import { useEffect, useMemo } from "react";
 
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
@@ -32,10 +33,17 @@ export default function CourtRoute() {
   useEffect(() => {
     if (phase === "set-decided") {
       push("setEnd");
-    } else if (phase === "match-ended") {
+    }
+  }, [phase, push]);
+
+  // The match is over: the court has nothing to show, so every time it is in front (also when the
+  // user comes back to it with the back button) it hands over to the result.
+  const focused = useIsFocused();
+  useEffect(() => {
+    if (phase === "match-ended" && focused) {
       replace("matchEnd");
     }
-  }, [phase, push, replace]);
+  }, [phase, focused, replace]);
 
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;

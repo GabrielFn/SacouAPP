@@ -70,3 +70,6 @@ export const HOLD_TO_OPEN_MENU_MS = 800;
 
 /** A DESFAZER with nothing to undo; the state is also told to the screen reader. */
 export const DISABLED_OPACITY = 0.4;
+
+/** More than this many waiting in the queue and the rest is a "+k": the strip keeps one row. */
+export const MAX_QUEUE_PILLS = 4;

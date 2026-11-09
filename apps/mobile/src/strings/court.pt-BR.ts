@@ -22,7 +22,7 @@ export const courtStrings = {
     menu: "Menu",
     menuLabelLocked: "Menu. Segure para abrir o menu",
     menuLabelUnlocked: "Menu",
-    lockLabelLocked: "Tela travada. Segure para sair",
+    lockLabelLocked: "Tela travada",
     lockLabelUnlocked: "Tela destravada. Toque para travar",
     setsLabel: (firstTeam: string, firstSets: number, secondTeam: string, secondSets: number) =>
       `Sets: ${firstTeam} ${String(firstSets)}, ${secondTeam} ${String(secondSets)}`,
@@ -49,6 +49,7 @@ export const courtStrings = {
   queue: {
     title: "Na fila",
     reserves: "reservas",
+    more: (hidden: number) => `+${String(hidden)}`,
     team: (position: number) => `Time ${String(position)}`,
     waiting: (names: string, reservesOnly: boolean) =>
       `Na fila: ${names}${reservesOnly ? " (reservas)" : ""}`,
@@ -57,6 +58,10 @@ export const courtStrings = {
     fullExit: "perde sai",
   },
   roster: { unknownPlayer: "Jogador", orange: "Laranja", blue: "Azul" },
+  storageError: {
+    title: "Não conseguimos abrir o armazenamento",
+    body: "O app não conseguiu abrir o banco de dados do celular. Nada foi apagado. Tente de novo; se continuar, feche e abra o app.",
+  },
   error: {
     title: "Não conseguimos abrir esta partida",
     body: "Seus pontos continuam salvos no celular. Tente de novo; se não abrir, feche e abra o app.",

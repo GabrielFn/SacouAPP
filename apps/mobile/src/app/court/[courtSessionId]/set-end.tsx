@@ -28,14 +28,14 @@ export default function SetEndRoute() {
     [timeline, courtRoster],
   );
   const phase = timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline));
-  const { back } = route;
+  const { backOrCourt } = route;
 
   // Once the set is confirmed the next one is being played; the end of the match is the court's to route.
   useEffect(() => {
     if (phase === "playing") {
-      back();
+      backOrCourt();
     }
-  }, [phase, back]);
+  }, [phase, backOrCourt]);
 
   if (model === null) {
     return null;
@@ -69,7 +69,10 @@ export default function SetEndRoute() {
         ),
         ...(model.needsFirstServer ? [setEnd.whoServes] : []),
       ]}
-      actions={[...confirmActions, { label: setEnd.back, variant: "secondary", onPress: back }]}
+      actions={[
+        ...confirmActions,
+        { label: setEnd.back, variant: "secondary", onPress: backOrCourt },
+      ]}
     />
   );
 }

@@ -13,6 +13,8 @@ export interface CourtRouteNavigation {
   readonly push: (path: CourtPathKey) => void;
   readonly replace: (path: CourtPathKey) => void;
   readonly back: () => void;
+  /** Back when there is somewhere to go back to, the court itself otherwise (a cold start on this route). */
+  readonly backOrCourt: () => void;
   readonly leave: () => void;
 }
 
@@ -39,8 +41,15 @@ export function useCourtRoute(): CourtRouteNavigation {
   const back = useCallback(() => {
     router.back();
   }, [router]);
+  const backOrCourt = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace(courtHref("court", params));
+    }
+  }, [router, params]);
   const leave = useCallback(() => {
     router.dismissTo("/");
   }, [router]);
-  return { params, push, replace, back, leave };
+  return { params, push, replace, back, backOrCourt, leave };
 }
