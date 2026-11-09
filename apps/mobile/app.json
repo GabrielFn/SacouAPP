@@ -3,7 +3,18 @@
     "name": "Sacou",
     "slug": "sacou",
     "scheme": "sacou",
+    "orientation": "portrait",
     "plugins": ["expo-router"],
+    "android": {
+      "package": "com.sacou.app",
+      "allowBackup": false,
+      "permissions": ["android.permission.VIBRATE"],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
     "experiments": {
       "typedRoutes": true
     }

@@ -51,3 +51,17 @@ Medição do replay e do `fsync` no Hermes, orçamento (toque no S3 com p95 ≤ 
 - **AsyncStorage ou MMKV:** sem transação nem restrição `UNIQUE`; a atomicidade do `SetEnded` com o `MatchEnded` ficaria à mão.
 - **Calcular a `sequence` só no banco:** o replay simulado precisa dela antes de gravar.
 - **Guardar o estado (snapshot) no SQLite:** duplicaria a fonte; o log é a fonte (`frontend.md`, regra 1).
+
+## Parte 3: recursos do aparelho e medição (atualização)
+
+**Cada recurso do aparelho tem uma porta e dois adaptadores** (`frontend.md`, regra 3): `ScreenAwake` (`expo-keep-awake`), `CourtFeedback` (`expo-haptics`), `BackGuard` (`BackHandler`), `ReducedMotion` (`AccessibilityInfo`) e `Clock` (`performance.now()`), cada um com uma implementação falsa em `src/adapters/`. O ESLint passou a reprovar `BackHandler`, `Vibration` e `AccessibilityInfo` de `react-native` fora de `src/adapters/` (o resto do `react-native` continua livre). Versões exatas do SDK 58: `expo-keep-awake` 58.0.3 e `expo-haptics` 58.0.7 (`bundledNativeModules`).
+
+**A trava é um reducer** (`guard/court-guard.reducer.ts`), e o estado dele guarda só o que não se deriva: se está travado e até quando vão o bloqueio e o toast. O texto do toast sai do log (`selectLastPoint`). A decisão de tocar a vibração sai de `deriveFeedback(antes, depois)`, pura, depois do commit. As ações são `lock`, `unlock`, `point-accepted`, `point-recorded`, `undo-accepted` e `tick`.
+
+**Manifesto e backup.** `android.allowBackup: false` (o backup automático não copia o `deviceId` para outro celular) e `android.package: com.sacou.app`. A vibração do `expo-haptics` pede só a permissão `VIBRATE` no Android, que não é sensível; conferir no APK (`aapt dump permissions`) é parte do roteiro.
+
+**APK de teste.** `apps/mobile/eas.json`, perfil `preview` (APK, distribuição interna, `EXPO_PUBLIC_DEV_TOOLS=1`). Nada de segredo no repositório; a conta da Expo é do Gabriel. O `package.json` do app tem o gancho `eas-build-post-install`, que compila `volley-rules` e `match-engine` (exportam `dist/`) antes do Metro rodar.
+
+**Medição no Hermes** (`/dev/replay-benchmark`, só com `EXPO_PUBLIC_DEV_TOOLS=1`, banco `sacou-benchmark.db` à parte). S1 a S4 montados com os comandos públicos do motor; S3 e S4 repetem uma partida de 1 set com outro `matchId` e IDs de evento novos (cópia em `relabel-events.ts`), porque jogar 10 mil eventos comando a comando seria quadrático. Mede (a) JSON + `parseEventEnvelope`, (b) `replayTimeline`, (c) `selectCourtScreen`, (d) `getOpenMatchStartIndex` × 10 + `getRecentPoints`, (e) o toque inteiro (comando, simulação, gravação) no SQLite de verdade, com 100 toques alternando ponto e desfazer (30 no S4, que repete 10 mil eventos por toque), (f) a leitura das linhas e reabrir a quadra. Três aquecimentos e 20 repetições; mediana, p95 e máximo. **Orçamento proposto:** toque do S3 com p95 ≤ 100 ms e reabrir o S4 em ≤ 1 s num Android intermediário.
+
+**Números medidos: pendentes do roteiro no celular.** Entram aqui, com o modelo do aparelho, quando o Gabriel rodar `/dev/replay-benchmark` no APK (modo de produção). Se o S3 ou o S4 estourar o orçamento, abre-se uma tarefa do motor (dobra incremental ou snapshot do replay, com ADR), sem mudar o motor na E4.9. Se `synchronous = FULL` pesar no item (e), a decisão por `NORMAL` também sai do número.

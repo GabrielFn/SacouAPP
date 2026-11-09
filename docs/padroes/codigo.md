@@ -33,7 +33,7 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Cor só no tema (app) | Hex, hex em template e `rgb(`/`rgba(` reprovam em `apps/mobile/src` fora de `src/theme/` | Testes |
 | Sem número em estilo (app) | Literal numérico em `StyleSheet.create`, em atributo `*style` ou em variável com tipo `*Style` reprova | Livres: `flex`, `flexGrow`, `flexShrink`, `opacity`, `aspectRatio`, `zIndex` |
 | Props como `interface` exportada (app) | `type XProps`, `interface XProps` sem `export` e props inline em componente PascalCase reprovam | Testes |
-| SDK só em adaptador (app) | `expo`, `expo-*`, `react-native-*`, `@react-native-community/*`, `@react-native-async-storage/*` só em `src/adapters/`, também em `import()` e `require()` | Livres: `expo-router`, `expo-status-bar`, `react-native-svg`, `react-native-safe-area-context`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-screens` |
+| SDK só em adaptador (app) | `expo`, `expo-*`, `react-native-*`, `@react-native-community/*`, `@react-native-async-storage/*` só em `src/adapters/`, também em `import()` e `require()`. Do próprio `react-native`, `BackHandler`, `Vibration` e `AccessibilityInfo` também (o resto, como `View`, é livre) | Livres: `expo-router`, `expo-status-bar`, `react-native-svg`, `react-native-safe-area-context`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-screens` |
 | Reducer exaustivo (app) | Arquivo `*.reducer.ts`: `switch-exhaustiveness-check` sem aceitar `default` e `default` proibido | Nenhuma |
 
 ## Imposto por ferramenta: C#

@@ -1,6 +1,6 @@
 # Modo quadra: log local, controlador e telas
 
-Regras do modo quadra no app (E4.9). As partes 1 (log local e controlador, sem tela) e 2 (telas 09 e 10) estão feitas; trava, vibração e tela ligada entram com a parte 3, e o líbero com a parte 4. Decisão técnica no [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md). Código em `apps/mobile/src/features/court/`.
+Regras do modo quadra no app (E4.9). As partes 1 (log local e controlador, sem tela), 2 (telas 09 e 10) e 3 (recursos do aparelho e medição) estão feitas; o líbero entra com a parte 4. Decisão técnica no [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md). Código em `apps/mobile/src/features/court/`.
 
 ## O estado é o log
 
@@ -48,7 +48,7 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 **Placar sem teto.** Fonte = 45,8% da altura da zona (132/288) até 2 dígitos; 3 dígitos usam 70% disso; 4 ou mais, 50%; e nunca passa da largura da coluna do placar (uma conta por dígito, sem `onLayout`). `allowFontScaling={false}`: o tamanho já vem da zona, e a escala do sistema o empurraria para fora dela. `adjustsFontSizeToFit` e `numberOfLines={1}` ficam de segurança. O rótulo de acessibilidade da zona traz o número inteiro.
 
-**Set point.** No Noite, o número fica amarelo (papel `scoreHighlight` do tema); no Sol, o número fica na cor do texto (amarelo sobre branco não chega a 3:1, testado) e só a etiqueta "Set point" é amarela, com borda preta (`serverOutline`). A etiqueta substitui a linha "Sacando"/"Em recepção", como na tela 10. Com os dois times em set point (sem vantagem), as duas etiquetas aparecem e a faixa diz "Quem fizer o próximo ponto fecha o set". A animação de pulso e o "reduzir movimento" são da parte 3 (a cor `#FFE08A` já está em `palette.ballYellowLight`).
+**Set point.** No Noite, o número fica amarelo (papel `scoreHighlight` do tema); no Sol, o número fica na cor do texto (amarelo sobre branco não chega a 3:1, testado) e só a etiqueta "Set point" é amarela, com borda preta (`serverOutline`). A etiqueta substitui a linha "Sacando"/"Em recepção", como na tela 10. Com os dois times em set point (sem vantagem), as duas etiquetas aparecem e a faixa diz "Quem fizer o próximo ponto fecha o set". O pulso e o "reduzir movimento" estão em "Recursos do aparelho" abaixo.
 
 **Outros.** Bolinhas de sets: uma por set jogado ou em jogo, escondidas com `bestOf` 1. Fila: pílulas numeradas; "reservas" só com jogadores avulsos; "perde sai · saída parcial" sem time completo na fila e "perde sai" com time; sem ninguém na fila, a linha some. "Laranja venceu N seguidas": partidas terminadas seguidas, da mais recente para trás, vencidas por um time que tem a maioria do time atual (`win-streak.ts`); a linha some com N = 0. Chip do levantador: selo "L" quando o chip é `actingSetter` (nenhum no sistema Livre). Time com rotação desligada: sem chips e sem linha de rotação, só a fase. DESFAZER usa a resposta do próprio motor (`undoLastAction`): fica desabilitado quando não há o que desfazer.
 
@@ -62,8 +62,41 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 **Tela de desenvolvimento.** `/dev/court`, atrás de `EXPO_PUBLIC_DEV_TOOLS=1` (`src/config/dev-tools.ts`; também vale para `/dev/catalog`, que deixou de usar `__DEV__`): "Nova partida (1 set)" e "(melhor de 3)", tema, "Continuar partida" e "Encerrar quadra". Cada nova partida fecha a sessão aberta e chama `startCourtMatch` com os times de exemplo.
 
-**Diferenças em relação ao design.** (1) O cadeado e o Menu ainda não têm a trava: o Menu abre segurando e o cadeado só aparece, com o rótulo "Tela travada" (sem prometer o "Segure para sair", que só existe na parte 3). (2) Sem o pulso do set point (parte 3). (3) A linha de ataque é uma linha SVG tracejada (`6 4`), não uma borda `dashed`, porque a borda tracejada de um lado só não é igual nos dois sistemas. (4) As posições do Azul na tela 09 vêm do catálogo (fonte única) e diferem do desenho até 0,4 em profundidade; as do Laranja batem com o design a 7%. (5) A tela 10 não é alcançável a partir de a1/b5 (com o Laranja sacando, os dois times giram o mesmo número de vezes); o teste usa as zonas iniciais 1 e 6.
+**Diferenças em relação ao design.** (1) O pulso do set point é amarelo para amarelo claro, sem o desenho exato da animação (o design é estático). (2) A linha de ataque é uma linha SVG tracejada (`6 4`), não uma borda `dashed`, porque a borda tracejada de um lado só não é igual nos dois sistemas. (3) As posições do Azul na tela 09 vêm do catálogo (fonte única) e diferem do desenho até 0,4 em profundidade; as do Laranja batem com o design a 7%. (4) A tela 10 não é alcançável a partir de a1/b5 (com o Laranja sacando, os dois times giram o mesmo número de vezes); o teste usa as zonas iniciais 1 e 6. (5) O rótulo do cadeado travado é "Tela travada. Segure para destravar" (o design diz "Segure para sair"), porque segurar o cadeado destrava e não sai da quadra.
+
+## Recursos do aparelho e proteções (parte 3)
+
+Cada recurso tem uma interface em `features/court/ports/` (`ScreenAwake`, `CourtFeedback`, `BackGuard`, `ReducedMotion`, `Clock`), uma implementação real em `src/adapters/` e uma falsa para os testes. O app injeta as reais em `app/_layout.tsx` (`Services`).
+
+**Trava.** Ligada ao entrar na quadra e ao reabrir o app (`INITIAL_COURT_GUARD`). Com ela ligada: o **Menu** só abre **segurando** (800 ms, `HOLD_TO_OPEN_MENU_MS`); **segurar o cadeado** (800 ms, `HOLD_TO_UNLOCK_MS`) destrava; o botão voltar do Android fica bloqueado (só na quadra, com ela em foco: no fim do set e no menu o voltar funciona). Com ela desligada: o Menu abre com um toque, o voltar funciona, e o cadeado aberto trava de novo com um toque. Os rótulos de acessibilidade dizem a ação: "Tela travada. Segure para destravar", "Tela destravada. Toque para travar", "Menu. Segure para abrir o menu". O estado vive em `guard/court-guard.reducer.ts` (reducer puro, `switch` exaustivo): `locked`, `cooldownUntil` e `toastUntil`; ações `lock`, `unlock`, `point-accepted`, `point-recorded`, `undo-accepted` e `tick`. Um timer no hook `useCourtGuard` só acorda o componente quando algo vence; o reducer limpa.
+
+**Bloqueio depois do ponto.** `POINT_COOLDOWN_MS` = 700 ms, contado do toque aceito (`point-accepted`), nas duas zonas. DESFAZER nunca é bloqueado e não conta como ponto. O bloqueio vale também se o motor recusar o ponto.
+
+**Palma.** Um toque com dois dedos ou mais na zona é ignorado (`guard/palm.ts`): o pico de dedos do gesto vem de `onTouchStart` (um dedo sozinho começa um gesto novo) e o `onPress` confere o pico.
+
+**Toast.** "+1 Laranja (19–15)": o time que marcou, com o placar dele primeiro. Aparece no lugar da linha "Posições no momento do saque" por `POINT_TOAST_MS` (1500 ms) **a partir da gravação** do ponto (`point-recorded`, depois do commit), e só se o último evento ativo for um `PointScored` (`model/point-toast.ts`). Desfazer o apaga.
+
+**Tela ligada.** O `_layout` da quadra liga a tela (`ScreenAwake.activate("sacou-court")`) quando monta e desliga quando desmonta. Como o `_layout` serve a quadra, o fim do set, o menu e a correção, a tela fica ligada em todas elas e apaga ao sair do modo quadra (inclusive por "Sair do modo quadra").
+
+**Vibração.** `model/feedback.ts`, `deriveFeedback(antes, depois)`: função pura entre dois estados, que lista os tipos em ordem de força; o aparelho toca só o último (`strongestFeedback`). O `_layout` da quadra compara o estado antes e depois de cada mudança do log, **depois do commit** (o primeiro estado, ao abrir ou retomar, não vibra). `refused` não sai dos estados: o hook da tela o toca quando o motor recusa um comando.
+
+| Tipo | Quando | Vibração (`expo-haptics`) |
+|---|---|---|
+| `point` | um ponto no mesmo set | `impactAsync` leve |
+| `side-out` | o ponto trocou o saque | `impactAsync` médio |
+| `set-point` | um time passou a ter set point | `notificationAsync` Warning |
+| `set-ended` | `confirm-set-end` que abre outro set | `notificationAsync` Success |
+| `match-ended` | a partida terminou (inclusive o set decisivo) | `notificationAsync` Success |
+| `refused` | o motor recusou o comando | `notificationAsync` Error |
+
+Desfazer não vibra como ponto (o placar volta). Bipe: fora (nenhuma tela o liga).
+
+**Pulso do set point.** A etiqueta "Set point" alterna o amarelo do tema e o amarelo claro `#FFE08A` (700 ms cada), exceto com "reduzir movimento" do aparelho ligado (`ReducedMotion`), quando fica parada.
+
+**Medição do Hermes.** `/dev/replay-benchmark` (só com `EXPO_PUBLIC_DEV_TOOLS=1`): cenários S1 (um set, cerca de 50 eventos), S2 (melhor de 5, 20 desfazer), S3 (rodada típica, 30 partidas) e S4 (limite, 200 partidas). Mede (a) ler e validar as linhas, (b) replay, (c) montar a tela, (d) `getOpenMatchStartIndex` × 10 e `getRecentPoints`, (e) o toque inteiro no SQLite de verdade e (f) a leitura das linhas, mais reabrir a quadra. Usa um arquivo de banco próprio (`sacou-benchmark.db`), nunca o das partidas. Resultado e orçamento no ADR 0038.
 
 ## Pendente
 
-Parte 3: trava e menu atrás do cadeado, bloqueio de 700 ms após o ponto, toque com a palma, toast do ponto, tela ligada, vibração, pulso do set point, tela de medição do Hermes. Parte 4: líbero na quadra (resposta à pergunta 14: o chip do líbero ocupa o lugar do central, cores invertidas e selo "Lí"; o modelo já marca `isLibero` no chip). E4.10: menu, correção, fim de set e de partida. Os nomes reais offline dependem da E4.2/E4.7.
+Teste no celular da parte 3 (roteiro em `docs/operacao/teste-no-celular.md`): vibração, tela ligada, trava do voltar, fechar e reabrir em modo avião e a medida do Hermes. Parte 4: líbero na quadra (resposta à pergunta 14: o chip do líbero ocupa o lugar do central, cores invertidas e selo "Lí"; o modelo já marca `isLibero` no chip). E4.10: menu, correção, fim de set e de partida. Os nomes reais offline dependem da E4.2/E4.7.
+
+**Lacuna de teste.** Os hooks de recursos do aparelho (`useCourtGuard`, `useBackGuard`, `useKeepAwakeWhileFocused`, `useCourtFeedback`) não têm teste de renderização, porque o projeto não tem um renderer de hooks. A lógica de decisão fica em funções puras testadas (reducer da trava, `deriveFeedback`, `feedbackOnChange`); a ligação com o React é conferida no roteiro do celular.

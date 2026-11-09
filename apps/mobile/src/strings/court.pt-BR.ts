@@ -22,7 +22,7 @@ export const courtStrings = {
     menu: "Menu",
     menuLabelLocked: "Menu. Segure para abrir o menu",
     menuLabelUnlocked: "Menu",
-    lockLabelLocked: "Tela travada",
+    lockLabelLocked: "Tela travada. Segure para destravar",
     lockLabelUnlocked: "Tela destravada. Toque para travar",
     setsLabel: (firstTeam: string, firstSets: number, secondTeam: string, secondSets: number) =>
       `Sets: ${firstTeam} ${String(firstSets)}, ${secondTeam} ${String(secondSets)}`,
@@ -45,6 +45,8 @@ export const courtStrings = {
     positions: "Posições no momento do saque",
     oneMorePoint: (team: string) => `Mais um ponto e o ${team} fecha o set`,
     nextPointCloses: "Quem fizer o próximo ponto fecha o set",
+    pointToast: (team: string, own: number, other: number) =>
+      `+1 ${team} (${String(own)}–${String(other)})`,
   },
   queue: {
     title: "Na fila",
@@ -105,5 +107,35 @@ export const courtStrings = {
     resume: "Continuar partida",
     closeCourt: "Encerrar quadra",
     startFailed: "Não foi possível abrir a partida.",
+    catalogLink: "Catálogo de componentes (desenvolvimento)",
+    benchmarkLink: "Medição do Hermes (desenvolvimento)",
+  },
+  benchmark: {
+    title: "Medição do replay",
+    intro:
+      "Mede o replay do log no motor do celular. Vale só em build de produção (APK de teste). Leva alguns minutos; não mexa no aparelho.",
+    run: "Rodar",
+    running: (scenario: string) => `Medindo ${scenario}...`,
+    done: "Pronto. Fotografe ou copie o texto abaixo.",
+    failed: "A medição falhou. Feche e abra o app e tente de novo.",
+    mode: (production: boolean, hermes: boolean, groupBy: boolean) =>
+      `Modo: ${production ? "produção" : "DESENVOLVIMENTO (não vale)"} · Hermes: ${hermes ? "sim" : "não"} · Object.groupBy: ${groupBy ? "sim" : "não"}`,
+    scenarioLine: (scenario: string, events: number) => `${scenario} · ${String(events)} eventos`,
+    stepLine: (step: string, median: string, p95: string, max: string) =>
+      `${step}: mediana ${median} ms · p95 ${p95} ms · máx ${max} ms`,
+    steps: {
+      parse: "(a) ler e validar as linhas",
+      replay: "(b) replay",
+      screen: "(c) montar a tela",
+      corrections: "(d) linha do tempo do Corrigir",
+      load: "(f) ler do SQLite",
+      reopen: "Reabrir a quadra (ler + replay)",
+      tap: "(e) toque inteiro (comando, simulação, gravação)",
+    },
+    budgetTap: (p95: string, limit: number, within: boolean) =>
+      `Orçamento do toque no S3: p95 ${p95} ms de ${String(limit)} ms · ${within ? "dentro" : "ESTOUROU"}`,
+    budgetReopen: (median: string, limit: number, within: boolean) =>
+      `Orçamento de reabrir no S4: ${median} ms de ${String(limit)} ms · ${within ? "dentro" : "ESTOUROU"}`,
+    budgetMissing: "Orçamento: sem medida.",
   },
 } as const;

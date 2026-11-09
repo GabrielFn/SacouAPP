@@ -68,6 +68,24 @@ export const FLUSH = 0;
  */
 export const HOLD_TO_OPEN_MENU_MS = 800;
 
+/** How long the lock is held to unlock the screen. */
+export const HOLD_TO_UNLOCK_MS = 800;
+
+/** After a point the zones ignore taps for this long, against a double tap (produto.md:136). */
+export const POINT_COOLDOWN_MS = 700;
+
+/** How long the toast "+1 Laranja (19-15)" stays in the line of the middle strip. */
+export const POINT_TOAST_MS = 1500;
+
+/** A touch with this many fingers or more is a palm, not a point. */
+export const MIN_PALM_TOUCHES = 2;
+
+/** One breath of the set point tag, from the yellow to the light yellow (screen 10). */
+export const SET_POINT_PULSE_MS = 700;
+
+/** The keep-awake tag of the court: the screen stays on while the court is open. */
+export const KEEP_AWAKE_TAG = "sacou-court";
+
 /** A DESFAZER with nothing to undo; the state is also told to the screen reader. */
 export const DISABLED_OPACITY = 0.4;
 
