@@ -13,6 +13,8 @@ export const palette = {
   waitingFill: "#FFF3CF",
   waitingBorder: "#E0A400",
   highlight: "#F3E3C3",
+  // The light end of the set point tag pulse (QuadraNoite.dc.html:16).
+  ballYellowLight: "#FFE08A",
 } as const;
 
 export const nightAlpha = {
@@ -110,3 +112,45 @@ export const canvasWidth = 390;
 export const scaleLimits = { min: 0.85, max: 1.4 } as const;
 export const fontScaleCap = 1.3;
 export const accessibilityFloors = { touchTarget: 44, hairline: 1 } as const;
+
+// Measures of the court screens (QuadraSol.dc.html, QuadraNoite.dc.html), in canvas pixels. They are
+// scaled by the window like the other tokens; the touch targets keep the floor of 44.
+export const courtSizes = {
+  chip: 28,
+  setDot: 12,
+  badge: 18,
+  tag: 30,
+  tagBadge: 22,
+  pill: 32,
+  pillBadge: 20,
+  undoButton: 54,
+  menuButton: 44,
+  lockButton: 44,
+  netMesh: 9,
+  savedIcon: 15,
+  menuIcon: 18,
+  lockIcon: 20,
+  undoIcon: 22,
+  correctIcon: 17,
+  flameIcon: 17,
+  ballIcon: 14,
+} as const;
+
+export const courtFontSizes = {
+  setTitle: 22,
+  chipNumber: 11,
+  badge: 10,
+  tag: 21,
+  tagBadge: 15,
+  pill: 19,
+} as const;
+
+export const courtBorderWidths = { outline: 2.5, frame: 3 } as const;
+
+export const courtSpacing = {
+  chipPadding: 9,
+  hairGap: 5,
+  scoreGap: 22,
+  badgeOffsetX: 6,
+  badgeOffsetY: 9,
+} as const;

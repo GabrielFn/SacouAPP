@@ -1,4 +1,7 @@
+import { courtStrings } from "./court.pt-BR";
+
 export const strings = {
+  court: courtStrings,
   appName: "Sacou",
   home: { placeholder: "Racha de vôlei sem confusão" },
   a11y: { createGroup: "Criar grupo", back: "Voltar", logo: "Logo do Sacou" },
