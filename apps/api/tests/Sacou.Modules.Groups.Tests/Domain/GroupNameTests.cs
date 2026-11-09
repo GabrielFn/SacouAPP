@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Sacou.Modules.Groups.Tests.Domain;
 
-/// <summary>D1: 1 to 60 text elements, at most 240 code points, nothing invisible.</summary>
+/// <summary>D1: NFC, 1 to 60 text elements, at most 240 code points, nothing invisible, something visible.</summary>
 public sealed class GroupNameTests
 {
     // Built from code points: invisible characters must never sit literally in the source.
@@ -15,6 +15,11 @@ public sealed class GroupNameTests
     private const int ByteOrderMark = 0xFEFF;
     private const int Person = 0x1F9D1;
     private const int Laptop = 0x1F4BB;
+    private const int CombiningAcute = 0x0301;
+    private const int CombiningCircumflex = 0x0302;
+    private const int VariationSelector16 = 0xFE0F;
+    private const char HighSurrogate = (char)0xD800;
+    private const char LowSurrogate = (char)0xDC00;
 
     private static readonly string Joiner = char.ConvertFromUtf32(ZeroWidthJoiner);
     private static readonly string Technologist = Text(Person, ZeroWidthJoiner, Laptop);
@@ -39,6 +44,37 @@ public sealed class GroupNameTests
         Joiner + Text(Laptop),
         Text(Person) + Joiner,
         Text(ByteOrderMark) + "Racha",
+        "Racha" + Text(0x0378),
+        "Racha" + Text(0xE000),
+        "Racha" + Text(0xF0000),
+        "Racha" + HighSurrogate,
+        LowSurrogate + "Racha",
+        "Ra" + Text(0x115F) + "cha",
+        "Ra" + Text(0x1160) + "cha",
+        "Ra" + Text(0x3164) + "cha",
+        "Ra" + Text(0xFFA0) + "cha",
+        "Ra" + Text(0x2800) + "cha",
+        Text(0x3164),
+        Text(0x2800, 0x2800),
+    };
+
+    /// <summary>Nothing a reader would take for a name: punctuation, marks or spaces only.</summary>
+    public static readonly TheoryData<string> NoVisibleContent = new()
+    {
+        "...",
+        "- _ -",
+        Text(CombiningAcute),
+        "(!)",
+    };
+
+    public static readonly TheoryData<string> VisibleContent = new()
+    {
+        "2026",
+        "!!! Racha",
+        "#5",
+        Text(0x26BD),
+        Text('1', VariationSelector16, 0x20E3),
+        Text(0x1F3F3, VariationSelector16, ZeroWidthJoiner, 0x1F308),
     };
 
     [Theory]
@@ -91,6 +127,50 @@ public sealed class GroupNameTests
     public void ControlFormatOrLooseJoiner_AreRefused(string name)
     {
         Assert.Equal(GroupErrors.NameInvalid, GroupName.Create(name).Error);
+    }
+
+    [Fact]
+    public void DecomposedText_IsStoredAsNfc()
+    {
+        var name = GroupName.Create("Vo" + Text(CombiningCircumflex) + "lei").Value;
+
+        Assert.Equal("Vôlei", name.Value);
+        Assert.Equal(GroupName.Create("Vôlei").Value, name);
+    }
+
+    [Theory]
+    [MemberData(nameof(NoVisibleContent))]
+    public void NoLetterNumberOrSymbol_IsRefused(string name)
+    {
+        Assert.Equal(GroupErrors.NameInvalid, GroupName.Create(name).Error);
+    }
+
+    [Theory]
+    [MemberData(nameof(VisibleContent))]
+    public void DigitsSymbolsAndEmojis_AreAccepted(string name)
+    {
+        Assert.True(GroupName.Create(name).IsSuccess);
+    }
+
+    /// <summary>"x" never composes with the acute accent, so NFC keeps every mark.</summary>
+    [Fact]
+    public void MarksPerCharacter_StopAtFour()
+    {
+        var four = "Racha x" + string.Concat(Enumerable.Repeat(Text(CombiningAcute), GroupName.MaxMarksPerCharacter));
+
+        Assert.True(GroupName.Create(four).IsSuccess);
+        Assert.True(GroupName.Create(four + Text(CombiningAcute)).IsFailure);
+    }
+
+    /// <summary>A stored name is trusted: one the rule now refuses still comes back as it was.</summary>
+    [Fact]
+    public void FromStored_KeepsANameTheRuleRefuses()
+    {
+        var stored = "Ra" + Text(0x3164) + "cha";
+
+        Assert.True(GroupName.Create(stored).IsFailure);
+        Assert.Equal(stored, GroupName.FromStored(stored).Value);
+        Assert.Throws<ArgumentNullException>(() => GroupName.FromStored(null!));
     }
 
     private static string Text(params int[] codePoints) => string.Concat(codePoints.Select(char.ConvertFromUtf32));

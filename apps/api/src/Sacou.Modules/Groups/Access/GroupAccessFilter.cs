@@ -59,12 +59,13 @@ internal sealed class GroupAccessFilter : IEndpointFilter
         }
 
         var group = new GroupId(id);
+        var caller = new UserId(user.Value.UserId);
         var member = await http.RequestServices.GetRequiredService<IGroupStore>()
-            .FindActiveMemberAsync(group, new UserId(user.Value.UserId), cancellationToken).ConfigureAwait(false);
-        return Authorize(group, member, permission);
+            .FindActiveMemberAsync(group, caller, cancellationToken).ConfigureAwait(false);
+        return Authorize(group, caller, member, permission);
     }
 
-    private static Result<GroupAccess> Authorize(GroupId group, GroupMember? member, GroupPermission permission)
+    private static Result<GroupAccess> Authorize(GroupId group, UserId caller, GroupMember? member, GroupPermission permission)
     {
         if (member is null)
         {
@@ -72,7 +73,7 @@ internal sealed class GroupAccessFilter : IEndpointFilter
         }
 
         return RolePermissions.Allows(member.Role, permission)
-            ? Result.Success(new GroupAccess(group, member))
+            ? Result.Success(new GroupAccess(group, member, caller))
             : Result.Failure<GroupAccess>(GroupErrors.Forbidden);
     }
 }

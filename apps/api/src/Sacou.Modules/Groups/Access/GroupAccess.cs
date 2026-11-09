@@ -7,8 +7,10 @@ namespace Sacou.Modules.Groups.Access;
 /// <summary>
 /// What <see cref="GroupAccessFilter"/> proved: the caller is an active member of the group in the route,
 /// with a role that holds the endpoint's permission. Read from the database on every request.
+/// <paramref name="Caller"/> is the user behind <paramref name="Member"/>, for a write that checks the role
+/// again in its own statement.
 /// </summary>
-internal sealed record GroupAccess(GroupId GroupId, GroupMember Member);
+internal sealed record GroupAccess(GroupId GroupId, GroupMember Member, UserId Caller);
 
 internal static class GroupAccessHttpContextExtensions
 {

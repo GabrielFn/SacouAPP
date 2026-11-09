@@ -34,6 +34,6 @@ internal static class RowMapping
         row.JoinedAt,
         row.LeftAt);
 
-    /// <summary>Stored names passed the domain rule when written.</summary>
-    public static GroupName ToName(string stored) => GroupName.Create(stored).Value;
+    /// <summary>Trusted: a name that a later, stricter rule refuses is still shown, never a 500.</summary>
+    public static GroupName ToName(string stored) => GroupName.FromStored(stored);
 }

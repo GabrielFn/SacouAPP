@@ -20,6 +20,7 @@ internal static class GroupRouteExtensions
         var group = endpoints.MapGroup(GroupRoute);
         group.AddEndpointFilter<GroupAccessFilter>();
         group.WithMetadata(GroupAccessFilterMetadata.Instance, SmallBody());
+        ((IEndpointConventionBuilder)group).Finally(RequireOnePermission);
         return group;
     }
 
@@ -27,4 +28,17 @@ internal static class GroupRouteExtensions
         builder.WithMetadata(new GroupPermissionMetadata(permission));
 
     public static RequestSizeLimitAttribute SmallBody() => new(MaxBodyBytes);
+
+    /// <summary>
+    /// Runs when the endpoints are built, after every convention of the route: the API refuses to start with a
+    /// group route that declares zero or two permissions, instead of failing on its first call.
+    /// </summary>
+    private static void RequireOnePermission(EndpointBuilder endpoint)
+    {
+        var declared = endpoint.Metadata.OfType<GroupPermissionMetadata>().Count();
+        if (declared != 1)
+        {
+            throw new InvalidOperationException($"{endpoint.DisplayName}: a group route declares {declared} permissions, not one.");
+        }
+    }
 }

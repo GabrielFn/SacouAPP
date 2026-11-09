@@ -38,6 +38,9 @@ app.UseAuthorization();
 app.MapHealthChecks("/health").AllowAnonymous();
 app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
+// Builds every endpoint now, so a route that breaks a mapping rule (a group route without exactly one
+// permission, ADR 0040, D4) stops the start instead of failing on its first call.
+_ = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints).Count();
 
 if (app.Configuration.GetValue<bool>(MigrateOnStartupKey))
 {

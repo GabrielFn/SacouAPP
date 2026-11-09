@@ -33,5 +33,9 @@ internal interface IGroupStore
     /// <summary>Active members only, in the order they joined.</summary>
     Task<IReadOnlyList<GroupMember>> ListActiveMembersAsync(GroupId group, CancellationToken cancellationToken);
 
-    Task RenameAsync(GroupId group, GroupName name, CancellationToken cancellationToken);
+    /// <summary>
+    /// Renames only while <paramref name="renamer"/> is still an active member whose role may rename, checked
+    /// in the same UPDATE: a demotion that lands after the access filter wins. False when nothing changed.
+    /// </summary>
+    Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken);
 }

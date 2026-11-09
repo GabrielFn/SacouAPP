@@ -66,23 +66,36 @@ public sealed class GroupRouteGuardTests
         Assert.Empty(GroupRouteGuard.Violations(Endpoints(app)));
     }
 
+    /// <summary>Caught when the endpoints are built, which Program forces at start-up: the API never comes up.</summary>
     [Fact]
-    public void GroupRouteWithoutPermission_IsReported()
+    public void GroupRouteWithoutPermission_FailsWhenTheEndpointsAreBuilt()
     {
         var app = PlantedApp();
         app.MapGroupRoutes().MapGet("/planted", () => 1);
 
-        Assert.Equal([$"GET {Planted}: declares 0 permissions, not one"], GroupRouteGuard.Violations(Endpoints(app)));
+        var error = Assert.Throws<InvalidOperationException>(() => Endpoints(app).ToList());
+        Assert.Contains("declares 0 permissions", error.Message, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void GroupRouteWithTwoPermissions_IsReported()
+    public void GroupRouteWithTwoPermissions_FailsWhenTheEndpointsAreBuilt()
     {
         var app = PlantedApp();
         app.MapGroupRoutes().MapGet("/planted", () => 1)
             .RequireGroupPermission(GroupPermission.ViewGroup).RequireGroupPermission(GroupPermission.RenameGroup);
 
-        Assert.Single(GroupRouteGuard.Violations(Endpoints(app)));
+        var error = Assert.Throws<InvalidOperationException>(() => Endpoints(app).ToList());
+        Assert.Contains("declares 2 permissions", error.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>The guard still reports it for a route built with the group id but outside MapGroupRoutes.</summary>
+    [Fact]
+    public void GroupIdRouteWithoutPermission_IsReported()
+    {
+        var app = PlantedApp();
+        app.MapGet(Planted, () => 1).WithMetadata(GroupAccessFilterMetadata.Instance);
+
+        Assert.Equal([$"GET {Planted}: declares 0 permissions, not one"], GroupRouteGuard.Violations(Endpoints(app)));
     }
 
     [Fact]

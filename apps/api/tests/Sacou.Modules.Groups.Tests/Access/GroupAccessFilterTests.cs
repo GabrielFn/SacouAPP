@@ -66,7 +66,7 @@ public sealed class GroupAccessFilterTests
 
         var outcome = await RunAsync(Caller.Value, GroupPermission.RenameGroup);
 
-        Assert.Equal(new GroupAccess(Group, member), outcome);
+        Assert.Equal(new GroupAccess(Group, member, Caller), outcome);
     }
 
     [Theory]

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Members;
+using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -80,10 +81,17 @@ internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
         return [.. rows.Select(RowMapping.ToMember)];
     }
 
-    public Task RenameAsync(GroupId group, GroupName name, CancellationToken cancellationToken) =>
-        database.Groups
-            .Where(row => row.Id == group.Value)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.Name, name.Value), cancellationToken);
+    public async Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken)
+    {
+        var active = ColumnValues.ActiveStatus;
+        var roles = ColumnValues.RolesWith(GroupPermission.RenameGroup);
+        var renamed = await database.Groups
+            .Where(row => row.Id == group.Value && database.Members.Any(member =>
+                member.GroupId == row.Id && member.UserId == renamer.Value && member.Status == active && roles.Contains(member.Role)))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.Name, name.Value), cancellationToken)
+            .ConfigureAwait(false);
+        return renamed > 0;
+    }
 
     private Task<int> CountActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>
         ActiveMembers().CountAsync(member => member.UserId == user.Value, cancellationToken);

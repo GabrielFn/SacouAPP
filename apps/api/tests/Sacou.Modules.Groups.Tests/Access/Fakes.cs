@@ -41,6 +41,6 @@ internal sealed class FakeGroupStore : IGroupStore
     public Task<IReadOnlyList<GroupMember>> ListActiveMembersAsync(GroupId group, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
-    public Task RenameAsync(GroupId group, GroupName name, CancellationToken cancellationToken) =>
+    public Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 }
