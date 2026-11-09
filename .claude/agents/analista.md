@@ -15,3 +15,5 @@ Escreva `docs/estado/tarefas/<ID>.md` com:
 4. Riscos, perguntas em aberto e se a tarefa é sensível para segurança (login, tokens, pagamentos, upload, QR, dados pessoais).
 
 Não escreva código de produção. Se algo depende de decisão do Gabriel que os docs não cobrem, diga claramente no topo do arquivo.
+
+Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
