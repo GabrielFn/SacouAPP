@@ -22,6 +22,9 @@ export type CourtCommand =
   | { readonly type: "undo" }
   | { readonly type: "confirm-set-end"; readonly firstServer?: TeamSide };
 
+/** What a screen can ask for: starting a match goes only through `startCourtMatch`. */
+export type PlayCommand = Exclude<CourtCommand, { readonly type: "start-match" }>;
+
 export type DraftsResult = Result<readonly EventDraft[], CommandError>;
 
 function currentState(timeline: CourtSessionTimeline): CourtSessionState {

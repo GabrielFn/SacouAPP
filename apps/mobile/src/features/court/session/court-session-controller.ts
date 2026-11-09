@@ -24,12 +24,17 @@ export type CommandResult = Result<void, CommandError>;
 
 export interface CourtSessionController {
   /** For `useSyncExternalStore`. */
-  subscribe(listener: () => void): () => void;
-  getSnapshot(): CourtSnapshot;
+  readonly subscribe: (listener: () => void) => () => void;
+  readonly getSnapshot: () => CourtSnapshot;
   /** One command at a time, in the order sent; each sees the log the one before left. */
-  dispatch(command: CourtCommand): Promise<CommandResult>;
+  readonly dispatch: (command: CourtCommand) => Promise<CommandResult>;
   /** Resolves when everything sent so far is settled. */
-  whenIdle(): Promise<void>;
+  readonly whenIdle: () => Promise<void>;
+  /**
+   * Reads the log from the file again, in the queue: the way out of `failed` without reopening the
+   * app. A log that is still broken stays `failed`, with nothing erased.
+   */
+  readonly retry: () => Promise<void>;
 }
 
 export type CourtSessionControllerDeps = CommandRunnerDeps;
@@ -89,5 +94,10 @@ export function createCourtSessionController(
     getSnapshot: store.getSnapshot,
     dispatch: (command) => enqueue(() => run(command)),
     whenIdle: () => queue.current,
+    retry: () =>
+      enqueue(() => {
+        store.set({ status: "loading" });
+        return load();
+      }),
   };
 }
