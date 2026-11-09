@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Sacou.Modules.Identity.Domain.Users;
 using Sacou.Modules.Identity.Infrastructure;
 using Xunit;
@@ -20,7 +22,7 @@ public sealed class IdentityModelTests : IDisposable
     [Fact]
     public void Users_KeepOnlyIdFirebaseUidAndCreatedAt()
     {
-        var users = context.Model.FindEntityType(typeof(User))!;
+        var users = Users();
 
         Assert.Equal("identity", users.GetSchema());
         Assert.Equal("users", users.GetTableName());
@@ -32,7 +34,7 @@ public sealed class IdentityModelTests : IDisposable
     [Fact]
     public void FirebaseUid_IsUniqueAndLengthChecked()
     {
-        var users = context.Model.FindEntityType(typeof(User))!;
+        var users = Users();
 
         var index = Assert.Single(users.GetIndexes());
         Assert.True(index.IsUnique);
@@ -41,4 +43,7 @@ public sealed class IdentityModelTests : IDisposable
     }
 
     public void Dispose() => context.Dispose();
+
+    /// <summary>The design-time model keeps check constraints; the runtime one drops them.</summary>
+    private IEntityType Users() => context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(User))!;
 }

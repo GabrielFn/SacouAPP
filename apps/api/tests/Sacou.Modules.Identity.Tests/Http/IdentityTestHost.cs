@@ -2,12 +2,14 @@ using System.Collections.Concurrent;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Sacou.Modules.Identity.Domain.Users;
 using Sacou.Modules.Identity.Infrastructure;
 using Sacou.Tests.TestSupport;
@@ -31,10 +33,7 @@ internal sealed class IdentityTestHost : IAsyncDisposable
         Keys = keys;
         Users = users;
         Logs = logs;
-        Client = app.GetTestClient();
     }
-
-    public HttpClient Client { get; }
 
     public StubHttpHandler Keys { get; }
 
@@ -79,22 +78,50 @@ internal sealed class IdentityTestHost : IAsyncDisposable
         return new IdentityTestHost(app, stub, users, logs);
     }
 
+    /// <summary>
+    /// Sends the header values as they are: HttpClient would parse and rewrite them (two spaces become
+    /// one), so the request goes straight to the TestServer.
+    /// </summary>
     public async Task<HttpResponseMessage> SignInAsync(IReadOnlyList<string>? authorization, string path = SignInPath)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, path);
-        if (authorization is not null)
+        var target = new Uri(new Uri("http://localhost"), path);
+        var context = await app.GetTestServer().SendAsync(
+            http =>
+            {
+                http.Request.Method = HttpMethods.Post;
+                http.Request.Path = target.AbsolutePath;
+                http.Request.QueryString = new QueryString(target.Query);
+                if (authorization is not null)
+                {
+                    http.Request.Headers.Authorization = new StringValues([.. authorization]);
+                }
+            },
+            TestContext.Current.CancellationToken);
+        return await ToResponseMessageAsync(context.Response);
+    }
+
+    private static async Task<HttpResponseMessage> ToResponseMessageAsync(HttpResponse response)
+    {
+        using var reader = new StreamReader(response.Body);
+        var message = new HttpResponseMessage((HttpStatusCode)response.StatusCode)
         {
-            request.Headers.TryAddWithoutValidation("Authorization", authorization);
+            Content = new StringContent(await reader.ReadToEndAsync(TestContext.Current.CancellationToken)),
+        };
+        message.Content.Headers.ContentType = response.ContentType is { } type
+            ? System.Net.Http.Headers.MediaTypeHeaderValue.Parse(type)
+            : null;
+        foreach (var header in response.Headers.Where(header => header.Key != "Content-Type"))
+        {
+            message.Headers.TryAddWithoutValidation(header.Key, [.. header.Value]);
         }
 
-        return await Client.SendAsync(request, TestContext.Current.CancellationToken);
+        return message;
     }
 
     public Task<HttpResponseMessage> SignInAsync(string token) => SignInAsync([$"Bearer {token}"]);
 
     public async ValueTask DisposeAsync()
     {
-        Client.Dispose();
         await app.DisposeAsync();
     }
 }

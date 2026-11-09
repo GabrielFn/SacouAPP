@@ -45,7 +45,8 @@ internal sealed class RefusalKeys : IDisposable
 /// <summary>R1 to R24 of the E3.1 plan, as one table. Each entry builds the request from the valid token.</summary>
 internal static class RefusalCases
 {
-    private static readonly TimeSpan JustPastSkew = TimeSpan.FromSeconds(61);
+    /// <summary>The exact edges (60 s passes, 61 s fails) are in the pure rule tests; HTTP runs on the real clock.</summary>
+    private static readonly TimeSpan JustPastSkew = TimeSpan.FromSeconds(120);
     private const int SubjectLimit = 128;
     private const int OversizedClaimLength = 9 * 1024;
     private const string AttackerUrl = "https://attacker.example/keys";

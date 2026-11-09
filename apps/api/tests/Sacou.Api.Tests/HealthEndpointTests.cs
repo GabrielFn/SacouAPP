@@ -1,14 +1,13 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Sacou.Api.Tests;
 
-public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class HealthEndpointTests(SacouApiFactory factory) : IClassFixture<SacouApiFactory>
 {
+    /// <summary>C1: the only endpoint open without a token.</summary>
     [Fact]
-    public async Task GetHealth_ReturnsOk()
+    public async Task GetHealth_WithoutAToken_ReturnsOk()
     {
         using var client = factory.CreateClient();
 
