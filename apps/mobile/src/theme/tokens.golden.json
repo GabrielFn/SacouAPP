@@ -86,6 +86,49 @@
     "sizes": "Inicio.dc.html:24,25,26,47; Onboarding.dc.html:20,47,91",
     "radii": "Inicio.dc.html:37,47,65,81; Onboarding.dc.html:20,91",
     "fontSizes": "Inicio.dc.html:24,41,47; Onboarding.dc.html:91",
-    "iconStroke": "Inicio.dc.html:26"
+    "iconStroke": "Inicio.dc.html:26",
+    "courtTokens": "QuadraSol.dc.html:17-37,44-130; QuadraNoite.dc.html:16-17,72"
+  },
+  "courtTokens": {
+    "sizes": {
+      "chip": 28,
+      "setDot": 12,
+      "badge": 18,
+      "tag": 30,
+      "tagBadge": 22,
+      "pill": 32,
+      "pillBadge": 20,
+      "undoButton": 54,
+      "menuButton": 44,
+      "lockButton": 44,
+      "netMesh": 9,
+      "savedIcon": 15,
+      "menuIcon": 18,
+      "lockIcon": 20,
+      "undoIcon": 22,
+      "correctIcon": 17,
+      "flameIcon": 17,
+      "ballIcon": 14
+    },
+    "fontSizes": {
+      "setTitle": 22,
+      "chipNumber": 11,
+      "badge": 10,
+      "tag": 21,
+      "tagBadge": 15,
+      "pill": 19
+    },
+    "borderWidths": {
+      "outline": 2.5,
+      "frame": 3
+    },
+    "spacing": {
+      "chipPadding": 9,
+      "hairGap": 5,
+      "scoreGap": 22,
+      "badgeOffsetX": 6,
+      "badgeOffsetY": 9
+    },
+    "pulseYellow": "#FFE08A"
   }
 }

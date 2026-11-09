@@ -36,7 +36,7 @@ Funciona no Vitest do repositório (Node 22.20, aviso de módulo experimental no
 
 ## Limitação conhecida
 
-Se o `ROLLBACK` falha com a transação aberta (disco cheio ou conexão quebrada), a conexão fica com a transação aberta e as gravações seguintes falham (`storage-failed`) até o app ser reaberto. O log não se corrompe: o que não deu `COMMIT` não existe. Um `retry()` do controlador e a reabertura da conexão ficam para a parte 2.
+Se o `ROLLBACK` falha com a transação aberta (disco cheio ou conexão quebrada), a conexão fica com a transação aberta e as gravações seguintes falham (`storage-failed`) até o app ser reaberto. O log não se corrompe: o que não deu `COMMIT` não existe. O `retry()` do controlador (parte 2) relê o log do arquivo dentro da fila e tira o controlador de `failed` quando o log abre; a reabertura da conexão depois de um `ROLLBACK` que falhou continua pendente, e até lá a gravação seguinte falha (`storage-failed`) até o app ser reaberto.
 
 ## Backup e `deviceId`
 
@@ -44,7 +44,7 @@ O backup automático do Android copiaria o `deviceId` para outro celular. A miti
 
 ## Pendente (partes seguintes)
 
-Medição do replay e do `fsync` no Hermes, orçamento (toque no S3 com p95 ≤ 100 ms e reabrir no S4 em ≤ 1 s), tela ligada, vibração, trava, telas 09 e 10 e o `DatabaseGate`. Estado de envio (sincronização) é migração 2, da E4.11.
+Medição do replay e do `fsync` no Hermes, orçamento (toque no S3 com p95 ≤ 100 ms e reabrir no S4 em ≤ 1 s), tela ligada, vibração e trava. As telas 09 e 10 e o `DatabaseGate` estão na parte 2 (`docs/dominio/quadra.md`). Estado de envio (sincronização) é migração 2, da E4.11.
 
 ## Alternativas descartadas
 
