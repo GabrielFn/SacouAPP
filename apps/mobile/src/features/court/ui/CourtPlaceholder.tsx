@@ -1,20 +1,14 @@
 import { View } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
-import { Button, type ButtonVariant } from "../../../ui/Button";
+import { ActionButtons, type ScreenAction } from "../../../ui/ActionButtons";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
-
-export interface PlaceholderAction {
-  readonly label: string;
-  readonly variant?: ButtonVariant;
-  readonly onPress: () => void;
-}
 
 export interface CourtPlaceholderProps {
   readonly title: string;
   readonly lines: readonly string[];
-  readonly actions: readonly PlaceholderAction[];
+  readonly actions: readonly ScreenAction[];
 }
 
 /** A plain page for the routes that E4.10 designs (end of set and match, menu, corrections). */
@@ -30,9 +24,7 @@ export function CourtPlaceholder({ title, lines, actions }: CourtPlaceholderProp
           <Text key={line}>{line}</Text>
         ))}
       </View>
-      {actions.map(({ label, variant, onPress }) => (
-        <Button key={label} label={label} variant={variant} onPress={onPress} />
-      ))}
+      <ActionButtons actions={actions} />
     </Screen>
   );
 }

@@ -9,10 +9,8 @@ import {
   selectSetEnd,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
-import {
-  CourtPlaceholder,
-  type PlaceholderAction,
-} from "../../../features/court/ui/CourtPlaceholder";
+import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
+import type { ScreenAction } from "../../../ui/ActionButtons";
 import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
 
@@ -53,7 +51,7 @@ export default function SetEndRoute() {
         : { type: "confirm-set-end", firstServer },
     );
   };
-  const confirmActions: readonly PlaceholderAction[] = model.needsFirstServer
+  const confirmActions: readonly ScreenAction[] = model.needsFirstServer
     ? SIDES.map((side) => ({
         label: setEnd.serves(model.scores[side].label),
         onPress: () => {
