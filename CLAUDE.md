@@ -18,6 +18,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/dominio/rotacoes-explorador.html` | Explorador interativo das formações (abrir no navegador) |
 | `design/telas/*.dc.html` | As 31 telas do app (fonte HTML). Títulos e ordem em `design/telas/canvas.json` |
 | `docs/estado/progresso.md` | Marco atual, tarefas feitas / em andamento / bloqueadas |
+| `docs/estado/pendencias.md` | Pendências herdadas das tarefas (só o orquestrador lê inteiro) |
 | `docs/estado/tarefas/<ID>.md` | Plano detalhado de cada tarefa, escrito pelo analista |
 | `docs/estado/sessoes/AAAA-MM-DD.md` | Diário de cada sessão |
 | `docs/estado/perguntas.md` | Perguntas abertas para o Gabriel e respostas |
@@ -29,7 +30,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 
 ## Ritual de sessão (obrigatório)
 
-1. **Início:** ler este arquivo, `docs/estado/progresso.md`, o último diário em `docs/estado/sessoes/` e `docs/estado/perguntas.md`. Só então escolher a próxima tarefa do backlog (`docs/plano-mvp.md`), respeitando as dependências.
+1. **Início:** ler este arquivo, `docs/estado/progresso.md`, `docs/estado/pendencias.md`, o último diário em `docs/estado/sessoes/` e `docs/estado/perguntas.md`. Só então escolher a próxima tarefa do backlog (`docs/plano-mvp.md`), respeitando as dependências.
 2. **Durante:** decisão técnica relevante vira ADR; regra nova vai para `docs/dominio/`; superfície de ataque nova atualiza `docs/seguranca/modelo-de-ameacas.md`; dado pessoal novo vai para `docs/seguranca/dados-pessoais.md`. **Salvamento contínuo** (pedido do Gabriel): o trabalho precisa sobreviver a um desligamento do computador ou ao fim do limite do plano, sem parar a sessão. Desenvolvedores fazem commit e push da própria branch a cada etapa, no máximo a cada 20 minutos (`wip(...)` é aceito, pois o merge é squash). O orquestrador atualiza `progresso.md` e o diário com o próximo passo exato a cada marco de tarefa, e antes disso sempre que o uso do plano passar de 80%.
 3. **Fim:** escrever o diário da sessão com o **próximo passo exato**, atualizar `progresso.md` e fazer commit. Nenhuma sessão termina com trabalho fora do repositório.
 
@@ -53,6 +54,15 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 | `desenvolvedor` | Sonnet. **Opus** nas regras do vôlei e do motor (`volley-rules`, `match-engine`) e nas tarefas sensíveis |
 
 Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees).
+
+### Economia de tokens (pedido do Gabriel, 09/11/2026)
+
+1. **Leitura dirigida.** O brief de cada agente lista exatamente os arquivos e as seções a ler. Ninguém lê a base inteira "por garantia". As pendências herdadas ficam em `docs/estado/pendencias.md`, que só o orquestrador lê inteiro; o agente recebe só as linhas da tarefa.
+2. **Ciclo de correção barato.** Depois de um ciclo reprovado, um único verificador novo confere só o diff da correção e os achados anteriores. O testador só volta se a correção mexer em regra de negócio. Se o histórico do desenvolvedor passar de cerca de 250 mil tokens, a correção vai para um desenvolvedor novo com brief curto, em vez de retomar o antigo.
+3. **Uma revisão por parte depois da primeira.** Em tarefa sensível, a primeira parte tem `revisor` e `revisor-seguranca` separados. Nas partes seguintes, um único agente Opus faz as duas revisões.
+4. **Menos partes.** Só dividir uma tarefa quando o PR passaria de cerca de 1.500 linhas alteradas.
+5. **Entrega completa.** Antes de devolver, o desenvolvedor roda a bateria completa (build, lint, testes e portões) **depois do último commit** e espera a CI verde.
+6. **Saídas e relatórios curtos.** Comandos com saída resumida (`tail`, modo silencioso); o testador escolhe as 5 ou 6 sabotagens mais importantes; relatórios de até 15 linhas, com achados numerados.
 
 ## Autonomia
 

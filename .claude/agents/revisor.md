@@ -13,3 +13,5 @@ Em tarefas do app (`apps/mobile`), leia também `docs/padroes/frontend.md`: esta
 Confira cada item da definição de pronto, a arquitetura (domínio sem infraestrutura, eventos sem dado pessoal, `MemberId`, glossário), Clean Code, fidelidade às telas e às regras de `docs/dominio/`.
 
 Devolva um veredito **APROVADO** ou **REPROVADO** e uma lista de achados, cada um com arquivo, linha, problema e correção sugerida, ordenados por gravidade. Não altere o código.
+
+Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
