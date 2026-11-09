@@ -7,10 +7,9 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
 import { findDuplicationFailures } from "./lib/duplication.mjs";
-import { exceptedPaths, readQualityExceptions, todayIso } from "./lib/quality-exceptions.mjs";
+import { exceptedPaths, readQualityExceptionsFile } from "./lib/quality-exceptions.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const EXCEPTIONS_FILE = resolve(import.meta.dirname, "quality-exceptions.json");
 const FIRST_PATH_ARGUMENT = 2;
 
 const jscpdManifest = createRequire(import.meta.url).resolve("jscpd/package.json");
@@ -39,10 +38,7 @@ function runJscpd(paths, output) {
 const output = mkdtempSync(join(tmpdir(), "jscpd-"));
 try {
   const report = runJscpd(process.argv.slice(FIRST_PATH_ARGUMENT), output);
-  const { exceptions, failures } = readQualityExceptions(
-    readFileSync(EXCEPTIONS_FILE, "utf8"),
-    todayIso(),
-  );
+  const { exceptions, failures } = readQualityExceptionsFile();
   const clones = findDuplicationFailures({
     report,
     root: ROOT,

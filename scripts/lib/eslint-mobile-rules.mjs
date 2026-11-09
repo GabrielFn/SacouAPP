@@ -69,31 +69,70 @@ const SDK_IMPORTS = {
   message: "Device and service SDKs are used only in src/adapters/, behind an interface.",
 };
 
+// The same SDK rule for import() and require(), which no-restricted-imports does not see.
+// esquery ends a regex at "/", so the selector spells it as "[/]".
+const SDK_SELECTOR_REGEX = SDK_IMPORTS.regex.replaceAll("/", "[/]");
+const SDK_DYNAMIC_RESTRICTIONS = [
+  {
+    selector: `ImportExpression[source.value=/${SDK_SELECTOR_REGEX}/]`,
+    message: SDK_IMPORTS.message,
+  },
+  {
+    selector: `CallExpression[callee.name='require'] > Literal.arguments[value=/${SDK_SELECTOR_REGEX}/]`,
+    message: SDK_IMPORTS.message,
+  },
+];
+
+function syntaxRule(restrictions) {
+  return { "no-restricted-syntax": ["error", ...restrictions] };
+}
+
+/**
+ * Two blocks for one set of files: outside src/adapters/ the SDK restrictions are added, inside
+ * they are not. A later block replaces `no-restricted-syntax` as a whole, so each list is complete.
+ */
+function syntaxBlocks({ files, ignores, restrictions }) {
+  return [
+    {
+      files,
+      ignores: [...ignores, ...MOBILE_ADAPTER_FILES],
+      rules: syntaxRule([...restrictions, ...SDK_DYNAMIC_RESTRICTIONS]),
+    },
+    {
+      files: files.map((pattern) => [...MOBILE_ADAPTER_FILES, pattern]),
+      ignores,
+      rules: syntaxRule(restrictions),
+    },
+  ];
+}
+
 /**
  * Config blocks for apps/mobile/src. The theme is the only place for colors and sizes, and
  * adapters the only place for device SDKs. `dataRestrictions` keeps the data-file rules alive in
  * mobile data files, because a later block replaces `no-restricted-syntax` as a whole.
  */
 export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
+  const outsideTheme = [...MOBILE_THEME_FILES, ...testFiles];
   return [
-    {
+    ...syntaxBlocks({
       files: MOBILE_SOURCE_FILES,
-      ignores: [...MOBILE_THEME_FILES, ...testFiles],
-      rules: { "no-restricted-syntax": ["error", ...MOBILE_SYNTAX_RESTRICTIONS] },
-    },
-    // A later block replaces the rule, so mobile data files keep both lists.
-    {
+      ignores: outsideTheme,
+      restrictions: MOBILE_SYNTAX_RESTRICTIONS,
+    }),
+    ...syntaxBlocks({
       files: MOBILE_DATA_FILES,
-      ignores: [...MOBILE_THEME_FILES, ...testFiles],
-      rules: {
-        "no-restricted-syntax": ["error", ...dataRestrictions, ...MOBILE_SYNTAX_RESTRICTIONS],
-      },
-    },
+      ignores: outsideTheme,
+      restrictions: [...dataRestrictions, ...MOBILE_SYNTAX_RESTRICTIONS],
+    }),
+    ...syntaxBlocks({
+      files: REDUCER_FILES,
+      ignores: testFiles,
+      restrictions: [...MOBILE_SYNTAX_RESTRICTIONS, NO_DEFAULT_IN_REDUCER],
+    }),
     {
       files: REDUCER_FILES,
       ignores: testFiles,
       rules: {
-        "no-restricted-syntax": ["error", ...MOBILE_SYNTAX_RESTRICTIONS, NO_DEFAULT_IN_REDUCER],
         "@typescript-eslint/switch-exhaustiveness-check": [
           "error",
           { considerDefaultExhaustiveForUnions: false, requireDefaultForNonUnion: false },

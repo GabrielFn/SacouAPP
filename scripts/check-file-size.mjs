@@ -4,10 +4,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { countLines, findSizeViolations } from "./lib/file-size.mjs";
-import { exceptedPaths, readQualityExceptions, todayIso } from "./lib/quality-exceptions.mjs";
+import { exceptedPaths, readQualityExceptionsFile } from "./lib/quality-exceptions.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const EXCEPTIONS_FILE = resolve(import.meta.dirname, "quality-exceptions.json");
 
 const trackedFiles = execFileSync("git", ["ls-files", "-z", "--", "apps/api/**/*.cs"], {
   cwd: ROOT,
@@ -21,10 +20,7 @@ const files = trackedFiles.map((path) => ({
   lines: countLines(readFileSync(resolve(ROOT, path), "utf8")),
 }));
 
-const { exceptions, failures } = readQualityExceptions(
-  readFileSync(EXCEPTIONS_FILE, "utf8"),
-  todayIso(),
-);
+const { exceptions, failures } = readQualityExceptionsFile();
 const violations = [
   ...failures,
   ...findSizeViolations({ files, exceptedPaths: exceptedPaths(exceptions, "max-lines") }),

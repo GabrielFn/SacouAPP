@@ -132,7 +132,12 @@ const CASES = [
   [`${MATCH_ENGINE}rules.ts`, 'import "@sacou/volley-rules";\n', CLEAN],
   [`${MOBILE}react.tsx`, 'export { useState } from "react";\n', CLEAN],
   ...qualityLintCases(PREFIX),
-].map(([file, code, expected]) => ({ path: resolve(ROOT, file), code, expected }));
+].map(([file, code, expected, messagePart]) => ({
+  path: resolve(ROOT, file),
+  code,
+  expected,
+  messagePart,
+}));
 
 function createFiles(cases) {
   return cases.flatMap(({ path, code }) => {
@@ -146,11 +151,18 @@ function removeFiles(paths) {
   paths.forEach((path) => rmSync(path, { recursive: true, force: true }));
 }
 
-function describeFailure({ expected }, messages) {
+// With `messagePart`, the message must also contain it (which no-restricted-syntax entry fired).
+function matches({ expected, messagePart }, { ruleId, message }) {
+  return ruleId === expected && (messagePart === undefined || message.includes(messagePart));
+}
+
+function describeFailure(testCase, messages) {
   const found = messages.map(({ ruleId, message }) => ruleId ?? message).join(", ") || "nothing";
+  const { expected, messagePart } = testCase;
   const passed =
-    expected === CLEAN ? messages.length === 0 : messages.some((m) => m.ruleId === expected);
-  return passed ? null : `expected ${expected}, found ${found}`;
+    expected === CLEAN ? messages.length === 0 : messages.some((m) => matches(testCase, m));
+  const wanted = messagePart === undefined ? expected : `${expected} ("${messagePart}")`;
+  return passed ? null : `expected ${wanted}, found ${found}`;
 }
 
 async function lintCases(cases) {

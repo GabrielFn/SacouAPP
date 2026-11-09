@@ -33,7 +33,7 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Cor só no tema (app) | Hex, hex em template e `rgb(`/`rgba(` reprovam em `apps/mobile/src` fora de `src/theme/` | Testes |
 | Sem número em estilo (app) | Literal numérico em `StyleSheet.create`, em atributo `*style` ou em variável com tipo `*Style` reprova | Livres: `flex`, `flexGrow`, `flexShrink`, `opacity`, `aspectRatio`, `zIndex` |
 | Props como `interface` exportada (app) | `type XProps`, `interface XProps` sem `export` e props inline em componente PascalCase reprovam | Testes |
-| SDK só em adaptador (app) | `expo`, `expo-*`, `react-native-*`, `@react-native-community/*`, `@react-native-async-storage/*` só em `src/adapters/` | Livres: `expo-router`, `expo-status-bar`, `react-native-svg`, `react-native-safe-area-context`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-screens` |
+| SDK só em adaptador (app) | `expo`, `expo-*`, `react-native-*`, `@react-native-community/*`, `@react-native-async-storage/*` só em `src/adapters/`, também em `import()` e `require()` | Livres: `expo-router`, `expo-status-bar`, `react-native-svg`, `react-native-safe-area-context`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-screens` |
 | Reducer exaustivo (app) | Arquivo `*.reducer.ts`: `switch-exhaustiveness-check` sem aceitar `default` e `default` proibido | Nenhuma |
 
 ## Imposto por ferramenta: C#
@@ -56,9 +56,9 @@ Decisão e motivos no [ADR 0035](../arquitetura/adr/0035-portoes-de-qualidade.md
 |---|---|---|
 | Complexidade ciclomática | 10 (TS e C#) | `eslint.config.mjs` (`MAX_COMPLEXITY`) e `CodeMetricsConfig.txt` |
 | Tamanho de arquivo | 300 linhas físicas; 600 em testes | `eslint.config.mjs` (`MAX_LINES`, `MAX_LINES_IN_TESTS`) e `scripts/lib/file-size.mjs` |
-| Duplicação | 50 tokens, qualquer clone reprova | `.jscpd.json` |
+| Duplicação | 50 tokens, qualquer clone reprova | `.jscpd.json` (pacote novo em `packages/` entra na lista `path`, porque o `jscpd` não aceita glob ali; migrações do EF Core ignoradas) |
 
-**Exceções: só em `scripts/quality-exceptions.json`.** Cada entrada é `{ "gate": "max-lines" | "complexity" | "duplication", "path": "...", "reason": "...", "expires": "AAAA-MM-DD" }`, com prazo de até 60 dias. Entrada malformada, com `gate` desconhecido ou vencida reprova o lint e os scripts, e não libera nada. A exceção vale só para aquele arquivo e aquele portão. CA1502 não tem exceção: refatore. A meta é o arquivo vazio (`[]`).
+**Exceções: só em `scripts/quality-exceptions.json`.** Cada entrada é `{ "gate": "max-lines" | "complexity" | "duplication", "path": "...", "reason": "...", "expires": "AAAA-MM-DD" }`, com prazo de até 60 dias a partir de hoje. Entrada malformada, com `gate` desconhecido, vencida, com prazo além de 60 dias, com `path` que tenha glob (`* ? [ ] { } !`) ou que não seja arquivo rastreado pelo Git reprova o lint e os scripts, e não libera nada. A exceção vale só para aquele arquivo e aquele portão. CA1502 não tem exceção: refatore. A meta é o arquivo vazio (`[]`).
 
 **Convenção de reducer:** o reducer de tela fica em `<nome>.reducer.ts`, que é onde o ESLint confere a exaustividade.
 
@@ -83,7 +83,7 @@ Corrija a causa. Quando não der, a exceção legítima vai para o `eslint.confi
 - Eventos sem dado pessoal; tudo aponta para `MemberId`.
 - Comentários e nomes em inglês; textos de interface em pt-BR, centralizados em `apps/mobile/src/strings/`.
 - Telas iguais ao design, toque ≥ 44 px, contraste AA.
-- Front-end, o que o ESLint não alcança: registro único de estado (cópia de prop ou de consulta em `useState`/`useEffect`, flag que repete outro estado), reducer puro e sem efeito colateral (API, armazenamento, vibração, navegação fora dele), interface junto do consumidor, implementação falsa de cada serviço, reducer fora da convenção `*.reducer.ts`, estilo montado em função ou vindo de variável sem tipo `*Style`, `width`/`height` fixos vindos de token.
+- Front-end, o que o ESLint não alcança: registro único de estado (cópia de prop ou de consulta em `useState`/`useEffect`, flag que repete outro estado), reducer puro e sem efeito colateral (API, armazenamento, vibração, navegação fora dele), interface junto do consumidor, implementação falsa de cada serviço, reducer fora da convenção `*.reducer.ts`, estilo montado em função ou objeto de estilo em variável sem tipo `*Style`, `width`/`height` fixos vindos de token, props declaradas em `memo`, `forwardRef`, `React.FC<{...}>` ou em parâmetro com valor padrão, hex embutido em string maior (`"1px solid #fff"`) e cor em `hsl(...)`.
 - Imutabilidade no C# além de IDE0044 e CA2227 (por exemplo, `record` e coleções somente leitura no domínio).
 
 ## Front-end do app (E4.1)

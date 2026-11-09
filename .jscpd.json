@@ -16,7 +16,8 @@
     "**/dist/**",
     "**/node_modules/**",
     "**/bin/**",
-    "**/obj/**"
+    "**/obj/**",
+    "**/Infrastructure/Migrations/**"
   ],
   "ignorePattern": ["using [A-Za-z0-9_.= ]+;"]
 }
