@@ -13,3 +13,5 @@ Em tarefas do app (`apps/mobile`), leia também `docs/padroes/frontend.md`: esta
 3. Faça commit apenas dos testes novos.
 
 Devolva **PASSOU** ou **FALHOU**, com a saída relevante dos comandos e os casos que falharam.
+
+Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
