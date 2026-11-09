@@ -36,7 +36,8 @@
 
 ## Em andamento
 
-- E3.1: plano em `docs/estado/tarefas/E3.1.md` na branch `task/E3.1-firebase-auth` (worktree `D:\projetos\SacouAPP-E3.1`). Desenvolvimento espera o merge da E0.10, para nascer dentro dos portões; o jscpd deve ignorar `**/Infrastructure/Migrations/**`. Falta o ID do projeto Firebase (pergunta 13).
+- E3.1: PR #43 (branch `task/E3.1-firebase-auth`, worktree `D:\projetos\SacouAPP-E3.1`), desenvolvedor Opus. Revisor e revisor de segurança aprovaram com condições; testador reprovou por teste instável. Ciclo 1 de correção (S1–S3, teste instável, teste de token no log). ID do projeto: `sacou-79493`.
+- E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44, desenvolvedor Sonnet, revisor Opus reprovou o ciclo 1 (tipos do Node no app, PRAGMAs fora da conexão que grava) e aprovou o ciclo 2; testador Sonnet passou. Próximo: Parte 2 (telas 09 e 10), na mesma branch depois do merge. Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 
 ## Adiadas
 
@@ -70,6 +71,7 @@
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
 - E3.16, da E3.1: apagar a linha do usuário não basta, porque um token ainda válido (até 1 h) recria o usuário em `POST /v1/me`; usar marca de exclusão, recusar `auth_time` anterior à exclusão ou `checkRevoked` nesse endpoint. A E3.1 valida o token como JWT, sem FirebaseAdmin (ADR 0036): citar no relatório do M3 (contraria o ADR 0014 e `produto.md:250`).
 - E0.10, pendências: `src/theme/` não barra `import()`/`require()` de SDK (o import estático reprova); hex dentro de string maior, `hsl(...)`, estilo em variável sem tipo `*Style` e algumas formas de props ficam com o revisor (`codigo.md`); pacote novo em `packages/` precisa entrar em `.jscpd.json` à mão.
+- E4.9 Parte 1, pendências: `turbo.json` não lista `scripts/lib/**` em `globalDependencies`, então mudar regra do ESLint em `scripts/lib/` não invalida o cache local do `lint` (tarefa de CI); PRAGMAs do adaptador Expo só verificáveis no aparelho (Parte 3).
 - E4.1, pendências: confirmar a compilação nativa e o catálogo no primeiro dev build (roteiro do fim do M3); check na pílula "Vou"; `text-underline-offset` sem suporte no `Text` do RN (ADR 0034); `StatusPill.tsx:20` usa `palette.night` direto no texto da espera, trocar por papel de tema.
 
 ## Lembretes para o Gabriel
