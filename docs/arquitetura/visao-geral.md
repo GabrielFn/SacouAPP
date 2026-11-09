@@ -12,7 +12,7 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 | Banco | PostgreSQL (Neon) + EF Core |
 | Tempo real e jobs | SignalR; Hangfire com intervalo de consulta alto |
 | Página da rodada | Razor Pages no mesmo projeto |
-| Login | Firebase Auth; a API valida com FirebaseAdmin ([ADR 0014](adr/0014-firebase-auth.md)) |
+| Login | Firebase Auth; a API valida o ID token como JWT pelas chaves públicas do Google ([ADR 0036](adr/0036-verificacao-do-token-e-usuario.md)); FirebaseAdmin só para administrar contas (E3.16) ([ADR 0014](adr/0014-firebase-auth.md)) |
 | App | Expo + TypeScript strict, com log de eventos em expo-sqlite |
 | Regras compartilhadas | `packages/match-engine`, `packages/volley-rules` |
 | Serviços | Cloudflare R2, RevenueCat, Sentry, PostHog, Resend, Expo Push |
@@ -54,7 +54,7 @@ Sacou.Api  ->  Sacou.Modules.*  ->  Sacou.Shared  ->  só BCL
 | `.../<Module>/Contracts/` | Única superfície pública para outros módulos |
 | `.../<Module>/Domain/` | Domínio `internal`, sem infraestrutura |
 | `.../<Module>/<Slice>/` | Fatia vertical `internal`: endpoint, request, handler, validação |
-| `.../<Module>/Infrastructure/` | `DbContext` etc., a partir da E0.6 |
+| `.../<Module>/Infrastructure/` | `DbContext` do módulo, mapeamentos, stores e `Migrations/` (geradas, `internal`), desde a E3.1 ([ADR 0037](adr/0037-persistencia-por-modulo-ef-core.md)) |
 | `tests/Sacou.Modules.<Module>.Tests/<Slice>/` | Testes da fatia, criados com a primeira fatia |
 
 Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm conteúdo.
@@ -112,6 +112,8 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0033](adr/0033-porte-csharp-do-motor.md) | Porte C# da função de estado: árvore própria de entrada, chave repetida recusada, golden compartilhados |
 | [0034](adr/0034-estilos-e-temas-no-app.md) | Estilos, temas e escala no app: `StyleSheet` com `ThemeProvider` próprio, tokens escalados pela janela |
 | [0035](adr/0035-portoes-de-qualidade.md) | Portões de qualidade: complexidade, tamanho, duplicação e regras do front na CI, exceções em `scripts/quality-exceptions.json` |
+| [0036](adr/0036-verificacao-do-token-e-usuario.md) | Verificação do ID token do Firebase sem FirebaseAdmin, `User` mínimo, `POST /v1/me`, política de fallback e `ProblemDetails` |
+| [0037](adr/0037-persistencia-por-modulo-ef-core.md) | Persistência por módulo com EF Core: `DbContext` e schema por módulo, migrações internas, primeiro login idempotente |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -129,7 +131,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 16 | Rating | 0018 |
 | 17 | Faixas da cartinha | 0018 |
 | 18 | Foto da cartinha | 0016 |
-| 19 | Login | 0014 |
+| 19 | Login | 0014, 0036 |
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |

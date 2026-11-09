@@ -24,13 +24,35 @@ Se falhar com "Could not start Postgres in Docker (…). Check that Docker is ru
 - Porta 5432 ocupada: pare o outro Postgres ou mude a porta do lado esquerdo em `docker-compose.yml` (só na sua cópia). Os testes usam porta aleatória.
 - Nunca rode `docker compose config` sem `--quiet`: imprime a senha.
 
+## Rodar a API local (E3.1)
+
+A API lê a conexão de `ConnectionStrings:Sacou` e só aplica as migrações quando `Database:MigrateOnStartup` é `true`. O `appsettings.Development.json` está no `.gitignore`, então use variáveis no shell (Git Bash), com o banco de desenvolvimento ligado:
+
+```sh
+set -a; . ./.env; set +a   # lê o POSTGRES_PASSWORD do .env sem imprimir
+export ConnectionStrings__Sacou="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=$POSTGRES_PASSWORD"
+export Database__MigrateOnStartup=true
+dotnet run --project apps/api/src/Sacou.Api
+```
+
+Nunca rode `echo $ConnectionStrings__Sacou` nem `env` sem filtro: imprimem a senha. `Firebase:ProjectId` já vem do `appsettings.json`.
+
+## Gerar uma migração (ADR 0037)
+
+```sh
+dotnet tool restore
+dotnet ef migrations add <Nome> --project apps/api/src/Sacou.Modules/Identity --startup-project apps/api/src/Sacou.Modules/Identity --output-dir Infrastructure/Migrations --namespace Sacou.Modules.Identity.Infrastructure.Migrations
+```
+
+Não precisa de banco: o `IdentityDesignTimeFactory` monta o contexto sem conectar. Depois de gerar: confira que o snapshot ficou em `Infrastructure/Migrations/` (o `dotnet ef` 10 às vezes cria uma pasta com o caminho do namespace; mova o arquivo e apague a pasta), troque `public partial class` por `internal partial class` nos três arquivos e salve em LF sem BOM. O teste `Model_HasNoChangesWithoutAMigration` reprova se o modelo mudar sem migração.
+
 ## Espaço em disco
 
 O disco de imagens do Docker Desktop fica no disco do sistema. Veja o espaço em Settings > Resources > Advanced (disk image location). Para liberar: `docker compose down -v`, `docker image prune`. Mover o disco de imagens é feito pela tela de configurações do Docker, nunca movendo o arquivo à mão.
 
 ## Roteiro de 10 minutos (conferência na máquina)
 
-1. Docker ligado: rode o teste de integração. Esperado: 2 testes aprovados.
+1. Docker ligado: rode o teste de integração. Esperado: 6 testes aprovados (2 do Postgres e 4 do login, desde a E3.1).
 2. `docker ps -a` logo depois: nenhum container do Testcontainers ou do Ryuk sobrando (o Ryuk some em alguns segundos).
 3. Desligue o Docker Desktop e rode o teste de novo. Esperado: vermelho, código de saída diferente de 0, mensagem apontando este roteiro, nenhum teste pulado.
 4. Ligue o Docker e siga a seção "Banco de desenvolvimento" até o `down -v`.

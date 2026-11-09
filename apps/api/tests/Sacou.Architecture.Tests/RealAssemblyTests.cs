@@ -40,6 +40,7 @@ public sealed class RealAssemblyTests
     /// <summary>An empty rule proves nothing: this fails if the model stops reading the real Domain code.</summary>
     [Theory]
     [InlineData("Sacou.Modules.Matches.Domain.")]
+    [InlineData("Sacou.Modules.Identity.Domain.")]
     [InlineData("Sacou.Modules.Stats.Domain.")]
     [InlineData(CourtSessionsNamespace + ".")]
     [InlineData(CourtSessionJsonNamespace + ".")]
