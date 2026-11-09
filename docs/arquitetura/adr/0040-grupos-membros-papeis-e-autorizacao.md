@@ -1,0 +1,53 @@
+# ADR 0040 · Grupos: `MemberId`, papéis, permissões, autorização por grupo, convite e concorrência
+
+**Status:** aceito (09/11/2026). **Tarefa:** E3.2, em três partes. Plano: [`E3.2.md`](../../estado/tarefas/E3.2.md). Fecha o "Em aberto" do [ADR 0005](0005-estrutura-modular-api.md) e o "A definir" do [ADR 0012](0012-personal-data-member-id.md) sobre o `MemberId`. Regras em [`docs/dominio/grupos.md`](../../dominio/grupos.md).
+
+**O que já tem código:** parte 1 (modelo, schema com as 3 tabelas, tabela de permissões, filtro de acesso, rotas de criar, listar, detalhar e renomear grupo e de listar membros). As decisões das partes 2 (papéis, saída, remoção, trava) e 3 (convite) estão aqui porque já foram tomadas; cada parte confirma a sua seção.
+
+## Contexto
+
+Grupo é o primeiro recurso com dono e com papéis. A autorização por recurso (`decisoes.md:27`) nasce aqui e vira o modelo para Sessions, placar e pagamentos. O `MemberId` é o ID para o qual todos os eventos apontam (ADR 0012).
+
+## Decisões do Gabriel (09/11/2026, perguntas 16 a 19 de [`perguntas.md`](../../estado/perguntas.md))
+
+- **16 · Co-admin:** faz tudo do dia a dia (renomear, convites, mensalista × avulso, dar e tirar Placar, remover jogador), mas **não** promove, rebaixa nem remove Admin ou Co-admin. Está na tabela `RolePermissions`.
+- **17 · Validade do link:** até ser revogado. Constante `InviteRules.DefaultLifetime` (`null`), parte 3.
+- **18 · Aprovação para entrar:** não; quem tem o link entra na hora.
+- **19 · Removido volta pelo link:** não (403 `groups.member-removed`); só se o admin readmitir pelo menu "⋯" da tela 19, ação que entra numa tarefa futura.
+
+## Decisões
+
+**D1 · Modelo** (parte 1). Agregado `Group` com os membros dentro, `internal` em `Groups/Domain/`, records imutáveis, sem EF nem ASP.NET. `GroupId` e `MemberId` são UUID v7 gerados pela API com o relógio injetado. `GroupName`: 1 a 60 grafemas e no máximo 240 pontos de código (o limite do banco), sem caracteres de controle, de formatação invisível ou de direção; o *zero-width joiner* só dentro de emoji. `GroupMember` tem `MemberId`, `UserId?` (nulo só para o convidado sem conta da E3.5), `GroupRole` (`Admin`, `CoAdmin`, `Scorekeeper`, `Player`), `MemberType` (`Regular`, `DropIn`), `MembershipStatus` (`Active`, `Left`, `Removed`), `JoinedAt`, `LeftAt?`. Linha de membro nunca é apagada. Quem cria vira `Admin`, `Active`, `DropIn`.
+
+**D2 · `MemberId` entre módulos** (parte 1). O tipo é do domínio do Groups (`internal`). Entre módulos viaja como `Guid`, e cada módulo o embrulha no próprio value object. Não vai para `Sacou.Shared` agora: a regra do ADR 0005 exige dois domínios consumidores. Promover quando o domínio do Sessions (E3.4) precisar trocar o tipo com o Groups, com ADR. `Groups.Contracts.IGroupMembership.FindActiveAsync(groupId, userId)` dá `GroupMembership(MemberId, Role, Type)` às outras tarefas (E3.3 em diante), com enums públicos espelhados e convertidos à mão.
+
+**D3 · Permissões** (tabela na parte 1; regras de alvo na parte 2). Duas camadas, ambas no domínio: `RolePermissions.Allows(GroupRole, GroupPermission)` é uma tabela de dados (um dicionário imutável de conjuntos, sem `if` encadeado); as regras sobre o alvo (quem mexe em quem, último admin) ficam nos métodos do agregado e devolvem `Result`. A tabela completa está em `grupos.md`. Vários admins são permitidos.
+
+**D4 · Autorização segura por padrão** (parte 1). Toda rota com `{groupId}` é mapeada por `MapGroupRoutes()`, que põe o prefixo `/v1/groups/{groupId:guid}`, o filtro `GroupAccessFilter` e um marcador, juntos. O filtro: resolve o usuário (`ICurrentUser`, ADR 0039); busca o membro **ativo** de `(groupId, userId)` numa consulta; sem membro, responde **404 `groups.group-not-found`**, o mesmo corpo de um grupo inexistente; com membro sem a permissão do endpoint, **403 `groups.forbidden`**; senão entrega `GroupAccess(GroupId, GroupMember)` ao handler pelas *features* da requisição. Cada endpoint declara **exatamente uma** permissão (`RequireGroupPermission`); zero ou duas é erro 500 no filtro e reprova o **teste de guarda**, que percorre todas as rotas da API real: rota com `{groupId}` sem o marcador ou sem exatamente uma permissão reprova, e as rotas sem `{groupId}` precisam estar numa lista fechada (`/health`, `POST /v1/me`, `POST` e `GET /v1/groups`; a parte 3 acrescenta prévia e aceite do convite). O papel é lido do banco a cada requisição: nada de claim, cache ou token. Membro `Left` ou `Removed` é não membro. Não membro nunca recebe 403. `groupId` só vem da rota; corpo nunca traz `groupId`, `memberId`, papel ou `userId` de quem age (e campo a mais é 400, ADR 0039).
+
+**D5 · Enumeração e IDOR** (parte 1; alvo e convite nas partes 2 e 3). Todo acesso é por `(groupId, userId)`; membro alvo por `(group_id, id)`, convite por `(group_id, id)`. UUID v7 não é segredo (revela o instante de criação): a proteção é a autorização. `GET /v1/groups` lista só os grupos ativos de quem chama; não há busca nem contagem pública.
+
+**D6 · Persistência** (parte 1). Schema `groups`, `GroupsDbContext` `internal`, histórico em `groups.__ef_migrations_history`, snake_case explícito, migração `internal` gerada. As **três tabelas** saem na parte 1 (convites inclusive), para haver uma migração só. Enums gravados como texto (`admin`, `co_admin`, `scorekeeper`, `player`; `regular`, `drop_in`; `active`, `left`, `removed`), com `CHECK` montado da mesma lista escrita à mão (`ColumnValues`). `CHECK ((status = 'active') = (left_at IS NULL))`. Índice único parcial `ux_members_group_user (group_id, user_id) WHERE user_id IS NOT NULL`: um `MemberId` por pessoa por grupo, inclusive de quem saiu. Índice `ix_members_user (user_id) WHERE status = 'active'` para "meus grupos". `invites.token_hash` `bytea` de 32 bytes com índice único. **Sem FK para `identity.users`**: módulo nunca amarra tabela de outro. Linhas de persistência só na `Infrastructure`, convertidas à mão. Leituras com `AsNoTracking`, sem trava.
+
+**D7 · Limites contra abuso** (constantes em `GroupLimits`). 300 membros ativos por grupo (`groups.member-limit`, 409), 20 convites ativos por grupo (`groups.invite-limit`, 409), 100 grupos ativos por pessoa (`groups.membership-limit`, 409). Revisão na E5.3. **Criar grupo** conta os grupos ativos da pessoa e grava o grupo com o fundador numa transação que segura uma trava consultiva por pessoa (`pg_advisory_xact_lock(família, hashtext(userId))`), para duas criações simultâneas não passarem juntas do teto. Ordem das travas, para a parte 3: grupo antes de pessoa, sempre.
+
+**D8 · Concorrência das escritas de membros** (parte 2). Trava pessimista curta por grupo: toda escrita que muda membros ou convites roda numa transação que começa com `SELECT id FROM groups.groups WHERE id = @id FOR UPDATE`, carrega o agregado, aplica o domínio e grava. Resolve sem nova tentativa: dois aceites da mesma pessoa, dois admins rebaixando um ao outro ou saindo juntos (o segundo recebe 409 `groups.last-admin`), tetos sem estourar. **Por que não `xmin`:** a regra é sobre o conjunto de membros, não sobre uma linha, e o `xmin` de `groups` não muda quando só um membro muda; o otimista (`decisoes.md:28`) segue para a última vaga da rodada (E3.4). Renomear não trava: uma coluna, sem regra sobre membros, e o último vence.
+
+**D9 · Regras de alvo** (parte 2). Último `Admin` ativo não sai nem é rebaixado (`groups.last-admin`); nenhuma promoção automática. Mudar o papel para o mesmo valor é sucesso sem efeito. Ninguém remove a si mesmo por `DELETE` (`groups.use-leave`). Quem volta (`Left`) recupera o mesmo `MemberId`, **sempre como `Player`**: um ex-admin nunca volta admin pelo link. Quando quem criou um convite sai, é removido ou cai para `Scorekeeper` ou `Player`, os convites ativos dele são revogados na mesma transação.
+
+**D10 · Convite por link** (parte 3). Token de 32 bytes de `RandomNumberGenerator`, em Base64url sem preenchimento (43 caracteres), gerado fora do domínio; o banco guarda só o SHA-256 (sem sal: 256 bits de entropia, e o índice único precisa de valor determinístico). O token sai uma vez, na criação. Uso múltiplo; `use_count` conta quem entrou. Revogado, expirado e inexistente dão a mesma resposta (404 `groups.invite-invalid`). Prévia e aceite recebem o token **no corpo**, nunca na rota nem na query; o link público leva o token no **fragmento** (`https://<domínio>/convite#<token>`), que o navegador não envia (E4.16 e E3.12). Token fora do formato é recusado sem consulta. Log sem token nem hash.
+
+## Alternativas descartadas
+
+- **Papel em claim do token:** ficaria velho até o token expirar; ex-admin manteria poder por até 1 h.
+- **403 para não membro:** confirma que o grupo existe.
+- **Atributo de autorização por endpoint com policy do ASP.NET:** a policy não tem o membro carregado e faria duas consultas; o filtro carrega uma vez e entrega ao handler.
+- **`xmin` para as escritas de membros:** ver D8.
+- **`smallint` nos enums:** ilegível no banco e frágil a reordenar o enum.
+
+## Consequências e riscos
+
+- **Último admin que apaga a conta (E3.16):** a exclusão não pode ser bloqueada (exigência das lojas). A E3.16 decide entre promover o co-admin ou o membro mais antigo, ou deixar o grupo sem admin.
+- **Sem nome na lista de membros:** a E3.2 não guarda nome; o perfil é da E3.17.
+- **`MemberId` como `Guid` entre módulos:** perde a checagem de tipo entre fronteiras; rever na E3.4.
+- **Trava por grupo e trava por pessoa:** se o Sessions travar o mesmo grupo (E3.4), combinar a ordem (grupo antes da rodada).

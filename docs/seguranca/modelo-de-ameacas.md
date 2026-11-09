@@ -2,7 +2,7 @@
 
 STRIDE por componente: **S**poofing, **T**ampering, **R**epudiation, **I**nformation disclosure, **D**enial of service, **E**levation of privilege.
 
-Já têm código a CI (seção 11), o login (E3.1, seção 1), o gerador puro do Pix (E1.4, seção 6) e o motor da partida (M2, seção 3): em TS, o parser do envelope, o replay, os parsers por tipo, os aplicadores, os comandos e as estatísticas (E2.1 a E2.9 e E2.11), e o porte para C# do leitor, dos parsers e do replay (E2.10, ADR 0033), ainda sem endpoint nem app que os use; os demais componentes não têm código. Fora das seções 1 e 11, "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
+Já têm código a CI (seção 11), o login (E3.1, seção 1), a autorização por grupo (E3.2, parte 1, seção 2), o gerador puro do Pix (E1.4, seção 6) e o motor da partida (M2, seção 3): em TS, o parser do envelope, o replay, os parsers por tipo, os aplicadores, os comandos e as estatísticas (E2.1 a E2.9 e E2.11), e o porte para C# do leitor, dos parsers e do replay (E2.10, ADR 0033), ainda sem endpoint nem app que os use; os demais componentes não têm código. Fora das seções 1, 2 e 11, "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
 
 ## 1. Login (Firebase Auth, E3.1)
 
@@ -28,19 +28,33 @@ Implementado na E3.1 ([ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-
 | E | Endpoint novo aberto por esquecimento | `FallbackPolicy` exige usuário autenticado; `AllowAnonymous` só em `Program.cs`, com guarda de texto em `Sacou.Architecture.Tests` |
 | E | Conta de convidado reivindicada por outra pessoa | Reivindicação por link (`revisao-mvp.md:114`); proteção do link a definir na E3.5 |
 
-## 2. API e autorização por recurso
+## 2. API e autorização por recurso (E3.2)
+
+A parte 1 da E3.2 tem código ([ADR 0039](../arquitetura/adr/0039-sacou-http-e-contratos-entre-modulos.md), [ADR 0040](../arquitetura/adr/0040-grupos-membros-papeis-e-autorizacao.md)): o mapeamento `Result → ProblemDetails`, as regras de JSON dos corpos, o filtro de acesso por grupo e as rotas de criar, listar, detalhar e renomear grupo e de listar membros. As linhas marcadas "parte 2" ou "parte 3" são decisões ainda sem código.
 
 | | Ameaça | Mitigação |
 |---|---|---|
-| S | Convite por link ou QR repassado a estranhos | A definir na E3.2 |
-| T | Disputa pela última vaga | Concorrência otimista com `xmin` (`produto.md:310`) |
-| T | Reconfigurar grupo ou rodada sem poder | Autorização por recurso (`decisoes.md:27`) |
+| S | Convite por link ou QR repassado a estranhos | Parte 3: token de 256 bits, só o hash no banco, revogável, válido até ser revogado (decisão do Gabriel, pergunta 17), sem aprovação (pergunta 18); o admin vê quem entrou e remove, e removido não volta pelo link (pergunta 19) |
+| S | Adivinhar ou enumerar convite | Parte 3: 256 bits; mesma resposta para inválido, revogado e expirado; prévia e aceite na lista de rotas a limitar (E5.3) |
+| T | Disputa pela última vaga | Concorrência otimista com `xmin` (`produto.md:310`, E3.4) |
+| T | Reconfigurar grupo ou rodada sem poder | Renomear exige `RenameGroup` (Admin e Co-admin); a configuração do grupo (E3.3) usa `Groups.Contracts.IGroupMembership`. Matriz M1 da parte 1 |
+| T | Atribuição em massa (corpo com `groupId`, `userId`, `role` ou campo a mais) | Campo que o DTO não declara é 400, para todo corpo da API (`ApiJson`, `UnmappedMemberHandling.Disallow`); enum só como texto. `groupId` só vem da rota. Testes de integração com campos a mais e corpo malformado; enums no corpo na parte 2 (M8) |
 | R | Admin nega uma alteração | A definir na E5.2 |
+| I | Descobrir se um grupo existe | Não membro, ex-membro e removido recebem o **mesmo 404** de um grupo inexistente, conferido byte a byte sem o `traceId` (M2), em detalhe, renomear e membros. Não membro nunca recebe 403 |
 | I | Nível privado lido pela API | Privado garantido na API, não só na tela (`produto.md:373`) |
-| I | Dados pessoais em respostas de erro | Erro de regra vira `ProblemDetails` (`produto.md:311`). Desde a E3.1, 401, 503 e 500 saem em `ProblemDetails` sem detalhe (P7: banco fora do ar não mostra conexão nem exceção); o mapeamento de erro de regra entra na E3.2 |
+| I | Dados pessoais em respostas de erro | Erro de regra vira `ProblemDetails` com `type`, `title`, `status`, `code` e `traceId`, sem `detail` nem valor recebido (E3.2, teste canário de nome inválido). Desde a E3.1, 401, 503 e 500 saem em `ProblemDetails` sem detalhe (P7) |
+| I | Nome do grupo, `userId` ou `sub` em log ou resposta | A lista de membros não tem `userId`, `sub`, e-mail nem nome (M5); `GroupName.ToString` esconde o nome; teste L1 grava todos os logs da API e procura nomes, `sub` e `userId` |
+| I | Token de convite em log ou URL | Parte 3: token só no corpo, nunca na rota ou na query; link público com o token no fragmento (E4.16); log sem token nem hash |
 | D | Abuso de requisições | Limite de requisições (`decisoes.md:31`); valores a definir na E5.3 |
-| E | Acessar recurso de outro grupo | Policies verificam o papel no grupo (`produto.md:312`) |
-| E | Papel Placar com mais poderes | Placar opera a quadra sem outros poderes (`produto.md:62`) |
+| D | Grupos, membros ou convites sem fim | Tetos em `GroupLimits`: 100 grupos ativos por pessoa (conferido numa transação com trava por pessoa, para criações simultâneas não passarem juntas), 300 membros por grupo e 20 convites ativos (parte 3). Corpo das rotas de grupo limitado a 4 KB (metadado aplicado pelo Kestrel; o 413 é testado na parte 2) |
+| E | Acessar recurso de outro grupo | `GroupAccessFilter` em toda rota com `{groupId}`: membro **ativo** de `(groupId, userId)` lido do banco a cada requisição; cada rota declara exatamente uma permissão, e um teste percorre todas as rotas da API e reprova rota sem o filtro, sem permissão ou fora da lista fechada (A4) |
+| E | IDOR de membro ou convite entre grupos | Busca sempre por `(group_id, id)` (partes 2 e 3, M6 e M10) |
+| E | Co-admin ou jogador se promove | Tabela de permissões (decisão do Gabriel, pergunta 16) testada nas 36 combinações; regra de alvo na parte 2 (M7) |
+| E | Grupo sem admin por corrida | Parte 2: trava por grupo (`FOR UPDATE`), testes C1 a C3 |
+| E | Ex-admin volta admin pelo link | Parte 3: quem volta é sempre `Player` (decisão D1, teste D9) |
+| E | Ex-membro com acesso por cache | Papel e situação lidos do banco a cada requisição, nunca de claim ou cache; quem saiu ou foi removido recebe 404 (M1; M9 na parte 2) |
+| E | Usuário autenticado sem registro age no grupo | Sem linha em `identity.users`, toda rota de grupo dá 403 `identity.user-not-registered` antes de qualquer consulta ao grupo (M1) |
+| E | Papel Placar com mais poderes | Placar opera a quadra sem outros poderes (`produto.md:62`): no grupo, só `ViewGroup` e `Leave` |
 
 ## 3. Sincronização de eventos (E3.7)
 

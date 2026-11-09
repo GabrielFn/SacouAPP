@@ -25,7 +25,7 @@ Monólito modular em .NET 10, com 7 módulos: Identity, Groups, Sessions, Matche
 | Módulo | Responsabilidade | Modelo |
 |---|---|---|
 | Identity | Usuário, perfil, posições, nível | CRUD |
-| Groups | Membros, papéis, mensalistas, configuração padrão, plano | Agregado Group |
+| Groups | Membros, papéis, mensalistas, configuração padrão, plano. Schema `groups` (grupos, membros, convites) e autorização por grupo desde a E3.2 ([ADR 0040](adr/0040-grupos-membros-papeis-e-autorizacao.md)) | Agregado Group |
 | Sessions | Presença, vagas, lista de espera, sorteio | Agregado Session |
 | Matches | Placar, fila, rotação, banco | Stream `CourtSession` com event sourcing ([ADR 0009](adr/0009-court-session-event-sourcing.md)) |
 | Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
@@ -37,10 +37,11 @@ Fonte: `produto.md:257-266`. Cada módulo tem o próprio schema no Postgres e nu
 ## Dependências permitidas
 
 ```
-Sacou.Api  ->  Sacou.Modules.*  ->  Sacou.Shared  ->  só BCL
+Sacou.Api  ->  Sacou.Modules.*  ->  Sacou.Http (ASP.NET)  ->  Sacou.Shared  ->  só BCL
 ```
 
-- Um módulo só enxerga de outro o namespace `Sacou.Modules.<Outro>.Contracts`. Hoje nenhum módulo referencia outro.
+- Um módulo só enxerga de outro o namespace `Sacou.Modules.<Outro>.Contracts`. Desde a E3.2, o Groups referencia o Identity e usa só `Identity.Contracts.ICurrentUser` (primeiro contrato, [ADR 0039](adr/0039-sacou-http-e-contratos-entre-modulos.md)); o Groups expõe `Groups.Contracts.IGroupMembership`.
+- `Sacou.Http` (fora de `Sacou.Modules/`, não é módulo): `Result → ProblemDetails` e as regras de JSON dos corpos. Só referencia ASP.NET e `Sacou.Shared`; nenhum domínio pode usá-lo (ADR 0039).
 - `Domain` só usa uma lista fechada de namespaces da BCL, `Sacou.Shared` e o próprio `Domain`.
 - As regras são testes em `apps/api/tests/Sacou.Architecture.Tests`, provados contra violações plantadas em `Sacou.Architecture.Fixtures`.
 
@@ -50,6 +51,7 @@ Sacou.Api  ->  Sacou.Modules.*  ->  Sacou.Shared  ->  só BCL
 |---|---|
 | `src/Sacou.Api/` | Composição (`Program.cs`, `/health`) e, depois, Razor Pages |
 | `src/Sacou.Shared/Results/` | `Result`, `Result<T>`, `Error`, `ErrorKind`. Namespace público novo exige ADR |
+| `src/Sacou.Http/` | `ProblemResults`, `ToHttpResult`, `ApiJson` (ADR 0039) |
 | `src/Sacou.Modules/<Module>/<Module>Module.cs` | Entrada pública: `AddXModule(IServiceCollection)` |
 | `.../<Module>/Contracts/` | Única superfície pública para outros módulos |
 | `.../<Module>/Domain/` | Domínio `internal`, sem infraestrutura |
@@ -115,6 +117,8 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0036](adr/0036-verificacao-do-token-e-usuario.md) | Verificação do ID token do Firebase sem FirebaseAdmin, `User` mínimo, `POST /v1/me`, política de fallback e `ProblemDetails` |
 | [0037](adr/0037-persistencia-por-modulo-ef-core.md) | Persistência por módulo com EF Core: `DbContext` e schema por módulo, migrações internas, primeiro login idempotente |
 | [0038](adr/0038-log-local-da-quadra.md) | Log local da quadra: SQLite, esquema, `deviceId`, simular antes de gravar |
+| [0039](adr/0039-sacou-http-e-contratos-entre-modulos.md) | `Result → ProblemDetails` no projeto `Sacou.Http`, regras de JSON e primeiro contrato entre módulos (`Identity.Contracts.ICurrentUser`) |
+| [0040](adr/0040-grupos-membros-papeis-e-autorizacao.md) | Grupos: `MemberId`, papéis, permissões, autorização por grupo, convite e concorrência |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -123,7 +127,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 7 | Nome, app nativo e página da rodada | 0008 |
 | 8 | Configuração herdada e modelos | 0017 |
 | 9 | Padrão de partida | 0017 |
-| 10 | Membros e papéis | 0017 |
+| 10 | Membros e papéis | 0017, 0040 |
 | 11 | Fila e saída parcial | 0017, 0029 |
 | 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028, 0030 |
 | 13 | Banco no MVP | 0017, 0027 |
@@ -137,8 +141,8 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 21 | Placar por QR | 0013 |
 | 25 | Back-end | 0008, 0005 |
 | 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0038 |
-| 27 | Padrões | 0011, 0029, 0035 |
-| 28 | Dados pessoais | 0012 |
+| 27 | Padrões | 0011, 0029, 0035, 0039, 0040 |
+| 28 | Dados pessoais | 0012, 0040 |
 | 29 | App | 0008 |
 | 30 | Monorepo | 0001 |
 | 31 | Serviços | 0008; varredura na CI: 0007, ainda sem merge |

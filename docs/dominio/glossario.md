@@ -6,14 +6,21 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 
 | Termo no app | Nome no código | Nota |
 |---|---|---|
-| Grupo | `Group` | |
-| Membro do grupo | `GroupMember` (`MemberId`) | Tudo aponta para `MemberId`, nunca `UserId` |
+| Grupo | `Group` (`GroupId`) | Agregado com os membros dentro ([grupos.md](grupos.md), ADR 0040) |
+| Nome do grupo | `GroupName` | 1 a 60 caracteres visíveis, até 240 pontos de código; nunca em log |
+| Membro do grupo | `GroupMember` (`MemberId`) | Tudo aponta para `MemberId`, nunca `UserId`. Um por pessoa por grupo, para sempre; entre módulos viaja como `Guid` (ADR 0040) |
+| Papel no grupo | `GroupRole` | `Admin`, `CoAdmin`, `Scorekeeper`, `Player`. Não confundir com `PlayerRole` (função em quadra) |
+| Jogador (papel) | `Player` | Papel sem poderes de gestão |
+| Permissão no grupo | `GroupPermission` | O que um papel pode fazer; cada rota de grupo exige exatamente uma ([grupos.md](grupos.md)) |
+| Situação do membro | `MembershipStatus` | `Active`, `Left` (saiu), `Removed` (removido pelo admin). A linha nunca é apagada |
+| Tipo de membro | `MemberType` | `Regular` (mensalista) ou `DropIn` (avulso) |
+| Convite por link ou QR | `GroupInvite` | Token de 256 bits mostrado uma vez; o banco guarda só o hash (E3.2, parte 3) |
 | Conta (pessoa que entrou no app) | `User` (`UserId`) | Módulo Identity (E3.1). `UserId` é interno (UUID v7) e nunca vai a evento ([ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)) |
 | Identidade do login | `AuthSubject` | UID do Firebase (`sub` do ID token), 1 a 128 caracteres ASCII visíveis, sensível a maiúsculas |
-| Mensalista / avulso | `Regular` / `DropIn` | |
+| Mensalista / avulso | `Regular` / `DropIn` | Valores de `MemberType` |
 | Convidado | A definir (E3.5) | Sempre avulso, nunca mensalista |
 | Ex-jogador | A definir (E3.16) | Como quem excluiu a conta aparece no histórico |
-| Admin / Co-admin / Placar (papéis) | `Admin` / `CoAdmin` / `Scorekeeper` | |
+| Admin / Co-admin / Placar (papéis) | `Admin` / `CoAdmin` / `Scorekeeper` | Valores de `GroupRole`; permissões em [grupos.md](grupos.md) |
 | Rodada | `Session` | |
 | Presença | `Attendance` | |
 | Lista de espera | `Waitlist` | |
