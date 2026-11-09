@@ -82,4 +82,4 @@
 
 ## Bloqueadas
 
-- E3.1 (e, por dependência, E3.2–E3.5, E4.2–E4.6): falta o acesso ao Firebase (pergunta 8 em `perguntas.md`).
+- Nenhuma.
