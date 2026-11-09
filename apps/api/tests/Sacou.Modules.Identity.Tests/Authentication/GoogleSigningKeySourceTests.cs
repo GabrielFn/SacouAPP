@@ -283,6 +283,13 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
     [Fact]
     public void Parser_RefusesTheBrokenRsaKeyWithoutThrowing()
     {
+        var pem = BrokenRsaCertificatePem();
+        using (var certificate = X509Certificate2.CreateFromPem(pem))
+        {
+            // Control: the recipe is the dangerous one, accepted by CreateFromPem and throwing later.
+            Assert.ThrowsAny<CryptographicException>(() => certificate.GetRSAPublicKey());
+        }
+
         var document = $$"""{"first":{{TestIdToken.Json(first.CertificatePem)}},"broken":{{TestIdToken.Json(BrokenRsaCertificatePem())}}}""";
 
         Assert.Null(SigningKeyDocumentParser.Parse(System.Text.Encoding.UTF8.GetBytes(document)));
