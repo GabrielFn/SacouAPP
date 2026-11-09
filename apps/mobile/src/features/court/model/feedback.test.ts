@@ -1,4 +1,4 @@
-import type { CourtSessionState } from "@sacou/match-engine";
+import { INITIAL_COURT_SESSION_STATE, type CourtSessionState } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
@@ -74,6 +74,11 @@ describe("what the phone does between two states", () => {
   test("the same state buzzes nothing", async () => {
     const [before] = await around("", () => Promise.resolve());
     expect(deriveFeedback(before, before)).toEqual([]);
+  });
+
+  test("reopening a match in progress buzzes nothing: the court only loads the log", async () => {
+    const [, midMatch] = await around("aab", (scenario) => score(scenario, "a"));
+    expect(deriveFeedback(INITIAL_COURT_SESSION_STATE, midMatch)).toEqual([]);
   });
 
   test("the phone plays the strongest of the list", () => {
