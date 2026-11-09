@@ -73,6 +73,10 @@ export function createCourtSessionController(
     }
     const outcome = await runCourtCommand(deps, context.current, snapshot.events, command);
     if (!outcome.ok) {
+      if (outcome.error.code === "write-failed") {
+        // The write may have committed before it failed: the file decides what the snapshot shows.
+        await load();
+      }
       return outcome;
     }
     store.set({ ...snapshot, events: outcome.value });

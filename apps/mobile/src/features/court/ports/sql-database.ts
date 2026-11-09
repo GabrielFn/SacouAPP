@@ -11,6 +11,6 @@ export interface SqlExecutor {
 }
 
 export interface SqlDatabase extends SqlExecutor {
-  /** Exclusive: commits when `work` resolves and rolls everything back when it rejects. */
+  /** One at a time, with the other calls queued behind it: commits when `work` resolves and rolls everything back when it rejects. */
   transaction<T>(work: (transaction: SqlExecutor) => Promise<T>): Promise<T>;
 }

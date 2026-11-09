@@ -28,6 +28,4 @@ export const MIGRATION_STEPS: readonly string[] = [
 ];
 
 export const USER_VERSION_PRAGMA = "user_version";
-export const DATABASE_FILE_NAME = "sacou.db";
 export const FIRST_BATCH = 1;
-export const FIRST_SEQUENCE = 1;

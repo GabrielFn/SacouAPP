@@ -5,8 +5,8 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "build": "tsc --noEmit && expo export --platform android --output-dir dist",
-    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit && expo export --platform android --output-dir dist",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run --dir src"
   },

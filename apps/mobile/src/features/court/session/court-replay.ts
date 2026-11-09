@@ -16,31 +16,41 @@ export interface CourtReplayer {
    * the same array costs nothing: a tap simulates the new log once and the screen reads that result.
    */
   replay(courtSessionId: string, events: readonly EventEnvelope[]): CourtReplayResult;
-  /** How many replays really ran, for the tests of the cache. */
-  runs(): number;
+}
+
+/** Runs a replay for real; the cache wraps it, and a test can wrap it to count the runs. */
+export type ReplayRunner = (
+  courtSessionId: string,
+  events: readonly EventEnvelope[],
+) => CourtReplayResult;
+
+export const runCourtReplay: ReplayRunner = (courtSessionId, events) =>
+  replayTimeline(
+    { courtSessionId, initialState: INITIAL_COURT_SESSION_STATE, appliers: SCORE_APPLIERS },
+    events,
+  );
+
+interface CacheEntry {
+  readonly courtSessionId: string;
+  readonly result: CourtReplayResult;
 }
 
 /**
  * The cache holds a value derived from an immutable array, never a second copy of the state: the
- * log is the source, and a new array (a new log) is a new key. The entry leaves with the array.
+ * log is the source, and a new array (a new log) is a new key. The entry leaves with the array and
+ * is used only for the stream it was computed for.
  */
-export function createCourtReplayer(): CourtReplayer {
-  const cache = new WeakMap<readonly EventEnvelope[], CourtReplayResult>();
-  const counter = { value: 0 };
+export function createCourtReplayer(run: ReplayRunner = runCourtReplay): CourtReplayer {
+  const cache = new WeakMap<readonly EventEnvelope[], CacheEntry>();
   return {
     replay(courtSessionId, events) {
       const cached = cache.get(events);
-      if (cached !== undefined) {
-        return cached;
+      if (cached?.courtSessionId === courtSessionId) {
+        return cached.result;
       }
-      counter.value += 1;
-      const result = replayTimeline(
-        { courtSessionId, initialState: INITIAL_COURT_SESSION_STATE, appliers: SCORE_APPLIERS },
-        events,
-      );
-      cache.set(events, result);
+      const result = run(courtSessionId, events);
+      cache.set(events, { courtSessionId, result });
       return result;
     },
-    runs: () => counter.value,
   };
 }

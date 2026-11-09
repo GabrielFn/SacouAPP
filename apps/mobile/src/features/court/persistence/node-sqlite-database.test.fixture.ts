@@ -27,7 +27,8 @@ function toRow(record: Readonly<Record<string, SQLOutputValue>>): SqlRow {
 
 export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
   const raw = new DatabaseSync(path);
-  raw.exec("PRAGMA foreign_keys = ON");
+  // A test file gains nothing from an fsync per commit, and it made the suite minutes long.
+  raw.exec("PRAGMA foreign_keys = ON; PRAGMA synchronous = OFF");
   const fault = { value: null as number | null };
 
   function failIfDue(): void {

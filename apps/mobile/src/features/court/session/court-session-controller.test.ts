@@ -1,5 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 
+import { err } from "@sacou/volley-rules";
+
+import type { CourtEventLog } from "../ports/court-event-log";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import {
   COURT_SESSION_ID,
@@ -9,6 +12,7 @@ import {
   type CourtHarness,
   type StorageKind,
 } from "./court-harness.test.fixture";
+import { createCourtSessionController } from "./court-session-controller";
 
 const STORAGES: readonly StorageKind[] = ["memory", "sqlite"];
 const FIXED_EVENT_ID = "e0000000-0000-4000-8000-0000000000ee";
@@ -61,6 +65,20 @@ describe("loading", () => {
     });
   });
 
+  test("a payload with an extra field fails closed and never echoes it", async () => {
+    const { harness } = await startedHarness("sqlite");
+    harness.sqlite?.raw.exec(
+      `UPDATE court_events SET payload = '{"name":"Pedro-Silva-secret"}' WHERE position = 1`,
+    );
+
+    const controller = harness.openController();
+    await controller.whenIdle();
+
+    const snapshot = controller.getSnapshot();
+    expect(snapshot).toEqual({ status: "failed", code: "replay-failed" });
+    expect(JSON.stringify(snapshot)).not.toContain("Pedro-Silva-secret");
+  });
+
   test("a corrupted row fails closed with a code and no value", async () => {
     const { harness } = await startedHarness("sqlite");
     harness.sqlite?.raw.exec("UPDATE court_events SET payload = 'Pedro'");
@@ -103,7 +121,7 @@ describe.each(STORAGES)("commands (%s)", (kind) => {
     const failed = await controller.dispatch({ type: "score-point", team: "a" });
 
     expect(failed).toEqual({ ok: false, error: { code: "write-failed", cause: "storage-failed" } });
-    expect(controller.getSnapshot()).toBe(before);
+    expect(controller.getSnapshot()).toEqual(before);
     expect(await storedSequences(harness)).toEqual([1]);
     expect((await controller.dispatch({ type: "score-point", team: "a" })).ok).toBe(true);
     expect(await storedSequences(harness)).toEqual([1, 2]);
@@ -138,9 +156,22 @@ describe.each(STORAGES)("commands (%s)", (kind) => {
     expect(await storedSequences(harness)).toEqual(stored);
   });
 
+  test("an event id the parser refuses is rejected before anything is written", async () => {
+    const { harness, controller } = await startedHarness(kind);
+    const stored = await storedSequences(harness);
+    const broken = harness.openController({ ids: { newId: () => "not-a-uuid" } });
+    await broken.whenIdle();
+
+    const outcome = await broken.dispatch({ type: "score-point", team: "a" });
+
+    expect(outcome).toEqual({ ok: false, error: { code: "rejected" } });
+    expect(await storedSequences(harness)).toEqual(stored);
+    expect(controller.getSnapshot().status).toBe("ready");
+  });
+
   test("the replay of the same log runs once: the screen reads what the tap simulated", async () => {
     const { harness, controller } = await startedHarness(kind);
-    const runsBefore = harness.replayer.runs();
+    const runsBefore = harness.runs();
 
     await controller.dispatch({ type: "score-point", team: "a" });
     const snapshot = controller.getSnapshot();
@@ -149,7 +180,44 @@ describe.each(STORAGES)("commands (%s)", (kind) => {
       harness.replayer.replay(COURT_SESSION_ID, snapshot.events);
     }
 
-    expect(harness.replayer.runs()).toBe(runsBefore + 1);
+    expect(harness.runs()).toBe(runsBefore + 1);
+  });
+});
+
+describe("a write that fails after the commit", () => {
+  test("the snapshot is the file again, and the next command works", async () => {
+    const harness = await createHarness("sqlite");
+    await harness.start(SAMPLE_MATCH_ONE_SET);
+    const real = harness.log;
+    const failures = { left: 1 };
+    const failingAfterCommit: CourtEventLog = {
+      ...real,
+      append: async (id, envelopes) => {
+        const written = await real.append(id, envelopes);
+        if (failures.left === 0) return written;
+        failures.left -= 1;
+        return err({ code: "storage-failed" });
+      },
+    };
+    const controller = createCourtSessionController({
+      courtSessionId: COURT_SESSION_ID,
+      log: failingAfterCommit,
+      replayer: harness.replayer,
+      ids: harness.ids,
+    });
+    await controller.whenIdle();
+
+    const failed = await controller.dispatch({ type: "score-point", team: "a" });
+
+    expect(failed).toEqual({ ok: false, error: { code: "write-failed", cause: "storage-failed" } });
+    const stored = await real.load(COURT_SESSION_ID);
+    const snapshot = controller.getSnapshot();
+    expect(snapshot.status === "ready" && snapshot.events).toEqual(
+      stored.ok && stored.value.events,
+    );
+    expect(await storedSequences(harness)).toEqual([1, 2]);
+    expect((await controller.dispatch({ type: "undo" })).ok).toBe(true);
+    expect(await storedSequences(harness)).toEqual([1, 2, 3]);
   });
 });
 

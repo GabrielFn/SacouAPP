@@ -65,6 +65,16 @@ describe("load", () => {
     },
   );
 
+  test("sequences of a device that skip a number are a corrupted log", async () => {
+    const sqlite = await openMigratedDatabase();
+    const log = repositoryOn(sqlite);
+    await log.openSession(SESSION_A);
+    await log.append(SESSION_A, [makeEnvelope({ sequence: 1 }), makeEnvelope({ sequence: 2 })]);
+    sqlite.raw.exec("UPDATE court_events SET sequence = 5 WHERE position = 2");
+
+    expect(await log.load(SESSION_A)).toEqual({ ok: false, error: { code: "corrupted-log" } });
+  });
+
   test("an unknown session cannot be loaded", async () => {
     const sqlite = await openMigratedDatabase();
 

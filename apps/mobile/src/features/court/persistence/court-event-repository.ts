@@ -9,7 +9,7 @@ import type {
 } from "../ports/court-event-log";
 import type { IdGenerator } from "../ports/id-generator";
 import type { SqlDatabase, SqlExecutor, SqlRow } from "../ports/sql-database";
-import { continuesLog } from "./append-rules";
+import { continuesLog, hasContiguousSequences } from "./append-rules";
 import { FIRST_BATCH } from "./migrations.data";
 import {
   CLOSED_STATUS,
@@ -98,6 +98,9 @@ async function loadSession(
     return failure;
   }
   const events = parsed.flatMap((result) => (result.ok ? [result.value] : []));
+  if (!hasContiguousSequences(events)) {
+    return err({ code: "corrupted-log" });
+  }
   return ok({ batch, events });
 }
 

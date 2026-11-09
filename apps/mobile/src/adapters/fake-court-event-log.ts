@@ -1,7 +1,7 @@
 import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok } from "@sacou/volley-rules";
 
-import { continuesLog } from "../features/court/persistence/append-rules";
+import { continuesLog, highestSequence } from "../features/court/persistence/append-rules";
 import { FIRST_BATCH } from "../features/court/persistence/migrations.data";
 import type { CourtEventLog, CourtLogResult } from "../features/court/ports/court-event-log";
 import type { IdGenerator } from "../features/court/ports/id-generator";
@@ -17,13 +17,6 @@ type FakeSessions = Readonly<Record<string, FakeSession>>;
 export interface FakeCourtEventLog extends CourtEventLog {
   /** The next `append` fails as a full disk would, writing nothing. */
   failNextAppend(): void;
-}
-
-function highestSequence(events: readonly EventEnvelope[], deviceId: string): number {
-  return events.reduce(
-    (highest, event) => (event.deviceId === deviceId ? Math.max(highest, event.sequence) : highest),
-    0,
-  );
 }
 
 export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {

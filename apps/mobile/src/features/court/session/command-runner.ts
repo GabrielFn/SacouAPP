@@ -3,6 +3,7 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtEventLog } from "../ports/court-event-log";
 import type { IdGenerator } from "../ports/id-generator";
+import { highestSequence } from "../persistence/append-rules";
 import { draftsFor, type CourtCommand } from "./command-drafts";
 import type { CommandError } from "./court-errors";
 import type { CourtReplayer } from "./court-replay";
@@ -14,15 +15,6 @@ export interface CommandRunnerDeps {
   readonly log: CourtEventLog;
   readonly replayer: CourtReplayer;
   readonly ids: IdGenerator;
-}
-
-/** The sequence that follows the last event of this device in the stream. */
-function nextSequence(events: readonly EventEnvelope[], deviceId: string): number {
-  const last = events.reduce(
-    (highest, event) => (event.deviceId === deviceId ? Math.max(highest, event.sequence) : highest),
-    0,
-  );
-  return last + 1;
 }
 
 /**
@@ -48,7 +40,7 @@ export async function runCourtCommand(
   const envelopes = buildEnvelopes(drafts.value, {
     ...context,
     courtSessionId,
-    firstSequence: nextSequence(events, context.deviceId),
+    firstSequence: highestSequence(events, context.deviceId) + 1,
     ids,
   });
   if (!envelopes.ok) {

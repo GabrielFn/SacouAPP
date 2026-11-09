@@ -21,3 +21,22 @@ export function continuesLog(
       envelope.sequence === lastSequence + index + 1,
   );
 }
+
+/** The highest sequence a device has in a stream, or 0 when it has none. */
+export function highestSequence(events: readonly EventEnvelope[], deviceId: string): number {
+  return events.reduce(
+    (highest, event) => (event.deviceId === deviceId ? Math.max(highest, event.sequence) : highest),
+    0,
+  );
+}
+
+/** True when each device's sequences are exactly 1..n, as only whole, ordered appends make them. */
+export function hasContiguousSequences(events: readonly EventEnvelope[]): boolean {
+  const byDevice = Object.groupBy(events, (event) => event.deviceId);
+  return Object.values(byDevice).every((own) =>
+    (own ?? [])
+      .map((event) => event.sequence)
+      .sort((a, b) => a - b)
+      .every((sequence, index) => sequence === index + 1),
+  );
+}

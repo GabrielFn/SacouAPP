@@ -14,19 +14,12 @@ import type { CourtSessionController } from "./court-session-controller";
 const STORAGES: readonly StorageKind[] = ["memory", "sqlite"];
 const FIRST_SET_WINNER_POINTS = { a: 25, b: 22 };
 
-/** Kills the app: the controller is dropped and a new one reads the file again. */
-async function reopen(harness: CourtHarness): Promise<CourtSessionController> {
-  const controller = harness.openController();
-  await controller.whenIdle();
-  return controller;
-}
-
 async function expectSurvivesKill(
   harness: CourtHarness,
   controller: CourtSessionController,
 ): Promise<CourtSessionController> {
   const before = stateOf(harness, controller);
-  const reopened = await reopen(harness);
+  const reopened = await harness.restart();
   expect(stateOf(harness, reopened)).toEqual(before);
   return reopened;
 }
@@ -41,7 +34,7 @@ describe.each(STORAGES)("a whole best-of-three match played offline (%s)", (kind
     const harness = await createHarness(kind);
     const started = await harness.start(SAMPLE_MATCH_BEST_OF_THREE);
     expect(started).toEqual({ ok: true, value: { route: `/court/${COURT_SESSION_ID}` } });
-    let controller = await reopen(harness);
+    let controller = await harness.restart();
 
     // Set 1. Undo 1 takes back a side-out (Azul scoring on the serve of Laranja), undo 2 a point.
     await rallies(controller, "a");
@@ -103,7 +96,7 @@ describe.each(STORAGES)("a whole best-of-three match played offline (%s)", (kind
   test("the snapshot is what a new repository loads, after any run of commands", async () => {
     const harness = await createHarness(kind);
     await harness.start(SAMPLE_MATCH_BEST_OF_THREE);
-    const controller = await reopen(harness);
+    const controller = await harness.restart();
 
     await rallies(controller, "abbaab");
     await controller.dispatch({ type: "undo" });
@@ -112,8 +105,10 @@ describe.each(STORAGES)("a whole best-of-three match played offline (%s)", (kind
 
     const snapshot = controller.getSnapshot();
     const loaded = await harness.log.load(COURT_SESSION_ID);
-    expect(snapshot.status === "ready" && loaded.ok && snapshot.events).toEqual(
-      loaded.ok && loaded.value.events,
-    );
+    expect(snapshot.status).toBe("ready");
+    expect(loaded.ok).toBe(true);
+    if (snapshot.status === "ready" && loaded.ok) {
+      expect(snapshot.events).toEqual(loaded.value.events);
+    }
   });
 });
