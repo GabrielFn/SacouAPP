@@ -35,6 +35,7 @@
 
 ## Em andamento
 
+- E3.1: plano em `docs/estado/tarefas/E3.1.md` na branch `task/E3.1-firebase-auth` (worktree `D:\projetos\SacouAPP-E3.1`). Desenvolvimento espera o merge da E0.10, para nascer dentro dos portões; o jscpd deve ignorar `**/Infrastructure/Migrations/**`. Falta o ID do projeto Firebase (pergunta 13).
 - E0.10: pedida pelo Gabriel em 07/11 (regras do front-end na CI, duplicação, complexidade e tamanho de arquivo). Plano em `docs/estado/tarefas/E0.10.md`; desenvolvedor (Opus, porque refatora o motor) na branch `task/E0.10-quality-gates`.
 
 ## Adiadas
@@ -67,6 +68,7 @@
 - E2.8, pendências: `attributions/commands.ts:65-71` repete `isPointKind` e a regra tipo × autor de `score/parse-payloads.ts:466-473` (exportar e reutilizar); `getUnattributedPoints` só lista o set exibido, então a E4.10 chama antes de confirmar o fim do set ou ganha filtro por set; o resolvedor não reaplica a plausibilidade, e um Ace forjado conta (E3.7); E3.7: um `PointAttributed` com autor de fora ou partida fechada derruba o replay do stream, então o servidor simula antes de gravar; sem limite de preenchimentos por ponto (E3.7 conta eventos por partida).
 - E2.9, pendências: `groupByMatch` (`stats/by-match.ts`) supõe que cada partida ocupa um trecho contíguo da linha do tempo, o que vale por haver uma partida aberta por vez; travar com teste se o modelo mudar. `entries.at(-1)?.state.finishedMatches` repetido em `player-stats.ts` e `side-stats.ts`. Mutação não rodada: ponto revertido contado.
 - E0.6, ressalvas não bloqueantes: nenhum passo da CI lê o endereço publicado pelo Postgres de teste, então a loopback só foi conferida no Windows; as guardas não pegam `.WithImage(...)`, `if: ${{ false }}` nem `|| exit 0`.
+- E3.16, da E3.1: apagar a linha do usuário não basta, porque um token ainda válido (até 1 h) recria o usuário em `POST /v1/me`; usar marca de exclusão, recusar `auth_time` anterior à exclusão ou `checkRevoked` nesse endpoint. A E3.1 valida o token como JWT, sem FirebaseAdmin (ADR 0036): citar no relatório do M3 (contraria o ADR 0014 e `produto.md:250`).
 - E4.1, pendências: confirmar a compilação nativa e o catálogo no primeiro dev build (roteiro do fim do M3); check na pílula "Vou"; `text-underline-offset` sem suporte no `Text` do RN (ADR 0034); `StatusPill.tsx:20` usa `palette.night` direto no texto da espera, trocar por papel de tema.
 
 ## Lembretes para o Gabriel
