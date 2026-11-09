@@ -6,6 +6,7 @@ import { dirname, resolve } from "node:path";
 
 import { ESLint } from "eslint";
 
+import { courtLintCases } from "./lib/court-regression.mjs";
 import {
   qualityLintCases,
   runComplexityProbe,
@@ -132,6 +133,7 @@ const CASES = [
   [`${MATCH_ENGINE}rules.ts`, 'import "@sacou/volley-rules";\n', CLEAN],
   [`${MOBILE}react.tsx`, 'export { useState } from "react";\n', CLEAN],
   ...qualityLintCases(PREFIX),
+  ...courtLintCases(PREFIX),
 ].map(([file, code, expected, messagePart]) => ({
   path: resolve(ROOT, file),
   code,

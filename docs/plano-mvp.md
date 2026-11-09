@@ -168,6 +168,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.14 | Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |
 | E4.15 | Paywall (informativo no piloto) | Tela 29 | E3.15 |
 | E4.16 | Links que abrem o app (universal links) | Link da rodada abre no app instalado | E3.12 |
+| E4.17 | Modo quadra: aviso de bateria abaixo de 20% sugerindo entregar o placar e modo paisagem (Time A à esquerda, B à direita, "Inverter lados") (`produto.md:139-140`) | Aviso aparece uma vez abaixo de 20%; paisagem igual ao layout aprovado pelo Gabriel (não há tela no design) | E4.9 |
 
 ### E5 · Operação (M4–M6)
 

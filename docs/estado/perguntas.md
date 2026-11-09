@@ -15,6 +15,9 @@
 13. ID do projeto Firebase (E3.1, 08/11/2026): não é segredo (vai dentro do app) e pode vir pelo chat. Fica em `appsettings.json`. Precisa estar lá antes do merge da E3.1.
 
 ## Respondidas
+- **Líbero nas telas 09 e 10, pergunta 14 (08/11/2026):** opção 1: o chip do líbero ocupa o lugar do central que ele cobre, com cores invertidas e selo "Lí"; o "L" segue sendo do levantador. Libera a Parte 4 da E4.9.
+- **Build de teste no celular, pergunta 15 (08/11/2026):** Android, APK de teste pelo EAS com conta grátis da Expo, criada pelo Gabriel no fim da Parte 3 da E4.9 (login por `! npx eas login`).
+- **Bateria e paisagem (08/11/2026):** os dois entram no M4, como a tarefa nova E4.17. O design não tem a paisagem: o analista da E4.17 propõe o layout para o Gabriel aprovar.
 - **Firebase, pergunta 8 (08/11/2026):** o Gabriel criou o projeto no Firebase. Pacote Android e Bundle ID iOS: `com.sacou.app` (definitivo depois da publicação nas lojas). O `google-services.json` e a chave da conta de serviço ficam fora do repositório (`D:\segredos\sacou\`) até a E3.1 definir o formato de `SACOU_FIREBASE_SERVICE_ACCOUNT` e a E4.3 ligar o Firebase no app (`app.json`, `.gitignore` e restrição da chave de API ao pacote). Nada cadastrado no GitHub ainda. A E3.1 está desbloqueada.
 - **Reducer pattern no app (07/11/2026):** vira a regra 4 de `docs/padroes/frontend.md`: `useReducer` com ações tipadas e reducer puro para estado com transições; modo quadra só com o reducer do motor; dados do servidor no TanStack Query.
 - **Regras do front-end (07/11/2026):** estado com registro único, layout só com unidades relativas e programação orientada a interfaces (`docs/padroes/frontend.md`). Ele concordou com a única exceção: pisos de acessibilidade em dp (toque ≥ 44 e linha fina), que a escala nunca reduz.
