@@ -6,6 +6,7 @@ import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import { COURT_FLEX_WEIGHTS } from "../court.data";
 import type { QueueModel } from "../model/court-screen.types";
+import { queueExitText, queueLabel } from "../model/screen-texts";
 import { FlameIcon } from "./CourtIcons";
 import { QueuePill } from "./QueuePill";
 
@@ -15,24 +16,12 @@ export interface QueueStripProps {
   readonly streak: string | null;
 }
 
-function exitText(queue: QueueModel | null): string | null {
-  if (queue === null) {
-    return null;
-  }
-  return queue.exit === "partial" ? strings.court.queue.partialExit : strings.court.queue.fullExit;
-}
-
-function queueLabel(queue: QueueModel): string {
-  const waiting = [...queue.teams.flatMap(({ players }) => players), ...queue.players];
-  return strings.court.queue.waiting(waiting.map(({ name }) => name).join(", "));
-}
-
 /** Who is waiting, the streak of the team that stays, and the rule of the exit. */
 export function QueueStrip({ queue, streak }: QueueStripProps) {
   const { colors, tokens } = useTheme();
   const textStyle: TextStyle = { color: colors.text, fontSize: tokens.fontSizes.small };
   const mutedStyle: TextStyle = { color: colors.textMuted, fontSize: tokens.fontSizes.caption };
-  const exit = exitText(queue);
+  const exit = queueExitText(queue);
   return (
     <View
       style={{

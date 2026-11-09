@@ -9,6 +9,12 @@ import {
   type CourtHarness,
 } from "../session/court-harness.test.fixture";
 import type { CourtSessionController } from "../session/court-session-controller";
+import {
+  AZUL_ZONE_ON_SCREEN_10,
+  SCREEN_09_SET_TWO_RALLIES,
+  SCREEN_10_ROUNDS,
+  SET_ONE_RALLIES,
+} from "./screen-scenarios.data";
 
 export const ROSTER = createSampleRoster();
 
@@ -54,9 +60,9 @@ export async function confirmSet(scenario: Scenario, firstServer?: TeamSide): Pr
 /** Screen 09: set 1 ends 25-22 for Laranja and set 2 reaches 18-15 (corrections.test.ts). */
 export async function screen09(): Promise<Scenario> {
   const scenario = await startScenario();
-  await score(scenario, `${"b".repeat(22)}${"a".repeat(25)}`);
+  await score(scenario, SET_ONE_RALLIES);
   await confirmSet(scenario);
-  await score(scenario, `${"a".repeat(12)}${"b".repeat(11)}aabbaabbaa`);
+  await score(scenario, SCREEN_09_SET_TWO_RALLIES);
   return scenario;
 }
 
@@ -70,13 +76,14 @@ export async function screen10(): Promise<Scenario> {
   const { rotations } = SAMPLE_MATCH_BEST_OF_THREE;
   const scenario = await startScenario({
     ...SAMPLE_MATCH_ONE_SET,
-    rotations: { a: rotations.a, b: rotations.b && { ...rotations.b, setterZone: 6 } },
+    rotations: {
+      a: rotations.a,
+      b: rotations.b && { ...rotations.b, setterZone: AZUL_ZONE_ON_SCREEN_10 },
+    },
   });
-  const serving = [3, 3, 3, 3, 3, 3];
-  const receiving = [2, 2, 3, 3, 3, 2];
-  await score(
-    scenario,
-    serving.map((own, round) => `b${"b".repeat(receiving[round] ?? 0)}a${"a".repeat(own)}`).join(""),
+  const rounds = SCREEN_10_ROUNDS.map(
+    ({ azul, laranja }) => `b${"b".repeat(azul)}a${"a".repeat(laranja)}`,
   );
+  await score(scenario, rounds.join(""));
   return scenario;
 }

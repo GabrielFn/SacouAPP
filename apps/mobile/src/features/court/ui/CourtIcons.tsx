@@ -48,7 +48,10 @@ export function LockIcon({ color }: CourtIconProps) {
   const stroke = color ?? colors.text;
   return (
     <Svg width={size} height={size} viewBox={VIEW_BOX} fill="none" stroke={stroke}>
-      <Path d="M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" strokeWidth={STROKE_ICON} />
+      <Path
+        d="M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z"
+        strokeWidth={STROKE_ICON}
+      />
       <Path d="M8 11V8a4 4 0 0 1 8 0v3" strokeWidth={STROKE_ICON} />
     </Svg>
   );

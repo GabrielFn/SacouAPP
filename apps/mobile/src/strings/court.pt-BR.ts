@@ -50,7 +50,8 @@ export const courtStrings = {
     title: "Na fila",
     reserves: "reservas",
     team: (position: number) => `Time ${String(position)}`,
-    waiting: (names: string) => `Na fila: ${names}`,
+    waiting: (names: string, reservesOnly: boolean) =>
+      `Na fila: ${names}${reservesOnly ? " (reservas)" : ""}`,
     streak: (team: string, count: number) => `${team} venceu ${String(count)} seguidas`,
     streakOne: (team: string) => `${team} venceu a última`,
     partialExit: "perde sai · saída parcial",

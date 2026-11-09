@@ -2,11 +2,11 @@ import type { TeamSide } from "@sacou/match-engine";
 import { useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { computeCourtLayout } from "../model/court-layout";
 import type { CourtScreenModel } from "../model/court-screen.types";
+import { hintText, setsLabel, streakText } from "../model/screen-texts";
 import { CenterStrip } from "./CenterStrip";
 import { CourtHeader } from "./CourtHeader";
 import { QueueStrip } from "./QueueStrip";
@@ -20,34 +20,8 @@ export interface CourtScreenProps {
   readonly onOpenMenu: () => void;
 }
 
-function hintText(model: CourtScreenModel): string {
-  const { hint, teams } = model;
-  switch (hint.kind) {
-    case "positions":
-      return strings.court.strip.positions;
-    case "closes-set":
-      return strings.court.strip.oneMorePoint(teams[hint.side].label);
-    case "next-point-closes":
-      return strings.court.strip.nextPointCloses;
-  }
-}
-
-function streakText(model: CourtScreenModel): string | null {
-  const { streak } = model;
-  return streak === null ? null : strings.court.queue.streak(streak.label, streak.count);
-}
-
-function setsWon(model: CourtScreenModel, side: TeamSide): number {
-  return model.dots.filter(({ winner }) => winner === side).length;
-}
-
 function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
   return model.dots.map(({ winner }) => (winner === null ? null : model.teams[winner].color));
-}
-
-function setsLabel(model: CourtScreenModel): string {
-  const { a, b } = model.teams;
-  return strings.court.header.setsLabel(a.label, setsWon(model, "a"), b.label, setsWon(model, "b"));
 }
 
 /** Screens 09 (sun) and 10 (night): the whole court, drawn from the model and nothing else. */
