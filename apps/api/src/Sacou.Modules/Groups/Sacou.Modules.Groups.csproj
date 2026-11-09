@@ -3,6 +3,18 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <!-- Only for `dotnet ef migrations add`: never flows to the API or its output. -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
+        <ProjectReference Include="../../Sacou.Http/Sacou.Http.csproj" />
+        <!-- Only Identity.Contracts is used: Sacou.Architecture.Tests checks it. -->
+        <ProjectReference Include="../Identity/Sacou.Modules.Identity.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sacou.Modules.Groups.Tests" />
     </ItemGroup>
 </Project>

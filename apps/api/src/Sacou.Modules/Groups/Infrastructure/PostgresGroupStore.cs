@@ -1,0 +1,96 @@
+using Microsoft.EntityFrameworkCore;
+using Sacou.Modules.Groups.Domain.Groups;
+using Sacou.Modules.Groups.Domain.Members;
+using Sacou.Shared.Results;
+
+namespace Sacou.Modules.Groups.Infrastructure;
+
+/// <summary>
+/// Reads with <c>AsNoTracking</c> and never lock (light CQRS). SQL is always parameterized: EF turns the
+/// interpolated values into parameters (ADR 0037, ADR 0040).
+/// </summary>
+internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
+{
+    /// <summary>First key of the two-key advisory lock: "memberships of one person", so it never collides with another lock family.</summary>
+    private const int MembershipLockFamily = 3_202;
+
+    public async Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(admission);
+        var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        await using (transaction.ConfigureAwait(false))
+        {
+            await database.Database.ExecuteSqlAsync(
+                $"SELECT pg_advisory_xact_lock({MembershipLockFamily}, hashtext({creator.Value.ToString()}))",
+                cancellationToken).ConfigureAwait(false);
+            var admitted = admission(await CountActiveGroupsAsync(creator, cancellationToken).ConfigureAwait(false));
+            if (admitted.IsFailure)
+            {
+                return admitted;
+            }
+
+            database.Groups.Add(RowMapping.ToRow(group));
+            database.Members.AddRange(group.Members.Select(member => RowMapping.ToRow(group.Id, member)));
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            return admitted;
+        }
+    }
+
+    public async Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken)
+    {
+        var rows = await ActiveMembers()
+            .Where(member => member.UserId == user.Value)
+            .Join(database.Groups.AsNoTracking(), member => member.GroupId, group => group.Id, (member, group) => new { member, group.Name })
+            .OrderBy(pair => pair.member.JoinedAt).ThenBy(pair => pair.member.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(pair => new MemberGroup(
+            new GroupId(pair.member.GroupId), RowMapping.ToName(pair.Name), RowMapping.ToMember(pair.member)))];
+    }
+
+    public async Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken)
+    {
+        var row = await ActiveMembers()
+            .SingleOrDefaultAsync(member => member.GroupId == group.Value && member.UserId == user.Value, cancellationToken)
+            .ConfigureAwait(false);
+        return row is null ? null : RowMapping.ToMember(row);
+    }
+
+    public async Task<GroupOverview?> FindOverviewAsync(GroupId group, CancellationToken cancellationToken)
+    {
+        var active = ColumnValues.ActiveStatus;
+        var overview = await database.Groups.AsNoTracking()
+            .Where(row => row.Id == group.Value)
+            .Select(row => new
+            {
+                row.Name,
+                Active = database.Members.Count(member => member.GroupId == row.Id && member.Status == active),
+            })
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        return overview is null ? null : new GroupOverview(group, RowMapping.ToName(overview.Name), overview.Active);
+    }
+
+    public async Task<IReadOnlyList<GroupMember>> ListActiveMembersAsync(GroupId group, CancellationToken cancellationToken)
+    {
+        var rows = await ActiveMembers()
+            .Where(member => member.GroupId == group.Value)
+            .OrderBy(member => member.JoinedAt).ThenBy(member => member.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(RowMapping.ToMember)];
+    }
+
+    public Task RenameAsync(GroupId group, GroupName name, CancellationToken cancellationToken) =>
+        database.Groups
+            .Where(row => row.Id == group.Value)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.Name, name.Value), cancellationToken);
+
+    private Task<int> CountActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>
+        ActiveMembers().CountAsync(member => member.UserId == user.Value, cancellationToken);
+
+    private IQueryable<MemberRow> ActiveMembers()
+    {
+        var active = ColumnValues.ActiveStatus;
+        return database.Members.AsNoTracking().Where(member => member.Status == active);
+    }
+}
