@@ -35,7 +35,7 @@ O alvo tem de estar ativo, vir antes na ordem canônica e não ser `RevertedTo`.
 - O `RevertedTo` não é listado em `activeEventIds`: a lista traz só os eventos cujo efeito está no estado.
 - Não há como voltar ao estado inicial, porque o alvo é sempre um evento. Por isso **todo stream abre com `MatchStarted`**, anterior a qualquer ponto, para o desfazer do primeiro ponto funcionar (E2.2). Qualquer outro evento sem partida aberta é `event-rejected`, e `RevertedTo` como primeiro evento é `invalid-revert-target`.
 - **Comandos que emitem o `RevertedTo`** (E2.7, [ADR 0030](../arquitetura/adr/0030-correcoes-da-linha-do-tempo.md)): `undoLastAction` aponta para o evento ativo anterior ao último, e `revertToEvent` para qualquer evento ativo da partida aberta que não seja o último. Código em `packages/match-engine/src/corrections/`.
-- **Dois `RevertedTo` offline** podem deixar o log em `invalid-revert-target`: o que vier depois na ordem canônica pode apontar para um alvo que o outro já deixou inativo. Com falha fechada, isso impede recalcular o stream. O tratamento fica na E3.7 e na E4.9.
+- **Dois `RevertedTo` offline** podem deixar o log em `invalid-revert-target`: o que vier depois na ordem canônica pode apontar para um alvo que o outro já deixou inativo. Com falha fechada, isso impede recalcular o stream. O tratamento fica na E3.7 e na E4.11 (com um escritor só, o log local da E4.9 nunca gera dois `RevertedTo` concorrentes: cada comando é simulado sobre o log mais recente).
 
 ## `replayEvents`
 
@@ -112,7 +112,7 @@ O C# lê o mesmo log com as mesmas regras e produz o mesmo estado nos 14 golden 
 ## O que fica para depois
 
 - **E3.7:** simular o replay **antes** de persistir e rejeitar ali, porque com falha fechada um evento inválido gravado impede recalcular o stream (o mesmo vale para o log local na E4.9). `courtSessionId` e permissão vêm do token, não do envelope. Tamanho do payload limitado no servidor. Quem numera o lote e a regra de um celular por vez.
-- **E4.9:** gerar o `deviceId` como UUID aleatório por instalação, nunca IMEI, Android ID, `identifierForVendor` ou token de push. Medir o custo do replay em celular real: não há cache.
+- **E4.9 (parte 1, feita, [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md)):** o `deviceId` é um UUID aleatório por instalação, gerado na primeira abertura e gravado no SQLite; o log local simula o replay antes de gravar; `batch` é 1 enquanto só este celular escreve, e quem o numera depois é a E3.7/E4.11. **Parte 3:** medir o custo do replay no Hermes (há um cache por array de eventos, para o toque não rodar dois replays).
 - **E4.11:** o que mostrar quando um evento atrasado reordena o passado. O estado no celular pode mudar ao sincronizar; é esperado pelo modelo.
 - **E2.7 (feito, ADR 0030):** "3 pontos serão apagados" (`Corrigir`) é texto para o usuário, montado pela E4.10 a partir de `previewRevert`; no log nada se apaga, e o `RevertedTo` só acrescenta.
 - **Dois escritores offline no mesmo lote:** a ordem é determinística, por `deviceId`, mas pode intercalar pontos. Não é erro no motor, para não travar o jogo. Se a retomada do admin offline gerar placar estranho, é pergunta ao Gabriel na E3.7.

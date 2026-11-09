@@ -1,9 +1,15 @@
+import { builtinModules } from "node:module";
+
 // Rules of docs/padroes/frontend.md that ESLint can check (ADR 0035), used by eslint.config.mjs.
 const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
 const MOBILE_SOURCE_FILES = [`apps/mobile/src/**/*.${TS_EXTENSIONS}`];
 const MOBILE_THEME_FILES = ["apps/mobile/src/theme/**"];
 const MOBILE_ADAPTER_FILES = ["apps/mobile/src/adapters/**"];
 const MOBILE_DATA_FILES = ["apps/mobile/src/**/*.data.{ts,mts,cts}"];
+const COURT_FILES = [`apps/mobile/src/features/court/**/*.${TS_EXTENSIONS}`];
+const COURT_DATA_FILES = ["apps/mobile/src/features/court/**/*.data.{ts,mts,cts}"];
+const COURT_REDUCER_FILES = ["apps/mobile/src/features/court/**/*.reducer.{ts,mts,cts}"];
+const FIXTURE_FILES = ["apps/mobile/src/**/*.test.fixture.ts"];
 const REDUCER_FILES = [`apps/mobile/src/**/*.reducer.${TS_EXTENSIONS}`];
 
 // Selector regexes avoid backslashes, which esquery drops.
@@ -83,6 +89,41 @@ const SDK_DYNAMIC_RESTRICTIONS = [
   },
 ];
 
+// The court mode works with the plane in airplane mode (E4.9): the slice has no way to reach a network.
+const NETWORK_MESSAGE = "The court slice is offline by design: no network access (E4.9).";
+const NETWORK_GLOBALS = ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map((name) => ({
+  name,
+  message: NETWORK_MESSAGE,
+}));
+const NETWORK_IMPORTS = { regex: "^@tanstack/", message: NETWORK_MESSAGE };
+const NETWORK_TARGETS = ["globalThis", "window", "self"];
+const NETWORK_PROPERTIES = NETWORK_TARGETS.flatMap((object) =>
+  ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map((property) => ({
+    object,
+    property,
+    message: NETWORK_MESSAGE,
+  })),
+);
+const NETWORK_DYNAMIC_RESTRICTIONS = [
+  {
+    selector: "ImportExpression[source.value=/^@tanstack[/]/]",
+    message: NETWORK_MESSAGE,
+  },
+];
+
+// The app runs on Hermes, not on Node.js: only tests (which run on Node) may use it.
+const NODE_MESSAGE = "The app does not run on Node.js: Node built-ins are for tests only.";
+const NODE_IMPORTS = {
+  regex: `^node:|^(${builtinModules.filter((name) => !name.startsWith("_")).join("|")})(/|$)`,
+  message: NODE_MESSAGE,
+};
+const NODE_GLOBALS = ["Buffer", "setImmediate", "__dirname", "__filename", "global"].map(
+  (name) => ({
+    name,
+    message: NODE_MESSAGE,
+  }),
+);
+
 function syntaxRule(restrictions) {
   return { "no-restricted-syntax": ["error", ...restrictions] };
 }
@@ -141,8 +182,64 @@ export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
     },
     {
       files: MOBILE_SOURCE_FILES,
-      ignores: [...MOBILE_ADAPTER_FILES, ...testFiles],
-      rules: { "@typescript-eslint/no-restricted-imports": ["error", { patterns: [SDK_IMPORTS] }] },
+      ignores: [...MOBILE_ADAPTER_FILES, ...testFiles, ...FIXTURE_FILES],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          { patterns: [SDK_IMPORTS, NODE_IMPORTS] },
+        ],
+      },
+    },
+    {
+      files: MOBILE_ADAPTER_FILES,
+      ignores: [...testFiles, ...FIXTURE_FILES],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": ["error", { patterns: [NODE_IMPORTS] }],
+      },
+    },
+    {
+      files: MOBILE_SOURCE_FILES,
+      ignores: [...testFiles, ...FIXTURE_FILES],
+      rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS] },
+    },
+    ...courtBlocks({ testFiles, dataRestrictions }),
+  ];
+}
+
+/** The court slice is also offline by design (E4.9); lists are complete because blocks replace. */
+function courtBlocks({ testFiles, dataRestrictions }) {
+  const outsideTheme = [...MOBILE_THEME_FILES, ...testFiles];
+  const restrictions = [...MOBILE_SYNTAX_RESTRICTIONS, ...NETWORK_DYNAMIC_RESTRICTIONS];
+  return [
+    ...syntaxBlocks({ files: COURT_FILES, ignores: outsideTheme, restrictions }),
+    ...syntaxBlocks({
+      files: COURT_DATA_FILES,
+      ignores: outsideTheme,
+      restrictions: [...dataRestrictions, ...restrictions],
+    }),
+    ...syntaxBlocks({
+      files: COURT_REDUCER_FILES,
+      ignores: testFiles,
+      restrictions: [...restrictions, NO_DEFAULT_IN_REDUCER],
+    }),
+    {
+      files: COURT_FILES,
+      rules: { "no-restricted-properties": ["error", ...NETWORK_PROPERTIES] },
+    },
+    {
+      files: COURT_FILES,
+      rules: { "no-restricted-globals": ["error", ...NETWORK_GLOBALS] },
+    },
+    {
+      files: COURT_FILES,
+      ignores: [...testFiles, ...FIXTURE_FILES],
+      rules: {
+        "no-restricted-globals": ["error", ...NETWORK_GLOBALS, ...NODE_GLOBALS],
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          { patterns: [SDK_IMPORTS, NODE_IMPORTS, NETWORK_IMPORTS] },
+        ],
+      },
     },
   ];
 }
