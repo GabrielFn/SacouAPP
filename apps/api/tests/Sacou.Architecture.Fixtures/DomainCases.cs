@@ -256,3 +256,9 @@ internal sealed class AllowedBclAndShared
         }
     }
 }
+
+// Sacou.Http is not Sacou.Shared: the domain must not map its own errors to HTTP (ADR 0039).
+internal sealed class HttpProjectInDomain
+{
+    internal object Map(Error error) => Sacou.Http.ProblemResults.From(error);
+}

@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sacou.Http;
 using Sacou.Modules.Surface;
 using Sacou.Shared.Results;
 
@@ -23,11 +24,13 @@ internal static class Assemblies
 
     internal static readonly Assembly Shared = typeof(Result).Assembly;
 
+    internal static readonly Assembly Http = typeof(ProblemResults).Assembly;
+
     internal static readonly Lazy<IReadOnlyList<Assembly>> RealModules = new(
         () => [.. ModuleFilesInOutput().Select(Assembly.LoadFrom)]);
 
     internal static readonly Lazy<IReadOnlyList<Assembly>> ModulesAndShared = new(
-        () => [.. RealModules.Value, Shared]);
+        () => [.. RealModules.Value, Shared, Http]);
 
     internal static readonly Lazy<ArchUnitNET.Domain.Architecture> FixturesArchitecture = new(
         () => ArchitectureDependencyRules.Load([Fixtures]));
