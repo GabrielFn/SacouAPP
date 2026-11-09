@@ -2,19 +2,30 @@
 
 STRIDE por componente: **S**poofing, **T**ampering, **R**epudiation, **I**nformation disclosure, **D**enial of service, **E**levation of privilege.
 
-Já têm código a CI (seção 11), o gerador puro do Pix (E1.4, seção 6) e o motor da partida (M2, seção 3): em TS, o parser do envelope, o replay, os parsers por tipo, os aplicadores, os comandos e as estatísticas (E2.1 a E2.9 e E2.11), e o porte para C# do leitor, dos parsers e do replay (E2.10, ADR 0033), ainda sem endpoint nem app que os use; os demais componentes não têm código. Fora da seção 11, "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
+Já têm código a CI (seção 11), o login (E3.1, seção 1), o gerador puro do Pix (E1.4, seção 6) e o motor da partida (M2, seção 3): em TS, o parser do envelope, o replay, os parsers por tipo, os aplicadores, os comandos e as estatísticas (E2.1 a E2.9 e E2.11), e o porte para C# do leitor, dos parsers e do replay (E2.10, ADR 0033), ainda sem endpoint nem app que os use; os demais componentes não têm código. Fora das seções 1 e 11, "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
 
 ## 1. Login (Firebase Auth, E3.1)
 
+Implementado na E3.1 ([ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)): `POST /v1/me` e o esquema de autenticação padrão da API.
+
 | | Ameaça | Mitigação |
 |---|---|---|
-| S | Token forjado ou de outro projeto | API valida com FirebaseAdmin (`produto.md:250`); token inválido é recusado (aceite da E3.1) |
-| S | Tentativas repetidas de senha | Limite de requisições (`decisoes.md:31`) só na API; proteção específica a definir na E3.1 |
-| T | Token alterado | Mesma validação |
+| S | Token forjado, de outro projeto ou com algoritmo trocado (`none`, HS256 com a chave pública, RS512, PS256, ES256) | ID token validado como JWT pelas chaves da URL documentada do Google, sem FirebaseAdmin: só RS256, `kid` obrigatório e só a chave dele, `aud` igual ao projeto e como string única, `iss` exato, `sub` de 1 a 128 ASCII visíveis. Matriz R1 a R24 com controle positivo, no host de teste |
+| S | Chave injetada pelo token (`jwk`, `jku`, `x5u`) | Cabeçalhos ignorados; a única fonte de chave é a URL fixa HTTPS, sem seguir redirecionamento (teste do handler primário e de URL buscada) |
+| S | Provedor ligado por engano no console (anônimo, telefone, personalizado) ou tenant | Lista permitida: `password`, `google.com`, `apple.com`; `firebase.tenant` presente é recusado |
+| S | Tentativas repetidas de senha | A senha nunca passa pela API: o Firebase bloqueia excesso de tentativas e tem proteção contra enumeração de e-mails. Limite de requisições do `POST /v1/me` na E5.3 |
+| S | Conta de e-mail e senha criada com o e-mail de outra pessoa (e-mail não verificado é aceito, D3) | A API nunca usa nem guarda e-mail, e não liga contas por e-mail; a E3.5 reivindica convidado só por link. Com "uma conta por e-mail", o dono entrando com Google torna esse provedor o confiável e remove a senha |
+| T | Token alterado (payload trocado depois de assinar) | Assinatura conferida antes de ler qualquer claim (R5) |
 | R | Negar uma ação feita com a conta | A definir na E5.2 (quais ações registrar nos logs estruturados) |
-| I | Token ou e-mail em logs | Logs sem e-mails nem tokens (`produto.md:375`) |
+| I | Token, UID ou e-mail em logs | Log só com a categoria da recusa (`IdTokenRejection`); mensagem de exceção da biblioteca nunca lida; `ShowPII` e `LogCompleteSecurityArtifact` desligados, com guarda de texto; principal só com o `sub`. Testes L1 a L3 gravam todos os logs e procuram token, segmentos, UID, e-mail e nome. O log de hospedagem do ASP.NET (Information) mostraria a query string: `appsettings.json` o corta em Warning, e a API nunca lê token da query |
+| I | Motivo da recusa usado como oráculo | 401 sempre igual (`ProblemDetails` e `WWW-Authenticate: Bearer`, sem `error`) |
+| I | Detalhe do erro do Postgres (valores da linha, como o UID) em exceção e log | **Regra para a E5.1:** a string de conexão de produção nunca tem `Include Error Detail=true` (padrão do Npgsql: desligado). A E5.1 confere isso ao mapear o `SACOU_DATABASE_URL`. O 500 já sai sem detalhe (P7) |
 | I | Token exposto no celular | A definir na E4.3 |
-| D | Excesso de chamadas de login | Limite de requisições (`decisoes.md:31`); valores a definir na E5.3 |
+| D | Busca de chaves forçada por `kid` aleatório | Com chaves em cache, no máximo uma busca a cada 5 min por `kid` desconhecido; uma busca por vez, reaproveitada por quem esperava (K6: 50 simultâneas, 1 busca) |
+| D | Google fora do ar, lento ou formato do documento mudou | Cache pelo `max-age` (5 min a 24 h); com falha, as chaves antigas valem até o `NotAfter`, e um `kid` conhecido com certificado vencido responde 503 enquanto o cache está velho (busca falha ou adiada; o app não desloga) e 401 com cache fresco (um token forjado com esse `kid` nunca ganha 503 sem conferir assinatura); sem cache, 503 com `Retry-After` (o app não desloga), e nova busca no máximo a cada 10 s (`MinTimeBetweenColdFetches`): 20 pedidos seguidos geram 1 busca. Documento com entrada inválida é recusado inteiro, inclusive certificado cujo campo de chave diz RSA sobre bytes inválidos (`GetRSAPublicKey` dentro do `try`), e os certificados lidos são descartados; qualquer falha do leitor vira `invalid-document` no fetcher; corpo até 64 KB. **Um prazo único de 5 s cobre envio e leitura do corpo** (corpo que nunca termina não prende a trava da busca), e corpo cortado no meio (`IOException`) é falha de rede, nunca 500. A tentativa conta mesmo se a busca lançar exceção |
+| D | Token enorme ou excesso de chamadas de login | Token acima de 8 KB recusado antes de ler; limite de requisições (`decisoes.md:31`), valores na E5.3 |
+| E | Token válido por até 1 h depois de exclusão ou bloqueio da conta | Risco aceito (sem `checkRevoked`). A E3.16 mitiga: marca de exclusão do UID, ou recusa de `auth_time` anterior à exclusão, ou `checkRevoked` só no `POST /v1/me` |
+| E | Endpoint novo aberto por esquecimento | `FallbackPolicy` exige usuário autenticado; `AllowAnonymous` só em `Program.cs`, com guarda de texto em `Sacou.Architecture.Tests` |
 | E | Conta de convidado reivindicada por outra pessoa | Reivindicação por link (`revisao-mvp.md:114`); proteção do link a definir na E3.5 |
 
 ## 2. API e autorização por recurso
@@ -26,7 +37,7 @@ Já têm código a CI (seção 11), o gerador puro do Pix (E1.4, seção 6) e o 
 | T | Reconfigurar grupo ou rodada sem poder | Autorização por recurso (`decisoes.md:27`) |
 | R | Admin nega uma alteração | A definir na E5.2 |
 | I | Nível privado lido pela API | Privado garantido na API, não só na tela (`produto.md:373`) |
-| I | Dados pessoais em respostas de erro | Erro de regra vira `ProblemDetails` (`produto.md:311`); conteúdo a definir com o primeiro endpoint |
+| I | Dados pessoais em respostas de erro | Erro de regra vira `ProblemDetails` (`produto.md:311`). Desde a E3.1, 401, 503 e 500 saem em `ProblemDetails` sem detalhe (P7: banco fora do ar não mostra conexão nem exceção); o mapeamento de erro de regra entra na E3.2 |
 | D | Abuso de requisições | Limite de requisições (`decisoes.md:31`); valores a definir na E5.3 |
 | E | Acessar recurso de outro grupo | Policies verificam o papel no grupo (`produto.md:312`) |
 | E | Papel Placar com mais poderes | Placar opera a quadra sem outros poderes (`produto.md:62`) |

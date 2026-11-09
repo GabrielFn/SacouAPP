@@ -3,10 +3,18 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Npgsql" />
         <!-- Testcontainers itself is pinned too: its version carries the Ryuk digest. -->
         <PackageReference Include="Testcontainers" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- The real API over the real database: sign-in end to end (E3.1). -->
+        <ProjectReference Include="../../src/Sacou.Api/Sacou.Api.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../TestSupport/*.cs" LinkBase="TestSupport" />
     </ItemGroup>
 </Project>
