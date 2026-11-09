@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { migrateDatabase } from "./migrations";
+import { isKnownSchemaVersion, migrateDatabase } from "./migrations";
 import { MIGRATION_STEPS } from "./migrations.data";
 import { openNodeSqliteDatabase } from "./node-sqlite-database.test.fixture";
 
@@ -14,6 +14,15 @@ function tableNames(sqlite: ReturnType<typeof openNodeSqliteDatabase>): readonly
     .all()
     .map((row) => row["name"]);
 }
+
+describe("isKnownSchemaVersion", () => {
+  test("knows an empty file and every step up to the latest, and nothing else", () => {
+    expect(isKnownSchemaVersion(0)).toBe(true);
+    expect(isKnownSchemaVersion(MIGRATION_STEPS.length)).toBe(true);
+    expect(isKnownSchemaVersion(MIGRATION_STEPS.length + 1)).toBe(false);
+    expect(isKnownSchemaVersion(-1)).toBe(false);
+  });
+});
 
 describe("migrateDatabase", () => {
   test("takes an empty database to the latest version", async () => {

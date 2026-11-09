@@ -9,6 +9,11 @@ export interface MigrationError {
   readonly code: MigrationErrorCode;
 }
 
+/** A schema version this app knows how to use: 0 (new file) up to the latest step. */
+export function isKnownSchemaVersion(version: number): boolean {
+  return version >= 0 && version <= MIGRATION_STEPS.length;
+}
+
 async function readVersion(executor: SqlExecutor): Promise<number> {
   const [row] = await executor.getAll(`PRAGMA ${USER_VERSION_PRAGMA}`);
   const version = row?.[USER_VERSION_PRAGMA];
@@ -36,7 +41,7 @@ export async function migrateDatabase(
   try {
     return await database.transaction(async (transaction) => {
       const version = await readVersion(transaction);
-      if (version > MIGRATION_STEPS.length) {
+      if (!isKnownSchemaVersion(version)) {
         return err({ code: "unsupported-database-version" as const });
       }
       await applySteps(transaction, version);

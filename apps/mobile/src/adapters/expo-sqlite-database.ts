@@ -1,9 +1,7 @@
 import { openDatabaseAsync } from "expo-sqlite";
 
-import {
-  MIGRATION_STEPS,
-  USER_VERSION_PRAGMA,
-} from "../features/court/persistence/migrations.data";
+import { isKnownSchemaVersion } from "../features/court/persistence/migrations";
+import { USER_VERSION_PRAGMA } from "../features/court/persistence/migrations.data";
 import type { SqlDatabase } from "../features/court/ports/sql-database";
 import { createSqliteConnectionDatabase } from "./sqlite-connection-database";
 
@@ -19,7 +17,7 @@ export async function openExpoSqliteDatabase(fileName: string): Promise<SqlDatab
     `PRAGMA ${USER_VERSION_PRAGMA}`,
   );
   const version = row?.[USER_VERSION_PRAGMA];
-  if (typeof version === "number" && version <= MIGRATION_STEPS.length) {
+  if (typeof version === "number" && isKnownSchemaVersion(version)) {
     await connection.execAsync(WAL_PRAGMA);
   }
   return createSqliteConnectionDatabase(connection);

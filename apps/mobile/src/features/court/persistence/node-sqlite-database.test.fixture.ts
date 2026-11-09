@@ -1,6 +1,10 @@
 import { DatabaseSync, type SQLOutputValue } from "node:sqlite";
 
-import type { SqlDatabase, SqlExecutor, SqlRow, SqlValue } from "../ports/sql-database";
+import {
+  createSqliteConnectionDatabase,
+  type SqliteConnection,
+} from "../../../adapters/sqlite-connection-database";
+import type { SqlDatabase, SqlRow, SqlValue } from "../ports/sql-database";
 
 /** Test-only: a real SQLite (the one built into Node) behind the port, with a fault injector. */
 export interface NodeSqliteDatabase {
@@ -42,17 +46,18 @@ export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
     }
   }
 
-  const executor: SqlExecutor = {
-    exec: (sql) => {
+  // The production wrapper over a connection, so the suite goes through its queue and its
+  // BEGIN IMMEDIATE / COMMIT / ROLLBACK, with the fault injector under it.
+  const connection: SqliteConnection = {
+    execAsync: (sql) => {
       raw.exec(sql);
       return Promise.resolve();
     },
-    run: (sql, params = []) => {
+    runAsync: (sql, params) => {
       failIfDue();
-      raw.prepare(sql).run(...params);
-      return Promise.resolve();
+      return Promise.resolve(raw.prepare(sql).run(...params));
     },
-    getAll: (sql, params = []) =>
+    getAllAsync: (sql, params) =>
       Promise.resolve(
         raw
           .prepare(sql)
@@ -60,21 +65,7 @@ export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
           .map(toRow),
       ),
   };
-
-  const database: SqlDatabase = {
-    ...executor,
-    async transaction(work) {
-      raw.exec("BEGIN IMMEDIATE");
-      try {
-        const result = await work(executor);
-        raw.exec("COMMIT");
-        return result;
-      } catch (error) {
-        raw.exec("ROLLBACK");
-        throw error;
-      }
-    },
-  };
+  const database = createSqliteConnectionDatabase(connection);
 
   return {
     database,

@@ -34,6 +34,10 @@ O modo quadra funciona em modo avião (`decisoes.md:26`; `frontend.md`, regra 1)
 
 Funciona no Vitest do repositório (Node 22.20, aviso de módulo experimental no console). Não foi preciso `sql.js`. O `STRICT` exige SQLite 3.37 ou mais; conferir a versão embutida no `expo-sqlite` está registrado abaixo.
 
+## Limitação conhecida
+
+Se o `ROLLBACK` falha com a transação aberta (disco cheio ou conexão quebrada), a conexão fica com a transação aberta e as gravações seguintes falham (`storage-failed`) até o app ser reaberto. O log não se corrompe: o que não deu `COMMIT` não existe. Um `retry()` do controlador e a reabertura da conexão ficam para a parte 2.
+
 ## Backup e `deviceId`
 
 O backup automático do Android copiaria o `deviceId` para outro celular. A mitigação (`android.allowBackup: false`) entra com o `app.json` na parte 3; o caso do iPhone fica para a E4.11 e a E3.7 (o servidor pode detectar o mesmo `deviceId` em dois aparelhos pelo `sequence-conflict`).

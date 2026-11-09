@@ -30,13 +30,20 @@ export function highestSequence(events: readonly EventEnvelope[], deviceId: stri
   );
 }
 
-/** True when each device's sequences are exactly 1..n, as only whole, ordered appends make them. */
+/**
+ * True when each device's sequences are exactly 1..n in the order given, which is the order of the
+ * positions in the file: only whole, ordered appends make that.
+ */
 export function hasContiguousSequences(events: readonly EventEnvelope[]): boolean {
-  const byDevice = Object.groupBy(events, (event) => event.deviceId);
-  return Object.values(byDevice).every((own) =>
-    (own ?? [])
-      .map((event) => event.sequence)
-      .sort((a, b) => a - b)
-      .every((sequence, index) => sequence === index + 1),
+  const outcome = events.reduce<{ valid: boolean; seen: Readonly<Record<string, number>> }>(
+    ({ valid, seen }, event) => {
+      const expected = (seen[event.deviceId] ?? 0) + 1;
+      return {
+        valid: valid && event.sequence === expected,
+        seen: { ...seen, [event.deviceId]: expected },
+      };
+    },
+    { valid: true, seen: {} },
   );
+  return outcome.valid;
 }

@@ -18,7 +18,7 @@ O estado da partida é **sempre** o replay do log de eventos persistido no SQLit
 - **Um comando por vez**, na ordem enviada. O estado usado é o do momento da execução, nunca o de quando o toque foi feito.
 - **Simular antes de gravar:** o log com os eventos novos precisa fazer replay; senão o resultado é `rejected` e nada é gravado.
 - **Atômico:** os eventos de um comando vão numa transação. O fim do set decisivo grava `SetEnded` e `MatchEnded` juntos (`placar.md`).
-- **Snapshot só depois do commit.** Se a gravação falha, o resultado é `write-failed`, o snapshot não muda e o próximo comando funciona.
+- **Snapshot só depois do commit.** Se a gravação falha, o resultado é `write-failed`, e o controlador **recarrega o log do arquivo dentro da fila**, porque a falha pode ter vindo depois do COMMIT. Dois desfechos: o snapshot ganha o evento que já estava gravado (ou continua igual, se nada foi gravado) e o próximo comando funciona; ou, se a recarga também falha, o snapshot vira `failed` (hoje permanente até reabrir o app; o `retry()` é da parte 2).
 - **Fim de set é sempre confirmado:** `confirm-set-end` é um comando do usuário; desfazer logo depois reabre o set (`undo` aponta para o evento anterior ao `SetEnded`).
 
 ## Começar uma partida
@@ -31,7 +31,8 @@ O estado da partida é **sempre** o replay do log de eventos persistido no SQLit
 |---|---|
 | Sessão que não existe | `failed` · `session-not-found` |
 | Linha que o parser recusa (payload que não é JSON, `type` vazio, UUID inválido) | `failed` · `corrupted-log` |
-| Linhas válidas, mas o log não faz replay | `failed` · `replay-failed` |
+| `sequence` de um aparelho fora de 1..n, na ordem das posições | `failed` · `corrupted-log` |
+| Linhas válidas, mas o log não faz replay (inclusive payload com campo a mais) | `failed` · `replay-failed` |
 | Erro do banco | `failed` · `storage-failed` |
 
 Nada é apagado e nenhum valor do log aparece no erro. A tela de erro ("Não conseguimos abrir esta partida") é da parte 2.

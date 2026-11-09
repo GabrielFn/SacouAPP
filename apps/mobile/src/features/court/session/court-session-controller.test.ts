@@ -67,9 +67,13 @@ describe("loading", () => {
 
   test("a payload with an extra field fails closed and never echoes it", async () => {
     const { harness } = await startedHarness("sqlite");
-    harness.sqlite?.raw.exec(
-      `UPDATE court_events SET payload = '{"name":"Pedro-Silva-secret"}' WHERE position = 1`,
-    );
+    const row = harness.sqlite?.raw
+      .prepare("SELECT payload FROM court_events WHERE position = 1")
+      .get();
+    const valid = JSON.parse(String(row?.["payload"])) as Record<string, unknown>;
+    harness.sqlite?.raw
+      .prepare("UPDATE court_events SET payload = ? WHERE position = 1")
+      .run(JSON.stringify({ ...valid, name: "Pedro-Silva-secret" }));
 
     const controller = harness.openController();
     await controller.whenIdle();

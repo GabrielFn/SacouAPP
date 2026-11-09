@@ -75,6 +75,18 @@ describe("load", () => {
     expect(await log.load(SESSION_A)).toEqual({ ok: false, error: { code: "corrupted-log" } });
   });
 
+  test("sequences out of the order of the positions are a corrupted log", async () => {
+    const sqlite = await openMigratedDatabase();
+    const log = repositoryOn(sqlite);
+    await log.openSession(SESSION_A);
+    await log.append(SESSION_A, [makeEnvelope({ sequence: 1 }), makeEnvelope({ sequence: 2 })]);
+    sqlite.raw.exec(
+      "UPDATE court_events SET position = 99 WHERE position = 1; UPDATE court_events SET position = 1 WHERE position = 2; UPDATE court_events SET position = 2 WHERE position = 99",
+    );
+
+    expect(await log.load(SESSION_A)).toEqual({ ok: false, error: { code: "corrupted-log" } });
+  });
+
   test("an unknown session cannot be loaded", async () => {
     const sqlite = await openMigratedDatabase();
 
