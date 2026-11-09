@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
+        <!-- The route guard reads every endpoint of the real API, not only the ones this module maps. -->
+        <ProjectReference Include="../../src/Sacou.Api/Sacou.Api.csproj" />
+    </ItemGroup>
+</Project>

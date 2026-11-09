@@ -12,6 +12,7 @@
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
 
 ## Respondidas
+- **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
 - **Senha mínima, pergunta 12 (08/11/2026):** 6 caracteres, o padrão do Firebase. Nada a ajustar no console. A E4.3 mostra a regra dos 6 na tela de cadastro.
 - **E-mail verificado, pergunta 11 (08/11/2026):** não exigir no login por e-mail e senha. Confirma a decisão da E3.1 (ADR 0036, D3): a API aceita token com `email_verified` falso.
 - **Firebase, pergunta 13 (08/11/2026):** ID do projeto Firebase: `sacou-79493` (08/11/2026). Fica em `Firebase:ProjectId`, no `apps/api/src/Sacou.Api/appsettings.json` (E3.1). Pacote Android: `com.sacou.app`.

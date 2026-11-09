@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Identity.Authentication;
+using Sacou.Modules.Identity.Contracts;
+using Sacou.Modules.Identity.CurrentUsers;
 using Sacou.Modules.Identity.Infrastructure;
 using Sacou.Modules.Identity.SignIn;
 
@@ -24,6 +26,8 @@ public static class IdentityModule
         services.AddFirebaseAuthentication(configuration);
         services.AddIdentityDatabase(configuration);
         services.AddScoped<SignInHandler>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, HttpCurrentUser>();
         return services;
     }
 

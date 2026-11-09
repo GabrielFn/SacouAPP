@@ -10,6 +10,8 @@ public sealed class RealAssemblyTests
 
     private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results"];
 
+    private static readonly string[] HttpPublicNamespaces = ["Sacou.Http"];
+
     [Fact]
     public void ModuleAssembliesInOutput_MatchTheCatalog()
     {
@@ -41,6 +43,7 @@ public sealed class RealAssemblyTests
     [Theory]
     [InlineData("Sacou.Modules.Matches.Domain.")]
     [InlineData("Sacou.Modules.Identity.Domain.")]
+    [InlineData("Sacou.Modules.Groups.Domain.")]
     [InlineData("Sacou.Modules.Stats.Domain.")]
     [InlineData(CourtSessionsNamespace + ".")]
     [InlineData(CourtSessionJsonNamespace + ".")]
@@ -125,5 +128,25 @@ public sealed class RealAssemblyTests
     public void SharedProject_HasNoDependencies()
     {
         ViolationAssert.None(RepositoryFiles.ProjectDependencyViolations(RepositoryFiles.SharedProject));
+    }
+
+    /// <summary>Sacou.Http stays below the modules: it never knows one, nor the API (ADR 0039).</summary>
+    [Fact]
+    public void Http_ReferencesNoModuleNorTheApi()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.HttpReferenceViolations(Assemblies.Http));
+    }
+
+    [Fact]
+    public void Http_ExposesOnlyItsOwnNamespace()
+    {
+        ViolationAssert.None(ArchitectureReflectionRules.SharedNamespaceViolations(Assemblies.Http, HttpPublicNamespaces));
+    }
+
+    /// <summary>The control for the rule above: the real Http project is found and really exposes types.</summary>
+    [Fact]
+    public void Http_IsInspected()
+    {
+        Assert.NotEmpty(Assemblies.Http.GetExportedTypes());
     }
 }

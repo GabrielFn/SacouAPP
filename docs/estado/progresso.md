@@ -37,6 +37,7 @@
 
 ## Em andamento
 
+- E3.2: plano em 3 partes em `docs/estado/tarefas/E3.2.md` (branch `task/E3.2-groups-members`, worktree `D:\projetos\SacouAPP-E3.1`), ADRs 0039 e 0040, perguntas 16–19 respondidas (opção 1). Parte 1 (grupos, membros, filtro de acesso, `Sacou.Http`) feita: PR #46, desenvolvedor Opus; revisor reprovou o ciclo 1 (500 ao reler nome gravado, enum sem caixa documentada), segurança aprovou com baixos, testador passou e escreveu o teste da trava concorrente; correções por desenvolvedor novo e verificador único aprovou. Próximo: Parte 2 (mudar papel, remover, sair, último admin), com um só agente Opus fazendo revisão e segurança. E3.17 (perfil do jogador) criada pelo orquestrador. E3.16: decidir o grupo do último admin que apaga a conta.
 - E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44 (Sonnet; revisor reprovou o ciclo 1 e aprovou o ciclo 2; testador passou). Parte 2 (telas 09 e 10) feita: PR #45 (Sonnet; revisor reprovou os ciclos 1 e 2 (preso na quadra, rótulo falso do cadeado; depois tela em branco no fim da partida) e aprovou o ciclo 3; testador passou e fechou 5 sabotagens). Próximo: Parte 3 (tela ligada, vibração, trava, medição no Hermes, APK pelo EAS). Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 
 ## Adiadas

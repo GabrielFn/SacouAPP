@@ -20,7 +20,7 @@ A arquitetura aprovada é um monólito modular em .NET 10 com DDD enxuto e fatia
 
 **Por que a `IDE0130` não é a garantia.** Um teste relatou build com 0 erros com `Sessions/Domain/` em namespace `Sessions.Core`; não reproduzimos. Num clone limpo em `D:\tmp`, com `dotnet build` sem parâmetros, ela reprovou em build de solução, de projeto e via projeto de teste, em Debug e Release, incremental ou não, e também no `dotnet test` e no `dotnet format`. Ela só deixou de disparar com `-p:RunAnalyzers=false` ou `-p:EnforceCodeStyleInBuild=false`, e um build sem parâmetros logo depois voltou a reprovar. Não sabemos com quais comandos o caso foi obtido. Como o resultado depende de propriedades de build, a regra não pode ser a única barreira.
 
-**`Result` sem HTTP e sem texto de interface.** `Error.Code` é constante estável; o texto pt-BR fica centralizado fora, e o mapeamento para `ProblemDetails` vem com o primeiro endpoint. Exceção só para erro de programação: ler `Value` em falha, `Error` em sucesso, código vazio.
+**`Result` sem HTTP e sem texto de interface.** `Error.Code` é constante estável; o texto pt-BR fica centralizado fora, e o mapeamento para `ProblemDetails` vem com o primeiro endpoint. Feito no projeto `Sacou.Http` ([ADR 0039](0039-sacou-http-e-contratos-entre-modulos.md)). Exceção só para erro de programação: ler `Value` em falha, `Error` em sucesso, código vazio.
 
 **CA1716 desligada só em `Sacou.Shared` e nos seus testes.** "Shared" e "Error" são palavras-chave apenas em VB, e a API é só C#. Vale o nome do glossário.
 
@@ -50,6 +50,6 @@ A arquitetura aprovada é um monólito modular em .NET 10 com DDD enxuto e fatia
 
 ## Em aberto, para tarefas futuras
 
-- E3.2: onde fica `MemberId`, usado em vários domínios (`Shared` por ADR ou `Groups.Contracts`, o que mudaria a regra do `Domain`).
+- E3.2: onde fica `MemberId`, usado em vários domínios (`Shared` por ADR ou `Groups.Contracts`, o que mudaria a regra do `Domain`). **Resolvido** no [ADR 0040](0040-grupos-membros-papeis-e-autorizacao.md) (D2): tipo do domínio do Groups, `Guid` entre módulos.
 - E3.11: como separar a Outbox, que precisa de infraestrutura, já que o domínio depende de `Shared`.
 - E1.5, **resolvido:** leitura dos JSON em `Matches`, sem projeto próprio ([ADR 0025](0025-json-compartilhado-no-csharp.md)).

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
 using Sacou.Tests.TestSupport;
 using Xunit;
@@ -28,8 +30,17 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     internal StubHttpHandler Keys { get; }
 
-    /// <summary>Applies the Identity migrations through the same entry point Program uses.</summary>
-    public Task MigrateAsync() => IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+    internal string ConnectionString => database.ConnectionString;
+
+    /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
+    internal CollectingLoggerProvider Logs { get; } = new();
+
+    /// <summary>Applies the Identity and then the Groups migrations, through the entry points Program uses, in its order.</summary>
+    public async Task MigrateAsync()
+    {
+        await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+        await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -38,6 +49,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("Firebase:ProjectId", TestIdToken.ProjectId);
         builder.UseSetting("ConnectionStrings:Sacou", database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(services => services
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => Keys)

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <!-- HTTP support shared by the modules (ADR 0039). Never a module, never the API: guarded by Sacou.Architecture.Tests. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Sacou.Shared/Sacou.Shared.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sacou.Http.Tests" />
+    </ItemGroup>
+</Project>

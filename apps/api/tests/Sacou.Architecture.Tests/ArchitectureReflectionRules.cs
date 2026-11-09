@@ -22,6 +22,8 @@ internal static partial class ArchitectureReflectionRules
     ];
 
     private const string UserIdSuffix = "UserId";
+    private const string ModuleAssemblyPrefix = "Sacou.Modules.";
+    private const string ApiAssemblyName = "Sacou.Api";
     private const string ConstructorName = "ctor";
     private const char MemberSeparator = ':';
 
@@ -119,6 +121,13 @@ internal static partial class ArchitectureReflectionRules
     /// <summary>Referenced assemblies outside the closed list. This also covers modules and ASP.NET.</summary>
     internal static IReadOnlyList<string> SharedReferenceViolations(Assembly assembly) =>
         SharedReferenceViolations(assembly.GetReferencedAssemblies().Select(reference => reference.Name ?? string.Empty));
+
+    /// <summary>Sacou.Http may know Shared and ASP.NET, never a module nor the API (ADR 0039).</summary>
+    internal static IReadOnlyList<string> HttpReferenceViolations(Assembly assembly) =>
+        HttpReferenceViolations(assembly.GetReferencedAssemblies().Select(reference => reference.Name ?? string.Empty));
+
+    internal static IReadOnlyList<string> HttpReferenceViolations(IEnumerable<string> references) =>
+        [.. references.Where(name => name.StartsWith(ModuleAssemblyPrefix, StringComparison.Ordinal) || name == ApiAssemblyName)];
 
     internal static IReadOnlyList<string> SharedReferenceViolations(IEnumerable<string> references) =>
         [.. references.Where(name => !AllowedSharedReferences.Contains(name))];

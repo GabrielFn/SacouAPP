@@ -31,5 +31,5 @@ O inventário está em [`dados-pessoais.md`](../../seguranca/dados-pessoais.md).
 - Retenção e base legal de cada dado, inclusive em backups: [`perguntas.md`](../../estado/perguntas.md), item 2.
 - Encarregado de dados e contato: `perguntas.md`, item 3.
 - Provedor de IA, que pode receber dados: `perguntas.md`, item 4.
-- Local do tipo `MemberId` (E3.2, já aberto no ADR 0005).
+- ~~Local do tipo `MemberId`~~: **resolvido** no [ADR 0040](0040-grupos-membros-papeis-e-autorizacao.md) (D2), tipo do domínio do Groups, `Guid` entre módulos.
 - Formato da exportação (E3.16) e efeito da exclusão em backups e serviços de terceiros (E6.2).
