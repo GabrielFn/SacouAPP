@@ -2,6 +2,8 @@
 
 **Status:** aceito (decidido em 30/10/2026, registrado em 31/10/2026). **Tarefa:** E0.8.
 
+> **Atualizado pelo [ADR 0036](0036-verificacao-do-token-e-usuario.md) (E3.1, 08/11/2026):** a validação não usa o FirebaseAdmin, e sim o JWT pelas chaves públicas do Google, sem conta de serviço. O FirebaseAdmin segue para administrar contas (E3.16). Os pontos a definir sobre dados guardados e tentativas de senha estão resolvidos lá.
+
 **Fontes:** `decisoes.md:19`; `produto.md:115, 250, 275, 400`.
 
 ## Decisão

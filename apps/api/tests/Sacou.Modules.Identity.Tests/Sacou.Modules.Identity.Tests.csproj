@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Sacou.Modules/Identity/Sacou.Modules.Identity.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../TestSupport/*.cs" LinkBase="TestSupport" />
+    </ItemGroup>
+</Project>

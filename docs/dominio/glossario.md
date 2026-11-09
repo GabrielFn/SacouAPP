@@ -8,6 +8,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 |---|---|---|
 | Grupo | `Group` | |
 | Membro do grupo | `GroupMember` (`MemberId`) | Tudo aponta para `MemberId`, nunca `UserId` |
+| Conta (pessoa que entrou no app) | `User` (`UserId`) | Módulo Identity (E3.1). `UserId` é interno (UUID v7) e nunca vai a evento ([ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)) |
+| Identidade do login | `AuthSubject` | UID do Firebase (`sub` do ID token), 1 a 128 caracteres ASCII visíveis, sensível a maiúsculas |
 | Mensalista / avulso | `Regular` / `DropIn` | |
 | Convidado | A definir (E3.5) | Sempre avulso, nunca mensalista |
 | Ex-jogador | A definir (E3.16) | Como quem excluiu a conta aparece no histórico |

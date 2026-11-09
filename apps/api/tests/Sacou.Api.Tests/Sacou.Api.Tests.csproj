@@ -9,4 +9,7 @@
     <ItemGroup>
         <ProjectReference Include="../../src/Sacou.Api/Sacou.Api.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../TestSupport/*.cs" LinkBase="TestSupport" />
+    </ItemGroup>
 </Project>

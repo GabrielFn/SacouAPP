@@ -10,11 +10,11 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 9. Tema Sol/Noite (E4.1, 07/11/2026): só no modo quadra, como no canvas, ou modo escuro no app todo? **Recomendação e padrão adotado até a resposta: só na quadra.** Fácil de mudar: os temas usam os mesmos papéis.
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
-11. E-mail verificado no login por e-mail e senha (E3.1, 08/11/2026): exigir a confirmação do e-mail antes de entrar? A API não usa nem guarda o e-mail; a identidade é o UID do Firebase. Opções: (1) não exigir; (2) exigir. **Recomendação: opção 1.** Não bloqueia a E3.1; muda a tela de login da E4.3.
-12. Senha mínima (E3.1, 08/11/2026): o Firebase aceita 6 caracteres por padrão. Opções: (1) 8 caracteres pela política de senha do console; (2) manter 6. **Recomendação: opção 1.** Não bloqueia a E3.1; é um ajuste no console, feito por você.
-13. ID do projeto Firebase (E3.1, 08/11/2026): não é segredo (vai dentro do app) e pode vir pelo chat. Fica em `appsettings.json`. Precisa estar lá antes do merge da E3.1.
 
 ## Respondidas
+- **Senha mínima, pergunta 12 (08/11/2026):** 6 caracteres, o padrão do Firebase. Nada a ajustar no console. A E4.3 mostra a regra dos 6 na tela de cadastro.
+- **E-mail verificado, pergunta 11 (08/11/2026):** não exigir no login por e-mail e senha. Confirma a decisão da E3.1 (ADR 0036, D3): a API aceita token com `email_verified` falso.
+- **Firebase, pergunta 13 (08/11/2026):** ID do projeto Firebase: `sacou-79493` (08/11/2026). Fica em `Firebase:ProjectId`, no `apps/api/src/Sacou.Api/appsettings.json` (E3.1). Pacote Android: `com.sacou.app`.
 - **Líbero nas telas 09 e 10, pergunta 14 (08/11/2026):** opção 1: o chip do líbero ocupa o lugar do central que ele cobre, com cores invertidas e selo "Lí"; o "L" segue sendo do levantador. Libera a Parte 4 da E4.9.
 - **Build de teste no celular, pergunta 15 (08/11/2026):** Android, APK de teste pelo EAS com conta grátis da Expo, criada pelo Gabriel no fim da Parte 3 da E4.9 (login por `! npx eas login`).
 - **Bateria e paisagem (08/11/2026):** os dois entram no M4, como a tarefa nova E4.17. O design não tem a paisagem: o analista da E4.17 propõe o layout para o Gabriel aprovar.

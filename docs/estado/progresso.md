@@ -33,10 +33,10 @@
 | Revisão geral de segurança do M2 | Feita | Aprovada com condições ([parecer](../seguranca/revisoes/M2-2026-11-03.md)): a E3.7 e a E3.8 só entram com os itens da seção 3.1 de `modelo-de-ameacas.md` atendidos ou com risco aceito pelo Gabriel; pendências antigas sem dono passaram à E5.3. |
 | E4.1 | Feita | PR #41, ADR 0034: Unistyles descartado na prova, `StyleSheet` com `ThemeProvider` próprio. Regras de `docs/padroes/frontend.md` (Gabriel, 07/11) aplicadas. Revisor reprovou o ciclo 1 por tipografia fora do canvas e aprovou o ciclo 2; testador passou, com 84 testes no app e a lacuna dos pisos de acessibilidade fechada. Orquestrador corrigiu as linhas citadas no golden das cores. |
 | E0.10 | Feita | PR #42, ADR 0035. Portões de complexidade (10), tamanho (300/600), duplicação (jscpd 50 tokens) e regras do front no ESLint, em TS e C#; `quality-exceptions.json` vazio, com prazo máximo de 60 dias. Motor dividido sem mudar comportamento (golden intactos, 211 exportações idênticas). Revisor (Opus) aprovou com 7 achados baixos, corrigidos em `ee27961`; testador (Sonnet) passou, com 13 sabotagens reprovadas. |
+| E3.1 | Feita | PR #43, ADRs 0036 (verificação do ID token como JWT, sem FirebaseAdmin) e 0037 (EF Core por módulo). `POST /v1/me` cria o usuário (só `id`, `firebase_uid`, `created_at`); projeto `sacou-79493`. Revisor (Opus) aprovou; revisor de segurança (Opus) aprovou com condições no ciclo 1, reprovou o ciclo 2 (certificado RSA inválido dava 500) e aprovou o ciclo 3; testador (Sonnet) reprovou o ciclo 1 por teste instável e passou no ciclo 2, com 13 sabotagens. Citar no relatório do M3: validação sem FirebaseAdmin, contra o ADR 0014 e `produto.md:250`. |
 
 ## Em andamento
 
-- E3.1: PR #43 (branch `task/E3.1-firebase-auth`, worktree `D:\projetos\SacouAPP-E3.1`), desenvolvedor Opus. Revisor e revisor de segurança aprovaram com condições; testador reprovou por teste instável. Ciclo 1 de correção (S1–S3, teste instável, teste de token no log). ID do projeto: `sacou-79493`.
 - E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44, desenvolvedor Sonnet, revisor Opus reprovou o ciclo 1 (tipos do Node no app, PRAGMAs fora da conexão que grava) e aprovou o ciclo 2; testador Sonnet passou. Próximo: Parte 2 (telas 09 e 10), na mesma branch depois do merge. Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 
 ## Adiadas
@@ -72,6 +72,7 @@
 - E3.16, da E3.1: apagar a linha do usuário não basta, porque um token ainda válido (até 1 h) recria o usuário em `POST /v1/me`; usar marca de exclusão, recusar `auth_time` anterior à exclusão ou `checkRevoked` nesse endpoint. A E3.1 valida o token como JWT, sem FirebaseAdmin (ADR 0036): citar no relatório do M3 (contraria o ADR 0014 e `produto.md:250`).
 - E0.10, pendências: `src/theme/` não barra `import()`/`require()` de SDK (o import estático reprova); hex dentro de string maior, `hsl(...)`, estilo em variável sem tipo `*Style` e algumas formas de props ficam com o revisor (`codigo.md`); pacote novo em `packages/` precisa entrar em `.jscpd.json` à mão.
 - E4.9 Parte 1, pendências: `turbo.json` não lista `scripts/lib/**` em `globalDependencies`, então mudar regra do ESLint em `scripts/lib/` não invalida o cache local do `lint` (tarefa de CI); PRAGMAs do adaptador Expo só verificáveis no aparelho (Parte 3).
+- E3.1, pendências: `Result → ProblemDetails` passa para a E3.2 (desvio do ADR 0005); limite de requisições na E5.3; `SACOU_FIREBASE_SERVICE_ACCOUNT` (Base64, `.env` e Railway, nunca no GitHub) só na E3.16; a guarda de `AllowAnonymous` corta `//` dentro de strings (alarme, não barreira); Gabriel confere no console: só E-mail/senha e Google ligados, proteção contra enumeração de e-mails.
 - E4.1, pendências: confirmar a compilação nativa e o catálogo no primeiro dev build (roteiro do fim do M3); check na pílula "Vou"; `text-underline-offset` sem suporte no `Text` do RN (ADR 0034); `StatusPill.tsx:20` usa `palette.night` direto no texto da espera, trocar por papel de tema.
 
 ## Lembretes para o Gabriel
@@ -81,4 +82,4 @@
 
 ## Bloqueadas
 
-- E3.1 (e, por dependência, E3.2–E3.5, E4.2–E4.6): falta o acesso ao Firebase (pergunta 8 em `perguntas.md`).
+- Nenhuma.
