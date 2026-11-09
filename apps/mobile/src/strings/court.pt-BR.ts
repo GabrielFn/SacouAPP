@@ -53,20 +53,15 @@ export const courtStrings = {
     waiting: (names: string, reservesOnly: boolean) =>
       `Na fila: ${names}${reservesOnly ? " (reservas)" : ""}`,
     streak: (team: string, count: number) => `${team} venceu ${String(count)} seguidas`,
-    streakOne: (team: string) => `${team} venceu a última`,
     partialExit: "perde sai · saída parcial",
     fullExit: "perde sai",
   },
   roster: { unknownPlayer: "Jogador", orange: "Laranja", blue: "Azul" },
-  loading: "Abrindo a partida",
   error: {
     title: "Não conseguimos abrir esta partida",
     body: "Seus pontos continuam salvos no celular. Tente de novo; se não abrir, feche e abra o app.",
     retry: "Tentar de novo",
     back: "Voltar ao início",
-  },
-  notPlayable: {
-    refusedPoint: "Não foi possível marcar o ponto. Tente de novo.",
   },
   setEnd: {
     title: (setNumber: number) => `Fim do ${String(setNumber)}º set`,
@@ -105,6 +100,5 @@ export const courtStrings = {
     resume: "Continuar partida",
     closeCourt: "Encerrar quadra",
     startFailed: "Não foi possível abrir a partida.",
-    storageFailed: "O armazenamento do celular não abriu.",
   },
 } as const;
