@@ -37,6 +37,7 @@
 
 ## Em andamento
 
+- E3.2: plano em 3 partes em `docs/estado/tarefas/E3.2.md` (branch `task/E3.2-groups-members`, worktree `D:\projetos\SacouAPP-E3.1`), ADRs 0039 e 0040. Tarefa sensível: desenvolvedor Opus e revisor de segurança em cada parte. Perguntas 16 a 19 com padrão adotado. E3.17 (perfil do jogador) criada pelo orquestrador: nenhuma tarefa cobria a API de perfil, que a tela 19 da E4.5 precisa. E3.16: decidir o grupo do último admin que apaga a conta.
 - E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44, desenvolvedor Sonnet, revisor Opus reprovou o ciclo 1 (tipos do Node no app, PRAGMAs fora da conexão que grava) e aprovou o ciclo 2; testador Sonnet passou. Próximo: Parte 2 (telas 09 e 10), na mesma branch depois do merge. Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 
 ## Adiadas
