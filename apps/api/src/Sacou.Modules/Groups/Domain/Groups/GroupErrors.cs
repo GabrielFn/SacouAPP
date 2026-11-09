@@ -16,4 +16,16 @@ internal static class GroupErrors
     public static readonly Error MembershipLimit = new("groups.membership-limit", ErrorKind.Conflict);
 
     public static readonly Error MemberLimit = new("groups.member-limit", ErrorKind.Conflict);
+
+    /// <summary>The target is not an active member of this group: missing, left, removed or from another group look the same.</summary>
+    public static readonly Error MemberNotFound = new("groups.member-not-found", ErrorKind.NotFound);
+
+    /// <summary>The change would leave the group without an active admin. Nobody is promoted automatically.</summary>
+    public static readonly Error LastAdmin = new("groups.last-admin", ErrorKind.Conflict);
+
+    /// <summary>Nobody removes themselves: leaving is its own route, with its own rule.</summary>
+    public static readonly Error UseLeave = new("groups.use-leave", ErrorKind.Validation);
+
+    /// <summary>A guest without an account (E3.5) is always a drop-in.</summary>
+    public static readonly Error RegularNeedsAccount = new("groups.regular-needs-account", ErrorKind.Validation);
 }

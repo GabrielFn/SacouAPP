@@ -3,12 +3,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Groups.Access;
+using Sacou.Modules.Groups.ChangeMemberRole;
+using Sacou.Modules.Groups.ChangeMemberType;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Groups.CreateGroup;
 using Sacou.Modules.Groups.GetGroup;
 using Sacou.Modules.Groups.Infrastructure;
+using Sacou.Modules.Groups.LeaveGroup;
 using Sacou.Modules.Groups.ListMembers;
 using Sacou.Modules.Groups.ListMyGroups;
+using Sacou.Modules.Groups.RemoveMember;
 using Sacou.Modules.Groups.RenameGroup;
 
 namespace Sacou.Modules.Groups;
@@ -36,7 +40,11 @@ public static class GroupsModule
         endpoints.MapGroupRoutes()
             .MapGetGroup()
             .MapRenameGroup()
-            .MapListMembers();
+            .MapListMembers()
+            .MapChangeMemberRole()
+            .MapChangeMemberType()
+            .MapRemoveMember()
+            .MapLeaveGroup();
         return endpoints;
     }
 

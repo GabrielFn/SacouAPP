@@ -93,6 +93,47 @@ internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
         return renamed > 0;
     }
 
+    public async Task<Result<GroupChange>> ExecuteInGroupLockAsync(
+        GroupId group, Func<Group, Result<GroupChange>> change, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        // EF opens no transaction for raw SQL by itself: without this one, FOR UPDATE would lock nothing.
+        var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        await using (transaction.ConfigureAwait(false))
+        {
+            var loaded = await LockAndLoadAsync(group, cancellationToken).ConfigureAwait(false);
+            var changed = loaded is null ? Result.Failure<GroupChange>(GroupErrors.GroupNotFound) : change(loaded);
+            if (changed.IsFailure || changed.Value.IsEmpty)
+            {
+                return changed;
+            }
+
+            database.Members.UpdateRange(changed.Value.ChangedMembers.Select(member => RowMapping.ToRow(group, member)));
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            return changed;
+        }
+    }
+
+    /// <summary>The group row is locked first, always: the lock order of ADR 0040, D7 (group before person).</summary>
+    private async Task<Group?> LockAndLoadAsync(GroupId group, CancellationToken cancellationToken)
+    {
+        var locked = await database.Database
+            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM groups.groups WHERE id = {group.Value} FOR UPDATE")
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        if (locked.Count == 0)
+        {
+            return null;
+        }
+
+        var row = await database.Groups.AsNoTracking().SingleAsync(row => row.Id == group.Value, cancellationToken).ConfigureAwait(false);
+        var members = await database.Members.AsNoTracking()
+            .Where(member => member.GroupId == group.Value)
+            .OrderBy(member => member.JoinedAt).ThenBy(member => member.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new Group(group, RowMapping.ToName(row.Name), row.CreatedAt, [.. members.Select(RowMapping.ToMember)]);
+    }
+
     private Task<int> CountActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>
         ActiveMembers().CountAsync(member => member.UserId == user.Value, cancellationToken);
 

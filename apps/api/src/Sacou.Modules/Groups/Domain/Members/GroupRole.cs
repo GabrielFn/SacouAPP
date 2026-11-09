@@ -8,3 +8,9 @@ internal enum GroupRole
     Scorekeeper,
     Player,
 }
+
+internal static class GroupRoleExtensions
+{
+    /// <summary>Admin and co-admin: only an admin gives, takes or removes them (Gabriel, question 16).</summary>
+    public static bool IsAdministrative(this GroupRole role) => role is GroupRole.Admin or GroupRole.CoAdmin;
+}
