@@ -44,8 +44,14 @@ internal static class SigningKeyDocumentParser
                 keys.Add(key);
             }
 
-            accepted = keys.Count > 0;
-            return accepted ? keys.ToFrozenDictionary(key => key.KeyId, key => key, StringComparer.Ordinal) : null;
+            if (keys.Count == 0)
+            {
+                return null;
+            }
+
+            var byKeyId = keys.ToFrozenDictionary(key => key.KeyId, key => key, StringComparer.Ordinal);
+            accepted = true;
+            return byKeyId;
         }
         finally
         {

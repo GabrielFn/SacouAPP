@@ -8,7 +8,7 @@ namespace Sacou.Modules.Identity.Authentication;
 /// Caches the Google signing keys for the <c>Cache-Control: max-age</c> of the response, clamped to
 /// 5 min..24 h. One fetch at a time; an unknown <c>kid</c> forces at most one fetch every 5 min. When a
 /// fetch fails, the cached keys keep working until each certificate expires, and an expired one answers
-/// "unavailable", never "unknown". With no keys at all, a
+/// "unavailable" while the cache is stale ("unknown" when the cache is fresh). With no keys at all, a
 /// failed fetch is retried at most every 10 s, and callers get "unavailable" (503) meanwhile (ADR 0036).
 /// </summary>
 internal sealed partial class GoogleSigningKeySource(
@@ -114,11 +114,24 @@ internal sealed partial class GoogleSigningKeySource(
         public bool Contains(string keyId) => Keys.ContainsKey(keyId);
 
         /// <summary>
-        /// A known <c>kid</c> whose certificate expired means the keys are out of date (the refresh failed),
-        /// not that the token is bad: "unavailable" (503), so the app keeps the person signed in.
+        /// A known <c>kid</c> whose certificate expired is "unavailable" (503) only while the cache is stale,
+        /// that is, after a refresh that failed or was held back: the keys may be out of date, and the app
+        /// keeps the person signed in. With a fresh cache it is "unknown" (401): Google itself serves that
+        /// certificate as expired, and a token naming it must never get a 503 without a signature check.
         /// </summary>
-        public SigningKeyLookup Find(string keyId, DateTimeOffset now) => Keys.TryGetValue(keyId, out var key)
-            ? key.Certificate.NotAfter.ToUniversalTime() > now.UtcDateTime ? SigningKeyLookup.Found(key) : SigningKeyLookup.Unavailable
-            : SigningKeyLookup.Unknown;
+        public SigningKeyLookup Find(string keyId, DateTimeOffset now)
+        {
+            if (!Keys.TryGetValue(keyId, out var key))
+            {
+                return SigningKeyLookup.Unknown;
+            }
+
+            if (key.Certificate.NotAfter.ToUniversalTime() > now.UtcDateTime)
+            {
+                return SigningKeyLookup.Found(key);
+            }
+
+            return now >= FreshUntil ? SigningKeyLookup.Unavailable : SigningKeyLookup.Unknown;
+        }
     }
 }

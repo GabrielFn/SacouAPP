@@ -112,6 +112,18 @@ public sealed class GoogleSigningKeySourceTests : IDisposable
         Assert.Equal(SigningKeyStatus.Unavailable, (await FindAsync(source, "expiring")).Status);
     }
 
+    /// <summary>Fresh cache: an expired certificate is Google's own answer, so a token naming it is refused (401), never 503.</summary>
+    [Fact]
+    public async Task FreshCacheWithAnExpiredCertificate_IsUnknownNotUnavailable()
+    {
+        using var expired = TestSigningKey.Create("expired", clock.GetUtcNow() - TimeSpan.FromMinutes(1));
+        using var source = Source(_ => StubHttpHandler.Json(TestSigningKeys.Document(expired), OneHour), out var stub);
+
+        Assert.Equal(SigningKeyStatus.Unknown, (await FindAsync(source, "expired")).Status);
+        Assert.Equal(SigningKeyStatus.Unknown, (await FindAsync(source, "expired")).Status);
+        Assert.Equal(1, stub.RequestCount);
+    }
+
     [Fact]
     public async Task FailedFetchWithoutCache_IsUnavailable()
     {
