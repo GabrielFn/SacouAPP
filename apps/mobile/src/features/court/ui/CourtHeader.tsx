@@ -35,6 +35,7 @@ export function CourtHeader({
 }: CourtHeaderProps) {
   const { colors, tokens } = useTheme();
   const { sizes, fontSizes } = tokens.court;
+  const LockGlyph = locked ? LockIcon : UnlockIcon;
   return (
     <View
       style={{
@@ -117,7 +118,7 @@ export function CourtHeader({
           justifyContent: "center",
         }}
       >
-        {locked ? <LockIcon /> : <UnlockIcon />}
+        <LockGlyph />
       </Pressable>
     </View>
   );

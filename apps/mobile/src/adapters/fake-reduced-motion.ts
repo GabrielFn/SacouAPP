@@ -1,4 +1,5 @@
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
+import { createListeners } from "./listeners";
 
 export interface FakeReducedMotion extends ReducedMotion {
   set(reduced: boolean): void;
@@ -6,20 +7,13 @@ export interface FakeReducedMotion extends ReducedMotion {
 
 export function createFakeReducedMotion(reduced = false): FakeReducedMotion {
   const state = { value: reduced };
-  const listeners = { value: [] as readonly (() => void)[] };
+  const listeners = createListeners();
   return {
     getSnapshot: () => state.value,
-    subscribe(listener) {
-      listeners.value = [...listeners.value, listener];
-      return () => {
-        listeners.value = listeners.value.filter((known) => known !== listener);
-      };
-    },
+    subscribe: listeners.add,
     set(next) {
       state.value = next;
-      listeners.value.forEach((listener) => {
-        listener();
-      });
+      listeners.notify();
     },
   };
 }
