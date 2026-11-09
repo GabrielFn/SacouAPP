@@ -147,6 +147,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.14 | Fotos: upload para o R2 e denúncia | Sem EXIF; só o recorte é salvo | acesso Cloudflare |
 | E3.15 | Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
+| E3.17 | Perfil do jogador: apelido, posições e nível (API) | Perfil salvo e lido por `MemberId`/`UserId`, sem dado pessoal em evento | E3.2 |
 
 ### E4 · App (M3–M6)
 

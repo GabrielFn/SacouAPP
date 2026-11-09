@@ -51,6 +51,7 @@ public sealed class PlantedViolationTests
     [InlineData("StopwatchAccess", "System.Diagnostics.Stopwatch")]
     [InlineData("MarshalAccess", "System.Runtime.InteropServices.Marshal")]
     [InlineData("NativeLibraryAccess", "System.Runtime.InteropServices.NativeLibrary")]
+    [InlineData("HttpProjectInDomain", "Sacou.Http.ProblemResults")]
     public void Domain_WithForbiddenDependency_IsReportedForThatDependency(string type, string dependency)
     {
         var details = DomainViolations.Value
@@ -453,5 +454,14 @@ public sealed class PlantedViolationTests
         {
             directory.Delete(recursive: true);
         }
+    }
+
+    [Theory]
+    [InlineData("Sacou.Modules.Groups")]
+    [InlineData("Sacou.Modules.Identity")]
+    [InlineData("Sacou.Api")]
+    public void Http_ReferencingAModuleOrTheApi_IsReported(string assembly)
+    {
+        Assert.Equal([assembly], ArchitectureReflectionRules.HttpReferenceViolations([assembly, "Sacou.Shared", "Microsoft.AspNetCore.Http.Results"]));
     }
 }

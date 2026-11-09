@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="xunit.v3.mtp-v2" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Sacou.Http/Sacou.Http.csproj" />
+    </ItemGroup>
+</Project>

@@ -9,5 +9,6 @@
     <ItemGroup>
         <ProjectReference Include="../../src/Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
         <ProjectReference Include="../../src/Sacou.Shared/Sacou.Shared.csproj" />
+        <ProjectReference Include="../../src/Sacou.Http/Sacou.Http.csproj" />
     </ItemGroup>
 </Project>
