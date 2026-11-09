@@ -48,19 +48,14 @@ internal static class PointAttributionResolver
     /// <summary>The state after a point always has its match open, because the applier accepted it there.</summary>
     private static IEnumerable<ScoredPoint> ScoredPointOf(TimelineEntry<CourtSessionState> entry)
     {
-        if (!string.Equals(entry.Event.Type, ScoreEventTypes.PointScored, StringComparison.Ordinal))
-        {
-            return [];
-        }
-
-        var parsed = ScorePayloadParser.Parse(entry.Event.Payload, ScorePayloadShapes.PointScored, PointScoredParser.ParseFields);
         var match = entry.State.CurrentMatch;
-        if (parsed.IsFailure || match is null || !string.Equals(match.MatchId, parsed.Value.MatchId, StringComparison.Ordinal))
+        if (PointScoredParser.ReadStored(entry.Event) is not { } point
+            || match is null
+            || !string.Equals(match.MatchId, point.MatchId, StringComparison.Ordinal))
         {
             return [];
         }
 
-        var point = parsed.Value;
         return [new ScoredPoint(entry.Event.EventId, point.MatchId, point.SetNumber, point.Team, match.Teams.Of(point.Team))];
     }
 

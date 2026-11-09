@@ -1,0 +1,23 @@
+{
+  "minTokens": 50,
+  "minLines": 1,
+  "format": ["typescript", "tsx", "csharp"],
+  "path": [
+    "packages/match-engine/src",
+    "packages/volley-rules/src",
+    "apps/mobile/src",
+    "apps/api/src"
+  ],
+  "ignore": [
+    "**/*.test.*",
+    "**/*.test.fixture.ts",
+    "**/*.data.ts",
+    "**/golden/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/bin/**",
+    "**/obj/**",
+    "**/Infrastructure/Migrations/**"
+  ],
+  "ignorePattern": ["using [A-Za-z0-9_.= ]+;"]
+}

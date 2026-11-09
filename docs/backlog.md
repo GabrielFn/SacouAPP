@@ -14,7 +14,7 @@ Este arquivo guarda só o mapa de marcos e a regra da próxima tarefa. Cada info
 |---|---|
 | M1 · Fundação | E0.1–E0.9, E1.1 |
 | M2 · Motor da partida | E1.2–E1.5, E2.1–E2.11 |
-| M3 · Base da API e do app | E3.1–E3.5, E4.1–E4.6 |
+| M3 · Base da API e do app | E0.10, E3.1–E3.5, E4.1–E4.6 |
 | M4 · A quadra | E3.6–E3.8, E4.7–E4.11, E5.1 |
 | M5 · Depois do jogo | E3.9–E3.14, E4.12–E4.14, E4.16 |
 | M6 · Prontidão para o piloto | E3.15, E3.16, E4.15, E5.2–E5.4, E6.1, E6.2 |

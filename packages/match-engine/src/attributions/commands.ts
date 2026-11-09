@@ -2,6 +2,7 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 
 import { getOpenMatch, getOpenMatchStartIndex } from "../corrections/timeline.js";
 import type { CourtSessionTimeline } from "../corrections/types.js";
+import type { TimelineEntry } from "../event-log/types.js";
 import {
   AUTHORLESS_POINT_KINDS,
   POINT_ATTRIBUTED_EVENT_TYPE,
@@ -10,7 +11,7 @@ import {
 } from "../score/constants.data.js";
 import { parsePointScoredPayload, parseScorePayload } from "../score/parse-payloads.js";
 import { onCourtInTheRally } from "../score/on-court.js";
-import type { MemberId, PointKind } from "../score/types.js";
+import type { CourtSessionState, MemberId, PointKind, TeamSide } from "../score/types.js";
 import { isPlausibleAuthor } from "./plausibility.js";
 import type {
   AttributionCommandResult,
@@ -22,6 +23,18 @@ import type {
 
 function refuse(code: AttributionRefusalCode): Result<never, AttributionError> {
   return err({ code });
+}
+
+/** The team that scored the event, when it is a point of the match; otherwise `null`. */
+function readMatchPointTeam(
+  event: TimelineEntry<CourtSessionState>["event"],
+  matchId: string,
+): TeamSide | null {
+  if (event.type !== POINT_SCORED_EVENT_TYPE) {
+    return null;
+  }
+  const parsed = parsePointScoredPayload(event.payload);
+  return parsed.ok && parsed.value.matchId === matchId ? parsed.value.team : null;
 }
 
 /**
@@ -40,14 +53,12 @@ function findRally(
   if (entry === undefined || index <= getOpenMatchStartIndex(timeline) || before === null) {
     return null;
   }
-  const { event } = entry;
-  const parsed =
-    event.type === POINT_SCORED_EVENT_TYPE ? parsePointScoredPayload(event.payload) : null;
+  const team = readMatchPointTeam(entry.event, matchId);
   const set = before.currentSet;
-  if (parsed?.ok !== true || parsed.value.matchId !== matchId || set === null) {
+  if (team === null || set === null) {
     return null;
   }
-  return { match: before, team: parsed.value.team, servingTeam: set.servingTeam };
+  return { match: before, team, servingTeam: set.servingTeam };
 }
 
 function isPointKind(kind: unknown): kind is PointKind {

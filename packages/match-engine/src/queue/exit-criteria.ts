@@ -1,5 +1,5 @@
-import { isUuid } from "../event-log/is-uuid.js";
 import type { MemberId } from "../score/types.js";
+import { readUniqueMemberIds } from "../score/unique-member-ids.js";
 import { getConsecutiveMatches, getMatchesPlayed } from "./consecutive-matches.js";
 import type {
   QueueExitCandidates,
@@ -9,23 +9,12 @@ import type {
   QueueExitCriterionKey,
 } from "./types.js";
 
-/** A list of members from outside the engine: UUIDs, each one once, or `null`. */
-function readMemberList(raw: unknown): readonly MemberId[] | null {
-  if (!Array.isArray(raw)) {
-    return null;
-  }
-  const items: readonly unknown[] = Array.from(raw as readonly unknown[]);
-  const memberIds = items.filter(isUuid);
-  const isValid = memberIds.length === items.length && new Set(memberIds).size === items.length;
-  return isValid ? memberIds : null;
-}
-
 /** The arrival order of the candidates, which must all be in it; others are ignored. */
 function readArrivalOrder(
   raw: unknown,
   { memberIds }: QueueExitCandidates,
 ): readonly MemberId[] | null {
-  const arrivalOrder = readMemberList(raw);
+  const arrivalOrder = readUniqueMemberIds(raw);
   return arrivalOrder !== null && memberIds.every((id) => arrivalOrder.includes(id))
     ? arrivalOrder.filter((id) => memberIds.includes(id))
     : null;
@@ -80,7 +69,7 @@ const arrivalOrderCriterion: QueueExitCriterion<QueueExitCriterionInputs["arriva
 /** The draw comes shuffled from outside: a permutation of the losing team, and the first leave. */
 const drawCriterion: QueueExitCriterion<QueueExitCriterionInputs["draw"]> = {
   choose: (candidates, { drawOrder }) => {
-    const order = readMemberList(drawOrder);
+    const order = readUniqueMemberIds(drawOrder);
     const { memberIds } = candidates;
     const isPermutation =
       order !== null &&
@@ -93,7 +82,7 @@ const drawCriterion: QueueExitCriterion<QueueExitCriterionInputs["draw"]> = {
 /** Exactly as many as leave, all of the losing team. */
 const manualCriterion: QueueExitCriterion<QueueExitCriterionInputs["manual"]> = {
   choose: ({ count, memberIds }, { chosen }) => {
-    const choice = readMemberList(chosen);
+    const choice = readUniqueMemberIds(chosen);
     const isValid =
       choice !== null && choice.length === count && choice.every((id) => memberIds.includes(id));
     return isValid ? choice : null;

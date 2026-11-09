@@ -110,6 +110,12 @@ jobs:
       - name: Lint API
         run: pnpm lint:api
 
+      - name: Check file size (C#)
+        run: pnpm check:size
+
+      - name: Check duplication
+        run: pnpm check:duplication
+
       - name: Build
         run: pnpm build
 

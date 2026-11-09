@@ -6,6 +6,12 @@ import { dirname, resolve } from "node:path";
 
 import { ESLint } from "eslint";
 
+import {
+  qualityLintCases,
+  runComplexityProbe,
+  runDuplicationCases,
+} from "./lib/quality-regression.mjs";
+
 const ROOT = resolve(import.meta.dirname, "..");
 const PREFIX = "__lint-regression__";
 const VOLLEY_RULES = `packages/volley-rules/src/${PREFIX}`;
@@ -125,7 +131,13 @@ const CASES = [
   [`${VOLLEY_RULES}node.test.ts`, 'import "node:fs";\nexport const sets = [5];\n', CLEAN],
   [`${MATCH_ENGINE}rules.ts`, 'import "@sacou/volley-rules";\n', CLEAN],
   [`${MOBILE}react.tsx`, 'export { useState } from "react";\n', CLEAN],
-].map(([file, code, expected]) => ({ path: resolve(ROOT, file), code, expected }));
+  ...qualityLintCases(PREFIX),
+].map(([file, code, expected, messagePart]) => ({
+  path: resolve(ROOT, file),
+  code,
+  expected,
+  messagePart,
+}));
 
 function createFiles(cases) {
   return cases.flatMap(({ path, code }) => {
@@ -139,11 +151,18 @@ function removeFiles(paths) {
   paths.forEach((path) => rmSync(path, { recursive: true, force: true }));
 }
 
-function describeFailure({ expected }, messages) {
+// With `messagePart`, the message must also contain it (which no-restricted-syntax entry fired).
+function matches({ expected, messagePart }, { ruleId, message }) {
+  return ruleId === expected && (messagePart === undefined || message.includes(messagePart));
+}
+
+function describeFailure(testCase, messages) {
   const found = messages.map(({ ruleId, message }) => ruleId ?? message).join(", ") || "nothing";
+  const { expected, messagePart } = testCase;
   const passed =
-    expected === CLEAN ? messages.length === 0 : messages.some((m) => m.ruleId === expected);
-  return passed ? null : `expected ${expected}, found ${found}`;
+    expected === CLEAN ? messages.length === 0 : messages.some((m) => matches(testCase, m));
+  const wanted = messagePart === undefined ? expected : `${expected} ("${messagePart}")`;
+  return passed ? null : `expected ${wanted}, found ${found}`;
 }
 
 async function lintCases(cases) {
@@ -162,7 +181,13 @@ async function main() {
     const failures = outcomes.filter(({ failure }) => failure !== null);
     failures.forEach(({ path, failure }) => console.error(`FAIL ${path}: ${failure}`));
     console.log(`lint:regression: ${outcomes.length - failures.length}/${outcomes.length} passed.`);
-    process.exitCode = failures.length === 0 ? 0 : 1;
+    const probeFailures = [
+      ...runDuplicationCases(ROOT, PREFIX),
+      ...runComplexityProbe(ROOT, PREFIX),
+    ];
+    probeFailures.forEach((failure) => console.error(`FAIL ${failure}`));
+    console.log(`lint:regression: probes ${probeFailures.length === 0 ? "passed" : "failed"}.`);
+    process.exitCode = failures.length === 0 && probeFailures.length === 0 ? 0 : 1;
   } finally {
     removeFiles(created);
   }

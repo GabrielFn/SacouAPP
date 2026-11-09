@@ -11,6 +11,14 @@ namespace Sacou.Modules.Matches.Domain.CourtSessions.Score;
 /// </summary>
 internal abstract record ScorePayload;
 
+/// <summary>A payload of an event of the open set: the match and the set it points to.</summary>
+internal interface ISetEventPayload
+{
+    string MatchId { get; }
+
+    int SetNumber { get; }
+}
+
 /// <summary><c>Queue</c> is the queue once this match starts: the result of the exit, recorded whole (ADR 0029).</summary>
 internal sealed record MatchStartedPayload(
     TeamSide FirstServer,
@@ -23,12 +31,12 @@ internal sealed record MatchStartedPayload(
     BySide<TeamRoster> Teams) : ScorePayload;
 
 /// <summary>Records no absolute score and no rotation: the side-out is derived from the state (ADR 0024).</summary>
-internal sealed record PointScoredPayload(string MatchId, int SetNumber, TeamSide Team) : ScorePayload;
+internal sealed record PointScoredPayload(string MatchId, int SetNumber, TeamSide Team) : ScorePayload, ISetEventPayload;
 
 /// <summary>A <c>null</c> setter zone is a team with the rotation off.</summary>
 internal sealed record NextSet(TeamSide FirstServer, BySide<int?> SetterZones, int TargetPoints);
 
-internal sealed record SetEndedPayload(string MatchId, NextSet? NextSet, int SetNumber, TeamSide Winner) : ScorePayload;
+internal sealed record SetEndedPayload(string MatchId, NextSet? NextSet, int SetNumber, TeamSide Winner) : ScorePayload, ISetEventPayload;
 
 internal sealed record MatchEndedPayload(MatchEndReason EndReason, string MatchId, TeamSide? Winner) : ScorePayload;
 
@@ -49,7 +57,7 @@ internal sealed record ServingTeamChangedPayload(
     TeamSide FirstServer,
     string MatchId,
     TeamSide ServingTeam,
-    int SetNumber) : ScorePayload;
+    int SetNumber) : ScorePayload, ISetEventPayload;
 
 /// <summary><c>Author</c> is <c>null</c> only for an error of the opponent (ADR 0031).</summary>
 internal sealed record PointAttributedPayload(

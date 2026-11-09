@@ -14,15 +14,8 @@ internal static class SetAppliers
     /// <summary>The side-out is derived from the state: that transition is part of what this event means (ADR 0024).</summary>
     public static Result<CourtSessionState, EventRejection> ApplyPointScored(CourtSessionState state, EventEnvelope envelope)
     {
-        var parsed = ScorePayloadParser.Parse(envelope.Payload, ScorePayloadShapes.PointScored, PointScoredParser.ParseFields);
-        if (parsed.IsFailure)
-        {
-            return Rejected();
-        }
-
-        var payload = parsed.Value;
-        var match = FindOpenMatch(state, payload.MatchId);
-        if (match is null || FindOpenSet(match, payload.SetNumber) is not { } set)
+        if (ParseOpenSet(state, envelope, ScorePayloadShapes.PointScored, PointScoredParser.ParseFields)
+            is not (var payload, var match, var set))
         {
             return Rejected();
         }
@@ -42,16 +35,8 @@ internal static class SetAppliers
 
     public static Result<CourtSessionState, EventRejection> ApplySetEnded(CourtSessionState state, EventEnvelope envelope)
     {
-        var parsed = ScorePayloadParser.Parse(envelope.Payload, ScorePayloadShapes.SetEnded, SetEndedParser.ParseFields);
-        if (parsed.IsFailure)
-        {
-            return Rejected();
-        }
-
-        var payload = parsed.Value;
-        var match = FindOpenMatch(state, payload.MatchId);
-        if (match is null
-            || FindOpenSet(match, payload.SetNumber) is not { } set
+        if (ParseOpenSet(state, envelope, ScorePayloadShapes.SetEnded, SetEndedParser.ParseFields)
+            is not (var payload, var match, var set)
             || OpensSetPastTheFormat(match, payload.SetNumber, payload.NextSet)
             || (payload.NextSet is { } next && !HasZonesForTheRotations(match.Rotations, next.SetterZones)))
         {
@@ -76,16 +61,8 @@ internal static class SetAppliers
     /// </summary>
     public static Result<CourtSessionState, EventRejection> ApplyServingTeamChanged(CourtSessionState state, EventEnvelope envelope)
     {
-        var parsed = ScorePayloadParser.Parse(
-            envelope.Payload, ScorePayloadShapes.ServingTeamChanged, ServingTeamChangedParser.ParseFields);
-        if (parsed.IsFailure)
-        {
-            return Rejected();
-        }
-
-        var payload = parsed.Value;
-        var match = FindOpenMatch(state, payload.MatchId);
-        if (match is null || FindOpenSet(match, payload.SetNumber) is not { } set)
+        if (ParseOpenSet(state, envelope, ScorePayloadShapes.ServingTeamChanged, ServingTeamChangedParser.ParseFields)
+            is not (var payload, var match, var set))
         {
             return Rejected();
         }
@@ -94,6 +71,25 @@ internal static class SetAppliers
         {
             CurrentSet = set with { FirstServer = payload.FirstServer, ServingTeam = payload.ServingTeam },
         }));
+    }
+
+    /// <summary>The payload with the open match and set it points to, or <c>null</c> when it is invalid or not open.</summary>
+    private static OpenSet<T>? ParseOpenSet<T>(
+        CourtSessionState state,
+        EventEnvelope envelope,
+        PayloadShape shape,
+        Func<RawObject, Result<T, PayloadError>> parseFields)
+        where T : ScorePayload, ISetEventPayload
+    {
+        var parsed = ScorePayloadParser.Parse(envelope.Payload, shape, parseFields);
+        if (parsed.IsFailure)
+        {
+            return null;
+        }
+
+        var payload = parsed.Value;
+        var match = FindOpenMatch(state, payload.MatchId);
+        return match is not null && FindOpenSet(match, payload.SetNumber) is { } set ? new OpenSet<T>(payload, match, set) : null;
     }
 
     /// <summary>Structure, not a rule: the format has no set past <c>BestOf</c>.</summary>
@@ -109,4 +105,6 @@ internal static class SetAppliers
 
     private static TeamState? WithRecordedZone(TeamState? teamState, int? setterZone) =>
         teamState is null || setterZone is not { } zone ? null : teamState with { SetterZone = zone };
+
+    private sealed record OpenSet<T>(T Payload, MatchScore Match, MatchSet Set);
 }

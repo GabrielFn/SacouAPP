@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 using Sacou.Modules.Matches.Domain.CourtSessions.Queue;
 using Sacou.Modules.Matches.Domain.CourtSessions.Rotation;
+using Sacou.Modules.Matches.Domain.Formations;
 
 namespace Sacou.Modules.Matches.Domain.CourtSessions.Score.PayloadParsers;
 
@@ -92,9 +93,7 @@ internal static class TeamPartsParser
             return Invalid<Optional<TeamState>>(PayloadFields.Path(PayloadFields.Rotations, side));
         }
 
-        // Exactly one player per position, and all of them from the team of the frozen copy.
-        if (LineupMembers(PayloadValues.Member(record, PayloadFields.Lineup)) is not { } lineup
-            || !lineup.All(memberId => roster.MemberIds.Contains(memberId, StringComparer.Ordinal)))
+        if (TeamLineup(PayloadValues.Member(record, PayloadFields.Lineup), roster) is not { } lineup)
         {
             return Invalid<Optional<TeamState>>(FieldOf(PayloadFields.Lineup));
         }
@@ -115,9 +114,7 @@ internal static class TeamPartsParser
         }
 
         var libero = ParseLibero(PayloadValues.Member(record, PayloadFields.Libero), lineup, bench);
-        if (!libero.IsValid
-            || !LiberoRules.IsLiberoAllowed(system, libero.Libero)
-            || (libero.Libero is { } teamLibero && !roster.MemberIds.Contains(teamLibero.MemberId, StringComparer.Ordinal)))
+        if (!IsTeamLibero(libero, system, roster))
         {
             return Invalid<Optional<TeamState>>(FieldOf(PayloadFields.Libero));
         }
@@ -128,6 +125,19 @@ internal static class TeamPartsParser
                 Optional<TeamState>.Some(new TeamState(bench, libero.Libero, lineup, setterZone, system)))
             : Invalid<Optional<TeamState>>(FieldOf(PayloadFields.Bench));
     }
+
+    /// <summary>Exactly one player per position, and all of them from the team of the frozen copy.</summary>
+    private static ImmutableArray<string>? TeamLineup(RawValue? value, TeamRoster roster) =>
+        LineupMembers(value) is { } lineup
+        && lineup.All(memberId => roster.MemberIds.Contains(memberId, StringComparer.Ordinal))
+            ? lineup
+            : null;
+
+    /// <summary>The libero of a team state: allowed by the system and part of the frozen copy.</summary>
+    private static bool IsTeamLibero(LiberoFormat libero, FormationSystem system, TeamRoster roster) =>
+        libero.IsValid
+        && LiberoRules.IsLiberoAllowed(system, libero.Libero)
+        && (libero.Libero is not { } teamLibero || roster.MemberIds.Contains(teamLibero.MemberId, StringComparer.Ordinal));
 
     /// <summary>Format only: teams, then players, nobody twice, and at most <see cref="QueueRules.MaxQueueMembers"/> in all.</summary>
     public static Result<TeamQueue, PayloadError> ParseQueue(RawValue? value)
