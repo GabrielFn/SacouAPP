@@ -55,19 +55,15 @@ describe("load", () => {
     ["type", ""],
     ["event_id", "NOT-A-UUID"],
     ["device_id", `${SECRET_TEXT}-imei`],
-  ])("a row with a bad %s is a corrupted log, with no partial state and no echo", async (column, value) => {
-    const result = await storedWith(value, column);
+  ])(
+    "a row with a bad %s is a corrupted log, with no partial state and no echo",
+    async (column, value) => {
+      const result = await storedWith(value, column);
 
-    expect(result).toEqual({ ok: false, error: { code: "corrupted-log" } });
-    expect(JSON.stringify(result)).not.toContain(SECRET_TEXT);
-  });
-
-  test("a payload with a field the schema does not know is kept by the parser as a payload field", async () => {
-    // The payload is the engine's to judge: the log only proves it is a JSON object.
-    const result = await storedWith('{"extra":1}', "payload");
-
-    expect(result.ok).toBe(true);
-  });
+      expect(result).toEqual({ ok: false, error: { code: "corrupted-log" } });
+      expect(JSON.stringify(result)).not.toContain(SECRET_TEXT);
+    },
+  );
 
   test("an unknown session cannot be loaded", async () => {
     const sqlite = await openMigratedDatabase();

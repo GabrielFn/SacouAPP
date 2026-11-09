@@ -2,10 +2,7 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import type { Result } from "@sacou/volley-rules";
 
 export type CourtLogErrorCode =
-  | "corrupted-log"
-  | "sequence-conflict"
-  | "session-not-found"
-  | "storage-failed";
+  "corrupted-log" | "sequence-conflict" | "session-not-found" | "storage-failed";
 
 /** Carries only a code: a stored value or a database message could hold data. */
 export interface CourtLogError {

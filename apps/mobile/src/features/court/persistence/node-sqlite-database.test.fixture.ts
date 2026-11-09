@@ -1,4 +1,4 @@
-import { DatabaseSync, type SQLInputValue, type SQLOutputValue } from "node:sqlite";
+import { DatabaseSync, type SQLOutputValue } from "node:sqlite";
 
 import type { SqlDatabase, SqlExecutor, SqlRow, SqlValue } from "../ports/sql-database";
 
@@ -28,15 +28,15 @@ function toRow(record: Readonly<Record<string, SQLOutputValue>>): SqlRow {
 export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
   const raw = new DatabaseSync(path);
   raw.exec("PRAGMA foreign_keys = ON");
-  const fault = { runsLeft: null as number | null };
+  const fault = { value: null as number | null };
 
   function failIfDue(): void {
-    if (fault.runsLeft === null) {
+    if (fault.value === null) {
       return;
     }
-    fault.runsLeft -= 1;
-    if (fault.runsLeft === 0) {
-      fault.runsLeft = null;
+    fault.value -= 1;
+    if (fault.value === 0) {
+      fault.value = null;
       throw new Error("injected disk failure");
     }
   }
@@ -48,14 +48,14 @@ export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
     },
     run: (sql, params = []) => {
       failIfDue();
-      raw.prepare(sql).run(...(params as readonly SQLInputValue[]));
+      raw.prepare(sql).run(...params);
       return Promise.resolve();
     },
     getAll: (sql, params = []) =>
       Promise.resolve(
         raw
           .prepare(sql)
-          .all(...(params as readonly SQLInputValue[]))
+          .all(...params)
           .map(toRow),
       ),
   };
@@ -79,7 +79,7 @@ export function openNodeSqliteDatabase(path = ":memory:"): NodeSqliteDatabase {
     database,
     raw,
     failOnRun(nth) {
-      fault.runsLeft = nth;
+      fault.value = nth;
     },
   };
 }

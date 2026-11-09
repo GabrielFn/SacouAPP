@@ -8,8 +8,7 @@ import {
 } from "./court-session-controller";
 
 export type StartCourtMatchError =
-  | CommandError
-  | { readonly code: "load-failed"; readonly cause: LoadFailureCode };
+  CommandError | { readonly code: "load-failed"; readonly cause: LoadFailureCode };
 
 export interface StartedCourtMatch {
   readonly route: string;

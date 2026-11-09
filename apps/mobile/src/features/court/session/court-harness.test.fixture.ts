@@ -66,10 +66,8 @@ export async function createHarness(kind: StorageKind): Promise<CourtHarness> {
         sqlite.failOnRun(1);
       }
     },
-    openController: (options) =>
-      createCourtSessionController(deps(options?.ids)),
-    start: (input) =>
-      startCourtMatch(deps(), input),
+    openController: (options) => createCourtSessionController(deps(options?.ids)),
+    start: (input) => startCourtMatch(deps(), input),
   };
 }
 
@@ -91,10 +89,7 @@ export function stateOf(
 }
 
 /** Scores the points one after the other: each letter is the team that scores. */
-export async function rallies(
-  controller: CourtSessionController,
-  teams: string,
-): Promise<void> {
+export async function rallies(controller: CourtSessionController, teams: string): Promise<void> {
   for (const letter of teams) {
     const team: TeamSide = letter === "a" ? "a" : "b";
     const result = await controller.dispatch({ type: "score-point", team });

@@ -1,4 +1,4 @@
-import { CURRENT_RULES_VERSION, type MatchStartedPayload, type TeamState } from "@sacou/match-engine";
+import { CURRENT_RULES_VERSION, type MatchStartedPayload } from "@sacou/match-engine";
 import { FORMATION_CATALOG_VERSION } from "@sacou/volley-rules";
 
 /**
@@ -31,14 +31,6 @@ export const SAMPLE_QUEUE_PLAYERS: readonly string[] = [
 
 export const SAMPLE_MATCH_ID = "f0000000-0000-4000-8000-000000000001";
 
-/** The setter zone of each team at the start, as on screen 09 (Laranja in 1, Azul in 5). */
-const SAMPLE_ORANGE_SETTER_ZONE = 1;
-const SAMPLE_BLUE_SETTER_ZONE = 5;
-
-function sampleTeamState(lineup: readonly string[], setterZone: 1 | 5): TeamState {
-  return { bench: [], libero: null, lineup, setterZone, system: "5x1" };
-}
-
 /** One set of 25, the default match (decisoes.md). */
 export const SAMPLE_SCORING_ONE_SET = {
   bestOf: 1,
@@ -61,8 +53,9 @@ export const SAMPLE_MATCH_BEST_OF_THREE: MatchStartedPayload = {
   matchId: SAMPLE_MATCH_ID,
   queue: { players: SAMPLE_QUEUE_PLAYERS, teams: [] },
   rotations: {
-    a: sampleTeamState(SAMPLE_ORANGE_LINEUP, SAMPLE_ORANGE_SETTER_ZONE),
-    b: sampleTeamState(SAMPLE_BLUE_LINEUP, SAMPLE_BLUE_SETTER_ZONE),
+    // The setter zone of each team at the start, as on screen 09 (Laranja in 1, Azul in 5).
+    a: { bench: [], libero: null, lineup: SAMPLE_ORANGE_LINEUP, setterZone: 1, system: "5x1" },
+    b: { bench: [], libero: null, lineup: SAMPLE_BLUE_LINEUP, setterZone: 5, system: "5x1" },
   },
   rulesVersion: CURRENT_RULES_VERSION,
   scoring: SAMPLE_SCORING_BEST_OF_THREE,

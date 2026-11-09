@@ -30,7 +30,9 @@ async function applySteps(transaction: SqlExecutor, from: number): Promise<void>
  * Brings the database to the latest schema, in one transaction. A database from a newer app is
  * left untouched: an old app must not write over a schema it does not know.
  */
-export async function migrateDatabase(database: SqlDatabase): Promise<Result<void, MigrationError>> {
+export async function migrateDatabase(
+  database: SqlDatabase,
+): Promise<Result<void, MigrationError>> {
   try {
     return await database.transaction(async (transaction) => {
       const version = await readVersion(transaction);

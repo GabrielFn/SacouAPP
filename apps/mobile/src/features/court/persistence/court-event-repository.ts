@@ -141,10 +141,7 @@ async function setStatus(
 }
 
 /** The court log on SQLite. Every method is atomic: it commits whole or leaves the file as it was. */
-export function createCourtEventRepository(
-  database: SqlDatabase,
-  ids: IdGenerator,
-): CourtEventLog {
+export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerator): CourtEventLog {
   return {
     getDeviceId: () => guarded(() => database.transaction((tx) => readOrCreateDeviceId(tx, ids))),
     openSession: (courtSessionId) =>
@@ -162,8 +159,6 @@ export function createCourtEventRepository(
     load: (courtSessionId) =>
       guarded(() => database.transaction((tx) => loadSession(tx, courtSessionId))),
     append: (courtSessionId, envelopes) =>
-      guarded(() =>
-        database.transaction((tx) => appendEnvelopes(tx, courtSessionId, envelopes)),
-      ),
+      guarded(() => database.transaction((tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
   };
 }

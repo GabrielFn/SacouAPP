@@ -10,7 +10,8 @@ export const INSERT_SESSION =
 export const SELECT_SESSION = "SELECT status, batch FROM court_sessions WHERE court_session_id = ?";
 export const SELECT_ACTIVE_SESSION =
   "SELECT court_session_id FROM court_sessions WHERE status = ? ORDER BY rowid DESC LIMIT 1";
-export const UPDATE_SESSION_STATUS = "UPDATE court_sessions SET status = ? WHERE court_session_id = ?";
+export const UPDATE_SESSION_STATUS =
+  "UPDATE court_sessions SET status = ? WHERE court_session_id = ?";
 
 export const SELECT_MAX_POSITION =
   "SELECT COALESCE(MAX(position), 0) AS value FROM court_events WHERE court_session_id = ?";

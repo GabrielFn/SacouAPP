@@ -6,7 +6,11 @@ import type { EventEnvelope } from "@sacou/match-engine";
  */
 export function continuesLog(
   envelopes: readonly EventEnvelope[],
-  { courtSessionId, batch, lastSequence }: { courtSessionId: string; batch: number; lastSequence: number },
+  {
+    courtSessionId,
+    batch,
+    lastSequence,
+  }: { courtSessionId: string; batch: number; lastSequence: number },
 ): boolean {
   const [first] = envelopes;
   return envelopes.every(

@@ -138,14 +138,18 @@ describe("the constraints of the file", () => {
     const { sqlite } = await openedRepository();
     sqlite.raw.prepare(INSERT).run(SESSION_A, 1, EVENT_A, DEVICE, 1);
 
-    expect(() => sqlite.raw.prepare(INSERT).run(SESSION_B, 1, EVENT_A, DEVICE, 1)).toThrow(/UNIQUE/);
+    expect(() => sqlite.raw.prepare(INSERT).run(SESSION_B, 1, EVENT_A, DEVICE, 1)).toThrow(
+      /UNIQUE/,
+    );
   });
 
   test("a repeated (batch, sequence, device) in a stream is refused by the database", async () => {
     const { sqlite } = await openedRepository();
     sqlite.raw.prepare(INSERT).run(SESSION_A, 1, EVENT_A, DEVICE, 1);
 
-    expect(() => sqlite.raw.prepare(INSERT).run(SESSION_A, 2, EVENT_B, DEVICE, 1)).toThrow(/UNIQUE/);
+    expect(() => sqlite.raw.prepare(INSERT).run(SESSION_A, 2, EVENT_B, DEVICE, 1)).toThrow(
+      /UNIQUE/,
+    );
   });
 
   test("an event of a session that does not exist is refused by the database", async () => {

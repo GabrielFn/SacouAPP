@@ -4,7 +4,10 @@ import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-i
 import type { SqlDatabase } from "../ports/sql-database";
 import { createCourtEventRepository } from "./court-event-repository";
 import { migrateDatabase } from "./migrations";
-import { openNodeSqliteDatabase, type NodeSqliteDatabase } from "./node-sqlite-database.test.fixture";
+import {
+  openNodeSqliteDatabase,
+  type NodeSqliteDatabase,
+} from "./node-sqlite-database.test.fixture";
 
 export const SESSION_A = "c0000000-0000-4000-8000-00000000000a";
 export const SESSION_B = "c0000000-0000-4000-8000-00000000000b";
