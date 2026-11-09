@@ -37,7 +37,7 @@
 
 ## Em andamento
 
-- E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44 (Sonnet; revisor reprovou o ciclo 1 e aprovou o ciclo 2; testador passou). Parte 2 (telas 09 e 10) feita: PR #45 (Sonnet; revisor reprovou os ciclos 1 e 2 (preso na quadra, rótulo falso do cadeado; depois tela em branco no fim da partida) e aprovou o ciclo 3; testador passou e fechou 5 sabotagens). Próximo: Parte 3 (tela ligada, vibração, trava, medição no Hermes, APK pelo EAS). Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
+- E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44 (Sonnet; revisor reprovou o ciclo 1 e aprovou o ciclo 2; testador passou). Parte 2 (telas 09 e 10) feita: PR #45 (Sonnet; revisor reprovou os ciclos 1 e 2 (preso na quadra, rótulo falso do cadeado; depois tela em branco no fim da partida) e aprovou o ciclo 3; testador passou e fechou 5 sabotagens). Parte 3 (trava, tela ligada, vibração, medição do Hermes, perfil EAS `preview`) feita: PR #48, Sonnet; revisor reprovou o ciclo 1 (rótulo do cadeado, permissões do Android) e o orquestrador conferiu o diff das correções; testador passou. Próximo: APK pelo EAS e roteiro de 10 minutos no celular do Gabriel (`docs/operacao/teste-no-celular.md`); depois a Parte 4 (líbero). Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 
 ## Adiadas
 
