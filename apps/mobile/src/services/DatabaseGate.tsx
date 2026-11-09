@@ -1,16 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { View } from "react-native";
 
 import { CourtRuntimeProvider } from "../features/court/hooks/court-runtime-context";
 import { ResumeProvider } from "../features/court/hooks/resume-context";
 import type { CourtRuntime, CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import { findResumableCourtSession } from "../features/court/session/resume-court";
 import { createResumeOnce, type ResumeOnce } from "../features/court/session/resume-once";
-import { useTheme } from "../theme/theme-context";
 import { strings } from "../strings/pt-BR";
-import { Button } from "../ui/Button";
-import { Screen } from "../ui/Screen";
-import { Text } from "../ui/Text";
+import { ErrorScreen } from "../ui/ErrorScreen";
 import { useServices } from "./services-context";
 
 type GateState =
@@ -35,7 +31,6 @@ async function openRuntime(opener: CourtRuntimeOpener): Promise<GateState> {
 /** Waits for the local database to open and migrate before any route shows (like the font gate). */
 export function DatabaseGate({ children }: DatabaseGateProps) {
   const { courtRuntimeOpener } = useServices();
-  const { tokens } = useTheme();
   const [state, setState] = useState<GateState>({ status: "opening" });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -54,18 +49,20 @@ export function DatabaseGate({ children }: DatabaseGateProps) {
   }
   if (state.status === "failed") {
     return (
-      <Screen>
-        <View accessibilityRole="alert" style={{ gap: tokens.spacing.s }}>
-          <Text variant="title">{strings.court.storageError.title}</Text>
-          <Text variant="muted">{strings.court.storageError.body}</Text>
-        </View>
-        <Button
-          label={strings.court.error.retry}
-          onPress={() => {
-            setAttempt((count) => count + 1);
-          }}
-        />
-      </Screen>
+      <ErrorScreen
+        title={strings.court.storageError.title}
+        body={strings.court.storageError.body}
+        actions={[
+          {
+            label: strings.court.error.retry,
+            onPress: () => {
+              // Shows the opening state again while the new attempt runs.
+              setState({ status: "opening" });
+              setAttempt((count) => count + 1);
+            },
+          },
+        ]}
+      />
     );
   }
   return (

@@ -11,6 +11,11 @@ describe("the text is scaled once", () => {
     expect(big.fontSizes.body).toBe(Math.round(fontSizes.body * fontScaleCap));
   });
 
+  it("grows below the cap, by the exact scale", () => {
+    const mid = createScaledTokens({ windowWidth: 390, fontScale: 1.2 });
+    expect(mid.fontSizes.body).toBe(Math.round(fontSizes.body * 1.2));
+  });
+
   it("so the native text does not scale it again", () => {
     expect(TEXT_SCALING_PROPS.allowFontScaling).toBe(false);
   });

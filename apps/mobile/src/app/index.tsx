@@ -6,6 +6,7 @@ import { View } from "react-native";
 
 import { useResumeOnce } from "../features/court/hooks/resume-context";
 import { courtHref } from "../features/court/navigation";
+import { takeResumeTarget } from "../features/court/session/resume-target";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { strings } from "../strings/pt-BR";
 import { AppHeader } from "../ui/AppHeader";
@@ -22,9 +23,9 @@ export default function HomeScreen() {
   const resume = useResumeOnce();
   // The court is resumed once per opening of the app: leaving it for the home must not bring it back.
   useEffect(() => {
-    const courtSessionId = resume.take();
-    if (courtSessionId !== null) {
-      router.replace(courtHref("court", { courtSessionId, theme: "sun" }));
+    const target = takeResumeTarget(resume);
+    if (target !== null) {
+      router.replace(courtHref("court", target));
     }
   }, [resume, router]);
   return (

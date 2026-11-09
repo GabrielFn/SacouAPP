@@ -58,3 +58,15 @@ export function queuePills(queue: QueueModel): readonly QueuePillText[] {
     ...queue.players.map(({ memberId, name }) => ({ key: memberId, label: name })),
   ];
 }
+
+export interface VisibleQueuePills {
+  readonly shown: readonly QueuePillText[];
+  /** How many did not fit: the "+k". */
+  readonly hidden: number;
+}
+
+/** Whole teams first, then the reserves; past the limit the rest is a "+k". */
+export function visibleQueuePills(queue: QueueModel | null, limit: number): VisibleQueuePills {
+  const entries = queue === null ? [] : queuePills(queue);
+  return { shown: entries.slice(0, limit), hidden: Math.max(0, entries.length - limit) };
+}

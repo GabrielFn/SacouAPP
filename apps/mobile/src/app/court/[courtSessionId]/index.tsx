@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import {
   selectCourtPhase,
   selectCourtScreen,
@@ -27,23 +28,18 @@ export default function CourtRoute() {
     [timeline, courtRoster],
   );
 
-  // Navigation is an effect of the phase, never of the data: it runs when the phase changes, so
-  // coming back from the end of the set (same phase) does not open it again.
+  // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
+  // changes, so coming back from the end of the set (same step) does not open it again.
   const { push, replace } = route;
-  useEffect(() => {
-    if (phase === "set-decided") {
-      push("setEnd");
-    }
-  }, [phase, push]);
-
-  // The match is over: the court has nothing to show, so every time it is in front (also when the
-  // user comes back to it with the back button) it hands over to the result.
   const focused = useIsFocused();
+  const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
-    if (phase === "match-ended" && focused) {
+    if (step === "open-set-end") {
+      push("setEnd");
+    } else if (step === "open-match-end") {
       replace("matchEnd");
     }
-  }, [phase, focused, replace]);
+  }, [step, push, replace]);
 
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;

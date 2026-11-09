@@ -6,7 +6,7 @@ import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import { COURT_FLEX_WEIGHTS, MAX_QUEUE_PILLS } from "../court.data";
 import type { QueueModel } from "../model/court-screen.types";
-import { queueExitText, queueLabel, queuePills } from "../model/screen-texts";
+import { queueExitText, queueLabel, visibleQueuePills } from "../model/screen-texts";
 import { FlameIcon } from "./CourtIcons";
 import { QueuePill } from "./QueuePill";
 
@@ -17,21 +17,12 @@ export interface QueueStripProps {
 }
 
 /** Who is waiting, the streak of the team that stays, and the rule of the exit. */
-/** Whole teams first, then the reserves; past the limit the rest is a "+k". */
-function visiblePills(queue: QueueModel | null) {
-  const entries = queue === null ? [] : queuePills(queue);
-  return {
-    shown: entries.slice(0, MAX_QUEUE_PILLS),
-    hidden: Math.max(0, entries.length - MAX_QUEUE_PILLS),
-  };
-}
-
 export function QueueStrip({ queue, streak }: QueueStripProps) {
   const { colors, tokens } = useTheme();
   const textStyle: TextStyle = { color: colors.text, fontSize: tokens.fontSizes.small };
   const mutedStyle: TextStyle = { color: colors.textMuted, fontSize: tokens.fontSizes.caption };
   const exit = queueExitText(queue);
-  const { shown, hidden } = visiblePills(queue);
+  const { shown, hidden } = visibleQueuePills(queue, MAX_QUEUE_PILLS);
   return (
     <View
       style={{

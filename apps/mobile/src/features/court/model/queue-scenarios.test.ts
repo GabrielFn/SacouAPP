@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import { selectCourtScreen } from "./court-screen.selectors";
-import { queuePills } from "./screen-texts";
+import { queuePills, visibleQueuePills } from "./screen-texts";
 import { ROSTER, startScenario } from "./screen-scenarios.test.fixture";
 
 const TEAM_SIZE = 6;
@@ -57,5 +57,30 @@ describe("a queue with whole teams, from the engine", () => {
       queue: { players: [], teams: [] },
     });
     expect(selectCourtScreen(scenario.timeline(), ROSTER)?.queue).toBeNull();
+  });
+});
+
+describe("the pills that fit in the strip", () => {
+  const model = (count: number) => ({
+    teams: [],
+    players: Array.from({ length: count }, (_, index) => ({
+      memberId: `m${String(index)}`,
+      name: `J${String(index)}`,
+    })),
+    exit: "partial" as const,
+  });
+  const LIMIT = 4;
+
+  test.each([
+    [4, 4, 0],
+    [5, 4, 1],
+    [9, 4, 5],
+  ])("%s waiting: %s shown and +%s", (waiting, shown, hidden) => {
+    const result = visibleQueuePills(model(waiting), LIMIT);
+    expect([result.shown.length, result.hidden]).toEqual([shown, hidden]);
+  });
+
+  test("no queue shows nothing", () => {
+    expect(visibleQueuePills(null, LIMIT)).toEqual({ shown: [], hidden: 0 });
   });
 });

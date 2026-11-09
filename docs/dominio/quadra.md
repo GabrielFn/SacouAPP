@@ -8,12 +8,12 @@ O estado da partida é **sempre** o replay do log de eventos persistido no SQLit
 
 ## Comandos
 
-| Comando | Faz | Recusas do motor |
-|---|---|---|
-| `start-match` | `startMatch` | `match-already-open`, `too-many-matches`, versão de regras ou formações não suportada |
-| `score-point { team }` | `scorePoint` | `set-decided`, `no-open-match`, `no-open-set` |
-| `undo` | `undoLastAction` (um `RevertedTo`) | `nothing-to-undo`, `no-open-match` |
-| `confirm-set-end { firstServer? }` | `confirmSetEnd`; `firstServer` só no sorteio do set decisivo (E4.10) | `set-not-decided`, `no-open-match` |
+| Comando                            | Faz                                                                  | Recusas do motor                                                                      |
+| ---------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `start-match`                      | `startMatch`                                                         | `match-already-open`, `too-many-matches`, versão de regras ou formações não suportada |
+| `score-point { team }`             | `scorePoint`                                                         | `set-decided`, `no-open-match`, `no-open-set`                                         |
+| `undo`                             | `undoLastAction` (um `RevertedTo`)                                   | `nothing-to-undo`, `no-open-match`                                                    |
+| `confirm-set-end { firstServer? }` | `confirmSetEnd`; `firstServer` só no sorteio do set decisivo (E4.10) | `set-not-decided`, `no-open-match`                                                    |
 
 - **As telas não têm `start-match`.** O tipo `PlayCommand` (`score-point`, `undo`, `confirm-set-end`) é o que o hook `useCourtSession` aceita; quem abre a partida é `startCourtMatch`.
 - **Um comando por vez**, na ordem enviada. O estado usado é o do momento da execução, nunca o de quando o toque foi feito.
@@ -28,13 +28,13 @@ O estado da partida é **sempre** o replay do log de eventos persistido no SQLit
 
 ## Falhas ao abrir
 
-| Situação | Estado do controlador |
-|---|---|
-| Sessão que não existe | `failed` · `session-not-found` |
-| Linha que o parser recusa (payload que não é JSON, `type` vazio, UUID inválido) | `failed` · `corrupted-log` |
-| `sequence` de um aparelho fora de 1..n, na ordem das posições | `failed` · `corrupted-log` |
-| Linhas válidas, mas o log não faz replay (inclusive payload com campo a mais) | `failed` · `replay-failed` |
-| Erro do banco | `failed` · `storage-failed` |
+| Situação                                                                        | Estado do controlador          |
+| ------------------------------------------------------------------------------- | ------------------------------ |
+| Sessão que não existe                                                           | `failed` · `session-not-found` |
+| Linha que o parser recusa (payload que não é JSON, `type` vazio, UUID inválido) | `failed` · `corrupted-log`     |
+| `sequence` de um aparelho fora de 1..n, na ordem das posições                   | `failed` · `corrupted-log`     |
+| Linhas válidas, mas o log não faz replay (inclusive payload com campo a mais)   | `failed` · `replay-failed`     |
+| Erro do banco                                                                   | `failed` · `storage-failed`    |
 
 Nada é apagado e nenhum valor do log aparece no erro. A tela de erro ("Não conseguimos abrir esta partida", com "Tentar de novo" e "Voltar ao início") aparece para qualquer `failed`, e "Tentar de novo" chama `retry()`: o controlador relê o log do arquivo dentro da fila de escrita, passa por `loading` e volta a `ready` se o log agora abre. Um log que continua quebrado continua `failed`, sem apagar nada. A reabertura da conexão depois de um `ROLLBACK` que falhou (ADR 0038, limitação conhecida) **não** foi feita: o `retry()` relê o log, mas a gravação seguinte ainda falha até reabrir o app.
 
@@ -52,7 +52,7 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 **Outros.** Bolinhas de sets: uma por set jogado ou em jogo, escondidas com `bestOf` 1. Fila: pílulas numeradas; "reservas" só com jogadores avulsos; "perde sai · saída parcial" sem time completo na fila e "perde sai" com time; sem ninguém na fila, a linha some. "Laranja venceu N seguidas": partidas terminadas seguidas, da mais recente para trás, vencidas por um time que tem a maioria do time atual (`win-streak.ts`); a linha some com N = 0. Chip do levantador: selo "L" quando o chip é `actingSetter` (nenhum no sistema Livre). Time com rotação desligada: sem chips e sem linha de rotação, só a fase. DESFAZER usa a resposta do próprio motor (`undoLastAction`): fica desabilitado quando não há o que desfazer.
 
-**Rotas.** `court/[courtSessionId]` (as telas 09 e 10), e os espaços da E4.10: `set-end` (abre sozinha quando o set fica decidido; "Confirmar fim do set", ou "Laranja saca"/"Azul saca" antes do set decisivo; "Voltar" volta à quadra, onde DESFAZER reabre o set), `match-end`, `menu` e `corrections`. A navegação é efeito da **fase** (`playing`, `set-decided`, `match-ended`): a quadra só navega quando a fase muda, então voltar do fim do set não o abre de novo. O `_layout` da quadra bloqueia o gesto de voltar (`gestureEnabled: false`). O tema (Sol ou Noite) vem do parâmetro `theme` da rota até a E4.10 ter a preferência; sem parâmetro, Sol. O Menu abre **segurando** (800 ms, `HOLD_TO_OPEN_MENU_MS`).
+**Rotas.** `court/[courtSessionId]` (as telas 09 e 10), e os espaços da E4.10: `set-end` (abre sozinha quando o set fica decidido; "Confirmar fim do set", ou "Laranja saca"/"Azul saca" antes do set decisivo; "Voltar" volta à quadra, onde DESFAZER reabre o set), `match-end`, `menu` e `corrections`. A navegação é efeito do **passo** que a fase pede (`nextCourtRoute(rota, fase, foco)`, função pura usada pela quadra e pelo fim do set): a quadra abre o fim do set quando o set fica decidido e abre o resultado quando a partida acaba, mas só com foco; o fim do set volta à quadra quando o próximo set começa e vai direto ao resultado quando a confirmação encerra a partida (o set decisivo grava `SetEnded` e `MatchEnded` juntos). O efeito só roda quando o passo muda, então voltar do fim do set não o abre de novo. O `_layout` da quadra bloqueia o gesto de voltar (`gestureEnabled: false`). O tema (Sol ou Noite) vem do parâmetro `theme` da rota até a E4.10 ter a preferência; sem parâmetro, Sol. O Menu abre **segurando** (800 ms, `HOLD_TO_OPEN_MENU_MS`).
 
 **Retomada.** Decidida **uma vez por abertura do app**, no `DatabaseGate`, junto com o banco (`findResumableCourtSession`: fase `playing` ou `set-decided`). A home entrega o valor uma só vez (`ResumeOnce.take()`) e redireciona; depois de "Sair do modo quadra" a home nova não encontra mais nada e não prende o usuário. Partida encerrada não retoma (a E4.10 trata a próxima). Voltar do Android numa quadra de partida encerrada leva de novo ao resultado; o voltar do fim do set sem histórico (abertura a frio) cai na quadra.
 

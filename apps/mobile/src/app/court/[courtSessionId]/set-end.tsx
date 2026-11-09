@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
+import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import {
   selectCourtPhase,
   selectSetEnd,
@@ -28,14 +29,18 @@ export default function SetEndRoute() {
     [timeline, courtRoster],
   );
   const phase = timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline));
-  const { backOrCourt } = route;
+  const { backOrCourt, replace } = route;
+  const step = nextCourtRoute("set-end", phase, true);
 
-  // Once the set is confirmed the next one is being played; the end of the match is the court's to route.
+  // Confirming the set starts the next one (back to the court) or, for the deciding set, ends the
+  // match: the same confirmation stores both events, so this screen hands over to the result.
   useEffect(() => {
-    if (phase === "playing") {
+    if (step === "go-back") {
       backOrCourt();
+    } else if (step === "open-match-end") {
+      replace("matchEnd");
     }
-  }, [phase, backOrCourt]);
+  }, [step, backOrCourt, replace]);
 
   if (model === null) {
     return null;
