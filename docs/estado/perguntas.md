@@ -10,12 +10,9 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 9. Tema Sol/Noite (E4.1, 07/11/2026): só no modo quadra, como no canvas, ou modo escuro no app todo? **Recomendação e padrão adotado até a resposta: só na quadra.** Fácil de mudar: os temas usam os mesmos papéis.
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
-16. Co-admin (E3.2, 09/11/2026): o que ele pode a menos que o Admin? Opções: (1) faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin; (2) igual ao Admin; (3) só rodadas e convites. **Recomendação e padrão adotado: opção 1.** Só a tabela de permissões da Parte 2 muda.
-17. Validade do link de convite (E3.2, 09/11/2026): (1) até ser revogado; (2) 30 dias; (3) 7 dias. **Recomendação e padrão adotado: opção 1**, porque o link costuma ficar fixado no grupo do WhatsApp.
-18. Entrar pelo link exige aprovação do admin? (E3.2, 09/11/2026): (1) não; (2) sim, com estado e tela que o design não tem. **Recomendação e padrão adotado: opção 1.**
-19. Removido volta pelo mesmo link? (E3.2, 09/11/2026): (1) não, só se o admin readmitir pelo menu "⋯" da tela 19; (2) sim. **Recomendação e padrão adotado: opção 1.**
 
 ## Respondidas
+- **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
 - **Senha mínima, pergunta 12 (08/11/2026):** 6 caracteres, o padrão do Firebase. Nada a ajustar no console. A E4.3 mostra a regra dos 6 na tela de cadastro.
 - **E-mail verificado, pergunta 11 (08/11/2026):** não exigir no login por e-mail e senha. Confirma a decisão da E3.1 (ADR 0036, D3): a API aceita token com `email_verified` falso.
 - **Firebase, pergunta 13 (08/11/2026):** ID do projeto Firebase: `sacou-79493` (08/11/2026). Fica em `Firebase:ProjectId`, no `apps/api/src/Sacou.Api/appsettings.json` (E3.1). Pacote Android: `com.sacou.app`.
