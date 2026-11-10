@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { after, before, describe, test } from "node:test";
+import { after, describe, test } from "node:test";
 
 import { BASE_CONTRACT, readBaseContract } from "./base-contract.mjs";
 
@@ -33,10 +33,7 @@ function createRepository() {
 }
 
 describe("base contract from a git ref (check:api-compat)", () => {
-  let cwd = "";
-  before(() => {
-    cwd = createRepository();
-  });
+  const cwd = createRepository();
   after(() => rmSync(cwd, { recursive: true, force: true }));
 
   test("a missing ref is an error, not an empty base", () => {

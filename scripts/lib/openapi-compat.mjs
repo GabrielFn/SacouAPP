@@ -117,12 +117,18 @@ function shapeOf(document, schema) {
   return { declared, value: resolveSchema(document, withoutNullAlternative(declared)) };
 }
 
+/** The references walked so far, with this one; undefined when it was already walked (a cycle). */
+function visit(schema, seen) {
+  const reference = schema?.$ref ?? withoutNullAlternative(schema ?? {}).$ref;
+  if (reference === undefined) return seen;
+  return seen.has(reference) ? undefined : new Set([...seen, reference]);
+}
+
 /** Walks two schemas side by side; `direction` is "request" or "response". `seen` stops reference cycles. */
 function schemaChanges(context, baseSchema, headSchema, where, seen = new Set()) {
   const { baseDocument, headDocument, direction } = context;
-  const reference = baseSchema?.$ref ?? withoutNullAlternative(baseSchema ?? {}).$ref;
-  if (reference !== undefined && seen.has(reference)) return [];
-  const nextSeen = reference === undefined ? seen : new Set([...seen, reference]);
+  const nextSeen = visit(baseSchema, seen);
+  if (nextSeen === undefined) return [];
   const baseShape = shapeOf(baseDocument, baseSchema);
   const headShape = shapeOf(headDocument, headSchema);
   const base = baseShape.value;
@@ -135,10 +141,11 @@ function schemaChanges(context, baseSchema, headSchema, where, seen = new Set())
       ? [`${where}.${name}: ${direction} field removed`]
       : schemaChanges(context, property, head.properties[name], `${where}.${name}`, nextSeen),
   );
-  const required =
-    direction === "request"
-      ? requestRequiredChanges(base, head, where)
-      : responseRequiredChanges(base, head, where);
+  const required = (direction === "request" ? requestRequiredChanges : responseRequiredChanges)(
+    base,
+    head,
+    where,
+  );
   return [
     ...typeChanges(base, head, where, direction),
     ...nullabilityChanges(baseShape.declared, headShape.declared, where, direction),
