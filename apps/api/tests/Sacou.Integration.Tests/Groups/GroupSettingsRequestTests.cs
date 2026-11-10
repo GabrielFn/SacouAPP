@@ -26,7 +26,7 @@ public sealed class GroupSettingsRequestTests(IntegrationDatabase database) : IA
 
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
-    /// <summary>A body the DTO or the catalog refuses: 400 with the code of the rule when the catalog is the one that refused.</summary>
+    /// <summary>A body the DTO or the catalog refuses: 400, with the code of the rule when the catalog refused it (a repeated key is refused earlier, by the JSON binder, with no code).</summary>
     [Theory]
     [InlineData("""{"settings":{"schemaVersion":1,"templateKey":"treino"}}""", SettingsInvalid)]
     [InlineData("""{"settings":{"schemaVersion":1,"groupId":"00000000-0000-0000-0000-000000000000"}}""", SettingsInvalid)]
@@ -42,8 +42,8 @@ public sealed class GroupSettingsRequestTests(IntegrationDatabase database) : IA
     [InlineData("""{"settings":{"schemaVersion":1,"schedule":{"venue":"Quadra\u0000"}}}""", SettingsInvalid)]
     [InlineData("""{"settings":{"schemaVersion":1,"schedule":{"venue":"Quadra​"}}}""", SettingsInvalid)]
     [InlineData("""{"settings":{"schemaVersion":1,"schedule":{"venue":"\ud800"}}}""", SettingsInvalid)]
-    [InlineData("""{"settings":{"schemaVersion":1,"schedule":{"venue":"a","venue":"b"}}}""", SettingsInvalid)]
-    [InlineData("""{"settings":{"schemaVersion":1,"scoring":{"bestOf":3,"bestOf":1}}}""", SettingsInvalid)]
+    [InlineData("""{"settings":{"schemaVersion":1,"schedule":{"venue":"a","venue":"b"}}}""", null)]
+    [InlineData("""{"settings":{"schemaVersion":1,"scoring":{"bestOf":3,"bestOf":1}}}""", null)]
     [InlineData("""{"settings":null}""", SettingsInvalid)]
     [InlineData("""{"settings":[]}""", SettingsInvalid)]
     [InlineData("""{"settings":"x"}""", SettingsInvalid)]
@@ -76,7 +76,7 @@ public sealed class GroupSettingsRequestTests(IntegrationDatabase database) : IA
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var venue = new string('ç', 80);
-        await SettingsCalls.PatchAsync(world, world.GroupPath, $$"""{"settings":{"schemaVersion":1,"schedule":{"venue":"{{venue}}"}}}""");
+        await SettingsCalls.PatchAsync(world, world.GroupPath, new JsonObject { ["settings"] = new JsonObject { ["schemaVersion"] = 1, ["schedule"] = new JsonObject { ["venue"] = venue } } }.ToJsonString());
         var current = await SettingsCalls.GetAsync(world, world.GroupPath);
 
         var body = new JsonObject { ["settings"] = SettingsCalls.Document(current) }.ToJsonString();

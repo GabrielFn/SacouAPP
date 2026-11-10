@@ -56,6 +56,7 @@ Família nova entra nesta tabela. **Ordem das travas:** grupo (`FOR UPDATE` de D
 - **Último admin que apaga a conta (E3.16):** a exclusão não pode ser bloqueada (exigência das lojas). A E3.16 decide entre promover o co-admin ou o membro mais antigo, ou deixar o grupo sem admin.
 - **Sem nome na lista de membros:** a E3.2 não guarda nome; o perfil é da E3.17.
 - **`MemberId` como `Guid` entre módulos:** perde a checagem de tipo entre fronteiras; rever na E3.4.
+- **Permissão `ManageSettings` (E3.3, pergunta 23):** Admin e Co-admin sim, Placar e Jogador não; ver a configuração é `ViewGroup`. A tabela passa a ter 4 papéis × 10 permissões (40 combinações). A configuração e os modelos salvos têm a própria trava, na linha de `groups.group_settings` ([ADR 0041](0041-configuracao-herdada-e-modelos.md), D5): não trava `groups.groups`, então **ordem das travas** (se uma escrita futura precisar das duas): grupo antes da configuração, e as duas antes da pessoa.
 - **Trava por grupo e trava por pessoa:** se o Sessions travar o mesmo grupo (E3.4), combinar a ordem (grupo antes da rodada).
 - **Link sem expiração:** um link vazado continua servindo até ser revogado. O admin vê quem entrou, remove, e o removido não volta; "gerar novo link" no app revoga o antigo (E4.5).
 - **Token mostrado uma vez:** o app guarda o link que gerou (armazenamento seguro do aparelho, E4.5); noutro aparelho, gera outro.

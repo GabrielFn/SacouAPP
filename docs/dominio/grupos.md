@@ -24,7 +24,7 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 
 ## Permissões
 
-Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão.
+Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão (4 papéis × 10 permissões). `ManageSettings` (E3.3) é do Co-admin também, pelo padrão adotado da pergunta 23; ver a configuração é `ViewGroup`, então o jogador vê "25 pontos · 1 set".
 
 | Permissão (`GroupPermission`) | Admin | Co-admin | Placar | Jogador |
 |---|---|---|---|---|
@@ -37,6 +37,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `RemoveMember` (remover Placar ou Jogador) | sim | sim | não | não |
 | `RemoveAdmin` (remover Co-admin ou Admin) | sim | não | não | não |
 | `Leave` (sair do grupo) | sim* | sim | sim | sim |
+| `ManageSettings` (mudar a configuração padrão, aplicar e salvar modelos) | sim | sim | não | não |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
 
@@ -49,12 +50,13 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | Membros ativos por grupo | 300 | `groups.member-limit` |
 | Grupos ativos por pessoa | 100 | `groups.membership-limit` |
 | Convites válidos por grupo (revogado e expirado não contam) | 20 | `groups.invite-limit` |
+| Modelos salvos por grupo (teto técnico; o limite do plano grátis é da E3.15) | 20 | `groups.template-limit` |
 
 ## Rotas
 
 | Rota | Permissão | Sucesso |
 |---|---|---|
-| `POST /v1/groups` `{ name }` | Usuário registrado | 201 `{ groupId, memberId }` |
+| `POST /v1/groups` `{ name, templateKey? }` | Usuário registrado | 201 `{ groupId, memberId }`; sem `templateKey`, o grupo nasce `do-zero` |
 | `GET /v1/groups` | Usuário registrado | 200 `[{ groupId, name, role, memberType }]`, só ativos, na ordem de entrada |
 | `GET /v1/groups/{groupId}` | `ViewGroup` | 200 `{ groupId, name, memberId, role, memberType, activeMembers }` |
 | `PATCH /v1/groups/{groupId}` `{ name }` | `RenameGroup` | 200 `{ groupId, name }` |
@@ -66,10 +68,18 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `POST /v1/groups/{groupId}/invites` | `ManageInvites` | 201 `{ inviteId, token, expiresAt }`, a única vez que o token sai |
 | `GET /v1/groups/{groupId}/invites` | `ManageInvites` | 200 `[{ inviteId, createdAt, createdBy, expiresAt, useCount }]`, só os válidos, do mais antigo ao mais novo |
 | `DELETE /v1/groups/{groupId}/invites/{inviteId}` | `ManageInvites` | 204, também para um link já revogado ou expirado |
+| `GET /v1/groups/{groupId}/settings` | `ViewGroup` | 200 `{ schemaVersion, settings, templateKey, savedTemplateId, updatedAt }` |
+| `PATCH /v1/groups/{groupId}/settings` `{ settings }` | `ManageSettings` | 200, o mesmo corpo. `settings` é uma camada parcial (com `schemaVersion`); `null` numa folha é 400 |
+| `POST /v1/groups/{groupId}/settings/apply-template` `{ templateKey }` ou `{ savedTemplateId }` | `ManageSettings` | 200, o mesmo corpo; os dois ids, ou nenhum, é 400 |
+| `GET /v1/groups/{groupId}/templates` | `ManageSettings` | 200 `[{ templateId, name, createdAt }]`, do mais antigo ao mais novo |
+| `POST /v1/groups/{groupId}/templates` `{ name }` | `ManageSettings` | 201 `{ templateId, name, createdAt }`, o retrato dos campos que não são fato |
+| `DELETE /v1/groups/{groupId}/templates/{templateId}` | `ManageSettings` | 204; a segunda vez e o modelo de outro grupo dão 404 |
 | `POST /v1/invites/preview` `{ token }` | Usuário registrado | 200 `{ groupName, activeMembers, alreadyMember }` |
 | `POST /v1/invites/accept` `{ token }` | Usuário registrado | 201 `{ groupId, memberId }` (entrou ou voltou) ou 200 (já era membro ativo) |
 
 As escritas de membro (papel, tipo, remover, sair) rodam numa transação que trava a linha do grupo (`FOR UPDATE`), carrega o grupo inteiro e aplica a regra: duas escritas no mesmo grupo nunca passam juntas pela regra do último admin (ADR 0040, D8). `role` e `memberType` são obrigatórios no corpo; faltar, `null`, número, valor desconhecido ou dois valores com vírgula dão 400.
+
+A configuração (E3.3, [ADR 0041](../arquitetura/adr/0041-configuracao-herdada-e-modelos.md)) mora em `groups.group_settings` (uma linha por grupo, `jsonb` com `schemaVersion`) e os modelos salvos em `groups.saved_templates`. Toda escrita de configuração ou de modelo roda numa transação que trava a linha de `group_settings` (`FOR UPDATE`, criada antes para um grupo antigo que não tenha), confere sob a trava que quem age ainda é membro ativo com `ManageSettings` e só então aplica a mudança: o `PATCH` é parcial e mesclado sob a trava, então dois admins mexendo em blocos diferentes não perdem a mudança um do outro, e o teto de 20 modelos não estoura por corrida. O modelo salvo é sempre buscado por `(group_id, id)`. A resposta nunca traz quem mudou nem quem criou.
 
 ## Convite por link e QR
 
@@ -97,3 +107,7 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.invite-not-found` | 404 | O convite a revogar não é deste grupo: de outro grupo e inexistente são iguais |
 | `groups.invite-invalid` | 404 | Link revogado, expirado, inexistente ou malformado, todos iguais |
 | `groups.member-removed` | 403 | Quem foi removido tenta voltar pelo link |
+| `groups.settings-invalid` | 400 | Camada ou corpo fora do catálogo (folha desconhecida, tipo ou faixa errada, `null`, texto inválido, JSON malformado); a resposta não diz o caminho |
+| `groups.template-not-found` | 400 / 404 | Criar grupo com chave desconhecida (400); aplicar ou apagar modelo inexistente ou de outro grupo (404) |
+| `groups.template-name-invalid` | 400 | Nome do modelo fora de 1 a 40 caracteres visíveis |
+| `groups.template-limit` | 409 | O grupo já tem 20 modelos salvos |
