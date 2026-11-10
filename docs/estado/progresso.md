@@ -50,6 +50,8 @@ Em [`pendencias.md`](pendencias.md). Só o orquestrador lê o arquivo inteiro; o
 
 ## Lembretes para o Gabriel
 
+- E4.9: teste no celular adiado pelo Gabriel em 09/11/2026 ("não vou testar com o celular hoje"). Passo a passo em `docs/operacao/teste-no-celular.md`; a E4.9 só vira "Feita" depois dele.
+
 - E0.6: rodar o passo 3 de `docs/operacao/postgres-local.md` (Docker desligado).
 - Internacionalização: citar no relatório do marco, até ele decidir quando entra (`docs/ideias.md`).
 

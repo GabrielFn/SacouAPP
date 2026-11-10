@@ -11,3 +11,5 @@ Verifique: autenticação e autorização por recurso, validação de entrada, s
 Devolva **APROVADO** ou **REPROVADO** com achados (arquivo, risco, correção) e diga quais arquivos de `docs/seguranca/` precisam ser atualizados. Achados graves bloqueiam o merge. Não altere o código.
 
 Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
+
+Para rodar comandos, use a seção da tarefa em `.claude/skills/bateria/SKILL.md`.

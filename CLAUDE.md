@@ -62,7 +62,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 3. **Uma revisão por parte depois da primeira.** Em tarefa sensível, a primeira parte tem `revisor` e `revisor-seguranca` separados. Nas partes seguintes, um único agente Opus faz as duas revisões.
 4. **Menos partes.** Só dividir uma tarefa quando o PR passaria de cerca de 1.500 linhas alteradas.
 5. **Entrega completa.** Antes de devolver, o desenvolvedor roda a bateria completa (build, lint, testes e portões) **depois do último commit** e espera a CI verde.
-6. **Saídas e relatórios curtos.** Comandos com saída resumida (`tail`, modo silencioso); o testador escolhe as 5 ou 6 sabotagens mais importantes; relatórios de até 15 linhas, com achados numerados.
+6. **Saídas e relatórios curtos** (skills `bateria` e `sabotagem` em `.claude/skills/`). Comandos com saída resumida (`tail`, modo silencioso); o testador escolhe as 5 ou 6 sabotagens mais importantes; relatórios de até 15 linhas, com achados numerados.
 
 ## Autonomia
 

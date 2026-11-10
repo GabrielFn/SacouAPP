@@ -15,3 +15,5 @@ Confira cada item da definição de pronto, a arquitetura (domínio sem infraest
 Devolva um veredito **APROVADO** ou **REPROVADO** e uma lista de achados, cada um com arquivo, linha, problema e correção sugerida, ordenados por gravidade. Não altere o código.
 
 Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
+
+Para rodar comandos, use a seção da tarefa em `.claude/skills/bateria/SKILL.md`.

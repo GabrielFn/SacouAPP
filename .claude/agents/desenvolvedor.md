@@ -18,3 +18,5 @@ Em tarefas do app (`apps/mobile`), leia também `docs/padroes/frontend.md`: esta
 Ao terminar, devolva: o que foi feito, arquivos alterados, como testar e qualquer desvio do plano.
 
 Economia de tokens (`CLAUDE.md`): leia só o que este arquivo e o brief do orquestrador indicam, com saída de comando resumida, e devolva um relatório de até 15 linhas, com achados numerados.
+
+Antes de entregar, siga `.claude/skills/bateria/SKILL.md` (bateria completa depois do último commit, saída resumida).
