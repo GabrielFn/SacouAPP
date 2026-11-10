@@ -1,4 +1,5 @@
 using Sacou.Modules.Groups.Domain.Groups;
+using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Shared.Results;
 
@@ -9,6 +10,12 @@ internal sealed record MemberGroup(GroupId GroupId, GroupName Name, GroupMember 
 
 /// <summary>What the group detail shows besides the caller's membership.</summary>
 internal sealed record GroupOverview(GroupId GroupId, GroupName Name, int ActiveMembers);
+
+/// <summary>What the invite preview shows: the invite, to check it is still valid, and the group it opens.</summary>
+internal sealed record InvitePreview(GroupInvite Invite, GroupName GroupName, int ActiveMembers, bool AlreadyMember);
+
+/// <summary>An acceptance: the invite the token found, if any (for the log, never the token), and what happened.</summary>
+internal sealed record InviteAttempt(InviteId? InviteId, Result<GroupChange> Change);
 
 /// <summary>
 /// Where groups live. Every read that a route uses goes by the group id from the route and, for a member,
@@ -44,7 +51,22 @@ internal interface IGroupStore
     /// <c>SELECT ... FOR UPDATE</c> on the group row, loads the whole aggregate, applies
     /// <paramref name="change"/> and writes the members it changed. Writes of one group run one after another,
     /// so two admins demoting each other cannot both pass the last-admin rule. A missing group is
-    /// <c>groups.group-not-found</c>; a failed change writes nothing.
+    /// <c>groups.group-not-found</c>; a failed change writes nothing. The aggregate holds the invites too, and
+    /// every member and invite the change returns is written whole, new or changed, under the same lock.
     /// </summary>
     Task<Result<GroupChange>> ExecuteInGroupLockAsync(GroupId group, Func<Group, Result<GroupChange>> change, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The acceptance, in one transaction: the invite by its hash (none: <c>groups.invite-invalid</c>), then
+    /// the group lock, then the per-person lock (group before person, ADR 0040, D7), the person's active
+    /// groups, and <paramref name="accept"/> on the locked aggregate. The member is written only here.
+    /// </summary>
+    Task<InviteAttempt> AcceptInviteAsync(
+        InviteTokenHash tokenHash, UserId person, Func<Group, InviteId, int, Result<GroupChange>> accept, CancellationToken cancellationToken);
+
+    /// <summary>The invites still valid at <paramref name="now"/>, oldest first.</summary>
+    Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken);
+
+    /// <summary>The invite with that hash and its group, without a lock; null when no invite has it.</summary>
+    Task<InvitePreview?> FindInvitePreviewAsync(InviteTokenHash tokenHash, UserId person, CancellationToken cancellationToken);
 }

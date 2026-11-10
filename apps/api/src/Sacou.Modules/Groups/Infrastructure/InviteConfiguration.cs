@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Sacou.Modules.Groups.Infrastructure;
 
 /// <summary>
-/// <c>groups.invites</c>, created with the other tables so E3.2 has a single migration; the invite domain
-/// arrives in part 3. Only the 32-byte SHA-256 of the token, behind a unique index (ADR 0040, D5).
+/// <c>groups.invites</c>, created with the other tables so E3.2 has a single migration. Only the 32-byte
+/// SHA-256 of the token, behind a unique index (ADR 0040, D10).
 /// </summary>
 internal sealed class InviteConfiguration : IEntityTypeConfiguration<InviteRow>
 {
     public const string Table = "invites";
-    public const int TokenHashLength = 32;
+    public const int TokenHashLength = Domain.Invites.InviteTokenHash.Length;
 
     private const string TimestampType = "timestamp with time zone";
 
