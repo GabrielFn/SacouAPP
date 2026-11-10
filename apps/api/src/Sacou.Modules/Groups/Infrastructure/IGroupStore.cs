@@ -38,4 +38,13 @@ internal interface IGroupStore
     /// in the same UPDATE: a demotion that lands after the access filter wins. False when nothing changed.
     /// </summary>
     Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Every write that changes members (ADR 0040, D8): one transaction that starts with
+    /// <c>SELECT ... FOR UPDATE</c> on the group row, loads the whole aggregate, applies
+    /// <paramref name="change"/> and writes the members it changed. Writes of one group run one after another,
+    /// so two admins demoting each other cannot both pass the last-admin rule. A missing group is
+    /// <c>groups.group-not-found</c>; a failed change writes nothing.
+    /// </summary>
+    Task<Result<GroupChange>> ExecuteInGroupLockAsync(GroupId group, Func<Group, Result<GroupChange>> change, CancellationToken cancellationToken);
 }

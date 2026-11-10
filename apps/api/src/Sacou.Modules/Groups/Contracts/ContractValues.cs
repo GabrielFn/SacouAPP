@@ -21,4 +21,20 @@ internal static class ContractValues
         DomainType.DropIn => MemberType.DropIn,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Every member type needs a public twin."),
     };
+
+    public static DomainRole ToDomain(GroupRole role) => role switch
+    {
+        GroupRole.Admin => DomainRole.Admin,
+        GroupRole.CoAdmin => DomainRole.CoAdmin,
+        GroupRole.Scorekeeper => DomainRole.Scorekeeper,
+        GroupRole.Player => DomainRole.Player,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "Every public role needs a domain twin."),
+    };
+
+    public static DomainType ToDomain(MemberType type) => type switch
+    {
+        MemberType.Regular => DomainType.Regular,
+        MemberType.DropIn => DomainType.DropIn,
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Every public member type needs a domain twin."),
+    };
 }

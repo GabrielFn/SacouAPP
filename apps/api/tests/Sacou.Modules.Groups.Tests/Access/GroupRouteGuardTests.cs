@@ -15,8 +15,8 @@ public sealed class GroupRouteGuardTests
 {
     private const string Planted = "/v1/groups/{groupId:guid}/planted";
 
-    /// <summary>Get, rename and list members: the guard must see them, or it checks nothing.</summary>
-    private const int GroupRoutesInPart1 = 3;
+    /// <summary>Get, rename, list members, change role and type, remove and leave: the guard must see them, or it checks nothing.</summary>
+    private const int GroupRoutesUpToPart2 = 7;
 
     [Fact]
     public async Task RealApi_EveryRouteIsGuardedOrListed()
@@ -25,7 +25,7 @@ public sealed class GroupRouteGuardTests
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints));
-        Assert.Equal(GroupRoutesInPart1, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
+        Assert.Equal(GroupRoutesUpToPart2, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
     }
 
     [Fact]

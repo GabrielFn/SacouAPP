@@ -26,7 +26,7 @@ public enum GroupActor
 /// <summary>
 /// A new group with one person per actor, built for one test so no row depends on another. The admin
 /// creates the group through the API; the other members are written straight to the table, because the
-/// routes that add them arrive in parts 2 and 3 of E3.2. Each actor is a new user.
+/// route that adds them (the invite) arrives in part 3 of E3.2. Each actor is a new user.
 /// </summary>
 internal sealed class GroupWorld
 {
@@ -38,6 +38,7 @@ internal sealed class GroupWorld
     private readonly HttpClient client;
     private readonly Dictionary<GroupActor, string> subjects = [];
     private readonly Dictionary<GroupActor, Guid> users = [];
+    private readonly Dictionary<GroupActor, Guid> members = [];
 
     private GroupWorld(ApiWithDatabase api, HttpClient client)
     {
@@ -53,6 +54,16 @@ internal sealed class GroupWorld
 
     public IReadOnlyDictionary<GroupActor, string> Subjects => subjects;
 
+    /// <summary>
+    /// Each actor's member id: in this group for the members (active or not), and in the other group for
+    /// <see cref="GroupActor.OutsiderMember"/>, its admin.
+    /// </summary>
+    public IReadOnlyDictionary<GroupActor, Guid> MemberIds => members;
+
+    public Guid OtherGroupId { get; private set; }
+
+    public string MemberPath(Guid memberId) => $"{GroupPath}/members/{memberId}";
+
     public static async Task<GroupWorld> CreateAsync(ApiWithDatabase api, HttpClient client, string groupName = "Racha da matriz")
     {
         var world = new GroupWorld(api, client);
@@ -65,22 +76,23 @@ internal sealed class GroupWorld
             }
         }
 
-        world.GroupId = await world.CreateGroupAsync(GroupActor.Admin, groupName);
+        (world.GroupId, world.members[GroupActor.Admin]) = await world.CreateGroupWithMemberAsync(GroupActor.Admin, groupName);
         await world.InsertMemberAsync(GroupActor.CoAdmin, "co_admin", "active");
         await world.InsertMemberAsync(GroupActor.Scorekeeper, "scorekeeper", "active");
         await world.InsertMemberAsync(GroupActor.Player, "player", "active");
         await world.InsertMemberAsync(GroupActor.LeftMember, "admin", "left");
         await world.InsertMemberAsync(GroupActor.RemovedMember, "player", "removed");
-        await world.CreateGroupAsync(GroupActor.OutsiderMember, "Outro racha");
+        (world.OtherGroupId, world.members[GroupActor.OutsiderMember]) = await world.CreateGroupWithMemberAsync(GroupActor.OutsiderMember, "Outro racha");
         return world;
     }
 
-    public async Task<Guid> CreateGroupAsync(GroupActor actor, string name)
+    public async Task<Guid> CreateGroupAsync(GroupActor actor, string name) => (await CreateGroupWithMemberAsync(actor, name)).GroupId;
+
+    /// <summary>One more active member with a new account, for a test that needs a target with a given role.</summary>
+    public async Task<Guid> AddMemberAsync(string role)
     {
-        using var response = await SendAsync(actor, HttpMethod.Post, GroupsPath, $$"""{"name":{{JsonValue.Create(name).ToJsonString()}}}""");
-        response.EnsureSuccessStatusCode();
-        var body = await response.Content.ReadFromJsonAsync<JsonObject>(TestContext.Current.CancellationToken);
-        return body!["groupId"]!.GetValue<Guid>();
+        var user = await RegisterAsync("uid-" + Guid.NewGuid().ToString("N"));
+        return await InsertRowAsync(GroupId, user, role, "active");
     }
 
     public async Task<HttpResponseMessage> SendAsync(GroupActor actor, HttpMethod method, string path, string? json = null)
@@ -99,9 +111,27 @@ internal sealed class GroupWorld
         return await client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    /// <summary>Writes one member row, as parts 2 and 3 will through their routes.</summary>
+    /// <summary>Writes one member row, as part 3 will through the invite.</summary>
     public async Task InsertMemberAsync(GroupActor actor, string role, string status, Guid? groupId = null)
     {
+        var member = await InsertRowAsync(groupId ?? GroupId, users[actor], role, status);
+        if (groupId is null)
+        {
+            members[actor] = member;
+        }
+    }
+
+    private async Task<(Guid GroupId, Guid MemberId)> CreateGroupWithMemberAsync(GroupActor actor, string name)
+    {
+        using var response = await SendAsync(actor, HttpMethod.Post, GroupsPath, $$"""{"name":{{JsonValue.Create(name).ToJsonString()}}}""");
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>(TestContext.Current.CancellationToken);
+        return (body!["groupId"]!.GetValue<Guid>(), body["memberId"]!.GetValue<Guid>());
+    }
+
+    private async Task<Guid> InsertRowAsync(Guid groupId, Guid user, string role, string status)
+    {
+        var id = Guid.CreateVersion7();
         await using var connection = new NpgsqlConnection(api.ConnectionString);
         await connection.OpenAsync(TestContext.Current.CancellationToken);
         await using var insert = new NpgsqlCommand(
@@ -110,14 +140,15 @@ internal sealed class GroupWorld
             VALUES (@id, @group, @user, @role, 'drop_in', @status, @now, CASE WHEN @status = 'active' THEN NULL ELSE @now END)
             """,
             connection);
-        insert.Parameters.AddWithValue("id", Guid.CreateVersion7());
-        insert.Parameters.AddWithValue("group", groupId ?? GroupId);
-        insert.Parameters.AddWithValue("user", users[actor]);
+        insert.Parameters.AddWithValue("id", id);
+        insert.Parameters.AddWithValue("group", groupId);
+        insert.Parameters.AddWithValue("user", user);
         insert.Parameters.AddWithValue("role", role);
         insert.Parameters.AddWithValue("status", status);
         // The host clock, as the API uses: the database clock could order members differently.
         insert.Parameters.AddWithValue("now", DateTimeOffset.UtcNow);
         await insert.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        return id;
     }
 
     private string TokenFor(string subject) =>

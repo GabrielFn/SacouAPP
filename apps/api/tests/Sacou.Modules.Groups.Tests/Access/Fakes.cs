@@ -43,4 +43,7 @@ internal sealed class FakeGroupStore : IGroupStore
 
     public Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
+
+    public Task<Result<GroupChange>> ExecuteInGroupLockAsync(GroupId group, Func<Group, Result<GroupChange>> change, CancellationToken cancellationToken) =>
+        throw new NotSupportedException();
 }
