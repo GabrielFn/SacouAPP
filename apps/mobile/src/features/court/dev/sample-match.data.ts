@@ -29,6 +29,12 @@ export const SAMPLE_QUEUE_PLAYERS: readonly string[] = [
   "c0000000-0000-4000-8000-000000000002",
 ];
 
+/** The libero of the "with libero" sample: Laranja, covering both middle blockers. */
+export const SAMPLE_LIBERO_ID = "a0000000-0000-4000-8000-000000000007";
+
+/** The lineup indexes of the two middle blockers of a 5x1 (S, OH1, MB1, OPP, OH2, MB2). */
+const SAMPLE_MIDDLE_BLOCKER_INDEXES = [2, 5] as const;
+
 export const SAMPLE_MATCH_ID = "f0000000-0000-4000-8000-000000000001";
 
 /** One set of 25, the default match (decisoes.md). */
@@ -68,4 +74,23 @@ export const SAMPLE_MATCH_BEST_OF_THREE: MatchStartedPayload = {
 export const SAMPLE_MATCH_ONE_SET: MatchStartedPayload = {
   ...SAMPLE_MATCH_BEST_OF_THREE,
   scoring: SAMPLE_SCORING_ONE_SET,
+};
+
+/** Best of three with a libero for Laranja, covering both middle blockers (`replacedIndexes [2, 5]`). */
+export const SAMPLE_MATCH_WITH_LIBERO: MatchStartedPayload = {
+  ...SAMPLE_MATCH_BEST_OF_THREE,
+  rotations: {
+    a: {
+      bench: [],
+      libero: { memberId: SAMPLE_LIBERO_ID, replacedIndexes: SAMPLE_MIDDLE_BLOCKER_INDEXES },
+      lineup: SAMPLE_ORANGE_LINEUP,
+      setterZone: 1,
+      system: "5x1",
+    },
+    b: SAMPLE_MATCH_BEST_OF_THREE.rotations.b,
+  },
+  teams: {
+    a: { memberIds: [...SAMPLE_ORANGE_LINEUP, SAMPLE_LIBERO_ID] },
+    b: { memberIds: SAMPLE_BLUE_LINEUP },
+  },
 };

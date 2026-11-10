@@ -4,10 +4,16 @@ import { strings } from "../../../strings/pt-BR";
 import type { CourtRoster, TeamAppearance } from "../ports/court-roster";
 import {
   SAMPLE_BLUE_LINEUP,
+  SAMPLE_LIBERO_ID,
   SAMPLE_ORANGE_LINEUP,
   SAMPLE_QUEUE_PLAYERS,
 } from "./sample-match.data";
-import { SAMPLE_BLUE_NAMES, SAMPLE_ORANGE_NAMES, SAMPLE_QUEUE_NAMES } from "./sample-names.data";
+import {
+  SAMPLE_BLUE_NAMES,
+  SAMPLE_LIBERO_NAME,
+  SAMPLE_ORANGE_NAMES,
+  SAMPLE_QUEUE_NAMES,
+} from "./sample-names.data";
 
 const SAMPLE_TEAMS: Readonly<Record<TeamSide, TeamAppearance>> = {
   a: { label: strings.court.roster.orange, color: "orange" },
@@ -24,6 +30,7 @@ function namesById(
 const SAMPLE_NAMES: ReadonlyMap<MemberId, string> = new Map([
   ...namesById(SAMPLE_ORANGE_LINEUP, SAMPLE_ORANGE_NAMES),
   ...namesById(SAMPLE_BLUE_LINEUP, SAMPLE_BLUE_NAMES),
+  [SAMPLE_LIBERO_ID, SAMPLE_LIBERO_NAME],
   ...namesById(SAMPLE_QUEUE_PLAYERS, SAMPLE_QUEUE_NAMES),
 ]);
 

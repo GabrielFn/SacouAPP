@@ -37,6 +37,8 @@ export const courtStrings = {
     setPointTag: "Set point",
     setterBadge: "L",
     setterLabel: "levantador",
+    liberoBadge: "Lí",
+    liberoLabel: "líbero",
     teamLetter: { a: "A", b: "B" },
   },
   strip: {
@@ -102,6 +104,7 @@ export const courtStrings = {
     title: "Modo quadra (desenvolvimento)",
     newOneSet: "Nova partida (1 set)",
     newBestOfThree: "Nova partida (melhor de 3)",
+    newWithLibero: "Nova partida (com líbero)",
     themeSun: "Tema Sol",
     themeNight: "Tema Noite",
     resume: "Continuar partida",
