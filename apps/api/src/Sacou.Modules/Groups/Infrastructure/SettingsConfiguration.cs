@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sacou.Modules.Groups.Domain.Settings;
@@ -30,17 +31,13 @@ internal sealed class GroupSettingsConfiguration : IEntityTypeConfiguration<Grou
         });
         builder.HasKey(row => row.GroupId).HasName("pk_group_settings");
         builder.Property(row => row.GroupId).HasColumnName("group_id").ValueGeneratedNever();
-        builder.Property(row => row.SchemaVersion).HasColumnName("schema_version");
-        builder.Property(row => row.Settings).HasColumnName("settings").HasColumnType("jsonb");
+        SettingsKeys.MapDocument(builder, row => row.SchemaVersion, row => row.Settings);
         builder.Property(row => row.TemplateKey).HasColumnName("template_key").HasColumnType("text");
         builder.Property(row => row.SavedTemplateId).HasColumnName("saved_template_id");
         builder.Property(row => row.UpdatedAt).HasColumnName("updated_at").HasColumnType(TimestampType);
         builder.Property(row => row.UpdatedByMemberId).HasColumnName("updated_by_member_id");
 
-        builder.HasOne<GroupRow>().WithMany().HasForeignKey(row => row.GroupId)
-            .HasConstraintName("fk_group_settings_groups").OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<MemberRow>().WithMany().HasForeignKey(row => row.UpdatedByMemberId)
-            .HasConstraintName("fk_group_settings_members").OnDelete(DeleteBehavior.Restrict);
+        SettingsKeys.ReferToGroupAndMember(builder, row => row.GroupId, row => row.UpdatedByMemberId, "fk_group_settings_groups", "fk_group_settings_members");
         builder.HasIndex(row => row.UpdatedByMemberId).HasDatabaseName("ix_group_settings_updated_by_member_id");
     }
 }
@@ -64,16 +61,38 @@ internal sealed class SavedTemplateConfiguration : IEntityTypeConfiguration<Save
         builder.Property(row => row.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(row => row.GroupId).HasColumnName("group_id");
         builder.Property(row => row.Name).HasColumnName("name").HasColumnType("text");
-        builder.Property(row => row.SchemaVersion).HasColumnName("schema_version");
-        builder.Property(row => row.Settings).HasColumnName("settings").HasColumnType("jsonb");
+        SettingsKeys.MapDocument(builder, row => row.SchemaVersion, row => row.Settings);
         builder.Property(row => row.CreatedAt).HasColumnName("created_at").HasColumnType(TimestampType);
         builder.Property(row => row.CreatedByMemberId).HasColumnName("created_by_member_id");
 
-        builder.HasOne<GroupRow>().WithMany().HasForeignKey(row => row.GroupId)
-            .HasConstraintName("fk_saved_templates_groups").OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<MemberRow>().WithMany().HasForeignKey(row => row.CreatedByMemberId)
-            .HasConstraintName("fk_saved_templates_members").OnDelete(DeleteBehavior.Restrict);
+        SettingsKeys.ReferToGroupAndMember(builder, row => row.GroupId, row => row.CreatedByMemberId, "fk_saved_templates_groups", "fk_saved_templates_members");
         builder.HasIndex(row => row.GroupId).HasDatabaseName("ix_saved_templates_group");
         builder.HasIndex(row => row.CreatedByMemberId).HasDatabaseName("ix_saved_templates_created_by_member_id");
+    }
+}
+
+/// <summary>What both settings tables share: the versioned document and the foreign keys to the group and to the member who wrote the row.</summary>
+internal static class SettingsKeys
+{
+    public static void MapDocument<TRow>(
+        EntityTypeBuilder<TRow> builder, Expression<Func<TRow, short>> schemaVersion, Expression<Func<TRow, string>> settings)
+        where TRow : class
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.Property(schemaVersion).HasColumnName("schema_version");
+        builder.Property(settings).HasColumnName("settings").HasColumnType("jsonb");
+    }
+
+    public static void ReferToGroupAndMember<TRow>(
+        EntityTypeBuilder<TRow> builder,
+        Expression<Func<TRow, object?>> group,
+        Expression<Func<TRow, object?>> member,
+        string groupKey,
+        string memberKey)
+        where TRow : class
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.HasOne<GroupRow>().WithMany().HasForeignKey(group).HasConstraintName(groupKey).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<MemberRow>().WithMany().HasForeignKey(member).HasConstraintName(memberKey).OnDelete(DeleteBehavior.Restrict);
     }
 }
