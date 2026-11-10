@@ -40,6 +40,7 @@
 
 ## Em andamento
 
+- E4.4: plano em `docs/estado/tarefas/E4.4.md` (branch `task/E4.4-home-groups`, worktree `D:\projetos\SacouAPP-E4.9`), ADR 0044 (abas com `expo-router/ui`). Desenvolvedor Sonnet, não sensível. Fecha com lacunas (rodada, presença, pagamento, Pro, AO VIVO e notificações têm dona em outras tarefas). Perguntas 28 e 29 com padrão adotado. Rodar antes da E4.5 (mesmos arquivos).
 - Próxima na API: E3.4 (rodadas, recorrência, presença e espera com concorrência).
 - E4.9 (M4, adiantada com o ok do Gabriel; plano em 4 partes em `docs/estado/tarefas/E4.9.md`, ADR 0038). Parte 1 (log local e controlador) feita: PR #44 (Sonnet; revisor reprovou o ciclo 1 e aprovou o ciclo 2; testador passou). Parte 2 (telas 09 e 10) feita: PR #45 (Sonnet; revisor reprovou os ciclos 1 e 2 (preso na quadra, rótulo falso do cadeado; depois tela em branco no fim da partida) e aprovou o ciclo 3; testador passou e fechou 5 sabotagens). Parte 3 (trava, tela ligada, vibração, medição do Hermes, perfil EAS `preview`) feita: PR #48, Sonnet; revisor reprovou o ciclo 1 (rótulo do cadeado, permissões do Android) e o orquestrador conferiu o diff das correções; testador passou. Próximo: APK pelo EAS e roteiro de 10 minutos no celular do Gabriel (`docs/operacao/teste-no-celular.md`); Parte 4 (líbero no placar, selo "Lí", resposta 14) feita: PR #51, Sonnet; revisor aprovou com baixos, testador passou. Só vira "Feita" depois do roteiro no celular do Gabriel (Parte 3, APK pelo EAS).
 

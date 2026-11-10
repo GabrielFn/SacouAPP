@@ -14,6 +14,8 @@
 21. Modelos prontos (E3.3, 10/11/2026): o que cada um (Pelada, Racha organizado, Treino, Areia rei da quadra, Do zero) liga. **Padrão adotado:** a tabela do D4 em `docs/estado/tarefas/E3.3.md`. Fácil de mudar: é um JSON.
 22. Modelo salvo (E3.3, 10/11/2026): "Aplicar modelo" em "Como jogamos" troca os padrões do grupo, sem mexer em dia, horário, local, vagas e valores. **Recomendação e padrão adotado.**
 23. Co-admin edita "Como jogamos" (E3.3, 10/11/2026)? **Recomendação e padrão adotado: sim**, coerente com a resposta 16.
+28. Saudação do Início (E4.4, 10/11/2026): "Fala!" sem o nome até existir o perfil (E3.17). **Recomendação e padrão adotado.**
+29. Entrada das notificações (E4.4, 10/11/2026): um sino no cabeçalho do Início abre a tela 28; o canvas não tem esse sino. **Recomendação e padrão adotado.**
 
 ## Respondidas
 - **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
