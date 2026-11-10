@@ -1,3 +1,4 @@
+using Sacou.Shared.Members;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Shared.Results;

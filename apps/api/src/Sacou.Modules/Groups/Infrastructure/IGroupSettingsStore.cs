@@ -1,6 +1,6 @@
+using Sacou.Shared.Members;
 using System.Collections.Immutable;
 using Sacou.Modules.Groups.Domain.Groups;
-using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Modules.Groups.Domain.Templates;
 using Sacou.Shared.Results;

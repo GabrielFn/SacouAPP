@@ -1,9 +1,9 @@
+using Sacou.Shared.Members;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Modules.Groups.Access;
-using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Modules.Groups.Infrastructure;
 

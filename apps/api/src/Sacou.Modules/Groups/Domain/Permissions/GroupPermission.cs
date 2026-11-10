@@ -13,4 +13,6 @@ internal enum GroupPermission
     RemoveAdmin,
     Leave,
     ManageSettings,
+    ManageRounds,
+    RespondAttendance,
 }

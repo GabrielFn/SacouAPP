@@ -19,6 +19,7 @@
         <Project Path="apps/api/tests/Sacou.Modules.Groups.Tests/Sacou.Modules.Groups.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Identity.Tests/Sacou.Modules.Identity.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Matches.Tests/Sacou.Modules.Matches.Tests.csproj" />
+        <Project Path="apps/api/tests/Sacou.Modules.Sessions.Tests/Sacou.Modules.Sessions.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Stats.Tests/Sacou.Modules.Stats.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Shared.Tests/Sacou.Shared.Tests.csproj" />
     </Folder>

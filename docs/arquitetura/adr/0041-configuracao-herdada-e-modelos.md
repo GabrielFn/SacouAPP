@@ -52,3 +52,5 @@
 **Contrato** (`ProducesProblem` em cada rota nova, para o portão do OpenAPI): `GET /settings` (`ViewGroup`), `PATCH /settings`, `POST /settings/apply-template`, `GET /templates`, `POST /templates` e `DELETE /templates/{templateId}` (`ManageSettings`), mais `templateKey` em `POST /v1/groups`. Detalhes em [`docs/dominio/grupos.md`](../../dominio/grupos.md).
 
 **Desvios do plano.** O contrato `Groups.Contracts.IGroupSettingsReader` (D6) fica para a E3.4, que é quem o consome; a Parte 2 não o cria. O `GET` devolve `schemaVersion` no topo e também dentro de `settings`, para o documento poder voltar inteiro num `PATCH`. O corpo cabe nos 4 KB (conferido com o documento completo e o local de 80 caracteres). Sem evento (Outbox é da E3.11; `GroupSettingsChanged` levará só `GroupId` e `MemberId`).
+
+> **Nota (E3.4, ADR 0043):** `IGroupSettingsReader` (D6) foi entregue na E3.4 Parte 1, com `ResolveRound`; `DisplayText` mudou para `Sacou.Shared.Text` (dois consumidores).

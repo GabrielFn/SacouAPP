@@ -21,6 +21,16 @@ export const apiErrorCodes = [
   "groups.use-leave",
   "identity.subject-invalid",
   "identity.user-not-registered",
+  "sessions.attendance-disabled",
+  "sessions.drop-in-window-closed",
+  "sessions.member-not-found",
+  "sessions.round-closed",
+  "sessions.round-full",
+  "sessions.round-invalid",
+  "sessions.round-limit",
+  "sessions.round-not-found",
+  "sessions.series-limit",
+  "sessions.series-not-found",
 ] as const;
 
 export type ApiErrorCode = (typeof apiErrorCodes)[number];

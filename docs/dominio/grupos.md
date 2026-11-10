@@ -24,7 +24,7 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 
 ## Permissões
 
-Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão (4 papéis × 10 permissões). `ManageSettings` (E3.3) é do Co-admin também, pelo padrão adotado da pergunta 23; ver a configuração é `ViewGroup`, então o jogador vê "25 pontos · 1 set".
+Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão (4 papéis × 12 permissões). `ManageSettings` (E3.3) é do Co-admin também, pelo padrão adotado da pergunta 23; ver a configuração é `ViewGroup`, então o jogador vê "25 pontos · 1 set".
 
 | Permissão (`GroupPermission`) | Admin | Co-admin | Placar | Jogador |
 |---|---|---|---|---|
@@ -38,6 +38,8 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `RemoveAdmin` (remover Co-admin ou Admin) | sim | não | não | não |
 | `Leave` (sair do grupo) | sim* | sim | sim | sim |
 | `ManageSettings` (mudar a configuração padrão, aplicar e salvar modelos) | sim | sim | não | não |
+| `ManageRounds` (criar, editar e cancelar rodada, parar a série, mexer na lista de presença; E3.4) | sim | sim | não | não |
+| `RespondAttendance` (responder "vou" ou "não vou" por si; E3.4) | sim | sim | sim | sim |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
 

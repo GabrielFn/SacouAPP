@@ -61,3 +61,5 @@ Família nova entra nesta tabela. **Ordem das travas:** grupo (`FOR UPDATE` de D
 - **Link sem expiração:** um link vazado continua servindo até ser revogado. O admin vê quem entrou, remove, e o removido não volta; "gerar novo link" no app revoga o antigo (E4.5).
 - **Token mostrado uma vez:** o app guarda o link que gerou (armazenamento seguro do aparelho, E4.5); noutro aparelho, gera outro.
 - **Convites carregados no agregado:** toda escrita do grupo lê todos os convites dele, revogados inclusive. Cada um exige um admin criando; o volume de um racha é minúsculo. Se crescer, carregar só os abertos e o alvo da revogação (rever na E5.3, com o limite de requisições de criar convite, prévia e aceite).
+
+> **Nota (E3.4, ADR 0043):** `MemberId` mora agora em `Sacou.Shared.Members` (Groups e Sessions o usam). `GroupPermission` ganhou `ManageRounds` e `RespondAttendance` (4 × 12); o contrato ganhou `GroupCapability`, `Allows` e `ListActiveAsync`.
