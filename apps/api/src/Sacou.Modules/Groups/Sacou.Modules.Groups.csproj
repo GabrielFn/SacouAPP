@@ -15,6 +15,9 @@
         <ProjectReference Include="../Identity/Sacou.Modules.Identity.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <!-- The single source of the settings catalog, shared with TypeScript (ADR 0041). A missing file fails the build. -->
+        <EmbeddedResource Include="../../../../../packages/match-engine/src/settings/settings-catalog.json"
+                          LogicalName="Sacou.Modules.Groups.settings-catalog.json" />
         <InternalsVisibleTo Include="Sacou.Modules.Groups.Tests" />
     </ItemGroup>
 </Project>

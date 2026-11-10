@@ -24,11 +24,15 @@ internal static partial class RepositoryFiles
 
     internal const string CatalogResourceName = "Sacou.Modules.Matches.formations.json";
     internal const string CatalogPath = "packages/volley-rules/src/formations/formations.json";
+    internal const string SettingsCatalogAssembly = "Sacou.Modules.Groups";
+    internal const string SettingsCatalogResourceName = "Sacou.Modules.Groups.settings-catalog.json";
+    internal const string SettingsCatalogPath = "packages/match-engine/src/settings/settings-catalog.json";
 
     /// <summary>Written by hand: a file lost from the repository must fail, not vanish from the list.</summary>
     internal static readonly IReadOnlyList<string> SharedJsonFiles =
     [
         CatalogPath,
+        SettingsCatalogPath,
         "packages/volley-rules/golden/formations.json",
         "packages/volley-rules/golden/overlap.json",
         "packages/volley-rules/golden/player-card-level.json",
@@ -48,6 +52,7 @@ internal static partial class RepositoryFiles
         "packages/match-engine/golden/corrections-events.json",
         "packages/match-engine/golden/attributions-events.json",
         "packages/match-engine/golden/stats-events.json",
+        "packages/match-engine/golden/settings-resolver.json",
     ];
 
     /// <summary>The golden folders of the shared packages, as a test project path reaches them.</summary>
@@ -164,10 +169,15 @@ internal static partial class RepositoryFiles
             .Where(path => !GoldenFromTestProject.Any(folder => path.StartsWith(folder, StringComparison.Ordinal)))
             .Select(path => $"EmbeddedResource outside the golden folder: {path}")];
 
-    /// <summary>The catalog in Matches and no other resource, in any production assembly: a golden file never ships.</summary>
+    /// <summary>The formations catalog in Matches, the settings catalog in Groups and no other resource, in any production assembly: a golden file never ships.</summary>
     internal static IReadOnlyList<string> ProductionResourceViolations(string assembly, IReadOnlyCollection<string> resources)
     {
-        string[] expected = assembly == CatalogAssembly ? [CatalogResourceName] : [];
+        string[] expected = assembly switch
+        {
+            CatalogAssembly => [CatalogResourceName],
+            SettingsCatalogAssembly => [SettingsCatalogResourceName],
+            _ => [],
+        };
         return
         [
             .. resources.Except(expected).Select(name => $"{assembly}: unexpected resource {name}"),

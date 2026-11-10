@@ -11,4 +11,8 @@
         <!-- The route guard reads every endpoint of the real API, not only the ones this module maps. -->
         <ProjectReference Include="../../src/Sacou.Api/Sacou.Api.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/settings-resolver.json" LogicalName="golden/settings-resolver.json" />
+    </ItemGroup>
 </Project>
