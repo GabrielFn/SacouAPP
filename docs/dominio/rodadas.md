@@ -80,7 +80,7 @@ Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do 
 | `POST /rounds` | `ManageRounds` | 201, mensalistas já confirmados; `repeatWeekly` cria a série |
 | `GET /rounds` | `ViewGroup` | 200, futuras e últimas 24 h; materializa as séries |
 | `GET /rounds/{roundId}` | `ViewGroup` | 200, repara se preciso |
-| `PATCH /rounds/{roundId}` | `ManageRounds` | 200; `settings` substitui a camada, `null` a limpa |
+| `PATCH /rounds/{roundId}` | `ManageRounds` | 200; `settings` substitui a camada (`{}` a limpa) |
 | `POST /rounds/{roundId}/cancel` | `ManageRounds` | 200 (de novo, sem efeito) |
 | `PUT /rounds/{roundId}/attendance/me` | `RespondAttendance` | 200 `{ status, position }` |
 | `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |

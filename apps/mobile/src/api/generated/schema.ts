@@ -616,7 +616,7 @@ export interface components {
       localDate: null | string;
       localTime: null | string;
       venue: null | string;
-      settings: components["schemas"]["JsonElement"];
+      settings: null | components["schemas"]["JsonElement"];
     };
     WaitlistEntry: {
       /** Format: uuid */

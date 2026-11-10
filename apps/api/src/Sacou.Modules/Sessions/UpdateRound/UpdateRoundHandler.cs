@@ -73,15 +73,15 @@ internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter w
         return parsed.IsSuccess ? Result.Success(new Option<T>(true, parsed.Value)) : Result.Failure<Option<T>>(parsed.Error);
     }
 
-    /// <summary>Absent keeps the layer; <c>null</c> or an object replaces it, validated and normalized against the group.</summary>
-    private async Task<Result<LayerEdit>> ParseLayerAsync(RoundAccess access, JsonElement settings, CancellationToken cancellationToken)
+    /// <summary>Absent keeps the layer; an object replaces it (an empty one clears it), validated and normalized against the group.</summary>
+    private async Task<Result<LayerEdit>> ParseLayerAsync(RoundAccess access, JsonElement? settings, CancellationToken cancellationToken)
     {
-        if (settings.ValueKind == JsonValueKind.Undefined)
+        if (settings is not { } body)
         {
             return Result.Success(LayerEdit.Keep);
         }
 
-        var layer = RoundRequestParsing.Layer(settings);
+        var layer = RoundRequestParsing.Layer(body);
         var state = await groups.LoadAsync(access.GroupId, cancellationToken).ConfigureAwait(false);
         if (layer.IsFailure || state.IsFailure)
         {
@@ -127,6 +127,6 @@ internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter w
 
 /// <summary>
 /// Every field is optional; one that is absent stays as it is. <c>settings</c> replaces the round's whole layer
-/// (the app sends the full layer of tela 20), and <c>null</c> clears it. Unknown fields are a 400 (ADR 0039).
+/// (the app sends the full layer of tela 20), and <c>{}</c> clears it. Unknown fields are a 400 (ADR 0039).
 /// </summary>
-internal sealed record UpdateRoundRequest(string? LocalDate, string? LocalTime, string? Venue, JsonElement Settings);
+internal sealed record UpdateRoundRequest(string? LocalDate, string? LocalTime, string? Venue, JsonElement? Settings);
