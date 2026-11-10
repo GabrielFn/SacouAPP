@@ -23,7 +23,8 @@ internal static class ChangeMemberTypeEndpoint
 
     public static RouteGroupBuilder MapChangeMemberType(this RouteGroupBuilder group)
     {
-        group.MapPut(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ChangeMemberType);
+        group.MapPut(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ChangeMemberType)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
         return group;
     }
 

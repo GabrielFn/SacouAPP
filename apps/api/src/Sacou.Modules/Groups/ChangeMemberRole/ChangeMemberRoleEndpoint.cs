@@ -24,7 +24,8 @@ internal static class ChangeMemberRoleEndpoint
 
     public static RouteGroupBuilder MapChangeMemberRole(this RouteGroupBuilder group)
     {
-        group.MapPut(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.AssignBasicRole);
+        group.MapPut(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.AssignBasicRole)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
     }
 

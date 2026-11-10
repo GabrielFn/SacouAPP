@@ -23,6 +23,8 @@ internal static class GroupRouteExtensions
         var group = endpoints.MapGroup(GroupRoute);
         group.AddEndpointFilter<GroupAccessFilter>();
         group.WithMetadata(GroupAccessFilterMetadata.Instance, SmallBody());
+        // What the filter itself answers: not registered or no permission (403), not a member (404).
+        group.ProducesProblem(StatusCodes.Status403Forbidden).ProducesProblem(StatusCodes.Status404NotFound);
         ((IEndpointConventionBuilder)group).Finally(RequireOnePermission);
         return group;
     }

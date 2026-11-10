@@ -14,7 +14,10 @@ internal static class CreateGroupEndpoint
 
     public static IEndpointRouteBuilder MapCreateGroup(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
+        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return endpoints;
     }
 
