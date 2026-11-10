@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
+using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
 
@@ -38,7 +39,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
 
-    /// <summary>Applies the Identity and then the Groups migrations, through the entry points Program uses, in its order.</summary>
+    /// <summary>Applies the Identity, Groups and then Sessions migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
         await MigrationGate.WaitAsync(TestContext.Current.CancellationToken);
@@ -46,6 +47,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         {
             await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await SessionsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
         }
         finally
         {

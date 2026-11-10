@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Modules.Groups.Access;
+using Sacou.Modules.Sessions.Access;
 
 namespace Sacou.Modules.Groups.Tests.Access;
 
 /// <summary>
-/// A4 (ADR 0040, D3): every route with a group id has the access filter and exactly one permission; every
+/// A4 (ADR 0040, D3; ADR 0043, D9): every route with a group id has one of the two access filters (the Groups' or the Sessions') and exactly one permission or capability; every
 /// other route of the API is on a closed list. Like the fallback policy of E3.1, a forgotten line fails.
 /// </summary>
 internal static class GroupRouteGuard
@@ -43,13 +44,19 @@ internal static class GroupRouteGuard
             return outsideTheFilter.Contains(route) ? [] : [$"{route}: outside the group filter and not on the closed list"];
         }
 
-        var permissions = endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count;
-        return
-        [
-            .. endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is null ? [$"{route}: without the group access filter"] : Array.Empty<string>(),
-            .. permissions == 1 ? Array.Empty<string>() : [$"{route}: declares {permissions} permissions, not one"],
-        ];
+        var groupFilter = endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null;
+        var roundFilter = endpoint.Metadata.GetMetadata<RoundAccessFilterMetadata>() is not null;
+        return (groupFilter, roundFilter) switch
+        {
+            (true, true) => [$"{route}: has both access filters"],
+            (false, false) => [$"{route}: without the group access filter"],
+            (true, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
+            (false, true) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<RoundCapabilityMetadata>().Count, "capabilities"),
+        };
     }
+
+    private static string[] ExactlyOne(string route, int declared, string what) =>
+        declared == 1 ? [] : [$"{route}: declares {declared} {what}, not one"];
 
     private static string Describe(RouteEndpoint endpoint)
     {
