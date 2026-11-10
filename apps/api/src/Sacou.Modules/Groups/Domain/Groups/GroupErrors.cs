@@ -28,4 +28,15 @@ internal static class GroupErrors
 
     /// <summary>A guest without an account (E3.5) is always a drop-in.</summary>
     public static readonly Error RegularNeedsAccount = new("groups.regular-needs-account", ErrorKind.Validation);
+
+    public static readonly Error InviteLimit = new("groups.invite-limit", ErrorKind.Conflict);
+
+    /// <summary>For an admin: the invite id is not one of this group's invites, whatever group it belongs to.</summary>
+    public static readonly Error InviteNotFound = new("groups.invite-not-found", ErrorKind.NotFound);
+
+    /// <summary>For whoever holds a token: revoked, expired, missing and malformed look the same, byte for byte.</summary>
+    public static readonly Error InviteInvalid = new("groups.invite-invalid", ErrorKind.NotFound);
+
+    /// <summary>Gabriel's answer 19: whoever an admin removed does not come back through a link.</summary>
+    public static readonly Error MemberRemoved = new("groups.member-removed", ErrorKind.Forbidden);
 }

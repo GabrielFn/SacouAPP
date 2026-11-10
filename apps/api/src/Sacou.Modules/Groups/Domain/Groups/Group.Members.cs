@@ -9,10 +9,11 @@ namespace Sacou.Modules.Groups.Domain.Groups;
 /// aggregate, which the store loads under the group lock: an actor demoted or removed after the access filter
 /// is judged by what the database says now. Order: actor, target, permission for that target and value, the
 /// value itself, and last the one rule over the whole group, that it never ends without an active admin.
+/// A member who leaves, is removed or loses <c>ManageInvites</c> loses their open invites in the same change.
 /// </summary>
 internal sealed partial record Group
 {
-    public Result<GroupChange> ChangeRole(MemberId actorId, MemberId targetId, GroupRole role)
+    public Result<GroupChange> ChangeRole(MemberId actorId, MemberId targetId, GroupRole role, DateTimeOffset now)
     {
         var pair = FindPair(actorId, targetId);
         if (pair.IsFailure)
@@ -29,7 +30,7 @@ internal sealed partial record Group
             return Result.Failure<GroupChange>(GroupErrors.Forbidden);
         }
 
-        return target.Role == role ? Unchanged() : Replace(target, target with { Role = role });
+        return target.Role == role ? Unchanged() : ReplaceAndRevokeInvites(target, target with { Role = role }, now);
     }
 
     public Result<GroupChange> ChangeMemberType(MemberId actorId, MemberId targetId, MemberType type)
@@ -72,7 +73,7 @@ internal sealed partial record Group
 
         var permission = target.Role.IsAdministrative() ? GroupPermission.RemoveAdmin : GroupPermission.RemoveMember;
         return RolePermissions.Allows(actor.Role, permission)
-            ? Replace(target, target.Remove(now))
+            ? ReplaceAndRevokeInvites(target, target.Remove(now), now)
             : Result.Failure<GroupChange>(GroupErrors.Forbidden);
     }
 
@@ -85,7 +86,7 @@ internal sealed partial record Group
         }
 
         return RolePermissions.Allows(actor.Role, GroupPermission.Leave)
-            ? Replace(actor, actor.Leave(now))
+            ? ReplaceAndRevokeInvites(actor, actor.Leave(now), now)
             : Result.Failure<GroupChange>(GroupErrors.Forbidden);
     }
 
@@ -110,6 +111,12 @@ internal sealed partial record Group
     private GroupMember? FindActive(MemberId id) => ActiveMembers.SingleOrDefault(member => member.Id == id);
 
     private Result<GroupChange> Unchanged() => Result.Success(new GroupChange(this, []));
+
+    private Result<GroupChange> ReplaceAndRevokeInvites(GroupMember before, GroupMember after, DateTimeOffset now)
+    {
+        var replaced = Replace(before, after);
+        return replaced.IsFailure ? replaced : Result.Success(RevokeInvitesOfPowerless(replaced.Value, after, now));
+    }
 
     /// <summary>The one rule over the whole group: a change that takes away the last active admin is refused.</summary>
     private Result<GroupChange> Replace(GroupMember before, GroupMember after)

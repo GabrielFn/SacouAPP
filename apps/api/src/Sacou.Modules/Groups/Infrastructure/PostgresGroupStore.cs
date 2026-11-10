@@ -10,7 +10,7 @@ namespace Sacou.Modules.Groups.Infrastructure;
 /// Reads with <c>AsNoTracking</c> and never lock (light CQRS). SQL is always parameterized: EF turns the
 /// interpolated values into parameters (ADR 0037, ADR 0040).
 /// </summary>
-internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
+internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGroupStore
 {
     /// <summary>First key of the two-key advisory lock: "memberships of one person", so it never collides with another lock family.</summary>
     private const int MembershipLockFamily = 3_202;
@@ -22,9 +22,7 @@ internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
-            await database.Database.ExecuteSqlAsync(
-                $"SELECT pg_advisory_xact_lock({MembershipLockFamily}, hashtext({creator.Value.ToString()}))",
-                cancellationToken).ConfigureAwait(false);
+            await LockPersonAsync(creator, cancellationToken).ConfigureAwait(false);
             var admitted = admission(await CountActiveGroupsAsync(creator, cancellationToken).ConfigureAwait(false));
             if (admitted.IsFailure)
             {
@@ -101,17 +99,50 @@ internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
-            var loaded = await LockAndLoadAsync(group, cancellationToken).ConfigureAwait(false);
-            var changed = loaded is null ? Result.Failure<GroupChange>(GroupErrors.GroupNotFound) : change(loaded);
-            if (changed.IsFailure || changed.Value.IsEmpty)
+            var changed = await ChangeUnderLockAsync(group, locked => Task.FromResult(change(locked)), cancellationToken).ConfigureAwait(false);
+            if (changed.IsSuccess)
             {
-                return changed;
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            database.Members.UpdateRange(changed.Value.ChangedMembers.Select(member => RowMapping.ToRow(group, member)));
-            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return changed;
+        }
+    }
+
+    /// <summary>Inside the caller's transaction: lock, load, change, and write the rows the change returned, new or changed.</summary>
+    private async Task<Result<GroupChange>> ChangeUnderLockAsync(
+        GroupId group, Func<Group, Task<Result<GroupChange>>> change, CancellationToken cancellationToken)
+    {
+        var loaded = await LockAndLoadAsync(group, cancellationToken).ConfigureAwait(false);
+        if (loaded is null)
+        {
+            return Result.Failure<GroupChange>(GroupErrors.GroupNotFound);
+        }
+
+        var changed = await change(loaded).ConfigureAwait(false);
+        if (changed.IsFailure || changed.Value.IsEmpty)
+        {
+            return changed;
+        }
+
+        Write(loaded, changed.Value);
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return changed;
+    }
+
+    /// <summary>Each row is written whole, as read under the lock: nothing outside the lock may write a member or an invite.</summary>
+    private void Write(Group before, GroupChange change)
+    {
+        foreach (var member in change.ChangedMembers)
+        {
+            var row = RowMapping.ToRow(before.Id, member);
+            _ = before.Members.Any(known => known.Id == member.Id) ? database.Members.Update(row) : database.Members.Add(row);
+        }
+
+        foreach (var invite in change.ChangedInvites)
+        {
+            var row = RowMapping.ToRow(before.Id, invite);
+            _ = before.Invites.Any(known => known.Id == invite.Id) ? database.Invites.Update(row) : database.Invites.Add(row);
         }
     }
 
@@ -131,8 +162,20 @@ internal sealed class PostgresGroupStore(GroupsDbContext database) : IGroupStore
             .Where(member => member.GroupId == group.Value)
             .OrderBy(member => member.JoinedAt).ThenBy(member => member.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return new Group(group, RowMapping.ToName(row.Name), row.CreatedAt, [.. members.Select(RowMapping.ToMember)]);
+        var invites = await database.Invites.AsNoTracking()
+            .Where(invite => invite.GroupId == group.Value)
+            .OrderBy(invite => invite.CreatedAt).ThenBy(invite => invite.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new Group(group, RowMapping.ToName(row.Name), row.CreatedAt, [.. members.Select(RowMapping.ToMember)])
+        {
+            Invites = [.. invites.Select(RowMapping.ToInvite)],
+        };
     }
+
+    /// <summary>The per-person advisory lock, in the caller's transaction. Always after the group lock when both are taken.</summary>
+    private Task<int> LockPersonAsync(UserId person, CancellationToken cancellationToken) =>
+        database.Database.ExecuteSqlAsync(
+            $"SELECT pg_advisory_xact_lock({MembershipLockFamily}, hashtext({person.Value.ToString()}))", cancellationToken);
 
     private Task<int> CountActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>
         ActiveMembers().CountAsync(member => member.UserId == user.Value, cancellationToken);

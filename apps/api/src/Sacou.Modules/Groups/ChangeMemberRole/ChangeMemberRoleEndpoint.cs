@@ -29,13 +29,18 @@ internal static class ChangeMemberRoleEndpoint
     }
 
     private static Task<Results<Ok<ChangeMemberRoleResponse>, ProblemHttpResult>> HandleAsync(
-        Guid memberId, ChangeMemberRoleRequest request, HttpContext context, IGroupStore store, CancellationToken cancellationToken)
+        Guid memberId,
+        ChangeMemberRoleRequest request,
+        HttpContext context,
+        IGroupStore store,
+        TimeProvider time,
+        CancellationToken cancellationToken)
     {
         var role = ContractValues.ToDomain(request.Role);
         return GroupWrite.ExecuteAsync(
             context,
             store,
-            (group, actor) => group.ChangeRole(actor, new MemberId(memberId), role),
+            (group, actor) => group.ChangeRole(actor, new MemberId(memberId), role, time.GetUtcNow()),
             () => TypedResults.Ok(new ChangeMemberRoleResponse(memberId, request.Role)),
             cancellationToken);
     }

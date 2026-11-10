@@ -37,8 +37,8 @@ public sealed class MemberRulesTests
         var world = GroupBuilder.WithFounder();
         world.Add(R.CoAdmin.ToDomain());
 
-        Assert.Equal(GroupErrors.LastAdmin, world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.CoAdmin.ToDomain()).Error);
-        Assert.Equal(GroupErrors.LastAdmin, world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain()).Error);
+        Assert.Equal(GroupErrors.LastAdmin, world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.CoAdmin.ToDomain(), GroupBuilder.Now).Error);
+        Assert.Equal(GroupErrors.LastAdmin, world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain(), GroupBuilder.Now).Error);
         Assert.Equal(GroupErrors.LastAdmin, world.Group.Leave(world.Founder.Id, Later).Error);
     }
 
@@ -48,8 +48,8 @@ public sealed class MemberRulesTests
         var world = GroupBuilder.WithFounder();
         var second = world.Add(R.Admin.ToDomain());
 
-        Assert.True(world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain()).IsSuccess);
-        Assert.True(world.Group.ChangeRole(world.Founder.Id, second.Id, R.CoAdmin.ToDomain()).IsSuccess);
+        Assert.True(world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain(), GroupBuilder.Now).IsSuccess);
+        Assert.True(world.Group.ChangeRole(world.Founder.Id, second.Id, R.CoAdmin.ToDomain(), GroupBuilder.Now).IsSuccess);
         Assert.True(world.Group.Leave(world.Founder.Id, Later).IsSuccess);
         Assert.True(world.Group.Leave(second.Id, Later).IsSuccess);
     }
@@ -71,7 +71,7 @@ public sealed class MemberRulesTests
     {
         var world = GroupBuilder.WithFounder();
         var second = world.Add(R.Admin.ToDomain());
-        var demoted = world.Group.ChangeRole(world.Founder.Id, second.Id, R.Player.ToDomain()).Value.Group;
+        var demoted = world.Group.ChangeRole(world.Founder.Id, second.Id, R.Player.ToDomain(), GroupBuilder.Now).Value.Group;
 
         Assert.Equal(GroupErrors.LastAdmin, demoted.Leave(world.Founder.Id, Later).Error);
     }
@@ -210,7 +210,7 @@ public sealed class MemberRulesTests
         var target = world.Add(R.Player.ToDomain());
         var before = world.Group;
 
-        var after = before.ChangeRole(world.Founder.Id, target.Id, R.Scorekeeper.ToDomain()).Value.Group;
+        var after = before.ChangeRole(world.Founder.Id, target.Id, R.Scorekeeper.ToDomain(), GroupBuilder.Now).Value.Group;
 
         Assert.Equal(R.Player.ToDomain(), before.Members.Single(member => member.Id == target.Id).Role);
         Assert.NotEqual(before, after);
