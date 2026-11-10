@@ -11,9 +11,10 @@ import {
 
 import type { GroupRole } from "../../../services/api/sacou-api";
 import { settingsStrings } from "../../../strings/settings.pt-BR";
+import type { TemplateLabel } from "./settings-document";
 import { organizes } from "./groups-list.selectors";
 import type { PendingLeaves, SettingsSheet } from "./group-settings-form.reducer";
-import { parseBrlToCents } from "./money-text";
+import { formatCents, parseBrlToCents } from "./money-text";
 import { scheduleSummary } from "./schedule-text";
 import { settingsErrorText } from "./settings-errors-text";
 import { leafOf, withLeaf } from "./settings-patch";
@@ -145,4 +146,39 @@ export function isProLeaf(path: SettingsPath): boolean {
 
 export function isBlockEnabled(block: SettingsBlock, settings: GroupSettings): boolean {
   return leafOf(settings, `${block}.enabled` as SettingsPath) === true;
+}
+
+const HOURS_SUFFIX = "h";
+
+/** What a field row shows at its right: "R$ 10", "14", "24h", or "Escolher" for an empty text. */
+export function fieldValueText(path: SettingsPath, settings: GroupSettings): string {
+  const value = leafOf(settings, path);
+  if (typeof value === "string") return value === "" ? screen.schedulePick : value;
+  if (typeof value !== "number") return "";
+  if (path.endsWith("Cents")) return formatCents(value);
+  return path === "attendance.dropInOpensHoursBefore"
+    ? `${String(value)}${HOURS_SUFFIX}`
+    : String(value);
+}
+
+/** What a sheet opens with for a field: the value as the person would type it. */
+export function fieldSheetText(path: SettingsPath, settings: GroupSettings): string {
+  const value = leafOf(settings, path);
+  if (typeof value === "string") return value;
+  if (typeof value !== "number") return "";
+  return path.endsWith("Cents") ? formatCents(value) : String(value);
+}
+
+/** The name shown in "Modelo usado": the ready-made one, the saved one, or "Personalizado". */
+export function templateLabelText(label: TemplateLabel): string {
+  switch (label.kind) {
+    case "ready": {
+      const known = Object.entries(settingsStrings.templates).find(([key]) => key === label.key);
+      return known === undefined ? screen.custom : known[1].name;
+    }
+    case "saved":
+      return label.name;
+    case "custom":
+      return screen.custom;
+  }
 }

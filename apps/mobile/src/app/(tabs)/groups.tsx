@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { useGroupsScreen } from "../../features/groups/hooks/use-groups-screen";
@@ -6,7 +7,12 @@ import {
   groupCardModel,
   groupsSummaryText,
 } from "../../features/groups/model/groups-list.selectors";
-import { PENDING_GROUP_SCREENS } from "../../features/groups/navigation";
+import {
+  createGroupHref,
+  groupSettingsHref,
+  PENDING_GROUP_SCREENS,
+} from "../../features/groups/navigation";
+import { CreateGroupPill } from "../../features/groups/ui/CreateGroupPill";
 import { GroupCard } from "../../features/groups/ui/GroupCard";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
 import { strings } from "../../strings/pt-BR";
@@ -17,19 +23,27 @@ import { Text } from "../../ui/Text";
 
 /** The groups list (screen 17). Order is the one of the API: the order of joining. */
 export default function GroupsScreen() {
+  const router = useRouter();
   const { tokens } = useTheme();
   const { state, bannerText, retry } = useGroupsScreen();
+  const goToCreateGroup = () => {
+    router.push(createGroupHref);
+  };
   const summary = state.kind === "list" ? groupsSummaryText(state.groups) : null;
   return (
     <Screen aboveTabBar scroll>
-      <Text variant="display" displaySize="displayTitle">
-        {strings.groups.title}
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s10 }}>
+        <Text variant="display" displaySize="displayTitle" style={{ flex: 1 }}>
+          {strings.groups.title}
+        </Text>
+        <CreateGroupPill onPress={goToCreateGroup} />
+      </View>
       {summary !== null ? <Text variant="muted">{summary}</Text> : null}
       {bannerText !== null ? <OfflineBanner text={bannerText} /> : null}
       <GroupsStateView
         state={state}
         onRetry={retry}
+        emptyActions={[{ label: strings.groups.createGroup, onPress: goToCreateGroup }]}
         renderList={(groups) => (
           <View style={{ gap: tokens.spacing.s10 }}>
             {groups.map((group) => (
@@ -37,7 +51,10 @@ export default function GroupsScreen() {
                 key={group.groupId}
                 model={groupCardModel(group)}
                 actions={groupCardActions(group.role, PENDING_GROUP_SCREENS)}
-                onAction={() => undefined}
+                onAction={(action, groupId) => {
+                  // "members" has no screen until E4.5 part 2: the card does not offer it (PENDING_GROUP_SCREENS).
+                  if (action === "settings") router.push(groupSettingsHref(groupId));
+                }}
               />
             ))}
           </View>

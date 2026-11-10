@@ -23,7 +23,7 @@ export function parseBrlToCents(text: string): number | null {
   return total <= MONEY_MAX_CENTS ? total : null;
 }
 
-const THOUSANDS_BOUNDARY = /B(?=(d{3})+(?!d))/g;
+const THOUSANDS_BOUNDARY = /\B(?=(\d{3})+(?!\d))/g;
 
 function withThousands(reais: number): string {
   return String(reais).replace(THOUSANDS_BOUNDARY, ".");

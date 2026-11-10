@@ -35,6 +35,7 @@ export type GroupSettingsFormAction =
   | { readonly type: "leaf-changed"; readonly path: SettingsPath; readonly value: SettingsValue }
   | { readonly type: "leaf-saved"; readonly path: SettingsPath }
   | { readonly type: "leaf-failed"; readonly path: SettingsPath; readonly message: string }
+  | { readonly type: "message-shown"; readonly message: string }
   | { readonly type: "message-dismissed" }
   | { readonly type: "sheet-opened"; readonly sheet: SettingsSheet }
   | { readonly type: "sheet-text-changed"; readonly text: string }
@@ -78,6 +79,8 @@ export function groupSettingsFormReducer(
         pending: withoutLeaf(state.pending, action.path),
         message: action.message,
       };
+    case "message-shown":
+      return { ...state, message: action.message };
     case "message-dismissed":
       return { ...state, message: null };
     case "sheet-opened":

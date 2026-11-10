@@ -137,7 +137,6 @@ export const settingsStrings = {
   },
   blocks: {
     attendance: { title: "Presença e vagas" },
-    format: { title: "Quadra" },
     scoring: { title: "Jogo" },
     queue: { title: "Fila", caption: "quem joga a próxima" },
     draw: { title: "Sorteio", caption: "times na hora" },
@@ -153,6 +152,7 @@ export const settingsStrings = {
   },
   rotationHelp: {
     libero: "Líbero só vale nos sistemas 5x1 e 6x2.",
+    now: (note: string) => `Agora: ${note}.`,
   },
   summary: {
     limit: (capacity: number) => `Limite ${String(capacity)}`,
@@ -179,6 +179,7 @@ export const settingsStrings = {
       "Isso troca as regras do jogo pelas do modelo. Dia, horário, local, vagas e valores ficam.",
     readyTemplates: "Modelos prontos",
     savedTemplates: "Seus modelos",
+    apply: "Aplicar",
     applyLabel: (name: string) => `Aplicar ${name}`,
     deleteLabel: (name: string) => `Apagar o modelo ${name}`,
     delete: "Apagar",
