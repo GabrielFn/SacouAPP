@@ -15,10 +15,15 @@ public sealed class RoundConcurrencyTests(IntegrationDatabase database) : IAsync
     private const int Capacity = 12;
 
     private readonly ApiWithDatabase api = new(database);
+    private readonly List<HttpClient> clients = [];
 
     public async ValueTask InitializeAsync() => await api.MigrateAsync();
 
-    public async ValueTask DisposeAsync() => await api.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        clients.ForEach(client => client.Dispose());
+        await api.DisposeAsync();
+    }
 
     /// <summary>C1: 12 spots, 11 taken, 16 different members say "vou" together: one goes, fifteen wait in places 1 to 15.</summary>
     [Fact]
@@ -187,7 +192,8 @@ public sealed class RoundConcurrencyTests(IntegrationDatabase database) : IAsync
     private async Task<(GroupWorld World, string Round, List<(string Subject, Guid MemberId)> Racers)> PreparedAsync(
         int taken, int racers, int capacity = Capacity)
     {
-        using var client = api.CreateClient();
+        var client = api.CreateClient();
+        clients.Add(client);
         var world = await GroupWorld.CreateAsync(api, client);
         await RoundCalls.ConfigureAttendanceAsync(world, capacity);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();

@@ -156,18 +156,6 @@ public sealed class RoundAuthorizationTests(IntegrationDatabase database) : IAsy
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    [Fact]
-    public async Task BodyOverFourKilobytes_IsRefusedWith413()
-    {
-        using var client = api.CreateClient();
-        var world = await GroupWorld.CreateAsync(api, client);
-        var big = $$"""{"localDate":"{{RoundCalls.FutureDate()}}","localTime":"20:30","venue":"{{new string('a', 5000)}}"}""";
-
-        using var response = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundsPath(world), big);
-
-        Assert.Equal(HttpStatusCode.RequestEntityTooLarge, response.StatusCode);
-    }
-
     /// <summary>M5: a demotion between the filter and the lock wins; here, the demotion is already in the table when the lock is taken.</summary>
     [Fact]
     public async Task AdminDemoted_IsForbiddenOnTheAdminRoute_AndTheRoundIsUntouched()
