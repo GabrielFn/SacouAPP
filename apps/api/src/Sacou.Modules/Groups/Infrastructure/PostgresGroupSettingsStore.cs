@@ -1,7 +1,7 @@
+using Sacou.Shared.Members;
 using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Sacou.Modules.Groups.Domain.Groups;
-using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Modules.Groups.Domain.Templates;

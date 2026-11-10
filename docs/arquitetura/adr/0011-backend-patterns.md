@@ -28,3 +28,5 @@ MediatR e AutoMapper: recusados porque passaram a ter licença comercial em 2025
 
 - Em `Sacou.Shared` só entra namespace novo com ADR (ADR 0005). `produto.md:348` lista Outbox, SettingsResolver e Entitlements ali; cada um entra na tarefa que o implementa.
 - **A definir:** como separar a Outbox, que precisa de infraestrutura (E3.11, já aberto no ADR 0005).
+
+> **Nota (E3.4, ADR 0043):** a disputa pela última vaga da rodada usa trava pessimista curta por rodada, não `xmin`; a regra é sobre o conjunto de presenças (mesmo motivo do ADR 0040 D8).

@@ -5,4 +5,7 @@
     <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Sacou.Modules.Sessions.Tests" />
+    </ItemGroup>
 </Project>

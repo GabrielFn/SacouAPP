@@ -1,4 +1,4 @@
-using Sacou.Modules.Groups.Domain.Members;
+using Sacou.Shared.Members;
 
 namespace Sacou.Modules.Groups.Domain.Invites;
 

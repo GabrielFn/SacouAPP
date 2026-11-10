@@ -26,9 +26,10 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Configuração resolvida | `ResolvedSettings` | `values` (documento completo) e `sources` (de onde veio cada folha) |
 | Origem de um valor | `SettingsSource` | `group`, `round` ou `match`: o cinza "do grupo" e o ponto laranja "nesta rodada" |
 | Modelo (Pelada, Racha, Treino, Areia, Do zero) | `SettingsTemplate` | Cópia, não vínculo; nunca traz nem apaga os fatos do grupo |
-| Rodada | `Session` | |
-| Presença | `Attendance` | |
-| Lista de espera | `Waitlist` | |
+| Rodada | `Session` (no código, o agregado é `Round`) | Uma ocorrência do racha ([rodadas.md](rodadas.md), ADR 0043) |
+| Série de rodadas ("Repetir toda semana") | `RoundSeries` | Dia da semana e hora local; cada ocorrência nasce herdando o grupo |
+| Presença | `Attendance` | Uma por membro por rodada; estados `Going`, `NotGoing`, `Waitlisted`, `Promoted` |
+| Lista de espera | `Waitlist` | A posição é calculada pela ordem (`Sequence`), nunca gravada |
 | Sorteio | `TeamDraw` | |
 | Resumo da rodada | `SessionSummary` | |
 

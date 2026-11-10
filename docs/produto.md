@@ -307,7 +307,7 @@ Termos acrescentados na revisão: Quadra da rodada → CourtSession, Cartinha �
 3. **SettingsResolver:** mescla grupo → rodada → partida; cada nível é um record com campos anuláveis (null herda), guardado em `jsonb`.
 4. **Outbox:** eventos gravados na mesma transação e enviados pelo Hangfire (push, e-mail).
 5. **Idempotência:** eventos da partida chegam com ID gerado no celular; reenviar não duplica.
-6. **Concorrência otimista:** a disputa pela última vaga usa `xmin` como versão.
+6. **Concorrência:** a disputa pela última vaga usa trava curta por rodada (`SELECT … FOR UPDATE`), não `xmin` ([ADR 0043](arquitetura/adr/0043-rodadas-presenca-e-espera.md)); `xmin` fica para edições sem regra de conjunto.
 7. **Result pattern:** erros de regra voltam como resultado e viram `ProblemDetails`, sem exceção.
 8. **Autorização por recurso:** policies verificam o papel no grupo (Admin, CoAdmin, Scorekeeper).
 9. **Entitlements:** `IGroupPlan` concentra o que é Pro (ex.: sistemas 4x2, 5x1, 6x2).

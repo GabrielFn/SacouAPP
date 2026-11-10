@@ -1,3 +1,4 @@
+using Sacou.Shared.Members;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -5,7 +6,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Contracts;
-using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Modules.Groups.Infrastructure;
 using ContractType = Sacou.Modules.Groups.Contracts.MemberType;
