@@ -2071,7 +2071,14 @@
             "format": "int32"
           },
           "settings": {
-            "$ref": "#/components/schemas/JsonElement"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonNode"
+              }
+            ]
           },
           "templateKey": {
             "type": [
@@ -2130,6 +2137,7 @@
         "additionalProperties": false
       },
       "JsonElement": {},
+      "JsonNode": {},
       "MemberResponse": {
         "required": [
           "memberId",

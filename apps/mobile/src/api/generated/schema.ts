@@ -335,7 +335,7 @@ export interface components {
     GroupSettingsResponse: {
       /** Format: int32 */
       schemaVersion: number;
-      settings: components["schemas"]["JsonElement"];
+      settings: null | components["schemas"]["JsonNode"];
       templateKey: null | string;
       /** Format: uuid */
       savedTemplateId: null | string;
@@ -355,6 +355,7 @@ export interface components {
       useCount: number;
     };
     JsonElement: unknown;
+    JsonNode: unknown;
     MemberResponse: {
       /** Format: uuid */
       memberId: string;

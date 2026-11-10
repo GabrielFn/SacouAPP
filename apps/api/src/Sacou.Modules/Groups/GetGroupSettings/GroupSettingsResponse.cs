@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.Text.Json.Nodes;
 using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Modules.Groups.Infrastructure.Settings;
 
@@ -10,14 +10,14 @@ namespace Sacou.Modules.Groups.GetGroupSettings;
 /// usado" (at most one of the two ids) and when it last changed. No member id: who changed it stays inside.
 /// </summary>
 internal sealed record GroupSettingsResponse(
-    int SchemaVersion, JsonElement Settings, string? TemplateKey, Guid? SavedTemplateId, DateTimeOffset UpdatedAt)
+    int SchemaVersion, JsonNode? Settings, string? TemplateKey, Guid? SavedTemplateId, DateTimeOffset UpdatedAt)
 {
     public static GroupSettingsResponse From(StoredSettings stored)
     {
         ArgumentNullException.ThrowIfNull(stored);
         var catalog = SettingsCatalogReader.Catalog;
-        using var document = JsonDocument.Parse(SettingsJsonWriter.Write(SettingsTree.ToNode(catalog, stored.Settings)));
+        var document = JsonNode.Parse(SettingsJsonWriter.Write(SettingsTree.ToNode(catalog, stored.Settings)));
         return new GroupSettingsResponse(
-            SettingsCatalog.SchemaVersion, document.RootElement.Clone(), stored.TemplateKey, stored.SavedTemplateId?.Value, stored.UpdatedAt);
+            SettingsCatalog.SchemaVersion, document, stored.TemplateKey, stored.SavedTemplateId?.Value, stored.UpdatedAt);
     }
 }
