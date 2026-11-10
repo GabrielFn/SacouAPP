@@ -141,6 +141,21 @@ public sealed class GroupsInviteTests(IntegrationDatabase database) : IAsyncLife
         Assert.Equal(0, await MembersOfAsync(world.GroupId, world.Users[A.NonMember]));
     }
 
+    /// <summary>M13 for the preview: a token in the query is never read, with a body that holds no token or none at all.</summary>
+    [Fact]
+    public async Task PreviewTokenOutsideTheBody_IsNeverRead()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var token = Uri.EscapeDataString(world.Invite.Token);
+
+        using var emptyBody = await world.SendAsync(A.NonMember, HttpMethod.Post, $"{GroupWorld.PreviewPath}?token={token}", "{}");
+        using var noBody = await world.SendAsync(A.NonMember, HttpMethod.Post, $"{GroupWorld.PreviewPath}?token={token}");
+
+        Assert.Equal((HttpStatusCode.NotFound, InviteInvalid), (emptyBody.StatusCode, await CodeAsync(emptyBody)));
+        Assert.NotEqual(HttpStatusCode.OK, noBody.StatusCode);
+    }
+
     /// <summary>M13: a token in the query or the path is never read.</summary>
     [Fact]
     public async Task TokenOutsideTheBody_IsNeverRead()
