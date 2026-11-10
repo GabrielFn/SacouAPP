@@ -13,7 +13,7 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 | Tempo real e jobs | SignalR; Hangfire com intervalo de consulta alto |
 | Página da rodada | Razor Pages no mesmo projeto |
 | Login | Firebase Auth; a API valida o ID token como JWT pelas chaves públicas do Google ([ADR 0036](adr/0036-verificacao-do-token-e-usuario.md)); FirebaseAdmin só para administrar contas (E3.16) ([ADR 0014](adr/0014-firebase-auth.md)) |
-| App | Expo + TypeScript strict, com log de eventos em expo-sqlite |
+| App | Expo + TypeScript strict, com log de eventos em expo-sqlite; tipos da API gerados do contrato OpenAPI versionado (`apps/api/openapi/v1.json`), que a API só serve em `Development` ([ADR 0042](adr/0042-contrato-openapi-e-cliente.md)) |
 | Regras compartilhadas | `packages/match-engine`, `packages/volley-rules` |
 | Serviços | Cloudflare R2, RevenueCat, Sentry, PostHog, Resend, Expo Push |
 | Hospedagem | Railway Hobby |

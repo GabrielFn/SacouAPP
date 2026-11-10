@@ -60,6 +60,7 @@ A parte 1 da E3.2 tem código ([ADR 0039](../arquitetura/adr/0039-sacou-http-e-c
 | E | Convite de quem perdeu o poder | Quem sai, é removido ou vira Placar ou Jogador tem os convites abertos revogados na mesma transação (ADR 0040, D9; D10 no domínio e na API) |
 | E | Ex-membro com acesso por cache | Papel e situação lidos do banco a cada requisição, nunca de claim ou cache; quem saiu ou foi removido recebe 404 (M1). Removido pela rota, o mesmo token recebe 404 na requisição seguinte (M9) |
 | E | Usuário autenticado sem registro age no grupo | Sem linha em `identity.users`, toda rota de grupo dá 403 `identity.user-not-registered` antes de qualquer consulta ao grupo (M1) |
+| I | Documento OpenAPI facilita varredura da API (lista rotas, campos e códigos de erro) | Só mapeado em `Development` (ADR 0042, D2): em qualquer outro ambiente a rota não existe e cai na `FallbackPolicy` (401), teste com `Production` e `Staging`; a lista fechada de rotas anônimas só aceita `/openapi/{documentName}.json` em `Development`. O documento não tem `servers`, nome de máquina, caminho de disco nem `ProjectId` (teste de texto). Não é segredo: o app distribuído revela o mesmo a quem o desmontar |
 | E | Papel Placar com mais poderes | Placar opera a quadra sem outros poderes (`produto.md:62`): no grupo, só `ViewGroup` e `Leave` |
 
 ## 3. Sincronização de eventos (E3.7)
