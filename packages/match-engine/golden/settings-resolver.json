@@ -1,0 +1,3506 @@
+[
+  {
+    "id": "S1",
+    "kind": "resolve",
+    "description": "Group only: values are the group, every source is group",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "expectedChanges": {},
+    "expectedSources": {}
+  },
+  {
+    "id": "S2",
+    "kind": "resolve",
+    "description": "Round changes bestOf to 3: only that leaf comes from the round",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round"
+    }
+  },
+  {
+    "id": "S3",
+    "kind": "resolve",
+    "description": "Match 15 over round 21 over group 25: 15 from the match",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 21
+      }
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 15
+      }
+    },
+    "expectedChanges": {
+      "scoring.pointsPerSet": 15
+    },
+    "expectedSources": {
+      "scoring.pointsPerSet": "match"
+    }
+  },
+  {
+    "id": "S4",
+    "kind": "resolve",
+    "description": "Round and match change different leaves: each keeps its source",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "queue": {
+        "exitCriterion": "arrival-order"
+      }
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 15
+      },
+      "rotation": {
+        "system": "5x1"
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3,
+      "queue.exitCriterion": "arrival-order",
+      "scoring.pointsPerSet": 15,
+      "rotation.system": "5x1"
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "queue.exitCriterion": "round",
+      "scoring.pointsPerSet": "match",
+      "rotation.system": "match"
+    }
+  },
+  {
+    "id": "S5-empty",
+    "kind": "resolve",
+    "description": "Empty layers are the group",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "round": {
+      "schemaVersion": 1
+    },
+    "match": {
+      "schemaVersion": 1
+    },
+    "expectedChanges": {},
+    "expectedSources": {}
+  },
+  {
+    "id": "S5-null-leaves",
+    "kind": "resolve",
+    "description": "Layers with null in every leaf, even leaves the level refuses, are the group",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "enabled": null,
+        "capacityLimited": null,
+        "capacity": null,
+        "waitlistEnabled": null,
+        "regularsEnabled": null,
+        "dropInWindowEnabled": null,
+        "dropInOpensHoursBefore": null
+      },
+      "schedule": {
+        "enabled": null,
+        "weekday": null,
+        "startTime": null,
+        "venue": null
+      },
+      "format": {
+        "modality": null
+      },
+      "scoring": {
+        "enabled": null,
+        "bestOf": null,
+        "pointsPerSet": null,
+        "tieBreakEnabled": null,
+        "tieBreakPoints": null,
+        "winMargin": null
+      },
+      "queue": {
+        "enabled": null,
+        "exitCriterion": null
+      },
+      "rotation": {
+        "enabled": null,
+        "system": null,
+        "ruleMode": null,
+        "liberoEnabled": null
+      },
+      "draw": {
+        "enabled": null,
+        "balanceByLevel": null
+      },
+      "mvp": {
+        "enabled": null,
+        "byStats": null,
+        "voting": null,
+        "individualPoints": null
+      },
+      "money": {
+        "enabled": null,
+        "dropInFeeCents": null,
+        "monthlyFeeCents": null
+      }
+    },
+    "match": {
+      "schemaVersion": 1,
+      "attendance": {
+        "enabled": null,
+        "capacityLimited": null,
+        "capacity": null,
+        "waitlistEnabled": null,
+        "regularsEnabled": null,
+        "dropInWindowEnabled": null,
+        "dropInOpensHoursBefore": null
+      },
+      "schedule": {
+        "enabled": null,
+        "weekday": null,
+        "startTime": null,
+        "venue": null
+      },
+      "format": {
+        "modality": null
+      },
+      "scoring": {
+        "enabled": null,
+        "bestOf": null,
+        "pointsPerSet": null,
+        "tieBreakEnabled": null,
+        "tieBreakPoints": null,
+        "winMargin": null
+      },
+      "queue": {
+        "enabled": null,
+        "exitCriterion": null
+      },
+      "rotation": {
+        "enabled": null,
+        "system": null,
+        "ruleMode": null,
+        "liberoEnabled": null
+      },
+      "draw": {
+        "enabled": null,
+        "balanceByLevel": null
+      },
+      "mvp": {
+        "enabled": null,
+        "byStats": null,
+        "voting": null,
+        "individualPoints": null
+      },
+      "money": {
+        "enabled": null,
+        "dropInFeeCents": null,
+        "monthlyFeeCents": null
+      }
+    },
+    "expectedChanges": {},
+    "expectedSources": {}
+  },
+  {
+    "id": "S5-null-blocks",
+    "kind": "resolve",
+    "description": "A null block in a layer inherits",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": null,
+      "queue": null
+    },
+    "match": {
+      "schemaVersion": 1,
+      "rotation": null
+    },
+    "expectedChanges": {},
+    "expectedSources": {}
+  },
+  {
+    "id": "S6",
+    "kind": "resolve",
+    "description": "Block off in the group, on in the round: on, inner leaves from the group",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.enabled": true
+    },
+    "expectedSources": {
+      "scoring.enabled": "round"
+    }
+  },
+  {
+    "id": "S7",
+    "kind": "resolve",
+    "description": "Block on in the group, off in the round: off, inner values kept",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "enabled": false
+      }
+    },
+    "expectedChanges": {
+      "queue.enabled": false
+    },
+    "expectedSources": {
+      "queue.enabled": "round"
+    }
+  },
+  {
+    "id": "S8",
+    "kind": "resolve",
+    "description": "Back to default: the layer of S4 without bestOf inherits it",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {},
+      "queue": {
+        "exitCriterion": "arrival-order"
+      }
+    },
+    "expectedChanges": {
+      "queue.exitCriterion": "arrival-order"
+    },
+    "expectedSources": {
+      "queue.exitCriterion": "round"
+    }
+  },
+  {
+    "id": "S-precedence",
+    "kind": "resolve",
+    "description": "Round and match change the same leaf: the match wins",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 5,
+        "winMargin": 1
+      }
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3,
+      "scoring.winMargin": 1
+    },
+    "expectedSources": {
+      "scoring.bestOf": "match",
+      "scoring.winMargin": "round"
+    }
+  },
+  {
+    "id": "S9-pelada",
+    "kind": "resolve",
+    "description": "Template pelada as the group, with a round layer: a leaf equal to the group still comes from the round",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S9-racha-organizado",
+    "kind": "resolve",
+    "description": "Template racha-organizado as the group, with a round layer: a leaf equal to the group still comes from the round",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S9-treino",
+    "kind": "resolve",
+    "description": "Template treino as the group, with a round layer: a leaf equal to the group still comes from the round",
+    "group": {
+      "template": "treino"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S9-areia-rei-da-quadra",
+    "kind": "resolve",
+    "description": "Template areia-rei-da-quadra as the group, with a round layer: a leaf equal to the group still comes from the round",
+    "group": {
+      "template": "areia-rei-da-quadra"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3,
+      "rotation.enabled": true
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S9-do-zero",
+    "kind": "resolve",
+    "description": "Template do-zero as the group, with a round layer: a leaf equal to the group still comes from the round",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      },
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3,
+      "rotation.enabled": true
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round",
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "attendance.enabled": true
+    },
+    "expectedSources": {
+      "attendance.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.capacityLimited",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "capacityLimited": true
+      }
+    },
+    "expectedChanges": {
+      "attendance.capacityLimited": true
+    },
+    "expectedSources": {
+      "attendance.capacityLimited": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.capacity",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "capacity": 13
+      }
+    },
+    "expectedChanges": {
+      "attendance.capacity": 13
+    },
+    "expectedSources": {
+      "attendance.capacity": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.waitlistEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "waitlistEnabled": true
+      }
+    },
+    "expectedChanges": {
+      "attendance.waitlistEnabled": true
+    },
+    "expectedSources": {
+      "attendance.waitlistEnabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.dropInWindowEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "dropInWindowEnabled": true
+      }
+    },
+    "expectedChanges": {
+      "attendance.dropInWindowEnabled": true
+    },
+    "expectedSources": {
+      "attendance.dropInWindowEnabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-attendance.dropInOpensHoursBefore",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "attendance": {
+        "dropInOpensHoursBefore": 25
+      }
+    },
+    "expectedChanges": {
+      "attendance.dropInOpensHoursBefore": 25
+    },
+    "expectedSources": {
+      "attendance.dropInOpensHoursBefore": "round"
+    }
+  },
+  {
+    "id": "S10-round-format.modality",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "format": {
+        "modality": "beach-4x4"
+      }
+    },
+    "expectedChanges": {
+      "format.modality": "beach-4x4"
+    },
+    "expectedSources": {
+      "format.modality": "round"
+    }
+  },
+  {
+    "id": "S10-round-scoring.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "scoring.enabled": true
+    },
+    "expectedSources": {
+      "scoring.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-scoring.bestOf",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "round"
+    }
+  },
+  {
+    "id": "S10-match-scoring.bestOf",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expectedChanges": {
+      "scoring.bestOf": 3
+    },
+    "expectedSources": {
+      "scoring.bestOf": "match"
+    }
+  },
+  {
+    "id": "S10-round-scoring.pointsPerSet",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 26
+      }
+    },
+    "expectedChanges": {
+      "scoring.pointsPerSet": 26
+    },
+    "expectedSources": {
+      "scoring.pointsPerSet": "round"
+    }
+  },
+  {
+    "id": "S10-match-scoring.pointsPerSet",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 26
+      }
+    },
+    "expectedChanges": {
+      "scoring.pointsPerSet": 26
+    },
+    "expectedSources": {
+      "scoring.pointsPerSet": "match"
+    }
+  },
+  {
+    "id": "S10-round-scoring.tieBreakEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "tieBreakEnabled": false
+      }
+    },
+    "expectedChanges": {
+      "scoring.tieBreakEnabled": false
+    },
+    "expectedSources": {
+      "scoring.tieBreakEnabled": "round"
+    }
+  },
+  {
+    "id": "S10-match-scoring.tieBreakEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "tieBreakEnabled": false
+      }
+    },
+    "expectedChanges": {
+      "scoring.tieBreakEnabled": false
+    },
+    "expectedSources": {
+      "scoring.tieBreakEnabled": "match"
+    }
+  },
+  {
+    "id": "S10-round-scoring.tieBreakPoints",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "tieBreakPoints": 16
+      }
+    },
+    "expectedChanges": {
+      "scoring.tieBreakPoints": 16
+    },
+    "expectedSources": {
+      "scoring.tieBreakPoints": "round"
+    }
+  },
+  {
+    "id": "S10-match-scoring.tieBreakPoints",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "tieBreakPoints": 16
+      }
+    },
+    "expectedChanges": {
+      "scoring.tieBreakPoints": 16
+    },
+    "expectedSources": {
+      "scoring.tieBreakPoints": "match"
+    }
+  },
+  {
+    "id": "S10-round-scoring.winMargin",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "winMargin": 1
+      }
+    },
+    "expectedChanges": {
+      "scoring.winMargin": 1
+    },
+    "expectedSources": {
+      "scoring.winMargin": "round"
+    }
+  },
+  {
+    "id": "S10-match-scoring.winMargin",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "scoring": {
+        "winMargin": 1
+      }
+    },
+    "expectedChanges": {
+      "scoring.winMargin": 1
+    },
+    "expectedSources": {
+      "scoring.winMargin": "match"
+    }
+  },
+  {
+    "id": "S10-round-queue.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "queue.enabled": true
+    },
+    "expectedSources": {
+      "queue.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-queue.exitCriterion",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "exitCriterion": "arrival-order"
+      }
+    },
+    "expectedChanges": {
+      "queue.exitCriterion": "arrival-order"
+    },
+    "expectedSources": {
+      "queue.exitCriterion": "round"
+    }
+  },
+  {
+    "id": "S10-round-rotation.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "rotation.enabled": true
+    },
+    "expectedSources": {
+      "rotation.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-rotation.system",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "system": "5x1"
+      }
+    },
+    "expectedChanges": {
+      "rotation.system": "5x1"
+    },
+    "expectedSources": {
+      "rotation.system": "round"
+    }
+  },
+  {
+    "id": "S10-match-rotation.system",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "match": {
+      "schemaVersion": 1,
+      "rotation": {
+        "system": "5x1"
+      }
+    },
+    "expectedChanges": {
+      "rotation.system": "5x1"
+    },
+    "expectedSources": {
+      "rotation.system": "match"
+    }
+  },
+  {
+    "id": "S10-round-rotation.ruleMode",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "ruleMode": "classic"
+      }
+    },
+    "expectedChanges": {
+      "rotation.ruleMode": "classic"
+    },
+    "expectedSources": {
+      "rotation.ruleMode": "round"
+    }
+  },
+  {
+    "id": "S10-round-rotation.liberoEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "liberoEnabled": true
+      }
+    },
+    "expectedChanges": {
+      "rotation.liberoEnabled": true
+    },
+    "expectedSources": {
+      "rotation.liberoEnabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-draw.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "draw": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "draw.enabled": true
+    },
+    "expectedSources": {
+      "draw.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-draw.balanceByLevel",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "draw": {
+        "balanceByLevel": true
+      }
+    },
+    "expectedChanges": {
+      "draw.balanceByLevel": true
+    },
+    "expectedSources": {
+      "draw.balanceByLevel": "round"
+    }
+  },
+  {
+    "id": "S10-round-mvp.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "mvp": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "mvp.enabled": true
+    },
+    "expectedSources": {
+      "mvp.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-mvp.byStats",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "mvp": {
+        "byStats": false
+      }
+    },
+    "expectedChanges": {
+      "mvp.byStats": false
+    },
+    "expectedSources": {
+      "mvp.byStats": "round"
+    }
+  },
+  {
+    "id": "S10-round-mvp.voting",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "mvp": {
+        "voting": true
+      }
+    },
+    "expectedChanges": {
+      "mvp.voting": true
+    },
+    "expectedSources": {
+      "mvp.voting": "round"
+    }
+  },
+  {
+    "id": "S10-round-mvp.individualPoints",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "mvp": {
+        "individualPoints": true
+      }
+    },
+    "expectedChanges": {
+      "mvp.individualPoints": true
+    },
+    "expectedSources": {
+      "mvp.individualPoints": "round"
+    }
+  },
+  {
+    "id": "S10-round-money.enabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "money": {
+        "enabled": true
+      }
+    },
+    "expectedChanges": {
+      "money.enabled": true
+    },
+    "expectedSources": {
+      "money.enabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-money.dropInFeeCents",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "money": {
+        "dropInFeeCents": 1
+      }
+    },
+    "expectedChanges": {
+      "money.dropInFeeCents": 1
+    },
+    "expectedSources": {
+      "money.dropInFeeCents": "round"
+    }
+  },
+  {
+    "id": "N1",
+    "kind": "normalize",
+    "description": "A leaf equal to the group goes, a different one stays: 1 change",
+    "group": {
+      "template": "pelada"
+    },
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 21
+      },
+      "queue": {
+        "enabled": true
+      }
+    },
+    "expectedLayer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 21
+      }
+    },
+    "expectedChangeCount": 1
+  },
+  {
+    "id": "N1-all-equal",
+    "kind": "normalize",
+    "description": "Every leaf equal to the group: no change",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "money": {
+        "enabled": true
+      },
+      "attendance": {
+        "capacity": 12
+      }
+    },
+    "expectedLayer": {
+      "schemaVersion": 1
+    },
+    "expectedChangeCount": 0
+  },
+  {
+    "id": "N1-all-different",
+    "kind": "normalize",
+    "description": "Every leaf different: all stay, in catalog order",
+    "group": {
+      "template": "do-zero"
+    },
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "money": {
+        "enabled": true
+      },
+      "attendance": {
+        "capacity": 20
+      }
+    },
+    "expectedLayer": {
+      "schemaVersion": 1,
+      "attendance": {
+        "capacity": 20
+      },
+      "money": {
+        "enabled": true
+      }
+    },
+    "expectedChangeCount": 2
+  },
+  {
+    "id": "N3",
+    "kind": "normalize",
+    "description": "A match is normalized against group and round resolved, not against the group",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 21
+      }
+    },
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 21,
+        "bestOf": 3
+      }
+    },
+    "expectedLayer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expectedChangeCount": 1
+  },
+  {
+    "id": "N4-tie-break-on",
+    "kind": "derive",
+    "description": "Tie-break on: the number",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "system": "livre",
+      "ruleMode": "fivb-2025-28",
+      "liberoAllowed": false
+    }
+  },
+  {
+    "id": "N4-tie-break-off",
+    "kind": "derive",
+    "description": "Tie-break off: null",
+    "group": {
+      "template": "racha-organizado"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "scoring": {
+        "tieBreakEnabled": false,
+        "bestOf": 3
+      }
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 25,
+        "tieBreakPoints": null,
+        "winMargin": 2
+      },
+      "system": "livre",
+      "ruleMode": "fivb-2025-28",
+      "liberoAllowed": false
+    }
+  },
+  {
+    "id": "N5-5x1",
+    "kind": "derive",
+    "description": "Libero on with 5x1: allowed",
+    "group": {
+      "template": "treino"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "liberoEnabled": true
+      }
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "system": "5x1",
+      "ruleMode": "fivb-2025-28",
+      "liberoAllowed": true
+    }
+  },
+  {
+    "id": "N5-6x2",
+    "kind": "derive",
+    "description": "Libero on with 6x2 from the match: allowed",
+    "group": {
+      "template": "treino"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "liberoEnabled": true
+      }
+    },
+    "match": {
+      "schemaVersion": 1,
+      "rotation": {
+        "system": "6x2"
+      }
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "system": "6x2",
+      "ruleMode": "fivb-2025-28",
+      "liberoAllowed": true
+    }
+  },
+  {
+    "id": "N5-livre",
+    "kind": "derive",
+    "description": "Libero on with livre: not allowed, no error",
+    "group": {
+      "template": "pelada"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "liberoEnabled": true,
+        "ruleMode": "classic"
+      }
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "system": "livre",
+      "ruleMode": "classic",
+      "liberoAllowed": false
+    }
+  },
+  {
+    "id": "N5-4x2-from-round",
+    "kind": "derive",
+    "description": "Libero on in the group, 4x2 from the round: not allowed",
+    "group": {
+      "template": "treino",
+      "set": {
+        "rotation.liberoEnabled": true
+      }
+    },
+    "round": {
+      "schemaVersion": 1,
+      "rotation": {
+        "system": "4x2"
+      }
+    },
+    "expected": {
+      "scoring": {
+        "bestOf": 1,
+        "pointsPerSet": 25,
+        "tieBreakPoints": 15,
+        "winMargin": 2
+      },
+      "system": "4x2",
+      "ruleMode": "fivb-2025-28",
+      "liberoAllowed": false
+    }
+  },
+  {
+    "id": "V1-complete",
+    "kind": "parse-group",
+    "description": "A complete document passes",
+    "document": {
+      "template": "do-zero"
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V1-missing-leaf",
+    "kind": "parse-group",
+    "description": "A missing leaf",
+    "document": {
+      "template": "do-zero",
+      "remove": ["scoring.winMargin"]
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.missing-field",
+      "path": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "V1-missing-block",
+    "kind": "parse-group",
+    "description": "A missing block",
+    "document": {
+      "template": "do-zero",
+      "remove": ["mvp"]
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.missing-field",
+      "path": "mvp"
+    }
+  },
+  {
+    "id": "V1-extra-leaf",
+    "kind": "parse-group",
+    "description": "A leaf the catalog does not have",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.extra": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": "scoring"
+    }
+  },
+  {
+    "id": "V1-unknown-block",
+    "kind": "parse-group",
+    "description": "A block the catalog does not have",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "extras": {}
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": ""
+    }
+  },
+  {
+    "id": "V1-proto-key",
+    "kind": "parse-group",
+    "description": "A __proto__ key at the root",
+    "document": {
+      "raw": { "schemaVersion": 1, "__proto__": {} }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": ""
+    }
+  },
+  {
+    "id": "V1-null-block",
+    "kind": "parse-group",
+    "description": "A null block in the document",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "mvp": null
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "mvp"
+    }
+  },
+  {
+    "id": "V1-array-block",
+    "kind": "parse-group",
+    "description": "An array as a block",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "mvp": []
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "mvp"
+    }
+  },
+  {
+    "id": "V1-first-error-in-catalog-order",
+    "kind": "parse-group",
+    "description": "Two errors: the first block of the catalog wins",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "mvp.voting": "x",
+        "attendance.enabled": "y"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "attendance.enabled"
+    }
+  },
+  {
+    "id": "V2-scoring.pointsPerSet-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V2-scoring.pointsPerSet-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-scoring.pointsPerSet-99",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 99
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-scoring.pointsPerSet-100",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 100
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V2-scoring.tieBreakPoints-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.tieBreakPoints": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "V2-scoring.tieBreakPoints-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.tieBreakPoints": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-scoring.tieBreakPoints-99",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.tieBreakPoints": 99
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-scoring.tieBreakPoints-100",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.tieBreakPoints": 100
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "scoring.tieBreakPoints"
+    }
+  },
+  {
+    "id": "V2-attendance.capacity-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.capacity": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "attendance.capacity"
+    }
+  },
+  {
+    "id": "V2-attendance.capacity-2",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.capacity": 2
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-attendance.capacity-300",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.capacity": 300
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-attendance.capacity-301",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.capacity": 301
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "attendance.capacity"
+    }
+  },
+  {
+    "id": "V2-attendance.dropInOpensHoursBefore-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.dropInOpensHoursBefore": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "attendance.dropInOpensHoursBefore"
+    }
+  },
+  {
+    "id": "V2-attendance.dropInOpensHoursBefore-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.dropInOpensHoursBefore": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-attendance.dropInOpensHoursBefore-168",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.dropInOpensHoursBefore": 168
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-attendance.dropInOpensHoursBefore-169",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "attendance.dropInOpensHoursBefore": 169
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "attendance.dropInOpensHoursBefore"
+    }
+  },
+  {
+    "id": "V2-money.dropInFeeCents--1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.dropInFeeCents": -1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "money.dropInFeeCents"
+    }
+  },
+  {
+    "id": "V2-money.dropInFeeCents-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.dropInFeeCents": 0
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-money.dropInFeeCents-100000",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.dropInFeeCents": 100000
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-money.dropInFeeCents-100001",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.dropInFeeCents": 100001
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "money.dropInFeeCents"
+    }
+  },
+  {
+    "id": "V2-money.monthlyFeeCents--1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.monthlyFeeCents": -1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "money.monthlyFeeCents"
+    }
+  },
+  {
+    "id": "V2-money.monthlyFeeCents-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.monthlyFeeCents": 0
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-money.monthlyFeeCents-100000",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.monthlyFeeCents": 100000
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-money.monthlyFeeCents-100001",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "money.monthlyFeeCents": 100001
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "money.monthlyFeeCents"
+    }
+  },
+  {
+    "id": "V2-schedule.weekday-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.weekday": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.weekday"
+    }
+  },
+  {
+    "id": "V2-schedule.weekday-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.weekday": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-schedule.weekday-7",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.weekday": 7
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-schedule.weekday-8",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.weekday": 8
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.weekday"
+    }
+  },
+  {
+    "id": "V3-scoring.bestOf-2",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": 2
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V3-scoring.bestOf-4",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": 4
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V3-scoring.bestOf-2.5",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": 2.5
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V3-scoring.bestOf-3",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": 3
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V3-scoring.winMargin-0",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.winMargin": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "V3-scoring.winMargin-3",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.winMargin": 3
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.winMargin"
+    }
+  },
+  {
+    "id": "V3-rotation.system-6x0",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "rotation.system": "6x0"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "rotation.system"
+    }
+  },
+  {
+    "id": "V3-rotation.system-5X1",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "rotation.system": "5X1"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "rotation.system"
+    }
+  },
+  {
+    "id": "V3-rotation.system-6x2",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "rotation.system": "6x2"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V3-queue.exitCriterion-level",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.exitCriterion": "level"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "queue.exitCriterion"
+    }
+  },
+  {
+    "id": "V3-rotation.ruleMode-FIVB",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "rotation.ruleMode": "FIVB"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "rotation.ruleMode"
+    }
+  },
+  {
+    "id": "V3-format.modality-beach-3x3",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "format.modality": "beach-3x3"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "format.modality"
+    }
+  },
+  {
+    "id": "V3-format.modality-beach-4x4",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "format.modality": "beach-4x4"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V4-number-as-text",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": "25"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V4-fraction",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 25.5
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V4-bool-in-number",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": true
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V4-number-in-bool",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.enabled": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.enabled"
+    }
+  },
+  {
+    "id": "V4-object-in-leaf",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.enabled": {}
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.enabled"
+    }
+  },
+  {
+    "id": "V4-array-in-leaf",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": [25]
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V4-text-in-choice-of-numbers",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": "3"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V4-number-in-choice-of-text",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "rotation.system": 5
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "rotation.system"
+    }
+  },
+  {
+    "id": "V4-huge-number",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 1e400
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V4-huge-number-in-choice",
+    "kind": "parse-group",
+    "description": "Wrong types",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": 1e400
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V4-integer-written-with-fraction",
+    "kind": "parse-group",
+    "description": "25.0 is 25, as JSON.parse reads it (ADR 0025)",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.pointsPerSet": 25.0
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V4-array-as-document",
+    "kind": "parse-group",
+    "description": "An array as the document",
+    "document": {
+      "raw": []
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": ""
+    }
+  },
+  {
+    "id": "V4-null-as-document",
+    "kind": "parse-group",
+    "description": "null as the document",
+    "document": {
+      "raw": null
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": ""
+    }
+  },
+  {
+    "id": "V4-text-as-document",
+    "kind": "parse-group",
+    "description": "Text as the document",
+    "document": {
+      "raw": "settings"
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": ""
+    }
+  },
+  {
+    "id": "V5-1",
+    "kind": "parse-group",
+    "description": "startTime \"20:00\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "20:00"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V5-2",
+    "kind": "parse-group",
+    "description": "startTime \"00:00\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "00:00"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V5-3",
+    "kind": "parse-group",
+    "description": "startTime \"23:59\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "23:59"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V5-4",
+    "kind": "parse-group",
+    "description": "startTime \"24:00\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "24:00"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-5",
+    "kind": "parse-group",
+    "description": "startTime \"20:60\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "20:60"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-6",
+    "kind": "parse-group",
+    "description": "startTime \"8:00\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "8:00"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-7",
+    "kind": "parse-group",
+    "description": "startTime \"20:00:00\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "20:00:00"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-8",
+    "kind": "parse-group",
+    "description": "startTime \"\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": ""
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-9",
+    "kind": "parse-group",
+    "description": "startTime \"\uFF12\uFF10:\uFF10\uFF10\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "\uFF12\uFF10:\uFF10\uFF10"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V5-10",
+    "kind": "parse-group",
+    "description": "startTime 2000",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": 2000
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
+    "id": "V6-1",
+    "kind": "parse-group",
+    "description": "venue: 80 characters",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-2",
+    "kind": "parse-group",
+    "description": "venue: 81 characters",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-3",
+    "kind": "parse-group",
+    "description": "venue: 80 composed accents",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9\u00E9"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-4",
+    "kind": "parse-group",
+    "description": "venue: empty",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": ""
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-5",
+    "kind": "parse-group",
+    "description": "venue: names and accents",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Gin\u00E1sio S\u00E3o Jo\u00E3o"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-6",
+    "kind": "parse-group",
+    "description": "venue: an emoji",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra \uD83C\uDFD0"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-7",
+    "kind": "parse-group",
+    "description": "venue: right-to-left override",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra\u202E"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-8",
+    "kind": "parse-group",
+    "description": "venue: line break",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra\nCentral"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-9",
+    "kind": "parse-group",
+    "description": "venue: leading space",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": " Quadra"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-10",
+    "kind": "parse-group",
+    "description": "venue: decomposed accent",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Jose\u0301"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-11",
+    "kind": "parse-group",
+    "description": "venue: only punctuation",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "..."
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-12",
+    "kind": "parse-group",
+    "description": "venue: only spaces",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "   "
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-13",
+    "kind": "parse-group",
+    "description": "venue: five stacked marks",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra q\u0300\u0301\u0302\u0303\u0304"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-14",
+    "kind": "parse-group",
+    "description": "venue: four stacked marks",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra q\u0300\u0301\u0302\u0303"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-15",
+    "kind": "parse-group",
+    "description": "venue: joiner inside an emoji",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Time \uD83D\uDC68\u200D\uD83D\uDC69"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V6-16",
+    "kind": "parse-group",
+    "description": "venue: joiner after a letter",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "a\u200Db"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V6-17",
+    "kind": "parse-group",
+    "description": "venue: private use",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra \uE000"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V8-version-0",
+    "kind": "parse-group",
+    "description": "schemaVersion 0",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schemaVersion": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V8-version-2",
+    "kind": "parse-group",
+    "description": "schemaVersion 2",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schemaVersion": 2
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V8-version-text",
+    "kind": "parse-group",
+    "description": "schemaVersion as text",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schemaVersion": "1"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V8-version-missing",
+    "kind": "parse-group",
+    "description": "schemaVersion missing",
+    "document": {
+      "template": "do-zero",
+      "remove": ["schemaVersion"]
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V9-null-leaf-in-document",
+    "kind": "parse-group",
+    "description": "null in a leaf of the document",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "scoring.bestOf": null
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V7-round-regulars",
+    "kind": "parse-layer",
+    "description": "Regulars are only of the group",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "attendance": {
+        "regularsEnabled": true
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "attendance.regularsEnabled"
+    }
+  },
+  {
+    "id": "V7-round-schedule",
+    "kind": "parse-layer",
+    "description": "The fixed day is only of the group",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "schedule": {
+        "weekday": 3
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "schedule.weekday"
+    }
+  },
+  {
+    "id": "V7-round-venue",
+    "kind": "parse-layer",
+    "description": "The venue is only of the group",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "schedule": {
+        "venue": "Quadra"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V7-round-monthly-fee",
+    "kind": "parse-layer",
+    "description": "The monthly fee is only of the group",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "money": {
+        "monthlyFeeCents": 100
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "money.monthlyFeeCents"
+    }
+  },
+  {
+    "id": "V7-match-capacity",
+    "kind": "parse-layer",
+    "description": "A match never changes the capacity",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "attendance": {
+        "capacity": 20
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "attendance.capacity"
+    }
+  },
+  {
+    "id": "V7-match-queue",
+    "kind": "parse-layer",
+    "description": "A match never changes the queue",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "queue": {
+        "enabled": true
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "queue.enabled"
+    }
+  },
+  {
+    "id": "V7-match-level-before-type",
+    "kind": "parse-layer",
+    "description": "The level is checked before the type",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "queue": {
+        "enabled": "x"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.not-allowed-at-level",
+      "path": "queue.enabled"
+    }
+  },
+  {
+    "id": "V7-match-scoring-and-system",
+    "kind": "parse-layer",
+    "description": "A match takes the scoring and the system",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 3,
+        "pointsPerSet": 15,
+        "tieBreakEnabled": false,
+        "tieBreakPoints": 10,
+        "winMargin": 1
+      },
+      "rotation": {
+        "system": "5x1"
+      }
+    },
+    "expected": {
+      "ok": true,
+      "layer": {
+        "schemaVersion": 1,
+        "scoring": {
+          "bestOf": 3,
+          "pointsPerSet": 15,
+          "tieBreakEnabled": false,
+          "tieBreakPoints": 10,
+          "winMargin": 1
+        },
+        "rotation": {
+          "system": "5x1"
+        }
+      }
+    }
+  },
+  {
+    "id": "V7-round-capacity",
+    "kind": "parse-layer",
+    "description": "A round takes the capacity",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "attendance": {
+        "capacity": 20
+      }
+    },
+    "expected": {
+      "ok": true,
+      "layer": {
+        "schemaVersion": 1,
+        "attendance": {
+          "capacity": 20
+        }
+      }
+    }
+  },
+  {
+    "id": "V7-round-null-in-group-leaf",
+    "kind": "parse-layer",
+    "description": "null in a leaf the level refuses is absent",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "schedule": {
+        "weekday": null
+      }
+    },
+    "expected": {
+      "ok": true,
+      "layer": {
+        "schemaVersion": 1
+      }
+    }
+  },
+  {
+    "id": "V8-layer-version-missing",
+    "kind": "parse-layer",
+    "description": "A layer without schemaVersion",
+    "level": "round",
+    "layer": {
+      "scoring": {
+        "bestOf": 3
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V8-layer-version-2",
+    "kind": "parse-layer",
+    "description": "A layer with schemaVersion 2",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 2
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unsupported-version",
+      "path": "schemaVersion"
+    }
+  },
+  {
+    "id": "V9-null-leaf-in-layer",
+    "kind": "parse-layer",
+    "description": "null in a leaf of a layer inherits",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": null,
+        "pointsPerSet": 21
+      }
+    },
+    "expected": {
+      "ok": true,
+      "layer": {
+        "schemaVersion": 1,
+        "scoring": {
+          "pointsPerSet": 21
+        }
+      }
+    }
+  },
+  {
+    "id": "V9-empty-block-dropped",
+    "kind": "parse-layer",
+    "description": "An empty block is left out",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {},
+      "queue": {
+        "enabled": false
+      }
+    },
+    "expected": {
+      "ok": true,
+      "layer": {
+        "schemaVersion": 1,
+        "queue": {
+          "enabled": false
+        }
+      }
+    }
+  },
+  {
+    "id": "V-layer-unknown-leaf",
+    "kind": "parse-layer",
+    "description": "A leaf the catalog does not have",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "foo": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": "scoring"
+    }
+  },
+  {
+    "id": "V-layer-constructor-leaf",
+    "kind": "parse-layer",
+    "description": "A constructor key is not read through the prototype",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "constructor": 1
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": "scoring"
+    }
+  },
+  {
+    "id": "V-layer-unknown-block",
+    "kind": "parse-layer",
+    "description": "A block the catalog does not have",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "extras": {}
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-field",
+      "path": ""
+    }
+  },
+  {
+    "id": "V-layer-array",
+    "kind": "parse-layer",
+    "description": "An array as a layer",
+    "level": "round",
+    "layer": [],
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": ""
+    }
+  },
+  {
+    "id": "V-layer-block-not-object",
+    "kind": "parse-layer",
+    "description": "A block that is not an object",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": 3
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring"
+    }
+  },
+  {
+    "id": "V-layer-wrong-type",
+    "kind": "parse-layer",
+    "description": "A wrong type in a layer",
+    "level": "round",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": "3"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V-layer-out-of-range",
+    "kind": "parse-layer",
+    "description": "Out of range in a layer",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "pointsPerSet": 100
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "scoring.pointsPerSet"
+    }
+  },
+  {
+    "id": "V-layer-unknown-value",
+    "kind": "parse-layer",
+    "description": "Out of the list in a layer",
+    "level": "match",
+    "layer": {
+      "schemaVersion": 1,
+      "scoring": {
+        "bestOf": 2
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "scoring.bestOf"
+    }
+  },
+  {
+    "id": "V11-pelada",
+    "kind": "apply-template",
+    "description": "Template pelada over \"Do zero\": every value pinned",
+    "group": {
+      "template": "do-zero"
+    },
+    "template": "pelada",
+    "expectedValues": {
+      "attendance.enabled": true,
+      "attendance.capacityLimited": false,
+      "attendance.capacity": 12,
+      "attendance.waitlistEnabled": false,
+      "attendance.regularsEnabled": false,
+      "attendance.dropInWindowEnabled": false,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": false,
+      "schedule.weekday": 2,
+      "schedule.startTime": "20:00",
+      "schedule.venue": "",
+      "format.modality": "indoor-6x6",
+      "scoring.enabled": true,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 25,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": true,
+      "queue.exitCriterion": "consecutive-matches",
+      "rotation.enabled": true,
+      "rotation.system": "livre",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": true,
+      "draw.balanceByLevel": false,
+      "mvp.enabled": true,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": false,
+      "money.dropInFeeCents": 0,
+      "money.monthlyFeeCents": 0
+    }
+  },
+  {
+    "id": "V11-racha-organizado",
+    "kind": "apply-template",
+    "description": "Template racha-organizado over \"Do zero\": every value pinned",
+    "group": {
+      "template": "do-zero"
+    },
+    "template": "racha-organizado",
+    "expectedValues": {
+      "attendance.enabled": true,
+      "attendance.capacityLimited": true,
+      "attendance.capacity": 12,
+      "attendance.waitlistEnabled": true,
+      "attendance.regularsEnabled": true,
+      "attendance.dropInWindowEnabled": true,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": false,
+      "schedule.weekday": 2,
+      "schedule.startTime": "20:00",
+      "schedule.venue": "",
+      "format.modality": "indoor-6x6",
+      "scoring.enabled": true,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 25,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": true,
+      "queue.exitCriterion": "consecutive-matches",
+      "rotation.enabled": true,
+      "rotation.system": "livre",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": true,
+      "draw.balanceByLevel": true,
+      "mvp.enabled": true,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": true,
+      "money.dropInFeeCents": 0,
+      "money.monthlyFeeCents": 0
+    }
+  },
+  {
+    "id": "V11-treino",
+    "kind": "apply-template",
+    "description": "Template treino over \"Do zero\": every value pinned",
+    "group": {
+      "template": "do-zero"
+    },
+    "template": "treino",
+    "expectedValues": {
+      "attendance.enabled": true,
+      "attendance.capacityLimited": false,
+      "attendance.capacity": 12,
+      "attendance.waitlistEnabled": false,
+      "attendance.regularsEnabled": false,
+      "attendance.dropInWindowEnabled": false,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": false,
+      "schedule.weekday": 2,
+      "schedule.startTime": "20:00",
+      "schedule.venue": "",
+      "format.modality": "indoor-6x6",
+      "scoring.enabled": true,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 25,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": false,
+      "queue.exitCriterion": "consecutive-matches",
+      "rotation.enabled": true,
+      "rotation.system": "5x1",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": false,
+      "draw.balanceByLevel": false,
+      "mvp.enabled": false,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": false,
+      "money.dropInFeeCents": 0,
+      "money.monthlyFeeCents": 0
+    }
+  },
+  {
+    "id": "V11-areia-rei-da-quadra",
+    "kind": "apply-template",
+    "description": "Template areia-rei-da-quadra over \"Do zero\": every value pinned",
+    "group": {
+      "template": "do-zero"
+    },
+    "template": "areia-rei-da-quadra",
+    "expectedValues": {
+      "attendance.enabled": true,
+      "attendance.capacityLimited": false,
+      "attendance.capacity": 12,
+      "attendance.waitlistEnabled": false,
+      "attendance.regularsEnabled": false,
+      "attendance.dropInWindowEnabled": false,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": false,
+      "schedule.weekday": 2,
+      "schedule.startTime": "20:00",
+      "schedule.venue": "",
+      "format.modality": "beach-2x2",
+      "scoring.enabled": true,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 21,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": true,
+      "queue.exitCriterion": "arrival-order",
+      "rotation.enabled": false,
+      "rotation.system": "livre",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": true,
+      "draw.balanceByLevel": false,
+      "mvp.enabled": true,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": false,
+      "money.dropInFeeCents": 0,
+      "money.monthlyFeeCents": 0
+    }
+  },
+  {
+    "id": "V11-do-zero",
+    "kind": "apply-template",
+    "description": "Template do-zero over \"Do zero\": every value pinned",
+    "group": {
+      "template": "do-zero"
+    },
+    "template": "do-zero",
+    "expectedValues": {
+      "attendance.enabled": false,
+      "attendance.capacityLimited": false,
+      "attendance.capacity": 12,
+      "attendance.waitlistEnabled": false,
+      "attendance.regularsEnabled": false,
+      "attendance.dropInWindowEnabled": false,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": false,
+      "schedule.weekday": 2,
+      "schedule.startTime": "20:00",
+      "schedule.venue": "",
+      "format.modality": "indoor-6x6",
+      "scoring.enabled": false,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 25,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": false,
+      "queue.exitCriterion": "consecutive-matches",
+      "rotation.enabled": false,
+      "rotation.system": "livre",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": false,
+      "draw.balanceByLevel": false,
+      "mvp.enabled": false,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": false,
+      "money.dropInFeeCents": 0,
+      "money.monthlyFeeCents": 0
+    }
+  },
+  {
+    "id": "V11-facts-kept",
+    "kind": "apply-template",
+    "description": "Changing from Racha to Treino keeps day, time, venue, capacity and money",
+    "group": {
+      "template": "racha-organizado",
+      "set": {
+        "attendance.capacity": 18,
+        "schedule.enabled": true,
+        "schedule.weekday": 4,
+        "schedule.startTime": "19:30",
+        "schedule.venue": "Quadra do clube",
+        "money.dropInFeeCents": 1500,
+        "money.monthlyFeeCents": 5000
+      }
+    },
+    "template": "treino",
+    "expectedValues": {
+      "attendance.enabled": true,
+      "attendance.capacityLimited": false,
+      "attendance.capacity": 18,
+      "attendance.waitlistEnabled": false,
+      "attendance.regularsEnabled": false,
+      "attendance.dropInWindowEnabled": false,
+      "attendance.dropInOpensHoursBefore": 24,
+      "schedule.enabled": true,
+      "schedule.weekday": 4,
+      "schedule.startTime": "19:30",
+      "schedule.venue": "Quadra do clube",
+      "format.modality": "indoor-6x6",
+      "scoring.enabled": true,
+      "scoring.bestOf": 1,
+      "scoring.pointsPerSet": 25,
+      "scoring.tieBreakEnabled": true,
+      "scoring.tieBreakPoints": 15,
+      "scoring.winMargin": 2,
+      "queue.enabled": false,
+      "queue.exitCriterion": "consecutive-matches",
+      "rotation.enabled": true,
+      "rotation.system": "5x1",
+      "rotation.ruleMode": "fivb-2025-28",
+      "rotation.liberoEnabled": false,
+      "draw.enabled": false,
+      "draw.balanceByLevel": false,
+      "mvp.enabled": false,
+      "mvp.byStats": true,
+      "mvp.voting": false,
+      "mvp.individualPoints": false,
+      "money.enabled": false,
+      "money.dropInFeeCents": 1500,
+      "money.monthlyFeeCents": 5000
+    }
+  }
+]
