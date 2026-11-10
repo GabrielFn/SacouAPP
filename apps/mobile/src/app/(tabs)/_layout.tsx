@@ -1,11 +1,10 @@
 import { TabList, Tabs, TabSlot, TabTrigger } from "expo-router/ui";
 
-import { groupsHref, homeHref } from "../../features/groups/navigation";
+import { groupsHref, homeHref, meHref } from "../../features/groups/navigation";
 import { strings } from "../../strings/pt-BR";
 import { GroupIcon, HomeIcon, PersonIcon } from "../../ui/Icons";
 import { TabBarFrame, TabBarItem } from "../../ui/TabBar";
 
-const ME_HREF = "/me";
 const { tabs } = strings.groups;
 
 /** Início, Grupo and Eu: the headless tabs of the router with the bar of the canvas (ADR 0044). */
@@ -21,7 +20,7 @@ export default function TabsLayout() {
           <TabTrigger name="groups" href={groupsHref} asChild>
             <TabBarItem label={tabs.groups} renderIcon={(color) => <GroupIcon color={color} />} />
           </TabTrigger>
-          <TabTrigger name="me" href={ME_HREF} asChild>
+          <TabTrigger name="me" href={meHref} asChild>
             <TabBarItem label={tabs.me} renderIcon={(color) => <PersonIcon color={color} />} />
           </TabTrigger>
         </TabBarFrame>

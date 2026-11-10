@@ -1,5 +1,5 @@
 import { apiErrorKindTexts, apiErrorTexts } from "../../strings/api-errors.pt-BR";
-import type { ApiError } from "./api-error";
+import { apiErrorOf, type ApiError } from "./api-error";
 
 /** The text of an error, by `code` for rule errors (D5). A code is never shown as it came. */
 export function apiErrorText(error: ApiError): string {
@@ -19,4 +19,10 @@ export function apiErrorText(error: ApiError): string {
     case "unexpected":
       return apiErrorKindTexts.unexpected;
   }
+}
+
+/** The text for anything a query or mutation threw: what is not an `ApiFailure` reads as unexpected. */
+export function errorTextOf(error: unknown): string {
+  const apiError = apiErrorOf(error);
+  return apiErrorText(apiError ?? { kind: "unexpected", status: 0 });
 }

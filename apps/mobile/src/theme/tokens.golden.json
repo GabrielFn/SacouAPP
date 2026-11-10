@@ -80,7 +80,10 @@
     "blockHeaderMin": 56,
     "systemButton": 56,
     "proBadge": 22,
-    "sheetHandle": 4
+    "sheetHandle": 4,
+    "chevronIcon": 20,
+    "courtIconWidth": 30,
+    "courtIconHeight": 22
   },
   "radii": {
     "field": 12,

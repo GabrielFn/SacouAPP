@@ -134,6 +134,9 @@ export const sizes = {
   systemButton: 56,
   proBadge: 22,
   sheetHandle: 4,
+  chevronIcon: 20,
+  courtIconWidth: 30,
+  courtIconHeight: 22,
 } as const;
 
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */
