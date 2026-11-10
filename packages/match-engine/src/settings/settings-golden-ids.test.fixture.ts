@@ -103,6 +103,7 @@ export const EXPECTED_SETTINGS_IDS: readonly string[] = [
   "V5-8",
   "V5-9",
   "V5-10",
+  "V5-11",
   "V6-1",
   "V6-2",
   "V6-3",

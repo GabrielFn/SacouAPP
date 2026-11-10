@@ -2501,6 +2501,22 @@
     }
   },
   {
+    "id": "V5-11",
+    "kind": "parse-group",
+    "description": "startTime \"20:00\\n\"",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.startTime": "20:00\n"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.wrong-type",
+      "path": "schedule.startTime"
+    }
+  },
+  {
     "id": "V6-1",
     "kind": "parse-group",
     "description": "venue: 80 characters",

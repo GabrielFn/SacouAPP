@@ -156,16 +156,18 @@ public sealed partial class SharedGoldenFilesTests
         }
     }
 
-    [Fact]
-    public void CatalogResource_IsByteForByteTheSharedFile()
+    [Theory]
+    [InlineData(MatchesAssembly, RepositoryFiles.CatalogResourceName, RepositoryFiles.CatalogPath)]
+    [InlineData(RepositoryFiles.SettingsCatalogAssembly, RepositoryFiles.SettingsCatalogResourceName, RepositoryFiles.SettingsCatalogPath)]
+    public void CatalogResource_IsByteForByteTheSharedFile(string assemblyName, string resourceName, string path)
     {
-        var assembly = Assemblies.RealModules.Value.Single(module => module.GetName().Name == MatchesAssembly);
-        using var resource = assembly.GetManifestResourceStream(RepositoryFiles.CatalogResourceName);
+        var assembly = Assemblies.RealModules.Value.Single(module => module.GetName().Name == assemblyName);
+        using var resource = assembly.GetManifestResourceStream(resourceName);
         Assert.NotNull(resource);
         using var bytes = new MemoryStream();
         resource.CopyTo(bytes);
 
-        Assert.Equal(RepositoryFiles.ReadRepositoryBytes(RepositoryFiles.CatalogPath.Split('/')), bytes.ToArray());
+        Assert.Equal(RepositoryFiles.ReadRepositoryBytes(path.Split('/')), bytes.ToArray());
     }
 
     [Theory]
@@ -205,6 +207,8 @@ public sealed partial class SharedGoldenFilesTests
     [InlineData(MatchesAssembly, "golden/overlap.json", "")]
     [InlineData(MatchesAssembly, "", "")]
     [InlineData("Sacou.Modules.Stats", "golden/player-card-level.json", "")]
+    [InlineData(RepositoryFiles.SettingsCatalogAssembly, "", "")]
+    [InlineData(RepositoryFiles.SettingsCatalogAssembly, RepositoryFiles.SettingsCatalogResourceName, "golden/settings-resolver.json")]
     public void ProductionAssembly_WithOtherResources_IsReported(string assembly, string first, string second)
     {
         string[] resources = [.. new[] { first, second }.Where(name => name.Length > 0)];

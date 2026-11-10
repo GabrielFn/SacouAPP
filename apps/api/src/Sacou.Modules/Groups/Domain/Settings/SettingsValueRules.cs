@@ -1,14 +1,15 @@
-using System.Text.RegularExpressions;
-
 namespace Sacou.Modules.Groups.Domain.Settings;
 
 /// <summary>The rule of each value type, the same as value-rules.ts. Each returns the refusal, or <c>null</c>.</summary>
-internal static partial class SettingsValueRules
+internal static class SettingsValueRules
 {
     private const int LastHour = 23;
     private const int LastMinute = 59;
-    private const int HourGroup = 1;
-    private const int MinuteGroup = 2;
+    private const int TimeLength = 5;
+    private const int HourStart = 0;
+    private const int SeparatorIndex = 2;
+    private const int MinuteStart = 3;
+    private const char TimeSeparator = ':';
     private const int DecimalBase = 10;
 
     public static string? Check(SettingsField field, SettingsNode node) => field.Type switch
@@ -46,23 +47,23 @@ internal static partial class SettingsValueRules
         return SettingsValue.FromNode(node) is { } value && field.Values.Contains(value) ? null : SettingsErrors.UnknownValue;
     }
 
+    /// <summary><c>HH:mm</c> with ASCII digits only: no regex, whose generated code the domain cannot reference, and no culture.</summary>
     private static string? CheckTime(SettingsNode node)
     {
-        var shape = node is TextNode text ? TimeShape().Match(text.Value) : Match.Empty;
-        if (!shape.Success)
+        if (node is not TextNode { Value: var text } || !HasTimeShape(text))
         {
             return SettingsErrors.WrongType;
         }
 
-        var isInRange = TwoDigits(shape.Groups[HourGroup].Value) <= LastHour
-            && TwoDigits(shape.Groups[MinuteGroup].Value) <= LastMinute;
+        var isInRange = TwoDigits(text, HourStart) <= LastHour && TwoDigits(text, MinuteStart) <= LastMinute;
         return isInRange ? null : SettingsErrors.OutOfRange;
     }
 
-    /// <summary>ASCII digits only, already checked by the pattern: no culture involved.</summary>
-    private static int TwoDigits(string digits) => ((digits[0] - '0') * DecimalBase) + (digits[1] - '0');
+    private static bool HasTimeShape(string text) =>
+        text.Length == TimeLength
+        && text[SeparatorIndex] == TimeSeparator
+        && char.IsAsciiDigit(text[HourStart]) && char.IsAsciiDigit(text[HourStart + 1])
+        && char.IsAsciiDigit(text[MinuteStart]) && char.IsAsciiDigit(text[MinuteStart + 1]);
 
-    /// <summary><c>HH:mm</c>. <c>[0-9]</c>, never <c>\d</c>, which takes any Unicode digit in .NET; <c>\z</c>, never <c>$</c>, which takes a final line break.</summary>
-    [GeneratedRegex(@"^([0-9]{2}):([0-9]{2})\z", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]
-    private static partial Regex TimeShape();
+    private static int TwoDigits(string text, int start) => ((text[start] - '0') * DecimalBase) + (text[start + 1] - '0');
 }
