@@ -9,6 +9,12 @@ public interface IGroupMembership
 {
     /// <summary>The person's active membership in the group, or null for a non-member, a left or a removed member.</summary>
     Task<GroupMembership?> FindActiveAsync(Guid groupId, Guid userId, CancellationToken cancellationToken);
+
+    /// <summary>Every active member of the group, in the order they joined; empty for a group that does not exist.</summary>
+    Task<IReadOnlyList<GroupMembership>> ListActiveAsync(Guid groupId, CancellationToken cancellationToken);
+
+    /// <summary>Whether the role may do it, read from the single permission table of the Groups domain.</summary>
+    bool Allows(GroupRole role, GroupCapability capability);
 }
 
 public sealed record GroupMembership(Guid MemberId, GroupRole Role, MemberType Type);

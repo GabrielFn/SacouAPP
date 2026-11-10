@@ -1,3 +1,4 @@
+using Sacou.Modules.Groups.Domain.Permissions;
 using DomainRole = Sacou.Modules.Groups.Domain.Members.GroupRole;
 using DomainType = Sacou.Modules.Groups.Domain.Members.MemberType;
 
@@ -20,6 +21,14 @@ internal static class ContractValues
         DomainType.Regular => MemberType.Regular,
         DomainType.DropIn => MemberType.DropIn,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Every member type needs a public twin."),
+    };
+
+    public static GroupPermission ToDomain(GroupCapability capability) => capability switch
+    {
+        GroupCapability.ViewGroup => GroupPermission.ViewGroup,
+        GroupCapability.ManageRounds => GroupPermission.ManageRounds,
+        GroupCapability.RespondAttendance => GroupPermission.RespondAttendance,
+        _ => throw new ArgumentOutOfRangeException(nameof(capability), capability, "Every capability needs a domain permission."),
     };
 
     public static DomainRole ToDomain(GroupRole role) => role switch

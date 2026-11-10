@@ -46,6 +46,7 @@ public static class GroupsModule
         services.AddScoped<SaveTemplateHandler>();
         services.AddSingleton<IInviteTokenGenerator, RandomInviteTokenGenerator>();
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
+        services.AddScoped<IGroupSettingsReader, StoreGroupSettingsReader>();
         return services;
     }
 
