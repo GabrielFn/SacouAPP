@@ -16,10 +16,10 @@ public sealed class GroupRouteGuardTests
     private const string Planted = "/v1/groups/{groupId:guid}/planted";
 
     /// <summary>
-    /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites:
-    /// the guard must see them, or it checks nothing.
+    /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites, and the six
+    /// of the settings and the saved templates: the guard must see them, or it checks nothing.
     /// </summary>
-    private const int GroupRoutes = 10;
+    private const int GroupRoutes = 16;
 
     [Fact]
     public async Task RealApi_EveryRouteIsGuardedOrListed()
@@ -29,6 +29,31 @@ public sealed class GroupRouteGuardTests
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints));
         Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
+    }
+
+    /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>
+    [Fact]
+    public async Task RealApi_SettingsRoutesDeclareTheirPermission()
+    {
+        await using var api = new ClosedDatabaseApi();
+        var declared = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
+            .Where(endpoint => endpoint.RoutePattern.RawText!.Contains("/settings", StringComparison.Ordinal)
+                || endpoint.RoutePattern.RawText.Contains("/templates", StringComparison.Ordinal))
+            .ToDictionary(
+                endpoint => $"{string.Join(',', endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()!.HttpMethods)} {endpoint.RoutePattern.RawText}",
+                endpoint => endpoint.Metadata.GetMetadata<GroupPermissionMetadata>()!.Permission);
+
+        Assert.Equal(
+            new Dictionary<string, GroupPermission>
+            {
+                ["GET /v1/groups/{groupId:guid}/settings"] = GroupPermission.ViewGroup,
+                ["PATCH /v1/groups/{groupId:guid}/settings"] = GroupPermission.ManageSettings,
+                ["POST /v1/groups/{groupId:guid}/settings/apply-template"] = GroupPermission.ManageSettings,
+                ["GET /v1/groups/{groupId:guid}/templates"] = GroupPermission.ManageSettings,
+                ["POST /v1/groups/{groupId:guid}/templates"] = GroupPermission.ManageSettings,
+                ["DELETE /v1/groups/{groupId:guid}/templates/{templateId:guid}"] = GroupPermission.ManageSettings,
+            },
+            declared);
     }
 
     [Fact]
