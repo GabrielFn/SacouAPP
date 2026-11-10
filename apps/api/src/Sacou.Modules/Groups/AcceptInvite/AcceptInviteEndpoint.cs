@@ -19,7 +19,10 @@ internal static class AcceptInviteEndpoint
 
     public static IEndpointRouteBuilder MapAcceptInvite(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return endpoints;
     }
 

@@ -23,7 +23,8 @@ internal static class CreateInviteEndpoint
 
     public static RouteGroupBuilder MapCreateInvite(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ManageInvites);
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ManageInvites)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
     }
 

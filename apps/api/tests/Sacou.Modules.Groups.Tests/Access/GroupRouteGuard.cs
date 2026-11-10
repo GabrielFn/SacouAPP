@@ -23,15 +23,24 @@ internal static class GroupRouteGuard
         "POST /v1/invites/accept",
     };
 
-    public static IReadOnlyList<string> Violations(IEnumerable<Endpoint> endpoints) =>
-        [.. endpoints.OfType<RouteEndpoint>().SelectMany(Violations)];
+    /// <summary>The OpenAPI document, mapped only in Development (ADR 0042, D2): in Production the list above is all.</summary>
+    public static readonly IReadOnlySet<string> DevelopmentOnlyRoutes = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "GET /openapi/{documentName}.json",
+    };
 
-    private static IEnumerable<string> Violations(RouteEndpoint endpoint)
+    public static IReadOnlySet<string> RoutesOutsideTheGroupFilterIn(bool development) =>
+        development ? RoutesOutsideTheGroupFilter.Union(DevelopmentOnlyRoutes).ToHashSet(StringComparer.Ordinal) : RoutesOutsideTheGroupFilter;
+
+    public static IReadOnlyList<string> Violations(IEnumerable<Endpoint> endpoints, bool development = false) =>
+        [.. endpoints.OfType<RouteEndpoint>().SelectMany(endpoint => Violations(endpoint, RoutesOutsideTheGroupFilterIn(development)))];
+
+    private static IEnumerable<string> Violations(RouteEndpoint endpoint, IReadOnlySet<string> outsideTheFilter)
     {
         var route = Describe(endpoint);
         if (endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is null)
         {
-            return RoutesOutsideTheGroupFilter.Contains(route) ? [] : [$"{route}: outside the group filter and not on the closed list"];
+            return outsideTheFilter.Contains(route) ? [] : [$"{route}: outside the group filter and not on the closed list"];
         }
 
         var permissions = endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count;

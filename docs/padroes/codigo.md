@@ -12,7 +12,11 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | `pnpm check:eol` | Falha se houver arquivo de texto com CRLF **no índice do Git** |
 | `pnpm check:size` | Tamanho dos arquivos C# (`scripts/check-file-size.mjs`) |
 | `pnpm check:duplication` | Duplicação de código em TS e C# (`jscpd`, `scripts/check-duplication.mjs`) |
-| `pnpm test:tooling` | Testes dos scripts: políticas de exceção do audit e dos portões, tamanho e duplicação |
+| `pnpm test:tooling` | Testes dos scripts: políticas de exceção do audit e dos portões, tamanho, duplicação, gerador de tipos da API e compatibilidade do `/v1` |
+| `pnpm api:contract` | Reescreve `apps/api/openapi/v1.json` pela API real (teste do contrato com `SACOU_UPDATE_OPENAPI=1`) e regenera os tipos do app (ADR 0042). Rode depois de mudar rota, DTO, enum ou erro |
+| `pnpm api:types` | Só regenera `apps/mobile/src/api/generated/` a partir do `v1.json` |
+| `pnpm check:api-types` | Falha se `apps/mobile/src/api/generated/` não for o que o `v1.json` gera |
+| `pnpm check:api-compat` | Falha se o `v1.json` quebrar o `/v1` da `origin/main` (rota, campo ou valor de enum removido; campo de requisição novo ou passado a obrigatório). Exceção: `BREAKING-V1` no corpo do PR, com ADR |
 | `pnpm lint:api` | `dotnet build` (analisadores) e `dotnet format --verify-no-changes` |
 | `pnpm format:api` | `dotnet format` |
 
@@ -30,6 +34,7 @@ Regras de `CLAUDE.md`, separadas entre o que a ferramenta impõe e o que só o r
 | Complexidade | ESLint `complexity` 10 em produção e `scripts/` | Testes. Exceção com prazo em `scripts/quality-exceptions.json` |
 | Tamanho de arquivo | ESLint `max-lines` 300 (linhas físicas); 600 em `*.test.*` e `*.test.fixture.ts` | Exceção com prazo em `scripts/quality-exceptions.json` |
 | Duplicação | `pnpm check:duplication`: qualquer clone de 50 tokens reprova, só em produção | Exceção com prazo em `scripts/quality-exceptions.json` |
+| Código gerado (app) | `apps/mobile/src/api/generated/**` fica fora do ESLint e do `check:duplication`, e dentro do `format:check` e do `typecheck`; quem o guarda é o `check:api-types` (ADR 0042) | Ninguém edita à mão |
 | Cor só no tema (app) | Hex, hex em template e `rgb(`/`rgba(` reprovam em `apps/mobile/src` fora de `src/theme/` | Testes |
 | Sem número em estilo (app) | Literal numérico em `StyleSheet.create`, em atributo `*style` ou em variável com tipo `*Style` reprova | Livres: `flex`, `flexGrow`, `flexShrink`, `opacity`, `aspectRatio`, `zIndex` |
 | Props como `interface` exportada (app) | `type XProps`, `interface XProps` sem `export` e props inline em componente PascalCase reprovam | Testes |

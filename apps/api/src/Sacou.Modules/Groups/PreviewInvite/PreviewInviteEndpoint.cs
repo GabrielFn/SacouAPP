@@ -18,7 +18,9 @@ internal static class PreviewInviteEndpoint
 
     public static IEndpointRouteBuilder MapPreviewInvite(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound);
         return endpoints;
     }
 

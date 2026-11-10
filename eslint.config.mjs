@@ -94,6 +94,8 @@ export default defineConfig([
     "**/.turbo/**",
     "**/node_modules/**",
     "**/coverage/**",
+    // Written by scripts/generate-api-types.mjs from the API contract; check:api-types guards it (ADR 0042).
+    "apps/mobile/src/api/generated/**",
   ]),
 
   // Exceptions live in this file, with a reason. Inline directives have no effect and warn.

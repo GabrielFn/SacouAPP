@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Sacou.Api.OpenApi;
 using Sacou.Http;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
@@ -27,6 +28,7 @@ builder.Services
     .AddPaymentsModule()
     .AddSummariesModule()
     .AddStatsModule();
+builder.Services.AddSacouOpenApi();
 
 var app = builder.Build();
 
@@ -38,6 +40,12 @@ app.UseAuthorization();
 app.MapHealthChecks("/health").AllowAnonymous();
 app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
+// The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi(SacouOpenApi.Route).AllowAnonymous();
+}
+
 // Builds every endpoint now, so a route that breaks a mapping rule (a group route without exactly one
 // permission, ADR 0040, D4) stops the start instead of failing on its first call.
 _ = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints).Count();

@@ -21,7 +21,9 @@ internal static class RemoveMemberEndpoint
 
     public static RouteGroupBuilder MapRemoveMember(this RouteGroupBuilder group)
     {
-        group.MapDelete(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.RemoveMember);
+        group.MapDelete(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.RemoveMember)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
     }
 

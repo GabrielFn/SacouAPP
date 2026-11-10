@@ -19,7 +19,8 @@ internal static class LeaveGroupEndpoint
 
     public static RouteGroupBuilder MapLeaveGroup(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.Leave);
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.Leave)
+            .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
     }
 
