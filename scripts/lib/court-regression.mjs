@@ -24,8 +24,6 @@ export function courtLintCases(prefix) {
   const groups = `apps/mobile/src/features/groups/${prefix}`;
   const screen = `apps/mobile/src/app/${prefix}`;
   const adapters = `apps/mobile/src/adapters/${prefix}`;
-  const groups = `apps/mobile/src/features/groups/${prefix}`;
-  const screen = `apps/mobile/src/app/${prefix}`;
   return [
     [`${court}fetch.ts`, 'export const call = fetch("/");\n', NO_RESTRICTED_GLOBALS],
     [`${court}xhr.ts`, "export const call = new XMLHttpRequest();\n", NO_RESTRICTED_GLOBALS],

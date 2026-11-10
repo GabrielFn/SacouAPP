@@ -35,14 +35,21 @@ export function parseApiBaseUrl(
   isDevelopment: boolean,
 ): Result<string, ApiConfigError> {
   if (typeof raw !== "string" || raw === "") return invalid("is not set");
-  const match = ORIGIN.exec(raw);
+  const match = ORIGIN.exec(raw.toLowerCase());
   if (!match) return invalid("must be only a scheme, a host and a port");
-  const [, scheme = "", host = "", port] = match;
+  const [origin, scheme = "", host = "", port] = match;
   if (port !== undefined && Number(port) > MAX_PORT) return invalid("has an invalid port");
-  if (scheme.toLowerCase() === "https") return ok(raw.toLowerCase());
+  return checkScheme({ origin, scheme, host }, isDevelopment);
+}
+
+function checkScheme(
+  url: { readonly origin: string; readonly scheme: string; readonly host: string },
+  isDevelopment: boolean,
+): Result<string, ApiConfigError> {
+  if (url.scheme === "https") return ok(url.origin);
   if (!isDevelopment) return invalid("must use https");
-  if (!isLocalNetwork(host.toLowerCase())) return invalid("may use http only on a local network");
-  return ok(raw.toLowerCase());
+  if (!isLocalNetwork(url.host)) return invalid("may use http only on a local network");
+  return ok(url.origin);
 }
 
 /** True when `url` is under the API's origin: the only place the ID token may go (D7). */
