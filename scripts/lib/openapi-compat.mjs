@@ -164,12 +164,20 @@ function parameterKey(parameter) {
   return `${parameter.in} ${parameter.name}`;
 }
 
-/** A parameter the app does not send yet, or one it may leave out, cannot become required. */
+/** The `{name}` segments of a route: the app always sent them, declared in the contract or not. */
+function templateParameterKeys(key) {
+  return [...key.matchAll(/{([^}]+)}/g)].map(([, name]) => `path ${name}`);
+}
+
+/**
+ * A parameter the app does not send yet, or one it may leave out, cannot become required. A segment of the
+ * route is already in every URL the app builds, so declaring it later breaks nothing (E4.2, Part 2).
+ */
 function parameterChanges(key, baseParameters, headParameters) {
   const optionalBefore = new Set(
     baseParameters.filter((parameter) => parameter.required !== true).map(parameterKey),
   );
-  const knownBefore = new Set(baseParameters.map(parameterKey));
+  const knownBefore = new Set([...baseParameters.map(parameterKey), ...templateParameterKeys(key)]);
   return headParameters
     .filter((parameter) => parameter.required === true)
     .map(parameterKey)

@@ -258,6 +258,16 @@ describe("check-openapi-compat (S3)", () => {
     });
   }
 
+  test("declaring a segment of the route as a path parameter keeps /v1, any other one does not", () => {
+    const route = (parameters) => ({ paths: { "/v1/groups/{groupId}": { get: { parameters } } } });
+    const required = (name) => ({ name, in: "path", required: true });
+
+    assert.deepEqual(findBreakingChanges(route([]), route([required("groupId")])), []);
+    assert.deepEqual(findBreakingChanges(route([]), route([required("memberId")])), [
+      "GET /v1/groups/{groupId} parameter path memberId: new required parameter",
+    ]);
+  });
+
   test("the message names the route and the field", () => {
     assert.deepEqual(changed([[...SCHEMAS, "Request", "properties", "note"], REMOVE]), [
       "POST /v1/groups request.note: request field removed",
