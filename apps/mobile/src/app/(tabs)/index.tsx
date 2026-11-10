@@ -7,11 +7,7 @@ import { useResumeOnce } from "../../features/court/hooks/resume-context";
 import { courtHref } from "../../features/court/navigation";
 import { takeResumeTarget } from "../../features/court/session/resume-target";
 import { useGroupsScreen } from "../../features/groups/hooks/use-groups-screen";
-import {
-  createGroupHref,
-  groupsHref,
-  notificationsHref,
-} from "../../features/groups/navigation";
+import { createGroupHref, groupsHref, notificationsHref } from "../../features/groups/navigation";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
 import { strings } from "../../strings/pt-BR";
 import { useTheme } from "../../theme/theme-context";

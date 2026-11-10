@@ -28,6 +28,10 @@ const invalidate = (key: SacouQueryKey): CacheEffect => ({ action: "invalidate",
 const remove = (key: SacouQueryKey): CacheEffect => ({ action: "remove", key });
 
 type MemberEvent = Extract<MutationEvent, { readonly targetIsMe: boolean }>;
+type SettingsEvent = Extract<
+  MutationEvent,
+  { readonly type: "settingsReplaced" | "templatesChanged" | "settingsForbidden" }
+>;
 
 function isMemberEvent(event: MutationEvent): event is MemberEvent {
   return "targetIsMe" in event;
@@ -38,9 +42,32 @@ function memberEffects(event: MemberEvent): readonly CacheEffect[] {
   return event.targetIsMe ? [members, invalidate(queryKeys.groups())] : [members];
 }
 
+function isSettingsEvent(event: MutationEvent): event is SettingsEvent {
+  return (
+    event.type === "settingsReplaced" ||
+    event.type === "templatesChanged" ||
+    event.type === "settingsForbidden"
+  );
+}
+
+function settingsEffects(event: SettingsEvent): readonly CacheEffect[] {
+  switch (event.type) {
+    case "settingsReplaced":
+      return [{ action: "set", key: queryKeys.settings(event.groupId), data: event.view }];
+    case "templatesChanged":
+      return [invalidate(queryKeys.templates(event.groupId))];
+    case "settingsForbidden":
+      return [
+        invalidate(queryKeys.group(event.groupId)),
+        invalidate(queryKeys.settings(event.groupId)),
+      ];
+  }
+}
+
 /** What each mutation makes stale, pure and tested as a golden table (P5). */
 export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
   if (isMemberEvent(event)) return memberEffects(event);
+  if (isSettingsEvent(event)) return settingsEffects(event);
   switch (event.type) {
     case "createGroup":
     case "acceptInvite":
@@ -52,15 +79,6 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "createInvite":
     case "revokeInvite":
       return [invalidate(queryKeys.invites(event.groupId))];
-    case "settingsReplaced":
-      return [{ action: "set", key: queryKeys.settings(event.groupId), data: event.view }];
-    case "templatesChanged":
-      return [invalidate(queryKeys.templates(event.groupId))];
-    case "settingsForbidden":
-      return [
-        invalidate(queryKeys.group(event.groupId)),
-        invalidate(queryKeys.settings(event.groupId)),
-      ];
   }
 }
 

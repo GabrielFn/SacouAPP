@@ -74,9 +74,9 @@ describe("the reducer of screen 18", () => {
   test("opening a block closes the other one", () => {
     const first = run({ type: "block-toggled", block: "attendance" });
     expect(first.expanded).toBe("attendance");
-    expect(groupSettingsFormReducer(first, { type: "block-toggled", block: "scoring" }).expanded).toBe(
-      "scoring",
-    );
+    expect(
+      groupSettingsFormReducer(first, { type: "block-toggled", block: "scoring" }).expanded,
+    ).toBe("scoring");
     expect(
       groupSettingsFormReducer(first, { type: "block-toggled", block: "attendance" }).expanded,
     ).toBeNull();
@@ -171,7 +171,11 @@ describe("blockSummary", () => {
   });
 
   test("the free system has no libero even with the switch on", () => {
-    const free = withLeaf(withLeaf(racha, "rotation.system", "livre"), "rotation.liberoEnabled", true);
+    const free = withLeaf(
+      withLeaf(racha, "rotation.system", "livre"),
+      "rotation.liberoEnabled",
+      true,
+    );
     expect(liberoNote(free)).toBe("sem líbero");
     expect(liberoNote(withLeaf(free, "rotation.system", "5x1"))).toBe("com líbero");
   });
@@ -183,7 +187,11 @@ describe("the rotation systems", () => {
     const catalog = SETTINGS_CATALOG.fields.find((field) => field.path === "rotation.system");
     expect(options.map(({ value }) => value)).toEqual(catalog?.values);
     expect(options.map(({ label }) => label)).toEqual(["Livre", "5x1", "4x2", "6x2"]);
-    expect(options.filter(({ pro }) => pro).map(({ label }) => label)).toEqual(["5x1", "4x2", "6x2"]);
+    expect(options.filter(({ pro }) => pro).map(({ label }) => label)).toEqual([
+      "5x1",
+      "4x2",
+      "6x2",
+    ]);
     expect(options.map(({ label }) => label)).not.toContain("6x0");
   });
 
@@ -261,16 +269,20 @@ describe("a field sheet", () => {
   });
 
   test("values are read for the rows", () => {
-    expect(fieldValueText("money.dropInFeeCents", withLeaf(racha, "money.dropInFeeCents", 1000))).toBe(
-      "R$ 10",
-    );
+    expect(
+      fieldValueText("money.dropInFeeCents", withLeaf(racha, "money.dropInFeeCents", 1000)),
+    ).toBe("R$ 10");
     expect(fieldValueText("attendance.dropInOpensHoursBefore", racha)).toBe("24h");
     expect(fieldValueText("schedule.venue", racha)).toBe("Escolher");
   });
 });
 
 describe("the document of the server", () => {
-  const document = (settings: unknown, templateKey: string | null, savedTemplateId: string | null) => ({
+  const document = (
+    settings: unknown,
+    templateKey: string | null,
+    savedTemplateId: string | null,
+  ) => ({
     schemaVersion: 1,
     settings,
     templateKey,

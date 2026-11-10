@@ -78,9 +78,9 @@ describe("the reducer of screen 05", () => {
       ...start,
       charges: false,
     });
-    expect(
-      createGroupReducer(start, { type: "modality-selected", modality: "beach-4x4" }),
-    ).toEqual({ ...start, modality: "beach-4x4" });
+    expect(createGroupReducer(start, { type: "modality-selected", modality: "beach-4x4" })).toEqual(
+      { ...start, modality: "beach-4x4" },
+    );
     expect(createGroupReducer(start, { type: "fee-changed", fee: "monthly", text: "9" })).toEqual({
       ...start,
       monthlyFeeText: "9",

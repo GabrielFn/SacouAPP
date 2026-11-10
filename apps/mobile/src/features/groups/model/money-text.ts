@@ -18,8 +18,7 @@ export function parseBrlToCents(text: string): number | null {
   if (typed === "") return 0;
   if (!MONEY_SHAPE.test(typed)) return null;
   const [reais = "", cents = ""] = typed.replace(/\./g, "").split(",");
-  const total =
-    Number(reais) * CENTS_PER_REAL + Number(cents.padEnd(MAX_DECIMALS, "0"));
+  const total = Number(reais) * CENTS_PER_REAL + Number(cents.padEnd(MAX_DECIMALS, "0"));
   return total <= MONEY_MAX_CENTS ? total : null;
 }
 

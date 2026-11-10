@@ -30,7 +30,7 @@ export function withLeaf(
   value: SettingsValue,
 ): GroupSettings {
   const [block, leaf] = split(path);
-  return { ...settings, [block]: { ...settings[block], [leaf]: value } } as GroupSettings;
+  return { ...settings, [block]: { ...settings[block], [leaf]: value } };
 }
 
 /** The layer with only the leaves of `edited` that differ from `base` (ADR 0041). */
@@ -42,10 +42,9 @@ export function settingsPatch(base: GroupSettings, edited: GroupSettings): Setti
 export function leafLayer(
   entries: readonly (readonly [SettingsPath, SettingsValue])[],
 ): SettingsLayer {
-  const blocks: Record<string, Record<string, SettingsValue>> = {};
-  entries.forEach(([path, value]) => {
+  const blocks = entries.reduce<Record<string, Leaves>>((layer, [path, value]) => {
     const [block, leaf] = split(path);
-    blocks[block] = { ...blocks[block], [leaf]: value };
-  });
-  return { schemaVersion: SETTINGS_SCHEMA_VERSION, ...blocks } as SettingsLayer;
+    return { ...layer, [block]: { ...layer[block], [leaf]: value } };
+  }, {});
+  return { schemaVersion: SETTINGS_SCHEMA_VERSION, ...blocks };
 }

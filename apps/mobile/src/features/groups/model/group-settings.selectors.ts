@@ -83,8 +83,12 @@ export function sheetChanges(sheet: SettingsSheet): readonly LeafChange[] | null
 /** The text under a sheet that cannot be confirmed, or `null` when it can. */
 export function sheetErrorText(server: GroupSettings, sheet: SettingsSheet): string | null {
   const changes = sheetChanges(sheet);
-  if (changes === null) return sheet.kind === "field" ? settingsStrings.errors.byCode["settings.wrong-type"] : null;
-  const edited = changes.reduce((settings, { path, value }) => withLeaf(settings, path, value), server);
+  if (changes === null)
+    return sheet.kind === "field" ? settingsStrings.errors.byCode["settings.wrong-type"] : null;
+  const edited = changes.reduce(
+    (settings, { path, value }) => withLeaf(settings, path, value),
+    server,
+  );
   return settingsError(edited);
 }
 

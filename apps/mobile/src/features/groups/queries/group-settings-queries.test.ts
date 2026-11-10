@@ -28,13 +28,20 @@ import {
 import { groupSettingsQuery, groupTemplatesQuery } from "./group-settings-queries";
 
 const GROUP = "8a4c2f0e-1111-4c3b-9d2e-000000000001";
+const MEMBER = "8a4c2f0e-2222-4c3b-9d2e-000000000002";
 const racha = applyTemplate(defaultGroupSettings(), getSettingsTemplate("racha-organizado"));
 
 function document(
   settings: GroupSettings,
   templateKey: string | null = "racha-organizado",
 ): GroupSettingsDocument {
-  return { schemaVersion: 1, settings, templateKey, savedTemplateId: null, updatedAt: "2026-11-10" };
+  return {
+    schemaVersion: 1,
+    settings,
+    templateKey,
+    savedTemplateId: null,
+    updatedAt: "2026-11-10",
+  };
 }
 
 const problem = (status: number, code: string): ApiError =>
@@ -61,7 +68,7 @@ describe("the settings query", () => {
   test("a document that passes the parser is kept as a view", async () => {
     const { client, fake } = setup();
     fake.respond("getGroupSettings", apiOk(document(racha)));
-    const view = await client.fetchQuery(groupSettingsQuery(fake.api, GROUP));
+    const view = await client.query(groupSettingsQuery(fake.api, GROUP));
     expect(view.settings).toEqual(racha);
     expect(view.templateKey).toBe("racha-organizado");
     expect(client.getQueryData(queryKeys.settings(GROUP))).toEqual(view);
@@ -71,7 +78,7 @@ describe("the settings query", () => {
     const { client, fake } = setup();
     fake.respond("getGroupSettings", apiOk({ ...document(racha), settings: { schemaVersion: 1 } }));
     const error: unknown = await client
-      .fetchQuery({ ...groupSettingsQuery(fake.api, GROUP), retry: false })
+      .query({ ...groupSettingsQuery(fake.api, GROUP), retry: false })
       .catch((thrown: unknown) => thrown);
     expect(apiErrorOf(error)?.kind).toBe("unexpected");
     expect(client.getQueryData(queryKeys.settings(GROUP))).toBeUndefined();
@@ -110,7 +117,7 @@ describe("saving a change", () => {
         // The first answer is slower: without the scope it would arrive last and win.
         await new Promise((resolve) => setTimeout(resolve, index === 0 ? 20 : 1));
         order.push(sent.scoring?.pointsPerSet ?? 0);
-        return apiOk(answers[index] ?? answers[0]!);
+        return apiOk(answers[index] ?? document(racha));
       },
     };
     const options = updateSettingsMutation(api, client, GROUP);
@@ -199,22 +206,32 @@ describe("templates", () => {
 });
 
 describe("creating a group", () => {
-  const input = { name: "Racha de terça", templateKey: "racha-organizado", patch: layer(21) } as const;
+  const input = {
+    name: "Racha de terça",
+    templateKey: "racha-organizado",
+    patch: layer(21),
+  } as const;
 
   test("POST and then PATCH, and the list of groups is stale", async () => {
     const { client, fake } = setup();
     client.setQueryData(queryKeys.groups(), []);
-    fake.respond("createGroup", apiOk({ groupId: GROUP, name: "Racha de terça" }));
+    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
     fake.respond("updateGroupSettings", apiOk(document(racha)));
-    expect(await createGroupFlow(fake.api, client, input)).toEqual({ kind: "done", groupId: GROUP });
-    expect(fake.calls().map((call) => call.operation)).toEqual(["createGroup", "updateGroupSettings"]);
+    expect(await createGroupFlow(fake.api, client, input)).toEqual({
+      kind: "done",
+      groupId: GROUP,
+    });
+    expect(fake.calls().map((call) => call.operation)).toEqual([
+      "createGroup",
+      "updateGroupSettings",
+    ]);
     expect(fake.calls()[0]?.args).toEqual(["Racha de terça", "racha-organizado"]);
     expect(client.getQueryState(queryKeys.groups())?.isInvalidated).toBe(true);
   });
 
   test("with nothing to save there is no PATCH", async () => {
     const { client, fake } = setup();
-    fake.respond("createGroup", apiOk({ groupId: GROUP, name: "x" }));
+    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
     const outcome = await createGroupFlow(fake.api, client, { ...input, patch: null });
     expect(outcome.kind).toBe("done");
     expect(fake.calls()).toHaveLength(1);
@@ -222,7 +239,7 @@ describe("creating a group", () => {
 
   test("if the PATCH fails the group exists and only the PATCH is repeated", async () => {
     const { client, fake } = setup();
-    fake.respond("createGroup", apiOk({ groupId: GROUP, name: "x" }));
+    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
     fake.respond("updateGroupSettings", apiErr({ kind: "offline" }));
     expect(await createGroupFlow(fake.api, client, input)).toEqual({
       kind: "created-without-settings",

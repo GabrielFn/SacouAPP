@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
+import type { Theme } from "../../../theme/themes";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { CheckIcon, PlusIcon } from "../../../ui/Icons";
 import { ProBadge } from "../../../ui/ProBadge";
@@ -18,7 +19,37 @@ export interface TemplateOptionProps {
 
 const FROM_SCRATCH: SettingsTemplateKey = "do-zero";
 
+function SelectedBadge() {
+  const { colors, tokens } = useTheme();
+  return (
+    <View
+      style={{
+        width: tokens.sizes.selectedBadge,
+        height: tokens.sizes.selectedBadge,
+        borderRadius: tokens.radii.pill,
+        backgroundColor: colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <CheckIcon color={colors.text} />
+    </View>
+  );
+}
+
 /** One option of the radio group of screen 04. "Do zero" is the dashed one, without a drawing. */
+interface OptionLook {
+  readonly borderColor: string;
+  readonly borderStyle: "solid" | "dashed";
+}
+
+function optionLook(selected: boolean, scratch: boolean, colors: Theme): OptionLook {
+  if (selected) return { borderColor: colors.primary, borderStyle: "solid" };
+  return scratch
+    ? { borderColor: colors.borderDashed, borderStyle: "dashed" }
+    : { borderColor: colors.borderCard, borderStyle: "solid" };
+}
+
 export function TemplateOption({ templateKey, pro, selected, onSelect }: TemplateOptionProps) {
   const { colors, tokens } = useTheme();
   const text = strings.settings.templates[templateKey];
@@ -40,12 +71,7 @@ export function TemplateOption({ templateKey, pro, selected, onSelect }: Templat
         borderRadius: tokens.radii.tile,
         backgroundColor: scratch ? "transparent" : colors.surface,
         borderWidth: selected ? tokens.borderWidths.thick : tokens.borderWidths.thin,
-        borderStyle: scratch && !selected ? "dashed" : "solid",
-        borderColor: selected
-          ? colors.primary
-          : scratch
-            ? colors.borderDashed
-            : colors.borderCard,
+        ...optionLook(selected, scratch, colors),
       }}
     >
       {scratch ? <PlusIcon /> : <TemplateIcon templateKey={templateKey} />}
@@ -63,20 +89,7 @@ export function TemplateOption({ templateKey, pro, selected, onSelect }: Templat
           {text.line}
         </Text>
       </View>
-      {selected ? (
-        <View
-          style={{
-            width: tokens.sizes.selectedBadge,
-            height: tokens.sizes.selectedBadge,
-            borderRadius: tokens.radii.pill,
-            backgroundColor: colors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CheckIcon color={colors.text} />
-        </View>
-      ) : null}
+      {selected ? <SelectedBadge /> : null}
     </Pressable>
   );
 }

@@ -1,8 +1,4 @@
-import type {
-  SettingsErrorCode,
-  SettingsPath,
-  SettingsTemplateKey,
-} from "@sacou/match-engine";
+import type { SettingsErrorCode, SettingsPath, SettingsTemplateKey } from "@sacou/match-engine";
 
 /** Weekdays by ISO number (1 is Monday), with the form used in a summary ("toda terça"). */
 const weekdays: Readonly<Record<number, { readonly name: string; readonly every: string }>> = {

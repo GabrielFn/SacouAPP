@@ -30,18 +30,22 @@ export const initialGroupSettingsFormState: GroupSettingsFormState = {
   message: null,
 };
 
-export type GroupSettingsFormAction =
+export type LeafAction =
   | { readonly type: "block-toggled"; readonly block: SettingsBlock }
   | { readonly type: "leaf-changed"; readonly path: SettingsPath; readonly value: SettingsValue }
   | { readonly type: "leaf-saved"; readonly path: SettingsPath }
   | { readonly type: "leaf-failed"; readonly path: SettingsPath; readonly message: string }
   | { readonly type: "message-shown"; readonly message: string }
-  | { readonly type: "message-dismissed" }
+  | { readonly type: "message-dismissed" };
+
+export type SheetAction =
   | { readonly type: "sheet-opened"; readonly sheet: SettingsSheet }
   | { readonly type: "sheet-text-changed"; readonly text: string }
   | { readonly type: "sheet-weekday-selected"; readonly weekday: number }
   | { readonly type: "sheet-confirmed" }
   | { readonly type: "sheet-cancelled" };
+
+export type GroupSettingsFormAction = LeafAction | SheetAction;
 
 function withoutLeaf(pending: PendingLeaves, path: SettingsPath): PendingLeaves {
   return Object.fromEntries(Object.entries(pending).filter(([key]) => key !== path));
@@ -61,16 +65,20 @@ function sheetWithText(sheet: SettingsSheet, text: string): SettingsSheet {
   }
 }
 
-/** Pure: the PATCH, the cache and the navigation are done by the hook (frontend.md, rule 4). */
-export function groupSettingsFormReducer(
-  state: GroupSettingsFormState,
-  action: GroupSettingsFormAction,
-): GroupSettingsFormState {
+function isSheetAction(action: GroupSettingsFormAction): action is SheetAction {
+  return action.type.startsWith("sheet-");
+}
+
+function leafReducer(state: GroupSettingsFormState, action: LeafAction): GroupSettingsFormState {
   switch (action.type) {
     case "block-toggled":
       return { ...state, expanded: state.expanded === action.block ? null : action.block };
     case "leaf-changed":
-      return { ...state, pending: { ...state.pending, [action.path]: action.value }, message: null };
+      return {
+        ...state,
+        pending: { ...state.pending, [action.path]: action.value },
+        message: null,
+      };
     case "leaf-saved":
       return { ...state, pending: withoutLeaf(state.pending, action.path) };
     case "leaf-failed":
@@ -83,6 +91,11 @@ export function groupSettingsFormReducer(
       return { ...state, message: action.message };
     case "message-dismissed":
       return { ...state, message: null };
+  }
+}
+
+function sheetReducer(state: GroupSettingsFormState, action: SheetAction): GroupSettingsFormState {
+  switch (action.type) {
     case "sheet-opened":
       return { ...state, sheet: action.sheet };
     case "sheet-text-changed":
@@ -95,4 +108,12 @@ export function groupSettingsFormReducer(
     case "sheet-cancelled":
       return { ...state, sheet: { kind: "none" } };
   }
+}
+
+/** Pure: the PATCH, the cache and the navigation are done by the hook (frontend.md, rule 4). */
+export function groupSettingsFormReducer(
+  state: GroupSettingsFormState,
+  action: GroupSettingsFormAction,
+): GroupSettingsFormState {
+  return isSheetAction(action) ? sheetReducer(state, action) : leafReducer(state, action);
 }

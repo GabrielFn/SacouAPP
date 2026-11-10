@@ -18,10 +18,7 @@ import {
   normalizeText,
   type CreateGroupErrors,
 } from "../model/create-group.selectors";
-import {
-  createGroupFlow,
-  saveCreatedGroupSettings,
-} from "../queries/group-settings-mutations";
+import { createGroupFlow, saveCreatedGroupSettings } from "../queries/group-settings-mutations";
 
 export interface CreateGroupModel {
   readonly state: CreateGroupState;
@@ -79,8 +76,7 @@ export function useCreateGroup(
     errors: createGroupErrors(state, templateKey),
     canSubmit: canSubmit(state, templateKey),
     pending: create.isPending || retry.isPending,
-    errorText:
-      create.isError || retry.isError ? errorTextOf(retry.error ?? create.error) : null,
+    errorText: create.isError || retry.isError ? errorTextOf(retry.error ?? create.error) : null,
     submit: () => {
       create.mutate();
     },

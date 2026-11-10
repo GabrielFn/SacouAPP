@@ -76,9 +76,9 @@ describe("cacheEffectsOf (P5, golden)", () => {
   ];
 
   test.each(golden)("%o", (event, expected) => {
-    expect(cacheEffectsOf(event).map((effect) => `${effect.action} ${effect.key.join("/")}`)).toEqual(
-      expected,
-    );
+    expect(
+      cacheEffectsOf(event).map((effect) => `${effect.action} ${effect.key.join("/")}`),
+    ).toEqual(expected);
   });
 
   test.each([
@@ -94,7 +94,10 @@ describe("cacheEffectsOf (P5, golden)", () => {
 
   test("a 409 without a rule that says what is old, or another status, touches nothing", () => {
     expect(
-      conflictEffects(G, failure({ kind: "problem", status: 409, code: "groups.membership-limit" })),
+      conflictEffects(
+        G,
+        failure({ kind: "problem", status: 409, code: "groups.membership-limit" }),
+      ),
     ).toEqual([]);
     expect(
       conflictEffects(G, failure({ kind: "problem", status: 403, code: "groups.last-admin" })),

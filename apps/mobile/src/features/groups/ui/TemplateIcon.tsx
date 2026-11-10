@@ -8,13 +8,15 @@ import { palette } from "../../../theme/tokens.data";
 const TEMPLATE_VIEW_BOX = "0 0 44 56";
 const COURT_VIEW_BOX = "0 0 40 30";
 const LINE_WIDTH = 2;
+const COURT_LINE_WIDTH = 1.8;
 const NET_WIDTH = 3;
+const OUTLINE_WIDTH = 1.5;
 
 export interface TemplateIconProps {
   readonly templateKey: SettingsTemplateKey;
 }
 
-interface DrawingProps {
+export interface DrawingProps {
   readonly ink: string;
   readonly orange: string;
   readonly yellow: string;
@@ -24,7 +26,7 @@ interface DrawingProps {
 function Court() {
   return (
     <>
-      <Rect x="3" y="3" width="38" height="50" rx="2" />
+      <Path d="M3 3h38v50H3z" />
       <Line x1="3" y1="28" x2="41" y2="28" strokeWidth={NET_WIDTH} />
     </>
   );
@@ -45,9 +47,9 @@ function Racha({ orange }: DrawingProps) {
       <Court />
       <Line x1="3" y1="19" x2="41" y2="19" />
       <Line x1="3" y1="37" x2="41" y2="37" />
-      <Rect x="9" y="42" width="8" height="6" fill={orange} stroke="none" />
-      <Rect x="18" y="42" width="8" height="6" fill={orange} stroke="none" />
-      <Rect x="27" y="42" width="8" height="6" fill={orange} stroke="none" />
+      <Path d="M9 42h8v6H9z" fill={orange} stroke="none" />
+      <Path d="M18 42h8v6H18z" fill={orange} stroke="none" />
+      <Path d="M27 42h8v6H27z" fill={orange} stroke="none" />
     </>
   );
 }
@@ -57,13 +59,13 @@ function Treino({ blue, yellow }: DrawingProps) {
     <>
       <Court />
       <G fill={blue} stroke="none">
-        <Rect x="8" y="33" width="7" height="6" />
-        <Rect x="18.5" y="33" width="7" height="6" />
-        <Rect x="29" y="33" width="7" height="6" />
-        <Rect x="8" y="42" width="7" height="6" />
-        <Rect x="18.5" y="42" width="7" height="6" />
+        <Path d="M8 33h7v6H8z" />
+        <Path d="M18.5 33h7v6h-7z" />
+        <Path d="M29 33h7v6h-7z" />
+        <Path d="M8 42h7v6H8z" />
+        <Path d="M18.5 42h7v6h-7z" />
       </G>
-      <Rect x="29" y="42" width="7" height="6" fill={yellow} stroke="none" />
+      <Path d="M29 42h7v6h-7z" fill={yellow} stroke="none" />
     </>
   );
 }
@@ -71,14 +73,14 @@ function Treino({ blue, yellow }: DrawingProps) {
 function Areia({ yellow, ink }: DrawingProps) {
   return (
     <>
-      <Rect x="0" y="0" width="44" height="56" rx="3" fill={palette.highlight} stroke="none" />
-      <Rect x="5" y="5" width="34" height="46" rx="2" />
+      <Rect width="44" height="56" rx="3" fill={palette.highlight} stroke="none" />
+      <Path d="M5 5h34v46H5z" />
       <Line x1="5" y1="28" x2="39" y2="28" strokeWidth={NET_WIDTH} />
       <Path
         d="M15 15l3-4 4 4 4-4 3 4v4H15z"
         fill={yellow}
         stroke={ink}
-        strokeWidth={1.5}
+        strokeWidth={OUTLINE_WIDTH}
         strokeLinejoin="round"
       />
     </>
@@ -100,7 +102,12 @@ const DRAWINGS: Readonly<Record<SettingsTemplateKey, (props: DrawingProps) => Re
 /** The small court of each template (CriarModelo.dc.html), drawn in the colors of the theme. */
 export function TemplateIcon({ templateKey }: TemplateIconProps) {
   const { colors, tokens } = useTheme();
-  const drawing = { ink: colors.text, orange: colors.primary, yellow: colors.accent, blue: colors.link };
+  const drawing: DrawingProps = {
+    ink: colors.text,
+    orange: colors.primary,
+    yellow: colors.accent,
+    blue: colors.link,
+  };
   const Drawing = DRAWINGS[templateKey];
   return (
     <Svg
@@ -124,7 +131,6 @@ export interface CourtIconProps {
 /** The court of the "Onde vocês jogam?" options: indoor with the yellow net, or sand. */
 export function CourtIcon({ modality, color }: CourtIconProps) {
   const { colors, tokens } = useTheme();
-  const indoor = modality === "indoor-6x6";
   return (
     <Svg
       width={tokens.sizes.courtIconWidth}
@@ -132,19 +138,19 @@ export function CourtIcon({ modality, color }: CourtIconProps) {
       viewBox={COURT_VIEW_BOX}
       fill="none"
       stroke={color}
-      strokeWidth={1.8}
+      strokeWidth={COURT_LINE_WIDTH}
     >
-      {indoor ? (
+      {modality === "indoor-6x6" ? (
         <>
-          <Rect x="1" y="1" width="38" height="28" />
+          <Path d="M1 1h38v28H1z" />
           <Line x1="20" y1="1" x2="20" y2="29" strokeWidth={NET_WIDTH} stroke={colors.accent} />
           <Line x1="13" y1="1" x2="13" y2="29" />
           <Line x1="27" y1="1" x2="27" y2="29" />
         </>
       ) : (
         <>
-          <Rect x="0" y="0" width="40" height="30" fill={palette.highlight} stroke="none" />
-          <Rect x="3" y="3" width="34" height="24" />
+          <Rect width="40" height="30" fill={palette.highlight} stroke="none" />
+          <Path d="M3 3h34v24H3z" />
           <Line x1="20" y1="3" x2="20" y2="27" strokeWidth={NET_WIDTH} />
         </>
       )}

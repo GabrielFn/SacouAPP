@@ -18,7 +18,7 @@ export interface TemplatePickerSheetProps {
   readonly onClose: () => void;
 }
 
-interface TemplateLineProps {
+export interface TemplateLineProps {
   readonly name: string;
   readonly onApply: () => void;
   readonly onDelete?: () => void;

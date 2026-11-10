@@ -10,7 +10,8 @@ import { TextField } from "../../../ui/TextField";
 import { weekdayName } from "../model/schedule-text";
 
 const { sheets } = strings.settings;
-const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
+/** The days of the week, by ISO number, as the texts list them. */
+const ISO_WEEKDAYS = Object.keys(strings.settings.weekdays).map(Number);
 const TIME_MAX_LENGTH = 5;
 
 export interface ScheduleSheetProps {

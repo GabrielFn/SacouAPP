@@ -221,7 +221,7 @@ export function ChoiceRow({ path, label, layout, selected, editable, onChange }:
   );
 }
 
-interface SystemButtonProps {
+export interface SystemButtonProps {
   readonly label: string;
   readonly pro: boolean;
   readonly selected: boolean;

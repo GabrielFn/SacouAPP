@@ -43,10 +43,7 @@ export interface SacouApi {
     groupId: string,
     layer: SettingsLayer,
   ): Promise<ApiResult<GroupSettingsDocument>>;
-  applyTemplate(
-    groupId: string,
-    choice: TemplateChoice,
-  ): Promise<ApiResult<GroupSettingsDocument>>;
+  applyTemplate(groupId: string, choice: TemplateChoice): Promise<ApiResult<GroupSettingsDocument>>;
   listTemplates(groupId: string): Promise<ApiResult<readonly SavedTemplate[]>>;
   saveTemplate(groupId: string, name: string): Promise<ApiResult<SavedTemplate>>;
   deleteTemplate(groupId: string, templateId: string): Promise<ApiResult<null>>;

@@ -51,9 +51,9 @@ describe("contrast of the create-group and settings screens", () => {
   });
 
   it("the off track of the switch reaches 3:1 against the card (WCAG 1.4.11)", () => {
-    expect(ratio(nightOver(palette.white, nightAlpha.trackOff), palette.white)).toBeGreaterThanOrEqual(
-      AA_NON_TEXT,
-    );
+    expect(
+      ratio(nightOver(palette.white, nightAlpha.trackOff), palette.white),
+    ).toBeGreaterThanOrEqual(AA_NON_TEXT);
     expect(appTheme.trackOff).toContain("rgba");
   });
 

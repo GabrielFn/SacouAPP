@@ -17,11 +17,7 @@ export function QuestionSection({ number, title, children }: QuestionSectionProp
   return (
     <View accessibilityRole="none" style={{ gap: tokens.spacing.s }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: tokens.spacing.s6 }}>
-        {number === undefined ? null : (
-          <Text variant="display">
-            {String(number)}
-          </Text>
-        )}
+        {number === undefined ? null : <Text variant="display">{String(number)}</Text>}
         <Text variant="title" accessibilityRole="header">
           {title}
         </Text>
