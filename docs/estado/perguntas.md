@@ -10,21 +10,14 @@
 7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
 9. Tema Sol/Noite (E4.1, 07/11/2026): só no modo quadra, como no canvas, ou modo escuro no app todo? **Recomendação e padrão adotado até a resposta: só na quadra.** Fácil de mudar: os temas usam os mesmos papéis.
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
-20. App fora da quadra sem internet (E4.2, 10/11/2026): (1) mostra os dados guardados de até 7 dias, com a faixa "Sem conexão · atualizado há X"; (2) o mesmo com 24 h; (3) tela "Sem conexão". **Recomendação e padrão adotado: opção 1** (uma constante e um texto em `strings/`).
-21. Modelos prontos (E3.3, 10/11/2026): o que cada um (Pelada, Racha organizado, Treino, Areia rei da quadra, Do zero) liga. **Padrão adotado:** a tabela do D4 em `docs/estado/tarefas/E3.3.md`. Fácil de mudar: é um JSON.
-22. Modelo salvo (E3.3, 10/11/2026): "Aplicar modelo" em "Como jogamos" troca os padrões do grupo, sem mexer em dia, horário, local, vagas e valores. **Recomendação e padrão adotado.**
-23. Co-admin edita "Como jogamos" (E3.3, 10/11/2026)? **Recomendação e padrão adotado: sim**, coerente com a resposta 16.
-<<<<<<< HEAD
 28. Saudação do Início (E4.4, 10/11/2026): "Fala!" sem o nome até existir o perfil (E3.17). **Recomendação e padrão adotado.**
 29. Entrada das notificações (E4.4, 10/11/2026): um sino no cabeçalho do Início abre a tela 28; o canvas não tem esse sino. **Recomendação e padrão adotado.**
-=======
-24. Mais mensalistas que vagas (E3.4, 10/11/2026): os que sobram vão para a espera, à frente dos avulsos. **Recomendação e padrão adotado.**
-25. Mensalista que desistiu e quer voltar na mesma rodada (E3.4, 10/11/2026): vai para o fim da espera, como qualquer um. **Recomendação e padrão adotado.**
 26. Admin reduz as vagas com a lista cheia (E3.4, 10/11/2026): ninguém sai da lista; a espera só anda quando sobrar vaga. **Recomendação e padrão adotado.**
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
->>>>>>> origin/main
 
 ## Respondidas
+- **Perguntas 20 a 25 (10/11/2026), todas na opção 1:** 20: fora da quadra sem internet, o app mostra os dados guardados de até 7 dias com a faixa "Sem conexão · atualizado há X" (o Gabriel questionou o valor do offline; o ganho principal são os nomes no placar, E4.7). 21: os modelos prontos ligam o que diz a tabela do D4 de `docs/estado/tarefas/E3.3.md`. 22: "Aplicar modelo" troca os padrões do grupo, sem mexer em dia, horário, local, vagas e valores. 23: o Co-admin edita "Como jogamos", inclusive o dinheiro. 24: mensalistas que sobram vão para a espera, à frente dos avulsos. 25: mensalista que desistiu e volta vai para o fim da espera.
+- **Modelo da E3.4 Parte 2 (10/11/2026):** Sonnet, como manda a tabela do `CLAUDE.md` (o analista recomendava Opus).
 - **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
 - **Senha mínima, pergunta 12 (08/11/2026):** 6 caracteres, o padrão do Firebase. Nada a ajustar no console. A E4.3 mostra a regra dos 6 na tela de cadastro.
 - **E-mail verificado, pergunta 11 (08/11/2026):** não exigir no login por e-mail e senha. Confirma a decisão da E3.1 (ADR 0036, D3): a API aceita token com `email_verified` falso.
