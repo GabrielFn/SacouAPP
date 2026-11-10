@@ -21,8 +21,11 @@ function checkInteger(field: SettingsField, value: unknown): SettingsErrorCode |
   if (!isFiniteNumber(value) || !Number.isInteger(value)) {
     return "settings.wrong-type";
   }
-  const isInRange = value >= (field.min ?? value) && value <= (field.max ?? value);
-  return isInRange ? null : "settings.out-of-range";
+  // The catalog parser requires both bounds; a field without them fails closed, never open.
+  if (field.min === null || field.max === null) {
+    return "settings.out-of-range";
+  }
+  return value >= field.min && value <= field.max ? null : "settings.out-of-range";
 }
 
 /** The type comes from the list: numbers for `bestOf`, text for the system. */

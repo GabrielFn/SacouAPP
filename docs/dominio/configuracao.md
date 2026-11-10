@@ -79,7 +79,7 @@ O que a partida congela no `MatchStarted` sai de `deriveMatchRules`:
 
 - **Fatos do grupo** (dia fixo, horário, local, vagas e valores em dinheiro): modelo nunca os traz e aplicar modelo nunca os apaga. Trocar de "Racha" para "Treino" não zera a mensalidade.
 - **Cópia, não vínculo:** aplicar um modelo copia os valores; o que o modelo não diz volta a "Do zero". Mudar o catálogo numa versão futura não mexe em grupo nenhum.
-- Nomes em pt-BR só no app (E4.5), pela chave. Os valores seguem o padrão adotado da pergunta 20 do plano da E3.3.
+- Nomes em pt-BR só no app (E4.5), pela chave. Os valores seguem o padrão adotado da pergunta 21 do plano da E3.3.
 
 ## Recusas
 

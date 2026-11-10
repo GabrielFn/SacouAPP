@@ -16,11 +16,18 @@ interface Candidate {
   readonly leaves: FlatSettings;
 }
 
-function winnerFor(path: SettingsPath, candidates: readonly Candidate[]) {
-  const winner = candidates.find((candidate) => candidate.leaves[path] !== undefined);
-  return winner === undefined
-    ? null
-    : { source: winner.source, value: winner.leaves[path] as SettingsValue };
+interface Winner {
+  readonly path: SettingsPath;
+  readonly source: SettingsSource;
+  readonly value: SettingsValue;
+}
+
+/** The group is a complete document, so it always has the last word when no layer has a value. */
+function winnerFor(path: SettingsPath, layers: readonly Candidate[], group: FlatSettings): Winner {
+  const layer = layers.find((candidate) => candidate.leaves[path] !== undefined);
+  return layer === undefined
+    ? { path, source: "group", value: group[path] as SettingsValue }
+    : { path, source: layer.source, value: layer.leaves[path] as SettingsValue };
 }
 
 /**
@@ -33,15 +40,14 @@ export function resolveSettings(
   round?: SettingsLayer,
   match?: SettingsLayer,
 ): ResolvedSettings {
-  const candidates: readonly Candidate[] = [
+  const layers: readonly Candidate[] = [
     { source: "match", leaves: match === undefined ? {} : flattenSettings(match) },
     { source: "round", leaves: round === undefined ? {} : flattenSettings(round) },
-    { source: "group", leaves: flattenSettings(group) },
   ];
-  const winners = SETTINGS_CATALOG.fields.map((field) => {
-    const winner = winnerFor(field.path, candidates);
-    return { path: field.path, source: winner?.source ?? "group", value: winner?.value };
-  });
+  const groupLeaves = flattenSettings(group);
+  const winners = SETTINGS_CATALOG.fields.map((field) =>
+    winnerFor(field.path, layers, groupLeaves),
+  );
   const values = Object.fromEntries(winners.map((winner) => [winner.path, winner.value]));
   const sources = Object.fromEntries(winners.map((winner) => [winner.path, winner.source]));
   return deepFreeze({
