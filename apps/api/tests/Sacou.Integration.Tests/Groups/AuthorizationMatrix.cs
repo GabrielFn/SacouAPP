@@ -4,7 +4,7 @@ using R = Sacou.Integration.Tests.Groups.GroupRoute;
 
 namespace Sacou.Integration.Tests.Groups;
 
-/// <summary>The routes of parts 1 and 2 of E3.2. Part 3 adds the invites, and rows below.</summary>
+/// <summary>The 14 routes of E3.2.</summary>
 public enum GroupRoute
 {
     CreateGroup,
@@ -16,14 +16,20 @@ public enum GroupRoute
     ChangeType,
     RemoveMember,
     LeaveGroup,
+    CreateInvite,
+    ListInvites,
+    RevokeInvite,
+    PreviewInvite,
+    AcceptInvite,
 }
 
 /// <summary>
-/// M1, the acceptance of E3.2 ("Autorização por papel testada"), for the routes of parts 1 and 2: every actor
-/// on every route, with the status and code written by hand from the permission table (docs/dominio/grupos.md),
-/// never derived from the production table. No code means a success, or a 401 with no ProblemDetails code.
-/// The writes of part 2 aim at the player (role to scorekeeper, type to regular, removal); the admin is the
-/// only active admin, so leaving is refused for them alone.
+/// M1, the acceptance of E3.2 ("Autorização por papel testada"): every actor on all 14 routes, with the status
+/// and code written by hand from the permission table (docs/dominio/grupos.md), never derived from the
+/// production table. No code means a success, or a 401 with no ProblemDetails code. The member writes aim at
+/// the player (role to scorekeeper, type to regular, removal); the admin is the only active admin, so leaving
+/// is refused for them alone. The invite routes use the admin's invite: preview and accept need no
+/// membership, only a registered user; the one who left comes back (201), the removed one does not (403).
 /// </summary>
 internal static class AuthorizationMatrix
 {
@@ -31,6 +37,7 @@ internal static class AuthorizationMatrix
     private const string NotFound = "groups.group-not-found";
     private const string Forbidden = "groups.forbidden";
     private const string LastAdmin = "groups.last-admin";
+    private const string MemberRemoved = "groups.member-removed";
 
     public static readonly TheoryData<A, R, int, string?> Rows = new()
     {
@@ -43,6 +50,11 @@ internal static class AuthorizationMatrix
         { A.Admin, R.ChangeType, 200, null },
         { A.Admin, R.RemoveMember, 204, null },
         { A.Admin, R.LeaveGroup, 409, LastAdmin },
+        { A.Admin, R.CreateInvite, 201, null },
+        { A.Admin, R.ListInvites, 200, null },
+        { A.Admin, R.RevokeInvite, 204, null },
+        { A.Admin, R.PreviewInvite, 200, null },
+        { A.Admin, R.AcceptInvite, 200, null },
 
         { A.CoAdmin, R.CreateGroup, 201, null },
         { A.CoAdmin, R.ListMyGroups, 200, null },
@@ -53,6 +65,11 @@ internal static class AuthorizationMatrix
         { A.CoAdmin, R.ChangeType, 200, null },
         { A.CoAdmin, R.RemoveMember, 204, null },
         { A.CoAdmin, R.LeaveGroup, 204, null },
+        { A.CoAdmin, R.CreateInvite, 201, null },
+        { A.CoAdmin, R.ListInvites, 200, null },
+        { A.CoAdmin, R.RevokeInvite, 204, null },
+        { A.CoAdmin, R.PreviewInvite, 200, null },
+        { A.CoAdmin, R.AcceptInvite, 200, null },
 
         { A.Scorekeeper, R.CreateGroup, 201, null },
         { A.Scorekeeper, R.ListMyGroups, 200, null },
@@ -63,6 +80,11 @@ internal static class AuthorizationMatrix
         { A.Scorekeeper, R.ChangeType, 403, Forbidden },
         { A.Scorekeeper, R.RemoveMember, 403, Forbidden },
         { A.Scorekeeper, R.LeaveGroup, 204, null },
+        { A.Scorekeeper, R.CreateInvite, 403, Forbidden },
+        { A.Scorekeeper, R.ListInvites, 403, Forbidden },
+        { A.Scorekeeper, R.RevokeInvite, 403, Forbidden },
+        { A.Scorekeeper, R.PreviewInvite, 200, null },
+        { A.Scorekeeper, R.AcceptInvite, 200, null },
 
         { A.Player, R.CreateGroup, 201, null },
         { A.Player, R.ListMyGroups, 200, null },
@@ -73,6 +95,11 @@ internal static class AuthorizationMatrix
         { A.Player, R.ChangeType, 403, Forbidden },
         { A.Player, R.RemoveMember, 403, Forbidden },
         { A.Player, R.LeaveGroup, 204, null },
+        { A.Player, R.CreateInvite, 403, Forbidden },
+        { A.Player, R.ListInvites, 403, Forbidden },
+        { A.Player, R.RevokeInvite, 403, Forbidden },
+        { A.Player, R.PreviewInvite, 200, null },
+        { A.Player, R.AcceptInvite, 200, null },
 
         { A.LeftMember, R.CreateGroup, 201, null },
         { A.LeftMember, R.ListMyGroups, 200, null },
@@ -83,6 +110,11 @@ internal static class AuthorizationMatrix
         { A.LeftMember, R.ChangeType, 404, NotFound },
         { A.LeftMember, R.RemoveMember, 404, NotFound },
         { A.LeftMember, R.LeaveGroup, 404, NotFound },
+        { A.LeftMember, R.CreateInvite, 404, NotFound },
+        { A.LeftMember, R.ListInvites, 404, NotFound },
+        { A.LeftMember, R.RevokeInvite, 404, NotFound },
+        { A.LeftMember, R.PreviewInvite, 200, null },
+        { A.LeftMember, R.AcceptInvite, 201, null },
 
         { A.RemovedMember, R.CreateGroup, 201, null },
         { A.RemovedMember, R.ListMyGroups, 200, null },
@@ -93,6 +125,11 @@ internal static class AuthorizationMatrix
         { A.RemovedMember, R.ChangeType, 404, NotFound },
         { A.RemovedMember, R.RemoveMember, 404, NotFound },
         { A.RemovedMember, R.LeaveGroup, 404, NotFound },
+        { A.RemovedMember, R.CreateInvite, 404, NotFound },
+        { A.RemovedMember, R.ListInvites, 404, NotFound },
+        { A.RemovedMember, R.RevokeInvite, 404, NotFound },
+        { A.RemovedMember, R.PreviewInvite, 200, null },
+        { A.RemovedMember, R.AcceptInvite, 403, MemberRemoved },
 
         { A.OutsiderMember, R.CreateGroup, 201, null },
         { A.OutsiderMember, R.ListMyGroups, 200, null },
@@ -103,6 +140,11 @@ internal static class AuthorizationMatrix
         { A.OutsiderMember, R.ChangeType, 404, NotFound },
         { A.OutsiderMember, R.RemoveMember, 404, NotFound },
         { A.OutsiderMember, R.LeaveGroup, 404, NotFound },
+        { A.OutsiderMember, R.CreateInvite, 404, NotFound },
+        { A.OutsiderMember, R.ListInvites, 404, NotFound },
+        { A.OutsiderMember, R.RevokeInvite, 404, NotFound },
+        { A.OutsiderMember, R.PreviewInvite, 200, null },
+        { A.OutsiderMember, R.AcceptInvite, 201, null },
 
         { A.NonMember, R.CreateGroup, 201, null },
         { A.NonMember, R.ListMyGroups, 200, null },
@@ -113,6 +155,11 @@ internal static class AuthorizationMatrix
         { A.NonMember, R.ChangeType, 404, NotFound },
         { A.NonMember, R.RemoveMember, 404, NotFound },
         { A.NonMember, R.LeaveGroup, 404, NotFound },
+        { A.NonMember, R.CreateInvite, 404, NotFound },
+        { A.NonMember, R.ListInvites, 404, NotFound },
+        { A.NonMember, R.RevokeInvite, 404, NotFound },
+        { A.NonMember, R.PreviewInvite, 200, null },
+        { A.NonMember, R.AcceptInvite, 201, null },
 
         { A.Unregistered, R.CreateGroup, 403, NotRegistered },
         { A.Unregistered, R.ListMyGroups, 403, NotRegistered },
@@ -123,6 +170,11 @@ internal static class AuthorizationMatrix
         { A.Unregistered, R.ChangeType, 403, NotRegistered },
         { A.Unregistered, R.RemoveMember, 403, NotRegistered },
         { A.Unregistered, R.LeaveGroup, 403, NotRegistered },
+        { A.Unregistered, R.CreateInvite, 403, NotRegistered },
+        { A.Unregistered, R.ListInvites, 403, NotRegistered },
+        { A.Unregistered, R.RevokeInvite, 403, NotRegistered },
+        { A.Unregistered, R.PreviewInvite, 403, NotRegistered },
+        { A.Unregistered, R.AcceptInvite, 403, NotRegistered },
 
         { A.Anonymous, R.CreateGroup, 401, null },
         { A.Anonymous, R.ListMyGroups, 401, null },
@@ -133,6 +185,11 @@ internal static class AuthorizationMatrix
         { A.Anonymous, R.ChangeType, 401, null },
         { A.Anonymous, R.RemoveMember, 401, null },
         { A.Anonymous, R.LeaveGroup, 401, null },
+        { A.Anonymous, R.CreateInvite, 401, null },
+        { A.Anonymous, R.ListInvites, 401, null },
+        { A.Anonymous, R.RevokeInvite, 401, null },
+        { A.Anonymous, R.PreviewInvite, 401, null },
+        { A.Anonymous, R.AcceptInvite, 401, null },
     };
 
     public static (HttpMethod Method, string Path, string? Json) Request(GroupWorld world, GroupRoute route) => route switch
@@ -146,6 +203,11 @@ internal static class AuthorizationMatrix
         R.ChangeType => (HttpMethod.Put, world.MemberPath(world.MemberIds[A.Player]) + "/type", """{"memberType":"regular"}"""),
         R.RemoveMember => (HttpMethod.Delete, world.MemberPath(world.MemberIds[A.Player]), null),
         R.LeaveGroup => (HttpMethod.Post, world.GroupPath + "/leave", null),
+        R.CreateInvite => (HttpMethod.Post, world.InvitesPath, null),
+        R.ListInvites => (HttpMethod.Get, world.InvitesPath, null),
+        R.RevokeInvite => (HttpMethod.Delete, $"{world.InvitesPath}/{world.Invite.Id}", null),
+        R.PreviewInvite => (HttpMethod.Post, GroupWorld.PreviewPath, GroupWorld.TokenBody(world.Invite.Token)),
+        R.AcceptInvite => (HttpMethod.Post, GroupWorld.AcceptPath, GroupWorld.TokenBody(world.Invite.Token)),
         _ => throw new ArgumentOutOfRangeException(nameof(route), route, "Every route needs a request."),
     };
 }
