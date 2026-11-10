@@ -231,7 +231,7 @@ public sealed class GroupsInviteTests(IntegrationDatabase database) : IAsyncLife
 
         Assert.Equal(HttpStatusCode.NotFound, refused.StatusCode);
         var logged = api.Logs.EntriesSince(start);
-        Assert.Contains(logged, entry => entry.Contains($"Invite acceptance: {InviteInvalid}, invite .", StringComparison.Ordinal));
+        Assert.Contains(logged, entry => entry.Contains($"Invite acceptance: {InviteInvalid}, invite none.", StringComparison.Ordinal));
         Assert.DoesNotContain(logged, entry => entry.Contains("canario-123", StringComparison.Ordinal));
     }
 

@@ -20,6 +20,9 @@ internal sealed partial class AcceptInviteHandler(
     private const string Joined = "joined";
     private const string AlreadyMember = "already-member";
 
+    /// <summary>A malformed token, or one that found no invite: there is no id to log.</summary>
+    private const string NoInvite = "none";
+
     public async Task<Result<AcceptedInvite>> HandleAsync(string? token, CancellationToken cancellationToken)
     {
         var user = await currentUser.GetAsync(cancellationToken).ConfigureAwait(false);
@@ -31,7 +34,7 @@ internal sealed partial class AcceptInviteHandler(
         var hash = InviteTokenHasher.HashIfWellFormed(token);
         if (hash.IsFailure)
         {
-            LogAcceptance(logger, hash.Error.Code, inviteId: null);
+            LogAcceptance(logger, hash.Error.Code, NoInvite);
             return Result.Failure<AcceptedInvite>(hash.Error);
         }
 
@@ -42,7 +45,8 @@ internal sealed partial class AcceptInviteHandler(
             .ConfigureAwait(false);
         var accepted = attempt.Change.Match(change => Result.Success(AcceptedInvite.From(change, person)), Result.Failure<AcceptedInvite>);
         var outcome = Outcome(accepted);
-        LogAcceptance(logger, outcome, attempt.InviteId?.Value);
+        var invite = attempt.InviteId?.Value.ToString() ?? NoInvite;
+        LogAcceptance(logger, outcome, invite);
         return accepted;
     }
 
@@ -50,7 +54,7 @@ internal sealed partial class AcceptInviteHandler(
         accepted.Match(value => value.Joined ? Joined : AlreadyMember, error => error.Code);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Invite acceptance: {Outcome}, invite {InviteId}.")]
-    private static partial void LogAcceptance(ILogger logger, string outcome, Guid? inviteId);
+    private static partial void LogAcceptance(ILogger logger, string outcome, string inviteId);
 }
 
 /// <summary>Where the person is now, and whether this call put them there (201) or they were in already (200).</summary>
