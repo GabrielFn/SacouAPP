@@ -14,6 +14,10 @@
 29. Entrada das notificações (E4.4, 10/11/2026): um sino no cabeçalho do Início abre a tela 28; o canvas não tem esse sino. **Recomendação e padrão adotado.**
 26. Admin reduz as vagas com a lista cheia (E3.4, 10/11/2026): ninguém sai da lista; a espera só anda quando sobrar vaga. **Recomendação e padrão adotado.**
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
+30. Tela de membros antes dos nomes (E4.5, 10/11/2026): (1) mostrar "Você" e "Membro desde 12 out" e esconder "Remover outra pessoa" até haver nome (E3.17); (2) liberar o remover mesmo sem nome; (3) fazer a E3.17 antes. **Recomendação e padrão adotado: opção 1.**
+31. Pix antes da E3.10 (E4.5, 10/11/2026): (1) esconder chave e forma até a E3.10; (2) mostrar o campo sem guardar; (3) pôr a E3.10 antes da E4.5. **Recomendação e padrão adotado: opção 1.**
+32. Destino de "Criar grupo" (E4.5, 10/11/2026): (1) membros (tela 19), para convidar; (2) "Como jogamos" (tela 18); (3) lista de grupos. **Recomendação e padrão adotado: opção 1** (tela 18 até a Parte 2; tela 06 quando a E4.6 chegar).
+33. Endereço do link de convite (E4.5, 10/11/2026): precisa de um domínio (conta, com você). (1) `EXPO_PUBLIC_INVITE_BASE_URL`, cadastrada quando houver domínio; sem ela, os botões de convite somem; (2) esquema do app `sacou://convite#token` até lá (só abre em quem já tem o app). **Recomendação e padrão adotado: opção 1.**
 
 ## Respondidas
 - **Revisão das telas do piloto (12/11/2026, pelo celular):** fila com três modos e "vencedor também sai" (resposta 3-2); votação do MVP só de quem jogou, sem votar em si, 24 h, secreta, empate pelo saldo (4-a); areia rei da quadra com duplas ou quartetos, vencedor fica e ranking do dia (5-1). Telas de `design/mvp/` aprovadas, inclusive 09a, 09b e 09c. ADR 0048.
