@@ -19,7 +19,7 @@ const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
 const NAV_STROKE_WIDTH = 2;
 const HEADER_STROKE_WIDTH = 2.2;
 
-interface StrokeIconProps extends IconProps {
+export interface StrokeIconProps extends IconProps {
   readonly size: number;
   readonly strokeWidth: number;
   readonly children: ReactNode;

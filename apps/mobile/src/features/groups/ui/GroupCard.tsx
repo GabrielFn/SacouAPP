@@ -41,7 +41,6 @@ export function GroupCard({ model, actions, onAction }: GroupCardProps) {
         <View
           style={{
             flex: 1,
-            minWidth: 0,
             padding: tokens.spacing.m,
             gap: tokens.spacing.xs,
           }}

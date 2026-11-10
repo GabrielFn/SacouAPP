@@ -33,6 +33,7 @@ export function GroupsStateView({
     case "error":
       return (
         <EmptyState
+          alert
           title={states.errorTitle}
           body={apiErrorText(state.error)}
           actions={[{ label: states.retry, variant: "secondary", onPress: onRetry }]}

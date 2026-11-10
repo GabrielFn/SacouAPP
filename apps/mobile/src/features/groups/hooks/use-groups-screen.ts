@@ -1,4 +1,5 @@
 import { useOnline } from "../../../services/api/use-online";
+import { wallClockNow } from "../../../services/api/wall-clock";
 import { offlineBannerText } from "../../../services/query/staleness";
 import { groupsViewState, type GroupsViewState } from "../model/groups-view-state";
 import { useMyGroups } from "../queries/use-group-queries";
@@ -19,7 +20,7 @@ export function useGroupsScreen(): GroupsScreenModel {
     bannerText: offlineBannerText({
       online,
       dataUpdatedAt: query.dataUpdatedAt,
-      now: Date.now(),
+      now: wallClockNow(),
     }),
     retry: () => {
       void query.refetch();
