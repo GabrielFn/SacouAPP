@@ -27,6 +27,12 @@ public sealed class OpenApiContractTests
         "post /v1/groups/{groupId}/invites CreateGroupInvite",
         "get /v1/groups/{groupId}/invites ListGroupInvites",
         "delete /v1/groups/{groupId}/invites/{inviteId} RevokeGroupInvite",
+        "get /v1/groups/{groupId}/settings GetGroupSettings",
+        "patch /v1/groups/{groupId}/settings UpdateGroupSettings",
+        "post /v1/groups/{groupId}/settings/apply-template ApplyGroupSettingsTemplate",
+        "get /v1/groups/{groupId}/templates ListGroupTemplates",
+        "post /v1/groups/{groupId}/templates SaveGroupTemplate",
+        "delete /v1/groups/{groupId}/templates/{templateId} DeleteGroupTemplate",
     ];
 
     /// <summary>

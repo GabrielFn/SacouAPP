@@ -76,6 +76,8 @@ describe("settings catalog against the engine (V10)", () => {
   });
 });
 
+const INTEGER_FIELD = String(rawCatalog.fields.findIndex((field) => field.type === "integer"));
+
 describe("settings catalog parser", () => {
   const fields = rawCatalog.fields;
   test.each([
@@ -90,6 +92,8 @@ describe("settings catalog parser", () => {
     ["an unknown template", ["templates", "outro"], { pro: false, values: {} }],
     ["an unknown key in a field", ["fields", "0", "extra"], 1],
     ["a missing key in a field", ["fields", "0", "groupFact"], REMOVED],
+    ["an integer field without min", ["fields", INTEGER_FIELD, "min"], REMOVED],
+    ["an integer field without max", ["fields", INTEGER_FIELD, "max"], REMOVED],
     ["a default its rule refuses", ["fields", "2", "default"], 1],
     ["a Pro value out of the list", ["fields", "21", "proValues"], ["6x0"]],
     ["a field without the group level", ["fields", "0", "levels"], ["round"]],

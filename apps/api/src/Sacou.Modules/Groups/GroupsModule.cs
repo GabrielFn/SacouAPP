@@ -3,23 +3,29 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Groups.AcceptInvite;
+using Sacou.Modules.Groups.ApplyTemplate;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.ChangeMemberRole;
 using Sacou.Modules.Groups.ChangeMemberType;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Groups.CreateGroup;
 using Sacou.Modules.Groups.CreateInvite;
+using Sacou.Modules.Groups.DeleteSavedTemplate;
 using Sacou.Modules.Groups.GetGroup;
+using Sacou.Modules.Groups.GetGroupSettings;
 using Sacou.Modules.Groups.Infrastructure;
 using Sacou.Modules.Groups.Infrastructure.InviteTokens;
 using Sacou.Modules.Groups.LeaveGroup;
 using Sacou.Modules.Groups.ListInvites;
+using Sacou.Modules.Groups.ListSavedTemplates;
 using Sacou.Modules.Groups.ListMembers;
 using Sacou.Modules.Groups.ListMyGroups;
 using Sacou.Modules.Groups.PreviewInvite;
 using Sacou.Modules.Groups.RemoveMember;
 using Sacou.Modules.Groups.RenameGroup;
 using Sacou.Modules.Groups.RevokeInvite;
+using Sacou.Modules.Groups.SaveTemplate;
+using Sacou.Modules.Groups.UpdateGroupSettings;
 
 namespace Sacou.Modules.Groups;
 
@@ -35,6 +41,9 @@ public static class GroupsModule
         services.AddScoped<CreateInviteHandler>();
         services.AddScoped<PreviewInviteHandler>();
         services.AddScoped<AcceptInviteHandler>();
+        services.AddScoped<UpdateGroupSettingsHandler>();
+        services.AddScoped<ApplyTemplateHandler>();
+        services.AddScoped<SaveTemplateHandler>();
         services.AddSingleton<IInviteTokenGenerator, RandomInviteTokenGenerator>();
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
         return services;
@@ -57,7 +66,13 @@ public static class GroupsModule
             .MapLeaveGroup()
             .MapCreateInvite()
             .MapListInvites()
-            .MapRevokeInvite();
+            .MapRevokeInvite()
+            .MapGetGroupSettings()
+            .MapUpdateGroupSettings()
+            .MapApplyTemplate()
+            .MapListSavedTemplates()
+            .MapSaveTemplate()
+            .MapDeleteSavedTemplate();
         return endpoints;
     }
 

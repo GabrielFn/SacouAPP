@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text;
 using Sacou.Shared.Results;
 
@@ -50,24 +49,5 @@ internal sealed record GroupName
     public override string ToString() => nameof(GroupName);
 
     private static bool IsAllowed(string text) =>
-        HasAllowedLength(text) && DisplayText.HasOnlyVisibleText(text) && DisplayText.HasVisibleContent(text) && HasFewMarksPerCharacter(text);
-
-    private static bool HasAllowedLength(string text) =>
-        new StringInfo(text).LengthInTextElements is >= 1 and <= MaxLength
-        && text.EnumerateRunes().Count() <= MaxCodePoints;
-
-    /// <summary>Against "zalgo" text, whose stacked marks spill over the lines around it.</summary>
-    private static bool HasFewMarksPerCharacter(string text)
-    {
-        var characters = StringInfo.GetTextElementEnumerator(text);
-        while (characters.MoveNext())
-        {
-            if (characters.GetTextElement().EnumerateRunes().Count(DisplayText.IsMark) > MaxMarksPerCharacter)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+        DisplayText.IsAllowedName(text, MaxLength, MaxCodePoints, MaxMarksPerCharacter);
 }

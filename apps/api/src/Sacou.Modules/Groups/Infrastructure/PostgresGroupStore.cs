@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
+using Sacou.Modules.Groups.Domain.Settings;
+using Sacou.Modules.Groups.Infrastructure.Settings;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -15,10 +17,11 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
     /// <summary>First key of the two-key advisory lock: "memberships of one person", so it never collides with another lock family.</summary>
     private const int MembershipLockFamily = 3_202;
 
-    public async Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, CancellationToken cancellationToken)
+    public async Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(group);
         ArgumentNullException.ThrowIfNull(admission);
+        ArgumentNullException.ThrowIfNull(settings);
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
@@ -31,6 +34,7 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
 
             database.Groups.Add(RowMapping.ToRow(group));
             database.Members.AddRange(group.Members.Select(member => RowMapping.ToRow(group.Id, member)));
+            database.GroupSettings.Add(SettingsRowMapping.ToRow(group.Id, settings, group.Members[0].Id));
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return admitted;

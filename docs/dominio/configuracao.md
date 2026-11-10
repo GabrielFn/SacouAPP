@@ -79,7 +79,7 @@ O que a partida congela no `MatchStarted` sai de `deriveMatchRules`:
 
 - **Fatos do grupo** (dia fixo, horário, local, vagas e valores em dinheiro): modelo nunca os traz e aplicar modelo nunca os apaga. Trocar de "Racha" para "Treino" não zera a mensalidade.
 - **Cópia, não vínculo:** aplicar um modelo copia os valores; o que o modelo não diz volta a "Do zero". Mudar o catálogo numa versão futura não mexe em grupo nenhum.
-- Nomes em pt-BR só no app (E4.5), pela chave. Os valores seguem o padrão adotado da pergunta 20 do plano da E3.3.
+- Nomes em pt-BR só no app (E4.5), pela chave. Os valores seguem o padrão adotado da pergunta 21 do plano da E3.3.
 
 ## Recusas
 
@@ -95,3 +95,11 @@ Cada recusa tem código e caminho (folha, bloco, ou `""` para a raiz; chave desc
 | `settings.unknown-value` | Valor fora da lista (`bestOf` 2, sistema `6x0`) |
 | `settings.invalid-text` | Texto com caractere invisível, sem letra, com espaço nas pontas ou fora de NFC |
 | `settings.not-allowed-at-level` | Folha que o nível não aceita (mensalidade na rodada, vagas na partida) |
+
+## Onde fica e quem muda (E3.3, parte 2)
+
+- **Grupo:** `groups.group_settings`, uma linha por grupo, com o documento completo. Ver é `ViewGroup` (todo membro ativo); mudar, aplicar modelo e gerir modelos salvos é `ManageSettings` (Admin e Co-admin, pergunta 23). Rotas e códigos em [`grupos.md`](grupos.md).
+- **Modelos salvos:** `groups.saved_templates`, até 20 por grupo. O retrato leva só os campos que não são fato; o nome tem de 1 a 40 caracteres visíveis. Aplicar um modelo salvo é o mesmo que aplicar um pronto: copia os valores e mantém os fatos.
+- **Rótulo "Modelo usado":** `templateKey` (pronto) ou `savedTemplateId` (salvo), o último aplicado, nunca os dois. Editar um campo não muda o rótulo; apagar o modelo salvo apontado limpa o rótulo.
+- **Grupo antigo sem linha** lê como "Do zero" (rótulo vazio) e ganha a linha na primeira escrita.
+- **Dado pessoal:** o local (`schedule.venue`) e o nome do modelo salvo são texto livre e nunca vão a log (`docs/seguranca/dados-pessoais.md`).

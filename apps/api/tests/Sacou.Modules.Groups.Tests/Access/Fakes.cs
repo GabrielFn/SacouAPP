@@ -1,6 +1,7 @@
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
+using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Modules.Groups.Infrastructure;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Shared.Results;
@@ -41,7 +42,8 @@ internal sealed class FakeGroupStore : IGroupStore
         return Task.FromResult(members.TryGetValue((group, user), out var member) && member.IsActive ? member : null);
     }
 
-    public Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, CancellationToken cancellationToken) =>
+    public Task<Result> CreateAsync(
+        Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
     public Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>

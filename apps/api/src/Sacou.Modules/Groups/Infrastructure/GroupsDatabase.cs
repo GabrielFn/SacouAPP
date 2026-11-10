@@ -15,6 +15,7 @@ internal static class GroupsDatabase
         services.AddDbContext<GroupsDbContext>(options => Configure(
             options, configuration.GetConnectionString(ConnectionStringName) ?? string.Empty));
         services.AddScoped<IGroupStore, PostgresGroupStore>();
+        services.AddScoped<IGroupSettingsStore, PostgresGroupSettingsStore>();
         return services;
     }
 

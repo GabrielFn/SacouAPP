@@ -48,10 +48,38 @@ internal static class DisplayText
     public static bool HasVisibleContent(string text) =>
         text.EnumerateRunes().Any(rune => Rune.IsLetter(rune) || Rune.IsNumber(rune) || Rune.IsSymbol(rune));
 
+    /// <summary>
+    /// The rule of a name (a group, a saved template): at most <paramref name="maxElements"/> user-perceived
+    /// characters, <paramref name="maxCodePoints"/> code points and <paramref name="maxMarks"/> combining marks
+    /// per character, all visible, with some letter, number or symbol. The text is already trimmed and in NFC.
+    /// </summary>
+    public static bool IsAllowedName(string text, int maxElements, int maxCodePoints, int maxMarks)
+    {
+        var elements = new StringInfo(text).LengthInTextElements;
+        return elements >= 1 && elements <= maxElements
+            && text.EnumerateRunes().Count() <= maxCodePoints
+            && HasOnlyVisibleText(text) && HasVisibleContent(text) && HasFewMarksPerCharacter(text, maxMarks);
+    }
+
     public static bool IsMark(Rune rune) => Rune.GetUnicodeCategory(rune) is
         UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark or UnicodeCategory.EnclosingMark;
 
     public static bool IsZeroWidthJoiner(Rune rune) => rune.Value == ZeroWidthJoiner;
+
+    /// <summary>Against "zalgo" text, whose stacked marks spill over the lines around it.</summary>
+    private static bool HasFewMarksPerCharacter(string text, int maxMarks)
+    {
+        var characters = StringInfo.GetTextElementEnumerator(text);
+        while (characters.MoveNext())
+        {
+            if (characters.GetTextElement().EnumerateRunes().Count(IsMark) > maxMarks)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     private static bool IsVisible(Rune[] runes, int index) =>
         IsZeroWidthJoiner(runes[index])

@@ -45,6 +45,19 @@ internal static class SettingsResolver
             field => field.IsGroupFact ? current.ValueOf(field.Path) : template.Values.GetValueOrDefault(field.Path, field.DefaultValue),
             StringComparer.Ordinal));
 
+    /// <summary>A patch on the group: each leaf it sets replaces the group's; every other leaf stays as it is.</summary>
+    public static GroupSettings ApplyPatch(GroupSettings current, SettingsLayer patch) =>
+        new(patch.Values.Aggregate(current.Values, (values, leaf) => values.SetItem(leaf.Key, leaf.Value)));
+
+    /// <summary>The leaves of a group that are not facts, for a saved template.</summary>
+    public static SettingsLayer Snapshot(SettingsCatalog catalog, GroupSettings settings) =>
+        new(catalog.Fields.Where(field => !field.IsGroupFact)
+            .ToImmutableDictionary(field => field.Path, field => settings.ValueOf(field.Path), StringComparer.Ordinal));
+
+    /// <summary>A saved template applied like a ready-made one: its leaves replace the group's, the facts stay.</summary>
+    public static GroupSettings ApplySnapshot(SettingsCatalog catalog, GroupSettings current, SettingsLayer snapshot) =>
+        ApplyTemplate(catalog, current, new SettingsTemplate(string.Empty, IsPro: false, snapshot.Values));
+
     /// <summary>"Do zero" in every leaf: the base of a new group before its template.</summary>
     public static GroupSettings Defaults(SettingsCatalog catalog) =>
         new(catalog.Fields.ToImmutableDictionary(field => field.Path, field => field.DefaultValue, StringComparer.Ordinal));
