@@ -251,6 +251,18 @@ describe("the cache follows the server (Q3, Q4, H6)", () => {
     expect(store.entries().size).toBe(0);
   });
 
+  test("clearSession removes the stored row at once, with no later save (Q4)", async () => {
+    const store = createMemoryKeyValueStore();
+    const client = createSacouQueryClient();
+    await loadAll(client, programmed());
+    await save(client, store);
+    expect(store.entries().size).toBe(1);
+
+    await createCacheSession(client, persister(store)).clearSession();
+
+    expect(store.entries().size).toBe(0);
+  });
+
   test("the invite token leaves memory once no screen holds the mutation", async () => {
     const client = createSacouQueryClient();
     const fake = programmed();
