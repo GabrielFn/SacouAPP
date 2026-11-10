@@ -30,7 +30,7 @@ internal sealed class MemberRow
     public DateTimeOffset? LeftAt { get; init; }
 }
 
-/// <summary>A row of <c>groups.invites</c>: only the SHA-256 of the token, never the token. Used from part 3 of E3.2.</summary>
+/// <summary>A row of <c>groups.invites</c>: only the SHA-256 of the token, never the token (ADR 0040, D10).</summary>
 internal sealed class InviteRow
 {
     public required Guid Id { get; init; }

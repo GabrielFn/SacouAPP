@@ -10,6 +10,9 @@ namespace Sacou.Modules.Groups.Access;
 internal static class GroupRouteExtensions
 {
     public const string GroupsRoute = "/v1/groups";
+    /// <summary>The invite preview and acceptance: outside the group filter, on the closed list of the route guard.</summary>
+    public const string InvitesRoute = "/v1/invites";
+
     public const string GroupRoute = GroupsRoute + "/{" + GroupAccessFilter.GroupIdRouteValue + ":guid}";
 
     /// <summary>Fits the largest body of E3.2 (a 60-character name or a 43-character token) with room to spare.</summary>

@@ -1,4 +1,5 @@
 using Sacou.Modules.Groups.Domain.Groups;
+using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -33,6 +34,27 @@ internal static class RowMapping
         ColumnValues.Parse(ColumnValues.Statuses, row.Status),
         row.JoinedAt,
         row.LeftAt);
+
+    public static InviteRow ToRow(GroupId group, GroupInvite invite) => new()
+    {
+        Id = invite.Id.Value,
+        GroupId = group.Value,
+        TokenHash = [.. invite.TokenHash.Bytes],
+        CreatedByMemberId = invite.CreatedBy.Value,
+        CreatedAt = invite.CreatedAt,
+        ExpiresAt = invite.ExpiresAt,
+        RevokedAt = invite.RevokedAt,
+        UseCount = invite.UseCount,
+    };
+
+    public static GroupInvite ToInvite(InviteRow row) => new(
+        new InviteId(row.Id),
+        InviteTokenHash.From(row.TokenHash),
+        new MemberId(row.CreatedByMemberId),
+        row.CreatedAt,
+        row.ExpiresAt,
+        row.RevokedAt,
+        row.UseCount);
 
     /// <summary>Trusted: a name that a later, stricter rule refuses is still shown, never a 500.</summary>
     public static GroupName ToName(string stored) => GroupName.FromStored(stored);

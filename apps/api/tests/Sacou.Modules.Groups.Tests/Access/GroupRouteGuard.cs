@@ -19,6 +19,8 @@ internal static class GroupRouteGuard
         "POST /v1/me",
         "POST /v1/groups",
         "GET /v1/groups",
+        "POST /v1/invites/preview",
+        "POST /v1/invites/accept",
     };
 
     public static IReadOnlyList<string> Violations(IEnumerable<Endpoint> endpoints) =>

@@ -14,9 +14,10 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 ## Ciclo de vida
 
 - **Criar:** quem cria vira Admin, ativo e avulso. Todo membro novo entra Jogador e avulso; o admin marca mensalista.
-- **Sair:** qualquer membro sai (`POST .../leave`); a linha fica, marcada como "saiu", com o papel que tinha, e a pessoa passa a receber o 404 de não membro. Quem saiu e volta pelo link (parte 3) recupera o mesmo `MemberId`, sempre como Jogador.
+- **Sair:** qualquer membro sai (`POST .../leave`); a linha fica, marcada como "saiu", com o papel que tinha, e a pessoa passa a receber o 404 de não membro. Quem saiu e volta pelo link recupera o mesmo `MemberId`, sempre como Jogador e avulso.
 - **Remover:** Admin e Co-admin removem Placar e Jogador; só o Admin remove Co-admin ou outro Admin. Ninguém remove a si mesmo (`groups.use-leave`): usa "sair". A linha fica, marcada como "removido". Quem foi removido não volta pelo link (decisão do Gabriel, pergunta 19).
 - **Mudar papel:** Admin e Co-admin trocam entre Placar e Jogador quem não é admin; dar ou tirar Admin ou Co-admin é só do Admin (pergunta 16). O Co-admin também não rebaixa a si mesmo; sai, se quiser. O Admin pode se rebaixar se houver outro Admin. Pôr o papel que o membro já tem é sucesso sem mudança.
+- **Entrar pelo link:** quem tem um link válido e está registrado entra na hora, sem aprovação (pergunta 18), como Jogador e avulso. Quem já é membro ativo recebe 200 com o mesmo `MemberId` e não conta uso. Quem saiu volta com o mesmo `MemberId`, como Jogador e avulso, com a data de entrada da volta: papel e tipo nunca são restaurados, então um ex-admin nunca volta admin. Quem foi removido não volta pelo link (`groups.member-removed`, pergunta 19). Antes de entrar, a prévia mostra o nome do grupo, quantos membros ativos tem e se a pessoa já está nele.
 - **Mensalista × avulso:** Admin e Co-admin mudam o tipo de qualquer membro ativo, inclusive de admins. Convidado sem conta (E3.5) é sempre avulso (`groups.regular-needs-account`).
 - **Último admin:** o único Admin ativo não sai nem é rebaixado (`groups.last-admin`); o app pede para promover alguém antes. Nenhuma promoção automática. Co-admin não conta como admin.
 - **Ordem das conferências** em toda escrita de membro: quem age (ainda ativo? senão, o 404 de não membro), o alvo (ativo neste grupo? senão, `groups.member-not-found`), a permissão para aquele alvo e valor (`groups.forbidden`), o valor (igual ao atual: sucesso sem mudança) e, por último, o último admin. Quem age é julgado pelo que o banco diz **sob a trava do grupo**, não pelo que o filtro leu antes: quem perdeu o papel no meio do caminho recebe 403.
@@ -47,7 +48,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 |---|---|---|
 | Membros ativos por grupo | 300 | `groups.member-limit` |
 | Grupos ativos por pessoa | 100 | `groups.membership-limit` |
-| Convites ativos por grupo | 20 | `groups.invite-limit` (parte 3) |
+| Convites válidos por grupo (revogado e expirado não contam) | 20 | `groups.invite-limit` |
 
 ## Rotas
 
@@ -62,8 +63,17 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `PUT /v1/groups/{groupId}/members/{memberId}/type` `{ memberType }` | `ChangeMemberType` | 200 `{ memberId, memberType }` |
 | `DELETE /v1/groups/{groupId}/members/{memberId}` | `RemoveMember` no filtro; `RemoveAdmin` no agregado quando o alvo é Admin ou Co-admin | 204 |
 | `POST /v1/groups/{groupId}/leave` | `Leave` | 204 |
+| `POST /v1/groups/{groupId}/invites` | `ManageInvites` | 201 `{ inviteId, token, expiresAt }`, a única vez que o token sai |
+| `GET /v1/groups/{groupId}/invites` | `ManageInvites` | 200 `[{ inviteId, createdAt, createdBy, expiresAt, useCount }]`, só os válidos, do mais antigo ao mais novo |
+| `DELETE /v1/groups/{groupId}/invites/{inviteId}` | `ManageInvites` | 204, também para um link já revogado ou expirado |
+| `POST /v1/invites/preview` `{ token }` | Usuário registrado | 200 `{ groupName, activeMembers, alreadyMember }` |
+| `POST /v1/invites/accept` `{ token }` | Usuário registrado | 201 `{ groupId, memberId }` (entrou ou voltou) ou 200 (já era membro ativo) |
 
 As escritas de membro (papel, tipo, remover, sair) rodam numa transação que trava a linha do grupo (`FOR UPDATE`), carrega o grupo inteiro e aplica a regra: duas escritas no mesmo grupo nunca passam juntas pela regra do último admin (ADR 0040, D8). `role` e `memberType` são obrigatórios no corpo; faltar, `null`, número, valor desconhecido ou dois valores com vírgula dão 400.
+
+## Convite por link e QR
+
+O QR do grupo (tela 19) é o mesmo link do convite, desenhado no app (E4.5); a API não gera imagem. O link vale até ser revogado (pergunta 17) e serve para muitas pessoas. O token tem 43 caracteres e só aparece na resposta que cria o convite: o app guarda o link que gerou; noutro aparelho, gera outro. A prévia e o aceite recebem o token no corpo, nunca no endereço; o link público leva o token depois do `#` (E4.16). Revogado, expirado, inexistente ou malformado dão a mesma resposta (`groups.invite-invalid`). Quando quem criou o link sai, é removido ou vira Placar ou Jogador, os links dele morrem na mesma hora; o Admin que vira Co-admin mantém os seus. Revogação, aceite e mudanças de membros passam pela mesma trava do grupo: um aceite nunca conta uso depois da revogação.
 
 Papéis e tipos saem como texto: `admin`, `coAdmin`, `scorekeeper`, `player`; `regular`, `dropIn`. A lista de membros não tem nome (o perfil é da E3.17).
 
@@ -78,10 +88,12 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.group-not-found` | 404 | Grupo inexistente ou de quem não é membro ativo |
 | `groups.forbidden` | 403 | Membro sem a permissão |
 | `groups.membership-limit` | 409 | A pessoa já está em 100 grupos ativos |
-| `groups.member-limit` | 409 | O grupo já tem 300 membros ativos (parte 3) |
+| `groups.member-limit` | 409 | O grupo já tem 300 membros ativos |
 | `groups.member-not-found` | 404 | O alvo não é membro ativo deste grupo: inexistente, de outro grupo, saiu ou foi removido, todos iguais |
 | `groups.last-admin` | 409 | A mudança deixaria o grupo sem Admin ativo |
 | `groups.use-leave` | 400 | Remover a si mesmo; o caminho é "sair" |
 | `groups.regular-needs-account` | 400 | Mensalista sem conta (convidado, E3.5) |
-
-A parte 3 acrescenta `groups.invite-limit`, `groups.invite-not-found`, `groups.invite-invalid` e `groups.member-removed`.
+| `groups.invite-limit` | 409 | O grupo já tem 20 convites válidos |
+| `groups.invite-not-found` | 404 | O convite a revogar não é deste grupo: de outro grupo e inexistente são iguais |
+| `groups.invite-invalid` | 404 | Link revogado, expirado, inexistente ou malformado, todos iguais |
+| `groups.member-removed` | 403 | Quem foi removido tenta voltar pelo link |

@@ -15,8 +15,11 @@ public sealed class GroupRouteGuardTests
 {
     private const string Planted = "/v1/groups/{groupId:guid}/planted";
 
-    /// <summary>Get, rename, list members, change role and type, remove and leave: the guard must see them, or it checks nothing.</summary>
-    private const int GroupRoutesUpToPart2 = 7;
+    /// <summary>
+    /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites:
+    /// the guard must see them, or it checks nothing.
+    /// </summary>
+    private const int GroupRoutes = 10;
 
     [Fact]
     public async Task RealApi_EveryRouteIsGuardedOrListed()
@@ -25,7 +28,7 @@ public sealed class GroupRouteGuardTests
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints));
-        Assert.Equal(GroupRoutesUpToPart2, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
+        Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
     }
 
     [Fact]
@@ -40,7 +43,7 @@ public sealed class GroupRouteGuardTests
     }
 
     /// <summary>
-    /// Every Groups route that takes a body caps it at 4 KB. Kestrel applies the metadata; the TestServer of the
+    /// Every Groups route, the invite ones included, caps the body at 4 KB. Kestrel applies the metadata; the TestServer of the
     /// integration tests does not, so the 413 itself is tested with Kestrel in part 2 (M8).
     /// </summary>
     [Fact]
@@ -48,10 +51,11 @@ public sealed class GroupRouteGuardTests
     {
         await using var api = new ClosedDatabaseApi();
         var groupRoutes = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
-            .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal))
+            .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal)
+                || endpoint.RoutePattern.RawText.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal))
             .ToList();
 
-        Assert.NotEmpty(groupRoutes);
+        Assert.Contains(groupRoutes, endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal));
         Assert.All(groupRoutes, endpoint => Assert.Equal(
             GroupRouteExtensions.MaxBodyBytes,
             endpoint.Metadata.GetMetadata<Microsoft.AspNetCore.Http.Metadata.IRequestSizeLimitMetadata>()?.MaxRequestBodySize));

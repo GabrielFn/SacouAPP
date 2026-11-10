@@ -25,12 +25,14 @@ public enum GroupActor
 
 /// <summary>
 /// A new group with one person per actor, built for one test so no row depends on another. The admin
-/// creates the group through the API; the other members are written straight to the table, because the
-/// route that adds them (the invite) arrives in part 3 of E3.2. Each actor is a new user.
+/// creates the group and one invite through the API; the other members are written straight to the table,
+/// so each actor has exactly the role and status it names. Each actor is a new user.
 /// </summary>
 internal sealed class GroupWorld
 {
     public const string GroupsPath = "/v1/groups";
+    public const string PreviewPath = "/v1/invites/preview";
+    public const string AcceptPath = "/v1/invites/accept";
 
     private const string SignInPath = "/v1/me";
 
@@ -39,6 +41,7 @@ internal sealed class GroupWorld
     private readonly Dictionary<GroupActor, string> subjects = [];
     private readonly Dictionary<GroupActor, Guid> users = [];
     private readonly Dictionary<GroupActor, Guid> members = [];
+    private CreatedInvite? invite;
 
     private GroupWorld(ApiWithDatabase api, HttpClient client)
     {
@@ -62,6 +65,11 @@ internal sealed class GroupWorld
 
     public Guid OtherGroupId { get; private set; }
 
+    /// <summary>The admin's invite to this group, made through the API: the only time its token is seen.</summary>
+    public CreatedInvite Invite => invite ?? throw new InvalidOperationException("The world makes its invite when it is created.");
+
+    public string InvitesPath => $"{GroupPath}/invites";
+
     public string MemberPath(Guid memberId) => $"{GroupPath}/members/{memberId}";
 
     public static async Task<GroupWorld> CreateAsync(ApiWithDatabase api, HttpClient client, string groupName = "Racha da matriz")
@@ -83,7 +91,40 @@ internal sealed class GroupWorld
         await world.InsertMemberAsync(GroupActor.LeftMember, "admin", "left");
         await world.InsertMemberAsync(GroupActor.RemovedMember, "player", "removed");
         (world.OtherGroupId, world.members[GroupActor.OutsiderMember]) = await world.CreateGroupWithMemberAsync(GroupActor.OutsiderMember, "Outro racha");
+        world.invite = await world.CreateInviteAsync(GroupActor.Admin, world.GroupId);
         return world;
+    }
+
+    /// <summary>A new invite through the API, as <paramref name="actor"/>, to <paramref name="groupId"/>.</summary>
+    public async Task<CreatedInvite> CreateInviteAsync(GroupActor actor, Guid groupId)
+    {
+        using var response = await SendAsync(actor, HttpMethod.Post, $"{GroupsPath}/{groupId}/invites");
+        Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>(TestContext.Current.CancellationToken);
+        return new CreatedInvite(body!["inviteId"]!.GetValue<Guid>(), body["token"]!.GetValue<string>());
+    }
+
+    /// <summary>The body of a preview or an acceptance: the token, and only in the body.</summary>
+    public static string TokenBody(string? token) => $$"""{"token":{{JsonValue.Create(token)?.ToJsonString() ?? "null"}}}""";
+
+    /// <summary>A new registered person who is in no group, for a test that needs many of them.</summary>
+    public async Task<(string Subject, Guid User)> RegisterPersonAsync()
+    {
+        var subject = "uid-" + Guid.NewGuid().ToString("N");
+        return (subject, await RegisterAsync(subject));
+    }
+
+    /// <summary>Like <see cref="SendAsync"/>, for a person who is not one of the actors.</summary>
+    public async Task<HttpResponseMessage> SendAsAsync(string subject, HttpMethod method, string path, string? json = null)
+    {
+        using var request = new HttpRequestMessage(method, path);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TokenFor(subject));
+        if (json is not null)
+        {
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        }
+
+        return await client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
     public async Task<Guid> CreateGroupAsync(GroupActor actor, string name) => (await CreateGroupWithMemberAsync(actor, name)).GroupId;
@@ -97,12 +138,12 @@ internal sealed class GroupWorld
 
     public async Task<HttpResponseMessage> SendAsync(GroupActor actor, HttpMethod method, string path, string? json = null)
     {
-        using var request = new HttpRequestMessage(method, path);
         if (actor != GroupActor.Anonymous)
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TokenFor(subjects[actor]));
+            return await SendAsAsync(subjects[actor], method, path, json);
         }
 
+        using var request = new HttpRequestMessage(method, path);
         if (json is not null)
         {
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -111,7 +152,7 @@ internal sealed class GroupWorld
         return await client.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
-    /// <summary>Writes one member row, as part 3 will through the invite.</summary>
+    /// <summary>Writes one member row straight to the table, with exactly the role and status a test needs.</summary>
     public async Task InsertMemberAsync(GroupActor actor, string role, string status, Guid? groupId = null)
     {
         var member = await InsertRowAsync(groupId ?? GroupId, users[actor], role, status);
@@ -164,3 +205,6 @@ internal sealed class GroupWorld
         return body!["userId"]!.GetValue<Guid>();
     }
 }
+
+/// <summary>An invite as its creator sees it, once: the id and the token.</summary>
+internal sealed record CreatedInvite(Guid Id, string Token);
