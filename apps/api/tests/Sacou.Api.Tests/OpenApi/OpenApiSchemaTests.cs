@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,7 @@ using Xunit;
 namespace Sacou.Api.Tests.OpenApi;
 
 /// <summary>C3 to C6 and C8 to C10 (E4.2): the document describes the wire, field by field and error by error.</summary>
-public sealed class OpenApiSchemaTests
+public sealed partial class OpenApiSchemaTests
 {
     private const string ErrorsSuffix = "Errors";
     private const string ModuleAssemblyPattern = "Sacou.Modules.*.dll";
@@ -154,4 +155,27 @@ public sealed class OpenApiSchemaTests
         Assert.NotEmpty(requests);
         Assert.All(requests, reference => Assert.False((bool?)schemas[OpenApiNodes.SchemaId(reference)]!["additionalProperties"] ?? true, reference));
     }
+    /// <summary>The group prefix is read by the access filter, not bound by a handler: it is still a path parameter.</summary>
+    [Fact]
+    public async Task Every_route_segment_is_a_required_path_parameter()
+    {
+        var document = await ContractDocument.ParsedAsync();
+
+        foreach (var (method, path, operation) in OpenApiNodes.Operations(document))
+        {
+            var segments = RouteSegments().Matches(path).Select(match => match.Groups[1].Value).ToList();
+            var declared = (operation["parameters"]?.AsArray() ?? [])
+                .Select(parameter => parameter!.AsObject())
+                .Where(parameter => (string?)parameter["in"] == "path" && (bool?)parameter["required"] == true)
+                .Select(parameter => (string?)parameter["name"])
+                .ToList();
+            Assert.True(segments.SequenceEqual(segments.Intersect(declared)), $"{method} {path}");
+        }
+
+        var groupId = OpenApiNodes.Operations(document).First(operation => operation.Path == "/v1/groups/{groupId}").Node["parameters"]![0]!;
+        Assert.Equal("uuid", (string?)groupId["schema"]?["format"]);
+    }
+
+    [GeneratedRegex(@"\{([A-Za-z0-9_]+)\}", RegexOptions.CultureInvariant)]
+    private static partial Regex RouteSegments();
 }

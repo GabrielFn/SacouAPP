@@ -7,7 +7,10 @@ import type { CourtRoster } from "../features/court/ports/court-roster";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
+import type { NetworkStatus } from "./api/network-status";
+import type { SacouApi } from "./api/sacou-api";
 import type { FontLoader } from "./font-loader";
+import type { CacheSession } from "./query/cache-persister";
 
 export interface Services {
   readonly fontLoader: FontLoader;
@@ -22,6 +25,11 @@ export interface Services {
   readonly clock: Clock;
   /** Opens a second database for the Hermes benchmark, never the one of the matches. */
   readonly benchmarkRuntimeOpener: CourtRuntimeOpener;
+  /** The API, typed by the contract (E4.2). Its answers live only in the TanStack cache, never here. */
+  readonly sacouApi: SacouApi;
+  readonly networkStatus: NetworkStatus;
+  /** Sign-out clears the server cache, in memory and in `sacou-cache.db` (E4.3 calls it). */
+  readonly cacheSession: CacheSession;
 }
 
 const ServicesContext = createContext<Services | null>(null);

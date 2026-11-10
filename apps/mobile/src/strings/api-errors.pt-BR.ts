@@ -31,3 +31,22 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
 };
+
+/** What the person reads for the other kinds of `ApiError` (E4.2, D5). */
+export const apiErrorKindTexts = {
+  sessionExpired: "Sua sessão acabou. Entre de novo.",
+  notRegistered: "Estamos terminando de preparar sua conta. Tente de novo.",
+  tooLarge: "Esse conteúdo é grande demais.",
+  unavailable: "O Sacou está fora do ar por um instante. Tentando de novo.",
+  offline: "Sem conexão.",
+  unexpected: "Algo deu errado. Tente de novo daqui a pouco.",
+} as const;
+
+/** The strip over data kept from the last time, without a network (question 20, option 1). */
+export const offlineTexts = {
+  banner: (updated: string) => `Sem conexão · atualizado ${updated}`,
+  justNow: "agora há pouco",
+  minutesAgo: (minutes: number) => `há ${String(minutes)} min`,
+  hoursAgo: (hours: number) => `há ${String(hours)} h`,
+  daysAgo: (days: number) => (days === 1 ? "há 1 dia" : `há ${String(days)} dias`),
+} as const;

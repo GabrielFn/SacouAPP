@@ -1,6 +1,6 @@
 # ADR 0042 · Contrato OpenAPI, tipos gerados no app, cliente HTTP e cache persistido
 
-**Status:** aceito (10/11/2026) para a Parte 1 (contrato e portões). A Parte 2 (cliente, TanStack Query, cache persistido) acrescenta a sua seção aqui. **Tarefa:** E4.2. Plano: [`E4.2.md`](../../estado/tarefas/E4.2.md). Fecha o "sem OpenAPI nesta tarefa" do [ADR 0036](0036-verificacao-do-token-e-usuario.md) (D7) e usa os `Results<...>` tipados do [ADR 0039](0039-sacou-http-e-contratos-entre-modulos.md) (D1).
+**Status:** aceito (10/11/2026): Parte 1 (contrato e portões) e Parte 2 (cliente, TanStack Query, cache persistido). **Tarefa:** E4.2. Plano: [`E4.2.md`](../../estado/tarefas/E4.2.md). Fecha o "sem OpenAPI nesta tarefa" do [ADR 0036](0036-verificacao-do-token-e-usuario.md) (D7) e usa os `Results<...>` tipados do [ADR 0039](0039-sacou-http-e-contratos-entre-modulos.md) (D1).
 
 ## Contexto
 
@@ -32,11 +32,39 @@ Atalho local: `pnpm api:contract` (teste em modo de escrita + gerador). `pnpm ap
 
 **Guardas** (`Sacou.Api.Tests/OpenApi`): as 15 operações, em lista literal, com `operationId`; enums iguais à serialização e à lista literal; erros de regra em `ApiProblem` com `code` obrigatório; 401/503 com `Retry-After` em toda operação; 400 com corpo e 413 com limite; catálogo de códigos contado por reflexão independente; cada DTO serializado tem exatamente as propriedades do esquema; esquemas de requisição com `additionalProperties: false`; documento sem `servers`, nome de máquina, caminho de disco nem `ProjectId`; `Production` e `Staging` não servem o documento. `ProblemContractGuard`: endpoint que devolve `ProblemHttpResult`, ou rota com `{groupId}` (o filtro de grupo responde 403/404), sem nenhum `ProducesProblem` reprova, com casos plantados. **Desvio do plano:** o caso plantado fica em `Sacou.Api.Tests` (app mínimo, como o `GroupRouteGuardTests`), não em `Sacou.Architecture.Fixtures`; e a "ida e volta" (C9) serializa cada DTO com as opções da API em vez de reusar respostas dos testes de integração, para rodar sem Postgres.
 
+## Decisões (Parte 2)
+
+**D5 · Portas e adaptadores** (`frontend.md`, regra 3). Interfaces em `apps/mobile/src/services/api/` e `src/services/query/`; implementações em `src/adapters/`, cada uma com o seu falso.
+
+| Porta | Real | Falsa |
+|---|---|---|
+| `SacouApi` (15 métodos, tipos de `components["schemas"]`, `Promise<ApiResult<T>>`) | `http-sacou-api.ts` sobre `openapi-fetch` | `fake-sacou-api.ts` (respostas programáveis, registro das chamadas) |
+| `IdTokenProvider` | E4.3 (Firebase) | `fake-id-token-provider.ts`: token fixo só com `__DEV__`; no release, `null`, e o app não chama a API |
+| `HttpTransport` | `fetch-http-transport.ts` (o único `fetch` do app) | `fake-http-transport.ts` (fila de respostas) |
+| `NetworkStatus` | `netinfo-network-status.ts` (`@react-native-community/netinfo` `12.0.1`, a do `bundledNativeModules` do SDK 58) | `fake-network-status.ts` (interruptor) |
+| `KeyValueStore` | `sqlite-key-value-store.ts` + `expo-cache-store.ts` (`sacou-cache.db`) | `memory-key-value-store.ts` |
+
+O ESLint passa a reprovar o global `fetch` e o import `openapi-fetch` fora de `src/adapters/` (o NetInfo já caía na regra de `@react-native-community/`), com casos no `lint:regression`.
+
+**D6 · Erros e repetições.** `ApiError` é uma união (`problem`, `session-expired`, `not-registered`, `too-large`, `unavailable`, `offline`, `unexpected`) sem corpo, cabeçalho nem URL; o texto vem de `strings/api-errors.pt-BR.ts` pelo `code`. `api-policy.ts` é pura: classifica a resposta, lê o `Retry-After` (segundos ou data HTTP, teto de 60 s, 30 s sem cabeçalho) e decide a única repetição de cada tipo: depois de um 401, uma renovação forçada do token (compartilhada entre chamadas simultâneas) e uma nova tentativa; depois de um 403 `identity.user-not-registered`, `POST /v1/me` e uma nova tentativa. As duas valem também para mutação, porque saem antes de qualquer handler. O segundo 401 chama `onSessionExpired()`. Tempo limite de 15 s, que vira `offline`. Só `ApiFailure` (uma `Error` com o `ApiError`) é lançada, e só em `unwrap`, no `queryFn` e no `mutationFn`.
+
+**D7 · TanStack Query** (`@tanstack/react-query`, `-persist-client` e `query-async-storage-persister`, `5.107.1`, exatos). Consultas: até 2 retentativas, só em `offline`, `unavailable` e 5xx, com o `Retry-After` do 503 como espera; `gcTime` de 7 dias; `refetchOnReconnect`; foco pelo `AppState` e rede pelo `NetworkStatus`. Mutações: `retry: false`, `networkMode: "always"` (sem fila offline: a única é a da quadra) e `gcTime: 0` (o token do convite sai da memória quando a tela solta a mutação). Chaves em `query-keys.ts`; invalidação pura em `invalidation.ts`; 404 `groups.group-not-found` remove `["groups", id]` e invalida `["groups"]`.
+
+**D8 · Cache persistido.** `sacou-cache.db`, separado do `sacou.db` da quadra (ADR 0038), tabela `kv (key TEXT PRIMARY KEY, value TEXT NOT NULL) STRICT`, com `user_version` próprio: versão desconhecida recomeça vazia (o cache se refaz pela API). Entram só `["groups"]`, `["groups", id]` e `["groups", id, "members"]` com `status: "success"`; validade de 7 dias (`PERSISTED_CACHE_MAX_AGE_MS`, pergunta 20, opção 1); `buster` = versão do app + `apiContractHash`. `clearSession()` limpa o `QueryClient` e o arquivo; a gravação com o cache vazio vira remoção da linha, para a gravação atrasada do persistidor não deixar nada depois do logout. Sem criptografia (justificativa no modelo de ameaças, seção 12). A faixa "Sem conexão · atualizado há X" é derivada de `dataUpdatedAt` e da rede (`offlineBannerText`), desenhada nas telas das E4.4 e E4.5.
+
+**D9 · URL da API.** `EXPO_PUBLIC_API_URL`, validada por `parseApiBaseUrl`: `https:` sempre; `http:` só em `__DEV__` e só para a rede local. Sem a variável, o build não tem API e o cliente não envia nada (o APK de teste até o primeiro deploy); com valor errado, o app para no início com mensagem que cita a variável, nunca o valor.
+
+**Desvios do plano (Parte 2).** (1) O contrato não declarava o `{groupId}` do prefixo `MapGroup` (quem o lê é o filtro de acesso, não o handler), e o cliente tipado não conseguia preenchê-lo: `RouteParameterOperationTransformer` declara todo segmento da rota como parâmetro de caminho obrigatório (`guid` vira `uuid`), com teste; o `check:api-compat` passa a aceitar a declaração de um segmento que já estava no caminho. (2) Consulta com erro (mesmo `offline`) deixa de ser gravada até voltar a dar certo; com o `networkMode` padrão, consulta sem rede fica pausada e não erra, então isso só acontece quando o NetInfo diz que há rede e não há. (3) Os hooks são finos sobre `queryOptions` (`group-queries.ts`), testados sem React, porque o app ainda não tem biblioteca de teste de componente. (4) Erro de corpo que não é JSON numa resposta 2xx vira `unexpected` com `status: 0`.
+
+**APK novo:** o NetInfo é módulo nativo. O build de teste anterior não o tem; o roteiro da E4.3 inclui "modo avião abre a lista de grupos do cache".
+
 ## Alternativas descartadas
 
 - **Swashbuckle ou NSwag:** dependência de terceiros para o que a plataforma faz e lê dos `Results<...>`.
 - **Documento publicado em produção:** facilita varredura e ninguém de fora precisa dele.
 - **Escrever os tipos do app à mão:** é o que o aceite proíbe.
+- **AsyncStorage ou MMKV para o cache:** dependência nativa nova sem ganho; o `expo-sqlite` já está no app.
+- **Fila offline de mutações:** um `createGroup` pausado e perdido, ou rodado horas depois, é pior que a mensagem "Sem conexão".
 - **`git diff --exit-code` no `check:api-types`:** não pega arquivo novo não versionado e depende do estado do índice; a comparação em memória faz as duas coisas.
 
 ## Consequências

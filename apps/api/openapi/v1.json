@@ -434,6 +434,17 @@
           "GetGroupEndpoint"
         ],
         "operationId": "GetGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -505,6 +516,17 @@
           "RenameGroupEndpoint"
         ],
         "operationId": "RenameGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -598,6 +620,17 @@
           "ListMembersEndpoint"
         ],
         "operationId": "ListGroupMembers",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -675,6 +708,15 @@
         ],
         "operationId": "ChangeMemberRole",
         "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "memberId",
             "in": "path",
@@ -790,6 +832,15 @@
         "operationId": "ChangeMemberType",
         "parameters": [
           {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "memberId",
             "in": "path",
             "required": true,
@@ -894,6 +945,15 @@
         "operationId": "RemoveGroupMember",
         "parameters": [
           {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "memberId",
             "in": "path",
             "required": true,
@@ -989,6 +1049,17 @@
           "LeaveGroupEndpoint"
         ],
         "operationId": "LeaveGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -1065,6 +1136,17 @@
           "CreateInviteEndpoint"
         ],
         "operationId": "CreateGroupInvite",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -1146,6 +1228,17 @@
           "ListInvitesEndpoint"
         ],
         "operationId": "ListGroupInvites",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -1224,6 +1317,15 @@
         "operationId": "RevokeGroupInvite",
         "parameters": [
           {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "inviteId",
             "in": "path",
             "required": true,
@@ -1299,6 +1401,17 @@
           "GetGroupSettingsEndpoint"
         ],
         "operationId": "GetGroupSettings",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -1370,6 +1483,17 @@
           "UpdateGroupSettingsEndpoint"
         ],
         "operationId": "UpdateGroupSettings",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1463,6 +1587,17 @@
           "ApplyTemplateEndpoint"
         ],
         "operationId": "ApplyGroupSettingsTemplate",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1556,6 +1691,17 @@
           "ListSavedTemplatesEndpoint"
         ],
         "operationId": "ListGroupTemplates",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "403": {
             "description": "Forbidden",
@@ -1630,6 +1776,17 @@
           "SaveTemplateEndpoint"
         ],
         "operationId": "SaveGroupTemplate",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1734,6 +1891,15 @@
         ],
         "operationId": "DeleteGroupTemplate",
         "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "templateId",
             "in": "path",
