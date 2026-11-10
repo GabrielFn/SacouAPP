@@ -21,6 +21,11 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Convidado | A definir (E3.5) | Sempre avulso, nunca mensalista |
 | Ex-jogador | A definir (E3.16) | Como quem excluiu a conta aparece no histórico |
 | Admin / Co-admin / Placar (papéis) | `Admin` / `CoAdmin` / `Scorekeeper` | Valores de `GroupRole`; permissões em [grupos.md](grupos.md) |
+| Configuração do grupo ("Como jogamos") | `GroupSettings` | Documento completo; toda folha tem valor ([configuracao.md](configuracao.md), ADR 0041) |
+| Configuração da rodada ou da partida | `SettingsLayer` | Camada parcial: folha ausente ou `null` herda |
+| Configuração resolvida | `ResolvedSettings` | `values` (documento completo) e `sources` (de onde veio cada folha) |
+| Origem de um valor | `SettingsSource` | `group`, `round` ou `match`: o cinza "do grupo" e o ponto laranja "nesta rodada" |
+| Modelo (Pelada, Racha, Treino, Areia, Do zero) | `SettingsTemplate` | Cópia, não vínculo; nunca traz nem apaga os fatos do grupo |
 | Rodada | `Session` | |
 | Presença | `Attendance` | |
 | Lista de espera | `Waitlist` | |
