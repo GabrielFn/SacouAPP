@@ -60,10 +60,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      # Full history: check:api-compat reads apps/api/openapi/v1.json from origin/main.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up pnpm
@@ -125,6 +123,15 @@ jobs:
       # the API serves (ADR 0042, D3).
       - name: Check API types
         run: pnpm check:api-types
+
+      # Only the tip of main: check:api-compat reads apps/api/openapi/v1.json from origin/main. The token goes in
+      # a header of this one command (the checkout keeps no credentials) and the runner masks it in the log.
+      - name: Fetch main
+        env:
+          FETCH_TOKEN: ${{ github.token }}
+        run: |
+          basic=$(printf "x-access-token:%s" "$FETCH_TOKEN" | base64 -w0)
+          git -c http.extraheader="AUTHORIZATION: basic $basic" fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
 
       # /v1 stays compatible with main; BREAKING-V1 in the PR body (read from the event) is the exception.
       - name: Check API compatibility

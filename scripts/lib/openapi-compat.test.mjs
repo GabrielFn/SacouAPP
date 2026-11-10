@@ -7,12 +7,16 @@ import { findBreakingChanges, isBreakingAllowed } from "./openapi-compat.mjs";
 
 const CONTRACT = resolve(import.meta.dirname, "..", "..", "apps", "api", "openapi", "v1.json");
 
-/** A small /v1 with one route: a request with a required and an optional field, a response with an enum. */
+/**
+ * A small /v1 with one route: an optional query parameter, an optional body with a required and an optional
+ * field, and a response with an enum.
+ */
 function contract() {
   return {
     paths: {
       "/v1/groups": {
         post: {
+          parameters: [{ name: "page", in: "query", schema: { type: "integer" } }],
           requestBody: {
             content: { "application/json": { schema: { $ref: "#/components/schemas/Request" } } },
           },
@@ -40,6 +44,8 @@ function contract() {
             name: { type: "string" },
             note: { type: "string" },
             role: { $ref: "#/components/schemas/Role" },
+            nickname: { $ref: "#/components/schemas/Nullable" },
+            size: { $ref: "#/components/schemas/Size" },
           },
         },
         Response: {
@@ -49,8 +55,12 @@ function contract() {
             groupId: { type: "string" },
             role: { $ref: "#/components/schemas/Role" },
             members: { type: "array", items: { $ref: "#/components/schemas/Member" } },
+            count: { $ref: "#/components/schemas/Count" },
           },
         },
+        Nullable: { type: ["null", "string"] },
+        Size: { type: "integer" },
+        Count: { type: "number" },
         Member: { type: "object", properties: { memberId: { type: "string" } } },
         Role: { type: "string", enum: ["admin", "player"] },
         ApiProblem: { type: "object", properties: { code: { type: "string" } } },
@@ -79,6 +89,10 @@ function changed(...changes) {
 }
 
 const text = { type: "string" };
+const nullableText = { type: ["null", "string"] };
+const POST = [...GROUPS, "post"];
+const RESPONSE = [...SCHEMAS, "Response"];
+const REQUEST = [...SCHEMAS, "Request"];
 
 describe("check-openapi-compat (S3)", () => {
   test("the same contract is compatible", () => {
@@ -120,13 +134,88 @@ describe("check-openapi-compat (S3)", () => {
     ],
     ["a removed response enum value", [[...SCHEMAS, "Role", "enum"], ["admin"]]],
     ["a removed success response", [[...GROUPS, "post", "responses", "201"], REMOVE]],
+    ["a changed response type", [[...RESPONSE, "properties", "groupId"], { type: "integer" }]],
+    [
+      "a widened response type",
+      [[...RESPONSE, "properties", "groupId"], { type: ["string", "integer"] }],
+    ],
+    ["a response field made nullable", [[...RESPONSE, "properties", "groupId"], nullableText]],
+    [
+      "a response field made nullable by a reference alternative",
+      [
+        [...RESPONSE, "properties", "role"],
+        { oneOf: [{ type: "null" }, { $ref: "#/components/schemas/Role" }] },
+      ],
+    ],
+    ["a response field no longer required", [[...RESPONSE, "required"], ["role"]]],
+    ["a narrowed request type", [[...REQUEST, "properties", "name"], { type: "integer" }]],
+    ["a request field that no longer accepts null", [[...SCHEMAS, "Nullable"], { type: "string" }]],
+    [
+      "a new required parameter",
+      [
+        [...POST, "parameters"],
+        [
+          { name: "page", in: "query" },
+          { name: "city", in: "query", required: true },
+        ],
+      ],
+    ],
+    [
+      "an optional parameter made required",
+      [[...POST, "parameters"], [{ name: "page", in: "query", required: true }]],
+    ],
+    [
+      "a new required path-level parameter",
+      [[...GROUPS, "parameters"], [{ name: "id", in: "path", required: true }]],
+    ],
+    ["a request body made required", [[...POST, "requestBody", "required"], true]],
   ];
+
+  /** The message each case must produce, so a case never passes on another rule's message. */
+  const expectedMessage = {
+    "a removed route": "POST /v1/groups: route or method removed",
+    "a removed method": "POST /v1/groups: route or method removed",
+    "a removed request field": "request.note: request field removed",
+    "an optional request field made required": "request.note: request field became required",
+    "a new required request field": "request.city: new required request field",
+    "a removed response field": "201.groupId: response field removed",
+    "a removed field inside a response list": "201.members[].memberId: response field removed",
+    "a removed response enum value": '201.role: enum value "player" removed',
+    "a removed success response": "201: response removed",
+    "a changed response type": "201.groupId: response type changed from string to integer",
+    "a widened response type": "201.groupId: response type changed from string to string,integer",
+    "a response field made nullable": "201.groupId: response field became nullable",
+    "a response field made nullable by a reference alternative":
+      "201.role: response field became nullable",
+    "a response field no longer required": "201.groupId: response field no longer required",
+    "a narrowed request type": "request.name: request type changed from string to integer",
+    "a request field that no longer accepts null":
+      "request.nickname: request field no longer accepts null",
+    "a new required parameter": "parameter query city: new required parameter",
+    "an optional parameter made required": "parameter query page: became required",
+    "a new required path-level parameter": "parameter path id: new required parameter",
+    "a request body made required": "request: body became required",
+  };
 
   for (const [name, ...changes] of breaking) {
     test(`${name} breaks /v1`, () => {
-      assert.equal(changed(...changes).length > 0, true);
+      const messages = changed(...changes);
+      assert.ok(
+        messages.some((message) => message.endsWith(expectedMessage[name])),
+        messages.join("\n"),
+      );
     });
   }
+
+  test("a nullable reference is compared by the schema under it", () => {
+    assert.deepEqual(
+      changed([
+        [...RESPONSE, "properties", "role"],
+        { oneOf: [{ type: "null" }, { $ref: "#/components/schemas/Role" }] },
+      ]),
+      ["POST /v1/groups 201.role: response field became nullable"],
+    );
+  });
 
   const compatible = [
     ["a new optional request field", [[...SCHEMAS, "Request", "properties", "city"], text]],
@@ -140,6 +229,27 @@ describe("check-openapi-compat (S3)", () => {
       ],
     ],
     ["a changed error body", [[...SCHEMAS, "ApiProblem", "properties", "code"], REMOVE]],
+    ["a request field that accepts null", [[...REQUEST, "properties", "name"], nullableText]],
+    ["a request integer widened to number", [[...SCHEMAS, "Size"], { type: "number" }]],
+    ["a response number narrowed to integer", [[...SCHEMAS, "Count"], { type: "integer" }]],
+    [
+      "a response field made required",
+      [
+        [...RESPONSE, "required"],
+        ["groupId", "role", "members"],
+      ],
+    ],
+    [
+      "a new optional parameter",
+      [
+        [...POST, "parameters"],
+        [
+          { name: "page", in: "query" },
+          { name: "city", in: "query" },
+        ],
+      ],
+    ],
+    ["a removed optional parameter", [[...POST, "parameters"], []]],
   ];
 
   for (const [name, ...changes] of compatible) {
