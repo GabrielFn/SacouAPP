@@ -1,6 +1,7 @@
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
+using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -26,8 +27,10 @@ internal interface IGroupStore
     /// <summary>
     /// Counts the creator's active groups and inserts the group with its founder, in one transaction that
     /// holds a per-person lock, so two concurrent creations cannot both pass <paramref name="admission"/>.
+    /// The group's first settings go in the same transaction, so a group never exists without them.
     /// </summary>
-    Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, CancellationToken cancellationToken);
+    Task<Result> CreateAsync(
+        Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken);
 
     /// <summary>Active memberships only, in the order the person joined.</summary>
     Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken);

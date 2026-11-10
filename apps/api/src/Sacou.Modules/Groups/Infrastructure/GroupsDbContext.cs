@@ -14,11 +14,17 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
 
     public DbSet<InviteRow> Invites => Set<InviteRow>();
 
+    public DbSet<GroupSettingsRow> GroupSettings => Set<GroupSettingsRow>();
+
+    public DbSet<SavedTemplateRow> SavedTemplates => Set<SavedTemplateRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfiguration(new GroupConfiguration());
         modelBuilder.ApplyConfiguration(new MemberConfiguration());
         modelBuilder.ApplyConfiguration(new InviteConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupSettingsConfiguration());
+        modelBuilder.ApplyConfiguration(new SavedTemplateConfiguration());
     }
 }

@@ -11,7 +11,7 @@ using Sacou.Modules.Groups.Infrastructure;
 namespace Sacou.Modules.Groups.Infrastructure.Migrations
 {
     [DbContext(typeof(GroupsDbContext))]
-    internal partial class GroupsDbContextModelSnapshot : ModelSnapshot
+    partial class GroupsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -44,6 +44,55 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                     b.ToTable("groups", "groups", t =>
                         {
                             t.HasCheckConstraint("ck_groups_name_length", "char_length(name) BETWEEN 1 AND 240");
+                        });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GroupSettingsRow", b =>
+                {
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<Guid?>("SavedTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("saved_template_id");
+
+                    b.Property<short>("SchemaVersion")
+                        .HasColumnType("smallint")
+                        .HasColumnName("schema_version");
+
+                    b.Property<string>("Settings")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("settings");
+
+                    b.Property<string>("TemplateKey")
+                        .HasColumnType("text")
+                        .HasColumnName("template_key");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UpdatedByMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by_member_id");
+
+                    b.HasKey("GroupId")
+                        .HasName("pk_group_settings");
+
+                    b.HasIndex("UpdatedByMemberId")
+                        .HasDatabaseName("ix_group_settings_updated_by_member_id");
+
+                    b.ToTable("group_settings", "groups", t =>
+                        {
+                            t.HasCheckConstraint("ck_group_settings_document", "jsonb_typeof(settings) = 'object' AND octet_length(settings::text) <= 8192");
+
+                            t.HasCheckConstraint("ck_group_settings_one_template", "NOT (template_key IS NOT NULL AND saved_template_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_group_settings_schema_version", "schema_version = 1");
+
+                            t.HasCheckConstraint("ck_group_settings_template_key", "template_key IN ('pelada', 'racha-organizado', 'treino', 'areia-rei-da-quadra', 'do-zero')");
                         });
                 });
 
@@ -169,6 +218,74 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.SavedTemplateRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_member_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<short>("SchemaVersion")
+                        .HasColumnType("smallint")
+                        .HasColumnName("schema_version");
+
+                    b.Property<string>("Settings")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("settings");
+
+                    b.HasKey("Id")
+                        .HasName("pk_saved_templates");
+
+                    b.HasIndex("CreatedByMemberId")
+                        .HasDatabaseName("ix_saved_templates_created_by_member_id");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_saved_templates_group");
+
+                    b.ToTable("saved_templates", "groups", t =>
+                        {
+                            t.HasCheckConstraint("ck_saved_templates_document", "jsonb_typeof(settings) = 'object' AND octet_length(settings::text) <= 8192");
+
+                            t.HasCheckConstraint("ck_saved_templates_name_length", "char_length(name) BETWEEN 1 AND 160");
+
+                            t.HasCheckConstraint("ck_saved_templates_schema_version", "schema_version = 1");
+                        });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GroupSettingsRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.GroupRow", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_group_settings_groups");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithMany()
+                        .HasForeignKey("UpdatedByMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_group_settings_members");
+                });
+
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.InviteRow", b =>
                 {
                     b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
@@ -194,6 +311,23 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_members_groups");
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.SavedTemplateRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_saved_templates_members");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.GroupRow", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_saved_templates_groups");
                 });
 #pragma warning restore 612, 618
         }

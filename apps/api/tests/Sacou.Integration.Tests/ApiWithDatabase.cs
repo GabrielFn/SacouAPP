@@ -17,6 +17,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 {
     private const string KeyId = "integration-key";
 
+    /// <summary>One migrator at a time: every test class migrates the one shared database when it starts, and two runners applying a pending migration together fail on "already exists".</summary>
+    private static readonly SemaphoreSlim MigrationGate = new(1, 1);
+
     private readonly IntegrationDatabase database;
 
     public ApiWithDatabase(IntegrationDatabase database)
@@ -38,8 +41,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// <summary>Applies the Identity and then the Groups migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
-        await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
-        await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+        await MigrationGate.WaitAsync(TestContext.Current.CancellationToken);
+        try
+        {
+            await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            MigrationGate.Release();
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

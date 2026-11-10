@@ -4,7 +4,7 @@ using Sacou.Modules.Groups.Domain.Members;
 namespace Sacou.Modules.Groups.Domain.Permissions;
 
 /// <summary>
-/// The permission table, as data (ADR 0040). Gabriel's answer to question 16: the co-admin runs the day to
+/// The permission table, as data (ADR 0040). Gabriel's answer to question 16 (and 23, for the settings): the co-admin runs the day to
 /// day but never promotes, demotes or removes an admin or co-admin. Rules about the target member live in
 /// the aggregate.
 /// </summary>
@@ -20,6 +20,7 @@ internal static class RolePermissions
         GroupPermission.ChangeMemberType,
         GroupPermission.AssignBasicRole,
         GroupPermission.RemoveMember,
+        GroupPermission.ManageSettings,
     ]);
 
     private static readonly ImmutableHashSet<GroupPermission> Everything = DayToDay.Union(

@@ -32,6 +32,42 @@ internal static class SettingsParser
             : SettingsResult<SettingsLayer>.Failure(read.Error);
     }
 
+    /// <summary>
+    /// What a group admin sends to change the group: any leaf, each one set. Unlike a round layer, null does
+    /// not mean "inherit" here, because the group is complete: a null leaf or block is refused.
+    /// </summary>
+    public static SettingsResult<SettingsLayer> ParsePatch(SettingsCatalog catalog, SettingsNode node) =>
+        ParseComplete(catalog, node, (field, leaf) => leaf is null ? LeafReading.Absent : Checked(field, leaf));
+
+    /// <summary>A saved template as stored: only the leaves that are not facts of the group, each one set.</summary>
+    public static SettingsResult<SettingsLayer> ParseSnapshot(SettingsCatalog catalog, SettingsNode node) =>
+        ParseComplete(catalog, node, (field, leaf) => (field.IsGroupFact, leaf) switch
+        {
+            (_, null) => LeafReading.Absent,
+            (true, _) => LeafReading.Refused(SettingsErrors.NotAllowedAtLevel),
+            _ => Checked(field, leaf),
+        });
+
+    private static SettingsResult<SettingsLayer> ParseComplete(
+        SettingsCatalog catalog, SettingsNode node, Func<SettingsField, SettingsNode?, LeafReading> readLeaf)
+    {
+        if (FirstNullBlock(catalog, node) is { } block)
+        {
+            return SettingsResult<SettingsLayer>.Failure(new SettingsError(SettingsErrors.WrongType, block));
+        }
+
+        var read = SettingsTreeReader.Read(catalog, node, requiresBlocks: false, (field, leaf) => leaf is NullNode ? LeafReading.Refused(SettingsErrors.WrongType) : readLeaf(field, leaf));
+        return read.IsSuccess
+            ? SettingsResult<SettingsLayer>.Success(new SettingsLayer(read.Value))
+            : SettingsResult<SettingsLayer>.Failure(read.Error);
+    }
+
+    /// <summary>Only after the root is valid does the reader walk the blocks, so a wrong root keeps its own error.</summary>
+    private static string? FirstNullBlock(SettingsCatalog catalog, SettingsNode node) =>
+        node is ObjectNode root && root.Member(SettingsErrors.SchemaVersionKey) is NumberNode { Value: SettingsCatalog.SchemaVersion }
+            ? catalog.Blocks.FirstOrDefault(block => root.Member(block) is NullNode)
+            : null;
+
     private static LeafReading ReadDocumentLeaf(SettingsField field, SettingsNode? leaf) => leaf switch
     {
         null => LeafReading.Refused(SettingsErrors.MissingField),

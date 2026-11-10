@@ -1,6 +1,6 @@
 # ADR 0041 · Configuração herdada: catálogo, camadas, resolver e modelos
 
-**Status:** aceito (10/11/2026). **Tarefa:** E3.3 (parte 1: catálogo, resolver e golden; a parte 2 traz persistência e rotas). Plano em [`docs/estado/tarefas/E3.3.md`](../../estado/tarefas/E3.3.md). Detalha o SettingsResolver do [ADR 0011](0011-backend-patterns.md) e a configuração herdada do [ADR 0017](0017-group-settings-queue-bench.md). Segue o padrão de JSON único dos ADRs [0006](0006-formacoes-em-json.md) e [0025](0025-json-compartilhado-no-csharp.md). Regras de produto em [`docs/dominio/configuracao.md`](../../dominio/configuracao.md).
+**Status:** aceito (10/11/2026). **Tarefa:** E3.3 (parte 1: catálogo, resolver e golden; parte 2: persistência e rotas, no fim deste ADR). Plano em [`docs/estado/tarefas/E3.3.md`](../../estado/tarefas/E3.3.md). Detalha o SettingsResolver do [ADR 0011](0011-backend-patterns.md) e a configuração herdada do [ADR 0017](0017-group-settings-queue-bench.md). Segue o padrão de JSON único dos ADRs [0006](0006-formacoes-em-json.md) e [0025](0025-json-compartilhado-no-csharp.md). Regras de produto em [`docs/dominio/configuracao.md`](../../dominio/configuracao.md).
 
 ## Decisões
 
@@ -24,7 +24,7 @@
 
 **Texto livre (local).** A regra do `GroupName`, com vazio permitido e sem aparar: o texto precisa já estar aparado e em NFC (o app normaliza antes de enviar). As peças comuns saíram de `GroupName` para `Groups/Domain/DisplayText`. **Diferença em relação ao plano:** o limite de 80 conta pontos de código que não são marca, ZWJ nem tom de pele, e não grafemas. O motor não pode usar `Intl` (regra de lint do determinismo), e o Hermes não garante `Intl.Segmenter`; contar igual nos dois lados vale mais que contar uma família de emoji como um. O teto de pontos de código é 4 por caractere, como no `GroupName`. Limite aceito: as tabelas Unicode do JavaScript e do .NET podem divergir em caracteres novos (`Cn`).
 
-**Modelos.** Um modelo pronto guarda só os campos não-fato que diferem de "Do zero"; aplicar um modelo copia esses valores e põe "Do zero" nos demais não-fatos. Os fatos do grupo (dia, horário, local, vagas e valores em dinheiro) nunca vêm de modelo nem são apagados por ele. É cópia, não vínculo: mudar o catálogo não mexe em grupo nenhum. Os valores seguem o padrão adotado da pergunta 20 do plano.
+**Modelos.** Um modelo pronto guarda só os campos não-fato que diferem de "Do zero"; aplicar um modelo copia esses valores e põe "Do zero" nos demais não-fatos. Os fatos do grupo (dia, horário, local, vagas e valores em dinheiro) nunca vêm de modelo nem são apagados por ele. É cópia, não vínculo: mudar o catálogo não mexe em grupo nenhum. Os valores seguem o padrão adotado da pergunta 21 do plano.
 
 **Partida.** Aceita pontos, sets, tie-break, vantagem e sistema. `deriveMatchRules` gera o que a partida congela: `ScoringRules` (tie-break desligado vira `null`), sistema, modo de regra e `liberoAllowed` (só com líbero ligado e sistema 5x1 ou 6x2). Conflito entre níveis se resolve aqui, nunca recusando a mesclagem. O C# não porta essa função: o servidor recebe a cópia congelada (`decisoes.md:26`).
 
@@ -36,3 +36,19 @@
 - **Herança por bloco:** mudar só os pontos na rodada levaria o bloco inteiro do grupo junto, e o ponto laranja apareceria em tudo.
 - **`JsonSerializer` direto para o tipo:** ignora chave desconhecida e aceita tipo próximo; o parser estrito é a única porta, inclusive para o que vem do banco.
 - **Catálogo em C# escrito à mão:** duas fontes divergem; o golden pegaria, mas tarde.
+
+## Persistência e rotas (parte 2)
+
+**Tabelas** (módulo Groups, schema `groups`, migração `AddGroupSettings`). `group_settings`: uma linha por grupo, com o documento completo em `jsonb` e `schema_version` (`CHECK = 1`); `template_key` (uma das 5 chaves) ou `saved_template_id` (nunca os dois) só para o rótulo "Modelo usado"; `updated_by_member_id` (nenhuma resposta o devolve). `saved_templates`: `id` (UUID v7), `group_id`, nome (1 a 160 pontos de código no banco; 1 a 40 caracteres no domínio, pela regra do `GroupName`), o retrato dos campos que não são fato em `jsonb` e `created_by_member_id`. Os dois `jsonb` têm `CHECK` de objeto e de no máximo 8 KiB. `saved_template_id` não tem chave estrangeira: apagar o modelo limpa a referência na mesma transação.
+
+**Criar grupo** grava a linha de configuração na mesma transação, com o modelo pedido (`do-zero` sem `templateKey`). Chave desconhecida é 400 `groups.template-not-found` e **nenhum grupo é criado**. Um grupo sem linha (feito antes da E3.3) é lido como "Do zero" e a linha é criada na primeira escrita, só para quem pode gerir a configuração.
+
+**Escrita.** `PATCH`, aplicar modelo, salvar e apagar modelo passam por `IGroupSettingsStore.ExecuteInSettingsLockAsync`: transação que cria a linha se faltar, trava com `SELECT ... FOR UPDATE` a linha de `group_settings`, confere sob a trava que quem age ainda é membro ativo com `ManageSettings` (rebaixado depois do filtro recebe 403 e nada muda), carrega a configuração e os modelos do grupo, aplica a mudança e grava. O `PATCH` é mesclado sob a trava, folha a folha: dois admins em blocos diferentes não perdem a mudança um do outro. O teto de 20 modelos é contado sob a mesma trava. Modelo salvo é sempre buscado entre os modelos do grupo da rota (`group_id`, `id`): o id de outro grupo é 404 `groups.template-not-found`.
+
+**`PATCH` aceita uma camada parcial do grupo**, com `schemaVersion`: `SettingsParser.ParsePatch` aceita qualquer folha do catálogo e recusa `null` numa folha ou num bloco (o grupo é completo, não herda). O modelo salvo é um retrato (`SettingsParser.ParseSnapshot`): só folhas que não são fato, todas as que o catálogo tem; aplicá-lo copia esses valores e deixa os fatos do grupo. Aplicar um modelo pronto grava `template_key`; aplicar um salvo grava `saved_template_id`; editar uma folha depois não muda o rótulo.
+
+**Erros.** Tudo que o catálogo recusa, e JSON malformado (chave repetida dentro de `settings`, *surrogate* solto no local, fundo demais), sai como 400 `groups.settings-invalid`, sem o caminho. Chave repetida no corpo inteiro é recusada antes, pelo *binder* (400 sem código). A linha do banco que não passa no parser é erro de servidor: 500 genérico, e o log leva só o `groupId`.
+
+**Contrato** (`ProducesProblem` em cada rota nova, para o portão do OpenAPI): `GET /settings` (`ViewGroup`), `PATCH /settings`, `POST /settings/apply-template`, `GET /templates`, `POST /templates` e `DELETE /templates/{templateId}` (`ManageSettings`), mais `templateKey` em `POST /v1/groups`. Detalhes em [`docs/dominio/grupos.md`](../../dominio/grupos.md).
+
+**Desvios do plano.** O contrato `Groups.Contracts.IGroupSettingsReader` (D6) fica para a E3.4, que é quem o consome; a Parte 2 não o cria. O `GET` devolve `schemaVersion` no topo e também dentro de `settings`, para o documento poder voltar inteiro num `PATCH`. O corpo cabe nos 4 KB (conferido com o documento completo e o local de 80 caracteres). Sem evento (Outbox é da E3.11; `GroupSettingsChanged` levará só `GroupId` e `MemberId`).
