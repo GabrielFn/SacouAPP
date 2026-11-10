@@ -125,13 +125,16 @@ jobs:
         run: pnpm check:api-types
 
       # Only the tip of main: check:api-compat reads apps/api/openapi/v1.json from origin/main. The token goes in
-      # a header of this one command (the checkout keeps no credentials) and the runner masks it in the log.
+      # a header of this one command (the checkout keeps no credentials). The encoded header is masked in the log
+      # and goes through the environment, so it never shows in the process arguments.
       - name: Fetch main
         env:
           FETCH_TOKEN: ${{ github.token }}
         run: |
           basic=$(printf "x-access-token:%s" "$FETCH_TOKEN" | base64 -w0)
-          git -c http.extraheader="AUTHORIZATION: basic $basic" fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          echo "::add-mask::$basic"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $basic" \
+            git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
 
       # /v1 stays compatible with main; BREAKING-V1 in the PR body (read from the event) is the exception.
       - name: Check API compatibility
