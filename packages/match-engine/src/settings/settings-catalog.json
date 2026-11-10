@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "fields": [
+    {
+      "path": "attendance.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "attendance.capacityLimited",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "attendance.capacity",
+      "type": "integer",
+      "min": 2,
+      "max": 300,
+      "default": 12,
+      "levels": ["group", "round"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "attendance.waitlistEnabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "attendance.regularsEnabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "attendance.dropInWindowEnabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "attendance.dropInOpensHoursBefore",
+      "type": "integer",
+      "min": 1,
+      "max": 168,
+      "default": 24,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "schedule.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "schedule.weekday",
+      "type": "integer",
+      "min": 1,
+      "max": 7,
+      "default": 2,
+      "levels": ["group"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "schedule.startTime",
+      "type": "time",
+      "default": "20:00",
+      "levels": ["group"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "schedule.venue",
+      "type": "text",
+      "maxLength": 80,
+      "default": "",
+      "levels": ["group"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "format.modality",
+      "type": "choice",
+      "values": ["indoor-6x6", "beach-4x4", "beach-2x2"],
+      "default": "indoor-6x6",
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.bestOf",
+      "type": "choice",
+      "values": [1, 3, 5],
+      "default": 1,
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.pointsPerSet",
+      "type": "integer",
+      "min": 1,
+      "max": 99,
+      "default": 25,
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.tieBreakEnabled",
+      "type": "boolean",
+      "default": true,
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.tieBreakPoints",
+      "type": "integer",
+      "min": 1,
+      "max": 99,
+      "default": 15,
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "scoring.winMargin",
+      "type": "choice",
+      "values": [1, 2],
+      "default": 2,
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "queue.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "queue.exitCriterion",
+      "type": "choice",
+      "values": ["consecutive-matches", "arrival-order", "draw", "manual"],
+      "default": "consecutive-matches",
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "rotation.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "rotation.system",
+      "type": "choice",
+      "values": ["livre", "5x1", "4x2", "6x2"],
+      "default": "livre",
+      "levels": ["group", "round", "match"],
+      "groupFact": false,
+      "pro": false,
+      "proValues": ["5x1", "4x2", "6x2"]
+    },
+    {
+      "path": "rotation.ruleMode",
+      "type": "choice",
+      "values": ["fivb-2025-28", "classic"],
+      "default": "fivb-2025-28",
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "rotation.liberoEnabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "draw.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "draw.balanceByLevel",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "mvp.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "mvp.byStats",
+      "type": "boolean",
+      "default": true,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "mvp.voting",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "mvp.individualPoints",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": true
+    },
+    {
+      "path": "money.enabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "money.dropInFeeCents",
+      "type": "integer",
+      "min": 0,
+      "max": 100000,
+      "default": 0,
+      "levels": ["group", "round"],
+      "groupFact": true,
+      "pro": false
+    },
+    {
+      "path": "money.monthlyFeeCents",
+      "type": "integer",
+      "min": 0,
+      "max": 100000,
+      "default": 0,
+      "levels": ["group"],
+      "groupFact": true,
+      "pro": false
+    }
+  ],
+  "templates": {
+    "pelada": {
+      "pro": false,
+      "values": {
+        "attendance.enabled": true,
+        "scoring.enabled": true,
+        "queue.enabled": true,
+        "queue.exitCriterion": "consecutive-matches",
+        "rotation.enabled": true,
+        "rotation.system": "livre",
+        "draw.enabled": true,
+        "mvp.enabled": true,
+        "mvp.byStats": true
+      }
+    },
+    "racha-organizado": {
+      "pro": false,
+      "values": {
+        "attendance.enabled": true,
+        "attendance.capacityLimited": true,
+        "attendance.waitlistEnabled": true,
+        "attendance.regularsEnabled": true,
+        "attendance.dropInWindowEnabled": true,
+        "attendance.dropInOpensHoursBefore": 24,
+        "scoring.enabled": true,
+        "scoring.tieBreakEnabled": true,
+        "scoring.tieBreakPoints": 15,
+        "queue.enabled": true,
+        "queue.exitCriterion": "consecutive-matches",
+        "rotation.enabled": true,
+        "rotation.system": "livre",
+        "draw.enabled": true,
+        "draw.balanceByLevel": true,
+        "mvp.enabled": true,
+        "mvp.byStats": true,
+        "money.enabled": true
+      }
+    },
+    "treino": {
+      "pro": true,
+      "values": {
+        "attendance.enabled": true,
+        "scoring.enabled": true,
+        "rotation.enabled": true,
+        "rotation.system": "5x1"
+      }
+    },
+    "areia-rei-da-quadra": {
+      "pro": false,
+      "values": {
+        "attendance.enabled": true,
+        "format.modality": "beach-2x2",
+        "scoring.enabled": true,
+        "scoring.pointsPerSet": 21,
+        "queue.enabled": true,
+        "queue.exitCriterion": "arrival-order",
+        "draw.enabled": true,
+        "mvp.enabled": true,
+        "mvp.byStats": true
+      }
+    },
+    "do-zero": {
+      "pro": false,
+      "values": {}
+    }
+  }
+}

@@ -5,6 +5,7 @@ export {
   ROTATION_KEYS,
   ROTATION_SLOTS,
 } from "./constants.data.js";
+export { deepFreeze } from "./deep-freeze.js";
 export { FORMATION_CATALOG, getFormation } from "./get-formation.js";
 export { parseFormationCatalog } from "./parse-catalog.js";
 export type {

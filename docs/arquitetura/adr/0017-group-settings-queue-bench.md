@@ -6,7 +6,7 @@
 
 ## Decisão
 
-**Configuração herdada.** Grupo → rodada → partida, tudo opcional: cobrança, limite de vagas, sets, pontos, tie-break, placar, rotação, fila e sorteio. Implementação no SettingsResolver ([ADR 0011](0011-backend-patterns.md)). Modelos: Pelada descontraída, Racha organizado, Treino, Areia rei da quadra e Do zero. Padrão de partida: 1 set, com opção de mudar.
+**Configuração herdada.** Grupo → rodada → partida, tudo opcional: cobrança, limite de vagas, sets, pontos, tie-break, placar, rotação, fila e sorteio. Implementação no SettingsResolver ([ADR 0011](0011-backend-patterns.md)); catálogo, camadas, modelos e golden no [ADR 0041](0041-configuracao-herdada-e-modelos.md). Modelos: Pelada descontraída, Racha organizado, Treino, Areia rei da quadra e Do zero. Padrão de partida: 1 set, com opção de mudar.
 
 **Membros.** Mensalista ou avulso. Convidado é sempre avulso, nunca mensalista. Papéis Admin, Co-admin e Placar.
 

@@ -25,7 +25,7 @@ Monólito modular em .NET 10, com 7 módulos: Identity, Groups, Sessions, Matche
 | Módulo | Responsabilidade | Modelo |
 |---|---|---|
 | Identity | Usuário, perfil, posições, nível | CRUD |
-| Groups | Membros, papéis, mensalistas, configuração padrão, plano. Schema `groups` (grupos, membros, convites) e autorização por grupo desde a E3.2 ([ADR 0040](adr/0040-grupos-membros-papeis-e-autorizacao.md)) | Agregado Group |
+| Groups | Membros, papéis, mensalistas, configuração padrão, plano. Schema `groups` (grupos, membros, convites) e autorização por grupo desde a E3.2 ([ADR 0040](adr/0040-grupos-membros-papeis-e-autorizacao.md)); catálogo e resolver da configuração no domínio desde a E3.3 ([ADR 0041](adr/0041-configuracao-herdada-e-modelos.md)) | Agregado Group |
 | Sessions | Presença, vagas, lista de espera, sorteio | Agregado Session |
 | Matches | Placar, fila, rotação, banco | Stream `CourtSession` com event sourcing ([ADR 0009](adr/0009-court-session-event-sourcing.md)) |
 | Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
@@ -119,14 +119,15 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0038](adr/0038-log-local-da-quadra.md) | Log local da quadra: SQLite, esquema, `deviceId`, simular antes de gravar |
 | [0039](adr/0039-sacou-http-e-contratos-entre-modulos.md) | `Result → ProblemDetails` no projeto `Sacou.Http`, regras de JSON e primeiro contrato entre módulos (`Identity.Contracts.ICurrentUser`) |
 | [0040](adr/0040-grupos-membros-papeis-e-autorizacao.md) | Grupos: `MemberId`, papéis, permissões, autorização por grupo, convite e concorrência |
+| [0041](adr/0041-configuracao-herdada-e-modelos.md) | Configuração herdada: catálogo JSON único, camadas parciais, resolver por folha, modelos e golden TS/C# |
 
 ## Matriz: `decisoes.md` → ADR
 
 | Linha | Decisão | ADR |
 |---|---|---|
 | 7 | Nome, app nativo e página da rodada | 0008 |
-| 8 | Configuração herdada e modelos | 0017 |
-| 9 | Padrão de partida | 0017 |
+| 8 | Configuração herdada e modelos | 0017, 0041 |
+| 9 | Padrão de partida | 0017, 0041 |
 | 10 | Membros e papéis | 0017, 0040 |
 | 11 | Fila e saída parcial | 0017, 0029 |
 | 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028, 0030 |

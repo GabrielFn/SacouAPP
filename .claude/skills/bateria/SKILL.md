@@ -13,7 +13,7 @@ Regra 5 da "Economia de tokens" do `CLAUDE.md`: rode depois do **último commit*
 export PATH="/d/tools/dotnet:$PATH" NUGET_PACKAGES=/d/tools/nuget-packages TEMP=/d/tmp TMP=/d/tmp
 ```
 
-Em worktree do app que já tem `node_modules`, não rode `pnpm install` sem `--frozen-lockfile --store-dir /d/tmp/pnpm-store-<pasta>`: um install sem store fixo já travou num prompt e apagou o `node_modules`.
+Em worktree que já tem `node_modules`, não rode `pnpm install` sem `--frozen-lockfile --store-dir /d/tmp/pnpm-store-<pasta>`, e **não rode `pnpm --offline <script>`**: os dois já dispararam um install que travou num prompt e apagou o `node_modules`. Se o `pnpm <script>` tentar instalar, rode a ferramenta direto: `node scripts/<script>.mjs`, `node_modules/.bin/vitest run`, `node_modules/.bin/eslint`, `node_modules/.bin/tsc`.
 
 ## `api` (C#)
 

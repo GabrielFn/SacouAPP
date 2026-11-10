@@ -11,6 +11,9 @@
 9. Tema Sol/Noite (E4.1, 07/11/2026): só no modo quadra, como no canvas, ou modo escuro no app todo? **Recomendação e padrão adotado até a resposta: só na quadra.** Fácil de mudar: os temas usam os mesmos papéis.
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
 20. App fora da quadra sem internet (E4.2, 10/11/2026): (1) mostra os dados guardados de até 7 dias, com a faixa "Sem conexão · atualizado há X"; (2) o mesmo com 24 h; (3) tela "Sem conexão". **Recomendação e padrão adotado: opção 1** (uma constante e um texto em `strings/`).
+21. Modelos prontos (E3.3, 10/11/2026): o que cada um (Pelada, Racha organizado, Treino, Areia rei da quadra, Do zero) liga. **Padrão adotado:** a tabela do D4 em `docs/estado/tarefas/E3.3.md`. Fácil de mudar: é um JSON.
+22. Modelo salvo (E3.3, 10/11/2026): "Aplicar modelo" em "Como jogamos" troca os padrões do grupo, sem mexer em dia, horário, local, vagas e valores. **Recomendação e padrão adotado.**
+23. Co-admin edita "Como jogamos" (E3.3, 10/11/2026)? **Recomendação e padrão adotado: sim**, coerente com a resposta 16.
 
 ## Respondidas
 - **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
