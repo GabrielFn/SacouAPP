@@ -23,6 +23,7 @@ export const nightAlpha = {
   chip: 0.18,
   field: 0.25,
   dashed: 0.4,
+  badge: 0.07,
 } as const;
 
 export const courtPalette = {
@@ -78,6 +79,8 @@ export const radii = {
   card: 18,
   pill: 22,
   statusPill: 15,
+  tabPill: 15,
+  roleBadge: 13,
 } as const;
 
 export const borderWidths = { thin: 1.5, thick: 2 } as const;
@@ -95,13 +98,30 @@ export const sizes = {
   logo: 26,
   plusIcon: 22,
   checkIcon: 16,
+  // Navigation tabs (Grupos.dc.html, bottom bar): the pill behind the active icon, and the touch
+  // target of each tab, taller than the floor because the label sits under the icon.
+  tabPillWidth: 56,
+  tabPillHeight: 30,
+  tabItem: 56,
+  tabIcon: 22,
+  backIcon: 24,
+  // Group card (Grupos.dc.html .main, .foot, .role) and the round list card of the home.
+  groupCardMin: 128,
+  homeCardMin: 112,
+  cardFooter: 46,
+  roleBadge: 26,
 } as const;
+
+/** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */
+export const dayStripBasis = "22%";
 
 export const interactiveHeights = [
   sizes.primaryButton,
   sizes.iconButton,
   sizes.field,
   sizes.chip,
+  sizes.tabItem,
+  sizes.cardFooter,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.
