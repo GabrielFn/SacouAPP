@@ -17,7 +17,5 @@
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Sacou.Modules.Sessions.Tests" />
-        <!-- The route guard test reads the markers of every module's routes. -->
-        <InternalsVisibleTo Include="Sacou.Modules.Groups.Tests" />
     </ItemGroup>
 </Project>

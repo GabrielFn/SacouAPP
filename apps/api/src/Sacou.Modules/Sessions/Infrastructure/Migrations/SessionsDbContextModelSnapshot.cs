@@ -11,7 +11,7 @@ using Sacou.Modules.Sessions.Infrastructure;
 namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 {
     [DbContext(typeof(SessionsDbContext))]
-    partial class SessionsDbContextModelSnapshot : ModelSnapshot
+    internal partial class SessionsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

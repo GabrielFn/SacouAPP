@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Modules.Groups.Access;
-using Sacou.Modules.Sessions.Access;
 
 namespace Sacou.Modules.Groups.Tests.Access;
 
@@ -12,6 +11,10 @@ namespace Sacou.Modules.Groups.Tests.Access;
 internal static class GroupRouteGuard
 {
     private const string AnyMethod = "*";
+
+    /// <summary>The Sessions' markers are internal to that module, so the guard recognizes them by type name.</summary>
+    private const string RoundFilterMarker = "RoundAccessFilterMetadata";
+    private const string RoundCapabilityMarker = "RoundCapabilityMetadata";
 
     /// <summary>Routes without a group id, written by hand. A new one means a reviewed change here.</summary>
     public static readonly IReadOnlySet<string> RoutesOutsideTheGroupFilter = new HashSet<string>(StringComparer.Ordinal)
@@ -36,7 +39,7 @@ internal static class GroupRouteGuard
     public static IReadOnlyList<string> Violations(IEnumerable<Endpoint> endpoints, bool development = false) =>
         [.. endpoints.OfType<RouteEndpoint>().SelectMany(endpoint => Violations(endpoint, RoutesOutsideTheGroupFilterIn(development)))];
 
-    private static IEnumerable<string> Violations(RouteEndpoint endpoint, IReadOnlySet<string> outsideTheFilter)
+    private static string[] Violations(RouteEndpoint endpoint, IReadOnlySet<string> outsideTheFilter)
     {
         var route = Describe(endpoint);
         if (endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is null)
@@ -45,13 +48,13 @@ internal static class GroupRouteGuard
         }
 
         var groupFilter = endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null;
-        var roundFilter = endpoint.Metadata.GetMetadata<RoundAccessFilterMetadata>() is not null;
+        var roundFilter = endpoint.Metadata.Any(item => item.GetType().Name == RoundFilterMarker);
         return (groupFilter, roundFilter) switch
         {
             (true, true) => [$"{route}: has both access filters"],
             (false, false) => [$"{route}: without the group access filter"],
             (true, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
-            (false, true) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<RoundCapabilityMetadata>().Count, "capabilities"),
+            (false, true) => ExactlyOne(route, endpoint.Metadata.Count(item => item.GetType().Name == RoundCapabilityMarker), "capabilities"),
         };
     }
 

@@ -50,6 +50,9 @@ public sealed class AttendanceTransitionTableTests
         }
 
         Assert.Equal(Enum.Parse<AttendanceStatus>(expected), StatusOf(result.Value.Round, 1));
+        // A new order number is spent only when the member's row is new or comes back: never for "no change" or a plain decline.
+        var spends = (origin is "None" or "NotGoing" && answer == "Going") || (origin == "None" && answer == "NotGoing");
+        Assert.Equal(round.NextSequence + (spends ? 1 : 0), result.Value.Round.NextSequence);
     }
 
     [Fact]

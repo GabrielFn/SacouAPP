@@ -20,6 +20,7 @@ public sealed class AttendancePropertyTests
         var rules = Rules(capacity: Capacity);
         var round = NewRound();
         var lastNext = round.NextSequence;
+        var queue = new List<Sacou.Shared.Members.MemberId>();
 
         for (var step = 0; step < Answers; step++)
         {
@@ -29,9 +30,12 @@ public sealed class AttendancePropertyTests
             round = result.IsSuccess ? result.Value.Round : round;
 
             Assert.InRange(round.SpotsHeld, 0, Capacity);
-            Assert.True(round.NextSequence >= lastNext);
+            // The counter rises by exactly the number of new order numbers handed out in this step.
+            var spent = round.Attendances.Count(a => a.Sequence >= lastNext);
+            Assert.Equal(lastNext + spent, round.NextSequence);
             lastNext = round.NextSequence;
             AssertLineIsSound(round);
+            queue = AssertWaitlistFollowsArrival(round, queue);
         }
     }
 
@@ -39,8 +43,20 @@ public sealed class AttendancePropertyTests
     {
         var sequences = round.Attendances.Select(a => a.Sequence).ToList();
         Assert.Equal(sequences.Count, sequences.Distinct().Count());
-        Assert.True(round.Waitlist.Select(a => a.Sequence).SequenceEqual(round.Waitlist.Select(a => a.Sequence).Order()));
         Assert.True(round.Waitlist.IsEmpty || round.SpotsHeld == Capacity, "A free spot with someone waiting.");
         Assert.All(round.Attendances, a => Assert.Equal(a.Status == AttendanceStatus.Promoted, a.PromotedAt is not null));
+    }
+
+    /// <summary>
+    /// An oracle kept apart from <c>Round.Waitlist</c>: whoever starts waiting joins the end of this list and whoever
+    /// stops waiting leaves it, so the line must equal it exactly.
+    /// </summary>
+    private static List<Sacou.Shared.Members.MemberId> AssertWaitlistFollowsArrival(Round round, List<Sacou.Shared.Members.MemberId> queue)
+    {
+        var waiting = round.Attendances.Where(a => a.IsWaiting).Select(a => a.Member).ToHashSet();
+        var next = queue.Where(waiting.Contains).ToList();
+        next.AddRange(round.Attendances.Where(a => a.IsWaiting && !next.Contains(a.Member)).OrderBy(a => a.Sequence).Select(a => a.Member));
+        Assert.Equal(next, round.Waitlist.Select(a => a.Member));
+        return next;
     }
 }

@@ -13,7 +13,7 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 {
     [DbContext(typeof(SessionsDbContext))]
     [Migration("20261110114553_CreateRounds")]
-    partial class CreateRounds
+    internal partial class CreateRounds
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
