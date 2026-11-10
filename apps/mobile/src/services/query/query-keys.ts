@@ -8,6 +8,8 @@ export const queryKeys = {
   group: (groupId: string) => ["groups", groupId] as const,
   members: (groupId: string) => ["groups", groupId, "members"] as const,
   invites: (groupId: string) => ["groups", groupId, "invites"] as const,
+  settings: (groupId: string) => ["groups", groupId, "settings"] as const,
+  templates: (groupId: string) => ["groups", groupId, "templates"] as const,
 };
 
 export type SacouQueryKey = readonly unknown[];

@@ -8,6 +8,11 @@ export type MutationEvent =
   | { readonly type: "createGroup" | "acceptInvite" }
   | { readonly type: "renameGroup" | "leaveGroup"; readonly groupId: string }
   | { readonly type: "createInvite" | "revokeInvite"; readonly groupId: string }
+  /** The server answered with the whole settings document: it replaces the cached one (ADR 0045). */
+  | { readonly type: "settingsReplaced"; readonly groupId: string; readonly view: unknown }
+  | { readonly type: "templatesChanged"; readonly groupId: string }
+  /** A change of the settings was refused for lack of permission: the role is stale. */
+  | { readonly type: "settingsForbidden"; readonly groupId: string }
   | {
       readonly type: "changeMemberRole" | "changeMemberType" | "removeMember";
       readonly groupId: string;
@@ -15,10 +20,9 @@ export type MutationEvent =
       readonly targetIsMe: boolean;
     };
 
-export interface CacheEffect {
-  readonly action: "invalidate" | "remove";
-  readonly key: SacouQueryKey;
-}
+export type CacheEffect =
+  | { readonly action: "invalidate" | "remove"; readonly key: SacouQueryKey }
+  | { readonly action: "set"; readonly key: SacouQueryKey; readonly data: unknown };
 
 const invalidate = (key: SacouQueryKey): CacheEffect => ({ action: "invalidate", key });
 const remove = (key: SacouQueryKey): CacheEffect => ({ action: "remove", key });
@@ -48,6 +52,15 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "createInvite":
     case "revokeInvite":
       return [invalidate(queryKeys.invites(event.groupId))];
+    case "settingsReplaced":
+      return [{ action: "set", key: queryKeys.settings(event.groupId), data: event.view }];
+    case "templatesChanged":
+      return [invalidate(queryKeys.templates(event.groupId))];
+    case "settingsForbidden":
+      return [
+        invalidate(queryKeys.group(event.groupId)),
+        invalidate(queryKeys.settings(event.groupId)),
+      ];
   }
 }
 
@@ -57,6 +70,21 @@ const CONFLICT = 409;
 export function isConflict(error: unknown): boolean {
   const apiError = apiErrorOf(error);
   return apiError?.kind === "problem" && apiError.status === CONFLICT;
+}
+
+/** What a 409 makes stale, by the code of the rule it broke (ADR 0045, D5). */
+const CONFLICT_STALE: Readonly<Record<string, (groupId: string) => SacouQueryKey>> = {
+  "groups.last-admin": queryKeys.members,
+  "groups.invite-limit": queryKeys.invites,
+  "groups.template-limit": queryKeys.templates,
+};
+
+/** The queries of the group a 409 says are old; a 409 with another code touches nothing. */
+export function conflictEffects(groupId: string, error: unknown): readonly CacheEffect[] {
+  const apiError = apiErrorOf(error);
+  if (!isConflict(error) || apiError?.kind !== "problem") return [];
+  const stale = CONFLICT_STALE[apiError.code];
+  return stale === undefined ? [] : [invalidate(stale(groupId))];
 }
 
 /**
@@ -73,8 +101,9 @@ export function groupGoneEffects(key: SacouQueryKey, error: unknown): readonly C
 }
 
 export function applyCacheEffects(client: QueryClient, effects: readonly CacheEffect[]): void {
-  effects.forEach(({ action, key }) => {
-    if (action === "remove") client.removeQueries({ queryKey: key });
-    else void client.invalidateQueries({ queryKey: key });
+  effects.forEach((effect) => {
+    if (effect.action === "set") client.setQueryData(effect.key, effect.data);
+    else if (effect.action === "remove") client.removeQueries({ queryKey: effect.key });
+    else void client.invalidateQueries({ queryKey: effect.key });
   });
 }

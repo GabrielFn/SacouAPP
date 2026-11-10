@@ -9,11 +9,15 @@ const DAYS_KEPT = 7;
 export const PERSISTED_CACHE_MAX_AGE_MS = DAYS_KEPT * MS_PER_DAY;
 
 const GROUP_KEY_LENGTH = 2;
-const MEMBERS_KEY_LENGTH = 3;
+const CHILD_KEY_LENGTH = 3;
+
+/** What is kept under a group: the members and the settings (the venue is free text, ADR 0045). */
+const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings"]);
 
 /**
- * The allow list of the persisted cache (D6): the groups, a group and its members. The default is not to
- * persist: `["me"]` (the internal user ID), the invites (admin only) and anything unknown stay out.
+ * The allow list of the persisted cache (D6): the groups, a group, its members and its settings. The
+ * default is not to persist: `["me"]` (the internal user ID), the invites and the saved templates (admin
+ * only) and anything unknown stay out.
  */
 export function isPersistedKey(key: SacouQueryKey): boolean {
   const [root, groupId, child] = key;
@@ -21,7 +25,8 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
   if (key.length === 1) return true;
   if (typeof groupId !== "string") return false;
   return (
-    key.length === GROUP_KEY_LENGTH || (key.length === MEMBERS_KEY_LENGTH && child === "members")
+    key.length === GROUP_KEY_LENGTH ||
+    (key.length === CHILD_KEY_LENGTH && PERSISTED_CHILDREN.has(child))
   );
 }
 

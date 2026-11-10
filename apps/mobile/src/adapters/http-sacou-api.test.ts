@@ -19,6 +19,7 @@ import { createHttpSacouApi } from "./http-sacou-api";
 const BASE = "https://api.example";
 const GROUP = "8a4c2f0e-1111-4c3b-9d2e-000000000001";
 const MEMBER = "8a4c2f0e-2222-4c3b-9d2e-000000000002";
+const TEMPLATE = "8a4c2f0e-4444-4c3b-9d2e-000000000004";
 const INVITE = "8a4c2f0e-3333-4c3b-9d2e-000000000003";
 const INVITE_TOKEN = "invite-token-Qw7";
 const NOW = Date.parse("2026-11-10T12:00:00Z");
@@ -61,11 +62,67 @@ const OPERATIONS: readonly Operation[] = [
   ["listMyGroups", (a) => a.listMyGroups(), "GET", "/v1/groups", "/v1/groups", null],
   [
     "createGroup",
-    (a) => a.createGroup("Racha"),
+    (a) => a.createGroup("Racha", "racha-organizado"),
     "POST",
     "/v1/groups",
     "/v1/groups",
-    { name: "Racha" },
+    { name: "Racha", templateKey: "racha-organizado" },
+  ],
+  [
+    "getGroupSettings",
+    (a) => a.getGroupSettings(GROUP),
+    "GET",
+    "/v1/groups/{groupId}/settings",
+    `/v1/groups/${GROUP}/settings`,
+    null,
+  ],
+  [
+    "updateGroupSettings",
+    (a) => a.updateGroupSettings(GROUP, { schemaVersion: 1, queue: { enabled: false } }),
+    "PATCH",
+    "/v1/groups/{groupId}/settings",
+    `/v1/groups/${GROUP}/settings`,
+    { settings: { schemaVersion: 1, queue: { enabled: false } } },
+  ],
+  [
+    "applyTemplate",
+    (a) => a.applyTemplate(GROUP, { kind: "ready", key: "treino" }),
+    "POST",
+    "/v1/groups/{groupId}/settings/apply-template",
+    `/v1/groups/${GROUP}/settings/apply-template`,
+    { templateKey: "treino", savedTemplateId: null },
+  ],
+  [
+    "applyTemplate (saved)",
+    (a) => a.applyTemplate(GROUP, { kind: "saved", templateId: TEMPLATE }),
+    "POST",
+    "/v1/groups/{groupId}/settings/apply-template",
+    `/v1/groups/${GROUP}/settings/apply-template`,
+    { templateKey: null, savedTemplateId: TEMPLATE },
+  ],
+  [
+    "listTemplates",
+    (a) => a.listTemplates(GROUP),
+    "GET",
+    "/v1/groups/{groupId}/templates",
+    `/v1/groups/${GROUP}/templates`,
+    null,
+  ],
+  [
+    "saveTemplate",
+    (a) => a.saveTemplate(GROUP, "Meu racha"),
+    "POST",
+    "/v1/groups/{groupId}/templates",
+    `/v1/groups/${GROUP}/templates`,
+    { name: "Meu racha" },
+  ],
+  [
+    "deleteTemplate",
+    (a) => a.deleteTemplate(GROUP, TEMPLATE),
+    "DELETE",
+    "/v1/groups/{groupId}/templates/{templateId}",
+    `/v1/groups/${GROUP}/templates/${TEMPLATE}`,
+    null,
   ],
   [
     "getGroup",
@@ -170,8 +227,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 15 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name)).size).toBe(15);
+  test("the table covers the 21 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(21);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {
@@ -230,7 +287,7 @@ describe("answers", () => {
     http.enqueue(problem(503), jsonAnswer(200, []));
     http.enqueue();
 
-    expect(await api.createGroup("Racha")).toEqual({
+    expect(await api.createGroup("Racha", "do-zero")).toEqual({
       ok: false,
       error: { kind: "unavailable", retryAfterMs: 30_000 },
     });
@@ -284,7 +341,7 @@ describe("the token (P2, P3, H2)", () => {
       jsonAnswer(201, { userId: "u" }),
       jsonAnswer(201, { groupId: GROUP }),
     );
-    expect((await api.createGroup("Racha")).ok).toBe(true);
+    expect((await api.createGroup("Racha", "do-zero")).ok).toBe(true);
     expect(http.requests().map((request) => request.url)).toEqual([
       `${BASE}/v1/groups`,
       `${BASE}/v1/me`,

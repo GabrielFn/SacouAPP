@@ -208,7 +208,7 @@ describe("offline (Q1, Q6)", () => {
     const fake = createFakeSacouApi();
     fake.respond("createGroup", apiErr({ kind: "offline" }));
     const observer = new MutationObserver(client, {
-      mutationFn: (name: string) => unwrap(fake.api.createGroup(name)),
+      mutationFn: (name: string) => unwrap(fake.api.createGroup(name, "do-zero")),
     });
 
     const error: unknown = await observer.mutate("Racha").catch((thrown: unknown) => thrown);
