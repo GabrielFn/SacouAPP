@@ -13,6 +13,9 @@ internal static class GroupLimits
     public const int MaxActiveGroupsPerPerson = 100;
     public const int MaxActiveInvitesPerGroup = 20;
 
+    /// <summary>Against abuse; the one-template limit of the free plan is E3.15's (docs/dominio/configuracao.md).</summary>
+    public const int MaxSavedTemplatesPerGroup = 20;
+
     /// <summary>Whether a person already active in <paramref name="activeGroups"/> groups may create or join one more.</summary>
     public static Result CanJoinAnotherGroup(int activeGroups) =>
         activeGroups < MaxActiveGroupsPerPerson ? Result.Success() : Result.Failure(GroupErrors.MembershipLimit);
@@ -20,4 +23,8 @@ internal static class GroupLimits
     /// <summary>Whether a group with <paramref name="activeMembers"/> active members may take one more.</summary>
     public static Result CanTakeAnotherMember(int activeMembers) =>
         activeMembers < MaxActiveMembersPerGroup ? Result.Success() : Result.Failure(GroupErrors.MemberLimit);
+
+    /// <summary>Whether a group with <paramref name="savedTemplates"/> saved templates may save one more.</summary>
+    public static Result CanSaveAnotherTemplate(int savedTemplates) =>
+        savedTemplates < MaxSavedTemplatesPerGroup ? Result.Success() : Result.Failure(GroupErrors.TemplateLimit);
 }

@@ -39,4 +39,17 @@ internal static class GroupErrors
 
     /// <summary>Gabriel's answer 19: whoever an admin removed does not come back through a link.</summary>
     public static readonly Error MemberRemoved = new("groups.member-removed", ErrorKind.Forbidden);
+
+    /// <summary>The settings document or patch broke a rule of the catalog. The path of the refusal stays out of the body (ADR 0039).</summary>
+    public static readonly Error SettingsInvalid = new("groups.settings-invalid", ErrorKind.Validation);
+
+    /// <summary>For an admin: the template is not one of this group's saved templates, whatever group it belongs to.</summary>
+    public static readonly Error TemplateNotFound = new("groups.template-not-found", ErrorKind.NotFound);
+
+    /// <summary>Creating a group: the ready-made template key is not in the catalog.</summary>
+    public static readonly Error UnknownTemplateKey = new("groups.template-not-found", ErrorKind.Validation);
+
+    public static readonly Error TemplateNameInvalid = new("groups.template-name-invalid", ErrorKind.Validation);
+
+    public static readonly Error TemplateLimit = new("groups.template-limit", ErrorKind.Conflict);
 }

@@ -7,21 +7,22 @@ using Sacou.Modules.Groups.Access;
 
 namespace Sacou.Modules.Groups.CreateGroup;
 
-/// <summary><c>POST /v1/groups</c> <c>{ name }</c>: 201 with the new group and the caller's member id.</summary>
+/// <summary><c>POST /v1/groups</c> <c>{ name, templateKey? }</c>: 201 with the new group and the caller's member id.</summary>
 internal static class CreateGroupEndpoint
 {
     public const string Name = "CreateGroup";
 
     public static IEndpointRouteBuilder MapCreateGroup(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
+        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+            .ProducesProblem(StatusCodes.Status400BadRequest).ProducesProblem(StatusCodes.Status409Conflict);
         return endpoints;
     }
 
     private static async Task<Results<Created<CreateGroupResponse>, ProblemHttpResult>> HandleAsync(
         CreateGroupRequest request, CreateGroupHandler handler, CancellationToken cancellationToken)
     {
-        var created = await handler.HandleAsync(request.Name, cancellationToken).ConfigureAwait(false);
+        var created = await handler.HandleAsync(request, cancellationToken).ConfigureAwait(false);
         return created.ToHttpResult(response => TypedResults.Created($"{GroupRouteExtensions.GroupsRoute}/{response.GroupId}", response));
     }
 }

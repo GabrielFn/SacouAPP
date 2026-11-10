@@ -12,4 +12,5 @@ internal enum GroupPermission
     RemoveMember,
     RemoveAdmin,
     Leave,
+    ManageSettings,
 }

@@ -7,13 +7,13 @@ using R = Sacou.Modules.Groups.Domain.Members.GroupRole;
 namespace Sacou.Modules.Groups.Tests.Domain;
 
 /// <summary>
-/// D3: all 36 combinations against a table written by hand from docs/dominio/grupos.md (Gabriel's answer
-/// to question 16), never derived from the production table.
+/// D3: all 40 combinations against a table written by hand from docs/dominio/grupos.md (Gabriel's answer
+/// to questions 16 and 23), never derived from the production table.
 /// </summary>
 public sealed class RolePermissionsTests
 {
     private const int RoleCount = 4;
-    private const int PermissionCount = 9;
+    private const int PermissionCount = 10;
 
     public static readonly TheoryData<string, string, bool> Table = new()
     {
@@ -26,6 +26,7 @@ public sealed class RolePermissionsTests
         { nameof(R.Admin), nameof(P.RemoveMember), true },
         { nameof(R.Admin), nameof(P.RemoveAdmin), true },
         { nameof(R.Admin), nameof(P.Leave), true },
+        { nameof(R.Admin), nameof(P.ManageSettings), true },
         { nameof(R.CoAdmin), nameof(P.ViewGroup), true },
         { nameof(R.CoAdmin), nameof(P.RenameGroup), true },
         { nameof(R.CoAdmin), nameof(P.ManageInvites), true },
@@ -35,6 +36,7 @@ public sealed class RolePermissionsTests
         { nameof(R.CoAdmin), nameof(P.RemoveMember), true },
         { nameof(R.CoAdmin), nameof(P.RemoveAdmin), false },
         { nameof(R.CoAdmin), nameof(P.Leave), true },
+        { nameof(R.CoAdmin), nameof(P.ManageSettings), true },
         { nameof(R.Scorekeeper), nameof(P.ViewGroup), true },
         { nameof(R.Scorekeeper), nameof(P.RenameGroup), false },
         { nameof(R.Scorekeeper), nameof(P.ManageInvites), false },
@@ -44,6 +46,7 @@ public sealed class RolePermissionsTests
         { nameof(R.Scorekeeper), nameof(P.RemoveMember), false },
         { nameof(R.Scorekeeper), nameof(P.RemoveAdmin), false },
         { nameof(R.Scorekeeper), nameof(P.Leave), true },
+        { nameof(R.Scorekeeper), nameof(P.ManageSettings), false },
         { nameof(R.Player), nameof(P.ViewGroup), true },
         { nameof(R.Player), nameof(P.RenameGroup), false },
         { nameof(R.Player), nameof(P.ManageInvites), false },
@@ -53,6 +56,7 @@ public sealed class RolePermissionsTests
         { nameof(R.Player), nameof(P.RemoveMember), false },
         { nameof(R.Player), nameof(P.RemoveAdmin), false },
         { nameof(R.Player), nameof(P.Leave), true },
+        { nameof(R.Player), nameof(P.ManageSettings), false },
     };
 
     [Theory]
