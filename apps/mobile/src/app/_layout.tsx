@@ -11,10 +11,29 @@ import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
 import { expoFontLoader } from "../adapters/expo-font-loader";
+import { bindAppStateFocus } from "../adapters/app-state-focus";
+import { expoAppVersion } from "../adapters/expo-app-version";
+import { createExpoCacheStore } from "../adapters/expo-cache-store";
+import { createFakeIdTokenProvider, FAKE_ID_TOKEN } from "../adapters/fake-id-token-provider";
+import { fetchHttpTransport } from "../adapters/fetch-http-transport";
+import { createHttpSacouApi } from "../adapters/http-sacou-api";
+import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
+import { buildApiBaseUrl } from "../config/api-url";
 import { createSampleRoster } from "../features/court/dev/sample-roster";
 import { DatabaseGate } from "../services/DatabaseGate";
+import { createCachePersister, createCacheSession } from "../services/query/cache-persister";
+import { createSacouQueryClient } from "../services/query/query-client";
+import { QueryProvider } from "../services/query/query-provider";
 import { ServicesProvider, useServices, type Services } from "../services/services-context";
 import { ThemeProvider } from "../theme/theme-context";
+
+const queryClient = createSacouQueryClient();
+const cachePersister = createCachePersister(createExpoCacheStore());
+const networkStatus = createNetInfoNetworkStatus();
+// Until the login (E4.3) brings Firebase, only a development build has a token, and a release build
+// never calls the API.
+const idTokenProvider = createFakeIdTokenProvider(__DEV__ ? FAKE_ID_TOKEN : null);
+bindAppStateFocus();
 
 const realServices: Services = {
   fontLoader: expoFontLoader,
@@ -27,6 +46,13 @@ const realServices: Services = {
   reducedMotion: createReactNativeReducedMotion(),
   clock: performanceClock,
   benchmarkRuntimeOpener: expoBenchmarkRuntimeOpener,
+  sacouApi: createHttpSacouApi({
+    baseUrl: buildApiBaseUrl(__DEV__),
+    transport: fetchHttpTransport,
+    idTokens: idTokenProvider,
+  }),
+  networkStatus,
+  cacheSession: createCacheSession(queryClient, cachePersister),
 };
 
 function FontGate() {
@@ -43,9 +69,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ServicesProvider services={realServices}>
-        <ThemeProvider name="app">
-          <FontGate />
-        </ThemeProvider>
+        <QueryProvider
+          client={queryClient}
+          persister={cachePersister}
+          networkStatus={networkStatus}
+          appVersion={expoAppVersion()}
+        >
+          <ThemeProvider name="app">
+            <FontGate />
+          </ThemeProvider>
+        </QueryProvider>
       </ServicesProvider>
     </SafeAreaProvider>
   );
