@@ -71,7 +71,7 @@ const NO_DEFAULT_IN_REDUCER = {
 const FREE_EXPO = "(router|status-bar)";
 const FREE_REACT_NATIVE = "(svg|safe-area-context|reanimated|gesture-handler|screens)";
 const SDK_IMPORTS = {
-  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/)`,
+  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/|openapi-fetch$)`,
   message: "Device and service SDKs are used only in src/adapters/, behind an interface.",
 };
 
@@ -133,6 +133,14 @@ const NODE_GLOBALS = ["Buffer", "setImmediate", "__dirname", "__filename", "glob
     message: NODE_MESSAGE,
   }),
 );
+
+// The API is reached through the SacouApi port only: `fetch` lives in src/adapters/ (E4.2, D4).
+const FETCH_GLOBALS = [
+  {
+    name: "fetch",
+    message: "Call the API through the SacouApi port; fetch is used only in src/adapters/.",
+  },
+];
 
 function syntaxRule(restrictions) {
   return { "no-restricted-syntax": ["error", ...restrictions] };
@@ -209,6 +217,11 @@ export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
     },
     {
       files: MOBILE_SOURCE_FILES,
+      ignores: [...MOBILE_ADAPTER_FILES, ...testFiles, ...FIXTURE_FILES],
+      rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS, ...FETCH_GLOBALS] },
+    },
+    {
+      files: MOBILE_ADAPTER_FILES,
       ignores: [...testFiles, ...FIXTURE_FILES],
       rules: { "no-restricted-globals": ["error", ...NODE_GLOBALS] },
     },

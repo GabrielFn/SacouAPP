@@ -23,8 +23,20 @@ export interface CacheEffect {
 const invalidate = (key: SacouQueryKey): CacheEffect => ({ action: "invalidate", key });
 const remove = (key: SacouQueryKey): CacheEffect => ({ action: "remove", key });
 
+type MemberEvent = Extract<MutationEvent, { readonly targetIsMe: boolean }>;
+
+function isMemberEvent(event: MutationEvent): event is MemberEvent {
+  return "targetIsMe" in event;
+}
+
+function memberEffects(event: MemberEvent): readonly CacheEffect[] {
+  const members = invalidate(queryKeys.members(event.groupId));
+  return event.targetIsMe ? [members, invalidate(queryKeys.groups())] : [members];
+}
+
 /** What each mutation makes stale, pure and tested as a golden table (P5). */
 export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
+  if (isMemberEvent(event)) return memberEffects(event);
   switch (event.type) {
     case "createGroup":
     case "acceptInvite":
@@ -36,12 +48,6 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "createInvite":
     case "revokeInvite":
       return [invalidate(queryKeys.invites(event.groupId))];
-    case "changeMemberRole":
-    case "changeMemberType":
-    case "removeMember":
-      return event.targetIsMe
-        ? [invalidate(queryKeys.members(event.groupId)), invalidate(queryKeys.groups())]
-        : [invalidate(queryKeys.members(event.groupId))];
   }
 }
 

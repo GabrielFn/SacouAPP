@@ -10,6 +10,7 @@ export interface FakeHttpTransport {
 }
 
 const JSON_TYPE = "application/json";
+const FIRST_ERROR_STATUS = 400;
 
 /** A JSON answer as the API sends it. */
 export function jsonAnswer(
@@ -19,7 +20,10 @@ export function jsonAnswer(
 ): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": status < 400 ? JSON_TYPE : "application/problem+json", ...headers },
+    headers: {
+      "content-type": status < FIRST_ERROR_STATUS ? JSON_TYPE : "application/problem+json",
+      ...headers,
+    },
   });
 }
 

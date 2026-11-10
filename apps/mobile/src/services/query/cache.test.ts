@@ -85,14 +85,14 @@ async function restore(store: MemoryKeyValueStore, version = VERSION): Promise<Q
 }
 
 async function loadAll(client: QueryClient, fake: FakeSacouApi): Promise<void> {
-  await client.fetchQuery(myGroupsQuery(fake.api));
-  await client.fetchQuery(groupQuery(fake.api, G));
-  await client.fetchQuery(groupMembersQuery(fake.api, G));
-  await client.fetchQuery({
+  await client.query(myGroupsQuery(fake.api));
+  await client.query(groupQuery(fake.api, G));
+  await client.query(groupMembersQuery(fake.api, G));
+  await client.query({
     queryKey: queryKeys.me(),
     queryFn: () => unwrap(fake.api.signIn()),
   });
-  await client.fetchQuery({
+  await client.query({
     queryKey: queryKeys.invites(G),
     queryFn: () => unwrap(fake.api.listInvites(G)),
   });
@@ -179,7 +179,7 @@ describe("offline (Q1, Q6)", () => {
     const store = createMemoryKeyValueStore();
     const first = createSacouQueryClient();
     const fake = programmed();
-    await first.fetchQuery(myGroupsQuery(fake.api));
+    await first.query(myGroupsQuery(fake.api));
     await save(first, store);
     const network = createFakeNetworkStatus(false);
     const unbind = bindOnlineManager(network);
@@ -229,9 +229,7 @@ describe("the cache follows the server (Q3, Q4, H6)", () => {
       apiErr({ kind: "problem", status: 404, code: "groups.group-not-found" }),
     );
 
-    await client
-      .fetchQuery({ ...groupMembersQuery(fake.api, G), staleTime: 0 })
-      .catch(() => undefined);
+    await client.query({ ...groupMembersQuery(fake.api, G), staleTime: 0 }).catch(() => undefined);
     await save(client, store);
 
     expect(client.getQueryData(queryKeys.group(G))).toBeUndefined();

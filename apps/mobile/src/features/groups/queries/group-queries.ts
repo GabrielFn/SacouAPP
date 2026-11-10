@@ -4,10 +4,9 @@ import { unwrap } from "../../../services/api/api-result";
 import type { SacouApi } from "../../../services/api/sacou-api";
 import { queryKeys } from "../../../services/query/query-keys";
 
-const SECOND_MS = 1_000;
 /** How long each answer is fresh (D6): the list changes with each group joined, a group less often. */
-export const MY_GROUPS_STALE_MS = 30 * SECOND_MS;
-export const GROUP_STALE_MS = 60 * SECOND_MS;
+export const MY_GROUPS_STALE_MS = 30_000;
+export const GROUP_STALE_MS = 60_000;
 
 /** The queries of the groups slice, as options: the hooks use them, and the tests run them without React. */
 export function myGroupsQuery(api: SacouApi) {

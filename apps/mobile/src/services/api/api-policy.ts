@@ -11,8 +11,8 @@ export interface RawAnswer {
 
 const MS_PER_SECOND = 1_000;
 /** A 503 without a usable `Retry-After`, and the ceiling of any wait (D5). */
-export const DEFAULT_RETRY_AFTER_MS = 30 * MS_PER_SECOND;
-export const MAX_RETRY_AFTER_MS = 60 * MS_PER_SECOND;
+export const DEFAULT_RETRY_AFTER_MS = 30_000;
+export const MAX_RETRY_AFTER_MS = 60_000;
 
 const HTTP = {
   firstSuccess: 200,
