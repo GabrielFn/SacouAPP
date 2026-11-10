@@ -2,9 +2,10 @@ import { View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { fontFamilies, palette } from "../../../theme/tokens.data";
+import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import { anchorAt, type ScreenPlace } from "../model/court-geometry";
+import { chipColors } from "../model/chip-colors";
 import type { PlayerChipModel } from "../model/court-screen.types";
 import { BallIcon } from "./CourtIcons";
 
@@ -18,8 +19,7 @@ export function PlayerChip({ chip, place }: PlayerChipProps) {
   const { colors, tokens } = useTheme();
   const { sizes, spacing, fontSizes } = tokens.court;
   const anchor = anchorAt(place);
-  const ink = chip.isServer ? palette.black : colors.text;
-  const subtleInk = chip.isServer ? palette.black : colors.textMuted;
+  const { fill, border, ink, subtleInk } = chipColors(chip, colors);
   return (
     <View
       pointerEvents="none"
@@ -38,8 +38,8 @@ export function PlayerChip({ chip, place }: PlayerChipProps) {
           paddingHorizontal: spacing.chipPadding,
           borderRadius: sizes.chip,
           borderWidth: tokens.borderWidths.thick,
-          borderColor: chip.isServer ? colors.serverOutline : colors.text,
-          backgroundColor: chip.isServer ? colors.accent : colors.background,
+          borderColor: border,
+          backgroundColor: fill,
           flexDirection: "row",
           alignItems: "center",
           gap: tokens.spacing.xs,
@@ -89,6 +89,35 @@ export function PlayerChip({ chip, place }: PlayerChipProps) {
               }}
             >
               {strings.court.zone.setterBadge}
+            </Text>
+          </View>
+        ) : null}
+        {chip.isLibero ? (
+          <View
+            accessibilityLabel={strings.court.zone.liberoLabel}
+            style={{
+              position: "absolute",
+              right: -spacing.badgeOffsetX,
+              top: -spacing.badgeOffsetY,
+              minWidth: sizes.badge,
+              height: sizes.badge,
+              paddingHorizontal: spacing.badgeOffsetX,
+              borderRadius: sizes.badge,
+              borderWidth: tokens.borderWidths.thick,
+              borderColor: colors.text,
+              backgroundColor: colors.background,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.text,
+                fontFamily: fontFamilies.body700,
+                fontSize: fontSizes.badge,
+              }}
+            >
+              {strings.court.zone.liberoBadge}
             </Text>
           </View>
         ) : null}

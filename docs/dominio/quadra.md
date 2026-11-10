@@ -1,6 +1,6 @@
 # Modo quadra: log local, controlador e telas
 
-Regras do modo quadra no app (E4.9). As partes 1 (log local e controlador, sem tela), 2 (telas 09 e 10) e 3 (recursos do aparelho e medição) estão feitas; o líbero entra com a parte 4. Decisão técnica no [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md). Código em `apps/mobile/src/features/court/`.
+Regras do modo quadra no app (E4.9). As partes 1 (log local e controlador, sem tela), 2 (telas 09 e 10) 3 (recursos do aparelho e medição) e 4 (líbero) estão feitas. Decisão técnica no [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md). Código em `apps/mobile/src/features/court/`.
 
 ## O estado é o log
 
@@ -62,7 +62,7 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 **Tela de desenvolvimento.** `/dev/court`, atrás de `EXPO_PUBLIC_DEV_TOOLS=1` (`src/config/dev-tools.ts`; também vale para `/dev/catalog`, que deixou de usar `__DEV__`): "Nova partida (1 set)" e "(melhor de 3)", tema, "Continuar partida" e "Encerrar quadra". Cada nova partida fecha a sessão aberta e chama `startCourtMatch` com os times de exemplo.
 
-**Diferenças em relação ao design.** (1) O pulso do set point é amarelo para amarelo claro, sem o desenho exato da animação (o design é estático). (2) A linha de ataque é uma linha SVG tracejada (`6 4`), não uma borda `dashed`, porque a borda tracejada de um lado só não é igual nos dois sistemas. (3) As posições do Azul na tela 09 vêm do catálogo (fonte única) e diferem do desenho até 0,4 em profundidade; as do Laranja batem com o design a 7%. (4) A tela 10 não é alcançável a partir de a1/b5 (com o Laranja sacando, os dois times giram o mesmo número de vezes); o teste usa as zonas iniciais 1 e 6. (5) O rótulo do cadeado travado é "Tela travada. Segure para destravar" (o design diz "Segure para sair"), porque segurar o cadeado destrava e não sai da quadra.
+**Diferenças em relação ao design.** (1) O design não mostra o líbero; pela decisão do Gabriel (pergunta 14, opção 1), o chip do líbero ocupa o lugar do central que ele cobre, com as cores invertidas (preenchimento na cor do texto, nome e zona na cor do fundo) e o selo "Lí"; o "L" continua sendo do levantador e o rótulo de leitor de tela diz "líbero". O líbero aparece no fundo de quem recebe, não aparece na posição 1 de quem saca e some ao chegar na 4 (regra do motor, ADR 0028; o app só desenha o que o motor calcula). O contraste das cores invertidas é testado nos dois temas (`chip-colors.test.ts`). A amostra de desenvolvimento "Nova partida (com líbero)" põe o líbero do Laranja cobrindo os dois centrais (`replacedIndexes [2, 5]`). (1b) O pulso do set point é amarelo para amarelo claro, sem o desenho exato da animação (o design é estático). (2) A linha de ataque é uma linha SVG tracejada (`6 4`), não uma borda `dashed`, porque a borda tracejada de um lado só não é igual nos dois sistemas. (3) As posições do Azul na tela 09 vêm do catálogo (fonte única) e diferem do desenho até 0,4 em profundidade; as do Laranja batem com o design a 7%. (4) A tela 10 não é alcançável a partir de a1/b5 (com o Laranja sacando, os dois times giram o mesmo número de vezes); o teste usa as zonas iniciais 1 e 6. (5) O rótulo do cadeado travado é "Tela travada. Segure para destravar" (o design diz "Segure para sair"), porque segurar o cadeado destrava e não sai da quadra.
 
 ## Recursos do aparelho e proteções (parte 3)
 
@@ -97,6 +97,6 @@ Desfazer não vibra como ponto (o placar volta). Bipe: fora (nenhuma tela o liga
 
 ## Pendente
 
-Teste no celular da parte 3 (roteiro em `docs/operacao/teste-no-celular.md`): vibração, tela ligada, trava do voltar, fechar e reabrir em modo avião e a medida do Hermes. Parte 4: líbero na quadra (resposta à pergunta 14: o chip do líbero ocupa o lugar do central, cores invertidas e selo "Lí"; o modelo já marca `isLibero` no chip). E4.10: menu, correção, fim de set e de partida. Os nomes reais offline dependem da E4.2/E4.7.
+Teste no celular da parte 3 (roteiro em `docs/operacao/teste-no-celular.md`): vibração, tela ligada, trava do voltar, fechar e reabrir em modo avião e a medida do Hermes. E4.10: menu, correção, fim de set e de partida. Os nomes reais offline dependem da E4.2/E4.7.
 
 **Lacuna de teste.** Os hooks de recursos do aparelho (`useCourtGuard`, `useBackGuard`, `useKeepAwakeWhileFocused`, `useCourtFeedback`) não têm teste de renderização, porque o projeto não tem um renderer de hooks. A lógica de decisão fica em funções puras testadas (reducer da trava, `deriveFeedback`, `feedbackOnChange`); a ligação com o React é conferida no roteiro do celular.

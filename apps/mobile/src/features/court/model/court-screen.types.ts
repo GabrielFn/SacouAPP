@@ -15,7 +15,7 @@ export interface PlayerChipModel {
   readonly point: CourtPoint;
   readonly isServer: boolean;
   readonly isSetter: boolean;
-  /** The libero stands in this slot. The screen draws it in part 4 of E4.9 (pergunta 14). */
+  /** The libero stands in this slot: the chip has inverted colors and the "Lí" badge (pergunta 14). */
   readonly isLibero: boolean;
 }
 

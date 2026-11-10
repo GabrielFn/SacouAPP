@@ -94,6 +94,12 @@ export default function DevCourtScreen() {
           void start("best-of-three");
         }}
       />
+      <Button
+        label={dev.newWithLibero}
+        onPress={() => {
+          void start("with-libero");
+        }}
+      />
       {openSession === null ? null : (
         <>
           <Button
