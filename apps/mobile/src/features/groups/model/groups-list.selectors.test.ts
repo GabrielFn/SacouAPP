@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { GroupRole, MyGroup } from "../../../services/api/sacou-api";
-import { groupCardActions, groupCardModel, groupsSummaryText, organizes, roleLabel } from "./groups-list.selectors";
+import {
+  groupCardActions,
+  groupCardModel,
+  groupsSummaryText,
+  organizes,
+  roleLabel,
+} from "./groups-list.selectors";
 
 function groups(...roles: readonly GroupRole[]): readonly MyGroup[] {
   return roles.map((role, index) => ({
@@ -32,9 +38,12 @@ describe("groupsSummaryText", () => {
 
 describe("roles", () => {
   it("names the four roles", () => {
-    expect(
-      (["admin", "coAdmin", "scorekeeper", "player"] as const).map(roleLabel),
-    ).toEqual(["Admin", "Co-admin", "Placar", "Jogador"]);
+    expect((["admin", "coAdmin", "scorekeeper", "player"] as const).map(roleLabel)).toEqual([
+      "Admin",
+      "Co-admin",
+      "Placar",
+      "Jogador",
+    ]);
   });
   it("only admin and co-admin organize", () => {
     expect((["admin", "coAdmin", "scorekeeper", "player"] as const).map(organizes)).toEqual([

@@ -42,9 +42,11 @@ describe("groupsViewState", () => {
     expect(state).toEqual({ kind: "list", groups: [GROUP] });
   });
   it("is empty with an empty list and a list with items", () => {
-    expect(groupsViewState(snapshot({ status: "success", fetchStatus: "idle", data: [] }))).toEqual({
-      kind: "empty",
-    });
+    expect(groupsViewState(snapshot({ status: "success", fetchStatus: "idle", data: [] }))).toEqual(
+      {
+        kind: "empty",
+      },
+    );
     expect(
       groupsViewState(snapshot({ status: "success", fetchStatus: "idle", data: [GROUP] })),
     ).toEqual({ kind: "list", groups: [GROUP] });
