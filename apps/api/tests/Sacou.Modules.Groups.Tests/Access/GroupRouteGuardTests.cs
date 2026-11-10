@@ -20,6 +20,7 @@ public sealed class GroupRouteGuardTests
     /// of the settings and the saved templates: the guard must see them, or it checks nothing.
     /// </summary>
     private const int GroupRoutes = 16;
+    private const int RoundRoutes = 8;
 
     private const string Development = "Development";
     private const string Production = "Production";
@@ -33,7 +34,9 @@ public sealed class GroupRouteGuardTests
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints, environment == Development));
-        Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
+        var withGroupId = endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null);
+        Assert.Equal(GroupRoutes + RoundRoutes, withGroupId);
+        Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null));
     }
 
     /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>

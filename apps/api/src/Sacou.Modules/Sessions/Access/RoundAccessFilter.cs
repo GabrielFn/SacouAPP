@@ -16,36 +16,13 @@ namespace Sacou.Modules.Sessions.Access;
 /// or was removed, gets the same 404 as a group that does not exist; a member whose role lacks the endpoint's
 /// capability gets 403 <c>groups.forbidden</c>. The role comes from the database on every request.
 /// </summary>
-internal sealed class RoundAccessFilter : IEndpointFilter
+internal sealed class RoundAccessFilter : AccessFilter<RoundAccess>
 {
     public const string GroupIdRouteValue = "groupId";
 
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    protected override async Task<Result<RoundAccess>> ResolveAsync(HttpContext http)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(next);
-        var http = context.HttpContext;
-        var access = await ResolveAsync(http, RequiredCapability(http)).ConfigureAwait(false);
-        if (access.IsFailure)
-        {
-            return ProblemResults.From(access.Error);
-        }
-
-        http.Features.Set(access.Value);
-        return await next(context).ConfigureAwait(false);
-    }
-
-    /// <summary>Fails closed: an endpoint that does not declare exactly one capability never runs.</summary>
-    private static GroupCapability RequiredCapability(HttpContext http)
-    {
-        var declared = http.GetEndpoint()?.Metadata.GetOrderedMetadata<RoundCapabilityMetadata>() ?? [];
-        return declared.Count == 1
-            ? declared[0].Capability
-            : throw new InvalidOperationException("A round endpoint must declare exactly one capability.");
-    }
-
-    private static async Task<Result<RoundAccess>> ResolveAsync(HttpContext http, GroupCapability capability)
-    {
+        var capability = Declared<RoundCapabilityMetadata>(http).Capability;
         var cancellationToken = http.RequestAborted;
         var user = await http.RequestServices.GetRequiredService<ICurrentUser>().GetAsync(cancellationToken).ConfigureAwait(false);
         if (user.IsFailure)

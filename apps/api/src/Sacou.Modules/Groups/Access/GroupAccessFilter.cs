@@ -16,36 +16,13 @@ namespace Sacou.Modules.Groups.Access;
 /// gets the same 404 as a group that does not exist; a member whose role lacks the endpoint's permission
 /// gets 403 <c>groups.forbidden</c>. The role comes from the database on every request, never from a claim.
 /// </summary>
-internal sealed class GroupAccessFilter : IEndpointFilter
+internal sealed class GroupAccessFilter : AccessFilter<GroupAccess>
 {
     public const string GroupIdRouteValue = "groupId";
 
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    protected override async Task<Result<GroupAccess>> ResolveAsync(HttpContext http)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(next);
-        var http = context.HttpContext;
-        var access = await ResolveAsync(http, RequiredPermission(http)).ConfigureAwait(false);
-        if (access.IsFailure)
-        {
-            return ProblemResults.From(access.Error);
-        }
-
-        http.Features.Set(access.Value);
-        return await next(context).ConfigureAwait(false);
-    }
-
-    /// <summary>Fails closed: an endpoint that does not declare exactly one permission never runs.</summary>
-    private static GroupPermission RequiredPermission(HttpContext http)
-    {
-        var declared = http.GetEndpoint()?.Metadata.GetOrderedMetadata<GroupPermissionMetadata>() ?? [];
-        return declared.Count == 1
-            ? declared[0].Permission
-            : throw new InvalidOperationException("A group endpoint must declare exactly one permission.");
-    }
-
-    private static async Task<Result<GroupAccess>> ResolveAsync(HttpContext http, GroupPermission permission)
-    {
+        var permission = Declared<GroupPermissionMetadata>(http).Permission;
         var cancellationToken = http.RequestAborted;
         var user = await http.RequestServices.GetRequiredService<ICurrentUser>().GetAsync(cancellationToken).ConfigureAwait(false);
         if (user.IsFailure)

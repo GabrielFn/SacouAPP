@@ -1,9 +1,10 @@
 import { courtStrings } from "./court.pt-BR";
+import { groupsStrings } from "./groups.pt-BR";
 
 export const strings = {
   court: courtStrings,
+  groups: groupsStrings,
   appName: "Sacou",
-  home: { placeholder: "Racha de vôlei sem confusão" },
   a11y: { createGroup: "Criar grupo", back: "Voltar", logo: "Logo do Sacou" },
   catalog: {
     title: "Catálogo de componentes",

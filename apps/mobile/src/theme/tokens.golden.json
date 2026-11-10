@@ -53,14 +53,25 @@
     "chip": 44,
     "statusPill": 30,
     "logo": 26,
-    "plusIcon": 22
+    "plusIcon": 22,
+    "tabPillWidth": 56,
+    "tabPillHeight": 30,
+    "tabItem": 56,
+    "tabIcon": 22,
+    "backIcon": 24,
+    "groupCardMin": 128,
+    "homeCardMin": 112,
+    "cardFooter": 46,
+    "roleBadge": 26
   },
   "radii": {
     "field": 12,
     "button": 14,
     "card": 18,
     "pill": 22,
-    "statusPill": 15
+    "statusPill": 15,
+    "tabPill": 15,
+    "roleBadge": 13
   },
   "borderWidths": {
     "thin": 1.5,
@@ -71,7 +82,8 @@
     "divider": 0.14,
     "chip": 0.18,
     "field": 0.25,
-    "dashed": 0.4
+    "dashed": 0.4,
+    "badge": 0.07
   },
   "fontSizes": {
     "displayBrand": 24,
@@ -87,7 +99,8 @@
     "radii": "Inicio.dc.html:37,47,65,81; Onboarding.dc.html:20,91",
     "fontSizes": "Inicio.dc.html:24,41,47; Onboarding.dc.html:91",
     "iconStroke": "Inicio.dc.html:26",
-    "courtTokens": "QuadraSol.dc.html:17-37,44-130; QuadraNoite.dc.html:16-17,72"
+    "courtTokens": "QuadraSol.dc.html:17-37,44-130; QuadraNoite.dc.html:16-17,72",
+    "groupsScreens": "Grupos.dc.html:17-30,121-135; Inicio.dc.html:35; Notificacoes.dc.html:30"
   },
   "courtTokens": {
     "sizes": {

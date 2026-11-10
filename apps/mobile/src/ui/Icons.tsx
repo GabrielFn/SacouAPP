@@ -1,4 +1,5 @@
-import Svg, { Path } from "react-native-svg";
+import type { ReactNode } from "react";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import { LOGO_ASPECT, LOGO_CELLS, LOGO_VIEW_BOX } from "../theme/logo.data";
 import { iconStroke } from "../theme/tokens.data";
@@ -15,6 +16,83 @@ export interface LogoProps {
 const VIEW_BOX = "0 0 24 24";
 const PLUS_PATH = "M12 5v14M5 12h14";
 const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
+const NAV_STROKE_WIDTH = 2;
+const HEADER_STROKE_WIDTH = 2.2;
+
+export interface StrokeIconProps extends IconProps {
+  readonly size: number;
+  readonly strokeWidth: number;
+  readonly children: ReactNode;
+}
+
+function StrokeIcon({ color, size, strokeWidth, children }: StrokeIconProps) {
+  const { colors } = useTheme();
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox={VIEW_BOX}
+      fill="none"
+      stroke={color ?? colors.text}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </Svg>
+  );
+}
+
+/** Icons of the bottom bar and the headers, drawn as in Grupos.dc.html and Notificacoes.dc.html. */
+export function HomeIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.tabIcon} strokeWidth={NAV_STROKE_WIDTH}>
+      <Path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z" />
+    </StrokeIcon>
+  );
+}
+
+export function GroupIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.tabIcon} strokeWidth={NAV_STROKE_WIDTH}>
+      <Circle cx="9" cy="8" r="3.5" />
+      <Path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <Path d="M16 4.5a3.5 3.5 0 0 1 0 7" />
+      <Path d="M18 14a6 6 0 0 1 3.5 6" />
+    </StrokeIcon>
+  );
+}
+
+export function PersonIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.tabIcon} strokeWidth={NAV_STROKE_WIDTH}>
+      <Circle cx="12" cy="8" r="4" />
+      <Path d="M4 21a8 8 0 0 1 16 0" />
+    </StrokeIcon>
+  );
+}
+
+export function BellIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.tabIcon} strokeWidth={HEADER_STROKE_WIDTH}>
+      <Path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <Path d="M10 21h4" />
+    </StrokeIcon>
+  );
+}
+
+export function BackIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.backIcon} strokeWidth={HEADER_STROKE_WIDTH}>
+      <Path d="M15 5l-7 7 7 7" />
+    </StrokeIcon>
+  );
+}
 
 export function PlusIcon({ color }: IconProps) {
   const { colors, tokens } = useTheme();

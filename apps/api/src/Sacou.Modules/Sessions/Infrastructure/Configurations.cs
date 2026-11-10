@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sacou.Shared.Persistence;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sacou.Modules.Sessions.Domain;
 using Sacou.Modules.Sessions.Domain.Time;
@@ -58,7 +59,7 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
     {
         builder.ToTable(Table, table =>
         {
-            table.HasCheckConstraint("ck_rounds_status", $"status IN ({ColumnValues.SqlList(ColumnValues.RoundStatuses)})");
+            table.HasCheckConstraint("ck_rounds_status", $"status IN ({EnumColumns.SqlList(ColumnValues.RoundStatuses)})");
             table.HasCheckConstraint("ck_rounds_time_zone", SeriesConfiguration.TimeZoneRule);
             table.HasCheckConstraint("ck_rounds_venue", SeriesConfiguration.VenueRule);
             table.HasCheckConstraint("ck_rounds_next_sequence", "next_sequence >= 1");
@@ -102,8 +103,8 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
     {
         builder.ToTable(Table, table =>
         {
-            table.HasCheckConstraint("ck_attendances_status", $"status IN ({ColumnValues.SqlList(ColumnValues.AttendanceStatuses)})");
-            table.HasCheckConstraint("ck_attendances_source", $"source IN ({ColumnValues.SqlList(ColumnValues.AttendanceSources)})");
+            table.HasCheckConstraint("ck_attendances_status", $"status IN ({EnumColumns.SqlList(ColumnValues.AttendanceStatuses)})");
+            table.HasCheckConstraint("ck_attendances_source", $"source IN ({EnumColumns.SqlList(ColumnValues.AttendanceSources)})");
             table.HasCheckConstraint("ck_attendances_sequence", "sequence >= 1");
             table.HasCheckConstraint("ck_attendances_promoted_at", $"(status = '{ColumnValues.PromotedStatus}') = (promoted_at IS NOT NULL)");
         });

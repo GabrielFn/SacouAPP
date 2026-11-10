@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Sacou.Shared.Persistence;
 using Sacou.Modules.Sessions.Domain;
 using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Modules.Sessions.Domain.Rounds;
@@ -19,7 +20,7 @@ internal static class RowMapping
         new RoundSlot(row.LocalDate, row.LocalTime, row.TimeZone, row.StartsAt),
         Venue.FromStored(row.Venue),
         row.SettingsLayer,
-        ColumnValues.Parse(ColumnValues.RoundStatuses, row.Status),
+        EnumColumns.Parse(ColumnValues.RoundStatuses, row.Status),
         row.NextSequence,
         [.. attendances.Select(ToAttendance)]);
 
@@ -41,9 +42,9 @@ internal static class RowMapping
 
     public static Attendance ToAttendance(AttendanceRow row) => new(
         new MemberId(row.MemberId),
-        ColumnValues.Parse(ColumnValues.AttendanceStatuses, row.Status),
+        EnumColumns.Parse(ColumnValues.AttendanceStatuses, row.Status),
         row.Sequence,
-        ColumnValues.Parse(ColumnValues.AttendanceSources, row.Source),
+        EnumColumns.Parse(ColumnValues.AttendanceSources, row.Source),
         row.RespondedAt,
         row.PromotedAt);
 
@@ -81,5 +82,5 @@ internal static class RowMapping
 
     public static ImmutableArray<SeriesOccurrence> ToOccurrences(IEnumerable<RoundRow> rows) =>
         [.. rows.Select(row => new SeriesOccurrence(
-            row.LocalDate, row.StartsAt, ColumnValues.Parse(ColumnValues.RoundStatuses, row.Status) == RoundStatus.Canceled))];
+            row.LocalDate, row.StartsAt, EnumColumns.Parse(ColumnValues.RoundStatuses, row.Status) == RoundStatus.Canceled))];
 }

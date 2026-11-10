@@ -28,13 +28,4 @@ internal static class ColumnValues
     public static string Canceled => RoundStatuses[RoundStatus.Canceled];
 
     public static string PromotedStatus => AttendanceStatuses[AttendanceStatus.Promoted];
-
-    public static TEnum Parse<TEnum>(ImmutableDictionary<TEnum, string> values, string text)
-        where TEnum : struct, Enum =>
-        values.Single(pair => pair.Value == text).Key;
-
-    /// <summary>The SQL list for a CHECK, such as <c>'going', 'promoted'</c>, in a fixed order.</summary>
-    public static string SqlList<TEnum>(ImmutableDictionary<TEnum, string> values)
-        where TEnum : struct, Enum =>
-        string.Join(", ", values.Values.Order(StringComparer.Ordinal).Select(value => $"'{value}'"));
 }
