@@ -236,3 +236,16 @@ Implementado na E4.2 ([ADR 0042](../arquitetura/adr/0042-contrato-openapi-e-clie
 | I | Cache lido por outro app ou copiado em backup | Arquivo no sandbox do app, `android.allowBackup: false` (E4.9). **Sem criptografia (decisão):** guarda nome de grupo, papel, tipo e `MemberId`, que os outros membros já veem; o `expo-secure-store` não comporta dezenas de KB. Rever se entrar nível ou rating, que ficam fora da lista |
 | I | `code` desconhecido de uma API mais nova mostrado como texto livre | Só `code` do catálogo gerado vira `problem`; o resto vira `unexpected`, com texto genérico (P1) |
 | D | API fora do ar derrubando o app em laço de retentativas | Consultas repetem no máximo 2 vezes, só em `offline`, `unavailable` e 5xx; o 503 respeita `Retry-After`, limitado a 60 s; tempo limite de 15 s por requisição |
+
+## 13. Rodadas e presença (E3.4)
+
+| Superfície | Ameaça | Mitigação |
+|---|---|---|
+| Rotas de rodada e série por id | E/I: IDOR (rodada, série ou `memberId` de outro grupo) | Consulta sempre por `(group_id, id)`; `memberId` da rota 7 precisa estar entre os ativos do grupo da rota; 404 igual para inexistente, de outro grupo, saiu ou removido (testes M3) |
+| Filtro do Sessions | E: rota sem filtro ou com duas capacidades | `MapRoundRoutes()` obriga uma `GroupCapability`; a API não sobe de outro modo; teste de guarda sobre todas as rotas da API |
+| Papel mudando entre o filtro e a escrita | E: rebaixado ainda age | Capacidade conferida de novo sob a trava da rodada (M5); janela residual de um commit do Groups, aceita e registrada no ADR 0043 |
+| Última vaga | T/D: dois pedidos passam pela mesma vaga | `SELECT ... FOR UPDATE` na rodada, transação explícita `READ COMMITTED`, `UNIQUE (round_id, sequence)` e PK `(round_id, member_id)` como rede; C1 a C7 com Postgres real, 5 repetições |
+| `GET` que escreve (materializa e repara) | D: leitura barata cria rodadas | Idempotente (`UNIQUE (series_id, local_date)` + `ON CONFLICT`); no máximo uma rodada por série ativa (7 séries); sem reparo a fazer, a leitura não escreve |
+| Enxurrada de rodadas | D | 20 rodadas futuras e 7 séries por grupo, contadas sob um advisory por grupo; data até 365 dias; corpo de 4 KB |
+| Atribuição em massa | T | Corpos fechados (`Disallow`); `response` obrigatório; `roundId`, `memberId`, `status` e `sequence` nunca no corpo |
+| Local e camada em log ou resposta | I | Log só com ids e códigos; camada inválida do banco vira 500 sem conteúdo (P5); resposta sem nome, e-mail nem `userId` (M6) |
