@@ -14,6 +14,10 @@
 21. Modelos prontos (E3.3, 10/11/2026): o que cada um (Pelada, Racha organizado, Treino, Areia rei da quadra, Do zero) liga. **Padrão adotado:** a tabela do D4 em `docs/estado/tarefas/E3.3.md`. Fácil de mudar: é um JSON.
 22. Modelo salvo (E3.3, 10/11/2026): "Aplicar modelo" em "Como jogamos" troca os padrões do grupo, sem mexer em dia, horário, local, vagas e valores. **Recomendação e padrão adotado.**
 23. Co-admin edita "Como jogamos" (E3.3, 10/11/2026)? **Recomendação e padrão adotado: sim**, coerente com a resposta 16.
+24. Mais mensalistas que vagas (E3.4, 10/11/2026): os que sobram vão para a espera, à frente dos avulsos. **Recomendação e padrão adotado.**
+25. Mensalista que desistiu e quer voltar na mesma rodada (E3.4, 10/11/2026): vai para o fim da espera, como qualquer um. **Recomendação e padrão adotado.**
+26. Admin reduz as vagas com a lista cheia (E3.4, 10/11/2026): ninguém sai da lista; a espera só anda quando sobrar vaga. **Recomendação e padrão adotado.**
+27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
 
 ## Respondidas
 - **Grupos, perguntas 16 a 19 (09/11/2026):** todas na opção 1, a recomendada. 16: o Co-admin faz tudo do dia a dia, mas não promove, rebaixa nem remove Admin ou Co-admin. 17: o link de convite vale até ser revogado. 18: entrar pelo link não precisa de aprovação. 19: quem foi removido não volta pelo link; só se o admin readmitir pelo menu "⋯" da tela 19.
