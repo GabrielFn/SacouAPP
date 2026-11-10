@@ -40,7 +40,7 @@ public sealed class GroupRouteGuardTests
     [Fact]
     public async Task RealApi_SettingsRoutesDeclareTheirPermission()
     {
-        await using var api = new ClosedDatabaseApi();
+        await using var api = new ClosedDatabaseApi(Production);
         var declared = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.RawText!.Contains("/settings", StringComparison.Ordinal)
                 || endpoint.RoutePattern.RawText.Contains("/templates", StringComparison.Ordinal))
