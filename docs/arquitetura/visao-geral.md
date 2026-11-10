@@ -26,7 +26,7 @@ Monólito modular em .NET 10, com 7 módulos: Identity, Groups, Sessions, Matche
 |---|---|---|
 | Identity | Usuário, perfil, posições, nível | CRUD |
 | Groups | Membros, papéis, mensalistas, configuração padrão, plano. Schema `groups` (grupos, membros, convites) e autorização por grupo desde a E3.2 ([ADR 0040](adr/0040-grupos-membros-papeis-e-autorizacao.md)); catálogo e resolver da configuração no domínio desde a E3.3 ([ADR 0041](adr/0041-configuracao-herdada-e-modelos.md)) | Agregado Group |
-| Sessions | Presença, vagas, lista de espera, sorteio | Agregado Session |
+| Sessions | Presença, vagas, lista de espera, sorteio. Domínio das rodadas, da recorrência semanal e da presença desde a E3.4 ([ADR 0043](adr/0043-rodadas-presenca-e-espera.md), [rodadas.md](../dominio/rodadas.md)) | Agregado Round (`Session` no glossário) |
 | Matches | Placar, fila, rotação, banco | Stream `CourtSession` com event sourcing ([ADR 0009](adr/0009-court-session-event-sourcing.md)) |
 | Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
 | Summaries | Resumo da rodada com IA, com cota por grupo | Serviço |
@@ -120,6 +120,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0039](adr/0039-sacou-http-e-contratos-entre-modulos.md) | `Result → ProblemDetails` no projeto `Sacou.Http`, regras de JSON e primeiro contrato entre módulos (`Identity.Contracts.ICurrentUser`) |
 | [0040](adr/0040-grupos-membros-papeis-e-autorizacao.md) | Grupos: `MemberId`, papéis, permissões, autorização por grupo, convite e concorrência |
 | [0041](adr/0041-configuracao-herdada-e-modelos.md) | Configuração herdada: catálogo JSON único, camadas parciais, resolver por folha, modelos e golden TS/C# |
+| [0043](adr/0043-rodadas-presenca-e-espera.md) | Rodadas, recorrência semanal em fuso fixo, presença com espera por sequência, mensalista e avulso |
 
 ## Matriz: `decisoes.md` → ADR
 
