@@ -1,5 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Microsoft.OpenApi" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- The OpenAPI transformers are internal; their tests read them (ADR 0042). -->
+        <InternalsVisibleTo Include="Sacou.Api.Tests" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../Sacou.Modules/Identity/Sacou.Modules.Identity.csproj" />
         <ProjectReference Include="../Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
         <ProjectReference Include="../Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />

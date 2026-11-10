@@ -21,25 +21,33 @@ public sealed class GroupRouteGuardTests
     /// </summary>
     private const int GroupRoutes = 10;
 
-    [Fact]
-    public async Task RealApi_EveryRouteIsGuardedOrListed()
+    private const string Development = "Development";
+    private const string Production = "Production";
+
+    [Theory]
+    [InlineData(Development)]
+    [InlineData(Production)]
+    public async Task RealApi_EveryRouteIsGuardedOrListed(string environment)
     {
-        await using var api = new ClosedDatabaseApi();
+        await using var api = new ClosedDatabaseApi(environment);
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
-        Assert.Empty(GroupRouteGuard.Violations(endpoints));
+        Assert.Empty(GroupRouteGuard.Violations(endpoints, environment == Development));
         Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
     }
 
-    [Fact]
-    public async Task RealApi_ListsEveryRouteOutsideTheFilter()
+    /// <summary>In Production the closed list is exactly the one of ADR 0040; Development adds only the OpenAPI document.</summary>
+    [Theory]
+    [InlineData(Development)]
+    [InlineData(Production)]
+    public async Task RealApi_ListsEveryRouteOutsideTheFilter(string environment)
     {
-        await using var api = new ClosedDatabaseApi();
+        await using var api = new ClosedDatabaseApi(environment);
         var outside = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is null)
             .Select(endpoint => $"{string.Join(',', endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()?.HttpMethods ?? ["*"])} {endpoint.RoutePattern.RawText}");
 
-        Assert.Equal(GroupRouteGuard.RoutesOutsideTheGroupFilter.Order(StringComparer.Ordinal), outside.Order(StringComparer.Ordinal));
+        Assert.Equal(GroupRouteGuard.RoutesOutsideTheGroupFilterIn(environment == Development).Order(StringComparer.Ordinal), outside.Order(StringComparer.Ordinal));
     }
 
     /// <summary>
@@ -49,7 +57,7 @@ public sealed class GroupRouteGuardTests
     [Fact]
     public async Task RealApi_GroupRoutesCapTheBody()
     {
-        await using var api = new ClosedDatabaseApi();
+        await using var api = new ClosedDatabaseApi(Production);
         var groupRoutes = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal)
                 || endpoint.RoutePattern.RawText.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal))
@@ -112,6 +120,16 @@ public sealed class GroupRouteGuardTests
     }
 
     [Fact]
+    public void OpenApiDocument_IsReportedOutsideDevelopment()
+    {
+        var app = PlantedApp();
+        app.MapGet("/openapi/{documentName}.json", () => 1);
+
+        Assert.Single(GroupRouteGuard.Violations(Endpoints(app)));
+        Assert.Empty(GroupRouteGuard.Violations(Endpoints(app), development: true));
+    }
+
+    [Fact]
     public void RouteOutsideTheClosedList_IsReported()
     {
         var app = PlantedApp();
@@ -126,10 +144,11 @@ public sealed class GroupRouteGuardTests
         ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints);
 
     /// <summary>The real Program with no migration and a database nobody listens on.</summary>
-    private sealed class ClosedDatabaseApi : WebApplicationFactory<Program>
+    private sealed class ClosedDatabaseApi(string environment) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseEnvironment(environment);
             builder.UseSetting("Firebase:ProjectId", "sacou-test-project");
             builder.UseSetting("ConnectionStrings:Sacou", "Host=127.0.0.1;Port=1;Database=sacou;Username=sacou;Timeout=2");
             builder.UseSetting("Database:MigrateOnStartup", "false");

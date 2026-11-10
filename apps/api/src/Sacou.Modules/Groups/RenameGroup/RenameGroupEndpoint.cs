@@ -22,7 +22,8 @@ internal static class RenameGroupEndpoint
 
     public static RouteGroupBuilder MapRenameGroup(this RouteGroupBuilder group)
     {
-        group.MapPatch(string.Empty, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.RenameGroup);
+        group.MapPatch(string.Empty, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.RenameGroup)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
         return group;
     }
 

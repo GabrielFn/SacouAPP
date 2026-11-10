@@ -17,7 +17,8 @@ internal static class ListMyGroupsEndpoint
 
     public static IEndpointRouteBuilder MapListMyGroups(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody());
+        endpoints.MapGet(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+            .ProducesProblem(StatusCodes.Status403Forbidden);
         return endpoints;
     }
 
