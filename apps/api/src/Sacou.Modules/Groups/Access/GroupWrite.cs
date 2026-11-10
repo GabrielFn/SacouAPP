@@ -1,8 +1,8 @@
+using Sacou.Shared.Members;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Sacou.Http;
 using Sacou.Modules.Groups.Domain.Groups;
-using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Infrastructure;
 using Sacou.Shared.Results;
 

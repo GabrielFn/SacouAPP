@@ -11,7 +11,7 @@ namespace Sacou.Modules.Groups.Domain.Groups;
 /// </summary>
 internal sealed partial record Group(GroupId Id, GroupName Name, DateTimeOffset CreatedAt, ImmutableArray<GroupMember> Members)
 {
-    /// <summary>Whoever creates the group is its first admin: active, drop-in, with a new <see cref="MemberId"/>.</summary>
+    /// <summary>Whoever creates the group is its first admin: active, drop-in, with a new <see cref="Sacou.Shared.Members.MemberId"/>.</summary>
     public static Group Create(GroupName name, UserId creator, DateTimeOffset now) =>
         new(GroupId.New(now), name, now, [GroupMember.Founder(creator, now)]);
 

@@ -1,3 +1,4 @@
+
 namespace Sacou.Modules.Groups.Contracts;
 
 /// <summary>

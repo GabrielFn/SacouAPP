@@ -3,14 +3,14 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 
-namespace Sacou.Modules.Groups.Domain;
+namespace Sacou.Shared.Text;
 
 /// <summary>
 /// The pieces of the free-text rule shared by the group name and the settings text (the venue): nothing
 /// invisible, at least one letter, number or symbol, and no lone surrogate. The TypeScript twin is
 /// packages/match-engine/src/settings/display-text.ts (ADR 0041).
 /// </summary>
-internal static class DisplayText
+public static class DisplayText
 {
     private const int ZeroWidthJoiner = 0x200D;
 
