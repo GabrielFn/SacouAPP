@@ -22,7 +22,10 @@ public sealed class GroupsLastAdminConcurrencyTests(IntegrationDatabase database
 
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
-    /// <summary>C1: each demotes the other; exactly one wins.</summary>
+    /// <summary>
+    /// C1: each demotes the other; exactly one wins. The loser is judged under the lock as what they now
+    /// are, a player, so the answer is 403 <c>groups.forbidden</c>, not 409: the role check comes first.
+    /// </summary>
     [Fact]
     public async Task TwoAdminsDemotingEachOther_LeaveOneAdmin()
     {
@@ -32,7 +35,7 @@ public sealed class GroupsLastAdminConcurrencyTests(IntegrationDatabase database
                 world => (HttpMethod.Put, world.MemberPath(world.MemberIds[A.CoAdmin]) + "/role", """{"role":"player"}"""),
                 world => (HttpMethod.Put, world.MemberPath(world.MemberIds[A.Admin]) + "/role", """{"role":"player"}"""));
 
-            Assert.Equal([HttpStatusCode.OK, HttpStatusCode.Conflict], statuses.Order());
+            Assert.Equal([HttpStatusCode.OK, HttpStatusCode.Forbidden], statuses.Order());
             Assert.Equal(1, await MemberRows.CountActiveAdminsAsync(api.ConnectionString, world.GroupId));
         }
     }

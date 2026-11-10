@@ -14,8 +14,12 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 ## Ciclo de vida
 
 - **Criar:** quem cria vira Admin, ativo e avulso. Todo membro novo entra Jogador e avulso; o admin marca mensalista.
-- **Sair e voltar** (parte 2 e 3): quem saiu e volta pelo link recupera o mesmo `MemberId`, sempre como Jogador. Quem foi removido não volta pelo link (decisão do Gabriel, pergunta 19).
-- **Último admin** (parte 2): o único Admin ativo não sai nem é rebaixado; o app pede para promover alguém antes.
+- **Sair:** qualquer membro sai (`POST .../leave`); a linha fica, marcada como "saiu", com o papel que tinha, e a pessoa passa a receber o 404 de não membro. Quem saiu e volta pelo link (parte 3) recupera o mesmo `MemberId`, sempre como Jogador.
+- **Remover:** Admin e Co-admin removem Placar e Jogador; só o Admin remove Co-admin ou outro Admin. Ninguém remove a si mesmo (`groups.use-leave`): usa "sair". A linha fica, marcada como "removido". Quem foi removido não volta pelo link (decisão do Gabriel, pergunta 19).
+- **Mudar papel:** Admin e Co-admin trocam entre Placar e Jogador quem não é admin; dar ou tirar Admin ou Co-admin é só do Admin (pergunta 16). O Co-admin também não rebaixa a si mesmo; sai, se quiser. O Admin pode se rebaixar se houver outro Admin. Pôr o papel que o membro já tem é sucesso sem mudança.
+- **Mensalista × avulso:** Admin e Co-admin mudam o tipo de qualquer membro ativo, inclusive de admins. Convidado sem conta (E3.5) é sempre avulso (`groups.regular-needs-account`).
+- **Último admin:** o único Admin ativo não sai nem é rebaixado (`groups.last-admin`); o app pede para promover alguém antes. Nenhuma promoção automática. Co-admin não conta como admin.
+- **Ordem das conferências** em toda escrita de membro: quem age (ainda ativo? senão, o 404 de não membro), o alvo (ativo neste grupo? senão, `groups.member-not-found`), a permissão para aquele alvo e valor (`groups.forbidden`), o valor (igual ao atual: sucesso sem mudança) e, por último, o último admin. Quem age é julgado pelo que o banco diz **sob a trava do grupo**, não pelo que o filtro leu antes: quem perdeu o papel no meio do caminho recebe 403.
 
 ## Permissões
 
@@ -45,7 +49,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | Grupos ativos por pessoa | 100 | `groups.membership-limit` |
 | Convites ativos por grupo | 20 | `groups.invite-limit` (parte 3) |
 
-## Rotas da parte 1
+## Rotas
 
 | Rota | Permissão | Sucesso |
 |---|---|---|
@@ -54,6 +58,12 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `GET /v1/groups/{groupId}` | `ViewGroup` | 200 `{ groupId, name, memberId, role, memberType, activeMembers }` |
 | `PATCH /v1/groups/{groupId}` `{ name }` | `RenameGroup` | 200 `{ groupId, name }` |
 | `GET /v1/groups/{groupId}/members` | `ViewGroup` | 200 `[{ memberId, role, memberType, hasAccount, isMe, joinedAt }]`, só ativos |
+| `PUT /v1/groups/{groupId}/members/{memberId}/role` `{ role }` | `AssignBasicRole` no filtro; `AssignAdminRole` no agregado quando o alvo ou o papel novo é Admin ou Co-admin | 200 `{ memberId, role }` |
+| `PUT /v1/groups/{groupId}/members/{memberId}/type` `{ memberType }` | `ChangeMemberType` | 200 `{ memberId, memberType }` |
+| `DELETE /v1/groups/{groupId}/members/{memberId}` | `RemoveMember` no filtro; `RemoveAdmin` no agregado quando o alvo é Admin ou Co-admin | 204 |
+| `POST /v1/groups/{groupId}/leave` | `Leave` | 204 |
+
+As escritas de membro (papel, tipo, remover, sair) rodam numa transação que trava a linha do grupo (`FOR UPDATE`), carrega o grupo inteiro e aplica a regra: duas escritas no mesmo grupo nunca passam juntas pela regra do último admin (ADR 0040, D8). `role` e `memberType` são obrigatórios no corpo; faltar, `null`, número, valor desconhecido ou dois valores com vírgula dão 400.
 
 Papéis e tipos saem como texto: `admin`, `coAdmin`, `scorekeeper`, `player`; `regular`, `dropIn`. A lista de membros não tem nome (o perfil é da E3.17).
 
@@ -69,5 +79,9 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.forbidden` | 403 | Membro sem a permissão |
 | `groups.membership-limit` | 409 | A pessoa já está em 100 grupos ativos |
 | `groups.member-limit` | 409 | O grupo já tem 300 membros ativos (parte 3) |
+| `groups.member-not-found` | 404 | O alvo não é membro ativo deste grupo: inexistente, de outro grupo, saiu ou foi removido, todos iguais |
+| `groups.last-admin` | 409 | A mudança deixaria o grupo sem Admin ativo |
+| `groups.use-leave` | 400 | Remover a si mesmo; o caminho é "sair" |
+| `groups.regular-needs-account` | 400 | Mensalista sem conta (convidado, E3.5) |
 
-As partes 2 e 3 acrescentam `groups.member-not-found`, `groups.last-admin`, `groups.use-leave`, `groups.regular-needs-account`, `groups.invite-limit`, `groups.invite-not-found`, `groups.invite-invalid` e `groups.member-removed`.
+A parte 3 acrescenta `groups.invite-limit`, `groups.invite-not-found`, `groups.invite-invalid` e `groups.member-removed`.
