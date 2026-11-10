@@ -120,7 +120,7 @@ public sealed class ChangeRoleTests
         var actor = world.Add(actorRole.ToDomain());
         var target = world.Add(targetRole.ToDomain());
 
-        var result = world.Group.ChangeRole(actor.Id, target.Id, newRole.ToDomain());
+        var result = world.Group.ChangeRole(actor.Id, target.Id, newRole.ToDomain(), GroupBuilder.Now);
 
         switch (outcome)
         {
@@ -145,7 +145,7 @@ public sealed class ChangeRoleTests
         var world = GroupBuilder.WithFounder();
         world.Add(R.Admin.ToDomain());
 
-        var result = world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain());
+        var result = world.Group.ChangeRole(world.Founder.Id, world.Founder.Id, R.Player.ToDomain(), GroupBuilder.Now);
 
         Assert.Equal(R.Player.ToDomain(), Assert.Single(result.Value.ChangedMembers).Role);
     }
@@ -160,7 +160,7 @@ public sealed class ChangeRoleTests
         var world = GroupBuilder.WithFounder();
         var actor = world.Add(actorRole.ToDomain());
 
-        Assert.Equal(GroupErrors.Forbidden, world.Group.ChangeRole(actor.Id, actor.Id, newRole.ToDomain()).Error);
+        Assert.Equal(GroupErrors.Forbidden, world.Group.ChangeRole(actor.Id, actor.Id, newRole.ToDomain(), GroupBuilder.Now).Error);
     }
 
     [Theory]
@@ -172,8 +172,8 @@ public sealed class ChangeRoleTests
         var target = world.Add(R.Player.ToDomain(), status.ToDomain());
         var active = world.Add(R.Player.ToDomain());
 
-        Assert.Equal(GroupErrors.MemberNotFound, world.Group.ChangeRole(world.Founder.Id, target.Id, R.Scorekeeper.ToDomain()).Error);
-        Assert.True(world.Group.ChangeRole(world.Founder.Id, active.Id, R.Scorekeeper.ToDomain()).IsSuccess);
+        Assert.Equal(GroupErrors.MemberNotFound, world.Group.ChangeRole(world.Founder.Id, target.Id, R.Scorekeeper.ToDomain(), GroupBuilder.Now).Error);
+        Assert.True(world.Group.ChangeRole(world.Founder.Id, active.Id, R.Scorekeeper.ToDomain(), GroupBuilder.Now).IsSuccess);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public sealed class ChangeRoleTests
         var other = GroupBuilder.WithFounder();
         var stranger = other.Add(R.Player.ToDomain());
 
-        Assert.Equal(GroupErrors.MemberNotFound, world.Group.ChangeRole(world.Founder.Id, stranger.Id, R.Admin.ToDomain()).Error);
+        Assert.Equal(GroupErrors.MemberNotFound, world.Group.ChangeRole(world.Founder.Id, stranger.Id, R.Admin.ToDomain(), GroupBuilder.Now).Error);
     }
 
     /// <summary>The actor is judged by the aggregate under the lock: one who left after the filter is a non-member.</summary>
@@ -194,6 +194,6 @@ public sealed class ChangeRoleTests
         var actor = world.Add(R.Admin.ToDomain(), MembershipStatus.Removed);
         var target = world.Add(R.Player.ToDomain());
 
-        Assert.Equal(GroupErrors.GroupNotFound, world.Group.ChangeRole(actor.Id, target.Id, R.Admin.ToDomain()).Error);
+        Assert.Equal(GroupErrors.GroupNotFound, world.Group.ChangeRole(actor.Id, target.Id, R.Admin.ToDomain(), GroupBuilder.Now).Error);
     }
 }

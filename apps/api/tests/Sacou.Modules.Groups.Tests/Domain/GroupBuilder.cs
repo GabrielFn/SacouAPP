@@ -33,6 +33,12 @@ internal sealed class GroupBuilder
     }
 
     public GroupMember Member(MemberId id) => Group.Members.Single(member => member.Id == id);
+
+    /// <summary>After a change the test applied on purpose, such as a new invite.</summary>
+    public void Replace(Group group) => Group = group;
+
+    /// <summary>The member with the same id, changed by hand.</summary>
+    public void Replace(GroupMember member) => Group = Group with { Members = Group.Members.Replace(Member(member.Id), member) };
 }
 
 /// <summary>Public twins of the internal domain enums, so they can be theory parameters; converted by name.</summary>

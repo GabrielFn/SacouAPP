@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Sacou.Modules.Groups.Infrastructure.InviteTokens;
 
 /// <summary>
@@ -9,7 +11,7 @@ internal static class InviteTokenFormat
     /// <summary>32 bytes in Base64url without padding.</summary>
     public const int Length = 43;
 
-    public static bool IsValid(string? token) => token is { Length: Length } && token.All(IsBase64UrlCharacter);
+    public static bool IsValid([NotNullWhen(true)] string? token) => token is { Length: Length } && token.All(IsBase64UrlCharacter);
 
     private static bool IsBase64UrlCharacter(char character) =>
         char.IsAsciiLetterOrDigit(character) || character is '-' or '_';

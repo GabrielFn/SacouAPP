@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
+using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Invites;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.Infrastructure.InviteTokens;
 
@@ -16,4 +18,10 @@ internal static class InviteTokenHasher
         ArgumentNullException.ThrowIfNull(token);
         return InviteTokenHash.From(SHA256.HashData(Encoding.ASCII.GetBytes(token)));
     }
+
+    /// <summary>A malformed token is <c>groups.invite-invalid</c>, the answer of a dead one, before any query.</summary>
+    public static Result<InviteTokenHash> HashIfWellFormed(string? token) =>
+        InviteTokenFormat.IsValid(token)
+            ? Result.Success(Hash(token))
+            : Result.Failure<InviteTokenHash>(GroupErrors.InviteInvalid);
 }
