@@ -58,7 +58,7 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 **Fila longa.** A faixa mostra no máximo 4 pílulas (`MAX_QUEUE_PILLS`, times inteiros primeiro, depois reservas) e um "+k" para o resto, para ela não quebrar em duas linhas.
 
-**Texto e abertura do banco.** O `Text` base não aplica a escala de fonte do sistema (`allowFontScaling={false}`), porque os tokens já a aplicam com teto de 1,3. Se o banco não abre, o `DatabaseGate` mostra "Não conseguimos abrir o armazenamento" com "Tentar de novo". **Pendência E4.2/E4.7:** o `CourtRoster` de amostra (nomes de teste) ainda é o que vai no build de produção; o roster real, que funciona offline, vem com elas.
+**Texto e abertura do banco.** O `Text` base não aplica a escala de fonte do sistema (`allowFontScaling={false}`), porque os tokens já a aplicam com teto de 1,3. Se o banco não abre, o `DatabaseGate` mostra "Não conseguimos abrir o armazenamento" com "Tentar de novo". **Pendência E4.7/E3.17:** o `CourtRoster` de amostra (nomes de teste) ainda é o que vai no build de produção. A E4.2 entregou o cache persistido (`sacou-cache.db`, ADR 0042, Parte 2), que já guarda os membros do grupo por `MemberId` e vale 7 dias sem rede; os nomes entram nele quando a E3.17 trouxer a rota de perfis, e a E4.7 troca a amostra por um `CourtRoster` que lê esse cache. O log da quadra continua sem nome.
 
 **Tela de desenvolvimento.** `/dev/court`, atrás de `EXPO_PUBLIC_DEV_TOOLS=1` (`src/config/dev-tools.ts`; também vale para `/dev/catalog`, que deixou de usar `__DEV__`): "Nova partida (1 set)" e "(melhor de 3)", tema, "Continuar partida" e "Encerrar quadra". Cada nova partida fecha a sessão aberta e chama `startCourtMatch` com os times de exemplo.
 

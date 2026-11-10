@@ -1,0 +1,119 @@
+import { QueryClient } from "@tanstack/react-query";
+import { describe, expect, test } from "vitest";
+
+import { ApiFailure, type ApiError } from "../api/api-error";
+import { cacheEffectsOf, groupGoneEffects, isConflict, type MutationEvent } from "./invalidation";
+import { cacheBuster, isPersistedKey, shouldPersistQuery } from "./persist-policy";
+import { queryKeys } from "./query-keys";
+import { queryRetryDelay, shouldRetryQuery } from "./retry-policy";
+
+const G = "group-1";
+const failure = (error: ApiError) => new ApiFailure(error);
+
+describe("shouldRetryQuery (P4)", () => {
+  test.each<[string, ApiError]>([
+    ["offline", { kind: "offline" }],
+    ["unavailable", { kind: "unavailable", retryAfterMs: 5_000 }],
+    ["a 5xx", { kind: "unexpected", status: 502 }],
+  ])("%s is tried again twice, not three times", (_name, error) => {
+    expect([0, 1, 2].map((count) => shouldRetryQuery(count, failure(error)))).toEqual([
+      true,
+      true,
+      false,
+    ]);
+  });
+
+  test.each<[string, ApiError]>([
+    ["a rule error", { kind: "problem", status: 404, code: "groups.group-not-found" }],
+    ["an expired session", { kind: "session-expired" }],
+    ["too large", { kind: "too-large" }],
+    ["a 4xx without code", { kind: "unexpected", status: 400 }],
+    ["a request never sent", { kind: "unexpected", status: 0 }],
+  ])("%s is never tried again", (_name, error) => {
+    expect(shouldRetryQuery(0, failure(error))).toBe(false);
+  });
+
+  test("anything that is not an ApiFailure is not tried again", () => {
+    expect(shouldRetryQuery(0, new Error("bug"))).toBe(false);
+  });
+
+  test("the delay is the Retry-After of a 503, otherwise 1 s then 2 s", () => {
+    expect(queryRetryDelay(0, failure({ kind: "unavailable", retryAfterMs: 7_000 }))).toBe(7_000);
+    expect(queryRetryDelay(0, failure({ kind: "offline" }))).toBe(1_000);
+    expect(queryRetryDelay(1, failure({ kind: "offline" }))).toBe(2_000);
+  });
+});
+
+describe("cacheEffectsOf (P5, golden)", () => {
+  const golden: readonly [MutationEvent, readonly string[]][] = [
+    [{ type: "createGroup" }, ["invalidate groups"]],
+    [{ type: "acceptInvite" }, ["invalidate groups"]],
+    [{ type: "renameGroup", groupId: G }, [`invalidate groups/${G}`, "invalidate groups"]],
+    [{ type: "leaveGroup", groupId: G }, [`remove groups/${G}`, "invalidate groups"]],
+    [{ type: "createInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
+    [{ type: "revokeInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
+    ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
+      (type): [MutationEvent, readonly string[]][] => [
+        [{ type, groupId: G, targetIsMe: false }, [`invalidate groups/${G}/members`]],
+        [
+          { type, groupId: G, targetIsMe: true },
+          [`invalidate groups/${G}/members`, "invalidate groups"],
+        ],
+      ],
+    ),
+  ];
+
+  test.each(golden)("%o", (event, expected) => {
+    expect(cacheEffectsOf(event).map(({ action, key }) => `${action} ${key.join("/")}`)).toEqual(
+      expected,
+    );
+  });
+
+  test("a 409 refreshes; other errors do not", () => {
+    expect(isConflict(failure({ kind: "problem", status: 409, code: "groups.last-admin" }))).toBe(
+      true,
+    );
+    expect(isConflict(failure({ kind: "problem", status: 403, code: "groups.forbidden" }))).toBe(
+      false,
+    );
+  });
+
+  test("a group that is gone leaves the cache only when the key is of that group", () => {
+    const gone = failure({ kind: "problem", status: 404, code: "groups.group-not-found" });
+    expect(groupGoneEffects(queryKeys.members(G), gone)).toEqual([
+      { action: "remove", key: ["groups", G] },
+      { action: "invalidate", key: ["groups"] },
+    ]);
+    expect(groupGoneEffects(queryKeys.groups(), gone)).toEqual([]);
+    expect(groupGoneEffects(queryKeys.group(G), failure({ kind: "offline" }))).toEqual([]);
+  });
+});
+
+describe("the allow list of the persisted cache (P6)", () => {
+  test.each([
+    [queryKeys.groups(), true],
+    [queryKeys.group(G), true],
+    [queryKeys.members(G), true],
+    [queryKeys.invites(G), false],
+    [queryKeys.me(), false],
+    [["groups", G, "members", "extra"], false],
+    [["groups", 1], false],
+    [["unknown"], false],
+  ])("%o is persisted: %s", (key, expected) => {
+    expect(isPersistedKey(key)).toBe(expected);
+  });
+
+  test.each(["error", "pending", "success"] as const)(
+    "a query in %s is written: only success",
+    (status) => {
+      const client = new QueryClient();
+      const query = client.getQueryCache().build(client, { queryKey: queryKeys.groups() });
+      query.setState({ status });
+      expect(shouldPersistQuery(query)).toBe(status === "success");
+    },
+  );
+
+  test("the buster joins the app version and the contract", () => {
+    expect(cacheBuster("1.2.3")).toMatch(/^1\.2\.3\+[0-9a-f]{16}$/);
+  });
+});

@@ -21,6 +21,9 @@ const NODE_GLOBAL_CASES = [
 export function courtLintCases(prefix) {
   const court = `apps/mobile/src/features/court/${prefix}`;
   const ui = `apps/mobile/src/ui/${prefix}`;
+  const groups = `apps/mobile/src/features/groups/${prefix}`;
+  const screen = `apps/mobile/src/app/${prefix}`;
+  const adapters = `apps/mobile/src/adapters/${prefix}`;
   return [
     [`${court}fetch.ts`, 'export const call = fetch("/");\n', NO_RESTRICTED_GLOBALS],
     [`${court}xhr.ts`, "export const call = new XMLHttpRequest();\n", NO_RESTRICTED_GLOBALS],
@@ -55,7 +58,20 @@ export function courtLintCases(prefix) {
     [`${ui}accessibility-info.ts`, deviceImport("AccessibilityInfo"), NO_RESTRICTED_IMPORTS],
     [`${ui}view.ts`, deviceImport("View"), CLEAN],
     [`apps/mobile/src/adapters/${prefix}back-handler.ts`, deviceImport("BackHandler"), CLEAN],
-    [`${ui}fetch.ts`, 'export const call = fetch("/");\n', CLEAN],
+    // The API is reached through the SacouApi port: fetch, openapi-fetch and NetInfo live in adapters (E4.2).
+    [`${ui}fetch.ts`, 'export const call = fetch("/");\n', NO_RESTRICTED_GLOBALS],
+    [`${groups}fetch.ts`, 'export const call = fetch("/");\n', NO_RESTRICTED_GLOBALS],
+    [`${screen}openapi.tsx`, 'import "openapi-fetch";\n', NO_RESTRICTED_IMPORTS],
+    [
+      `${groups}openapi-lazy.ts`,
+      'export const c = import("openapi-fetch");\n',
+      NO_RESTRICTED_SYNTAX,
+    ],
+    [`${groups}netinfo.ts`, 'import "@react-native-community/netinfo";\n', NO_RESTRICTED_IMPORTS],
+    [`${groups}query.ts`, 'import "@tanstack/react-query";\n', CLEAN],
+    [`${adapters}fetch.ts`, 'export const call = fetch("/");\n', CLEAN],
+    [`${adapters}openapi.ts`, 'import "openapi-fetch";\n', CLEAN],
+    [`${adapters}netinfo.ts`, 'import "@react-native-community/netinfo";\n', CLEAN],
     // Node.js is for tests only, everywhere in the app.
     [`${ui}node.ts`, 'import "node:fs";\n', NO_RESTRICTED_IMPORTS],
     [`${ui}node-bare.ts`, 'import "path";\n', NO_RESTRICTED_IMPORTS],
