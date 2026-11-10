@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 
@@ -15,7 +14,7 @@ public static class DisplayText
     private const int ZeroWidthJoiner = 0x200D;
 
     /// <summary>Letters or symbols by category that render as blank space.</summary>
-    private static readonly ImmutableHashSet<int> BlankFillers = [0x115F, 0x1160, 0x3164, 0xFFA0, 0x2800];
+    private static readonly HashSet<int> BlankFillers = [0x115F, 0x1160, 0x3164, 0xFFA0, 0x2800];
 
     /// <summary>No lone surrogate: rune enumeration would silently turn it into U+FFFD.</summary>
     public static bool IsWellFormed(string text)

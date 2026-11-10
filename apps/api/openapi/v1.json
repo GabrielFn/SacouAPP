@@ -2388,6 +2388,16 @@
     "groups.template-not-found",
     "groups.use-leave",
     "identity.subject-invalid",
-    "identity.user-not-registered"
+    "identity.user-not-registered",
+    "sessions.attendance-disabled",
+    "sessions.drop-in-window-closed",
+    "sessions.member-not-found",
+    "sessions.round-closed",
+    "sessions.round-full",
+    "sessions.round-invalid",
+    "sessions.round-limit",
+    "sessions.round-not-found",
+    "sessions.series-limit",
+    "sessions.series-not-found"
   ]
 }

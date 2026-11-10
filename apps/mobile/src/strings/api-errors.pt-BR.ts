@@ -30,4 +30,17 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "groups.use-leave": "Para sair do grupo, use a opção Sair do grupo.",
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
+  "sessions.attendance-disabled": "A presença está desligada nesta rodada.",
+  "sessions.drop-in-window-closed":
+    "A lista ainda não abriu para avulsos. Tente de novo mais perto da rodada.",
+  "sessions.member-not-found": "Essa pessoa não faz parte deste grupo.",
+  "sessions.round-closed": "Esta rodada não aceita mais mudanças.",
+  "sessions.round-full": "A rodada está cheia e a lista de espera está desligada.",
+  "sessions.round-invalid": "Confira a data, a hora e o local da rodada.",
+  "sessions.round-limit":
+    "O grupo já tem rodadas demais marcadas. Cancele uma antes de criar outra.",
+  "sessions.round-not-found": "Essa rodada não existe mais.",
+  "sessions.series-limit":
+    "O grupo já tem o máximo de rodadas que se repetem. Pare uma antes de criar outra.",
+  "sessions.series-not-found": "Essa repetição não existe mais.",
 };

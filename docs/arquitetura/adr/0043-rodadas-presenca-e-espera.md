@@ -34,7 +34,7 @@ A rodada é o centro do uso: o admin cria (ou uma série cria), os jogadores res
 
 **D13 · Permissões.** `ManageRounds` (Admin e Co-admin) e `RespondAttendance` (os quatro papéis; o Placar também joga) entram em `GroupPermission` e `RolePermissions`; a tabela do teste passa de 4 × 10 para 4 × 12. Ver a rodada é `ViewGroup`.
 
-**D14 · `MemberId` e `DisplayText` vão para `Sacou.Shared`.** Dois módulos passam a usar `MemberId` (ADR 0040 D2 já previa a promoção) e `DisplayText` (regra do local, ADR 0005: dois consumidores). `MemberId` é público em `Sacou.Shared.Members`; o contrato do Groups continua com `Guid`. Mudança mecânica: só namespace e visibilidade.
+**D14 · `MemberId` e `DisplayText` vão para `Sacou.Shared`.** Dois módulos passam a usar `MemberId` (ADR 0040 D2 já previa a promoção) e `DisplayText` (regra do local, ADR 0005: dois consumidores). `MemberId` é público em `Sacou.Shared.Members`; o contrato do Groups continua com `Guid`. Mudança mecânica: só namespace e visibilidade. A lista fechada de namespaces públicos do Shared (teste de arquitetura) ganhou `Sacou.Shared.Members` e `Sacou.Shared.Text`; o `DisplayText` usa `HashSet`, para a lista de assemblies da BCL continuar a mesma.
 
 ## Alternativas descartadas
 
