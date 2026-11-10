@@ -17,7 +17,8 @@
     "**/node_modules/**",
     "**/bin/**",
     "**/obj/**",
-    "**/Infrastructure/Migrations/**"
+    "**/Infrastructure/Migrations/**",
+    "**/api/generated/**"
   ],
   "ignorePattern": ["using [A-Za-z0-9_.= ]+;"]
 }
