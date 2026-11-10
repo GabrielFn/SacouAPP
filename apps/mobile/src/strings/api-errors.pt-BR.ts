@@ -20,9 +20,12 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "Você já está no número máximo de grupos. Saia de algum para entrar neste.",
   "groups.name-invalid": "Escolha um nome de até 60 letras, sem deixar em branco.",
   "groups.regular-needs-account": "Só quem tem conta no Sacou pode ser mensalista.",
-  "groups.settings-invalid": "Alguma configuração não é válida. Confira os valores e tente de novo.",
-  "groups.template-limit": "O grupo já tem o máximo de modelos salvos. Apague um para salvar outro.",
-  "groups.template-name-invalid": "Escolha um nome de até 40 letras para o modelo, sem deixar em branco.",
+  "groups.settings-invalid":
+    "Alguma configuração não é válida. Confira os valores e tente de novo.",
+  "groups.template-limit":
+    "O grupo já tem o máximo de modelos salvos. Apague um para salvar outro.",
+  "groups.template-name-invalid":
+    "Escolha um nome de até 40 letras para o modelo, sem deixar em branco.",
   "groups.template-not-found": "Esse modelo não existe mais.",
   "groups.use-leave": "Para sair do grupo, use a opção Sair do grupo.",
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
