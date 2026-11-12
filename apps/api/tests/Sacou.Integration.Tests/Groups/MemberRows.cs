@@ -37,6 +37,14 @@ internal static class MemberRows
         await update.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
+    public static async Task RemoveAsync(string connectionString, Guid memberId)
+    {
+        await using var connection = await OpenAsync(connectionString);
+        await using var update = new NpgsqlCommand("UPDATE groups.members SET status = 'removed', left_at = now() WHERE id = @id", connection);
+        update.Parameters.AddWithValue("id", memberId);
+        await update.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+    }
+
     public static async Task<NpgsqlConnection> OpenAsync(string connectionString)
     {
         var connection = new NpgsqlConnection(connectionString);

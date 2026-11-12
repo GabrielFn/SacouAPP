@@ -156,20 +156,58 @@ public sealed class RoundAuthorizationTests(IntegrationDatabase database) : IAsy
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    /// <summary>M5: a demotion between the filter and the lock wins; here, the demotion is already in the table when the lock is taken.</summary>
+    /// <summary>The lookup number of the access filter (1) and of the one under the round's lock (2).</summary>
+    private const int LookupUnderTheLock = 2;
+
+    /// <summary>M5: the admin is demoted after the filter let the request in and before the lock is used: the lock-time lookup wins (403), nothing is written.</summary>
     [Fact]
-    public async Task AdminDemoted_IsForbiddenOnTheAdminRoute_AndTheRoundIsUntouched()
+    public async Task AdminDemotedBetweenTheFilterAndTheLock_IsForbidden_AndTheRoundIsUntouched()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         await RoundCalls.ConfigureAttendanceAsync(world);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
-        await MemberRows.SetRoleAsync(api.ConnectionString, world.MemberIds[A.CoAdmin], "player");
+        var coAdmin = world.MemberIds[A.CoAdmin];
+        var filterAllowed = false;
+        api.BeforeMembershipLookup = async lookup =>
+        {
+            if (lookup == LookupUnderTheLock)
+            {
+                filterAllowed = true;
+                await MemberRows.SetRoleAsync(api.ConnectionString, coAdmin, "player");
+            }
+        };
 
         using var response = await world.SendAsync(
             A.CoAdmin, HttpMethod.Put, $"{RoundCalls.RoundPath(world, round)}/attendance/{world.MemberIds[A.Player]}", RoundCalls.Response(true));
 
+        Assert.True(filterAllowed, "The request must have passed the filter as a co-admin before the demotion.");
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(RoundCalls.Forbidden, await RoundCalls.CodeAsync(response));
+        Assert.Empty(await RoundCalls.RowsAsync(api.ConnectionString, round));
+    }
+
+    /// <summary>M5: removed from the group between the filter and the lock: the non-member 404 of route 6, nothing written.</summary>
+    [Fact]
+    public async Task PlayerRemovedBetweenTheFilterAndTheLock_IsNotFound_AndTheRoundIsUntouched()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        await RoundCalls.ConfigureAttendanceAsync(world);
+        var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
+        var player = world.MemberIds[A.Player];
+        api.BeforeMembershipLookup = async lookup =>
+        {
+            if (lookup == LookupUnderTheLock)
+            {
+                await MemberRows.RemoveAsync(api.ConnectionString, player);
+            }
+        };
+
+        using var response = await world.SendAsync(A.Player, HttpMethod.Put, RoundCalls.RoundPath(world, round) + "/attendance/me", RoundCalls.Response(true));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(RoundCalls.GroupNotFound, await RoundCalls.CodeAsync(response));
         Assert.Empty(await RoundCalls.RowsAsync(api.ConnectionString, round));
     }
 
