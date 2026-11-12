@@ -46,7 +46,7 @@ export interface BlockHeaderProps {
 }
 
 /** The head of a block: title (and summary with a chevron, for an accordion) and the block switch. */
-function BlockHeader({
+export function BlockHeader({
   title,
   caption,
   summary,
