@@ -72,9 +72,9 @@ São 7 marcos em sequência; cada um termina com algo que você pode ver ou test
 1. **M1 · Fundação (semana 1):** monorepo, CI, padrões de código, `CLAUDE.md` com as regras para os agentes, backlog no repositório, formações das rotações em JSON. *Você vê:* repositório organizado e CI verde.
 2. **M2 · Motor da partida (semanas 2–4):** placar, side-out, rotação por time, sobreposição, fila com saída parcial, desfazer e corrigir, ponto individual; testes golden em TS e C#. *Você vê:* um relatório de cenários testados (ex.: uma rodada inteira simulada).
 3. **M3 · Base da API e do app (semanas 3–6):** login, grupos, membros, rodadas, presença com espera, convidados; app Expo com design system, navegação e telas de entrada. *Você vê:* primeiro build no seu celular.
-4. **M4 · A quadra (semanas 6–9):** sorteio, pré-jogo, escalação, modo quadra offline com sincronização, menu, corrigir, fim de set e de partida, fila; placar ao vivo; API no ar em ambiente de teste. *Você vê:* uma rodada completa jogada no app.
-5. **M5 · Depois do jogo (semanas 9–11):** estatísticas, MVP, rating, resumo com IA, story, perfil, cartinha com foto recortada, Pix copia e cola, página web da rodada com login, notificações. *Você vê:* a cartinha com a sua foto.
-6. **M6 · Prontidão para o piloto (semanas 11–13):** conta, exclusão e exportação de dados, termos e privacidade, observabilidade, backups, feature flags, Pro liberado para o piloto, builds no TestFlight e no teste interno do Google Play. *Você vê:* o app instalável por convite.
+4. **M4 · A quadra (semanas 6–9):** sorteio, pré-jogo, escalação, modo quadra offline com sincronização, menu, corrigir, fim de set e de partida, fila; API no ar em ambiente de teste. *Você vê:* uma rodada completa jogada no app.
+5. **M5 · Depois do jogo (semanas 9–11):** estatísticas, MVP, perfil, cartinha com avatar, página web da rodada com login, notificações (rating, resumo com IA, story, foto e Pix ficam para depois do piloto, ADR 0046). *Você vê:* a sua cartinha.
+6. **M6 · Prontidão para o piloto (semanas 11–13):** conta, exclusão e exportação de dados, termos e privacidade, observabilidade, backups, feature flags, builds no TestFlight e no teste interno do Google Play. *Você vê:* o app instalável por convite.
 7. **M7 · Piloto (semanas 13–17):** 3 a 5 grupos reais, correções semanais, métricas do portão (60% das confirmações pelo link). *Você vê:* relatório semanal com as métricas.
 
 ## Backlog
@@ -135,17 +135,17 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.2 | Grupos, membros, papéis, convite por link e QR | Autorização por papel testada | E3.1 |
 | E3.3 | Configuração herdada (grupo → rodada → partida) e modelos | Resolver testado com sobrescritas | E3.2 |
 | E3.4 | Rodadas, recorrência, presença, espera com concorrência, mensalista e avulso | Duas confirmações na última vaga: uma vai para a espera | E3.3 |
-| E3.5 | Convidado sem conta e reivindicação por link | Estatísticas migram para a conta | E3.4 |
+| E3.5 | Convidado sem conta (entra como avulso). Reivindicação por link: pós-piloto (ADR 0046) | Convidado joga e aparece nas estatísticas da rodada | E3.4 |
 | E3.6 | Sorteio equilibrado com travas e reservas | Diferença de média mínima em casos de teste | E3.4 |
-| E3.7 | Stream da quadra: sincronização idempotente, SignalR ao vivo | Reenvio não duplica; espectador recebe pontos | E2.10 |
-| E3.8 | Token de placar por QR e um celular escrevendo por vez | Celular antigo é recusado após a entrega | E3.7 |
-| E3.9 | Projeções de estatísticas, MVP e rating Glicko-2 | Correção recalcula tudo | E3.7 |
-| E3.10 | Pagamentos: Pix copia e cola, "já paguei", confirmação | Fluxo completo testado | E3.4, E1.4 |
+| E3.7 | Stream da quadra: sincronização idempotente, evento a evento. SignalR ao vivo: pós-piloto (ADR 0046) | Reenvio não duplica | E2.10 |
+| E3.8 | Placar assume a quadra: Placar, Co-admin ou Admin assume a escrita do stream com confirmação (último ponto recebido e placar); um celular escreve por vez (ADR 0046) | Celular antigo é recusado após a troca; os eventos dele não enviados são recusados e o app avisa quantos pontos não entraram | E3.7 |
+| E3.9 | Projeções de estatísticas e MVP. Rating Glicko-2: pós-piloto (ADR 0046) | Correção recalcula tudo | E3.7 |
+| E3.10 | **Pós-piloto (ADR 0046).** Pagamentos: Pix copia e cola, "já paguei", confirmação | Fluxo completo testado | E3.4, E1.4 |
 | E3.11 | Outbox, Hangfire e push (Expo) | Notificação de promoção da espera chega uma vez | E3.4 |
 | E3.12 | Página web da rodada (Razor) com prévia no WhatsApp e login | Prévia aparece; VOU funciona logado e deslogado | E3.4 |
-| E3.13 | Resumo com IA e cota por grupo | Texto gerado com dados reais; falha usa texto padrão | E3.9 |
-| E3.14 | Fotos: upload para o R2 e denúncia | Sem EXIF; só o recorte é salvo | acesso Cloudflare |
-| E3.15 | Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
+| E3.13 | **Pós-piloto (ADR 0046).** Resumo com IA e cota por grupo | Texto gerado com dados reais; falha usa texto padrão | E3.9 |
+| E3.14 | **Pós-piloto (ADR 0046).** Fotos: upload para o R2 e denúncia | Sem EXIF; só o recorte é salvo | acesso Cloudflare |
+| E3.15 | **Pós-piloto (ADR 0046).** Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
 | E3.17 | Perfil do jogador: apelido, posições e nível (API) | Perfil salvo e lido por `MemberId`/`UserId`, sem dado pessoal em evento | E3.2 |
 
@@ -163,13 +163,13 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |
 | E4.9 | Modo quadra offline (SQLite, tela ligada, vibração, trava) | Telas 09, 10; partida inteira em modo avião | E2.7 |
 | E4.10 | Menu, corrigir, fim de set e de partida, ponto individual | Telas 11, 23, 24, 25, 31 | E4.9 |
-| E4.11 | Sincronização e placar ao vivo | Volta da internet sem perder pontos | E3.7 |
-| E4.12 | Resumo e story | Telas 12, 13; imagem compartilhável | E3.13 |
-| E4.13 | Perfil e cartinha | Telas 14, 15 | E3.9 |
-| E4.14 | Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |
-| E4.15 | Paywall (informativo no piloto) | Tela 29 | E3.15 |
-| E4.16 | Links que abrem o app (universal links) | Link da rodada abre no app instalado | E3.12 |
-| E4.17 | Modo quadra: aviso de bateria abaixo de 20% sugerindo entregar o placar e modo paisagem (Time A à esquerda, B à direita, "Inverter lados") (`produto.md:139-140`) | Aviso aparece uma vez abaixo de 20%; paisagem igual ao layout aprovado pelo Gabriel (não há tela no design) | E4.9 |
+| E4.11 | Sincronização a cada ponto, com sinal (ADR 0046). Placar ao vivo: pós-piloto | Cada ponto chega ao servidor logo depois de gravado; volta da internet sem perder pontos | E3.7 |
+| E4.12 | **Pós-piloto (ADR 0046).** Resumo e story | Telas 12, 13; imagem compartilhável | E3.13 |
+| E4.13 | Perfil e cartinha (com avatar no piloto; foto pós-piloto, ADR 0046) | Telas 14, 15 | E3.9 |
+| E4.14 | **Pós-piloto (ADR 0046).** Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |
+| E4.15 | **Pós-piloto (ADR 0046).** Paywall (informativo no piloto) | Tela 29 | E3.15 |
+| E4.16 | **Pós-piloto (ADR 0046).** Links que abrem o app (universal links) | Link da rodada abre no app instalado | E3.12 |
+| E4.17 | Modo quadra: aviso de bateria abaixo de 20% sugerindo ligar no carregador (ADR 0046) e modo paisagem (Time A à esquerda, B à direita, "Inverter lados") (`produto.md:139-140`) | Aviso aparece uma vez abaixo de 20%; paisagem igual ao layout aprovado pelo Gabriel (não há tela no design) | E4.9 |
 
 ### E5 · Operação (M4–M6)
 

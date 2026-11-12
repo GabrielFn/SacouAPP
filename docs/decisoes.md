@@ -15,10 +15,11 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 - **MVP do dia:** padrão calculado por dados (saldo +/− em quadra, aproveitamento, sequência, ganho de rating). Votação = opção do grupo.
 - **Rating:** Glicko-2, separado quadra x areia. Conversão: 1500 = 3,0; cada 100 pontos = 0,5; limitado a 1–5. Nível autodeclarado é a semente. Privado no app; aparece na cartinha por padrão (o jogador pode esconder). Admin vê os níveis no sorteio, nunca na imagem compartilhada. Ranking do grupo nunca por nível.
 - **Faixas da cartinha:** Bronze ≤ 2,4 · Prata 2,5–3,4 · Ouro 3,5–4,4 · Elite ≥ 4,5.
-- **Foto da cartinha (Fase 1):** recorte da silhueta no celular (Vision no iOS, ML Kit no Android, módulo nativo Expo); pincel apagar/restaurar; enquadramento. Salva em R2 como WebP sem EXIF. ONNX no servidor fica para depois. Denúncia de foto.
+- **Foto da cartinha (pós-piloto, ADR 0046; antes Fase 1):** recorte da silhueta no celular (Vision no iOS, ML Kit no Android, módulo nativo Expo); pincel apagar/restaurar; enquadramento. Salva em R2 como WebP sem EXIF. ONNX no servidor fica para depois. Denúncia de foto.
 - **Login:** Google, Apple (obrigatório no iOS) e e-mail/senha via Firebase Auth. Sem telefone. Botões de login só aparecem para quem está deslogado.
 - **Planos:** Pro do Grupo e Sacou+ do Jogador (o plano do jogador está confirmado). Preços **propostos, ainda não confirmados**: Pro do Grupo R$ 12,90/mês ou R$ 99/ano; Sacou+ R$ 5,90/mês ou R$ 44,90/ano. Cobrança pelas lojas via RevenueCat. Pix copia e cola só para mensalidade/diária do racha. Nada pago dá vantagem em quadra. No piloto, Pro liberado de graça. Controle por `IGroupPlan` e `IUserPlan`.
-- **Placar por QR:** sessão temporária de Placar daquela quadra; um celular escreve por vez; o admin pode retomar. No MVP pede-se instalar o app.
+- **Placar assume a quadra** (substitui o placar por QR, decisão do Gabriel em 11/11/2026, ADR 0046): Placar, Co-admin ou Admin assume a escrita da quadra a qualquer momento, com confirmação que mostra o último ponto recebido e o placar; um celular escreve por vez; o anterior fica só olhando, e os eventos dele ainda não enviados são recusados com aviso de quantos pontos não entraram. Sincronização a cada ponto quando houver sinal. Aviso de bateria abaixo de 20% sugere ligar no carregador.
+- **Escopo do piloto** (decisão do Gabriel em 11/11/2026, ADR 0046): ficam para depois do piloto o resumo com IA e o story, a foto da cartinha (no piloto, avatar), o rating Glicko-2, o placar ao vivo, planos e paywall, o Pix com confirmação, a reivindicação da conta do convidado, os links que abrem o app e a entrega do placar por QR.
 
 ## Arquitetura
 
@@ -29,7 +30,7 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 - **Dados pessoais:** nada pessoal nos eventos; tudo aponta para `MemberId`. Exclusão e exportação de conta (LGPD); quem sai vira "Ex-jogador" no histórico.
 - **App:** Expo + TypeScript strict, Expo Router, EAS, TanStack Query, Zustand, React Hook Form + Zod, cliente gerado do OpenAPI (ADR 0042), abas com o `expo-router/ui` e barra própria (ADR 0044), estilos e temas próprios sobre o StyleSheet (Unistyles descartado, ADR 0034), expo-sqlite (log de eventos offline), Reanimated, view-shot, expo-keep-awake/haptics.
 - **Monorepo:** pnpm + Turborepo — `apps/mobile`, `apps/api`, `packages/match-engine` (TS puro), `packages/volley-rules` (formações, faixas, Pix, testes golden).
-- **Serviços:** Cloudflare R2 (fotos e backups), RevenueCat, Sentry, PostHog, Resend, rate limiting nativo do ASP.NET Core, feature flags e versão mínima do app, backup diário, varredura de segurança na CI.
+- **Serviços:** Cloudflare R2 (backups no piloto; fotos depois), RevenueCat e PostHog depois do piloto (ADR 0046), Sentry, Resend, rate limiting nativo do ASP.NET Core, feature flags e versão mínima do app, backup diário, varredura de segurança na CI.
 
 ## Processo
 

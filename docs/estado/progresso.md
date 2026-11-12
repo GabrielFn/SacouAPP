@@ -48,6 +48,8 @@
 
 ## Adiadas
 
+- Pós-piloto (decisão do Gabriel em 11/11/2026, [ADR 0046](../arquitetura/adr/0046-escopo-do-piloto-e-papel-placar.md)): E3.10, E3.13–E3.15, E4.12, E4.14–E4.16 e partes da E3.5, E3.7, E3.9 e E4.11. A E3.8 virou "Placar assume a quadra".
+
 - E0.7: tarefa agendada. Adiada pelo Gabriel em 30/10/2026: por enquanto as sessões são abertas manualmente.
 
 ## Pendências herdadas
