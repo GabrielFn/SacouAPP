@@ -16,7 +16,7 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/dominio/rotacoes.md` | Especificação das regras de rotação e sobreposição (FIVB 2025–28) |
 | `packages/volley-rules/src/formations/formations.json` | Coordenadas das formações (5x1, 6x2, 4x2, Livre) — fonte única, lida pelo TS e pelo C# |
 | `docs/dominio/rotacoes-explorador.html` | Explorador interativo das formações (abrir no navegador) |
-| `design/mvp/*.dc.html` | **As 30 telas do piloto, só com o que entra no MVP (ADR 0046 e 0047). É a referência das tarefas até o fim do piloto.** Títulos e ordem em `design/mvp/canvas.json` |
+| `design/mvp/*.dc.html` | **As 34 telas do piloto, só com o que entra no MVP (ADR 0046 e 0047). É a referência das tarefas até o fim do piloto.** Títulos e ordem em `design/mvp/canvas.json` |
 | `design/telas/*.dc.html` | As 33 telas do produto completo, inclusive o que ficou para depois do piloto. Títulos e ordem em `design/telas/canvas.json` |
 | `docs/estado/progresso.md` | Marco atual, tarefas feitas / em andamento / bloqueadas |
 | `docs/estado/pendencias.md` | Pendências herdadas das tarefas (só o orquestrador lê inteiro) |

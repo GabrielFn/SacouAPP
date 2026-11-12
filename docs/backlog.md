@@ -15,8 +15,8 @@ Este arquivo guarda só o mapa de marcos e a regra da próxima tarefa. Cada info
 | M1 · Fundação | E0.1–E0.9, E1.1 |
 | M2 · Motor da partida | E1.2–E1.5, E2.1–E2.11 |
 | M3 · Base da API e do app | E0.10, E3.1–E3.5, E3.17, E4.1–E4.6 |
-| M4 · A quadra | E3.6–E3.8, E4.7–E4.11, E4.17, E5.1 |
-| M5 · Depois do jogo | E3.9, E3.11, E3.12, E4.12, E4.13 |
+| M4 · A quadra | E2.12, E3.6–E3.8, E4.7–E4.11, E4.17, E5.1 |
+| M5 · Depois do jogo | E3.9, E3.11, E3.12, E3.18, E4.12, E4.13, E4.18 |
 | M6 · Prontidão para o piloto | E3.16, E5.2–E5.4, E6.1, E6.2 |
 | M7 · Piloto | E7.1–E7.3 |
 | Pós-piloto ([ADR 0046](arquitetura/adr/0046-escopo-do-piloto-e-papel-placar.md)) | E3.10, E3.13–E3.15, E4.14–E4.16; e as partes adiadas da E3.5, E3.7, E4.11 e E4.12. Não entram na regra da próxima tarefa; voltam com decisão do Gabriel depois do M7 |
