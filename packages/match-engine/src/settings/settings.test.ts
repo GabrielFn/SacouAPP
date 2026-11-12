@@ -1,11 +1,22 @@
 import { FORMATION_SYSTEMS, OVERLAP_RULE_MODES, type Result } from "@sacou/volley-rules";
 import { describe, expect, expectTypeOf, test } from "vitest";
 
-import { QUEUE_EXIT_CRITERION_KEYS } from "../queue/constants.data.js";
+import {
+  DEFAULT_FIXED_EXIT_COUNT,
+  DEFAULT_QUEUE_EXIT_MODE,
+  DEFAULT_WINNER_EXIT_ENABLED,
+  DEFAULT_WINNER_EXIT_WINS,
+  MAX_WINNER_EXIT_WINS,
+  MIN_FIXED_EXIT_COUNT,
+  MIN_WINNER_EXIT_WINS,
+  QUEUE_EXIT_CRITERION_KEYS,
+  QUEUE_EXIT_MODE_KINDS,
+} from "../queue/constants.data.js";
 import {
   BEST_OF_VALUES,
   MATCH_STARTED_EVENT_TYPE,
   MAX_SET_POINTS,
+  MAX_TEAM_MEMBERS,
   MIN_SET_POINTS,
   WIN_MARGIN_VALUES,
 } from "../score/constants.data.js";
@@ -68,6 +79,24 @@ describe("settings catalog against the engine (V10)", () => {
     });
     expect(fieldAt("attendance.capacity").max).toBe(MAX_ACTIVE_MEMBERS_PER_GROUP);
     expect(fieldAt("schedule.venue").maxLength).toBe(VENUE_MAX_LENGTH);
+  });
+
+  test("the queue modes are the constants of the engine (E2.12)", () => {
+    expect(fieldAt("queue.exitMode")).toMatchObject({
+      defaultValue: DEFAULT_QUEUE_EXIT_MODE,
+      values: QUEUE_EXIT_MODE_KINDS,
+    });
+    expect(fieldAt("queue.fixedExitCount")).toMatchObject({
+      defaultValue: DEFAULT_FIXED_EXIT_COUNT,
+      max: MAX_TEAM_MEMBERS,
+      min: MIN_FIXED_EXIT_COUNT,
+    });
+    expect(fieldAt("queue.winnerExitEnabled").defaultValue).toBe(DEFAULT_WINNER_EXIT_ENABLED);
+    expect(fieldAt("queue.winnerExitWins")).toMatchObject({
+      defaultValue: DEFAULT_WINNER_EXIT_WINS,
+      max: MAX_WINNER_EXIT_WINS,
+      min: MIN_WINNER_EXIT_WINS,
+    });
   });
 
   test("is frozen", () => {

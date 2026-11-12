@@ -337,6 +337,30 @@
     }
   },
   {
+    "id": "S-queue-exit-mode",
+    "kind": "resolve",
+    "description": "A group with the fixed count, and a round back to the automatic mode: the count stays from the group",
+    "group": {
+      "template": "do-zero",
+      "set": {
+        "queue.exitMode": "fixed-count",
+        "queue.fixedExitCount": 4
+      }
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "exitMode": "automatic"
+      }
+    },
+    "expectedChanges": {
+      "queue.exitMode": "automatic"
+    },
+    "expectedSources": {
+      "queue.exitMode": "round"
+    }
+  },
+  {
     "id": "S9-pelada",
     "kind": "resolve",
     "description": "Template pelada as the group, with a round layer: a leaf equal to the group still comes from the round",
@@ -856,6 +880,86 @@
     },
     "expectedSources": {
       "queue.exitCriterion": "round"
+    }
+  },
+  {
+    "id": "S10-round-queue.exitMode",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "exitMode": "whole-team"
+      }
+    },
+    "expectedChanges": {
+      "queue.exitMode": "whole-team"
+    },
+    "expectedSources": {
+      "queue.exitMode": "round"
+    }
+  },
+  {
+    "id": "S10-round-queue.fixedExitCount",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "fixedExitCount": 3
+      }
+    },
+    "expectedChanges": {
+      "queue.fixedExitCount": 3
+    },
+    "expectedSources": {
+      "queue.fixedExitCount": "round"
+    }
+  },
+  {
+    "id": "S10-round-queue.winnerExitEnabled",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "winnerExitEnabled": true
+      }
+    },
+    "expectedChanges": {
+      "queue.winnerExitEnabled": true
+    },
+    "expectedSources": {
+      "queue.winnerExitEnabled": "round"
+    }
+  },
+  {
+    "id": "S10-round-queue.winnerExitWins",
+    "kind": "resolve",
+    "description": "Every leaf overridden once at each level that takes it",
+    "group": {
+      "template": "do-zero"
+    },
+    "round": {
+      "schemaVersion": 1,
+      "queue": {
+        "winnerExitWins": 5
+      }
+    },
+    "expectedChanges": {
+      "queue.winnerExitWins": 5
+    },
+    "expectedSources": {
+      "queue.winnerExitWins": "round"
     }
   },
   {
@@ -1932,6 +2036,126 @@
     }
   },
   {
+    "id": "V2-queue.fixedExitCount-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.fixedExitCount": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "queue.fixedExitCount"
+    }
+  },
+  {
+    "id": "V2-queue.fixedExitCount-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.fixedExitCount": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-queue.fixedExitCount-24",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.fixedExitCount": 24
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-queue.fixedExitCount-25",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.fixedExitCount": 25
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "queue.fixedExitCount"
+    }
+  },
+  {
+    "id": "V2-queue.winnerExitWins-0",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.winnerExitWins": 0
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "queue.winnerExitWins"
+    }
+  },
+  {
+    "id": "V2-queue.winnerExitWins-1",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.winnerExitWins": 1
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-queue.winnerExitWins-10",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.winnerExitWins": 10
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V2-queue.winnerExitWins-11",
+    "kind": "parse-group",
+    "description": "Range edges",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.winnerExitWins": 11
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "queue.winnerExitWins"
+    }
+  },
+  {
     "id": "V3-scoring.bestOf-2",
     "kind": "parse-group",
     "description": "Allowed lists",
@@ -2085,6 +2309,36 @@
       "ok": false,
       "code": "settings.unknown-value",
       "path": "queue.exitCriterion"
+    }
+  },
+  {
+    "id": "V3-queue.exitMode-level",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.exitMode": "level"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.unknown-value",
+      "path": "queue.exitMode"
+    }
+  },
+  {
+    "id": "V3-queue.exitMode-fixed-count",
+    "kind": "parse-group",
+    "description": "Allowed lists",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "queue.exitMode": "fixed-count"
+      }
+    },
+    "expected": {
+      "ok": true
     }
   },
   {
@@ -3275,6 +3529,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": true,
       "queue.exitCriterion": "consecutive-matches",
+      "queue.exitMode": "automatic",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": true,
       "rotation.system": "livre",
       "rotation.ruleMode": "fivb-2025-28",
@@ -3319,6 +3577,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": true,
       "queue.exitCriterion": "consecutive-matches",
+      "queue.exitMode": "automatic",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": true,
       "rotation.system": "livre",
       "rotation.ruleMode": "fivb-2025-28",
@@ -3363,6 +3625,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": false,
       "queue.exitCriterion": "consecutive-matches",
+      "queue.exitMode": "automatic",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": true,
       "rotation.system": "5x1",
       "rotation.ruleMode": "fivb-2025-28",
@@ -3407,6 +3673,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": true,
       "queue.exitCriterion": "arrival-order",
+      "queue.exitMode": "whole-team",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": false,
       "rotation.system": "livre",
       "rotation.ruleMode": "fivb-2025-28",
@@ -3451,6 +3721,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": false,
       "queue.exitCriterion": "consecutive-matches",
+      "queue.exitMode": "automatic",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": false,
       "rotation.system": "livre",
       "rotation.ruleMode": "fivb-2025-28",
@@ -3504,6 +3778,10 @@
       "scoring.winMargin": 2,
       "queue.enabled": false,
       "queue.exitCriterion": "consecutive-matches",
+      "queue.exitMode": "automatic",
+      "queue.fixedExitCount": 2,
+      "queue.winnerExitEnabled": false,
+      "queue.winnerExitWins": 3,
       "rotation.enabled": true,
       "rotation.system": "5x1",
       "rotation.ruleMode": "fivb-2025-28",
