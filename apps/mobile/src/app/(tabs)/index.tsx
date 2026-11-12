@@ -73,7 +73,7 @@ export default function HomeScreen() {
       <GroupsStateView
         state={state}
         onRetry={retry}
-        emptyActions={[{ label: strings.groups.createGroup, onPress: goToCreateGroup }]}
+        onCreateGroup={goToCreateGroup}
         renderList={() => (
           <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={seeGroups} />
         )}

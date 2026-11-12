@@ -23,18 +23,32 @@ function refused(client: QueryClient, groupId: string, error: unknown): void {
   applyCacheEffects(client, conflictEffects(groupId, error));
 }
 
+function replacedWith(client: QueryClient, groupId: string) {
+  return (view: unknown) => {
+    applyCacheEffects(client, cacheEffectsOf({ type: "settingsReplaced", groupId, view }));
+  };
+}
+
+function templatesChangedFor(client: QueryClient, groupId: string) {
+  return () => {
+    applyCacheEffects(client, cacheEffectsOf({ type: "templatesChanged", groupId }));
+  };
+}
+
+function refusedBy(client: QueryClient, groupId: string) {
+  return (error: unknown) => {
+    refused(client, groupId, error);
+  };
+}
+
 /** The answer of a write is the whole merged document: it replaces the cache (D4). */
 export function updateSettingsMutation(api: SacouApi, client: QueryClient, groupId: string) {
   return {
     scope: settingsScope(groupId),
     mutationFn: async (layer: SettingsLayer) =>
       viewOrThrow(await unwrap(api.updateGroupSettings(groupId, layer))),
-    onSuccess: (view: unknown) => {
-      applyCacheEffects(client, cacheEffectsOf({ type: "settingsReplaced", groupId, view }));
-    },
-    onError: (error: unknown) => {
-      refused(client, groupId, error);
-    },
+    onSuccess: replacedWith(client, groupId),
+    onError: refusedBy(client, groupId),
   };
 }
 
@@ -43,36 +57,24 @@ export function applyTemplateMutation(api: SacouApi, client: QueryClient, groupI
     scope: settingsScope(groupId),
     mutationFn: async (choice: TemplateChoice) =>
       viewOrThrow(await unwrap(api.applyTemplate(groupId, choice))),
-    onSuccess: (view: unknown) => {
-      applyCacheEffects(client, cacheEffectsOf({ type: "settingsReplaced", groupId, view }));
-    },
-    onError: (error: unknown) => {
-      refused(client, groupId, error);
-    },
+    onSuccess: replacedWith(client, groupId),
+    onError: refusedBy(client, groupId),
   };
 }
 
 export function saveTemplateMutation(api: SacouApi, client: QueryClient, groupId: string) {
   return {
     mutationFn: (name: string) => unwrap(api.saveTemplate(groupId, name)),
-    onSuccess: () => {
-      applyCacheEffects(client, cacheEffectsOf({ type: "templatesChanged", groupId }));
-    },
-    onError: (error: unknown) => {
-      refused(client, groupId, error);
-    },
+    onSuccess: templatesChangedFor(client, groupId),
+    onError: refusedBy(client, groupId),
   };
 }
 
 export function deleteTemplateMutation(api: SacouApi, client: QueryClient, groupId: string) {
   return {
     mutationFn: (templateId: string) => unwrap(api.deleteTemplate(groupId, templateId)),
-    onSuccess: () => {
-      applyCacheEffects(client, cacheEffectsOf({ type: "templatesChanged", groupId }));
-    },
-    onError: (error: unknown) => {
-      refused(client, groupId, error);
-    },
+    onSuccess: templatesChangedFor(client, groupId),
+    onError: refusedBy(client, groupId),
   };
 }
 

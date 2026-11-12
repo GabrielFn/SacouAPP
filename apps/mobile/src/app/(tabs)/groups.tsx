@@ -43,7 +43,7 @@ export default function GroupsScreen() {
       <GroupsStateView
         state={state}
         onRetry={retry}
-        emptyActions={[{ label: strings.groups.createGroup, onPress: goToCreateGroup }]}
+        onCreateGroup={goToCreateGroup}
         renderList={(groups) => (
           <View style={{ gap: tokens.spacing.s10 }}>
             {groups.map((group) => (
