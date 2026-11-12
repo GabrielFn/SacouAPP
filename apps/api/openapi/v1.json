@@ -65,6 +65,157 @@
         }
       }
     },
+    "/v1/me/profile": {
+      "get": {
+        "tags": [
+          "GetMyProfileEndpoint"
+        ],
+        "operationId": "GetMyProfile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SaveMyProfileEndpoint"
+        ],
+        "operationId": "SaveMyProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveMyProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
     "/v1/groups": {
       "post": {
         "tags": [
@@ -2311,7 +2462,10 @@
           "memberType",
           "hasAccount",
           "isMe",
-          "joinedAt"
+          "joinedAt",
+          "nickname",
+          "primaryPosition",
+          "otherPositions"
         ],
         "type": "object",
         "properties": {
@@ -2334,6 +2488,25 @@
           "joinedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "nickname": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryPosition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrimaryPosition"
+              }
+            ]
+          },
+          "otherPositions": {
+            "type": "array"
           }
         },
         "additionalProperties": false
@@ -2367,6 +2540,41 @@
           },
           "memberType": {
             "$ref": "#/components/schemas/MemberType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MyProfileResponse": {
+        "required": [
+          "nickname",
+          "primaryPosition",
+          "otherPositions",
+          "suggestedLevel"
+        ],
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "primaryPosition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrimaryPosition"
+              }
+            ]
+          },
+          "otherPositions": {
+            "type": "array"
+          },
+          "suggestedLevel": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
           }
         },
         "additionalProperties": false
@@ -2407,6 +2615,7 @@
         },
         "additionalProperties": false
       },
+      "PrimaryPosition": {},
       "ProblemDetails": {
         "required": [
           "status",
@@ -2486,6 +2695,47 @@
         },
         "additionalProperties": false
       },
+      "SaveMyProfileRequest": {
+        "required": [
+          "nickname",
+          "primaryPosition",
+          "otherPositions",
+          "suggestedLevel"
+        ],
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryPosition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrimaryPosition"
+              }
+            ]
+          },
+          "otherPositions": {
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "suggestedLevel": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "SaveTemplateRequest": {
         "required": [
           "name"
@@ -2553,6 +2803,9 @@
     "groups.template-name-invalid",
     "groups.template-not-found",
     "groups.use-leave",
+    "identity.nickname-invalid",
+    "identity.profile-invalid",
+    "identity.profile-not-found",
     "identity.subject-invalid",
     "identity.user-not-registered",
     "sessions.attendance-disabled",
