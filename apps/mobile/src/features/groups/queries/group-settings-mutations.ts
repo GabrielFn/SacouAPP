@@ -11,7 +11,7 @@ import {
 } from "../../../services/query/invalidation";
 import { viewOrThrow } from "./group-settings-queries";
 
-/** One queue per group: TanStack runs the mutations of a scope one after the other (ADR 0045, D4). */
+/** One queue per group: TanStack runs the mutations of a scope one after the other (ADR 0049, D4). */
 export function settingsScope(groupId: string): { readonly id: string } {
   return { id: `settings-${groupId}` };
 }

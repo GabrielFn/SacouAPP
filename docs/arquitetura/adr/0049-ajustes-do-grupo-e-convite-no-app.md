@@ -1,4 +1,4 @@
-# ADR 0045 · Ajustes do grupo e convite no app
+# ADR 0049 · Ajustes do grupo e convite no app
 
 **Status:** aceito (10/11/2026), Parte 1. **Tarefa:** E4.5. Plano: [`E4.5.md`](../../estado/tarefas/E4.5.md). A Parte 2 (membros, convite e QR) acrescenta as decisões D7 abaixo.
 

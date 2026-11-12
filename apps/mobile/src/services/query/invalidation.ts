@@ -8,7 +8,7 @@ export type MutationEvent =
   | { readonly type: "createGroup" | "acceptInvite" }
   | { readonly type: "renameGroup" | "leaveGroup"; readonly groupId: string }
   | { readonly type: "createInvite" | "revokeInvite"; readonly groupId: string }
-  /** The server answered with the whole settings document: it replaces the cached one (ADR 0045). */
+  /** The server answered with the whole settings document: it replaces the cached one (ADR 0049). */
   | { readonly type: "settingsReplaced"; readonly groupId: string; readonly view: unknown }
   | { readonly type: "templatesChanged"; readonly groupId: string }
   /** A change of the settings was refused for lack of permission: the role is stale. */
@@ -90,7 +90,7 @@ export function isConflict(error: unknown): boolean {
   return apiError?.kind === "problem" && apiError.status === CONFLICT;
 }
 
-/** What a 409 makes stale, by the code of the rule it broke (ADR 0045, D5). */
+/** What a 409 makes stale, by the code of the rule it broke (ADR 0049, D5). */
 const CONFLICT_STALE: Readonly<Record<string, (groupId: string) => SacouQueryKey>> = {
   "groups.last-admin": queryKeys.members,
   "groups.invite-limit": queryKeys.invites,

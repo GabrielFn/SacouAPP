@@ -11,7 +11,7 @@ export const PERSISTED_CACHE_MAX_AGE_MS = DAYS_KEPT * MS_PER_DAY;
 const GROUP_KEY_LENGTH = 2;
 const CHILD_KEY_LENGTH = 3;
 
-/** What is kept under a group: the members and the settings (the venue is free text, ADR 0045). */
+/** What is kept under a group: the members and the settings (the venue is free text, ADR 0049). */
 const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings"]);
 
 /**
