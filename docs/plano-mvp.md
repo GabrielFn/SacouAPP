@@ -157,15 +157,15 @@ Acrescentadas para a base de conhecimento e a segurança:
 |---|---|---|---|
 | E4.1 | Expo, Expo Router, Unistyles com tokens e temas Sol/Noite | Componentes base iguais ao canvas | E0.1 |
 | E4.2 | Cliente da API gerado, TanStack Query, tratamento de erro e offline | Tipos sempre iguais aos da API | E3.1 |
-| E4.3 | Login, perfil rápido (onboarding) e conta | Telas 02, 27, 30 | E4.2 |
+| E4.3 | Login, perfil rápido (onboarding) e conta, com exportar e excluir | Telas 02, 27, 30, 30a, 30b | E4.2 |
 | E4.4 | Início, lista de grupos, notificações | Telas 03, 17, 28 | E4.2 |
-| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047); regra da fila (ADR 0048) e criar do zero | Telas 04, 04a, 05, 18, 18a, 19, 19a, 19b | E3.3 |
-| E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador | Telas 06, 20, 21, 26 | E3.4 |
+| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047); regra da fila (ADR 0048) e criar do zero | Telas 04, 04a, 05, 18, 18a, 19, 19a, 19b, 19c, 19d | E3.3 |
+| E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador e convidado | Telas 06, 20, 21, 21a, 26 | E3.4 |
 | E4.7 | Sorteio e pré-jogo | Telas 07, 08 | E3.6 |
 | E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |
 | E4.9 | Modo quadra offline (SQLite, tela ligada, vibração, trava) | Telas 09, 10; partida inteira em modo avião | E2.7 |
-| E4.10 | Menu, corrigir, fim de set e de partida, ponto individual | Telas 11, 23, 24, 25, 31 | E4.9 |
-| E4.11 | Sincronização a cada ponto, com sinal (ADR 0046). Placar ao vivo: pós-piloto | Cada ponto chega ao servidor logo depois de gravado; volta da internet sem perder pontos | E3.7 |
+| E4.10 | Menu, corrigir, fim de set e de partida, ponto individual | Telas 11, 23, 23a, 24, 25, 31 | E4.9 |
+| E4.11 | Sincronização a cada ponto, com sinal (ADR 0046). Placar ao vivo: pós-piloto | Cada ponto chega ao servidor logo depois de gravado; volta da internet sem perder pontos; assumir a quadra e pontos recusados nas telas 09a, 09b e 09c (E3.8) | E3.7 |
 | E4.12 | Resumo da rodada sem IA: saldo, vitórias, sequência e MVP do dia (tela 12 sem o texto da IA). Texto da IA e story (tela 13): pós-piloto (ADR 0046) | Tela 12 com os números da E3.9, iguais aos conferidos à mão na rodada simulada da E2.9 | E3.9 |
 | E4.13 | Perfil e cartinha (com avatar no piloto; foto pós-piloto, ADR 0046) | Telas 14, 15 | E3.9 |
 | E4.14 | **Pós-piloto (ADR 0046).** Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |

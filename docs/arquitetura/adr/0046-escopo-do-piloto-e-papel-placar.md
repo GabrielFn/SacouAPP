@@ -47,7 +47,7 @@ A paisagem continua (E4.17), porque o celular fica apoiado. O aviso de bateria a
 
 > **Ajuste (11/11/2026, Gabriel):** o Resumo da rodada sem IA voltou para o piloto. Sem ele, o jogador só via os números depois do jogo na tela de fim de partida e no perfil. A E4.12 mostra saldo, vitórias, sequência e MVP do dia, a partir da E3.9. Ficam fora só o texto da IA e o story.
 
-> **Telas do piloto (12/11/2026):** `design/mvp/` e o canvas "Sacou — Telas do MVP (piloto)" têm só o que entra no piloto: sem story, texto da IA, foto da cartinha, Pix, paywall, placar ao vivo, entrega por QR e nota ou faixa na cartinha. Ainda faltam desenhar a confirmação de assumir a quadra, o aviso de pontos recusados, o aviso de bateria e a paisagem.
+> **Telas do piloto (12/11/2026):** `design/mvp/` e o canvas "Sacou — Telas do MVP (piloto)" têm só o que entra no piloto: sem story, texto da IA, foto da cartinha, Pix, paywall, placar ao vivo, entrega por QR e nota ou faixa na cartinha. A confirmação de assumir a quadra (09a), o celular que perdeu o placar (09b) e os pontos recusados (09c) foram aprovados em 12/11/2026. Ainda faltam desenhar o aviso de bateria e a paisagem.
 
 ## Alternativas descartadas
 
