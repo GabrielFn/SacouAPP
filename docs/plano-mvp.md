@@ -136,10 +136,10 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.3 | Configuração herdada (grupo → rodada → partida) e modelos | Resolver testado com sobrescritas | E3.2 |
 | E3.4 | Rodadas, recorrência, presença, espera com concorrência, mensalista e avulso | Duas confirmações na última vaga: uma vai para a espera | E3.3 |
 | E3.5 | Convidado sem conta (entra como avulso). Reivindicação por link: pós-piloto (ADR 0046) | Convidado joga e aparece nas estatísticas da rodada | E3.4 |
-| E3.6 | Sorteio equilibrado com travas e reservas | Diferença de média mínima em casos de teste | E3.4 |
+| E3.6 | Sorteio equilibrado com travas e reservas, pela nota do admin, ou a sugestão, ou 3,0 (ADR 0047) | Diferença de média mínima em casos de teste | E3.4 |
 | E3.7 | Stream da quadra: sincronização idempotente, evento a evento. SignalR ao vivo: pós-piloto (ADR 0046) | Reenvio não duplica | E2.10 |
 | E3.8 | Placar assume a quadra: Placar, Co-admin ou Admin assume a escrita do stream com confirmação (último ponto recebido e placar); um celular escreve por vez (ADR 0046) | Celular antigo é recusado após a troca; os eventos dele não enviados são recusados e o app avisa quantos pontos não entraram | E3.7 |
-| E3.9 | Projeções de estatísticas e MVP. Rating Glicko-2: pós-piloto (ADR 0046) | Correção recalcula tudo | E3.7 |
+| E3.9 | Projeções de estatísticas e MVP; rating OpenSkill por partida, calculado e escondido no piloto, com porte para C# e golden da `openskill` de TS (ADR 0047) | Correção recalcula tudo; nenhuma rota devolve o rating ao jogador | E3.7 |
 | E3.10 | **Pós-piloto (ADR 0046).** Pagamentos: Pix copia e cola, "já paguei", confirmação | Fluxo completo testado | E3.4, E1.4 |
 | E3.11 | Outbox, Hangfire e push (Expo) | Notificação de promoção da espera chega uma vez | E3.4 |
 | E3.12 | Página web da rodada (Razor) com prévia no WhatsApp e login | Prévia aparece; VOU funciona logado e deslogado | E3.4 |
@@ -147,7 +147,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.14 | **Pós-piloto (ADR 0046).** Fotos: upload para o R2 e denúncia | Sem EXIF; só o recorte é salvo | acesso Cloudflare |
 | E3.15 | **Pós-piloto (ADR 0046).** Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
-| E3.17 | Perfil do jogador: apelido, posições e nível (API) | Perfil salvo e lido por `MemberId`/`UserId`, sem dado pessoal em evento | E3.2 |
+| E3.17 | Perfil do jogador: apelido, posições e nível sugerido (API); nota do membro definida pelo Admin ou Co-admin, privada (ADR 0047) | Perfil salvo e lido por `MemberId`/`UserId`, sem dado pessoal em evento | E3.2 |
 
 ### E4 · App (M3–M6)
 
@@ -157,7 +157,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.2 | Cliente da API gerado, TanStack Query, tratamento de erro e offline | Tipos sempre iguais aos da API | E3.1 |
 | E4.3 | Login, perfil rápido (onboarding) e conta | Telas 02, 27, 30 | E4.2 |
 | E4.4 | Início, lista de grupos, notificações | Telas 03, 17, 28 | E4.2 |
-| E4.5 | Criar grupo, ajustes "Como jogamos", membros | Telas 04, 05, 18, 19 | E3.3 |
+| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047; layout com o Gabriel, sem tela no canvas) | Telas 04, 05, 18, 19 | E3.3 |
 | E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador | Telas 06, 20, 21, 26 | E3.4 |
 | E4.7 | Sorteio e pré-jogo | Telas 07, 08 | E3.6 |
 | E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |

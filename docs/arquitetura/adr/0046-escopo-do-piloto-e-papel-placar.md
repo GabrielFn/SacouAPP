@@ -16,7 +16,7 @@ Voltam depois do piloto, com dados reais de uso:
 |---|---|
 | Texto do resumo com IA e story | E3.13 e parte da E4.12. O Resumo da rodada sem IA (tela 12) fica no piloto |
 | Foto da cartinha: upload, denúncia e recorte nativo | E3.14, E4.14. A cartinha do piloto usa avatar |
-| Rating Glicko-2 | Parte da E3.9. Ficam as projeções de estatísticas e o MVP do dia |
+| ~~Rating Glicko-2~~ | Trocado pelo OpenSkill, calculado e escondido no piloto ([ADR 0047](0047-nota-do-admin-e-rating-openskill.md)) |
 | Placar ao vivo com SignalR | Parte da E3.7 e da E4.11. Fica a sincronização |
 | Planos e paywall | E3.15, E4.15. O Pro já é liberado no piloto |
 | Pix com "já paguei" e confirmação | E3.10 |
