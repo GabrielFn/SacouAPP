@@ -164,7 +164,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.9 | Modo quadra offline (SQLite, tela ligada, vibração, trava) | Telas 09, 10; partida inteira em modo avião | E2.7 |
 | E4.10 | Menu, corrigir, fim de set e de partida, ponto individual | Telas 11, 23, 24, 25, 31 | E4.9 |
 | E4.11 | Sincronização a cada ponto, com sinal (ADR 0046). Placar ao vivo: pós-piloto | Cada ponto chega ao servidor logo depois de gravado; volta da internet sem perder pontos | E3.7 |
-| E4.12 | **Pós-piloto (ADR 0046).** Resumo e story | Telas 12, 13; imagem compartilhável | E3.13 |
+| E4.12 | Resumo da rodada sem IA: saldo, vitórias, sequência e MVP do dia (tela 12 sem o texto da IA). Texto da IA e story (tela 13): pós-piloto (ADR 0046) | Tela 12 com os números da E3.9, iguais aos conferidos à mão na rodada simulada da E2.9 | E3.9 |
 | E4.13 | Perfil e cartinha (com avatar no piloto; foto pós-piloto, ADR 0046) | Telas 14, 15 | E3.9 |
 | E4.14 | **Pós-piloto (ADR 0046).** Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |
 | E4.15 | **Pós-piloto (ADR 0046).** Paywall (informativo no piloto) | Tela 29 | E3.15 |
