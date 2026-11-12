@@ -1,28 +1,12 @@
 import { readFileSync } from "node:fs";
 
-import { describe, expect, test } from "vitest";
+import { describe } from "vitest";
 
-import type { CourtSessionState } from "../score/types.js";
-import { planNextMatch } from "./plan-next-match.js";
-import type { NextMatchInput } from "./types.js";
+import { type PlanCase, testPlanGolden } from "./queue-golden.test.fixture.js";
 
-interface PlanCase {
-  readonly id: string;
-  readonly input: {
-    readonly state: CourtSessionState;
-    readonly criterion: string;
-    readonly criterionInput: unknown;
-    readonly playersPerTeam: number;
-  };
-  readonly expected: unknown;
-}
-
-function readCases(): readonly PlanCase[] {
-  const url = new URL("../../golden/queue-plans.json", import.meta.url);
-  return JSON.parse(readFileSync(url, "utf8")) as readonly PlanCase[];
-}
-
-const CASES = readCases();
+const CASES = JSON.parse(
+  readFileSync(new URL("../../golden/queue-plans.json", import.meta.url), "utf8"),
+) as readonly PlanCase[];
 
 /** Literal, never read from the file: a case that disappears must fail. */
 const EXPECTED_IDS: readonly string[] = [
@@ -60,23 +44,6 @@ const EXPECTED_IDS: readonly string[] = [
   "r-without-a-finished-match",
 ];
 
-function planCase({ input }: PlanCase) {
-  const { state, ...choice } = input;
-  // The file holds criteria and inputs the type forbids, as the screen or a hostile caller may.
-  const planned = planNextMatch(state, choice as NextMatchInput);
-  return planned.ok ? { ok: true, ...planned.value } : { ok: false, ...planned.error };
-}
-
 describe("queue plans golden", () => {
-  test.each(CASES)("$id", (goldenCase) => {
-    const outcome = planCase(goldenCase);
-
-    expect(outcome).toStrictEqual(goldenCase.expected);
-    // Key order is part of the contract with the C# port.
-    expect(JSON.stringify(outcome)).toBe(JSON.stringify(goldenCase.expected));
-  });
-
-  test("has exactly the expected cases", () => {
-    expect(CASES.map(({ id }) => id)).toStrictEqual(EXPECTED_IDS);
-  });
+  testPlanGolden(CASES, EXPECTED_IDS);
 });
