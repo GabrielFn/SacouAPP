@@ -14,7 +14,7 @@ Voltam depois do piloto, com dados reais de uso:
 
 | O que sai | Tarefas |
 |---|---|
-| Resumo com IA e story | E3.13, E4.12 |
+| Texto do resumo com IA e story | E3.13 e parte da E4.12. O Resumo da rodada sem IA (tela 12) fica no piloto |
 | Foto da cartinha: upload, denúncia e recorte nativo | E3.14, E4.14. A cartinha do piloto usa avatar |
 | Rating Glicko-2 | Parte da E3.9. Ficam as projeções de estatísticas e o MVP do dia |
 | Placar ao vivo com SignalR | Parte da E3.7 e da E4.11. Fica a sincronização |
@@ -44,6 +44,8 @@ Com sinal, o app envia cada evento logo depois de gravá-lo no SQLite (E4.11), e
 ### 4. Modo quadra: paisagem e aviso de bateria
 
 A paisagem continua (E4.17), porque o celular fica apoiado. O aviso de bateria abaixo de 20% continua, mas sugere ligar no carregador ou na power bank em vez de entregar o placar (muda `produto.md:139`).
+
+> **Ajuste (11/11/2026, Gabriel):** o Resumo da rodada sem IA voltou para o piloto. Sem ele, o jogador só via os números depois do jogo na tela de fim de partida e no perfil. A E4.12 mostra saldo, vitórias, sequência e MVP do dia, a partir da E3.9. Ficam fora só o texto da IA e o story.
 
 ## Alternativas descartadas
 
