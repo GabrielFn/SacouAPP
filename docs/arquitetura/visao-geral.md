@@ -125,6 +125,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0046](adr/0046-escopo-do-piloto-e-papel-placar.md) | Escopo do piloto, Placar assume a quadra e sincronização a cada ponto |
 | [0047](adr/0047-nota-do-admin-e-rating-openskill.md) | Nota definida pelo admin e rating OpenSkill por partida, escondido no piloto |
 | [0048](adr/0048-modos-de-fila-votacao-e-areia.md) | Modos de fila, votação do MVP e areia rei da quadra no MVP |
+| [0049](adr/0049-ajustes-do-grupo-e-convite-no-app.md) | Ajustes do grupo salvos na hora, criar grupo e convite no app |
 
 ## Matriz: `decisoes.md` → ADR
 
