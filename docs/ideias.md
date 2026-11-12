@@ -8,3 +8,5 @@
 - Modos da fila além do automático: "sempre parcial com N fixo", "sempre time inteiro" e "vencedor sai após X vitórias". Fora do MVP por decisão do Gabriel em 03/11/2026 (E2.6, ADR 0029): o motor só tem o modo automático, e o interruptor "Saída parcial automática" saiu da tela de ajustes do grupo.
 - Critério "nível" para escolher quem sai na saída parcial (equilíbrio de nível). Fora do MVP por decisão do Gabriel em 03/11/2026 (E2.6, ADR 0029): o nível é privado e nunca entra no evento nem na decisão da fila; o chip saiu da tela de ajustes do grupo.
 - Grupos, fora da E3.2 (ADR 0040): apagar grupo, transferir a propriedade e banir. Readmitir quem foi removido pelo menu "⋯" da tela 19 (decisão do Gabriel na pergunta 19) entra numa tarefa futura. Teto de usos por link de convite (hoje o teto é o de membros do grupo). Nota para a E3.16: o último admin que apaga a conta deixa o grupo sem admin, e a E3.16 decide entre promover alguém ou deixá-lo assim.
+
+- **Pontos recusados ao assumir a quadra** (ADR 0046): guardar os eventos do celular antigo que chegaram depois da troca para o admin revisar e aplicar, em vez de só avisar.

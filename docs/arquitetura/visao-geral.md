@@ -122,6 +122,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0041](adr/0041-configuracao-herdada-e-modelos.md) | Configuração herdada: catálogo JSON único, camadas parciais, resolver por folha, modelos e golden TS/C# |
 | [0043](adr/0043-rodadas-presenca-e-espera.md) | Rodadas, recorrência semanal em fuso fixo, presença com espera por sequência, mensalista e avulso |
 | [0045](adr/0045-por-que-fatias-verticais.md) | Por que fatias verticais no back-end, e não camadas técnicas |
+| [0046](adr/0046-escopo-do-piloto-e-papel-placar.md) | Escopo do piloto, Placar assume a quadra e sincronização a cada ponto |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -141,7 +142,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 18 | Foto da cartinha | 0016 |
 | 19 | Login | 0014, 0036 |
 | 20 | Planos | 0015 |
-| 21 | Placar por QR | 0013 |
+| 21 | Placar assume a quadra (antes por QR) | 0013, 0046 |
 | 25 | Back-end | 0008, 0005, 0045 |
 | 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0038 |
 | 27 | Padrões | 0011, 0029, 0035, 0039, 0040 |
