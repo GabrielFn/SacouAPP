@@ -8,10 +8,10 @@ import { useTheme } from "../../../theme/theme-context";
 import { Button } from "../../../ui/Button";
 import { Screen } from "../../../ui/Screen";
 import { StepHeader } from "../../../ui/StepHeader";
-import { Text } from "../../../ui/Text";
 import { READY_TEMPLATES, templateOrigin } from "../model/custom-blocks";
 import { createGroupCustomHref, createGroupDetailsHref, groupsHref } from "../navigation";
 import { FromScratchLink } from "./FromScratchLink";
+import { StepIntro } from "./StepIntro";
 import { TemplateOption } from "./TemplateOption";
 
 const { step1 } = strings.createGroup;
@@ -44,12 +44,7 @@ export function CreateGroupTemplateScreen() {
           else router.replace(groupsHref);
         }}
       />
-      <View style={{ gap: tokens.spacing.xs }}>
-        <Text variant="display" displaySize="displayTitleSmall" accessibilityRole="header">
-          {step1.title}
-        </Text>
-        <Text variant="muted">{step1.subtitle}</Text>
-      </View>
+      <StepIntro title={step1.title} subtitle={step1.subtitle} />
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel={step1.radiogroup}

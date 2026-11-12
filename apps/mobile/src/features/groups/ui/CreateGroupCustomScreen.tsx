@@ -7,11 +7,11 @@ import { useTheme } from "../../../theme/theme-context";
 import { Button } from "../../../ui/Button";
 import { Screen } from "../../../ui/Screen";
 import { StepHeader } from "../../../ui/StepHeader";
-import { Text } from "../../../ui/Text";
 import { customBlocksReducer, initialCustomBlocksState } from "../model/custom-blocks.reducer";
 import { CUSTOM_BLOCKS, scratchOrigin } from "../model/custom-blocks";
 import { createGroupDetailsHref, createGroupHref } from "../navigation";
 import { CustomBlockCard } from "./CustomBlockCard";
+import { StepIntro } from "./StepIntro";
 
 const { custom } = strings.createGroup;
 
@@ -38,12 +38,7 @@ export function CreateGroupCustomScreen() {
           else router.replace(createGroupHref);
         }}
       />
-      <View style={{ gap: tokens.spacing.xs }}>
-        <Text variant="display" displaySize="displayTitleSmall" accessibilityRole="header">
-          {custom.title}
-        </Text>
-        <Text variant="muted">{custom.subtitle}</Text>
-      </View>
+      <StepIntro title={custom.title} subtitle={custom.subtitle} />
       <View style={{ gap: tokens.spacing.s }}>
         {CUSTOM_BLOCKS.map((block) => (
           <CustomBlockCard

@@ -1,9 +1,10 @@
 import { useId } from "react";
-import { TextInput, View, type TextInputProps } from "react-native";
+import { TextInput, type TextInputProps } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
 import { fontFamilies } from "../theme/tokens.data";
 
+import { FieldFrame } from "./FieldFrame";
 import { Text } from "./Text";
 
 export interface TextFieldProps extends Pick<
@@ -20,10 +21,7 @@ export function TextField({ label, help, error, ...inputProps }: TextFieldProps)
   const { colors, tokens } = useTheme();
   const helpId = useId();
   return (
-    <View style={{ gap: tokens.spacing.xs }}>
-      <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small }}>
-        {label}
-      </Text>
+    <FieldFrame label={label}>
       <TextInput
         {...inputProps}
         accessibilityLabel={label}
@@ -51,6 +49,6 @@ export function TextField({ label, help, error, ...inputProps }: TextFieldProps)
           {help}
         </Text>
       ) : null}
-    </View>
+    </FieldFrame>
   );
 }

@@ -13,8 +13,6 @@ export const createGroupStrings = {
     subtitle:
       "Tudo começa desligado. Ligue o que o grupo usa; dá pra mudar depois em Como jogamos.",
     continue: "Continuar",
-    expand: (block: string) => `Abrir ${block}`,
-    collapse: (block: string) => `Fechar ${block}`,
     blocks: {
       attendance: {
         title: "Presença e vagas",

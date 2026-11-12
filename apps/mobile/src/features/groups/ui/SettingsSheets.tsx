@@ -7,17 +7,17 @@ import { TextSheet } from "./TextSheet";
 
 const { sheets, fields } = strings.settings;
 
-interface ModelProps {
-  readonly model: GroupSettingsScreenModel;
-}
-
 export interface SettingsSheetsProps {
   readonly model: GroupSettingsScreenModel;
   readonly ready: SettingsReady;
 }
 
+export interface FieldSheetProps {
+  readonly model: GroupSettingsScreenModel;
+}
+
 /** The sheet of one number, amount or text of a field; closed unless the reducer says "field". */
-function FieldSheet({ model }: ModelProps) {
+function FieldSheet({ model }: FieldSheetProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "field") return null;
   return (
@@ -35,7 +35,11 @@ function FieldSheet({ model }: ModelProps) {
   );
 }
 
-function SaveTemplateSheet({ model }: ModelProps) {
+export interface SaveTemplateSheetProps {
+  readonly model: GroupSettingsScreenModel;
+}
+
+function SaveTemplateSheet({ model }: SaveTemplateSheetProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "save-template") return null;
   return (
@@ -55,7 +59,11 @@ function SaveTemplateSheet({ model }: ModelProps) {
   );
 }
 
-function DayAndTimeSheet({ model }: ModelProps) {
+export interface DayAndTimeSheetProps {
+  readonly model: GroupSettingsScreenModel;
+}
+
+function DayAndTimeSheet({ model }: DayAndTimeSheetProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "schedule") return null;
   return (

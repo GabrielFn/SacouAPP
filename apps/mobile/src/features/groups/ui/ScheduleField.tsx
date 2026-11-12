@@ -1,7 +1,8 @@
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
+import { FieldFrame } from "../../../ui/FieldFrame";
 import { Text } from "../../../ui/Text";
 
 export interface ScheduleFieldProps {
@@ -17,10 +18,7 @@ export interface ScheduleFieldProps {
 export function ScheduleField({ label, valueText, chosen, error, onPress }: ScheduleFieldProps) {
   const { colors, tokens } = useTheme();
   return (
-    <View style={{ gap: tokens.spacing.xs }}>
-      <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small }}>
-        {label}
-      </Text>
+    <FieldFrame label={label}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${valueText}`}
@@ -51,6 +49,6 @@ export function ScheduleField({ label, valueText, chosen, error, onPress }: Sche
           {error}
         </Text>
       ) : null}
-    </View>
+    </FieldFrame>
   );
 }

@@ -146,7 +146,11 @@ export function Logo({ size }: LogoProps) {
 
 const CHEVRON_STROKE_WIDTH = 2.2;
 
-export function ChevronDownIcon({ color }: IconProps) {
+export interface ChevronProps extends IconProps {
+  readonly path: string;
+}
+
+function Chevron({ color, path }: ChevronProps) {
   const { colors, tokens } = useTheme();
   return (
     <StrokeIcon
@@ -154,20 +158,15 @@ export function ChevronDownIcon({ color }: IconProps) {
       size={tokens.sizes.chevronIcon}
       strokeWidth={CHEVRON_STROKE_WIDTH}
     >
-      <Path d="M6 9l6 6 6-6" />
+      <Path d={path} />
     </StrokeIcon>
   );
 }
 
+export function ChevronDownIcon({ color }: IconProps) {
+  return <Chevron color={color} path="M6 9l6 6 6-6" />;
+}
+
 export function ChevronRightIcon({ color }: IconProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <StrokeIcon
-      color={color ?? colors.textMuted}
-      size={tokens.sizes.chevronIcon}
-      strokeWidth={CHEVRON_STROKE_WIDTH}
-    >
-      <Path d="M9 6l6 6-6 6" />
-    </StrokeIcon>
-  );
+  return <Chevron color={color} path="M9 6l6 6-6 6" />;
 }

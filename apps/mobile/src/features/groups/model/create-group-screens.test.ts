@@ -76,7 +76,7 @@ describe("screen 04a", () => {
       const field = SETTINGS_CATALOG.fields.find(({ path }) => path === `${block}.enabled`);
       expect(field?.type).toBe("boolean");
     });
-    expect(CUSTOM_BLOCKS.map(String)).not.toContain("money");
+    expect([...CUSTOM_BLOCKS]).not.toContain("money");
   });
 
   test("every block has a title, a summary and a text", () => {
@@ -115,7 +115,8 @@ describe("screen 05", () => {
 
 describe("screen 18", () => {
   test("there is no money block and no money text", () => {
-    expect(SETTINGS_SCREEN.map(({ block }) => String(block))).not.toContain("money");
+    const blocks: readonly string[] = SETTINGS_SCREEN.map(({ block }) => block);
+    expect(blocks).not.toContain("money");
     expect(Object.keys(fields).filter((path) => path.startsWith("money."))).toEqual([]);
     expect(Object.keys(strings.settings.blocks)).not.toContain("money");
   });
