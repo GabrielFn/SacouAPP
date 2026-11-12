@@ -23,7 +23,7 @@ public sealed class GroupSettingsSchemaTests(IntegrationDatabase database) : IAs
         await using var connection = await OpenAsync();
 
         Assert.Equal(
-            ["20261109143655_CreateGroups", "20261110054747_AddGroupSettings"],
+            ["20261109143655_CreateGroups", "20261110054747_AddGroupSettings", "20261112120000_AddQueueExitModeSettings"],
             await ReadAsync(connection, "SELECT \"MigrationId\" FROM groups.__ef_migrations_history ORDER BY \"MigrationId\""));
         Assert.Contains(
             "ix_saved_templates_group",

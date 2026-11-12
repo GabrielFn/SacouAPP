@@ -1,6 +1,6 @@
 # Fila da quadra: "quem perde sai" com saída parcial
 
-Regras da fila de uma `CourtSession` (E2.6, [ADR 0029](../arquitetura/adr/0029-fila-da-quadra.md); modos da E2.12, [ADR 0048](../arquitetura/adr/0048-modos-de-fila-votacao-e-areia.md)). Código em `packages/match-engine/src/queue/`; casos em `packages/match-engine/golden/queue-events.json`, `queue-plans.json` e `queue-modes.json`. Eventos em [`eventos.md`](eventos.md).
+Regras da fila de uma `CourtSession` (E2.6, [ADR 0029](../arquitetura/adr/0029-fila-da-quadra.md); modos da E2.12, [ADR 0048](../arquitetura/adr/0048-modos-de-fila-votacao-e-areia.md) e [ADR 0050](../arquitetura/adr/0050-modos-de-fila.md)). Código em `packages/match-engine/src/queue/`; casos em `packages/match-engine/golden/queue-events.json`, `queue-plans.json` e `queue-modes.json`. Eventos em [`eventos.md`](eventos.md).
 
 ## A fila
 
@@ -40,7 +40,7 @@ Ao fim de uma partida, o plano da próxima parte da última partida terminada:
 
 `arrivalOrder` precisa ter todos do time que sai; `drawOrder` é esse time inteiro, em outra ordem. Entrada inválida dá `invalid-exit-choice`. O critério só é conferido quando alguém sai pela saída parcial: com ninguém esperando, um critério inválido não reprova o plano. O critério por nível ficou fora do MVP, e o nível nunca entra na decisão (`docs/ideias.md`).
 
-## Modos de quem sai (E2.12, ADR 0048)
+## Modos de quem sai (E2.12, ADR 0048 e ADR 0050)
 
 O grupo escolhe um modo (`queue.exitMode`) e, à parte, o "vencedor também sai" (`queue.winnerExitEnabled`, `queue.winnerExitWins`). Os três vêm da configuração resolvida como entrada do `planNextMatch`, como o critério: **não vão para evento nenhum**, porque o `MatchStarted` seguinte grava o resultado (fila, times e rotação inteiros). Logs antigos continuam válidos, sem mudar `schemaVersion` nem `rulesVersion`.
 
@@ -63,6 +63,8 @@ Em todos os modos valem a regra 1 (sem vencedor ou ninguém esperando: ninguém 
 - **Ninguém esperando:** o vencedor fica e a contagem continua (4, 5...): ele sai no primeiro plano em que houver alguém esperando.
 - **Critério do vencedor:** usa o mesmo critério do grupo, com a entrada própria `winnerCriterionInput` (para `draw`, um sorteio só do vencedor; para `manual`, a escolha só dele). Ausente quando o vencedor sai pela saída parcial: `invalid-exit-choice`. Presente sem uso: ignorada.
 - O plano diz `winnerLeaving: { side, streak }` quando dispara, para a tela 11 mostrar "saiu após 3 vitórias".
+- **Plano:** `enteringTeams` lista os lados em que entra time novo (`a` antes de `b`), com a rotação a montar; cada saída parcial diz o `side`; `exits` vem com o lado `a` primeiro e, no lado, na ordem do time.
+- **Recusas:** modo desconhecido ou `count` fora de 1 a 24 dá `invalid-exit-mode`; `wins` fora de 1 a 10 dá `invalid-winner-exit`. Ordem: partida aberta, sem partida terminada, `playersPerTeam`, modo, vencedor, critério (só quando alguém sai pela saída parcial) e, por fim, a fila acima de 96.
 
 ## Cenário da revisão (`revisao-mvp.md:28`; tela 11)
 

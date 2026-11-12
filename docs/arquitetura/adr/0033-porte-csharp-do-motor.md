@@ -2,7 +2,7 @@
 
 **Status:** aceito (03/11/2026). **Tarefa:** E2.10. Plano em [`docs/estado/tarefas/E2.10.md`](../../estado/tarefas/E2.10.md). Cumpre os contratos C# dos ADRs [0022](0022-event-envelope-replay.md), [0023](0023-placar-e-catalogo-de-eventos.md), [0024](0024-saque-e-rotacao-derivados.md), [0026](0026-posicoes-no-saque.md), [0027](0027-banco-manual.md), [0028](0028-libero-ligado.md), [0029](0029-fila-da-quadra.md), [0030](0030-correcoes-da-linha-do-tempo.md), [0031](0031-ponto-individual.md) e [0032](0032-estatisticas-por-jogador.md), sobre a base do [ADR 0025](0025-json-compartilhado-no-csharp.md).
 
-**Aceite:** TS e C# produzem o mesmo estado nos 14 golden de `packages/match-engine/golden/` (`queue-plans.json` fica fora, ADR 0029), lidos pelo caminho como recurso embutido, sem cópia, cada um com lista literal de IDs no teste. O motor TS não mudou durante o porte.
+**Aceite:** TS e C# produzem o mesmo estado nos 14 golden de `packages/match-engine/golden/` (`queue-plans.json` fica fora, ADR 0029; o [ADR 0050](0050-modos-de-fila.md) traz o planejador e o `queue-modes.json` para o C# na E2.12), lidos pelo caminho como recurso embutido, sem cópia, cada um com lista literal de IDs no teste. O motor TS não mudou durante o porte.
 
 ## Decisões (D1 a D14 do plano)
 
