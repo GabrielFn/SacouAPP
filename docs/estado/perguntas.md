@@ -13,6 +13,11 @@
 28. Saudação do Início (E4.4, 10/11/2026): "Fala!" sem o nome até existir o perfil (E3.17). **Recomendação e padrão adotado.**
 29. Entrada das notificações (E4.4, 10/11/2026): um sino no cabeçalho do Início abre a tela 28; o canvas não tem esse sino. **Recomendação e padrão adotado.**
 26. Admin reduz as vagas com a lista cheia (E3.4, 10/11/2026): ninguém sai da lista; a espera só anda quando sobrar vaga. **Recomendação e padrão adotado.**
+34. Interruptores da tela 04a (E4.5, 12/11/2026): a tela tem "Placar" e "Jogo", mas o catálogo só tem `scoring.enabled`. **Recomendação e padrão adotado: um bloco só, "Jogo", como na tela 18.**
+35. Página do link de convite (E4.5, 12/11/2026): era da E4.16, que saiu do piloto. **Recomendação e padrão adotado: a página web da E3.12 ganha a rota do convite.**
+36. Fila, vencedor bate X vitórias com só um time esperando (E2.12): (1) sai o vencedor e o perdedor fica; (2) sai o perdedor, como sempre. **Recomendação e padrão adotado: 1** (com três times na noite, é a única em que o interruptor faz efeito).
+37. Fila, "sempre o time inteiro" com só avulsos esperando (E2.12): (1) remonta o time com os avulsos e completa com quem perdeu; (2) ninguém sai; (3) igual ao automático. **Recomendação e padrão adotado: 1.**
+38. "Vencedor também sai" em grupo novo (E2.12): (1) desligado, com X = 3 pronto para ligar; (2) ligado, como no exemplo da tela 18. **Recomendação e padrão adotado: 1.**
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
 
 ## Respondidas
