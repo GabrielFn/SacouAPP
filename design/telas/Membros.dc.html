@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Membros e papéis</title>
+<title>Membros · nota do admin</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,7 +24,11 @@ a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
 .nm{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600}
 .ds{font-size:13px;color:#4A5566;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl{height:22px;padding:0 7px;border-radius:6px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;box-sizing:border-box}
-.lv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;width:30px;text-align:right}
+.nota{min-width:52px;height:48px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.nota b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;line-height:1}
+.nota small{font-size:11px;font-weight:600;line-height:1.2}
+.sug{border:1.5px dashed #9A6A00;background:#FFF8E1;color:#5C3F00}
+.sem{border:1.5px dashed rgba(15,27,45,0.4);color:#4A5566}
 .more{width:44px;height:48px;display:flex;align-items:center;justify-content:center;color:#4A5566;flex:none}
 </style>
 </helmet>
@@ -48,9 +52,15 @@ a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
     <button role="tab" aria-selected="false">Convites</button>
   </div>
 
+  <a href="RevisarNotas.dc.html" style="margin: 10px 16px 0; min-height: 48px; padding: 0 12px; border-radius: 14px; background: #FFF8E1; border: 1.5px solid #E0A400; display: flex; align-items: center; gap: 10px; box-sizing: border-box">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <span style="flex: 1; font-size: 14px"><b>3 notas para confirmar.</b> O sorteio usa a sugestão até lá.</span>
+    <span style="font-size: 14px; font-weight: 700; color: #1340C0">Revisar</span>
+  </a>
+
   <p style="margin: 10px 20px 8px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4A5566">
     <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-    O número é o nível. <b style="color: #0F1B2D">Só você vê.</b>
+    A nota é usada no sorteio. <b style="color: #0F1B2D">Só admins veem.</b>
   </p>
 
   <div style="padding: 0 16px" role="tabpanel" aria-label="Mensalistas">
@@ -58,56 +68,50 @@ a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
       <li>
         <span class="av" aria-hidden="true" style="background: #0F1B2D; color: #F6F1E7">JO</span>
         <span class="who"><span class="nm">João <span class="rl" style="background: #0F1B2D; color: #F6F1E7">Admin</span></span><span class="ds">Ponteiro · mensalista · você</span></span>
-        <span class="lv">3,8</span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de João: 3,5. Alterar"><b>3,5</b></a>
         <button class="more" aria-label="Opções de João"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true">MA</span>
         <span class="who"><span class="nm">Marcos <span class="rl" style="border: 1.5px solid #0F1B2D">Co-admin</span></span><span class="ds">Oposto · mensalista</span></span>
-        <span class="lv">2,9</span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Marcos: 3,0. Alterar"><b>3,0</b></a>
         <button class="more" aria-label="Opções de Marcos"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
-      </li>
-      <li>
-        <span class="av" aria-hidden="true">LI</span>
-        <span class="who"><span class="nm">Lia <span class="rl" style="background: #E3EAFF; color: #1340C0">Placar</span></span><span class="ds">Central · mensalista</span></span>
-        <span class="lv">3,4</span>
-        <button class="more" aria-label="Opções de Lia"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true">BI</span>
         <span class="who"><span class="nm">Bia <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Ponteira · líbero · mensalista</span></span>
-        <span class="lv">3,7</span>
+        <a href="NotaMembro.dc.html" class="nota sug" aria-label="Bia sugeriu 4,0, ainda sem nota confirmada. Definir"><b>4,0</b><small>sugeriu</small></a>
         <button class="more" aria-label="Opções de Bia"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">LI</span>
+        <span class="who"><span class="nm">Lia <span class="rl" style="background: #E3EAFF; color: #1340C0">Placar</span></span><span class="ds">Central · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Lia: 3,5. Alterar"><b>3,5</b></a>
+        <button class="more" aria-label="Opções de Lia"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true">CA</span>
         <span class="who"><span class="nm">Caio <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Oposto · central · mensalista</span></span>
-        <span class="lv">3,8</span>
+        <a href="NotaMembro.dc.html" class="nota sug" aria-label="Caio sugeriu 4,5, ainda sem nota confirmada. Definir"><b>4,5</b><small>sugeriu</small></a>
         <button class="more" aria-label="Opções de Caio"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true">GA</span>
         <span class="who"><span class="nm">Gabi <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Levantadora · mensalista</span></span>
-        <span class="lv">4,1</span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Gabi: 4,0. Alterar"><b>4,0</b></a>
         <button class="more" aria-label="Opções de Gabi"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true" style="background: #FFFFFF; border: 1.5px dashed rgba(15,27,45,0.45); box-sizing: border-box">LE</span>
         <span class="who"><span class="nm">Léo <span class="rl" style="background: #FFF3CF; border: 1.5px solid #E0A400; color: #0F1B2D">Sem conta</span></span><span class="ds">Ponteiro · mensalista · entrou pelo WhatsApp</span></span>
-        <span class="lv">3,2</span>
+        <a href="NotaMembro.dc.html" class="nota sem" aria-label="Léo sem nota. Definir"><b>–</b><small>sem nota</small></a>
         <button class="more" aria-label="Opções de Léo"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
       <li>
         <span class="av" aria-hidden="true">NI</span>
         <span class="who"><span class="nm">Nina <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Central · mensalista</span></span>
-        <span class="lv">3,4</span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Nina: 3,0. Alterar"><b>3,0</b></a>
         <button class="more" aria-label="Opções de Nina"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
-      </li>
-      <li>
-        <span class="av" aria-hidden="true">RA</span>
-        <span class="who"><span class="nm">Rafa <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Ponteiro · mensalista</span></span>
-        <span class="lv">3,9</span>
-        <button class="more" aria-label="Opções de Rafa"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </li>
     </ul>
   </div>
