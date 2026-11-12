@@ -35,6 +35,14 @@ public sealed class OpenApiContractTests
         "get /v1/groups/{groupId}/templates ListGroupTemplates",
         "post /v1/groups/{groupId}/templates SaveGroupTemplate",
         "delete /v1/groups/{groupId}/templates/{templateId} DeleteGroupTemplate",
+        "post /v1/groups/{groupId}/rounds CreateRound",
+        "get /v1/groups/{groupId}/rounds ListRounds",
+        "get /v1/groups/{groupId}/rounds/{roundId} GetRound",
+        "patch /v1/groups/{groupId}/rounds/{roundId} UpdateRound",
+        "post /v1/groups/{groupId}/rounds/{roundId}/cancel CancelRound",
+        "put /v1/groups/{groupId}/rounds/{roundId}/attendance/me RespondAttendance",
+        "put /v1/groups/{groupId}/rounds/{roundId}/attendance/{memberId} SetMemberAttendance",
+        "post /v1/groups/{groupId}/series/{seriesId}/stop StopSeries",
     ];
 
     /// <summary>

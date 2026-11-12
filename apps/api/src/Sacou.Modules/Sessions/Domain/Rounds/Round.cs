@@ -43,7 +43,7 @@ internal sealed partial record Round(
     /// The admin's edit (date, time, venue, layer): refused once cancelled or started. A new date or time
     /// recalculates the instant; the layer, when given, replaces the whole one.
     /// </summary>
-    public Result<RoundChange> Edit(RoundSlot? slot, Venue? venue, LayerEdit layer, DateTimeOffset now)
+    public Result<RoundChange> Edit(RequestedSlot? slot, Venue? venue, LayerEdit layer, DateTimeOffset now)
     {
         if (IsCanceled || Slot.StartsAt <= now)
         {
@@ -52,7 +52,7 @@ internal sealed partial record Round(
 
         var edited = this with
         {
-            Slot = slot ?? Slot,
+            Slot = slot?.Slot ?? Slot,
             Venue = venue ?? Venue,
             SettingsLayerJson = layer.Replaces ? layer.Json : SettingsLayerJson,
         };

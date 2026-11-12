@@ -28,6 +28,7 @@ export const apiErrorCodes = [
   "sessions.drop-in-window-closed",
   "sessions.member-not-found",
   "sessions.round-closed",
+  "sessions.round-date-taken",
   "sessions.round-full",
   "sessions.round-invalid",
   "sessions.round-limit",

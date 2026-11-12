@@ -38,6 +38,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "A lista ainda não abriu para avulsos. Tente de novo mais perto da rodada.",
   "sessions.member-not-found": "Essa pessoa não faz parte deste grupo.",
   "sessions.round-closed": "Esta rodada não aceita mais mudanças.",
+  "sessions.round-date-taken": "Essa repetição já tem uma rodada nesse dia. Escolha outra data.",
   "sessions.round-full": "A rodada está cheia e a lista de espera está desligada.",
   "sessions.round-invalid": "Confira a data, a hora e o local da rodada.",
   "sessions.round-limit":

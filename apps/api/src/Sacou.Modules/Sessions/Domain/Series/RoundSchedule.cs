@@ -37,10 +37,16 @@ internal static class RoundSchedule
     private static DateOnly Latest(DateOnly first, DateOnly second) => first > second ? first : second;
 
     /// <summary>At most a week and a day of looking: the weekday comes around, and today's may have started already.</summary>
-    private static DateOnly? FirstWeekdayStartingAfter(RoundSeries series, DateOnly earliest, DateTimeOffset now) =>
-        Enumerable.Range(0, DaysInWeek + 1)
-            .Select(offset => earliest.AddDays(offset))
-            .Where(date => date.DayOfWeek == series.Weekday)
-            .Select(date => (DateOnly?)date)
-            .FirstOrDefault(date => RoundSlot.At(date!.Value, series.LocalTime).StartsAt > now);
+    private static DateOnly? FirstWeekdayStartingAfter(RoundSeries series, DateOnly earliest, DateTimeOffset now)
+    {
+        foreach (var date in Enumerable.Range(0, DaysInWeek + 1).Select(offset => earliest.AddDays(offset)))
+        {
+            if (date.DayOfWeek == series.Weekday && RoundSlot.At(date, series.LocalTime).StartsAt > now)
+            {
+                return date;
+            }
+        }
+
+        return null;
+    }
 }

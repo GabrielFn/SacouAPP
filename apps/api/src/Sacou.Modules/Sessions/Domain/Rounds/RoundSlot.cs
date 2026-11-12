@@ -11,14 +11,8 @@ namespace Sacou.Modules.Sessions.Domain.Rounds;
 internal sealed record RoundSlot(DateOnly Date, TimeOnly Time, string TimeZoneId, DateTimeOffset StartsAt)
 {
     /// <summary>A slot an admin asks for: in the future and at most a year ahead, by local date.</summary>
-    public static Result<RoundSlot> Request(DateOnly date, TimeOnly time, DateTimeOffset now)
-    {
-        var slot = At(date, time);
-        var lastDay = SessionsTime.LocalDateOf(now, SessionsTime.TimeZone).AddDays(SessionLimits.MaxDaysAhead);
-        return slot.StartsAt > now && slot.Date <= lastDay
-            ? Result.Success(slot)
-            : Result.Failure<RoundSlot>(RoundErrors.RoundInvalid);
-    }
+    public static Result<RequestedSlot> Request(DateOnly date, TimeOnly time, DateTimeOffset now) =>
+        RequestedSlot.From(At(date, time), now);
 
     /// <summary>A slot with no window rule, for the occurrences a series makes.</summary>
     public static RoundSlot At(DateOnly date, TimeOnly time)
@@ -29,4 +23,23 @@ internal sealed record RoundSlot(DateOnly Date, TimeOnly Time, string TimeZoneId
 
     /// <summary>The moment avulsos may start answering: an instant calculation, not a local-clock one, so a change of hour in between does not move it.</summary>
     public DateTimeOffset DropInOpensAt(int hoursBefore) => StartsAt.AddHours(-hoursBefore);
+}
+
+/// <summary>
+/// A <see cref="RoundSlot"/> that passed the window rule of an admin's request. It can only be made by
+/// <see cref="RoundSlot.Request"/>, so an edit that takes one cannot be handed a slot that skipped the rule.
+/// </summary>
+internal sealed record RequestedSlot
+{
+    private RequestedSlot(RoundSlot slot) => Slot = slot;
+
+    public RoundSlot Slot { get; }
+
+    internal static Result<RequestedSlot> From(RoundSlot slot, DateTimeOffset now)
+    {
+        var lastDay = SessionsTime.LocalDateOf(now, SessionsTime.TimeZone).AddDays(SessionLimits.MaxDaysAhead);
+        return slot.StartsAt > now && slot.Date <= lastDay
+            ? Result.Success(new RequestedSlot(slot))
+            : Result.Failure<RequestedSlot>(RoundErrors.RoundInvalid);
+    }
 }
