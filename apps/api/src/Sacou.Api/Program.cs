@@ -23,7 +23,7 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services
     .AddIdentityModule(builder.Configuration)
     .AddGroupsModule(builder.Configuration)
-    .AddSessionsModule()
+    .AddSessionsModule(builder.Configuration)
     .AddMatchesModule()
     .AddPaymentsModule()
     .AddSummariesModule()
@@ -40,6 +40,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health").AllowAnonymous();
 app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
+app.MapSessionsEndpoints();
 // The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).
 if (app.Environment.IsDevelopment())
 {
@@ -54,6 +55,7 @@ if (app.Configuration.GetValue<bool>(MigrateOnStartupKey))
 {
     await IdentityModule.MigrateAsync(app.Services);
     await GroupsModule.MigrateAsync(app.Services);
+    await SessionsModule.MigrateAsync(app.Services);
 }
 
 await app.RunAsync();

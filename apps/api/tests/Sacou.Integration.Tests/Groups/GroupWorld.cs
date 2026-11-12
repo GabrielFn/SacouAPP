@@ -136,6 +136,15 @@ internal sealed class GroupWorld
         return await InsertRowAsync(GroupId, user, role, "active");
     }
 
+    /// <summary>One more active member who can call the API (a subject and a member id), with the given role and member type.</summary>
+    public async Task<(string Subject, Guid MemberId)> AddPersonAsync(string role = "player", string memberType = "drop_in")
+    {
+        var subject = "uid-" + Guid.NewGuid().ToString("N");
+        var user = await RegisterAsync(subject);
+        var member = await InsertRowAsync(GroupId, user, role, "active", memberType);
+        return (subject, member);
+    }
+
     public async Task<HttpResponseMessage> SendAsync(GroupActor actor, HttpMethod method, string path, string? json = null)
     {
         if (actor != GroupActor.Anonymous)
@@ -170,7 +179,7 @@ internal sealed class GroupWorld
         return (body!["groupId"]!.GetValue<Guid>(), body["memberId"]!.GetValue<Guid>());
     }
 
-    private async Task<Guid> InsertRowAsync(Guid groupId, Guid user, string role, string status)
+    private async Task<Guid> InsertRowAsync(Guid groupId, Guid user, string role, string status, string memberType = "drop_in")
     {
         var id = Guid.CreateVersion7();
         await using var connection = new NpgsqlConnection(api.ConnectionString);
@@ -178,13 +187,14 @@ internal sealed class GroupWorld
         await using var insert = new NpgsqlCommand(
             """
             INSERT INTO groups.members (id, group_id, user_id, role, member_type, status, joined_at, left_at)
-            VALUES (@id, @group, @user, @role, 'drop_in', @status, @now, CASE WHEN @status = 'active' THEN NULL ELSE @now END)
+            VALUES (@id, @group, @user, @role, @type, @status, @now, CASE WHEN @status = 'active' THEN NULL ELSE @now END)
             """,
             connection);
         insert.Parameters.AddWithValue("id", id);
         insert.Parameters.AddWithValue("group", groupId);
         insert.Parameters.AddWithValue("user", user);
         insert.Parameters.AddWithValue("role", role);
+        insert.Parameters.AddWithValue("type", memberType);
         insert.Parameters.AddWithValue("status", status);
         // The host clock, as the API uses: the database clock could order members differently.
         insert.Parameters.AddWithValue("now", DateTimeOffset.UtcNow);
@@ -193,7 +203,7 @@ internal sealed class GroupWorld
     }
 
     private string TokenFor(string subject) =>
-        TestIdToken.Valid(api.Key, FixedTimeProvider.WholeSecondNow()).With("sub", subject).With("user_id", subject).Sign();
+        TestIdToken.Valid(api.Key, DateTimeOffset.FromUnixTimeSeconds(api.Clock.GetUtcNow().ToUnixTimeSeconds())).With("sub", subject).With("user_id", subject).Sign();
 
     private async Task<Guid> RegisterAsync(string subject)
     {

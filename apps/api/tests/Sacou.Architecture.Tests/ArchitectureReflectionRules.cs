@@ -15,6 +15,7 @@ internal static partial class ArchitectureReflectionRules
     private static readonly HashSet<string> AllowedSharedReferences =
     [
         "System.Collections",
+        "System.Collections.Immutable",
         "System.Linq",
         "System.Memory",
         "System.Runtime",

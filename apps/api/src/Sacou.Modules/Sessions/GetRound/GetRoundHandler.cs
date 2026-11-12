@@ -1,0 +1,53 @@
+using Sacou.Modules.Sessions.Access;
+using Sacou.Modules.Sessions.Application;
+using Sacou.Modules.Sessions.Domain.Attendances;
+using Sacou.Modules.Sessions.Domain.Rounds;
+using Sacou.Modules.Sessions.Infrastructure;
+using Sacou.Shared.Results;
+
+namespace Sacou.Modules.Sessions.GetRound;
+
+/// <summary>
+/// One round with its lists. The read first makes the next occurrence of the group's series, then looks for
+/// something to repair without a lock (a free spot with someone waiting, someone who left the group still
+/// listed); only then does it write, under the lock. With nothing to repair a read never writes
+/// (ADR 0043, D7).
+/// </summary>
+internal sealed class GetRoundHandler(
+    IRoundStore store, RoundMaterializer materializer, GroupRoundContext groups, RoundWriter writer, TimeProvider time)
+{
+    public async Task<Result<RoundResponse>> HandleAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(access);
+        await materializer.EnsureUpcomingAsync(access.GroupId, cancellationToken).ConfigureAwait(false);
+        var round = await store.FindAsync(access.GroupId, id, cancellationToken).ConfigureAwait(false);
+        if (round is null)
+        {
+            return Result.Failure<RoundResponse>(RoundErrors.RoundNotFound);
+        }
+
+        var state = await groups.LoadAsync(access.GroupId, cancellationToken).ConfigureAwait(false);
+        if (state.IsFailure)
+        {
+            return Result.Failure<RoundResponse>(state.Error);
+        }
+
+        var resolved = state.Value.ResolveStored(round);
+        var needsRepair = !RoundReconciliation.Reconcile(round, resolved.Rules, state.Value.ActiveIds, time.GetUtcNow()).IsEmpty;
+        return needsRepair
+            ? await RepairAsync(access, id, cancellationToken).ConfigureAwait(false)
+            : Result.Success(RoundResponse.From(round, resolved, state.Value, access.MemberId));
+    }
+
+    private async Task<Result<RoundResponse>> RepairAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
+    {
+        var repaired = await writer.ExecuteAsync(access, id, required: null, Reconcile, cancellationToken).ConfigureAwait(false);
+        return repaired.IsFailure
+            ? Result.Failure<RoundResponse>(repaired.Error)
+            : Result.Success(repaired.Value.ToResponse(access.MemberId));
+    }
+
+    private static Result<RoundChange> Reconcile(RoundWriteContext context) =>
+        Result.Success(RoundReconciliation.Reconcile(
+            context.Round, context.Group.ResolveStored(context.Round).Rules, context.Group.ActiveIds, context.Now));
+}

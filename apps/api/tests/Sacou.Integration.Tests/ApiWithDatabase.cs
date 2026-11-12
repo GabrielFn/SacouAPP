@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups;
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity;
+using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
 
@@ -38,7 +41,17 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
 
-    /// <summary>Applies the Identity and then the Groups migrations, through the entry points Program uses, in its order.</summary>
+    /// <summary>The API's clock: the real time, moved to wherever a test sets it (tokens are minted by it too, so they stay valid).</summary>
+    internal ShiftableClock Clock { get; } = new();
+
+    /// <summary>
+    /// Runs before every <see cref="IGroupMembership.FindActiveAsync"/> of a request, with the 1-based number of
+    /// that lookup in the request (1 is the access filter, 2 is the one under the round's lock). Lets a test
+    /// change the Groups tables at an exact moment of a write.
+    /// </summary>
+    internal Func<int, Task>? BeforeMembershipLookup { get; set; }
+
+    /// <summary>Applies the Identity, Groups and then Sessions migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
         await MigrationGate.WaitAsync(TestContext.Current.CancellationToken);
@@ -46,6 +59,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         {
             await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await SessionsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
         }
         finally
         {
@@ -61,10 +75,26 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:Sacou", database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
+        builder.ConfigureServices(HookMembership);
+        builder.ConfigureServices(services =>
+        {
+            _ = services.RemoveAll<TimeProvider>();
+            _ = services.AddSingleton<TimeProvider>(Clock);
+        });
         builder.ConfigureServices(services => services
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => Keys)
             .SetHandlerLifetime(Timeout.InfiniteTimeSpan));
+    }
+
+    /// <summary>Wraps the Groups' own membership (whatever type it is) in a pass-through that runs <see cref="BeforeMembershipLookup"/>.</summary>
+    private void HookMembership(IServiceCollection services)
+    {
+        var original = services.Single(descriptor => descriptor.ServiceType == typeof(IGroupMembership));
+        var implementation = original.ImplementationType ?? throw new InvalidOperationException("IGroupMembership is registered by type.");
+        _ = services.Remove(original);
+        _ = services.AddScoped<IGroupMembership>(provider => new HookedMembership(
+            (IGroupMembership)ActivatorUtilities.CreateInstance(provider, implementation), () => BeforeMembershipLookup));
     }
 
     protected override void Dispose(bool disposing)

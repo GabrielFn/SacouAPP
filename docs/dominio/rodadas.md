@@ -60,6 +60,7 @@ Uma por membro por rodada.
 | Código | Quando |
 |---|---|
 | `sessions.round-invalid` (400) | Data ou hora fora do formato, no passado, a mais de 365 dias, local fora da regra |
+| `sessions.round-date-taken` (409) | `PATCH` moveu uma rodada da série para uma data em que a série já tem rodada |
 | `sessions.round-not-found` (404), `sessions.series-not-found` (404), `sessions.member-not-found` (404) | Não existe neste grupo (inexistente, de outro grupo e quem saiu parecem iguais) |
 | `sessions.round-closed` (409) | Cancelada, ou jogador depois do início, ou edição de rodada cancelada ou começada |
 | `sessions.round-full` (409) | Cheia e sem espera |
@@ -70,3 +71,20 @@ Uma por membro por rodada.
 ## Permissões
 
 `ManageRounds` (criar, editar, cancelar, parar a série, mexer na lista): Admin e Co-admin. `RespondAttendance` (responder por si): os quatro papéis. Ver a rodada é `ViewGroup`. Tabela completa em [grupos.md](grupos.md).
+
+## Rotas (E3.4, Parte 2)
+
+Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do Groups). Corpos fechados e de até 4 KB; datas `YYYY-MM-DD`, horas `HH:mm`.
+
+| Rota | Capacidade | Sucesso |
+|---|---|---|
+| `POST /rounds` | `ManageRounds` | 201, mensalistas já confirmados; `repeatWeekly` cria a série |
+| `GET /rounds` | `ViewGroup` | 200, futuras e últimas 24 h; materializa as séries |
+| `GET /rounds/{roundId}` | `ViewGroup` | 200, repara se preciso |
+| `PATCH /rounds/{roundId}` | `ManageRounds` | 200; `settings` substitui a camada (`{}` a limpa) |
+| `POST /rounds/{roundId}/cancel` | `ManageRounds` | 200 (de novo, sem efeito) |
+| `PUT /rounds/{roundId}/attendance/me` | `RespondAttendance` | 200 `{ status, position }` |
+| `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |
+| `POST /series/{seriesId}/stop` | `ManageRounds` | 204 (de novo, 204) |
+
+Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.
