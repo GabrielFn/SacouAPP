@@ -99,30 +99,27 @@ Lista única, consolidada na [revisão do M2](revisoes/M2-2026-11-03.md) a parti
 3. **Simular antes de gravar (E3.7; E4.9 no aparelho):** nada entra no stream sem o parser estrito e o replay do stream com o lote. Recusa tipo desconhecido, ponto em set decidido, evento entre `SetEnded` sem próximo set e `MatchEnded`, `PointAttributed` órfão ou de autor de fora e `RevertedTo` sem alvo. Custo: snapshot ou os limites dos itens 1 e 2.
 4. **Autorização por papel e sessão (E3.7 e E3.8):** quem pode enviar cada tipo. `LineupChanged`, `QueueChanged`, `ServingTeamChanged`, `RevertedTo`, `PointAttributed` e o `winner` de `manual` exigem papel; o `firstServer` do sorteio precisa de origem autorizada. O ID do celular não autentica.
 5. **Evento prova formato, não verdade (E3.7):** `teams`, `rotations`, `bench` e `libero` contra a escalação da rodada; `queue` contra a presença; `scoring` e `nextSet.targetPoints` contra a configuração congelada; `SetEnded` e `MatchEnded` contra o placar e a regra; `nextSet.firstServer` e `setterZones` contra a regra e o estado; `system` contra `IGroupPlan`; `ServingTeamChanged` e `PointAttributed` pelo comando rodado no servidor (plausibilidade de `attributePoint`, plano Pro e opção do grupo).
-6. **`RevertedTo` pelo QR (E3.8):** o escopo do token decide se o Placar pode voltar antes do próprio lote. Recomendação da revisão do M2: não pode; só o admin.
+6. **`RevertedTo` de quem assumiu (E3.8):** decidir se quem assumiu a quadra pode voltar antes do primeiro evento que escreveu. Recomendação da revisão do M2: não pode; só o admin.
 7. **Versões (E3.7):** `schemaVersion`, `rulesVersion` e `formationsVersion` contra listas de versões suportadas, não só a atual, por causa do app antigo offline. Como side-out, giro e líbero são calculados e não gravados (exceção a `decisoes.md:26`), mudar essas regras exige subir `rulesVersion` e manter a regra antiga no replay dos logs antigos.
 8. **Erros e logs (E3.7):** nunca registrar `JsonException.Message` (ecoa byte e posição) nem o corpo recebido; a resposta leva só `code` e `eventId` ou `field`.
-9. **Token do placar (E3.8):** uso único, validade, formato e tamanho, revogação quando o admin retoma, escopo só daquele stream e fora dos logs (seção 4).
+9. **Escrita da quadra (E3.8):** o servidor guarda quem escreve o stream; só esse celular grava, e quem assume precisa de papel Placar, Co-admin ou Admin no grupo, com login normal (seção 4). O token do QR saiu (ADR 0046).
 10. **Identificadores (E3.7):** projeções e Stats por `(courtSessionId, matchId)`; UUID sem conferência de versão é opaco, nunca carrega dado.
 
-## 4. QR do placar (E3.8)
+## 4. Placar assume a quadra (E3.8)
 
-Ver também a seção 3 e a lista 3.1 (itens 4, 6 e 9): um `RevertedTo` de quem recebeu o QR pode apagar pontos marcados pelo admin antes da entrega (E2.7). A E3.8 decide o escopo do token, inclusive se o placar pode voltar antes do próprio lote.
-
-Sessão daquela quadra, conforme `decisoes.md:21` e [ADR 0013](../arquitetura/adr/0013-scorekeeper-qr-token.md).
+Substitui o QR do placar ([ADR 0046](../arquitetura/adr/0046-escopo-do-piloto-e-papel-placar.md)): sem código nem token sem conta; quem assume usa o login normal. Ver também a seção 3 e a lista 3.1 (itens 4, 6 e 9).
 
 | | Ameaça | Mitigação |
 |---|---|---|
-| S | QR fotografado ou repassado | Código de uso único (`produto.md:357`); validade a definir na E3.8 |
-| S | Adivinhar o código | Formato e tamanho a definir na E3.8; limite de requisições (`decisoes.md:31`) |
-| T | Dois celulares escrevendo | Um celular escreve por vez (`decisoes.md:21`); celular antigo é recusado após a entrega (aceite da E3.8) |
-| R | Identificar quem marcou com a sessão temporária | A definir na E3.8 |
-| I | Token de placar em logs | Logs sem tokens (`produto.md:375`) |
-| D | Admin perde o controle da quadra | O admin pode retomar (`decisoes.md:21`) |
-| E | Token usado em outro stream ou outra ação | Válido só para aquele stream, sem outros poderes (`produto.md:121, 357`) |
-| E | Token continua válido depois da sessão | Validade e revogação a definir na E3.8 |
+| S | Alguém sem papel assume a quadra | Só Placar, Co-admin ou Admin do grupo, conferido no servidor a cada troca; o ID do celular não autentica |
+| T | Dois celulares escrevendo | Um celular escreve por vez (`decisoes.md:22`); o servidor recusa os eventos do celular antigo a partir da troca, e o app avisa quantos pontos não entraram |
+| T | Celular antigo reenvia eventos com hora anterior à troca | A recusa segue a troca registrada no servidor, nunca o relógio do aparelho; detalhes na E3.8 |
+| R | Quem assumiu e quando | A troca fica registrada com o `MemberId` de quem assumiu (sem dado pessoal) |
+| I | A confirmação mostra o placar e a hora do último ponto | Só a quem já pode assumir a quadra |
+| D | Trocas repetidas para atrapalhar a partida | Limite de trocas por stream e de requisições a definir na E3.8 |
+| E | `RevertedTo` de quem assumiu apaga pontos de antes da troca | Item 6 da lista 3.1 |
 
-## 5. Upload de foto (E3.14)
+## 5. Upload de foto (E3.14, pós-piloto)
 
 | | Ameaça | Mitigação |
 |---|---|---|
@@ -136,7 +133,7 @@ Sessão daquela quadra, conforme `decisoes.md:21` e [ADR 0013](../arquitetura/ad
 | D | Arquivos enormes gerando custo | Limite de tamanho a definir na E3.14 |
 | E | Credencial do R2 exposta no app | Como o app envia o arquivo: a definir na E3.14 |
 
-## 6. Pix copia e cola (E3.10)
+## 6. Pix copia e cola (gerador da E1.4; a E3.10 é pós-piloto)
 
 | | Ameaça | Mitigação |
 |---|---|---|
@@ -153,7 +150,7 @@ Sessão daquela quadra, conforme `decisoes.md:21` e [ADR 0013](../arquitetura/ad
 | D | Geração abusiva de códigos | Limite de requisições (`decisoes.md:31`) |
 | E | Não admin confirma pagamento | Confirmação do admin (`produto.md:65`) com autorização por recurso (`decisoes.md:27`) |
 
-## 7. Webhooks da RevenueCat (E3.15)
+## 7. Webhooks da RevenueCat (E3.15, pós-piloto)
 
 Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é uma hipótese a confirmar na E3.15. No piloto o Pro é liberado de graça (`decisoes.md:20`).
 
@@ -179,7 +176,7 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | D | Abuso da página pública | Limite de requisições (`decisoes.md:31`) |
 | E | Ação de admin pela página | Autorização por recurso (`decisoes.md:27`) |
 
-## 9. SignalR, placar ao vivo (E3.7)
+## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 
 | | Ameaça | Mitigação |
 |---|---|---|
@@ -194,10 +191,16 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 
 | Superfície | Ameaça | Mitigação |
 |---|---|---|
-| Resumo com IA (E3.13) | I: dados enviados ao provedor | Provedor ainda não definido ([`perguntas.md`](../estado/perguntas.md), item 4); dados enviados a definir na E3.13 |
-| Resumo com IA (E3.13) | T: texto de usuário alterando o resumo | A definir na E3.13. Falha usa texto padrão (aceite da E3.13) |
-| Resumo com IA (E3.13) | D: custo por uso abusivo | Cota por grupo (`revisao-mvp.md:116`) |
-| Sentry, PostHog e logs (E5.2) | I: dado pessoal enviado a terceiros | Logs sem e-mails nem tokens (`produto.md:375`); o que vai para Sentry e PostHog a definir na E5.2 |
+| Nota do admin e rating (E3.17, E3.6, E3.9) | I: jogador lê a própria nota ou o rating | Nenhuma rota devolve ao jogador a nota que o admin deu nem o rating; no piloto, o rating não sai da API (ADR 0047). Teste de autorização por rota na E3.17 |
+| Nota do admin (E3.17) | E: Placar ou membro comum define nota | Só Admin ou Co-admin do grupo (ADR 0047) |
+| Nota do admin (E3.6) | I: nota na imagem compartilhada do sorteio | Nunca na imagem (`decisoes.md:16`) |
+| Votação do MVP (E3.18) | S/E: quem não jogou vota, ou vota em si | Só quem jogou a rodada, sem votar em si, conferido no servidor (ADR 0048) |
+| Votação do MVP (E3.18) | T: voto duplicado ou fora do prazo | Um voto por `MemberId` e rodada, com trava; fecha 24 h depois do fim da rodada |
+| Votação do MVP (E3.18) | I: ver em quem cada um votou | Voto secreto: nenhuma rota devolve o voto de outro, nem ao admin; só o resultado |
+| Resumo com IA (E3.13, pós-piloto) | I: dados enviados ao provedor | Provedor ainda não definido ([`perguntas.md`](../estado/perguntas.md), item 4); dados enviados a definir na E3.13 |
+| Resumo com IA (E3.13, pós-piloto) | T: texto de usuário alterando o resumo | A definir na E3.13. Falha usa texto padrão (aceite da E3.13) |
+| Resumo com IA (E3.13, pós-piloto) | D: custo por uso abusivo | Cota por grupo (`revisao-mvp.md:116`) |
+| Sentry e logs (E5.2; PostHog pós-piloto) | I: dado pessoal enviado a terceiros | Logs sem e-mails nem tokens (`produto.md:375`); o que vai para Sentry e PostHog a definir na E5.2 |
 | Backups no R2 (E5.3) | I: cópia do banco exposta | Criptografia e acesso a definir na E5.3; retenção em `perguntas.md`, item 2 |
 | CI e repositório | I: segredo em commit | Varredura de segurança na CI (`varredura-ci.md`) |
 

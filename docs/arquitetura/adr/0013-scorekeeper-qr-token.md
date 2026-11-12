@@ -2,6 +2,8 @@
 
 **Status:** aceito (decidido em 30/10/2026, registrado em 31/10/2026). **Tarefa:** E0.8.
 
+> **Substituído no piloto pelo [ADR 0046](0046-escopo-do-piloto-e-papel-placar.md) (11/11/2026):** a entrega por QR, o código de uso único e o token sem conta saem; quem tem o papel Placar, Co-admin ou Admin assume a quadra com confirmação. Continua valendo "um celular escreve por vez". O QR pode voltar depois do piloto, com decisão do Gabriel.
+
 **Fontes:** `decisoes.md:21`; `revisao-mvp.md:85, 110, 123, 156`; `produto.md:121, 357`.
 
 ## Contexto

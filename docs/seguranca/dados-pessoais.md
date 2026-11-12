@@ -6,7 +6,8 @@ Registra o que os documentos preveem. Desde a E3.1, a API guarda o UID do Fireba
 
 - **Retenção e base legal: a definir** (item 2), para todas as linhas abaixo, inclusive backups. Por isso as tabelas não têm essas colunas preenchidas.
 - **Encarregado de dados: a definir** (item 3). `produto.md:372` exige o canal, mas não diz quem é nem o contato.
-- **Provedor de IA do resumo: a definir** (item 4).
+- **Provedor de IA do resumo: a definir** (item 4), só depois do piloto (ADR 0046).
+- **Fora do piloto** (ADR 0046): foto e denúncia, resumo com IA, Pix e "já paguei", assinatura dos planos e PostHog. As linhas ficam abaixo para quando voltarem.
 - **Região de armazenamento de cada serviço e transferência internacional:** nenhum documento define; a definir na E6.2.
 
 ## Conta e perfil
@@ -17,7 +18,9 @@ Registra o que os documentos preveem. Desde a E3.1, a API guarda o UID do Fireba
 | Dados de conta guardados na API: `identity.users` com `id` interno (UUID v7), `firebase_uid` (UID do Firebase: identificador online, pseudônimo, ligado ao e-mail no Firebase) e `created_at`. **Nada mais:** nem e-mail, `email_verified`, nome, foto, provedor, IP, horário do último login ou token. Um teste de modelo trava as 3 colunas. Logs não levam UID, e-mail nem token (só a categoria da recusa) | Postgres (Neon) | Vincular a conta do Firebase ao usuário interno e, na E3.2, aos `MemberId` | `produto.md:250, 259`; [ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md) | A E3.16 apaga a linha e o usuário no Firebase, e impede que um token ainda válido (até 1 h) recrie a conta |
 | Apelido. **Perfil único da pessoa, no Identity (E3.17):** não há apelido por grupo, e a E3.2 não guarda nome | Postgres (Neon) | Identificar nas listas e times | `produto.md:63` | Perfil apagado; histórico como "Ex-jogador" (`produto.md:371`) |
 | Posições | Postgres (Neon) | Sorteio e escalação | `produto.md:63` | Perfil apagado |
-| Nível autodeclarado e rating (quadra e areia) | Postgres (Neon) | Sorteio e cartinha; privado | `decisoes.md:16` | Perfil apagado; projeções de rating a definir na E3.16 |
+| Nível sugerido pelo jogador (perfil, E3.17) | Postgres (Neon) | Sugestão para o admin; privado | `decisoes.md:16`, ADR 0047 | Perfil apagado |
+| Nota do membro definida pelo Admin ou Co-admin, por grupo (E3.17), com quem definiu (`MemberId`) | Postgres (Neon) | Sorteio; **o jogador não vê** (ADR 0047) | `decisoes.md:16`, ADR 0047 | A definir na E3.16 |
+| Rating OpenSkill (μ e σ, quadra e areia, E3.9) | Postgres (Neon), projeção | Calibrar o sorteio; **ninguém vê no piloto** (ADR 0047) | `decisoes.md:16` | Projeções de rating a definir na E3.16 |
 | Preferência de mostrar nível e foto; consentimento | Postgres (Neon) | Cartinha | `decisoes.md:16`; `produto.md:373` | A definir na E3.16 |
 | Foto da cartinha (recorte, WebP sem EXIF) | Cloudflare R2 | Cartinha | `decisoes.md:18` | Foto apagada (`produto.md:371`) |
 | Denúncia de foto | A definir na E3.14 | Moderação | `produto.md:374` | A definir na E3.14 |
@@ -37,6 +40,7 @@ Registra o que os documentos preveem. Desde a E3.1, a API guarda o UID do Fireba
 | ID do celular no envelope do evento (`deviceId`): identificador online, tratado como potencialmente pessoal. UUID aleatório por instalação, gerado fora do motor (E4.9, `expo-crypto` `randomUUID`, gravado na tabela `device` do SQLite local), pseudônimo e sem vínculo com o hardware: nunca IMEI, Android ID, `identifierForVendor` ou token de push. Autoria não entra no evento. O backup do aparelho poderia copiá-lo para outro celular (mitigação no `modelo-de-ameacas.md`) | Postgres (Neon) e expo-sqlite | Ordem e sincronização | `decisoes.md:26`; ADR 0022 | A definir na E6.2 (se identifica a pessoa) |
 | Estatísticas, MVP e projeções | Postgres (Neon) | Cartinha, ranking e resumo | `revisao-mvp.md:111` | Histórico como "Ex-jogador" |
 | Estatísticas por jogador derivadas dos eventos da quadra (E2.9): partidas, vitórias, derrotas, saldo +/− em quadra, sequência de vitórias e pontos por tipo, por `MemberId` | Só em memória: calculadas no motor a partir dos eventos, sem gravar nem registrar; quando a E3.9 as projetar no servidor, valem as linhas acima | Resumo, Story e cartinha. Só `MemberId` e inteiros, sem nome; é dado de desempenho da pessoa, derivado do autor de cada ponto e de quem estava em quadra | `decisoes.md:15`; ADR 0032 | Recalculadas dos eventos, que apontam para `MemberId` |
+| Votos do MVP do dia (E3.18): quem votou e em quem, só por `MemberId`; secretos, nem o admin vê (ADR 0048) | Postgres (Neon) | Apurar o MVP | `decisoes.md:15`, ADR 0048 | A definir na E3.16 e na E3.18 |
 | Resumo da rodada com IA | A definir na E3.13 | Compartilhar | `produto.md:70` | A definir na E3.13 |
 
 ## Pagamentos

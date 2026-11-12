@@ -10,12 +10,12 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 |---|---|
 | API | ASP.NET Core .NET 10, Minimal APIs, monólito modular |
 | Banco | PostgreSQL (Neon) + EF Core |
-| Tempo real e jobs | SignalR; Hangfire com intervalo de consulta alto |
+| Tempo real e jobs | SignalR (placar ao vivo, pós-piloto, [ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)); Hangfire com intervalo de consulta alto |
 | Página da rodada | Razor Pages no mesmo projeto |
 | Login | Firebase Auth; a API valida o ID token como JWT pelas chaves públicas do Google ([ADR 0036](adr/0036-verificacao-do-token-e-usuario.md)); FirebaseAdmin só para administrar contas (E3.16) ([ADR 0014](adr/0014-firebase-auth.md)) |
 | App | Expo + TypeScript strict, com log de eventos em expo-sqlite; tipos da API gerados do contrato OpenAPI versionado (`apps/api/openapi/v1.json`), que a API só serve em `Development` ([ADR 0042](adr/0042-contrato-openapi-e-cliente.md)) |
 | Regras compartilhadas | `packages/match-engine`, `packages/volley-rules` |
-| Serviços | Cloudflare R2, RevenueCat, Sentry, PostHog, Resend, Expo Push |
+| Serviços | Cloudflare R2 (backups no piloto; fotos depois), Sentry, Resend, Expo Push; RevenueCat e PostHog depois do piloto ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)) |
 | Hospedagem | Railway Hobby |
 
 ## Módulos da API
@@ -65,13 +65,13 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 
 **Confirmar presença pelo link.** Prévia no WhatsApp → página da rodada (Razor) → VOU → login via Firebase, uma vez → Sessions grava a presença e controla as vagas com `xmin` → Pix, se a cobrança estiver ligada. Promoção da espera sai pela Outbox e pelo Hangfire, em push (`produto.md:115, 308, 310`).
 
-**Jogo na quadra.** O app aplica as regras em `match-engine` e grava os eventos em expo-sqlite, mesmo sem internet (`apps/mobile/src/features/court/`: o controlador simula o replay e só então grava; o estado da partida é o replay do log persistido, [ADR 0038](adr/0038-log-local-da-quadra.md)) → sincroniza em lote, com reenvio idempotente → Matches aplica os eventos ao stream `CourtSession`, sem reimplementar a lógica → SignalR leva ao espectador → Stats recalcula as projeções ([ADR 0009](adr/0009-court-session-event-sourcing.md)).
+**Jogo na quadra.** O app aplica as regras em `match-engine` e grava os eventos em expo-sqlite, mesmo sem internet (`apps/mobile/src/features/court/`: o controlador simula o replay e só então grava; o estado da partida é o replay do log persistido, [ADR 0038](adr/0038-log-local-da-quadra.md)) → sincroniza evento a evento quando há sinal ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)), com reenvio idempotente; um celular escreve por vez, e o Placar, o Co-admin ou o Admin pode assumir a escrita → Matches aplica os eventos ao stream `CourtSession`, sem reimplementar a lógica → SignalR leva ao espectador (pós-piloto) → Stats recalcula as projeções ([ADR 0009](adr/0009-court-session-event-sourcing.md)).
 
 **Entregar o placar.** QR na tela do admin → código de uso único troca por token só daquele stream → um celular escreve por vez → o admin pode retomar ([ADR 0013](adr/0013-scorekeeper-qr-token.md)).
 
-**Cartinha.** Recorte no celular → upload do WebP sem EXIF para o R2 ([ADR 0016](adr/0016-player-card-photo.md)). Como o arquivo chega ao R2 está a definir na E3.14.
+**Cartinha.** Recorte no celular → upload do WebP sem EXIF para o R2 ([ADR 0016](adr/0016-player-card-photo.md)). Como o arquivo chega ao R2 está a definir na E3.14. **Pós-piloto** ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)): no piloto, a cartinha usa avatar.
 
-**Planos.** Compra pelas lojas via RevenueCat → `IGroupPlan` e `IUserPlan` controlam o acesso ([ADR 0015](adr/0015-plans-and-billing.md)). Como a API recebe o estado está a definir na E3.15.
+**Planos.** Compra pelas lojas via RevenueCat → `IGroupPlan` e `IUserPlan` controlam o acesso ([ADR 0015](adr/0015-plans-and-billing.md)). Como a API recebe o estado está a definir na E3.15. **Pós-piloto** ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)): no piloto, o Pro é liberado.
 
 **Pix do racha.** Copia e cola gerado da chave do organizador (`volley-rules`) → "Já paguei" → confirmação do admin.
 
@@ -91,7 +91,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0010](adr/0010-rotation-and-rule-mode.md) | Rotação por time, formações como dados e modo de regra |
 | [0011](adr/0011-backend-patterns.md) | Padrões de back-end, sem MediatR e AutoMapper |
 | [0012](adr/0012-personal-data-member-id.md) | Dados pessoais: `MemberId` e LGPD |
-| [0013](adr/0013-scorekeeper-qr-token.md) | Placar por QR com token por stream |
+| [0013](adr/0013-scorekeeper-qr-token.md) | Placar por QR com token por stream (substituído pelo 0046 no piloto) |
 | [0014](adr/0014-firebase-auth.md) | Login com Firebase Auth |
 | [0015](adr/0015-plans-and-billing.md) | Planos, cobrança pelas lojas e Pix |
 | [0016](adr/0016-player-card-photo.md) | Foto da cartinha: recorte no celular e R2 |

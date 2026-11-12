@@ -54,11 +54,11 @@ Só o repositório bloqueia o início; as outras contas só são necessárias no
 | Projeto no Firebase | Login com Google, Apple e e-mail | M2 | Grátis |
 | Conta Expo (EAS) | Builds do app e atualizações | M3 | Grátis no início |
 | Railway + Neon | API e banco de testes e produção | M4 | ~US$ 5/mês |
-| Cloudflare (R2 e DNS) | Fotos da cartinha e domínio | M5 | Grátis no início |
-| Chave de API de um provedor de IA | Resumo da rodada | M5 | Centavos por resumo |
+| Cloudflare (R2 e DNS) | Backups (E5.3) e domínio; fotos da cartinha só depois do piloto (ADR 0046) | M5 | Grátis no início |
+| Chave de API de um provedor de IA | Texto do resumo da rodada: **pós-piloto** (ADR 0046) | Depois do M7 | Centavos por resumo |
 | Apple Developer (com Small Business Program) | TestFlight e App Store | M6 | US$ 99/ano |
 | Google Play Console | Teste interno e Play Store | M6 | US$ 25 uma vez |
-| Sentry e PostHog | Erros e métricas do piloto | M6 | Grátis |
+| Sentry | Erros do piloto (PostHog só depois do piloto, ADR 0046) | M6 | Grátis |
 | Domínios sacou.app / sacou.com.br | Página da rodada e links | M5 | ~R$ 150/ano |
 
 **Como passar segredos:** nunca pelo chat. Você cadastra as chaves nos segredos do repositório (GitHub Actions) e no painel do Railway; eu só referencio pelo nome.
@@ -179,7 +179,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
 | E5.1 | Deploy da API no Railway e banco no Neon (teste e produção) | Deploy automático a partir da branch principal. Criar o projeto Neon com `pg_version` 18, a mesma versão principal dos testes (ADR 0020) | acesso Railway e Neon |
-| E5.2 | Sentry, logs estruturados e PostHog | Erro proposital aparece no painel | acessos |
+| E5.2 | Sentry e logs estruturados (PostHog: pós-piloto, ADR 0046) | Erro proposital aparece no painel | acessos |
 | E5.3 | Backups diários, limite de requisições, feature flags e versão mínima | Restauração de backup testada | E5.1 |
 | E5.4 | Builds EAS e envio para TestFlight e teste interno | Instalável por convite | acessos das lojas |
 
@@ -195,7 +195,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
 | E7.1 | Onboarding dos grupos do piloto | 3 a 5 grupos ativos | M6 |
-| E7.2 | Painel de métricas do portão | 60% pelo link medido | E5.2 |
+| E7.2 | Painel de métricas do portão, contado direto no banco (sem PostHog, ADR 0046) | 60% pelo link medido | E3.4, E3.12 |
 | E7.3 | Ciclo semanal de correções | Relatório semanal | E7.1 |
 
 ## Base de conhecimento
@@ -211,7 +211,7 @@ Tudo o que uma sessão nova precisa para continuar o trabalho fica no repositór
 | `docs/arquitetura/visao-geral.md` | Módulos, fluxos, diagramas, stack | Quando a estrutura muda |
 | `docs/arquitetura/adr/NNNN-titulo.md` | Registro de decisões de arquitetura: contexto, decisão, alternativas, consequências | Toda decisão técnica relevante |
 | `docs/dominio/` | Glossário, regras do vôlei e rotações, catálogo de eventos, regras da fila e do MVP | Quando uma regra muda |
-| `docs/seguranca/modelo-de-ameacas.md` | Ameaças por componente (STRIDE) e mitigações | Novas superfícies (login, pagamento, upload, QR) |
+| `docs/seguranca/modelo-de-ameacas.md` | Ameaças por componente (STRIDE) e mitigações | Novas superfícies (login, pagamento, upload, assumir a quadra, votação) |
 | `docs/seguranca/checklist.md` | Checklist baseado no OWASP ASVS (API) e MASVS (app) | Revisão de segurança de cada marco |
 | `docs/seguranca/dados-pessoais.md` | Inventário LGPD: que dado, onde fica, por quê, por quanto tempo | Todo dado pessoal novo |
 | `docs/seguranca/segredos.md` | Lista de segredos por nome e onde ficam (nunca os valores) | Todo segredo novo |
@@ -227,7 +227,7 @@ Tudo o que uma sessão nova precisa para continuar o trabalho fica no repositór
 
 **Segurança no fluxo:**
 
-1. Tarefas sensíveis (login, tokens, pagamentos, upload de foto, QR do placar, dados pessoais) passam também por um **revisor de segurança**, um agente separado que confere o modelo de ameaças e o checklist.
+1. Tarefas sensíveis (login, tokens, pagamentos, upload de foto, assumir a quadra, nota do admin, votação do MVP, dados pessoais) passam também por um **revisor de segurança**, um agente separado que confere o modelo de ameaças e o checklist.
 2. A CI roda varredura de segredos, dependências vulneráveis (`npm audit`, `dotnet list package --vulnerable`) e análise estática.
 3. No fim de cada marco, uma **revisão de segurança geral** atualiza o checklist; achados graves bloqueiam o marco.
 
