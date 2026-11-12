@@ -2,6 +2,8 @@
 
 **Status:** aceito (decidido em 30/10/2026, registrado em 31/10/2026). **Tarefa:** E0.8.
 
+> **Substituído em parte pelo [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) (11/11/2026):** o rating passa a ser OpenSkill por partida, com a nota inicial definida pelo admin; o jogador não vê a nota do admin nem o rating; no piloto, o rating é calculado e escondido. Faixas, MVP e ponto individual seguem como abaixo.
+
 **Fontes:** `decisoes.md:14-17`; `revisao-mvp.md:68, 80-81, 111, 154, 157`; `produto.md:67, 70, 264`.
 
 ## Decisão

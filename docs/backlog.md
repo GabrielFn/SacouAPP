@@ -19,7 +19,7 @@ Este arquivo guarda só o mapa de marcos e a regra da próxima tarefa. Cada info
 | M5 · Depois do jogo | E3.9, E3.11, E3.12, E4.12, E4.13 |
 | M6 · Prontidão para o piloto | E3.16, E5.2–E5.4, E6.1, E6.2 |
 | M7 · Piloto | E7.1–E7.3 |
-| Pós-piloto ([ADR 0046](arquitetura/adr/0046-escopo-do-piloto-e-papel-placar.md)) | E3.10, E3.13–E3.15, E4.14–E4.16; e as partes adiadas da E3.5, E3.7, E3.9, E4.11 e E4.12. Não entram na regra da próxima tarefa; voltam com decisão do Gabriel depois do M7 |
+| Pós-piloto ([ADR 0046](arquitetura/adr/0046-escopo-do-piloto-e-papel-placar.md)) | E3.10, E3.13–E3.15, E4.14–E4.16; e as partes adiadas da E3.5, E3.7, E4.11 e E4.12. Não entram na regra da próxima tarefa; voltam com decisão do Gabriel depois do M7 |
 
 ## Próxima tarefa
 

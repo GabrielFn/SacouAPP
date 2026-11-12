@@ -30,7 +30,7 @@ Monólito modular em .NET 10, com 7 módulos: Identity, Groups, Sessions, Matche
 | Matches | Placar, fila, rotação, banco | Stream `CourtSession` com event sourcing ([ADR 0009](adr/0009-court-session-event-sourcing.md)) |
 | Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
 | Summaries | Resumo da rodada com IA, com cota por grupo | Serviço |
-| Stats | Estatísticas, MVP e rating Glicko-2 ([ADR 0018](adr/0018-rating-and-mvp.md)) | Projeções recalculáveis |
+| Stats | Estatísticas, MVP e rating OpenSkill ([ADR 0018](adr/0018-rating-and-mvp.md), [ADR 0047](adr/0047-nota-do-admin-e-rating-openskill.md)) | Projeções recalculáveis |
 
 Fonte: `produto.md:257-266`. Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro.
 
@@ -123,6 +123,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0043](adr/0043-rodadas-presenca-e-espera.md) | Rodadas, recorrência semanal em fuso fixo, presença com espera por sequência, mensalista e avulso |
 | [0045](adr/0045-por-que-fatias-verticais.md) | Por que fatias verticais no back-end, e não camadas técnicas |
 | [0046](adr/0046-escopo-do-piloto-e-papel-placar.md) | Escopo do piloto, Placar assume a quadra e sincronização a cada ponto |
+| [0047](adr/0047-nota-do-admin-e-rating-openskill.md) | Nota definida pelo admin e rating OpenSkill por partida, escondido no piloto |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -137,7 +138,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 13 | Banco no MVP | 0017, 0027 |
 | 14 | Ponto individual | 0018, 0031 |
 | 15 | MVP do dia | 0018, 0032 |
-| 16 | Rating | 0018 |
+| 16 | Rating | 0018, 0047 |
 | 17 | Faixas da cartinha | 0018 |
 | 18 | Foto da cartinha | 0016 |
 | 19 | Login | 0014, 0036 |
