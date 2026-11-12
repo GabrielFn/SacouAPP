@@ -11,7 +11,7 @@ using Sacou.Modules.Identity.Infrastructure;
 namespace Sacou.Modules.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    internal partial class IdentityDbContextModelSnapshot : ModelSnapshot
+    partial class IdentityDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -49,6 +49,63 @@ namespace Sacou.Modules.Identity.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("ck_users_firebase_uid_length", "char_length(firebase_uid) BETWEEN 1 AND 128");
                         });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Identity.Infrastructure.PlayerProfileRow", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Nickname")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("nickname");
+
+                    b.PrimitiveCollection<string[]>("OtherPositions")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("other_positions")
+                        .HasDefaultValueSql("'{}'");
+
+                    b.Property<string>("PrimaryPosition")
+                        .HasColumnType("text")
+                        .HasColumnName("primary_position");
+
+                    b.Property<short?>("SuggestedLevelTenths")
+                        .HasColumnType("smallint")
+                        .HasColumnName("suggested_level_tenths");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId")
+                        .HasName("pk_player_profiles");
+
+                    b.ToTable("player_profiles", "identity", t =>
+                        {
+                            t.HasCheckConstraint("ck_player_profiles_nickname_length", "char_length(nickname) BETWEEN 1 AND 80");
+
+                            t.HasCheckConstraint("ck_player_profiles_other_positions", "other_positions <@ ARRAY['libero', 'middle_blocker', 'opposite', 'outside_hitter', 'setter']::text[]");
+
+                            t.HasCheckConstraint("ck_player_profiles_other_positions_count", "cardinality(other_positions) <= 4");
+
+                            t.HasCheckConstraint("ck_player_profiles_primary_position", "primary_position IS NULL OR primary_position IN ('any', 'libero', 'middle_blocker', 'opposite', 'outside_hitter', 'setter')");
+
+                            t.HasCheckConstraint("ck_player_profiles_suggested_level", "suggested_level_tenths IS NULL OR (suggested_level_tenths BETWEEN 10 AND 50 AND suggested_level_tenths % 5 = 0)");
+                        });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Identity.Infrastructure.PlayerProfileRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Identity.Domain.Users.User", null)
+                        .WithOne()
+                        .HasForeignKey("Sacou.Modules.Identity.Infrastructure.PlayerProfileRow", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_profiles_users");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,7 @@ public sealed class RealAssemblyTests
     private const string CourtSessionsNamespace = "Sacou.Modules.Matches.Domain.CourtSessions";
     private const string CourtSessionJsonNamespace = "Sacou.Modules.Matches.CourtSessionJson";
 
-    private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results", "Sacou.Shared.Members", "Sacou.Shared.Text"];
+    private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results", "Sacou.Shared.Members", "Sacou.Shared.Text", "Sacou.Shared.Levels"];
 
     private static readonly string[] HttpPublicNamespaces = ["Sacou.Http"];
 

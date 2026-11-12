@@ -21,6 +21,8 @@ public sealed partial class OpenApiSchemaTests
     [Theory]
     [InlineData(typeof(GroupRole), new[] { "admin", "coAdmin", "scorekeeper", "player" })]
     [InlineData(typeof(MemberType), new[] { "regular", "dropIn" })]
+    [InlineData(typeof(Sacou.Modules.Identity.Contracts.PlayingPosition), new[] { "setter", "outsideHitter", "opposite", "middleBlocker", "libero" })]
+    [InlineData(typeof(Sacou.Modules.Identity.Contracts.PrimaryPosition), new[] { "any", "setter", "outsideHitter", "opposite", "middleBlocker", "libero" })]
     public async Task Enum_values_are_what_the_api_serializes(Type enumType, string[] wire)
     {
         var schema = OpenApiNodes.Schemas(await ContractDocument.ParsedAsync())[enumType.Name]!;

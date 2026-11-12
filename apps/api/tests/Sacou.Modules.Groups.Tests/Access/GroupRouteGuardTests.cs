@@ -15,6 +15,9 @@ public sealed class GroupRouteGuardTests
 {
     private const string Planted = "/v1/groups/{groupId:guid}/planted";
 
+    /// <summary>The profile write of E3.17, outside the group filter but with the same body cap.</summary>
+    private const string ProfileRoute = "/v1/me/profile";
+
     /// <summary>
     /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites, and the six
     /// of the settings and the saved templates: the guard must see them, or it checks nothing.
@@ -76,7 +79,7 @@ public sealed class GroupRouteGuardTests
     }
 
     /// <summary>
-    /// Every Groups route, the invite ones included, caps the body at 4 KB. Kestrel applies the metadata; the TestServer of the
+    /// Every Groups route, the invite ones included, and the profile write cap the body at 4 KB. Kestrel applies the metadata; the TestServer of the
     /// integration tests does not, so the 413 itself is tested with Kestrel in part 2 (M8).
     /// </summary>
     [Fact]
@@ -85,9 +88,11 @@ public sealed class GroupRouteGuardTests
         await using var api = new ClosedDatabaseApi(Production);
         var groupRoutes = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal)
-                || endpoint.RoutePattern.RawText.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal))
+                || endpoint.RoutePattern.RawText.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal)
+                || (endpoint.RoutePattern.RawText == ProfileRoute && endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()!.HttpMethods.Contains(HttpMethods.Put)))
             .ToList();
 
+        Assert.Contains(groupRoutes, endpoint => endpoint.RoutePattern.RawText == ProfileRoute);
         Assert.Contains(groupRoutes, endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal));
         Assert.All(groupRoutes, endpoint => Assert.Equal(
             GroupRouteExtensions.MaxBodyBytes,
