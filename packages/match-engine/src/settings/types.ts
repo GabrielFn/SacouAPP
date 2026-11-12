@@ -1,6 +1,6 @@
 import type { FormationSystem, OverlapRuleMode } from "@sacou/volley-rules";
 
-import type { QueueExitCriterionKey } from "../queue/types.js";
+import type { QueueExitCriterionKey, QueueExitModeKind } from "../queue/types.js";
 import type { BestOf, ScoringRules, WinMargin } from "../score/types.js";
 import type {
   SETTINGS_ERROR_CODES,
@@ -60,6 +60,12 @@ export type ScoringSettings = {
 export type QueueSettings = {
   readonly enabled: boolean;
   readonly exitCriterion: QueueExitCriterionKey;
+  readonly exitMode: QueueExitModeKind;
+  /** Used only by the `fixed-count` mode. */
+  readonly fixedExitCount: number;
+  readonly winnerExitEnabled: boolean;
+  /** X of "vencedor também sai", used only when it is on. */
+  readonly winnerExitWins: number;
 };
 
 export type RotationSettings = {

@@ -125,6 +125,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0046](adr/0046-escopo-do-piloto-e-papel-placar.md) | Escopo do piloto, Placar assume a quadra e sincronização a cada ponto |
 | [0047](adr/0047-nota-do-admin-e-rating-openskill.md) | Nota definida pelo admin e rating OpenSkill por partida, escondido no piloto |
 | [0048](adr/0048-modos-de-fila-votacao-e-areia.md) | Modos de fila, votação do MVP e areia rei da quadra no MVP |
+| [0050](adr/0050-modos-de-fila.md) | Modos de fila e "vencedor também sai" no planejador |
 | [0051](adr/0051-perfil-do-jogador-e-nota-do-admin.md) | Perfil do jogador e nota do membro definida pelo admin |
 
 ## Matriz: `decisoes.md` → ADR
@@ -135,7 +136,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 8 | Configuração herdada e modelos | 0017, 0041 |
 | 9 | Padrão de partida | 0017, 0041 |
 | 10 | Membros e papéis | 0017, 0040 |
-| 11 | Fila e saída parcial | 0017, 0029, 0048 |
+| 11 | Fila e saída parcial | 0017, 0029, 0048, 0050 |
 | 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028, 0030 |
 | 13 | Banco no MVP | 0017, 0027 |
 | 14 | Ponto individual | 0018, 0031 |

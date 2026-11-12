@@ -50,6 +50,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Configurações do jogo | `GameSettings` | Value object (`produto.md:272`) |
 | Regras de pontuação | `ScoringRules` | Sets, pontos, tie-break e vantagem, por valor no `MatchStarted` (ADR 0023) |
 | Fila de times | `TeamQueue` | Mistura times e jogadores avulsos: `{ teams, players }`, no estado da `CourtSession`, gravada inteira no `MatchStarted` e no `QueueChanged` (ADR 0029) |
+| Times entrando | `enteringTeams` | Lados em que entra um time novo no plano da próxima partida (`a` antes de `b`), com a rotação a montar (ADR 0050) |
+| Vitórias seguidas | `getWinStreak` | Partidas terminadas seguidas, terminando na última, vencidas pelo lado com o mesmo conjunto de membros; dispara o "vencedor também sai" (`winnerLeaving`, ADR 0050) |
 | Saída parcial | `PartialExit` | Quem sai do perdedor, quem entra e o lugar herdado, calculado por `planNextMatch` com o critério (`QueueExitCriterion`); nunca gravado (ADR 0029) |
 | Banco | `bench` | Quem é do time e não está em `lineup`, na ordem da fila. Só manual no MVP (ADR 0027) |
 | Alteração de escalação | `LineupChanged` | Evento com a alocação inteira do time: troca com o banco e tela 22 (ADR 0027) |
