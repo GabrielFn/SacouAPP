@@ -13,6 +13,9 @@ interface PlanCase {
     readonly criterion: string;
     readonly criterionInput: unknown;
     readonly playersPerTeam: number;
+    readonly exitMode: unknown;
+    readonly winnerExit: unknown;
+    readonly winnerCriterionInput: unknown;
   };
   readonly expected: unknown;
 }

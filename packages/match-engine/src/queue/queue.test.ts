@@ -34,6 +34,8 @@ const [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO] = [1, 2, 3, 4, 5, 6, 7, 8]
 const ARRIVAL_ORDER = [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO];
 const SCORING = { bestOf: 1, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 } as const;
 const NOBODY: TeamQueue = { players: [], teams: [] };
+/** The mode of E2.6, without the "vencedor também sai". */
+const AUTOMATIC = { exitMode: { kind: "automatic" }, winnerExit: null } as const;
 
 interface CourtPlayer {
   readonly state: () => CourtSessionState;
@@ -104,13 +106,21 @@ function planOf(state: CourtSessionState, input: NextMatchInput): NextMatchPlan 
 }
 
 function manual(chosen: readonly MemberId[]): NextMatchInput {
-  return { criterion: "manual", criterionInput: { chosen }, playersPerTeam: PLAYERS_PER_TEAM };
+  return {
+    ...AUTOMATIC,
+    criterion: "manual",
+    criterionInput: { chosen },
+    playersPerTeam: PLAYERS_PER_TEAM,
+    winnerCriterionInput: null,
+  };
 }
 
 const BY_CONSECUTIVE_MATCHES: NextMatchInput = {
+  ...AUTOMATIC,
   criterion: "consecutive-matches",
   criterionInput: { arrivalOrder: ARRIVAL_ORDER },
   playersPerTeam: PLAYERS_PER_TEAM,
+  winnerCriterionInput: null,
 };
 
 function endWith(player: CourtPlayer, winner: TeamSide) {
@@ -272,9 +282,11 @@ describe("planNextMatch", () => {
     endWith(player, "a");
 
     const plan = planOf(player.state(), {
+      ...AUTOMATIC,
       criterion: "arrival-order",
       criterionInput: { arrivalOrder: ARRIVAL_ORDER },
       playersPerTeam: PLAYERS_PER_TEAM,
+      winnerCriterionInput: null,
     });
 
     expect(plan.exits.map(({ outgoing, incoming }) => [outgoing, incoming])).toStrictEqual([
