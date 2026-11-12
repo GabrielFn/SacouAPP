@@ -1,10 +1,6 @@
 import { Redirect, useLocalSearchParams } from "expo-router";
 
-import {
-  BLOCKS_PARAM,
-  createGroupHref,
-  TEMPLATE_PARAM,
-} from "../../../features/groups/navigation";
+import { BLOCKS_PARAM, createGroupHref, TEMPLATE_PARAM } from "../../../features/groups/navigation";
 import { originFromParams } from "../../../features/groups/model/custom-blocks";
 import { CreateGroupDetailsScreen } from "../../../features/groups/ui/CreateGroupDetailsScreen";
 

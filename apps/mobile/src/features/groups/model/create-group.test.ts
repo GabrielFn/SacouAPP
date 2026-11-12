@@ -149,7 +149,9 @@ describe("createGroupDraft", () => {
   test("the draft of every template and of the canvas passes the parser of the server", () => {
     SETTINGS_TEMPLATE_KEYS.forEach((key) => {
       const origin = originOf(key);
-      expect(parseGroupSettings(createGroupDraft(createInitialState(origin), origin)).ok).toBe(true);
+      expect(parseGroupSettings(createGroupDraft(createInitialState(origin), origin)).ok).toBe(
+        true,
+      );
     });
     expect(parseGroupSettings(createGroupDraft(canvas(), RACHA)).ok).toBe(true);
   });
@@ -225,8 +227,14 @@ describe("createGroupPatch", () => {
 describe("screen 05 reached from screen 04a", () => {
   const scratch = scratchOrigin(["attendance", "queue"]);
 
-  test("the blocks chosen are the base: nothing to patch until the person answers", () => {
-    expect(hasPatch(createGroupPatch(createInitialState(scratch), scratch))).toBe(false);
+  test("the blocks chosen are the patch; with none and no answer there is nothing to send", () => {
+    expect(createGroupPatch(createInitialState(scratch), scratch)).toEqual({
+      schemaVersion: 1,
+      attendance: { enabled: true },
+      queue: { enabled: true },
+    });
+    const none = scratchOrigin([]);
+    expect(hasPatch(createGroupPatch(createInitialState(none), none))).toBe(false);
     expect(customBase(["attendance", "queue"])).toMatchObject({
       attendance: { enabled: true },
       queue: { enabled: true },
@@ -242,7 +250,8 @@ describe("screen 05 reached from screen 04a", () => {
     );
     expect(createGroupPatch(state, scratch)).toEqual({
       schemaVersion: 1,
-      attendance: { capacity: 10 },
+      attendance: { enabled: true, capacity: 10 },
+      queue: { enabled: true },
     });
     expect(createGroupErrors(state, scratch)).toEqual({});
     expect(canSubmit(state, scratch)).toBe(true);

@@ -26,6 +26,11 @@ export type CustomBlock = (typeof CUSTOM_BLOCKS)[number];
 const LIST_SEPARATOR = ",";
 const FROM_SCRATCH: SettingsTemplateKey = "do-zero";
 
+/** The templates of the radio group of screen 04: all but "Do zero", which is the link to screen 04a. */
+export const READY_TEMPLATES: readonly SettingsTemplateKey[] = SETTINGS_TEMPLATE_KEYS.filter(
+  (key) => key !== FROM_SCRATCH,
+);
+
 /** The switch leaf of a block: the one thing screen 04a turns on. */
 export function enabledPath(block: CustomBlock): SettingsPath {
   return `${block}.enabled` as SettingsPath;
@@ -93,9 +98,12 @@ export function originFromParams(
   return parsed === null ? null : scratchOrigin(parsed);
 }
 
-/** The document the origin alone would give: the base of the draft and of the patch. */
+/** The document the server creates from the template key alone: the base of the patch. */
+export function serverBase(origin: GroupOrigin): GroupSettings {
+  return applyTemplate(defaultGroupSettings(), getSettingsTemplate(origin.templateKey));
+}
+
+/** The document the person starts from: the server base, or "Do zero" with the blocks of 04a on. */
 export function originBase(origin: GroupOrigin): GroupSettings {
-  return isFromScratch(origin)
-    ? customBase(origin.blocks)
-    : applyTemplate(defaultGroupSettings(), getSettingsTemplate(origin.templateKey));
+  return isFromScratch(origin) ? customBase(origin.blocks) : serverBase(origin);
 }

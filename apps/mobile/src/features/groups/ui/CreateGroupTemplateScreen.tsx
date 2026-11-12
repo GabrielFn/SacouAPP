@@ -1,8 +1,4 @@
-import {
-  getSettingsTemplate,
-  SETTINGS_TEMPLATE_KEYS,
-  type SettingsTemplateKey,
-} from "@sacou/match-engine";
+import { getSettingsTemplate, type SettingsTemplateKey } from "@sacou/match-engine";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -13,17 +9,13 @@ import { Button } from "../../../ui/Button";
 import { Screen } from "../../../ui/Screen";
 import { StepHeader } from "../../../ui/StepHeader";
 import { Text } from "../../../ui/Text";
-import { templateOrigin } from "../model/custom-blocks";
+import { READY_TEMPLATES, templateOrigin } from "../model/custom-blocks";
 import { createGroupCustomHref, createGroupDetailsHref, groupsHref } from "../navigation";
 import { FromScratchLink } from "./FromScratchLink";
 import { TemplateOption } from "./TemplateOption";
 
 const { step1 } = strings.createGroup;
 const FIRST_STEP_PROGRESS = 0.5;
-/** The four ready-made templates in the radio group; "Do zero" is the link below it. */
-const READY_TEMPLATES: readonly SettingsTemplateKey[] = SETTINGS_TEMPLATE_KEYS.filter(
-  (key) => key !== "do-zero",
-);
 /** The option that is marked when the screen opens, as in the canvas. */
 const INITIAL_TEMPLATE: SettingsTemplateKey = "racha-organizado";
 

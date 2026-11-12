@@ -9,7 +9,7 @@ import {
 
 import { strings } from "../../../strings/pt-BR";
 import type { CreateGroupState } from "./create-group.reducer";
-import { originBase, type GroupOrigin } from "./custom-blocks";
+import { originBase, serverBase, type GroupOrigin } from "./custom-blocks";
 import { settingsErrorText } from "./settings-errors-text";
 import { settingsPatch } from "./settings-patch";
 
@@ -94,9 +94,12 @@ export function createGroupErrors(state: CreateGroupState, origin: GroupOrigin):
   };
 }
 
-/** The leaves the answers changed from the origin; empty when there is nothing to save. */
+/**
+ * The leaves that differ from what the server creates from the template key: the blocks of screen 04a and
+ * the answers. Empty when there is nothing to save.
+ */
 export function createGroupPatch(state: CreateGroupState, origin: GroupOrigin): SettingsLayer {
-  return settingsPatch(originBase(origin), createGroupDraft(state, origin));
+  return settingsPatch(serverBase(origin), createGroupDraft(state, origin));
 }
 
 export function hasPatch(layer: SettingsLayer): boolean {

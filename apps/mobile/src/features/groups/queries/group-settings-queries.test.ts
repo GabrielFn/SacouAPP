@@ -229,6 +229,20 @@ describe("creating a group", () => {
     expect(client.getQueryState(queryKeys.groups())?.isInvalidated).toBe(true);
   });
 
+  test("from scratch sends the key 'do-zero' and then the switches of screen 04a", async () => {
+    const { client, fake } = setup();
+    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
+    fake.respond("updateGroupSettings", apiOk(document(racha)));
+    const patch = {
+      schemaVersion: 1,
+      attendance: { enabled: true },
+      queue: { enabled: true },
+    } as const;
+    await createGroupFlow(fake.api, client, { name: "Racha", templateKey: "do-zero", patch });
+    expect(fake.calls()[0]?.args).toEqual(["Racha", "do-zero"]);
+    expect(fake.calls()[1]?.args[1]).toEqual(patch);
+  });
+
   test("with nothing to save there is no PATCH", async () => {
     const { client, fake } = setup();
     fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));

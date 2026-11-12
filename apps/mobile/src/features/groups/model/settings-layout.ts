@@ -26,8 +26,7 @@ export interface RowEntry {
   readonly visibleWhen?: (settings: GroupSettings) => boolean;
 }
 
-export type LayoutBlock =
-  "attendance" | "scoring" | "queue" | "draw" | "rotation" | "mvp";
+export type LayoutBlock = "attendance" | "scoring" | "queue" | "draw" | "rotation" | "mvp";
 
 export interface BlockSpec {
   readonly block: LayoutBlock;

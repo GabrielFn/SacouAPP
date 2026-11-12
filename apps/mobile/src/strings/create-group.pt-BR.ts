@@ -10,7 +10,8 @@ export const createGroupStrings = {
   },
   custom: {
     title: "Monte do seu jeito",
-    subtitle: "Tudo começa desligado. Ligue o que o grupo usa; dá pra mudar depois em Como jogamos.",
+    subtitle:
+      "Tudo começa desligado. Ligue o que o grupo usa; dá pra mudar depois em Como jogamos.",
     continue: "Continuar",
     expand: (block: string) => `Abrir ${block}`,
     collapse: (block: string) => `Fechar ${block}`,
@@ -18,7 +19,8 @@ export const createGroupStrings = {
       attendance: {
         title: "Presença e vagas",
         summary: "Lista de quem vai, limite de vagas, espera, mensalistas e avulsos",
-        detail: "Liga a lista de presença, o limite de vagas, a espera, os mensalistas e os avulsos.",
+        detail:
+          "Liga a lista de presença, o limite de vagas, a espera, os mensalistas e os avulsos.",
       },
       scoring: {
         title: "Jogo",
