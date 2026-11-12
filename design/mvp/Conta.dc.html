@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Conta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.gh{margin:14px 20px 6px;font-size:14px;font-weight:700;color:#4A5566}
+.cd{margin:0 16px;padding:0;list-style:none;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.12);border-radius:16px;overflow:hidden}
+.r{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-bottom:1px solid rgba(15,27,45,0.08);box-sizing:border-box;width:100%;text-align:left}
+.cd li:last-child .r{border-bottom:0}
+.k{font-size:15px;color:#4A5566;width:72px;flex:none}
+.v{font-size:15px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb{flex:1;font-size:15px;font-weight:600}
+.chev{margin-left:auto;color:#4A5566;flex:none}
+.sw{width:52px;height:32px;border-radius:16px;background:rgba(15,27,45,0.22);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:13px;background:#FFFFFF;box-shadow:0 1px 2px rgba(15,27,45,0.3)}
+.sw[aria-checked="true"]{background:#0C6B35}
+.sw[aria-checked="true"]::after{left:23px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center; gap: 2px">
+    <a href="Perfil.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 32px; line-height: 1">Conta</h1>
+  </header>
+
+  <h2 class="gh">Seus dados</h2>
+  <ul class="cd">
+    <li><a href="#" class="r"><span class="k">Nome</span><span class="v">João Ferreira</span><svg class="chev" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a></li>
+    <li><div class="r"><span class="k">E-mail</span><span class="v">joao.ferreira@gmail.com</span></div></li>
+    <li><div class="r"><span class="k">Login</span><span style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid rgba(15,27,45,0.18); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1F5BFF">G</span>Google</span></div></li>
+  </ul>
+
+  <h2 class="gh">Notificações</h2>
+  <ul class="cd">
+    <li><a href="Notificacoes.dc.html" class="r"><span class="lb">Notificações</span><span style="font-size: 14px; color: #4A5566">Lista, espera, times</span><svg class="chev" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 0"><path d="M9 5l7 7-7 7"/></svg></a></li>
+  </ul>
+
+  <h2 class="gh">Mais</h2>
+  <ul class="cd">
+    <li><button class="r"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg><span class="lb">Exportar meus dados</span></button></li>
+    <li><a href="#" class="r"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6"/></svg><span class="lb">Termos de uso</span><svg class="chev" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a></li>
+    <li><a href="#" class="r"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/></svg><span class="lb">Política de privacidade</span><svg class="chev" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a></li>
+    <li><a href="Login.dc.html" class="r"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5v16h-5"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg><span class="lb">Sair</span></a></li>
+  </ul>
+
+  <section aria-labelledby="del-title" style="margin: 14px 16px 0; background: #FDECEA; border: 1.5px solid #B3261E; border-radius: 16px; padding: 10px 14px 12px; display: flex; align-items: center; gap: 12px">
+    <div style="flex: 1; min-width: 0">
+      <h2 id="del-title" style="margin: 0; font-size: 16px; font-weight: 700; color: #8C1D18">Excluir conta</h2>
+      <p style="margin: 2px 0 0; font-size: 13px; line-height: 1.35; color: #4A5566">Apaga seu perfil. Seu histórico nas partidas fica como Ex-jogador.</p>
+    </div>
+    <button style="height: 44px; padding: 0 14px; flex: none; border-radius: 12px; background: #B3261E; color: #FFFFFF; font-size: 14px; font-weight: 700">Excluir</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -124,6 +124,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E2.7 | Desfazer, voltar a um ponto, trocar sacador, girar e desgirar | Linha do tempo reverte placar, rotação e fila juntos | E2.6 |
 | E2.8 | Ponto individual (autor e tipo) e pontos sem autor | Preencher depois funciona. Parser estrito de payload por tipo, só com IDs (`MemberId`) | E2.2 |
 | E2.9 | Estatísticas por jogador (saldo +/− em quadra, vitórias, sequência) | Rodada simulada com números conferidos à mão | E2.6 |
+| E2.12 | Modos de fila: sempre o time inteiro, número fixo e "vencedor também sai" após X vitórias seguidas, com porte C# e golden (ADR 0048) | Cenários de cada modo, inclusive fila menor que N e os dois times saindo; golden TS/C# iguais | E2.6, E2.10 |
 | E2.11 | Líbero ligado: configuração, 7º membro no evento e trocas | Só no fundo, nunca saca, sai ao chegar na 4, troca só com quem substituiu; golden | E2.4, E2.5 |
 | E2.10 | Porte da função de estado para C# + testes golden compartilhados | TS e C# produzem o mesmo estado em todos os cenários | E2.9, E2.11, E1.5 |
 
@@ -139,7 +140,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.6 | Sorteio equilibrado com travas e reservas, pela nota do admin, ou a sugestão, ou 3,0 (ADR 0047) | Diferença de média mínima em casos de teste | E3.4 |
 | E3.7 | Stream da quadra: sincronização idempotente, evento a evento. SignalR ao vivo: pós-piloto (ADR 0046) | Reenvio não duplica | E2.10 |
 | E3.8 | Placar assume a quadra: Placar, Co-admin ou Admin assume a escrita do stream com confirmação (último ponto recebido e placar); um celular escreve por vez (ADR 0046) | Celular antigo é recusado após a troca; os eventos dele não enviados são recusados e o app avisa quantos pontos não entraram | E3.7 |
-| E3.9 | Projeções de estatísticas e MVP; rating OpenSkill por partida, calculado e escondido no piloto, com porte para C# e golden da `openskill` de TS (ADR 0047) | Correção recalcula tudo; nenhuma rota devolve o rating ao jogador | E3.7 |
+| E3.9 | Projeções de estatísticas e MVP, com o ranking do dia por dupla ou quarteto na areia (ADR 0048); rating OpenSkill por partida, calculado e escondido no piloto, com porte para C# e golden da `openskill` de TS (ADR 0047) | Correção recalcula tudo; nenhuma rota devolve o rating ao jogador | E3.7 |
 | E3.10 | **Pós-piloto (ADR 0046).** Pagamentos: Pix copia e cola, "já paguei", confirmação | Fluxo completo testado | E3.4, E1.4 |
 | E3.11 | Outbox, Hangfire e push (Expo) | Notificação de promoção da espera chega uma vez | E3.4 |
 | E3.12 | Página web da rodada (Razor) com prévia no WhatsApp e login | Prévia aparece; VOU funciona logado e deslogado | E3.4 |
@@ -147,6 +148,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E3.14 | **Pós-piloto (ADR 0046).** Fotos: upload para o R2 e denúncia | Sem EXIF; só o recorte é salvo | acesso Cloudflare |
 | E3.15 | **Pós-piloto (ADR 0046).** Planos: `IGroupPlan` e `IUserPlan` (Pro liberado no piloto) | Recursos Pro bloqueados fora do piloto | E3.2 |
 | E3.16 | Conta: exclusão, exportação e privacidade | Exclusão mantém o histórico como Ex-jogador | E3.1 |
+| E3.18 | Votação do MVP: só quem jogou, sem votar em si, fecha em 24 h, voto secreto, empate pelo saldo (ADR 0048) | Voto duplicado e fora do prazo recusados; ninguém lê o voto de outro | E3.9 |
 | E3.17 | Perfil do jogador: apelido, posições e nível sugerido (API); nota do membro definida pelo Admin ou Co-admin, privada (ADR 0047) | Perfil salvo e lido por `MemberId`/`UserId`, sem dado pessoal em evento | E3.2 |
 
 ### E4 · App (M3–M6)
@@ -157,7 +159,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.2 | Cliente da API gerado, TanStack Query, tratamento de erro e offline | Tipos sempre iguais aos da API | E3.1 |
 | E4.3 | Login, perfil rápido (onboarding) e conta | Telas 02, 27, 30 | E4.2 |
 | E4.4 | Início, lista de grupos, notificações | Telas 03, 17, 28 | E4.2 |
-| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047) | Telas 04, 05, 18, 19, 19a, 19b | E3.3 |
+| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047); regra da fila (ADR 0048) e criar do zero | Telas 04, 04a, 05, 18, 18a, 19, 19a, 19b | E3.3 |
 | E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador | Telas 06, 20, 21, 26 | E3.4 |
 | E4.7 | Sorteio e pré-jogo | Telas 07, 08 | E3.6 |
 | E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |
@@ -169,6 +171,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.14 | **Pós-piloto (ADR 0046).** Módulo nativo de recorte de foto (Vision e ML Kit) + editor | Tela 16; teste no seu aparelho | E4.13 |
 | E4.15 | **Pós-piloto (ADR 0046).** Paywall (informativo no piloto) | Tela 29 | E3.15 |
 | E4.16 | **Pós-piloto (ADR 0046).** Links que abrem o app (universal links) | Link da rodada abre no app instalado | E3.12 |
+| E4.18 | Votação do MVP e resumo da areia com ranking do dia (ADR 0048) | Telas 12a, 12b | E3.18, E4.12 |
 | E4.17 | Modo quadra: aviso de bateria abaixo de 20% sugerindo ligar no carregador (ADR 0046) e modo paisagem (Time A à esquerda, B à direita, "Inverter lados") (`produto.md:139-140`) | Aviso aparece uma vez abaixo de 20%; paisagem igual ao layout aprovado pelo Gabriel (não há tela no design) | E4.9 |
 
 ### E5 · Operação (M4–M6)

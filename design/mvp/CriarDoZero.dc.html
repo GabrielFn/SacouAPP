@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Criar grupo · do zero</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.blk{margin:0 16px 8px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.12);border-radius:16px}
+.bh{display:flex;align-items:center;gap:6px;min-height:56px;padding:0 6px 0 14px}
+.bh h2{margin:0;font-size:16px;font-weight:700}
+.acc{flex:1;min-width:0;min-height:56px;display:flex;align-items:center;gap:8px;padding:8px 0}
+.acc .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sum{font-size:13px;color:#4A5566;line-height:1.35}
+.chev{margin-left:auto;flex:none;color:#4A5566}
+.row{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 6px 0 14px;border-top:1px solid rgba(15,27,45,0.08);font-size:15px;font-weight:600}
+.val{margin-left:auto;display:inline-flex;align-items:center;gap:4px;height:44px;padding:0 8px;color:#4A5566;font-weight:600;font-size:15px}
+.help{margin:-6px 14px 0;padding-bottom:8px;font-size:13px;color:#4A5566;line-height:1.35}
+.sw{width:58px;height:44px;flex:none;display:flex;align-items:center;justify-content:center}
+.tr{width:50px;height:30px;border-radius:15px;background:rgba(15,27,45,0.22);position:relative}
+.tr span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 2px rgba(15,27,45,0.3)}
+.sw[aria-checked="true"] .tr{background:#FF5A1F}
+.sw[aria-checked="true"] .tr span{left:23px}
+.pro{height:22px;padding:0 7px;border-radius:6px;background:#FFC83D;color:#0F1B2D;font-size:13px;font-weight:800;display:inline-flex;align-items:center}
+.lbl{margin:0;padding:10px 14px 6px;font-size:14px;font-weight:700;border-top:1px solid rgba(15,27,45,0.08)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px}
+.chip{height:44px;padding:0 14px;border-radius:22px;border:1.5px solid rgba(15,27,45,0.18);background:#FFFFFF;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
+.chip[aria-checked="true"]{background:#0F1B2D;color:#F6F1E7;border-color:#0F1B2D;font-weight:700}
+.sys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:0 14px 12px}
+.sys button{height:56px;border-radius:12px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;line-height:1}
+.sys button[aria-checked="true"]{background:#0F1B2D;color:#F6F1E7;border-color:#0F1B2D}
+.sys small{font-family:Inter,sans-serif;font-size:13px;font-weight:800;padding:1px 6px;border-radius:6px;background:#FFC83D;color:#0F1B2D;line-height:1.3}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px;border-radius:14px;background:rgba(15,27,45,0.08);margin:0 14px 12px}
+.seg button{height:44px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566;text-align:center}
+.seg button[aria-pressed="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center; gap: 4px">
+    <a href="CriarModelo.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 32px; line-height: 1">Monte do seu jeito</h1>
+  </header>
+  <p style="margin: 2px 20px 12px; font-size: 14px; color: #4A5566; line-height: 1.4">Tudo começa desligado. Ligue o que o grupo usa; dá pra mudar depois em Como jogamos.</p>
+
+  <section class="blk" aria-label="Presença e vagas">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Presença e vagas</span><span class="sum">Lista de quem vai, limite de vagas, espera, mensalistas e avulsos</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Presença e vagas"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="Placar">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Placar</span><span class="sum">Marcar os pontos no celular, mesmo sem internet</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Placar"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="Jogo">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Jogo</span><span class="sum">Pontos, sets, tie-break e vantagem</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Jogo"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="Fila">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Fila</span><span class="sum">Quem perde sai, com saída parcial</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Fila"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="Rotação">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Rotação</span><span class="sum">Cada time com a sua: Livre, 6x0, 4x2, 5x1 ou 6x2</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Rotação"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="Sorteio">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">Sorteio</span><span class="sum">Times equilibrados pela nota do admin</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="Sorteio"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+  <section class="blk" aria-label="MVP do dia">
+    <div class="bh">
+      <button class="acc" aria-expanded="false">
+        <span class="t"><span style="font-size: 16px; font-weight: 700">MVP do dia</span><span class="sum">Pelos dados do placar ou por votação</span></span>
+        <svg class="chev" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="sw" role="switch" aria-checked="false" aria-label="MVP do dia"><span class="tr"><span></span></span></button>
+    </div>
+  </section>
+
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 28px">
+    <a href="CriarPerguntas.dc.html" style="height: 58px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; text-decoration: none">Continuar</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
