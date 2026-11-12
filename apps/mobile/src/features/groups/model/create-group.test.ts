@@ -5,6 +5,7 @@ import {
 } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
+import { customBase, scratchOrigin, templateOrigin, type GroupOrigin } from "./custom-blocks";
 import {
   createGroupReducer,
   createInitialState,
@@ -20,13 +21,17 @@ import {
   normalizeText,
 } from "./create-group.selectors";
 
-const RACHA: SettingsTemplateKey = "racha-organizado";
+const RACHA: GroupOrigin = templateOrigin("racha-organizado");
 
-function typed(key: SettingsTemplateKey, ...actions: readonly CreateGroupAction[]) {
-  return actions.reduce(createGroupReducer, createInitialState(key));
+function typed(origin: GroupOrigin, ...actions: readonly CreateGroupAction[]) {
+  return actions.reduce(createGroupReducer, createInitialState(origin));
 }
 
-/** The case of the canvas: Racha de terça, terça 20h30, Ginásio Sesc, 14 vagas, R$ 10 e R$ 35. */
+function originOf(key: SettingsTemplateKey): GroupOrigin {
+  return key === "do-zero" ? scratchOrigin([]) : templateOrigin(key);
+}
+
+/** The case of the canvas: Racha de terça, terça 20h30, Ginásio Sesc, 14 vagas. */
 function canvas(): CreateGroupState {
   return typed(
     RACHA,
@@ -35,25 +40,28 @@ function canvas(): CreateGroupState {
     { type: "schedule-confirmed" },
     { type: "venue-changed", venue: "Ginásio Sesc" },
     { type: "capacity-changed", text: "14" },
-    { type: "fee-changed", fee: "dropIn", text: "R$ 10" },
-    { type: "fee-changed", fee: "monthly", text: "R$ 35" },
   );
 }
 
 describe("the reducer of screen 05", () => {
   test("init takes the answers of each template", () => {
-    const racha = createInitialState("racha-organizado");
-    expect(racha).toMatchObject({ regulars: true, charges: true, capacityText: "12" });
-    const pelada = createInitialState("pelada");
-    expect(pelada).toMatchObject({ regulars: false, charges: false, capacityText: "" });
-    expect(createInitialState("areia-rei-da-quadra").modality).toBe("beach-2x2");
-    expect(createInitialState("do-zero")).toMatchObject({
+    const racha = createInitialState(RACHA);
+    expect(racha).toMatchObject({ regulars: true, capacityText: "12" });
+    const pelada = createInitialState(templateOrigin("pelada"));
+    expect(pelada).toMatchObject({ regulars: false, capacityText: "" });
+    expect(createInitialState(templateOrigin("areia-rei-da-quadra")).modality).toBe("beach-2x2");
+    expect(createInitialState(scratchOrigin([]))).toMatchObject({
       regulars: false,
-      charges: false,
       capacityText: "",
       modality: "indoor-6x6",
     });
-    expect(createGroupReducer(racha, { type: "init", templateKey: "pelada" })).toEqual(pelada);
+    const init = { type: "init", origin: templateOrigin("pelada") } as const;
+    expect(createGroupReducer(racha, init)).toEqual(pelada);
+  });
+
+  test("the state has no money field", () => {
+    const keys = Object.keys(createInitialState(RACHA));
+    expect(keys.filter((key) => /fee|charge|money/i.test(key))).toEqual([]);
   });
 
   test("each action changes only its field", () => {
@@ -74,17 +82,9 @@ describe("the reducer of screen 05", () => {
       ...start,
       regulars: false,
     });
-    expect(createGroupReducer(start, { type: "charges-selected", value: false })).toEqual({
-      ...start,
-      charges: false,
-    });
     expect(createGroupReducer(start, { type: "modality-selected", modality: "beach-4x4" })).toEqual(
       { ...start, modality: "beach-4x4" },
     );
-    expect(createGroupReducer(start, { type: "fee-changed", fee: "monthly", text: "9" })).toEqual({
-      ...start,
-      monthlyFeeText: "9",
-    });
   });
 
   test("cancelling the schedule sheet keeps the day that was stored", () => {
@@ -139,16 +139,17 @@ describe("createGroupDraft", () => {
     expect(createGroupDraft(createInitialState(RACHA), RACHA).schedule.enabled).toBe(false);
   });
 
-  test("money in cents, regulars and modality come from the answers", () => {
+  test("regulars and modality come from the answers; money stays as the template has it", () => {
     const draft = createGroupDraft(canvas(), RACHA);
-    expect(draft.money).toEqual({ enabled: true, dropInFeeCents: 1000, monthlyFeeCents: 3500 });
+    expect(draft.money).toEqual(createGroupDraft(createInitialState(RACHA), RACHA).money);
     expect(draft.attendance.regularsEnabled).toBe(true);
     expect(draft.format.modality).toBe("indoor-6x6");
   });
 
   test("the draft of every template and of the canvas passes the parser of the server", () => {
     SETTINGS_TEMPLATE_KEYS.forEach((key) => {
-      expect(parseGroupSettings(createGroupDraft(createInitialState(key), key)).ok).toBe(true);
+      const origin = originOf(key);
+      expect(parseGroupSettings(createGroupDraft(createInitialState(origin), origin)).ok).toBe(true);
     });
     expect(parseGroupSettings(createGroupDraft(canvas(), RACHA)).ok).toBe(true);
   });
@@ -196,13 +197,6 @@ describe("createGroupErrors", () => {
     expect(createGroupErrors(state, RACHA).schedule).toBeTypeOf("string");
   });
 
-  test("an amount that is not money is refused only while the group charges", () => {
-    const bad = withName({ type: "fee-changed", fee: "dropIn", text: "abc" });
-    expect(createGroupErrors(bad, RACHA).dropInFee).toBeTypeOf("string");
-    const noCharge = createGroupReducer(bad, { type: "charges-selected", value: false });
-    expect(createGroupErrors(noCharge, RACHA).dropInFee).toBeUndefined();
-  });
-
   test("once submitted it cannot be submitted again", () => {
     const created = createGroupReducer(canvas(), { type: "group-created", groupId: "g" });
     expect(canSubmit(created, RACHA)).toBe(false);
@@ -216,19 +210,47 @@ describe("createGroupPatch", () => {
       schemaVersion: 1,
       attendance: { capacity: 14 },
       schedule: { enabled: true, startTime: "20:30", venue: "Ginásio Sesc" },
-      money: { dropInFeeCents: 1000, monthlyFeeCents: 3500 },
     });
     expect(hasPatch(patch)).toBe(true);
   });
 
   test("answering nothing different gives an empty layer for every template", () => {
     SETTINGS_TEMPLATE_KEYS.forEach((key) => {
-      expect(hasPatch(createGroupPatch(createInitialState(key), key))).toBe(false);
+      const origin = originOf(key);
+      expect(hasPatch(createGroupPatch(createInitialState(origin), origin))).toBe(false);
+    });
+  });
+});
+
+describe("screen 05 reached from screen 04a", () => {
+  const scratch = scratchOrigin(["attendance", "queue"]);
+
+  test("the blocks chosen are the base: nothing to patch until the person answers", () => {
+    expect(hasPatch(createGroupPatch(createInitialState(scratch), scratch))).toBe(false);
+    expect(customBase(["attendance", "queue"])).toMatchObject({
+      attendance: { enabled: true },
+      queue: { enabled: true },
+      scoring: { enabled: false },
     });
   });
 
-  test("Racha with no charge turns the money block off", () => {
-    const patch = createGroupPatch(typed(RACHA, { type: "charges-selected", value: false }), RACHA);
-    expect(patch).toEqual({ schemaVersion: 1, money: { enabled: false } });
+  test("the answers go on top of the blocks, and the draft passes the parser", () => {
+    const state = typed(
+      scratch,
+      { type: "name-changed", name: "Racha" },
+      { type: "capacity-changed", text: "10" },
+    );
+    expect(createGroupPatch(state, scratch)).toEqual({
+      schemaVersion: 1,
+      attendance: { capacity: 10 },
+    });
+    expect(createGroupErrors(state, scratch)).toEqual({});
+    expect(canSubmit(state, scratch)).toBe(true);
+  });
+
+  test("the blocks chosen change the base of the draft", () => {
+    const none = scratchOrigin([]);
+    expect(createGroupDraft(createInitialState(none), none).attendance.enabled).toBe(false);
+    expect(createGroupDraft(createInitialState(scratch), scratch).attendance.enabled).toBe(true);
   });
 });

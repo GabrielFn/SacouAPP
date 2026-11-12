@@ -1,12 +1,6 @@
-import {
-  applyTemplate,
-  defaultGroupSettings,
-  getSettingsTemplate,
-  type SettingsModality,
-  type SettingsTemplateKey,
-} from "@sacou/match-engine";
+import type { SettingsModality } from "@sacou/match-engine";
 
-import { moneyFieldText } from "./money-text";
+import { originBase, type GroupOrigin } from "./custom-blocks";
 
 export interface ScheduleDraft {
   readonly weekday: number;
@@ -29,13 +23,8 @@ export interface CreateGroupState {
   readonly capacityText: string;
   readonly modality: SettingsModality;
   readonly regulars: boolean;
-  readonly charges: boolean;
-  readonly dropInFeeText: string;
-  readonly monthlyFeeText: string;
   readonly submit: SubmitState;
 }
-
-export type FeeKind = "dropIn" | "monthly";
 
 export type ScheduleAction =
   | { readonly type: "schedule-opened"; readonly draft: ScheduleDraft }
@@ -48,12 +37,10 @@ export type AnswerAction =
   | { readonly type: "venue-changed"; readonly venue: string }
   | { readonly type: "capacity-changed"; readonly text: string }
   | { readonly type: "modality-selected"; readonly modality: SettingsModality }
-  | { readonly type: "regulars-selected"; readonly value: boolean }
-  | { readonly type: "charges-selected"; readonly value: boolean }
-  | { readonly type: "fee-changed"; readonly fee: FeeKind; readonly text: string };
+  | { readonly type: "regulars-selected"; readonly value: boolean };
 
 export type LifecycleAction =
-  | { readonly type: "init"; readonly templateKey: SettingsTemplateKey }
+  | { readonly type: "init"; readonly origin: GroupOrigin }
   | { readonly type: "group-created"; readonly groupId: string }
   | { readonly type: "settings-saved"; readonly groupId: string };
 
@@ -61,9 +48,9 @@ export type CreateGroupAction = ScheduleAction | AnswerAction | LifecycleAction;
 
 const NOT_A_DIGIT = /\D/g;
 
-/** The answers a template gives before the person touches anything (D3). */
-export function createInitialState(templateKey: SettingsTemplateKey): CreateGroupState {
-  const base = applyTemplate(defaultGroupSettings(), getSettingsTemplate(templateKey));
+/** The answers the origin (a template, or "Do zero" with blocks) gives before the person touches anything. */
+export function createInitialState(origin: GroupOrigin): CreateGroupState {
+  const base = originBase(origin);
   return {
     name: "",
     scheduleWeekday: null,
@@ -73,9 +60,6 @@ export function createInitialState(templateKey: SettingsTemplateKey): CreateGrou
     capacityText: base.attendance.capacityLimited ? String(base.attendance.capacity) : "",
     modality: base.format.modality,
     regulars: base.attendance.regularsEnabled,
-    charges: base.money.enabled,
-    dropInFeeText: moneyFieldText(base.money.dropInFeeCents),
-    monthlyFeeText: moneyFieldText(base.money.monthlyFeeCents),
     submit: { kind: "idle" },
   };
 }
@@ -121,19 +105,13 @@ function answerReducer(state: CreateGroupState, action: AnswerAction): CreateGro
       return { ...state, modality: action.modality };
     case "regulars-selected":
       return { ...state, regulars: action.value };
-    case "charges-selected":
-      return { ...state, charges: action.value };
-    case "fee-changed":
-      return action.fee === "dropIn"
-        ? { ...state, dropInFeeText: action.text }
-        : { ...state, monthlyFeeText: action.text };
   }
 }
 
 function lifecycleReducer(state: CreateGroupState, action: LifecycleAction): CreateGroupState {
   switch (action.type) {
     case "init":
-      return createInitialState(action.templateKey);
+      return createInitialState(action.origin);
     case "group-created":
       return { ...state, submit: { kind: "created-without-settings", groupId: action.groupId } };
     case "settings-saved":

@@ -13,11 +13,17 @@ import { Button } from "../../../ui/Button";
 import { Screen } from "../../../ui/Screen";
 import { StepHeader } from "../../../ui/StepHeader";
 import { Text } from "../../../ui/Text";
-import { createGroupDetailsHref, groupsHref } from "../navigation";
+import { templateOrigin } from "../model/custom-blocks";
+import { createGroupCustomHref, createGroupDetailsHref, groupsHref } from "../navigation";
+import { FromScratchLink } from "./FromScratchLink";
 import { TemplateOption } from "./TemplateOption";
 
 const { step1 } = strings.createGroup;
 const FIRST_STEP_PROGRESS = 0.5;
+/** The four ready-made templates in the radio group; "Do zero" is the link below it. */
+const READY_TEMPLATES: readonly SettingsTemplateKey[] = SETTINGS_TEMPLATE_KEYS.filter(
+  (key) => key !== "do-zero",
+);
 /** The option that is marked when the screen opens, as in the canvas. */
 const INITIAL_TEMPLATE: SettingsTemplateKey = "racha-organizado";
 
@@ -32,7 +38,7 @@ export function CreateGroupTemplateScreen() {
         <Button
           label={step1.continueWith(strings.settings.templates[selected].name)}
           onPress={() => {
-            router.push(createGroupDetailsHref(selected));
+            router.push(createGroupDetailsHref(templateOrigin(selected)));
           }}
         />
       }
@@ -57,7 +63,7 @@ export function CreateGroupTemplateScreen() {
         accessibilityLabel={step1.radiogroup}
         style={{ gap: tokens.spacing.s10 }}
       >
-        {SETTINGS_TEMPLATE_KEYS.map((key) => (
+        {READY_TEMPLATES.map((key) => (
           <TemplateOption
             key={key}
             templateKey={key}
@@ -67,6 +73,11 @@ export function CreateGroupTemplateScreen() {
           />
         ))}
       </View>
+      <FromScratchLink
+        onPress={() => {
+          router.push(createGroupCustomHref);
+        }}
+      />
     </Screen>
   );
 }

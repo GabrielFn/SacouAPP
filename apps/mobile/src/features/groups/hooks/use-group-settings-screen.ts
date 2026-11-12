@@ -2,6 +2,7 @@ import type { SettingsBlock, SettingsPath, SettingsValue } from "@sacou/match-en
 import { useReducer } from "react";
 
 import type { TemplateChoice } from "../../../services/api/sacou-api";
+import type { ShownPath } from "../../../strings/settings.pt-BR";
 import {
   groupSettingsFormReducer,
   initialGroupSettingsFormState,
@@ -23,7 +24,7 @@ export interface GroupSettingsScreenModel {
   readonly retry: () => void;
   readonly changeLeaf: (path: SettingsPath, value: SettingsValue) => void;
   readonly toggleBlock: (block: SettingsBlock) => void;
-  readonly openField: (path: SettingsPath) => void;
+  readonly openField: (path: ShownPath) => void;
   readonly openSchedule: () => void;
   readonly openPicker: () => void;
   readonly openSave: () => void;

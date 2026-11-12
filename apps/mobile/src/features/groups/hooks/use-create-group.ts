@@ -1,9 +1,10 @@
-import type { SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
+import type { SettingsLayer } from "@sacou/match-engine";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useReducer } from "react";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
 import { useServices } from "../../../services/services-context";
+import type { GroupOrigin } from "../model/custom-blocks";
 import {
   createGroupReducer,
   createInitialState,
@@ -35,19 +36,19 @@ export interface CreateGroupModel {
 
 /** Runs the reducer of screen 05 and the two calls of "Criar grupo"; the screen only draws (D3). */
 export function useCreateGroup(
-  templateKey: SettingsTemplateKey,
+  origin: GroupOrigin,
   onDone: (groupId: string) => void,
 ): CreateGroupModel {
   const { sacouApi } = useServices();
   const client = useQueryClient();
-  const [state, dispatch] = useReducer(createGroupReducer, templateKey, createInitialState);
+  const [state, dispatch] = useReducer(createGroupReducer, origin, createInitialState);
 
   const create = useMutation({
     mutationFn: () => {
-      const patch: SettingsLayer = createGroupPatch(state, templateKey);
+      const patch: SettingsLayer = createGroupPatch(state, origin);
       return createGroupFlow(sacouApi, client, {
         name: normalizeText(state.name),
-        templateKey,
+        templateKey: origin.templateKey,
         patch: hasPatch(patch) ? patch : null,
       });
     },
@@ -63,7 +64,7 @@ export function useCreateGroup(
 
   const retry = useMutation({
     mutationFn: (groupId: string) =>
-      saveCreatedGroupSettings(sacouApi, client, groupId, createGroupPatch(state, templateKey)),
+      saveCreatedGroupSettings(sacouApi, client, groupId, createGroupPatch(state, origin)),
     onSuccess: (_result, groupId) => {
       dispatch({ type: "settings-saved", groupId });
       onDone(groupId);
@@ -73,8 +74,8 @@ export function useCreateGroup(
   return {
     state,
     dispatch,
-    errors: createGroupErrors(state, templateKey),
-    canSubmit: canSubmit(state, templateKey),
+    errors: createGroupErrors(state, origin),
+    canSubmit: canSubmit(state, origin),
     pending: create.isPending || retry.isPending,
     errorText: create.isError || retry.isError ? errorTextOf(retry.error ?? create.error) : null,
     submit: () => {

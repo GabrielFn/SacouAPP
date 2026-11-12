@@ -1,19 +1,15 @@
 import {
-  applyTemplate,
   checkDisplayText,
   countLayerChanges,
-  defaultGroupSettings,
-  getSettingsTemplate,
   parseGroupSettings,
   type GroupSettings,
   type SettingsError,
   type SettingsLayer,
-  type SettingsTemplateKey,
 } from "@sacou/match-engine";
 
 import { strings } from "../../../strings/pt-BR";
 import type { CreateGroupState } from "./create-group.reducer";
-import { parseBrlToCents } from "./money-text";
+import { originBase, type GroupOrigin } from "./custom-blocks";
 import { settingsErrorText } from "./settings-errors-text";
 import { settingsPatch } from "./settings-patch";
 
@@ -25,21 +21,9 @@ export function normalizeText(text: string): string {
   return text.trim().normalize("NFC");
 }
 
-/** The group the template alone would give: the base of the draft and of the patch. */
-export function templateBase(templateKey: SettingsTemplateKey): GroupSettings {
-  return applyTemplate(defaultGroupSettings(), getSettingsTemplate(templateKey));
-}
-
-function feeCents(text: string, fallback: number): number {
-  return parseBrlToCents(text) ?? fallback;
-}
-
-/** The settings the answers make, on top of the template (D3). */
-export function createGroupDraft(
-  state: CreateGroupState,
-  templateKey: SettingsTemplateKey,
-): GroupSettings {
-  const base = templateBase(templateKey);
+/** The settings the answers make, on top of the origin (D3). The `money.*` leaves are never touched. */
+export function createGroupDraft(state: CreateGroupState, origin: GroupOrigin): GroupSettings {
+  const base = originBase(origin);
   const capacity = state.capacityText === "" ? null : Number(state.capacityText);
   const scheduled = state.scheduleWeekday !== null && state.scheduleTime !== null;
   return {
@@ -57,11 +41,6 @@ export function createGroupDraft(
       venue: normalizeText(state.venue),
     },
     format: { modality: state.modality },
-    money: {
-      enabled: state.charges,
-      dropInFeeCents: feeCents(state.dropInFeeText, base.money.dropInFeeCents),
-      monthlyFeeCents: feeCents(state.monthlyFeeText, base.money.monthlyFeeCents),
-    },
   };
 }
 
@@ -70,8 +49,6 @@ export interface CreateGroupErrors {
   readonly schedule?: string;
   readonly venue?: string;
   readonly capacity?: string;
-  readonly dropInFee?: string;
-  readonly monthlyFee?: string;
 }
 
 type ErrorField = keyof CreateGroupErrors;
@@ -98,18 +75,8 @@ function fieldOfRefusal(error: SettingsError): ErrorField | null {
   }
 }
 
-function moneyErrors(state: CreateGroupState): CreateGroupErrors {
-  if (!state.charges) return {};
-  return {
-    ...(parseBrlToCents(state.dropInFeeText) === null ? { dropInFee: errors.money } : {}),
-    ...(state.regulars && parseBrlToCents(state.monthlyFeeText) === null
-      ? { monthlyFee: errors.money }
-      : {}),
-  };
-}
-
-function refusalErrors(state: CreateGroupState, key: SettingsTemplateKey): CreateGroupErrors {
-  const parsed = parseGroupSettings(createGroupDraft(state, key));
+function refusalErrors(state: CreateGroupState, origin: GroupOrigin): CreateGroupErrors {
+  const parsed = parseGroupSettings(createGroupDraft(state, origin));
   if (parsed.ok) return {};
   const field = fieldOfRefusal(parsed.error);
   return field === null ? {} : { [field]: settingsErrorText(parsed.error) };
@@ -117,34 +84,27 @@ function refusalErrors(state: CreateGroupState, key: SettingsTemplateKey): Creat
 
 /**
  * One error per field. The settings are checked by the engine's own parser, the rule of the server,
- * with the text chosen by its `code` and `path`; only the name and the money text are the app's.
+ * with the text chosen by its `code` and `path`; only the name is the app's.
  */
-export function createGroupErrors(
-  state: CreateGroupState,
-  templateKey: SettingsTemplateKey,
-): CreateGroupErrors {
+export function createGroupErrors(state: CreateGroupState, origin: GroupOrigin): CreateGroupErrors {
   const name = nameError(state.name);
   return {
     ...(name === undefined ? {} : { name }),
-    ...moneyErrors(state),
-    ...refusalErrors(state, templateKey),
+    ...refusalErrors(state, origin),
   };
 }
 
-/** The leaves the answers changed from the template; empty when there is nothing to save. */
-export function createGroupPatch(
-  state: CreateGroupState,
-  templateKey: SettingsTemplateKey,
-): SettingsLayer {
-  return settingsPatch(templateBase(templateKey), createGroupDraft(state, templateKey));
+/** The leaves the answers changed from the origin; empty when there is nothing to save. */
+export function createGroupPatch(state: CreateGroupState, origin: GroupOrigin): SettingsLayer {
+  return settingsPatch(originBase(origin), createGroupDraft(state, origin));
 }
 
 export function hasPatch(layer: SettingsLayer): boolean {
   return countLayerChanges(layer) > 0;
 }
 
-export function canSubmit(state: CreateGroupState, templateKey: SettingsTemplateKey): boolean {
-  const errors = createGroupErrors(state, templateKey);
+export function canSubmit(state: CreateGroupState, origin: GroupOrigin): boolean {
+  const errors = createGroupErrors(state, origin);
   return state.submit.kind === "idle" && Object.keys(errors).length === 0;
 }
 

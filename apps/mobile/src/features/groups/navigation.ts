@@ -1,5 +1,6 @@
-import type { SettingsTemplateKey } from "@sacou/match-engine";
 import type { Href } from "expo-router";
+
+import { isFromScratch, serializeCustomBlocks, type GroupOrigin } from "./model/custom-blocks";
 
 export type PendingGroupScreen = "createGroup" | "members" | "settings";
 
@@ -11,12 +12,17 @@ export const groupsHref: Href = "/groups";
 export const meHref: Href = "/me";
 export const notificationsHref: Href = "/notifications";
 export const createGroupHref: Href = "/groups/new";
+export const createGroupCustomHref: Href = "/groups/new/custom";
 
-/** The template chosen on screen 04 travels on the route: the router is its only place (E4.5, D1). */
+/** The template chosen on screen 04 and the blocks of 04a travel on the route: its only place (E4.5, D1). */
 export const TEMPLATE_PARAM = "template";
+export const BLOCKS_PARAM = "blocks";
 
-export function createGroupDetailsHref(templateKey: SettingsTemplateKey): Href {
-  return { pathname: "/groups/new/details", params: { [TEMPLATE_PARAM]: templateKey } };
+export function createGroupDetailsHref(origin: GroupOrigin): Href {
+  const params = isFromScratch(origin)
+    ? { [TEMPLATE_PARAM]: origin.templateKey, [BLOCKS_PARAM]: serializeCustomBlocks(origin.blocks) }
+    : { [TEMPLATE_PARAM]: origin.templateKey };
+  return { pathname: "/groups/new/details", params };
 }
 
 export function groupSettingsHref(groupId: string): Href {

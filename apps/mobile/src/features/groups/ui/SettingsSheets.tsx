@@ -6,7 +6,6 @@ import { TemplatePickerSheet } from "./TemplatePickerSheet";
 import { TextSheet } from "./TextSheet";
 
 const { sheets, fields } = strings.settings;
-const MONEY_SUFFIX = "Cents";
 
 export interface SettingsSheetsProps {
   readonly model: GroupSettingsScreenModel;
@@ -17,16 +16,13 @@ export interface SettingsSheetsProps {
 function FieldSheet({ model }: Pick<SettingsSheetsProps, "model">) {
   const { sheet } = model.form;
   if (sheet.kind !== "field") return null;
-  const money = sheet.path.endsWith(MONEY_SUFFIX);
   return (
     <TextSheet
       visible
       title={fields[sheet.path]}
       label={fields[sheet.path]}
       value={sheet.text}
-      hint={money ? sheets.moneyHint : undefined}
       error={model.sheetError}
-      keyboardType={money ? "decimal-pad" : "default"}
       canConfirm={model.canConfirmSheet}
       onChange={model.setSheetText}
       onConfirm={model.confirmSheet}

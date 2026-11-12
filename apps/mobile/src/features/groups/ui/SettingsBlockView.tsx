@@ -2,6 +2,7 @@ import type { GroupSettings, SettingsPath, SettingsValue } from "@sacou/match-en
 import { Pressable, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
+import type { ShownPath } from "../../../strings/settings.pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { ChevronDownIcon } from "../../../ui/Icons";
 import { Switch } from "../../../ui/Switch";
@@ -28,7 +29,7 @@ export interface SettingsBlockViewProps {
   readonly expanded: boolean;
   readonly onToggleExpanded: () => void;
   readonly onLeafChange: (path: SettingsPath, value: SettingsValue) => void;
-  readonly onOpenField: (path: SettingsPath) => void;
+  readonly onOpenField: (path: ShownPath) => void;
   readonly onOpenSchedule: () => void;
 }
 

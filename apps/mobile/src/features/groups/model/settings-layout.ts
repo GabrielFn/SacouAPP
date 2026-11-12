@@ -1,20 +1,22 @@
-import type { GroupSettings, SettingsPath } from "@sacou/match-engine";
+import type { GroupSettings } from "@sacou/match-engine";
+
+import type { ShownPath } from "../../../strings/settings.pt-BR";
 
 /** How one line of screen 18 is drawn and what it writes; the screen only follows this list (D4). */
 export type RowSpec =
-  | { readonly kind: "switch"; readonly path: SettingsPath }
+  | { readonly kind: "switch"; readonly path: ShownPath }
   /** A switch over a choice of two numbers: on is the second value of the pair. */
   | {
       readonly kind: "margin";
-      readonly path: SettingsPath;
+      readonly path: ShownPath;
       readonly on: number;
       readonly off: number;
     }
-  | { readonly kind: "field"; readonly path: SettingsPath }
+  | { readonly kind: "field"; readonly path: ShownPath }
   | { readonly kind: "schedule" }
   | {
       readonly kind: "choice";
-      readonly path: SettingsPath;
+      readonly path: ShownPath;
       readonly layout: "chips" | "segmented" | "systems";
     }
   | { readonly kind: "queue-rule" };
@@ -25,7 +27,7 @@ export interface RowEntry {
 }
 
 export type LayoutBlock =
-  "attendance" | "scoring" | "queue" | "draw" | "rotation" | "mvp" | "money";
+  "attendance" | "scoring" | "queue" | "draw" | "rotation" | "mvp";
 
 export interface BlockSpec {
   readonly block: LayoutBlock;
@@ -38,8 +40,8 @@ const WIN_BY_TWO = 2;
 const WIN_BY_ONE = 1;
 
 /**
- * The blocks in the order of the canvas, with "Sorteio" in the same pattern (D4). The money block has no
- * "Forma" nor "Chave" until the Pix of E3.10.
+ * The blocks in the order of the canvas, with "Sorteio" in the same pattern (D4). No money block: the
+ * pilot does not charge (ADR 0046).
  */
 export const SETTINGS_SCREEN: readonly BlockSpec[] = [
   {
@@ -107,14 +109,6 @@ export const SETTINGS_SCREEN: readonly BlockSpec[] = [
       { row: { kind: "switch", path: "mvp.byStats" } },
       { row: { kind: "switch", path: "mvp.voting" } },
       { row: { kind: "switch", path: "mvp.individualPoints" } },
-    ],
-  },
-  {
-    block: "money",
-    accordion: false,
-    rows: [
-      { row: { kind: "field", path: "money.dropInFeeCents" } },
-      { row: { kind: "field", path: "money.monthlyFeeCents" } },
     ],
   },
 ];

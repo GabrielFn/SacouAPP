@@ -14,7 +14,6 @@ import { settingsStrings } from "../../../strings/settings.pt-BR";
 import type { TemplateLabel } from "./settings-document";
 import { organizes } from "./groups-list.selectors";
 import type { PendingLeaves, SettingsSheet } from "./group-settings-form.reducer";
-import { formatCents, parseBrlToCents } from "./money-text";
 import { scheduleSummary } from "./schedule-text";
 import { settingsErrorText } from "./settings-errors-text";
 import { leafOf, withLeaf } from "./settings-patch";
@@ -56,7 +55,6 @@ function fieldOf(path: SettingsPath): SettingsField | undefined {
 export function parseFieldText(path: SettingsPath, text: string): SettingsValue | null {
   const type = fieldOf(path)?.type;
   if (type === "text") return normalizeText(text);
-  if (path.endsWith("Cents")) return parseBrlToCents(text);
   if (type === "integer") return WHOLE_NUMBER.test(text.trim()) ? Number(text.trim()) : null;
   return null;
 }
@@ -154,12 +152,11 @@ export function isBlockEnabled(block: SettingsBlock, settings: GroupSettings): b
 
 const HOURS_SUFFIX = "h";
 
-/** What a field row shows at its right: "R$ 10", "14", "24h", or "Escolher" for an empty text. */
+/** What a field row shows at its right: "14", "24h", or "Escolher" for an empty text. */
 export function fieldValueText(path: SettingsPath, settings: GroupSettings): string {
   const value = leafOf(settings, path);
   if (typeof value === "string") return value === "" ? screen.schedulePick : value;
   if (typeof value !== "number") return "";
-  if (path.endsWith("Cents")) return formatCents(value);
   return path === "attendance.dropInOpensHoursBefore"
     ? `${String(value)}${HOURS_SUFFIX}`
     : String(value);
@@ -170,7 +167,7 @@ export function fieldSheetText(path: SettingsPath, settings: GroupSettings): str
   const value = leafOf(settings, path);
   if (typeof value === "string") return value;
   if (typeof value !== "number") return "";
-  return path.endsWith("Cents") ? formatCents(value) : String(value);
+  return String(value);
 }
 
 /** The name shown in "Modelo usado": the ready-made one, the saved one, or "Personalizado". */

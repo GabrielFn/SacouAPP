@@ -1,17 +1,17 @@
-import { SETTINGS_TEMPLATE_KEYS, type SettingsTemplateKey } from "@sacou/match-engine";
 import { Redirect, useLocalSearchParams } from "expo-router";
 
-import { createGroupHref, TEMPLATE_PARAM } from "../../../features/groups/navigation";
+import {
+  BLOCKS_PARAM,
+  createGroupHref,
+  TEMPLATE_PARAM,
+} from "../../../features/groups/navigation";
+import { originFromParams } from "../../../features/groups/model/custom-blocks";
 import { CreateGroupDetailsScreen } from "../../../features/groups/ui/CreateGroupDetailsScreen";
 
-function isTemplateKey(value: unknown): value is SettingsTemplateKey {
-  return SETTINGS_TEMPLATE_KEYS.some((key) => key === value);
-}
-
-/** Screen 05: the template comes on the route; a missing or unknown one goes back to screen 04. */
+/** Screen 05: the origin comes on the route; one that cannot be read goes back to screen 04. */
 export default function CreateGroupDetailsRoute() {
-  const params = useLocalSearchParams<{ [TEMPLATE_PARAM]?: string }>();
-  const template = params[TEMPLATE_PARAM];
-  if (!isTemplateKey(template)) return <Redirect href={createGroupHref} />;
-  return <CreateGroupDetailsScreen templateKey={template} />;
+  const params = useLocalSearchParams<{ [TEMPLATE_PARAM]?: string; [BLOCKS_PARAM]?: string }>();
+  const origin = originFromParams(params[TEMPLATE_PARAM], params[BLOCKS_PARAM]);
+  if (origin === null) return <Redirect href={createGroupHref} />;
+  return <CreateGroupDetailsScreen origin={origin} />;
 }

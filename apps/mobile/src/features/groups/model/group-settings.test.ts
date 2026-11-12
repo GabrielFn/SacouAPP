@@ -186,7 +186,7 @@ describe("the rotation systems", () => {
     const options = choiceOptions("rotation.system");
     const catalog = SETTINGS_CATALOG.fields.find((field) => field.path === "rotation.system");
     expect(options.map(({ value }) => value)).toEqual(catalog?.values);
-    expect(options.map(({ label }) => label)).toEqual(["Livre", "5x1", "4x2", "6x2"]);
+    expect(options.map(({ label }) => label)).toEqual(["Livre / 6x0", "5x1", "4x2", "6x2"]);
     expect(options.filter(({ pro }) => pro).map(({ label }) => label)).toEqual([
       "5x1",
       "4x2",
@@ -237,20 +237,26 @@ describe("the layout of the screen", () => {
     expect(kinds(off)).not.toContain("attendance.capacity");
   });
 
-  test("there is no Pix line while E3.10 is missing", () => {
-    const money = SETTINGS_SCREEN.find((spec) => spec.block === "money");
-    expect(money?.rows.map(({ row }) => ("path" in row ? row.path : row.kind))).toEqual([
-      "money.dropInFeeCents",
-      "money.monthlyFeeCents",
+  test("the pilot has no money block and no money line (ADR 0046)", () => {
+    expect(SETTINGS_SCREEN.map((spec) => spec.block)).toEqual([
+      "attendance",
+      "scoring",
+      "queue",
+      "draw",
+      "rotation",
+      "mvp",
     ]);
+    const paths = SETTINGS_SCREEN.flatMap((spec) => spec.rows).flatMap(({ row }) =>
+      "path" in row ? [row.path] : [],
+    );
+    expect(paths.filter((path) => path.startsWith("money."))).toEqual([]);
   });
 });
 
 describe("a field sheet", () => {
-  test("numbers, money and text are read as the leaf they write", () => {
+  test("numbers and text are read as the leaf they write", () => {
     expect(parseFieldText("scoring.pointsPerSet", " 21 ")).toBe(21);
     expect(parseFieldText("scoring.pointsPerSet", "2x")).toBeNull();
-    expect(parseFieldText("money.monthlyFeeCents", "R$ 35")).toBe(3500);
     expect(parseFieldText("schedule.venue", "  Ginásio ")).toBe("Ginásio");
   });
 
@@ -269,9 +275,6 @@ describe("a field sheet", () => {
   });
 
   test("values are read for the rows", () => {
-    expect(
-      fieldValueText("money.dropInFeeCents", withLeaf(racha, "money.dropInFeeCents", 1000)),
-    ).toBe("R$ 10");
     expect(fieldValueText("attendance.dropInOpensHoursBefore", racha)).toBe("24h");
     expect(fieldValueText("schedule.venue", racha)).toBe("Escolher");
   });

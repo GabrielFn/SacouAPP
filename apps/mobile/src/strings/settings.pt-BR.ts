@@ -1,5 +1,8 @@
 import type { SettingsErrorCode, SettingsPath, SettingsTemplateKey } from "@sacou/match-engine";
 
+/** The leaves the app shows. The `money.*` ones stay in the document but are hidden in the pilot (ADR 0046). */
+export type ShownPath = Exclude<SettingsPath, `money.${string}`>;
+
 /** Weekdays by ISO number (1 is Monday), with the form used in a summary ("toda terça"). */
 const weekdays: Readonly<Record<number, { readonly name: string; readonly every: string }>> = {
   1: { name: "Segunda", every: "toda segunda" },
@@ -21,7 +24,7 @@ const templates: Readonly<
   },
   "racha-organizado": {
     name: "Racha organizado",
-    line: "Liga mensalistas, Pix, sorteio por nível e fila de quem perde sai.",
+    line: "Liga mensalistas, sorteio por nota e fila de quem perde sai.",
   },
   treino: {
     name: "Treino",
@@ -34,7 +37,7 @@ const templates: Readonly<
   "do-zero": { name: "Do zero", line: "Tudo desligado. Você liga o que usar." },
 };
 
-const fields: Readonly<Record<SettingsPath, string>> = {
+const fields: Readonly<Record<ShownPath, string>> = {
   "attendance.enabled": "Presença e vagas",
   "attendance.capacityLimited": "Limite de vagas",
   "attendance.capacity": "Vagas",
@@ -60,14 +63,11 @@ const fields: Readonly<Record<SettingsPath, string>> = {
   "rotation.ruleMode": "Regra de sobreposição",
   "rotation.liberoEnabled": "Líbero",
   "draw.enabled": "Sorteio",
-  "draw.balanceByLevel": "Equilibrar por nível",
+  "draw.balanceByLevel": "Equilibrar pela nota do admin",
   "mvp.enabled": "MVP do dia",
   "mvp.byStats": "Pelos dados do placar",
   "mvp.voting": "Votação da galera",
   "mvp.individualPoints": "Ponto individual",
-  "money.enabled": "Dinheiro",
-  "money.dropInFeeCents": "Avulso por rodada",
-  "money.monthlyFeeCents": "Mensalidade",
 };
 
 /** The label of each value of a choice leaf, by the value as text. */
@@ -84,7 +84,7 @@ const choices: Readonly<Record<string, Readonly<Record<string, string>>>> = {
     "arrival-order": "Ordem de chegada",
     manual: "Manual",
   },
-  "rotation.system": { livre: "Livre", "4x2": "4x2", "5x1": "5x1", "6x2": "6x2" },
+  "rotation.system": { livre: "Livre / 6x0", "4x2": "4x2", "5x1": "5x1", "6x2": "6x2" },
   "rotation.ruleMode": { "fivb-2025-28": "FIVB atual", classic: "Clássica" },
 };
 
@@ -138,12 +138,11 @@ export const settingsStrings = {
     draw: { title: "Sorteio", caption: "times na hora" },
     rotation: { title: "Rotação", caption: "cada time tem a sua" },
     mvp: { title: "MVP do dia" },
-    money: { title: "Dinheiro" },
   },
   queueRule: {
     label: "Regra",
-    value: "Perde sai",
-    accessibility: "Regra da fila: perde sai",
+    value: "Automático",
+    accessibility: "Regra da fila: automático",
     help: "Só sai do perdedor quem vai ser substituído.",
   },
   rotationHelp: {
@@ -184,6 +183,5 @@ export const settingsStrings = {
     saveNamePlaceholder: "Meu racha",
     save: "Salvar",
     saveError: "Escolha um nome de até 40 letras, sem deixar em branco.",
-    moneyHint: "Em reais, de R$ 0 a R$ 1.000.",
   },
 } as const;

@@ -1,9 +1,11 @@
 import type { SettingsBlock, SettingsPath, SettingsValue } from "@sacou/match-engine";
 
+import type { ShownPath } from "../../../strings/settings.pt-BR";
+
 /** The sheet that is open over screen 18, with the draft it is editing. */
 export type SettingsSheet =
   | { readonly kind: "none" }
-  | { readonly kind: "field"; readonly path: SettingsPath; readonly text: string }
+  | { readonly kind: "field"; readonly path: ShownPath; readonly text: string }
   | { readonly kind: "schedule"; readonly weekday: number; readonly time: string }
   | { readonly kind: "template-picker" }
   | { readonly kind: "save-template"; readonly name: string };

@@ -2,7 +2,6 @@ import { View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { TextField } from "../../../ui/TextField";
 import type { CreateGroupModel } from "../hooks/use-create-group";
 import { isScheduleChosen } from "../model/create-group.selectors";
@@ -80,51 +79,6 @@ export function WhenAndWhereQuestion({ model }: CreateGroupQuestionProps) {
           />
         </View>
       </View>
-    </QuestionSection>
-  );
-}
-
-export function ChargesQuestion({ model }: CreateGroupQuestionProps) {
-  const { tokens } = useTheme();
-  const { state, dispatch, errors } = model;
-  return (
-    <QuestionSection number={3} title={step2.charges}>
-      <SegmentedControl
-        accessibilityLabel={step2.charges}
-        options={YES_NO}
-        selected={state.charges}
-        onSelect={(value) => {
-          dispatch({ type: "charges-selected", value });
-        }}
-      />
-      {state.charges ? (
-        <View style={{ flexDirection: "row", gap: tokens.spacing.s }}>
-          <View style={{ flex: 1 }}>
-            <TextField
-              label={step2.dropInFee}
-              value={state.dropInFeeText}
-              keyboardType="decimal-pad"
-              onChangeText={(text) => {
-                dispatch({ type: "fee-changed", fee: "dropIn", text });
-              }}
-              error={errors.dropInFee}
-            />
-          </View>
-          {state.regulars ? (
-            <View style={{ flex: 1 }}>
-              <TextField
-                label={step2.monthlyFee}
-                value={state.monthlyFeeText}
-                keyboardType="decimal-pad"
-                onChangeText={(text) => {
-                  dispatch({ type: "fee-changed", fee: "monthly", text });
-                }}
-                error={errors.monthlyFee}
-              />
-            </View>
-          ) : null}
-        </View>
-      ) : null}
     </QuestionSection>
   );
 }

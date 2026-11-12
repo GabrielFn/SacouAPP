@@ -1,4 +1,4 @@
-import { SETTINGS_MODALITIES, type SettingsTemplateKey } from "@sacou/match-engine";
+import { SETTINGS_MODALITIES } from "@sacou/match-engine";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
 
@@ -12,9 +12,10 @@ import { StepHeader } from "../../../ui/StepHeader";
 import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
 import { useCreateGroup, type CreateGroupModel } from "../hooks/use-create-group";
-import { afterCreateGroupHref, createGroupHref } from "../navigation";
+import { isFromScratch, type GroupOrigin } from "../model/custom-blocks";
+import { afterCreateGroupHref, createGroupCustomHref, createGroupHref } from "../navigation";
 import { CourtOption } from "./CourtOption";
-import { ChargesQuestion, SHEET_START, WhenAndWhereQuestion, YES_NO } from "./CreateGroupQuestions";
+import { SHEET_START, WhenAndWhereQuestion, YES_NO } from "./CreateGroupQuestions";
 import { QuestionSection } from "./QuestionSection";
 import { ScheduleSheet } from "./ScheduleSheet";
 
@@ -22,7 +23,7 @@ const { step2, partial } = strings.createGroup;
 const FINAL_STEP_PROGRESS = 1;
 
 export interface CreateGroupDetailsScreenProps {
-  readonly templateKey: SettingsTemplateKey;
+  readonly origin: GroupOrigin;
 }
 
 export interface CreateGroupFooterProps {
@@ -60,11 +61,11 @@ function CreateGroupFooter({ model, onKeep }: CreateGroupFooterProps) {
   );
 }
 
-/** Screen 05: the three questions. The reducer holds the answers; the hook makes the two calls. */
-export function CreateGroupDetailsScreen({ templateKey }: CreateGroupDetailsScreenProps) {
+/** Screen 05: the two questions. The reducer holds the answers; the hook makes the two calls. */
+export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenProps) {
   const router = useRouter();
   const { tokens } = useTheme();
-  const model = useCreateGroup(templateKey, (groupId) => {
+  const model = useCreateGroup(origin, (groupId) => {
     router.replace(afterCreateGroupHref(groupId));
   });
   const { state, dispatch, errors } = model;
@@ -81,12 +82,12 @@ export function CreateGroupDetailsScreen({ templateKey }: CreateGroupDetailsScre
       }
     >
       <StepHeader
-        title={strings.settings.templates[templateKey].name}
+        title={strings.settings.templates[origin.templateKey].name}
         progressLabel={step2.progress}
         progress={FINAL_STEP_PROGRESS}
         onBack={() => {
           if (router.canGoBack()) router.back();
-          else router.replace(createGroupHref);
+          else router.replace(isFromScratch(origin) ? createGroupCustomHref : createGroupHref);
         }}
       />
       <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
@@ -131,7 +132,6 @@ export function CreateGroupDetailsScreen({ templateKey }: CreateGroupDetailsScre
         />
         <Text variant="caption">{step2.regularsHelp}</Text>
       </QuestionSection>
-      <ChargesQuestion model={model} />
       <ScheduleSheet
         visible={sheet !== null}
         weekday={sheet?.weekday ?? SHEET_START.weekday}
