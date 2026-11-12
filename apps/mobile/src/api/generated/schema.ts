@@ -383,7 +383,7 @@ export interface components {
       joinedAt: string;
       nickname: null | string;
       primaryPosition: null | components["schemas"]["PrimaryPosition"];
-      otherPositions: unknown[];
+      otherPositions: ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
     };
     /**
      * @description Mensalista (MemberType.Regular) or avulso (MemberType.DropIn).
@@ -400,7 +400,7 @@ export interface components {
     MyProfileResponse: {
       nickname: string;
       primaryPosition: null | components["schemas"]["PrimaryPosition"];
-      otherPositions: unknown[];
+      otherPositions: ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
       /** Format: double */
       suggestedLevel: null | number;
     };
@@ -413,7 +413,8 @@ export interface components {
       activeMembers: number;
       alreadyMember: boolean;
     };
-    PrimaryPosition: unknown;
+    /** @enum {string} */
+    PrimaryPosition: "any" | "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero";
     ProblemDetails: {
       type?: string;
       title: string;
@@ -440,7 +441,8 @@ export interface components {
     SaveMyProfileRequest: {
       nickname: null | string;
       primaryPosition: null | components["schemas"]["PrimaryPosition"];
-      otherPositions: null | unknown[];
+      otherPositions:
+        null | ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
       /** Format: double */
       suggestedLevel: null | number;
     };

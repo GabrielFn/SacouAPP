@@ -2506,7 +2506,17 @@
             ]
           },
           "otherPositions": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "enum": [
+                "setter",
+                "outsideHitter",
+                "opposite",
+                "middleBlocker",
+                "libero"
+              ],
+              "type": "string"
+            }
           }
         },
         "additionalProperties": false
@@ -2567,7 +2577,17 @@
             ]
           },
           "otherPositions": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "enum": [
+                "setter",
+                "outsideHitter",
+                "opposite",
+                "middleBlocker",
+                "libero"
+              ],
+              "type": "string"
+            }
           },
           "suggestedLevel": {
             "type": [
@@ -2615,7 +2635,17 @@
         },
         "additionalProperties": false
       },
-      "PrimaryPosition": {},
+      "PrimaryPosition": {
+        "enum": [
+          "any",
+          "setter",
+          "outsideHitter",
+          "opposite",
+          "middleBlocker",
+          "libero"
+        ],
+        "type": "string"
+      },
       "ProblemDetails": {
         "required": [
           "status",
@@ -2724,7 +2754,17 @@
             "type": [
               "null",
               "array"
-            ]
+            ],
+            "items": {
+              "enum": [
+                "setter",
+                "outsideHitter",
+                "opposite",
+                "middleBlocker",
+                "libero"
+              ],
+              "type": "string"
+            }
           },
           "suggestedLevel": {
             "type": [
