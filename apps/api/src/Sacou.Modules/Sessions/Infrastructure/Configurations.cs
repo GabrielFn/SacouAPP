@@ -90,7 +90,8 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
 
 /// <summary>
 /// <c>sessions.attendances</c>: one row per member per round (the primary key turns a double tap into one row).
-/// <c>(round_id, sequence)</c> is unique: the order is a number the lock hands out, never the clock.
+/// <c>(round_id, sequence)</c> is unique among the rows that are in the order (going, waitlisted, promoted): the order is a
+/// number the lock hands out, never the clock. A "não vou" with no earlier row is not in the order and spends no number.
 /// </summary>
 internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<AttendanceRow>
 {
@@ -119,6 +120,7 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
 
         builder.HasOne<RoundRow>().WithMany().HasForeignKey(attendance => attendance.RoundId)
             .HasConstraintName("fk_attendances_rounds").OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(attendance => new { attendance.RoundId, attendance.Sequence }).IsUnique().HasDatabaseName(SequenceIndex);
+        builder.HasIndex(attendance => new { attendance.RoundId, attendance.Sequence }).IsUnique().HasDatabaseName(SequenceIndex)
+            .HasFilter($"status <> '{ColumnValues.NotGoingStatus}'");
     }
 }

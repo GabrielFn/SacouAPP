@@ -63,7 +63,8 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 
                     b.HasIndex("RoundId", "Sequence")
                         .IsUnique()
-                        .HasDatabaseName("ux_attendances_round_sequence");
+                        .HasDatabaseName("ux_attendances_round_sequence")
+                        .HasFilter("status <> 'not_going'");
 
                     b.ToTable("attendances", "sessions", t =>
                         {

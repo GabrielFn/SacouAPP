@@ -21,7 +21,7 @@ internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter w
 
     private readonly record struct Edit(Option<DateOnly> Date, Option<TimeOnly> Time, Option<Venue> Venue, LayerEdit Layer);
 
-    private readonly record struct SlotEdit(RoundSlot? Slot);
+    private readonly record struct SlotEdit(RequestedSlot? Slot);
 
     public async Task<Result<RoundResponse>> HandleAsync(RoundAccess access, RoundId id, UpdateRoundRequest request, CancellationToken cancellationToken)
     {

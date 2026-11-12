@@ -105,7 +105,8 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                 schema: "sessions",
                 table: "attendances",
                 columns: new[] { "round_id", "sequence" },
-                unique: true);
+                unique: true,
+                filter: "status <> 'not_going'");
 
             migrationBuilder.CreateIndex(
                 name: "ix_round_series_group_id",

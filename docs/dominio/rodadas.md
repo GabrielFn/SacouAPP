@@ -60,6 +60,7 @@ Uma por membro por rodada.
 | Código | Quando |
 |---|---|
 | `sessions.round-invalid` (400) | Data ou hora fora do formato, no passado, a mais de 365 dias, local fora da regra |
+| `sessions.round-date-taken` (409) | `PATCH` moveu uma rodada da série para uma data em que a série já tem rodada |
 | `sessions.round-not-found` (404), `sessions.series-not-found` (404), `sessions.member-not-found` (404) | Não existe neste grupo (inexistente, de outro grupo e quem saiu parecem iguais) |
 | `sessions.round-closed` (409) | Cancelada, ou jogador depois do início, ou edição de rodada cancelada ou começada |
 | `sessions.round-full` (409) | Cheia e sem espera |
@@ -86,4 +87,4 @@ Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do 
 | `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |
 | `POST /series/{seriesId}/stop` | `ManageRounds` | 204 (de novo, 204) |
 
-Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha e gasta um número, porque a linha precisa de um); `Source` guarda a origem da **última** mudança (quem desistiu ou foi tirado deixa de ser `Regular`); a posição na espera é calculada, nunca gravada.
+Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.

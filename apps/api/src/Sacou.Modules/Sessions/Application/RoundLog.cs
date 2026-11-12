@@ -21,6 +21,9 @@ internal static partial class RoundLog
     [LoggerMessage(Level = LogLevel.Information, Message = "Waitlist promotion in round {RoundId} for member {MemberId}.")]
     public static partial void Promoted(ILogger logger, Guid roundId, Guid memberId);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Group {GroupId}: series {SeriesId} stop: {Result}.")]
+    public static partial void SeriesStopped(ILogger logger, Guid groupId, Guid seriesId, string result);
+
     /// <summary>One line per write: the result code and the promotions, by member id.</summary>
     public static void LogChange(ILogger logger, RoundId round, string result, RoundChange? change)
     {

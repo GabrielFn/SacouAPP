@@ -46,9 +46,13 @@ internal sealed class CreateRoundHandler(IRoundStore store, GroupRoundContext gr
     {
         var date = RoundRequestParsing.Date(request.LocalDate);
         var clock = RoundRequestParsing.Time(request.LocalTime);
-        return date.IsSuccess && clock.IsSuccess
-            ? RoundSlot.Request(date.Value, clock.Value, now)
-            : Result.Failure<RoundSlot>(RoundErrors.RoundInvalid);
+        if (date.IsFailure || clock.IsFailure)
+        {
+            return Result.Failure<RoundSlot>(RoundErrors.RoundInvalid);
+        }
+
+        var requested = RoundSlot.Request(date.Value, clock.Value, now);
+        return requested.IsSuccess ? Result.Success(requested.Value.Slot) : Result.Failure<RoundSlot>(requested.Error);
     }
 
     private async Task<Result<RoundResponse>> StoreAsync(

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Modules.Groups.Contracts;
+using Sacou.Modules.Sessions.Domain;
 
 namespace Sacou.Modules.Sessions.Access;
 
@@ -11,8 +12,14 @@ internal static class RoundRouteExtensions
 {
     public const string GroupRoute = "/v1/groups/{" + RoundAccessFilter.GroupIdRouteValue + ":guid}";
 
-    /// <summary>Fits the largest body of the rounds (a layer of 4 KB is the settings ceiling, D10) with room to spare.</summary>
-    public const long MaxBodyBytes = 4 * 1024;
+    /// <summary>What a body carries besides the layer: date, time, a venue of up to 4 bytes per character, the flag and the JSON syntax.</summary>
+    public const long EnvelopeAllowanceBytes = 1024;
+
+    /// <summary>
+    /// A layer at the settings ceiling (D10) plus the rest of the body, so a layer near the ceiling reaches the
+    /// Groups' own refusal (400 <c>groups.settings-invalid</c>) instead of a 413.
+    /// </summary>
+    public const long MaxBodyBytes = SessionLimits.MaxSettingsLayerBytes + EnvelopeAllowanceBytes;
 
     public static RouteGroupBuilder MapRoundRoutes(this IEndpointRouteBuilder endpoints)
     {

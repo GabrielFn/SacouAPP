@@ -71,7 +71,7 @@ internal static class RoundReconciliation
     {
         var departed = round.Attendances
             .Where(attendance => attendance.Status != AttendanceStatus.NotGoing && !activeMembers.Contains(attendance.Member))
-            .Select(attendance => attendance.Decline(AttendanceSource.Admin, now))
+            .Select(attendance => attendance.Decline(now))
             .ToImmutableArray();
         return new RoundChange(
             departed.Aggregate(round, (current, attendance) => current.With(attendance)),

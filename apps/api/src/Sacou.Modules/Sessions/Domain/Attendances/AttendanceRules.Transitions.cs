@@ -41,7 +41,7 @@ internal static partial class AttendanceRules
 
     private static RoundChange Decline(Round round, Attendance existing, AttendanceSource source, DateTimeOffset now)
     {
-        var declined = existing.Decline(source, now);
+        var declined = existing.Decline(now);
         return new RoundChange(round.With(declined), [declined], [new AttendanceChanged(round.Id, existing.Member, AttendanceStatus.NotGoing)]);
     }
 
@@ -66,6 +66,8 @@ internal static partial class AttendanceRules
     private static RoundChange NewAttendance(Round round, MemberId member, AttendanceStatus status, AttendanceSource source, DateTimeOffset now)
     {
         var attendance = new Attendance(member, status, round.NextSequence, source, now, PromotedAt: null);
-        return new RoundChange(round.With(attendance).WithNextSequenceTaken(), [attendance], []);
+        var placed = round.With(attendance);
+        // Only a row that enters the order spends a number; a first "não vou" holds the counter's value without taking it.
+        return new RoundChange(status == AttendanceStatus.NotGoing ? placed : placed.WithNextSequenceTaken(), [attendance], []);
     }
 }

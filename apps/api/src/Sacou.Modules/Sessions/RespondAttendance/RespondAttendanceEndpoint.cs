@@ -48,8 +48,9 @@ internal sealed class RespondAttendanceHandler(RoundWriter writer)
         RoundAccess access, RoundId id, AttendanceResponse response, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(access);
-        var written = await writer.ExecuteAsync(access, id, GroupCapability.RespondAttendance, context =>
-            AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(context.Caller!), response, ResponseActor.Self), cancellationToken)
+        var written = await writer.ExecuteAsync(access, id, GroupCapability.RespondAttendance, context => context.Caller is { } caller
+            ? AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(caller), response, ResponseActor.Self)
+            : Result.Failure<RoundChange>(GroupAccessErrors.GroupNotFound), cancellationToken)
             .ConfigureAwait(false);
         return written.IsFailure
             ? Result.Failure<AttendanceAnswerResponse>(written.Error)

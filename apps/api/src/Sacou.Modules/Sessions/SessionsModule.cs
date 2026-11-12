@@ -12,6 +12,7 @@ using Sacou.Modules.Sessions.ListRounds;
 using Sacou.Modules.Sessions.RespondAttendance;
 using Sacou.Modules.Sessions.SetMemberAttendance;
 using Sacou.Modules.Sessions.StopSeries;
+using Sacou.Modules.Sessions.StopSeries;
 using Sacou.Modules.Sessions.UpdateRound;
 
 namespace Sacou.Modules.Sessions;
@@ -34,6 +35,7 @@ public static class SessionsModule
         services.AddScoped<CancelRoundHandler>();
         services.AddScoped<RespondAttendanceHandler>();
         services.AddScoped<SetMemberAttendanceHandler>();
+        services.AddScoped<StopSeriesHandler>();
         return services;
     }
 

@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Modules.Sessions.Domain.Series;
 using Sacou.Shared.Results;
@@ -71,9 +72,24 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         }
 
         Write(loaded.Value.Round, loaded.Value.CreatedAt, changed.Value);
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbUpdateException exception) when (IsSeriesDateTaken(exception))
+        {
+            // An edit moved this round to a date its series already has a round on: the transaction is not committed.
+            return Result.Failure<RoundChange>(RoundErrors.RoundDateTaken);
+        }
+
         return changed;
     }
+
+    private static bool IsSeriesDateTaken(DbUpdateException exception) => exception.InnerException is PostgresException
+    {
+        SqlState: PostgresErrorCodes.UniqueViolation,
+        ConstraintName: RoundConfiguration.SeriesDateIndex,
+    };
 
     /// <summary>Each attendance and the round are written whole, as read under the lock: nothing outside the lock may write them.</summary>
     private void Write(Round before, DateTimeOffset createdAt, RoundChange change)

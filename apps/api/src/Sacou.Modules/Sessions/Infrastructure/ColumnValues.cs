@@ -27,5 +27,7 @@ internal static class ColumnValues
 
     public static string Canceled => RoundStatuses[RoundStatus.Canceled];
 
+    public static string NotGoingStatus => AttendanceStatuses[AttendanceStatus.NotGoing];
+
     public static string PromotedStatus => AttendanceStatuses[AttendanceStatus.Promoted];
 }
