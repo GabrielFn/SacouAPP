@@ -24,10 +24,12 @@ public sealed class PlayerPositionsTests
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData(Primary.Any)]
-    public void NoOrAnyMainPosition_WithOthers_IsRefused(Primary? primary)
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NoOrAnyMainPosition_WithOthers_IsRefused(bool any)
     {
+        Primary? primary = any ? Primary.Any : null;
+
         Assert.Equal(ProfileErrors.ProfileInvalid, PlayerPositions.Create(primary, [P.Libero]).Error);
     }
 
