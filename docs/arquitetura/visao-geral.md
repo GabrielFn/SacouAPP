@@ -121,6 +121,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0040](adr/0040-grupos-membros-papeis-e-autorizacao.md) | Grupos: `MemberId`, papéis, permissões, autorização por grupo, convite e concorrência |
 | [0041](adr/0041-configuracao-herdada-e-modelos.md) | Configuração herdada: catálogo JSON único, camadas parciais, resolver por folha, modelos e golden TS/C# |
 | [0043](adr/0043-rodadas-presenca-e-espera.md) | Rodadas, recorrência semanal em fuso fixo, presença com espera por sequência, mensalista e avulso |
+| [0045](adr/0045-por-que-fatias-verticais.md) | Por que fatias verticais no back-end, e não camadas técnicas |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -141,7 +142,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 19 | Login | 0014, 0036 |
 | 20 | Planos | 0015 |
 | 21 | Placar por QR | 0013 |
-| 25 | Back-end | 0008, 0005 |
+| 25 | Back-end | 0008, 0005, 0045 |
 | 26 | Event sourcing | 0009, 0022, 0023, 0024, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0038 |
 | 27 | Padrões | 0011, 0029, 0035, 0039, 0040 |
 | 28 | Dados pessoais | 0012, 0040 |
