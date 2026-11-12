@@ -38,7 +38,9 @@ interface BlockText {
   readonly caption?: string;
 }
 
-const BLOCK_TEXT: Readonly<Record<BlockSpec["block"], BlockText>> = blocks;
+type BlockTexts = Readonly<Record<BlockSpec["block"], BlockText>>;
+
+const BLOCK_TEXT: BlockTexts = blocks;
 
 export interface BlockHeaderProps {
   readonly title: string;

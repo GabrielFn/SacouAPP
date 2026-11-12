@@ -250,7 +250,7 @@ describe("screen 05 reached from screen 04a", () => {
     );
     expect(createGroupPatch(state, scratch)).toEqual({
       schemaVersion: 1,
-      attendance: { enabled: true, capacity: 10 },
+      attendance: { enabled: true, capacityLimited: true, capacity: 10 },
       queue: { enabled: true },
     });
     expect(createGroupErrors(state, scratch)).toEqual({});

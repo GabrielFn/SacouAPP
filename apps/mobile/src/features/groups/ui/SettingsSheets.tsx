@@ -7,13 +7,17 @@ import { TextSheet } from "./TextSheet";
 
 const { sheets, fields } = strings.settings;
 
+interface ModelProps {
+  readonly model: GroupSettingsScreenModel;
+}
+
 export interface SettingsSheetsProps {
   readonly model: GroupSettingsScreenModel;
   readonly ready: SettingsReady;
 }
 
 /** The sheet of one number, amount or text of a field; closed unless the reducer says "field". */
-function FieldSheet({ model }: Pick<SettingsSheetsProps, "model">) {
+function FieldSheet({ model }: ModelProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "field") return null;
   return (
@@ -31,7 +35,7 @@ function FieldSheet({ model }: Pick<SettingsSheetsProps, "model">) {
   );
 }
 
-function SaveTemplateSheet({ model }: Pick<SettingsSheetsProps, "model">) {
+function SaveTemplateSheet({ model }: ModelProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "save-template") return null;
   return (
@@ -51,7 +55,7 @@ function SaveTemplateSheet({ model }: Pick<SettingsSheetsProps, "model">) {
   );
 }
 
-function DayAndTimeSheet({ model }: Pick<SettingsSheetsProps, "model">) {
+function DayAndTimeSheet({ model }: ModelProps) {
   const { sheet } = model.form;
   if (sheet.kind !== "schedule") return null;
   return (

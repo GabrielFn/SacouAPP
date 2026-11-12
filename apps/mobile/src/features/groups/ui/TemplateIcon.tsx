@@ -91,7 +91,9 @@ function DoZero({ ink }: DrawingProps) {
   return <Path d="M22 14v28M8 28h28" stroke={ink} strokeWidth={NET_WIDTH} strokeLinecap="round" />;
 }
 
-const DRAWINGS: Readonly<Record<SettingsTemplateKey, (props: DrawingProps) => ReactNode>> = {
+type Drawings = Readonly<Record<SettingsTemplateKey, (props: DrawingProps) => ReactNode>>;
+
+const DRAWINGS: Drawings = {
   pelada: Pelada,
   "racha-organizado": Racha,
   treino: Treino,
