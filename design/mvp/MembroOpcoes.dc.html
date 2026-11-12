@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Opções do membro</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+input{font:inherit;color:inherit}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F6F1E7;border-radius:24px 24px 0 0;padding:12px 20px 28px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
+.grab{align-self:center;width:40px;height:5px;border-radius:3px;background:rgba(15,27,45,0.2)}
+.h2{margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;line-height:1}
+.h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:36px;line-height:1}
+.mut{font-size:14px;color:#4A5566;line-height:1.4;margin:0}
+.lbl{font-size:14px;font-weight:700;margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:44px;padding:0 14px;border-radius:22px;border:1.5px solid rgba(15,27,45,0.18);background:#FFFFFF;font-size:14px;font-weight:600;display:inline-flex;align-items:center;box-sizing:border-box}
+.chip[aria-checked="true"],.chip[aria-pressed="true"]{background:#0F1B2D;color:#F6F1E7;border-color:#0F1B2D;font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px;border-radius:14px;background:rgba(15,27,45,0.08)}
+.seg button{height:44px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566;text-align:center}
+.seg button[aria-pressed="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+.card{background:#FFFFFF;border-radius:16px;border:1.5px solid rgba(15,27,45,0.1)}
+.row{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;font-size:15px;font-weight:600}
+.row+.row{border-top:1px solid rgba(15,27,45,0.08)}
+.cta{height:56px;border-radius:14px;background:#FF5A1F;color:#0F1B2D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700;text-align:center;width:100%}
+.sec{height:56px;border-radius:14px;border:1.5px solid #0F1B2D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700;text-align:center;width:100%;box-sizing:border-box}
+.danger{height:56px;border-radius:14px;background:#B42318;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;text-align:center;width:100%}
+.av{width:44px;height:44px;border-radius:22px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;background:#E9E1D1;color:#0F1B2D}
+.in{height:52px;border-radius:12px;border:1.5px solid rgba(15,27,45,0.25);background:#FFFFFF;padding:0 14px;font-size:16px;font-weight:600;box-sizing:border-box;width:100%}
+.rd{width:24px;height:24px;border-radius:12px;border:2px solid rgba(15,27,45,0.4);flex:none;box-sizing:border-box}
+[aria-checked="true"] > .rd{border:7px solid #FF5A1F}
+.pick{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 14px;box-sizing:border-box;font-size:15px;font-weight:600}
+.pick+.pick{border-top:1px solid rgba(15,27,45,0.08)}
+.pick[aria-checked="true"]{background:#FFF1EA}
+.tag{font-size:12px;font-weight:700;color:#4A5566;margin-left:auto}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: rgba(15,27,45,0.55); font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+  <div role="dialog" aria-modal="true" aria-labelledby="t" class="sheet">
+    <span class="grab" aria-hidden="true"></span>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span class="av" aria-hidden="true">BI</span>
+      <div style="flex: 1"><h2 id="t" class="h2">Bia</h2><p class="mut">Ponteira · líbero · entrou em 03/11</p></div>
+      <a href="Membros.dc.html" aria-label="Fechar" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    </div>
+    <div>
+      <p class="lbl" id="pp">Papel</p>
+      <div class="chips" role="radiogroup" aria-labelledby="pp">
+        <button class="chip" role="radio" aria-checked="false">Admin</button>
+        <button class="chip" role="radio" aria-checked="false">Co-admin</button>
+        <button class="chip" role="radio" aria-checked="true">Placar</button>
+        <button class="chip" role="radio" aria-checked="false">Jogador</button>
+      </div>
+      <p class="mut" style="margin-top: 6px; font-size: 13px">Placar abre a quadra e marca os pontos. Co-admin faz quase tudo que o admin faz.</p>
+    </div>
+    <div>
+      <p class="lbl" id="tp">Tipo</p>
+      <div class="seg" role="group" aria-labelledby="tp"><button aria-pressed="true">Mensalista</button><button aria-pressed="false">Avulso</button></div>
+    </div>
+    <div class="card">
+      <a href="NotaMembro.dc.html" class="row">Nota do sorteio<span style="margin-left: auto; color: #4A5566">4,0 · sugerida</span></a>
+    </div>
+    <button class="sec" style="border-color: #B42318; color: #B42318">Remover do grupo</button>
+    <p class="mut" style="font-size: 13px; text-align: center">Quem é removido não volta pelo link de convite. O histórico dela nas partidas fica.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

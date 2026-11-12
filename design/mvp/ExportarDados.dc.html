@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Exportar meus dados</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+input{font:inherit;color:inherit}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F6F1E7;border-radius:24px 24px 0 0;padding:12px 20px 28px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
+.grab{align-self:center;width:40px;height:5px;border-radius:3px;background:rgba(15,27,45,0.2)}
+.h2{margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;line-height:1}
+.h1{margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:36px;line-height:1}
+.mut{font-size:14px;color:#4A5566;line-height:1.4;margin:0}
+.lbl{font-size:14px;font-weight:700;margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:44px;padding:0 14px;border-radius:22px;border:1.5px solid rgba(15,27,45,0.18);background:#FFFFFF;font-size:14px;font-weight:600;display:inline-flex;align-items:center;box-sizing:border-box}
+.chip[aria-checked="true"],.chip[aria-pressed="true"]{background:#0F1B2D;color:#F6F1E7;border-color:#0F1B2D;font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px;border-radius:14px;background:rgba(15,27,45,0.08)}
+.seg button{height:44px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566;text-align:center}
+.seg button[aria-pressed="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+.card{background:#FFFFFF;border-radius:16px;border:1.5px solid rgba(15,27,45,0.1)}
+.row{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;font-size:15px;font-weight:600}
+.row+.row{border-top:1px solid rgba(15,27,45,0.08)}
+.cta{height:56px;border-radius:14px;background:#FF5A1F;color:#0F1B2D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700;text-align:center;width:100%}
+.sec{height:56px;border-radius:14px;border:1.5px solid #0F1B2D;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:700;text-align:center;width:100%;box-sizing:border-box}
+.danger{height:56px;border-radius:14px;background:#B42318;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;text-align:center;width:100%}
+.av{width:44px;height:44px;border-radius:22px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;background:#E9E1D1;color:#0F1B2D}
+.in{height:52px;border-radius:12px;border:1.5px solid rgba(15,27,45,0.25);background:#FFFFFF;padding:0 14px;font-size:16px;font-weight:600;box-sizing:border-box;width:100%}
+.rd{width:24px;height:24px;border-radius:12px;border:2px solid rgba(15,27,45,0.4);flex:none;box-sizing:border-box}
+[aria-checked="true"] > .rd{border:7px solid #FF5A1F}
+.pick{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 14px;box-sizing:border-box;font-size:15px;font-weight:600}
+.pick+.pick{border-top:1px solid rgba(15,27,45,0.08)}
+.pick[aria-checked="true"]{background:#FFF1EA}
+.tag{font-size:12px;font-weight:700;color:#4A5566;margin-left:auto}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: rgba(15,27,45,0.55); font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+  <div role="dialog" aria-modal="true" aria-labelledby="t" class="sheet">
+    <span class="grab" aria-hidden="true"></span>
+    <h2 id="t" class="h2">Exportar meus dados</h2>
+    <p class="mut">Vamos juntar tudo o que o Sacou guarda sobre você num arquivo:</p>
+    <div class="card"><div class="row" style="font-weight: 500">Perfil: apelido e posições</div><div class="row" style="font-weight: 500">Grupos e papéis</div><div class="row" style="font-weight: 500">Presenças nas rodadas</div><div class="row" style="font-weight: 500">Partidas e estatísticas</div></div>
+    <p class="mut">Mandamos o link para o seu e-mail. O link vale por pouco tempo.</p>
+    <button class="cta">Mandar para o meu e-mail</button>
+    <a href="Conta.dc.html" class="sec">Agora não</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
