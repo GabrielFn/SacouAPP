@@ -1,4 +1,5 @@
 using Sacou.Shared.Members;
+using Sacou.Shared.Persistence;
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
@@ -30,9 +31,9 @@ internal static class RowMapping
     public static GroupMember ToMember(MemberRow row) => new(
         new MemberId(row.Id),
         row.UserId is { } user ? new UserId(user) : null,
-        ColumnValues.Parse(ColumnValues.Roles, row.Role),
-        ColumnValues.Parse(ColumnValues.MemberTypes, row.MemberType),
-        ColumnValues.Parse(ColumnValues.Statuses, row.Status),
+        EnumColumns.Parse(ColumnValues.Roles, row.Role),
+        EnumColumns.Parse(ColumnValues.MemberTypes, row.MemberType),
+        EnumColumns.Parse(ColumnValues.Statuses, row.Status),
         row.JoinedAt,
         row.LeftAt);
 

@@ -8,6 +8,9 @@ internal static class RoundErrors
     /// <summary>Date, time or venue outside the rule: not a date, in the past, beyond a year, wrong format.</summary>
     public static readonly Error RoundInvalid = new("sessions.round-invalid", ErrorKind.Validation);
 
+    /// <summary>An edit moved a round of a series to a date the series already has a round on.</summary>
+    public static readonly Error RoundDateTaken = new("sessions.round-date-taken", ErrorKind.Conflict);
+
     public static readonly Error RoundNotFound = new("sessions.round-not-found", ErrorKind.NotFound);
 
     public static readonly Error SeriesNotFound = new("sessions.series-not-found", ErrorKind.NotFound);

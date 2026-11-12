@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sacou.Shared.Persistence;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -20,9 +21,9 @@ internal sealed class MemberConfiguration : IEntityTypeConfiguration<MemberRow>
     {
         builder.ToTable(Table, table =>
         {
-            table.HasCheckConstraint("ck_members_role", $"role IN ({ColumnValues.SqlList(ColumnValues.Roles)})");
-            table.HasCheckConstraint("ck_members_member_type", $"member_type IN ({ColumnValues.SqlList(ColumnValues.MemberTypes)})");
-            table.HasCheckConstraint("ck_members_status", $"status IN ({ColumnValues.SqlList(ColumnValues.Statuses)})");
+            table.HasCheckConstraint("ck_members_role", $"role IN ({EnumColumns.SqlList(ColumnValues.Roles)})");
+            table.HasCheckConstraint("ck_members_member_type", $"member_type IN ({EnumColumns.SqlList(ColumnValues.MemberTypes)})");
+            table.HasCheckConstraint("ck_members_status", $"status IN ({EnumColumns.SqlList(ColumnValues.Statuses)})");
             table.HasCheckConstraint("ck_members_left_at", $"(status = '{ColumnValues.ActiveStatus}') = (left_at IS NULL)");
         });
         builder.HasKey(member => member.Id).HasName("pk_members");

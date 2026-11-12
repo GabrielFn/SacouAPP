@@ -43,7 +43,7 @@ internal sealed record Attendance(
     public Attendance Promote(DateTimeOffset now) =>
         this with { Status = AttendanceStatus.Promoted, PromotedAt = now };
 
-    /// <summary>Gives up or is dropped: no spot, no promotion mark, the sequence stays for the history.</summary>
-    public Attendance Decline(AttendanceSource source, DateTimeOffset now) =>
-        this with { Status = AttendanceStatus.NotGoing, Source = source, RespondedAt = now, PromotedAt = null };
+    /// <summary>Gives up or is dropped: no spot, no promotion mark, the sequence stays for the history. <see cref="Source"/> stays: it is where the row came from (ADR 0043, D6).</summary>
+    public Attendance Decline(DateTimeOffset now) =>
+        this with { Status = AttendanceStatus.NotGoing, RespondedAt = now, PromotedAt = null };
 }

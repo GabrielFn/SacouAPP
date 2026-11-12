@@ -20,6 +20,7 @@ public sealed class GroupRouteGuardTests
     /// of the settings and the saved templates: the guard must see them, or it checks nothing.
     /// </summary>
     private const int GroupRoutes = 16;
+    private const int RoundRoutes = 8;
 
     private const string Development = "Development";
     private const string Production = "Production";
@@ -33,7 +34,9 @@ public sealed class GroupRouteGuardTests
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints;
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints, environment == Development));
-        Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null));
+        var withGroupId = endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null);
+        Assert.Equal(GroupRoutes + RoundRoutes, withGroupId);
+        Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null));
     }
 
     /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>
@@ -75,6 +78,10 @@ public sealed class GroupRouteGuardTests
         Assert.Equal(GroupRouteGuard.RoutesOutsideTheGroupFilterIn(environment == Development).Order(StringComparer.Ordinal), outside.Order(StringComparer.Ordinal));
     }
 
+    /// <summary>The rounds and series routes live under the same prefix but belong to the Sessions, which has its own body cap (layer ceiling plus envelope).</summary>
+    private static bool IsSessionsRoute(string route) =>
+        route.Contains("/rounds", StringComparison.Ordinal) || route.Contains("/series/", StringComparison.Ordinal);
+
     /// <summary>
     /// Every Groups route, the invite ones included, caps the body at 4 KB. Kestrel applies the metadata; the TestServer of the
     /// integration tests does not, so the 413 itself is tested with Kestrel in part 2 (M8).
@@ -86,6 +93,7 @@ public sealed class GroupRouteGuardTests
         var groupRoutes = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.GroupsRoute, StringComparison.Ordinal)
                 || endpoint.RoutePattern.RawText.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal))
+            .Where(endpoint => !IsSessionsRoute(endpoint.RoutePattern.RawText!))
             .ToList();
 
         Assert.Contains(groupRoutes, endpoint => endpoint.RoutePattern.RawText!.StartsWith(GroupRouteExtensions.InvitesRoute, StringComparison.Ordinal));

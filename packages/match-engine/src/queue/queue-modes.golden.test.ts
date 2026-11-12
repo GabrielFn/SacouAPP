@@ -1,0 +1,66 @@
+import { readFileSync } from "node:fs";
+
+import { describe } from "vitest";
+
+import { type PlanCase, testPlanGolden } from "./queue-golden.test.fixture.js";
+
+const CASES = JSON.parse(
+  readFileSync(new URL("../../golden/queue-modes.json", import.meta.url), "utf8"),
+) as readonly PlanCase[];
+
+/** Literal, never read from the file: a case that disappears must fail. */
+const EXPECTED_IDS: readonly string[] = [
+  "wt1-a-team-waits-the-loser-leaves-whole-and-waits-as-a-team",
+  "wt2-the-loser-goes-after-the-teams-never-into-the-singles",
+  "wt3-only-singles-the-team-is-set-again-with-who-lost",
+  "wt4-nobody-waiting-nobody-leaves",
+  "wt5-without-a-winner-nobody-leaves",
+  "wt6-beach-pairs-the-loser-pair-waits-as-a-pair",
+  "f1-two-leave-by-the-criterion-in-the-order-of-the-team",
+  "f2-fewer-waiting-than-the-count-only-they-come-in",
+  "f3-nobody-waiting-nobody-leaves",
+  "f4-the-queue-becomes-one-line-and-the-rest-forms-a-team-again",
+  "f5-count-past-the-team-the-whole-team-leaves-each-with-an-heir",
+  "f6-the-libero-leaves-whoever-comes-in-goes-to-the-end-of-the-bench",
+  "f7-rotation-off-the-place-is-in-the-team",
+  "s1-three-wins-two-teams-waiting-both-leave",
+  "s2-three-wins-one-team-waiting-the-winner-leaves-the-loser-stays",
+  "s2b-unused-winner-criterion-input-is-ignored",
+  "s3-two-wins-the-loser-leaves-as-always",
+  "s4-four-wins-one-single-waiting-one-of-the-winner-leaves",
+  "s5-three-singles-the-winner-takes-them-all",
+  "s6-a-match-without-a-winner-resets-the-streak",
+  "s7-a-new-member-in-the-winner-resets-the-streak",
+  "s8-a-loss-resets-the-streak-of-the-new-winner",
+  "s9-one-win-the-winner-leaves-whenever-someone-waits",
+  "s10-three-wins-nobody-waiting-nobody-leaves",
+  "s11-fixed-count-the-winner-first-then-the-loser-with-what-is-left",
+  "s12-whole-team-one-team-waiting-the-winner-waits-as-a-team",
+  "s13-whole-team-two-teams-waiting-both-wait-as-teams",
+  "s14-r-winner-criterion-input-missing-when-the-winner-leaves-by-partial-exit",
+  "s15-r-manual-two-chosen-instead-of-one-of-the-winner",
+  "s16-r-winner-exit-wins-0",
+  "s16-r-winner-exit-wins-11",
+  "s16-r-winner-exit-wins-fraction",
+  "s16-r-winner-exit-without-wins",
+  "s17-review-with-the-winner-exit-davi-and-sofia-go-to-laranja",
+  "s18-whole-team-a-queue-that-ends-at-96",
+  "s18-r-whole-team-a-queue-that-would-end-at-97",
+  "s19-an-invalid-criterion-with-nobody-waiting-is-not-checked",
+  "s20-winner-on-side-b-two-teams-waiting-the-winner-waits-first",
+  "s21-winner-on-side-b-the-exits-list-side-a-first",
+  "r-exit-mode-count-0",
+  "r-exit-mode-count-25",
+  "r-exit-mode-count-fraction",
+  "r-exit-mode-count-missing",
+  "r-exit-mode-kind-level",
+  "r-exit-mode-kind-inherited-constructor",
+  "r-exit-mode-null",
+  "r-players-per-team-before-the-exit-mode",
+  "r-exit-mode-before-the-winner-exit",
+  "r-winner-exit-before-the-exit-choice",
+];
+
+describe("queue modes golden", () => {
+  testPlanGolden(CASES, EXPECTED_IDS);
+});

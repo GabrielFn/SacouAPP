@@ -50,7 +50,7 @@
 | Arquivo em `packages/match-engine/golden/` | O que tem |
 |---|---|
 | `queue-events.json` | 24 casos no formato de `event-log.json`, com o campo opcional `consecutiveMatches` (`{ memberId: n }`): fila gravada no `MatchStarted`, `QueueChanged` que troca e esvazia, sobreposição, repetido, 96 e 97, time de 0 e de 25, sem partida aberta, outro `matchId`, escritores intercalados, `RevertedTo` antes do `QueueChanged` e antes do segundo `MatchStarted`, `queue` ausente e `null`, `MatchEnded` mantendo a fila e 200 partidas terminadas |
-| `queue-plans.json` | 32 casos `{ id, input: { state, criterion, criterionInput, playersPerTeam }, expected: { ok: true, enteringTeam, exits, queue, rotations, teams } \| { ok: false, code } }`. Fica só em TS, salvo decisão da E3.7 |
+| `queue-plans.json` | 32 casos `{ id, input: { state, criterion, criterionInput, playersPerTeam }, expected: { ok: true, enteringTeam, exits, queue, rotations, teams } \| { ok: false, code } }`. Fica só em TS, salvo decisão da E3.7. **Mudou:** o ADR 0050 (E2.12) porta o planejador para o C# e acrescenta `exitMode`, `winnerExit` e `winnerCriterionInput` na entrada, e `enteringTeams`, `side` e `winnerLeaving` na saída |
 | `score-payloads.json` | Acrescenta 122 casos: `queue` no `MatchStarted` e a matriz inteira do `QueueChanged`, com `field` e ordem de validação |
 | `score-events.json`, `rotation-events.json`, `bench-events.json`, `libero-events.json` | Migrados só com o acréscimo de `queue` vazio no payload e no estado |
 

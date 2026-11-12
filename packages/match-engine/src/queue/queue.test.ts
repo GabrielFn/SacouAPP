@@ -1,6 +1,7 @@
 import { FORMATION_CATALOG_VERSION } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
+import { REVERTED_TO_EVENT_TYPE } from "../event-log/constants.data.js";
 import type { EventEnvelope } from "../event-log/types.js";
 import { INITIAL_COURT_SESSION_STATE } from "../score/appliers.js";
 import { endMatchManually, startMatch } from "../score/commands.js";
@@ -16,7 +17,7 @@ import type {
   TeamSide,
 } from "../score/types.js";
 import { changeQueue } from "./commands.js";
-import { getConsecutiveMatches, getMatchesPlayed } from "./consecutive-matches.js";
+import { getConsecutiveMatches, getMatchesPlayed, getWinStreak } from "./consecutive-matches.js";
 import { planNextMatch } from "./plan-next-match.js";
 import type { NextMatchInput, NextMatchPlan } from "./types.js";
 
@@ -34,8 +35,11 @@ const [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO] = [1, 2, 3, 4, 5, 6, 7, 8]
 const ARRIVAL_ORDER = [RAFA, DUDA, GIL, HUGO, DAVI, SOFIA, BIA, CAIO];
 const SCORING = { bestOf: 1, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 } as const;
 const NOBODY: TeamQueue = { players: [], teams: [] };
+/** The mode of E2.6, without the "vencedor também sai". */
+const AUTOMATIC = { exitMode: { kind: "automatic" }, winnerExit: null } as const;
 
 interface CourtPlayer {
+  readonly events: () => readonly EventEnvelope[];
   readonly state: () => CourtSessionState;
   readonly run: (command: (state: CourtSessionState) => ScoreCommandResult) => void;
 }
@@ -45,6 +49,7 @@ function createCourtPlayer(): CourtPlayer {
   const events: EventEnvelope[] = [];
   const state = () => replayAll(events);
   return {
+    events: () => [...events],
     state,
     run: (command) => {
       const result = command(state());
@@ -104,13 +109,21 @@ function planOf(state: CourtSessionState, input: NextMatchInput): NextMatchPlan 
 }
 
 function manual(chosen: readonly MemberId[]): NextMatchInput {
-  return { criterion: "manual", criterionInput: { chosen }, playersPerTeam: PLAYERS_PER_TEAM };
+  return {
+    ...AUTOMATIC,
+    criterion: "manual",
+    criterionInput: { chosen },
+    playersPerTeam: PLAYERS_PER_TEAM,
+    winnerCriterionInput: null,
+  };
 }
 
 const BY_CONSECUTIVE_MATCHES: NextMatchInput = {
+  ...AUTOMATIC,
   criterion: "consecutive-matches",
   criterionInput: { arrivalOrder: ARRIVAL_ORDER },
   playersPerTeam: PLAYERS_PER_TEAM,
+  winnerCriterionInput: null,
 };
 
 function endWith(player: CourtPlayer, winner: TeamSide) {
@@ -272,9 +285,11 @@ describe("planNextMatch", () => {
     endWith(player, "a");
 
     const plan = planOf(player.state(), {
+      ...AUTOMATIC,
       criterion: "arrival-order",
       criterionInput: { arrivalOrder: ARRIVAL_ORDER },
       playersPerTeam: PLAYERS_PER_TEAM,
+      winnerCriterionInput: null,
     });
 
     expect(plan.exits.map(({ outgoing, incoming }) => [outgoing, incoming])).toStrictEqual([
@@ -302,5 +317,54 @@ describe("planNextMatch", () => {
       ok: false,
       error: { code: "invalid-payload", field: "queue" },
     });
+  });
+});
+
+describe("getWinStreak", () => {
+  const LAST_THREE_WINS = 3;
+  const AFTER_THE_REVERT = 2;
+
+  test("counts the wins in a row of the same members, and the loser has none", () => {
+    const state = playReviewScenario().state();
+
+    expect(getWinStreak(state, "a")).toBe(LAST_THREE_WINS);
+    expect(getWinStreak(state, "b")).toBe(0);
+  });
+
+  test("a RevertedTo before the last MatchEnded takes the win back", () => {
+    const player = playReviewScenario();
+    const events = player.events();
+    const lastStart = [...events].reverse().find(({ type }) => type === "MatchStarted");
+    if (lastStart === undefined) {
+      throw new Error("no MatchStarted");
+    }
+    const sequence = events.length + 1;
+    const revert: EventEnvelope = {
+      ...lastStart,
+      eventId: memberId("e0000000", sequence),
+      payload: { targetEventId: lastStart.eventId },
+      sequence,
+      type: REVERTED_TO_EVENT_TYPE,
+    };
+
+    expect(getWinStreak(replayAll([...events, revert]), "a")).toBe(AFTER_THE_REVERT);
+  });
+
+  test("a round without a finished match has no streak", () => {
+    expect(getWinStreak(INITIAL_COURT_SESSION_STATE, "a")).toBe(0);
+  });
+});
+
+describe("planNextMatch refusals of the modes", () => {
+  const state = playReviewScenario().state();
+
+  test.each([
+    [{ playersPerTeam: 0, exitMode: { kind: "level" } }, "invalid-players-per-team"],
+    [{ exitMode: { kind: "level" }, winnerExit: { wins: 0 } }, "invalid-exit-mode"],
+    [{ winnerExit: { wins: 0 }, criterionInput: { arrivalOrder: [] } }, "invalid-winner-exit"],
+  ])("refuses %o with %s first", (change, code) => {
+    const input = { ...BY_CONSECUTIVE_MATCHES, ...change } as unknown as NextMatchInput;
+
+    expect(planNextMatch(state, input)).toStrictEqual({ ok: false, error: { code } });
   });
 });

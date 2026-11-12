@@ -1,0 +1,30 @@
+# ADR 0050 · Modos de fila e "vencedor também sai" no planejador
+
+**Status:** aceito (12/11/2026). **Tarefa:** E2.12. Plano em [`docs/estado/tarefas/E2.12.md`](../../estado/tarefas/E2.12.md). Regras em [`fila.md`](../../dominio/fila.md), seções "Modos de quem sai" e "Vencedor também sai". Cumpre a decisão 1 do [ADR 0048](0048-modos-de-fila-votacao-e-areia.md) e estende o [ADR 0029](0029-fila-da-quadra.md) e o [ADR 0041](0041-configuracao-herdada-e-modelos.md). Muda o "fica só em TS" do planejador nos ADR 0029 e [0033](0033-porte-csharp-do-motor.md).
+
+## Respostas do Gabriel (perguntas 36, 37 e 38; adotadas as recomendações)
+
+- **P1 (36):** quando o vencedor bate X com um time só esperando, sai o vencedor e o perdedor fica. Com dois times esperando, saem os dois. Isolado em `exitOrder` (`plan-next-match.ts`).
+- **P2 (37):** no "sempre o time inteiro" só com avulsos esperando, o time é remontado: entram os avulsos, o critério escolhe quem do perdedor descansa, e a escalação fica a montar. Isolado em `rebuildWithSingles` (`exit-modes.ts`).
+- **P3 (38):** o "vencedor também sai" vem desligado em grupo novo, com X = 3 pronto para ligar. Isolado no catálogo e em `DEFAULT_WINNER_EXIT_ENABLED`/`DEFAULT_WINNER_EXIT_WINS`, conferidos por teste.
+
+## Decisões
+
+1. **O modo vive só na entrada do comando, nunca no evento.** Nem no `MatchStarted` nem no `QueueChanged`: o `MatchStarted` seguinte já grava fila, times e rotação inteiros (mesmo princípio do ADR 0029 para o critério). Sem mudança de `schemaVersion` nem de `rulesVersion`; logs e golden de eventos antigos valem byte a byte.
+2. **Entrada nova de `NextMatchInput`**, toda obrigatória: `exitMode` (`automatic`, `whole-team` ou `fixed-count` com `count` inteiro de 1 a 24), `winnerExit` (`{ wins }` de 1 a 10, ou `null`) e `winnerCriterionInput` (mesmo tipo do `criterionInput`, correlacionado pela chave do critério, ou `null`). A entrada do vencedor é separada para não mudar a validação do `criterionInput`.
+3. **Saída nova de `NextMatchPlan`:** `enteringTeams` (lista, `a` antes de `b`) no lugar de `enteringTeam`; `side` em cada `PartialExit`; `winnerLeaving: { side, streak } | null`. Ordem de chaves: `enteringTeams`, `exits`, `queue`, `rotations`, `teams`, `winnerLeaving`. `exits` em ordem de lado e, no lado, na ordem do time.
+4. **Códigos novos** `invalid-exit-mode` e `invalid-winner-exit`. Ordem: `match-already-open`, `no-finished-match`, `invalid-players-per-team`, `invalid-exit-mode`, `invalid-winner-exit`, depois `invalid-exit-choice` (só quando alguém sai pela saída parcial) e por fim `invalid-payload` `queue` (acima de 96). O tipo do modo é procurado só nas chaves próprias do mapa (`constructor` é recusado).
+5. **Vitórias seguidas são calculadas** (`getWinStreak`): partidas terminadas seguidas, terminando na última, vencidas pelo lado com o mesmo conjunto de membros da última. O evento não tem `teamId`; com o conjunto, a contagem continua quando ninguém espera e zera sozinha quando alguém sai. Efeito aceito: uma troca do admin no vencedor também zera.
+6. **Passos sobre uma fila compartilhada:** com o "vencedor também sai" disparado, o modo roda primeiro no vencedor e depois no perdedor, com o que sobrou. Um passo com a fila vazia não faz nada. Quem sai só entra na fila no fim (vencedor primeiro, perdedor depois, cada um na ordem do time); depois, `formTeams` e o limite de 96.
+7. **Strategy por modo** (`QueueExitModeStep`, `IQueueExitModeStep` no C#), num mapa por `kind`, cada passo puro sobre `(lado, fila, critério)`. A herança de lugar, o líbero e o critério ficam em `exit-steps.ts`, iguais aos da E2.6.
+8. **`whole-team`:** o perdedor volta como time para o fim de `queue.teams`, sem se dissolver nos avulsos (preserva duplas e quartetos da areia para a E3.9).
+9. **`fixed-count`:** a fila vira uma linha (times membro a membro, depois avulsos); saem `min(N, time, linha)`; o resto vira avulsos e `formTeams` reagrupa pela ordem.
+10. **Catálogo** (ADR 0041), níveis grupo e rodada: `queue.exitMode` (padrão `automatic`), `queue.fixedExitCount` (1 a 24, padrão 2), `queue.winnerExitEnabled` (padrão `false`), `queue.winnerExitWins` (1 a 10, padrão 3). O modelo `areia-rei-da-quadra` ganha `whole-team`. Um teste confere os limites contra as constantes do motor. O contrato OpenAPI não muda: `settings` é um documento JSON livre no contrato (ADR 0042).
+11. **Documentos gravados antes das chaves novas** (`group_settings` e `saved_templates`) seriam recusados pelo leitor (`settings.missing-field`). A migração `AddQueueExitModeSettings` acrescenta as quatro folhas com o padrão a cada documento que não as tem, como pede o ADR 0041 ("versão nova exige migração explícita"), sem mudar `schemaVersion`.
+12. **Porte C# do planejador inteiro** (critérios e modos) na Parte 2 da E2.12, com `queue-plans.json` e `queue-modes.json` lidos pelos dois lados. Sem ele não há golden TS/C# iguais para os modos, e a E3.7 ganha como recalcular o plano no servidor.
+
+## Consequências
+
+- `queue-plans.json` foi migrado por script (entrada com o modo automático; `enteringTeams`, `side` e `winnerLeaving` no esperado), sem outra mudança. `queue-modes.json` tem os casos novos, com esperados escritos à mão.
+- A E4.9 (tela 11) mostra dois times trocando e o `winnerLeaving`; o plano da E4.9 recebe o aviso.
+- Ligar o "vencedor também sai" no meio da rodada usa a contagem da história: um time com 5 vitórias seguidas sai no plano seguinte.

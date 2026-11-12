@@ -271,11 +271,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 3,
@@ -284,7 +289,8 @@
           "place": {
             "area": "lineup",
             "index": 1
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 3,
@@ -293,7 +299,8 @@
           "place": {
             "area": "lineup",
             "index": 5
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -351,7 +358,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -623,11 +631,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [],
       "queue": {
         "players": [],
@@ -684,7 +697,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -959,11 +973,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [],
       "queue": {
         "players": ["b0000000-0000-4000-8000-000000000005", "b0000000-0000-4000-8000-000000000006"],
@@ -1020,7 +1039,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -1288,11 +1308,16 @@
           "b0000000-0000-4000-8000-000000000008"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 3,
@@ -1301,7 +1326,8 @@
           "place": {
             "area": "lineup",
             "index": 5
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -1359,7 +1385,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -1662,11 +1689,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 3,
@@ -1675,7 +1707,8 @@
           "place": {
             "area": "team",
             "index": 0
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 4,
@@ -1684,7 +1717,8 @@
           "place": {
             "area": "team",
             "index": 1
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -1729,7 +1763,8 @@
             "b0000000-0000-4000-8000-000000000009"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -2029,11 +2064,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 2,
@@ -2042,7 +2082,8 @@
           "place": {
             "area": "team",
             "index": 1
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -2087,7 +2128,8 @@
             "b0000000-0000-4000-8000-000000000012"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -2382,11 +2424,16 @@
           "90000000-0000-4000-8000-000000000005"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 2,
@@ -2395,7 +2442,8 @@
           "place": {
             "area": "team",
             "index": 1
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -2440,7 +2488,8 @@
             "90000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -2726,11 +2775,16 @@
           "b0000000-0000-4000-8000-000000000008"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 3,
@@ -2739,7 +2793,8 @@
           "place": {
             "area": "bench",
             "index": 0
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 3,
@@ -2747,7 +2802,8 @@
           "outgoing": "b0000000-0000-4000-8000-000000000011",
           "place": {
             "area": "libero"
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -2807,7 +2863,8 @@
             "b0000000-0000-4000-8000-000000000008"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -3090,11 +3147,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": "b",
+      "enteringTeams": ["b"],
       "exits": [],
       "queue": {
         "players": ["b0000000-0000-4000-8000-000000000004"],
@@ -3149,7 +3211,8 @@
             "90000000-0000-4000-8000-000000000012"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -3263,11 +3326,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 4
+      "playersPerTeam": 4,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": "a",
+      "enteringTeams": ["a"],
       "exits": [],
       "queue": {
         "players": ["a0000000-0000-4000-8000-000000000005", "a0000000-0000-4000-8000-000000000006"],
@@ -3311,7 +3379,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -3407,11 +3476,16 @@
           "b0000000-0000-4000-8000-000000000001"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 1,
@@ -3420,7 +3494,8 @@
           "place": {
             "area": "team",
             "index": 0
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3429,7 +3504,8 @@
           "place": {
             "area": "team",
             "index": 1
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3438,7 +3514,8 @@
           "place": {
             "area": "team",
             "index": 2
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3447,7 +3524,8 @@
           "place": {
             "area": "team",
             "index": 3
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -3501,7 +3579,8 @@
             "90000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -3604,11 +3683,16 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 1,
@@ -3617,7 +3701,8 @@
           "place": {
             "area": "team",
             "index": 0
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3626,7 +3711,8 @@
           "place": {
             "area": "team",
             "index": 1
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3635,7 +3721,8 @@
           "place": {
             "area": "team",
             "index": 2
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3644,7 +3731,8 @@
           "place": {
             "area": "team",
             "index": 3
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -3693,7 +3781,8 @@
             "90000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -3964,11 +4053,16 @@
           "b0000000-0000-4000-8000-000000000007"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 2,
@@ -3977,7 +4071,8 @@
           "place": {
             "area": "lineup",
             "index": 2
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -3986,7 +4081,8 @@
           "place": {
             "area": "lineup",
             "index": 4
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -4044,7 +4140,8 @@
             "b0000000-0000-4000-8000-000000000006"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -4313,11 +4410,16 @@
           "b0000000-0000-4000-8000-000000000008"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 2,
@@ -4326,7 +4428,8 @@
           "place": {
             "area": "lineup",
             "index": 0
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -4335,7 +4438,8 @@
           "place": {
             "area": "lineup",
             "index": 3
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -4393,7 +4497,8 @@
             "b0000000-0000-4000-8000-000000000004"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -4655,11 +4760,16 @@
       "criterionInput": {
         "chosen": ["b0000000-0000-4000-8000-000000000004", "b0000000-0000-4000-8000-000000000002"]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": true,
-      "enteringTeam": null,
+      "enteringTeams": [],
       "exits": [
         {
           "consecutiveMatches": 3,
@@ -4668,7 +4778,8 @@
           "place": {
             "area": "lineup",
             "index": 5
-          }
+          },
+          "side": "b"
         },
         {
           "consecutiveMatches": 1,
@@ -4677,7 +4788,8 @@
           "place": {
             "area": "lineup",
             "index": 4
-          }
+          },
+          "side": "b"
         }
       ],
       "queue": {
@@ -4735,7 +4847,8 @@
             "b0000000-0000-4000-8000-000000000006"
           ]
         }
-      }
+      },
+      "winnerLeaving": null
     }
   },
   {
@@ -4997,7 +5110,12 @@
       "criterionInput": {
         "chosen": ["b0000000-0000-4000-8000-000000000001"]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -5267,7 +5385,12 @@
           "b0000000-0000-4000-8000-000000000003"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -5533,7 +5656,12 @@
       "criterionInput": {
         "chosen": ["b0000000-0000-4000-8000-000000000001", "a0000000-0000-4000-8000-000000000001"]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -5799,7 +5927,12 @@
       "criterionInput": {
         "chosen": ["b0000000-0000-4000-8000-000000000001", "b0000000-0000-4000-8000-000000000005"]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -6065,7 +6198,12 @@
       "criterionInput": {
         "chosen": ["b0000000-0000-4000-8000-000000000001", "b0000000-0000-4000-8000-000000000001"]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -6337,7 +6475,12 @@
           "b0000000-0000-4000-8000-000000000002"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -6610,7 +6753,12 @@
           "b0000000-0000-4000-8000-000000000002"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -6883,7 +7031,12 @@
           "a0000000-0000-4000-8000-000000000001"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -7155,7 +7308,12 @@
           "b0000000-0000-4000-8000-000000000003"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -7419,7 +7577,12 @@
       },
       "criterion": "consecutive-matches",
       "criterionInput": {},
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -7698,7 +7861,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -7962,7 +8130,12 @@
       },
       "criterion": "draw",
       "criterionInput": null,
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -8241,7 +8414,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 0
+      "playersPerTeam": 0,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -8520,7 +8698,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 25
+      "playersPerTeam": 25,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -8799,7 +8982,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 5.5
+      "playersPerTeam": 5.5,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -9155,7 +9343,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,
@@ -9193,7 +9386,12 @@
           "b0000000-0000-4000-8000-000000000012"
         ]
       },
-      "playersPerTeam": 6
+      "playersPerTeam": 6,
+      "exitMode": {
+        "kind": "automatic"
+      },
+      "winnerExit": null,
+      "winnerCriterionInput": null
     },
     "expected": {
       "ok": false,

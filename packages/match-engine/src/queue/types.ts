@@ -9,9 +9,22 @@ import type {
   TeamRotations,
   TeamSide,
 } from "../score/types.js";
-import type { QUEUE_EXIT_CRITERION_KEYS } from "./constants.data.js";
+import type { QUEUE_EXIT_CRITERION_KEYS, QUEUE_EXIT_MODE_KINDS } from "./constants.data.js";
 
 export type QueueExitCriterionKey = (typeof QUEUE_EXIT_CRITERION_KEYS)[number];
+
+export type QueueExitModeKind = (typeof QUEUE_EXIT_MODE_KINDS)[number];
+
+/** Who leaves the losing team (`queue.exitMode`); `count` goes from 1 to 24 (ADR 0050). */
+export type QueueExitMode =
+  | { readonly kind: "automatic" }
+  | { readonly kind: "whole-team" }
+  | { readonly kind: "fixed-count"; readonly count: number };
+
+/** "Vencedor também sai": the winner leaves too after `wins` wins in a row, from 1 to 10. */
+export interface WinnerExit {
+  readonly wins: number;
+}
 
 /**
  * What each criterion needs from outside the pure engine: the arrival order comes from the round
@@ -32,8 +45,25 @@ export type QueueExitChoice<K extends QueueExitCriterionKey = QueueExitCriterion
   };
 }[K];
 
-/** `playersPerTeam` and the criterion come from the resolved settings (ADR 0017). */
-export type NextMatchInput = QueueExitChoice & { readonly playersPerTeam: number };
+/**
+ * The criterion with the input for each team: `criterionInput` for the loser and
+ * `winnerCriterionInput` for the winner who leaves too (`null` when the group does not use it).
+ */
+export type QueueExitChoices<K extends QueueExitCriterionKey = QueueExitCriterionKey> = {
+  readonly [P in K]: QueueExitChoice<P> & {
+    readonly winnerCriterionInput: QueueExitCriterionInputs[P] | null;
+  };
+}[K];
+
+/**
+ * Everything comes from the resolved settings (ADR 0017) and never goes into an event: the next
+ * `MatchStarted` records the result (ADR 0050).
+ */
+export type NextMatchInput = QueueExitChoices & {
+  readonly exitMode: QueueExitMode;
+  readonly playersPerTeam: number;
+  readonly winnerExit: WinnerExit | null;
+};
 
 /** Who of the losing team may leave, how many leave, and the round so far. */
 export interface QueueExitCandidates {
@@ -65,23 +95,37 @@ export interface PartialExit {
   readonly incoming: MemberId;
   readonly outgoing: MemberId;
   readonly place: PartialExitPlace;
+  readonly side: TeamSide;
+}
+
+/** The winner that leaves too, and the wins in a row that made it leave. */
+export interface WinnerLeaving {
+  readonly side: TeamSide;
+  readonly streak: number;
 }
 
 /**
  * The next match the queue proposes: what screen 11 shows, and what "Confirmar" hands to
- * `startMatch`. `enteringTeam` is the side a whole team of the queue comes into, with its rotation
- * off for E4.7 to set; `exits` are the partial exits, in the order of the team.
+ * `startMatch`. `enteringTeams` are the sides a new team comes into (`a` before `b`), with the
+ * rotation off for E4.7 to set; `exits` are the partial exits, side `a` first and then in the order
+ * of the team; `winnerLeaving` says the winner left too.
  */
 export interface NextMatchPlan {
-  readonly enteringTeam: TeamSide | null;
+  readonly enteringTeams: readonly TeamSide[];
   readonly exits: readonly PartialExit[];
   readonly queue: TeamQueue;
   readonly rotations: TeamRotations;
   readonly teams: MatchTeams;
+  readonly winnerLeaving: WinnerLeaving | null;
 }
 
 export type QueueRefusalCode =
-  "invalid-exit-choice" | "invalid-players-per-team" | "match-already-open" | "no-finished-match";
+  | "invalid-exit-choice"
+  | "invalid-exit-mode"
+  | "invalid-players-per-team"
+  | "invalid-winner-exit"
+  | "match-already-open"
+  | "no-finished-match";
 
 export type QueueCommandError = ScorePayloadError | { readonly code: QueueRefusalCode };
 

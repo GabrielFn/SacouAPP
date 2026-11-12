@@ -14,6 +14,7 @@ const TEAM_SIZE = 2;
 const BLUE = [1, 2].map((index) => memberId("b0000000", index));
 const ORANGE = [1, 2].map((index) => memberId("a0000000", index));
 const WAITING = memberId("c0000000", 1);
+const AUTOMATIC = { exitMode: { kind: "automatic" }, winnerExit: null } as const;
 
 /** One finished match won by side `a`, with one single player waiting to replace a loser. */
 function stateAfterOneMatch(): CourtSessionState {
@@ -46,9 +47,11 @@ describe("criterion keys come only from the own keys of the criteria map", () =>
 
   test.each(INHERITED_KEYS)("refuses the inherited key %s", (criterion) => {
     const input = {
+      ...AUTOMATIC,
       criterion,
       criterionInput: { arrivalOrder: [...BLUE] },
       playersPerTeam: TEAM_SIZE,
+      winnerCriterionInput: null,
     } as unknown as NextMatchInput;
 
     expect(planNextMatch(stateAfterOneMatch(), input)).toStrictEqual({
@@ -59,9 +62,11 @@ describe("criterion keys come only from the own keys of the criteria map", () =>
 
   test("still accepts a real key on the same state", () => {
     const input: NextMatchInput = {
+      ...AUTOMATIC,
       criterion: "arrival-order",
       criterionInput: { arrivalOrder: [...BLUE] },
       playersPerTeam: TEAM_SIZE,
+      winnerCriterionInput: null,
     };
 
     expect(planNextMatch(stateAfterOneMatch(), input).ok).toBe(true);

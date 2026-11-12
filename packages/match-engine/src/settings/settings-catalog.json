@@ -177,6 +177,43 @@
       "pro": false
     },
     {
+      "path": "queue.exitMode",
+      "type": "choice",
+      "values": ["automatic", "whole-team", "fixed-count"],
+      "default": "automatic",
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "queue.fixedExitCount",
+      "type": "integer",
+      "min": 1,
+      "max": 24,
+      "default": 2,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "queue.winnerExitEnabled",
+      "type": "boolean",
+      "default": false,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
+      "path": "queue.winnerExitWins",
+      "type": "integer",
+      "min": 1,
+      "max": 10,
+      "default": 3,
+      "levels": ["group", "round"],
+      "groupFact": false,
+      "pro": false
+    },
+    {
       "path": "rotation.enabled",
       "type": "boolean",
       "default": false,
@@ -344,6 +381,7 @@
         "scoring.pointsPerSet": 21,
         "queue.enabled": true,
         "queue.exitCriterion": "arrival-order",
+        "queue.exitMode": "whole-team",
         "draw.enabled": true,
         "mvp.enabled": true,
         "mvp.byStats": true
