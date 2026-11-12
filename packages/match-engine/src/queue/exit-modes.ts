@@ -62,12 +62,11 @@ const fixedCountStep: QueueExitModeStep<ModeOf<"fixed-count">> = {
   },
 };
 
-const QUEUE_EXIT_MODE_STEPS: { readonly [K in QueueExitModeKind]: QueueExitModeStep<ModeOf<K>> } =
-  {
-    automatic: automaticStep,
-    "whole-team": wholeTeamStep,
-    "fixed-count": fixedCountStep,
-  };
+const QUEUE_EXIT_MODE_STEPS: { readonly [K in QueueExitModeKind]: QueueExitModeStep<ModeOf<K>> } = {
+  automatic: automaticStep,
+  "whole-team": wholeTeamStep,
+  "fixed-count": fixedCountStep,
+};
 
 function isFixedCount(value: unknown): boolean {
   return (
