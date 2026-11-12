@@ -39,6 +39,6 @@ Os valores acima partem do nível declarado. Começando com todos iguais, o rati
 
 - Não há biblioteca oficial de OpenSkill em C#. A E3.9 porta o modelo para o C#, com testes golden gerados da `openskill` de TypeScript (MIT), como já é feito com o motor.
 - A nota do admin é privada e precisa de autorização na API: nenhuma rota devolve ao jogador a nota que o admin deu nem o rating (`produto.md:373`). Entra no modelo de ameaças e no inventário de dados pessoais na tarefa que a implementar (E3.17).
-- A tela de membros (E4.5) ganha a nota do admin com a sugestão do jogador. Não há desenho dessa tela no canvas: o layout passa pelo Gabriel.
+- A tela de membros (E4.5) ganha a nota do admin com a sugestão do jogador. Telas aprovadas pelo Gabriel em 12/11/2026: 19 (Membros, com a nota), 19a (Definir a nota), 19b (Revisar notas sugeridas) e 27 (Perfil rápido, com o nível como sugestão).
 - O sorteio (E3.6) usa a nota do admin, ou a sugestão, ou 3,0.
 - Mostrar o rating ao jogador, a nota e a faixa na cartinha e o ganho de rating no MVP voltam com decisão do Gabriel depois do piloto, com os dados calibrados.

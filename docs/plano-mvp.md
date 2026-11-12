@@ -157,7 +157,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E4.2 | Cliente da API gerado, TanStack Query, tratamento de erro e offline | Tipos sempre iguais aos da API | E3.1 |
 | E4.3 | Login, perfil rápido (onboarding) e conta | Telas 02, 27, 30 | E4.2 |
 | E4.4 | Início, lista de grupos, notificações | Telas 03, 17, 28 | E4.2 |
-| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047; layout com o Gabriel, sem tela no canvas) | Telas 04, 05, 18, 19 | E3.3 |
+| E4.5 | Criar grupo, ajustes "Como jogamos", membros, com a nota do admin e a sugestão do jogador (ADR 0047) | Telas 04, 05, 18, 19, 19a, 19b | E3.3 |
 | E4.6 | Criar rodada, detalhe (admin e jogador), adicionar jogador | Telas 06, 20, 21, 26 | E3.4 |
 | E4.7 | Sorteio e pré-jogo | Telas 07, 08 | E3.6 |
 | E4.8 | Escalação por time | Tela 22 | E2.4, E2.5 |
