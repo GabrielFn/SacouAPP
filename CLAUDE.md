@@ -42,7 +42,7 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 1. `analista` — detalha a tarefa: sub-passos, arquivos, casos de teste, riscos. Escreve o plano em `docs/estado/tarefas/<ID>.md`.
 2. `desenvolvedor` — implementa numa branch `task/<ID>-<slug>`, com testes.
 3. `revisor` — agente **novo**, que não viu o raciocínio do desenvolvedor. Confere a definição de pronto e a arquitetura.
-4. `revisor-seguranca` — só para tarefas sensíveis (login, tokens, pagamentos, upload de foto, QR do placar, dados pessoais).
+4. `revisor-seguranca` — só para tarefas sensíveis (login, tokens, pagamentos, upload de foto, assumir a quadra, nota do admin, votação do MVP, dados pessoais).
 5. `testador` — agente **novo**. Roda build, lint e testes; escreve testes extras para os critérios de aceite; tenta quebrar.
 6. Se revisão e testes passam → merge na `main` (merge automático autorizado pelo Gabriel). Se falham → volta ao desenvolvedor com os achados. **3 ciclos falhando = parar e perguntar ao Gabriel.**
 

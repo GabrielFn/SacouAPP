@@ -34,7 +34,7 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | MASVS-CRYPTO | Pendente | E4.3, E4.9 |
 | MASVS-AUTH | Pendente | E3.8, E4.3 |
 | MASVS-NETWORK | Pendente | E4.2, E4.11 |
-| MASVS-PLATFORM | Pendente | E4.14, E4.16 |
+| MASVS-PLATFORM | Pendente | E4.9, E4.17 (E4.14 e E4.16 pós-piloto, ADR 0046) |
 | MASVS-CODE | Parcial: dependências conferidas; versão mínima pendente | E0.9, E5.3 (versão mínima), E5.4 |
 | MASVS-RESILIENCE | Pendente | E5.4, E6.2 |
 | MASVS-PRIVACY | Pendente. Motor: eventos e estatísticas só com `MemberId`, sem nome nem nível (M2) | E3.16, E4.13, E5.2, E6.2 |

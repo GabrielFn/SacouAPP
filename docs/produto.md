@@ -60,11 +60,11 @@ O núcleo é grátis e cobre presença, sorteio, fila, placar e Pix. A configura
 ### Núcleo
 
 1. **Grupos:** convite por link e QR; papéis Admin, Co-admin e Placar (opera a quadra sem outros poderes); multi-admin grátis e sem limite.
-2. **Jogadores:** apelido, posição principal e secundárias, nível 1–5 autodeclarado; tipo mensalista ou avulso.
+2. **Jogadores:** apelido, posição principal e secundárias, nível 1–5 sugerido pelo jogador e definido pelo admin (ADR 0047); tipo mensalista ou avulso.
 3. **Rodadas:** presença VOU / NÃO VOU (sem "talvez"); lista de espera com promoção automática; mensalista já entra confirmado e só avisa se não for; lista de avulsos abre X horas antes; recorrência automática sem reconfirmar todo mundo; admin adiciona convidado sem conta.
 4. **Cobrança Pix (opcional):** Pix copia e cola gerado a partir da chave do organizador (QR opcional) na própria confirmação; serve só para a diária e a mensalidade do racha, nunca para o Pro; "Já paguei" com confirmação do admin, exibida como "pago (marcado por Fulano)"; lembrete neutro, nunca lista pública de devedores.
 5. **Sorteio:** equilibra nível e posição, evita repetir times; medidor de equilíbrio; trocar e travar duplas; imagem dos times para compartilhar.
-6. **Rating ****(Glicko-2, separado por modalidade: quadra e areia)****:** ajustado pelos resultados (conversão para a nota: 1500 = 3,0 e cada 100 pontos valem 0,5, limitado entre 1 e 5; o nível autodeclarado no cadastro é o ponto de partida; os números são ajustados com os dados do piloto), privado no app (o jogador vê só o próprio); na cartinha compartilhável aparece por padrão, e o jogador pode esconder. A borda da cartinha indica a faixa: Bronze até 2,4; Prata de 2,5 a 3,4; Ouro de 3,5 a 4,4; Elite a partir de 4,5. A cartinha usa a foto do jogador com o fundo removido, recortada na silhueta: o recorte é automático no próprio celular (Vision no iOS, ML Kit Subject Segmentation no Android, via módulo nativo do Expo), com pincel para apagar ou restaurar bordas e enquadramento por arrastar e pinça. Se o aparelho não suportar, o recorte é feito no servidor com um modelo de segmentação em ONNX Runtime no .NET. A imagem final é salva em PNG ou WebP com transparência.
+6. **Rating** *(atualizado em 11/11/2026, ADR 0047: OpenSkill por partida, nota inicial do admin, invisível ao jogador e escondido no piloto; foto da cartinha pós-piloto, ADR 0046; vale `decisoes.md`)* **(Glicko-2, separado por modalidade: quadra e areia):** ajustado pelos resultados (conversão para a nota: 1500 = 3,0 e cada 100 pontos valem 0,5, limitado entre 1 e 5; o nível autodeclarado no cadastro é o ponto de partida; os números são ajustados com os dados do piloto), privado no app (o jogador vê só o próprio); na cartinha compartilhável aparece por padrão, e o jogador pode esconder. A borda da cartinha indica a faixa: Bronze até 2,4; Prata de 2,5 a 3,4; Ouro de 3,5 a 4,4; Elite a partir de 4,5. A cartinha usa a foto do jogador com o fundo removido, recortada na silhueta: o recorte é automático no próprio celular (Vision no iOS, ML Kit Subject Segmentation no Android, via módulo nativo do Expo), com pincel para apagar ou restaurar bordas e enquadramento por arrastar e pinça. Se o aparelho não suportar, o recorte é feito no servidor com um modelo de segmentação em ONNX Runtime no .NET. A imagem final é salva em PNG ou WebP com transparência.
 7. **Fila de times:** quem perde sai; contador de sequência; próximo time entra automaticamente ao fim da partida. Quando há menos gente esperando do que um time completo, a saída é parcial: só sai do time perdedor o número de pessoas que está esperando (ex.: 2 substitutos → saem 2). Quem sai é definido por critério configurável — quem está há mais partidas seguidas (padrão), ordem de chegada, sorteio ou escolha manual. Quem entra assume a posição de quem saiu; com rotação ligada, entra no lugar dela na escalação. Se ninguém está esperando, ninguém sai. Quem sai entra no fim da fila como avulso; quando os avulsos somam um time, ele se forma por ordem de chegada. No MVP, a fila tem só o modo automático: time inteiro quando há time completo esperando, parcial quando não há. "Sempre parcial com N fixo", "sempre time inteiro", "vencedor sai após X vitórias" e o critério por nível ficam para depois (`docs/ideias.md`; decisão do Gabriel em 03/11/2026).
 8. **Placar:** pontos por set, número de sets, tie-break e vantagem configuráveis; desfazer ilimitado; fim de set sempre confirmado.
 9. **Resumo da rodada com IA:** placares, sequências, MVP do dia calculado pelos dados por padrão (saldo de pontos +/− enquanto em quadra, aproveitamento de vitórias, maior sequência e ganho de rating); votação rápida como opção do grupo; ponto individual ("De quem?" ao marcar, para aces e bloqueios) como opção do grupo no Sacou Pro; formatos texto, feed e story.
@@ -136,7 +136,7 @@ Uma aba "Explorar" (Falta 1, mapa) só entra quando houver densidade de usuário
 3. **Proteção contra erro:** trava ligada por padrão, bloqueio de 700 ms após cada ponto, toques com a palma ignorados, toast "+1 Laranja (22–19)".
 4. **Corrigir sem estresse:** linha do tempo dos últimos 10 pontos; um toque volta àquele estado; trocar sacador e girar time a 1 toque; cada correção mostra o que mudou.
 5. **Feedback:** vibração no ponto, no side-out, no set point e no fim de set; bipe opcional.
-6. **Tela sempre ligada** durante o modo quadra; aviso de bateria abaixo de 20% sugerindo entregar o placar.
+6. **Tela sempre ligada** durante o modo quadra; aviso de bateria abaixo de 20% sugerindo ligar no carregador ou na power bank (ADR 0046).
 7. **Paisagem** quando o celular está apoiado: Time A à esquerda e B à direita, com "Inverter lados".
 
 ## Identidade visual e nome
@@ -217,7 +217,7 @@ A Fase 2 só começa quando 5 grupos reais usarem o app por 4 rodadas seguidas, 
 | Bugs a cada versão (o que derrubou Chega+ e Pelada+) | Escopo pequeno e testes automatizados da lógica de fila e de cada sistema de rotação |
 | Excesso de configuração | Modelos, funções dormentes, no máximo 5 itens visíveis por bloco |
 | Rotação errada desacredita o app | Livre como padrão, Corrigir visível, testes extensos |
-| Conflito social com o nível | Nível autodeclarado e rating privado |
+| Conflito social com o nível | Nota definida pelo admin, que o jogador não vê, e rating escondido (ADR 0047) |
 | Constrangimento ao cobrar | Cobrança opcional, lembrete neutro, sem lista pública de devedores |
 | Tela ilegível ao sol e bateria | Tema Sol, aviso de bateria, entregar placar |
 | Rejeição nas lojas (exclusão de conta, denúncia de foto, privacidade) | Exclusão de conta no app, denúncia e remoção de foto, termos e política de privacidade desde a Fase 1 |
@@ -245,7 +245,7 @@ Monólito modular em ASP.NET Core (.NET 10), com DDD enxuto: agregados só onde 
 |---|---|
 | API | ASP.NET Core .NET 10, Minimal APIs |
 | Banco | PostgreSQL (Neon) + EF Core/Npgsql |
-| Tempo real | SignalR (placar ao vivo) |
+| Tempo real | SignalR (placar ao vivo, pós-piloto, ADR 0046) |
 | Jobs | Hangfire (rodadas recorrentes, lembretes, outbox) |
 | Login | Firebase Auth: Google, Apple e e-mail com senha; a API valida o token com FirebaseAdmin |
 | Página da rodada | Razor Pages no mesmo projeto, com meta tags para a prévia no WhatsApp |
@@ -261,7 +261,7 @@ Monólito modular em ASP.NET Core (.NET 10), com DDD enxuto: agregados só onde 
 | Sessions | Presença, vagas, lista de espera, sorteio | Agregado Session |
 | Matches | Placar, fila, rotação, banco | Stream CourtSession (quadra da rodada) com event sourcing; partidas, fila e saída parcial dentro dele |
 | Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
-| Summaries | Resumo da rodada com IA (com cota por grupo); estatísticas, MVP e rating Glicko-2 ficam num módulo Stats com projeções recalculáveis | Serviço |
+| Summaries | Resumo da rodada com IA (com cota por grupo); estatísticas, MVP e rating OpenSkill (ADR 0047) ficam num módulo Stats com projeções recalculáveis | Serviço |
 
 Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a comunicação é pela interface pública do módulo ou por eventos.
 

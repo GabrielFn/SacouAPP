@@ -42,4 +42,4 @@ A rodada do plano, com os números conferidos à mão, está no teste `stats.acc
 
 ## Fora daqui
 
-Somar rodadas, quadras e grupos; MVP do dia; Glicko-2; aproveitamento em %; presença; projeções no servidor (E3.9); texto da IA (E3.13); esconder estatísticas (E4.13).
+Somar rodadas, quadras e grupos; MVP do dia e votação (E3.18); ranking do dia da areia (E3.9, ADR 0048); rating OpenSkill (E3.9, ADR 0047); aproveitamento em %; presença; projeções no servidor (E3.9); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).

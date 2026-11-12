@@ -61,7 +61,7 @@ São 12 telas essenciais para o MVP; quase todas as decisões de configuração 
 | Onboarding do jogador | Essencial | Apelido, foto, posições e nível inicial: o sorteio por nível depende disso |
 | Adicionar quem confirmou no WhatsApp / convidado sem conta | Essencial | O botão existe na tela 06 sem destino |
 | Notificações (permissão e central) | Essencial mínima | Recorrência e lista de espera dependem de push |
-| Entregar placar por QR | Recomendada | Pode entrar logo depois se o admin marcar sozinho no piloto |
+| Entregar placar por QR | Recomendada | Pode entrar logo depois se o admin marcar sozinho no piloto. **Trocado por "Placar assume a quadra" (ADR 0046)** |
 | Pagamentos completos e resumo financeiro | Recomendada | "Ver os 18" sem destino |
 | Estados de vazio, erro, offline e sincronização | Recomendada | Inclui "removendo fundo…" da foto |
 | Editar perfil, excluir conta, termos e privacidade | Essencial | Exigência das lojas e da LGPD |
@@ -78,7 +78,7 @@ O documento cobre bem o núcleo, mas ficou atrás das decisões das últimas hor
 3. **Pix:** o documento fala em QR; a decisão é copia e cola no MVP, QR opcional.
 4. **Pro com "rating completo":** conflita com a cartinha grátis mostrando o nível. Trocar por "histórico completo além da temporada atual".
 5. **Ranking do grupo:** sem critério, vazaria o nível privado. Definir: por vitórias, saldo e MVPs, nunca por nível.
-6. **"Rating com IA":** o Glicko-2 é cálculo, não IA. Corrigir o nome.
+6. **"Rating com IA":** o rating é cálculo, não IA. Corrigir o nome. (O Glicko-2 virou OpenSkill, ADR 0047.)
 7. **"Sem instalar nada":** a confirmação exige login. Trocar por "sem instalar o app; login uma vez na própria página".
 8. **Tempos de criação de grupo:** 60 s num lugar e 90 s em outro. Unificar: 60 s até o grupo criado, 90 s até o 1º convite.
 9. **Risco "limites do PWA":** já resolvido com o app nativo; tirar da tabela.

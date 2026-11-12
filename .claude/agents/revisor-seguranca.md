@@ -1,6 +1,6 @@
 ---
 name: revisor-seguranca
-description: Revisão de segurança de tarefas sensíveis do Sacou (login, tokens, pagamentos, upload de foto, QR do placar, dados pessoais) e revisão geral no fim de cada marco.
+description: Revisão de segurança de tarefas sensíveis do Sacou (login, tokens, pagamentos, upload de foto, assumir a quadra, nota do admin, votação do MVP, dados pessoais) e revisão geral no fim de cada marco.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

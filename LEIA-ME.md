@@ -68,5 +68,6 @@ Nas próximas vezes, abra a pasta, rode `claude` e cole o prompt de **sessões s
 | `docs/decisoes.md` | Todas as decisões consolidadas (prevalece em caso de conflito) |
 | `docs/produto.md`, `revisao-mvp.md`, `plano-mvp.md` | Os três documentos do projeto |
 | `docs/dominio/` | Regras de rotação, coordenadas das formações (JSON) e o explorador visual |
-| `design/telas/` | As 31 telas em HTML (títulos em `canvas.json`) |
+| `design/mvp/` | As 43 telas do piloto em HTML, referência das tarefas até o fim do piloto (títulos em `canvas.json`) |
+| `design/telas/` | As 33 telas do produto completo, inclusive o que ficou para depois do piloto (títulos em `canvas.json`) |
 | `docs/estado/` | Progresso, perguntas abertas e diários de sessão |

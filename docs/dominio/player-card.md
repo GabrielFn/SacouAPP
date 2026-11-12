@@ -29,4 +29,4 @@ Consequência: 1790, que daria 4,45 sem arredondar, já é Elite.
 
 ## Fora desta regra
 
-Rótulos em pt-BR e a formatação "3,8" (E4.13); Glicko-2 e a conversão inversa da semente, em que 3 vira 1500 (E3.9); privacidade do nível, garantida na API (E3.9 e E4.13).
+Rótulos em pt-BR e a formatação "3,8" (E4.13); rating OpenSkill e a conversão para a nota (E3.9, ADR 0047, que trocou o Glicko-2; no piloto a cartinha não mostra nota nem faixa); privacidade do nível, garantida na API (E3.9 e E4.13).
