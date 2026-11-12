@@ -46,7 +46,8 @@ public sealed class ProfileBehaviourTests(IntegrationDatabase database) : IAsync
         Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
         Assert.Equal(HttpStatusCode.OK, read.StatusCode);
         Assert.Equal(savedJson.ToJsonString(), readJson.ToJsonString());
-        Assert.Equal("""{"nickname":"João","primaryPosition":"opposite","otherPositions":["setter","libero"],"suggestedLevel":4.5}""", readJson.ToJsonString());
+        // Parsed and written the same way, so the escaping of "ã" is the same on both sides.
+        Assert.Equal(JsonNode.Parse("""{"nickname":"João","primaryPosition":"opposite","otherPositions":["setter","libero"],"suggestedLevel":4.5}""")!.ToJsonString(), readJson.ToJsonString());
         Assert.Equal(new ProfileState("João", "opposite", "setter,libero", 45), await ProfileRows.ReadAsync(api.ConnectionString, world.Users[A.Player]));
     }
 

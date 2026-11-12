@@ -38,7 +38,7 @@ public sealed class ProfileSchemaTests(IntegrationDatabase database) : IAsyncLif
             await ReadAsync(connection, "SELECT conname FROM pg_constraint WHERE contype = 'c' AND conrelid = 'identity.player_profiles'::regclass ORDER BY conname"));
         Assert.Equal(
             ["fk_player_profiles_users:c"],
-            await ReadAsync(connection, "SELECT conname || ':' || confdeltype FROM pg_constraint WHERE contype = 'f' AND conrelid = 'identity.player_profiles'::regclass"));
+            await ReadAsync(connection, "SELECT conname || ':' || confdeltype::text FROM pg_constraint WHERE contype = 'f' AND conrelid = 'identity.player_profiles'::regclass"));
     }
 
     /// <summary>The database refuses what the domain refuses, should a bug or a hand-written row get past it; 4.5 is the control.</summary>
