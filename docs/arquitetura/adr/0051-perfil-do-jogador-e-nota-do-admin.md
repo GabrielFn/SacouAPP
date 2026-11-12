@@ -39,3 +39,8 @@ O ADR 0047 tirou o nível autodeclarado do papel de nota definitiva: o jogador s
 - **Apelido por grupo:** a pendência herdada da E3.2 e `dados-pessoais.md` pedem perfil único.
 - **O Groups ler `identity.player_profiles` direto:** quebraria a fronteira de módulos (ADR 0039).
 - **Nível como texto ou inteiro de 1 a 5:** a tela 19b mostra meios pontos; décimos inteiros evitam ponto flutuante e conversão.
+
+## Notas da implementação (Parte 1)
+
+- **Contrato `/v1`:** o gerador do OpenAPI deixava vazio o enum anulável (`PrimaryPosition?`) e sem `items` a lista de enums (`otherPositions`). O `EnumAsTextSchemaTransformer` (ADR 0042, D1) passa a desembrulhar o `Nullable<T>` e a descrever cada item da lista de enums em linha, com os valores do fio; teste `Position_lists_carry_the_wire_values_of_each_item`.
+- **Textos do app:** o mapa de erros do app é exaustivo sobre os códigos gerados, então os três códigos novos (`identity.nickname-invalid`, `identity.profile-invalid`, `identity.profile-not-found`) já ganham texto pt-BR em `api-errors.pt-BR.ts`; a E4.3 pode ajustá-los.
