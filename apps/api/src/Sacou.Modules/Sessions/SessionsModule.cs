@@ -12,7 +12,6 @@ using Sacou.Modules.Sessions.ListRounds;
 using Sacou.Modules.Sessions.RespondAttendance;
 using Sacou.Modules.Sessions.SetMemberAttendance;
 using Sacou.Modules.Sessions.StopSeries;
-using Sacou.Modules.Sessions.StopSeries;
 using Sacou.Modules.Sessions.UpdateRound;
 
 namespace Sacou.Modules.Sessions;

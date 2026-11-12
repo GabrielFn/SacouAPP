@@ -30,8 +30,8 @@ public sealed class AttendancePropertyTests
             round = result.IsSuccess ? result.Value.Round : round;
 
             Assert.InRange(round.SpotsHeld, 0, Capacity);
-            // The counter rises by exactly the number of new order numbers handed out in this step.
-            var spent = round.Attendances.Count(a => a.Sequence >= lastNext);
+            // The counter rises by exactly the number of new order numbers handed out in this step (a first "não vou" takes none).
+            var spent = round.Attendances.Count(a => a.Sequence >= lastNext && a.Status != AttendanceStatus.NotGoing);
             Assert.Equal(lastNext + spent, round.NextSequence);
             lastNext = round.NextSequence;
             AssertLineIsSound(round);
@@ -41,7 +41,8 @@ public sealed class AttendancePropertyTests
 
     private static void AssertLineIsSound(Round round)
     {
-        var sequences = round.Attendances.Select(a => a.Sequence).ToList();
+        // The order is among the rows that are in it: a "não vou" without an earlier row holds the counter's value without taking it.
+        var sequences = round.Attendances.Where(a => a.Status != AttendanceStatus.NotGoing).Select(a => a.Sequence).ToList();
         Assert.Equal(sequences.Count, sequences.Distinct().Count());
         Assert.True(round.Waitlist.IsEmpty || round.SpotsHeld == Capacity, "A free spot with someone waiting.");
         Assert.All(round.Attendances, a => Assert.Equal(a.Status == AttendanceStatus.Promoted, a.PromotedAt is not null));

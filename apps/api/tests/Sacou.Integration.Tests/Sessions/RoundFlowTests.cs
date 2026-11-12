@@ -90,6 +90,101 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(HttpStatusCode.NoContent, again.StatusCode);
     }
 
+    /// <summary>F1: the whole week of a racha, on a clock the test moves: mensalistas in, the drop-in window, the waitlist, and the next round.</summary>
+    [Fact]
+    public async Task WeeklyRacha_RunsFromTheMensalistasToTheNextRound()
+    {
+        const int WindowHours = 24;
+        const int InsideTheWindowHours = 23;
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 4, regulars: true, dropInOpensHoursBefore: WindowHours);
+        var firstRegular = await world.AddPersonAsync(memberType: "regular");
+        _ = await world.AddPersonAsync(memberType: "regular");
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(repeat: true));
+        var round = created["roundId"]!.GetValue<string>();
+        var startsAt = created["startsAt"]!.GetValue<DateTimeOffset>();
+        Assert.Equal(2, created["goingCount"]!.GetValue<int>());
+
+        var closed = await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true);
+        api.Clock.SetNow(startsAt.AddHours(-InsideTheWindowHours));
+        var first = await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true);
+        var second = await RoundCalls.RespondAsync(world, world.Subjects[A.Scorekeeper], round, going: true);
+        var third = await RoundCalls.RespondAsync(world, world.Subjects[A.CoAdmin], round, going: true);
+
+        Assert.Equal("sessions.drop-in-window-closed", closed.Code);
+        Assert.Equal(["going", "going", "waitlisted"], new[] { first, second, third }.Select(answer => answer.Body!["status"]!.GetValue<string>()));
+        Assert.Equal(1, third.Body!["position"]!.GetValue<int>());
+
+        var gaveUp = await RoundCalls.RespondAsync(world, firstRegular.Subject, round, going: false);
+        var afterGivingUp = await RoundCalls.GetAsync(world, round);
+        Assert.Equal(HttpStatusCode.OK, gaveUp.Status);
+        Assert.Equal(4, afterGivingUp["goingCount"]!.GetValue<int>());
+        Assert.Equal(0, afterGivingUp["waitlistCount"]!.GetValue<int>());
+        Assert.Contains(afterGivingUp["going"]!.AsArray(), entry => entry!["memberId"]!.GetValue<Guid>() == world.MemberIds[A.CoAdmin] && entry["promoted"]!.GetValue<bool>());
+
+        api.Clock.SetNow(startsAt.AddHours(1));
+        var next = await NextScheduledAsync(world, after: startsAt);
+        Assert.Equal(2, next["goingCount"]!.GetValue<int>());
+        Assert.Equal(WeekLater(created), next["localDate"]!.GetValue<string>());
+    }
+
+    /// <summary>F2: cancelling the upcoming occurrence makes the next week's on the next read.</summary>
+    [Fact]
+    public async Task CancelingTheUpcomingOccurrence_MakesTheOneOfTheFollowingWeek()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(repeat: true));
+        var round = created["roundId"]!.GetValue<string>();
+
+        using var cancel = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/cancel");
+        var next = await NextScheduledAsync(world, after: created["startsAt"]!.GetValue<DateTimeOffset>());
+
+        Assert.Equal(HttpStatusCode.OK, cancel.StatusCode);
+        Assert.Equal(WeekLater(created), next["localDate"]!.GetValue<string>());
+        Assert.Equal(created["seriesId"]!.GetValue<string>(), (await RoundCalls.GetAsync(world, next["roundId"]!.GetValue<string>()))["seriesId"]!.GetValue<string>());
+    }
+
+    /// <summary>An edit that moves a round of a series onto a date the series already has is a 409 with its own code, and the round stays as it was.</summary>
+    [Fact]
+    public async Task MovingASeriesRoundToATakenDate_Is409_AndNothingChanges()
+    {
+        const int DaysInWeek = 7;
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(repeat: true));
+        var round = created["roundId"]!.GetValue<string>();
+        await using (var connection = await MemberRows.OpenAsync(api.ConnectionString))
+        {
+            await ExecuteAsync(connection,
+                "INSERT INTO sessions.rounds (id, group_id, series_id, local_date, local_time, time_zone, starts_at, venue, status, next_sequence, created_at) " +
+                $"SELECT gen_random_uuid(), group_id, series_id, local_date + {DaysInWeek}, local_time, time_zone, starts_at + interval '{DaysInWeek} days', venue, status, next_sequence, created_at " +
+                $"FROM sessions.rounds WHERE id = '{round}'");
+        }
+
+        using var response = await world.SendAsync(
+            A.Admin, HttpMethod.Patch, RoundCalls.RoundPath(world, round), $$"""{"localDate":"{{WeekLater(created)}}"}""");
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal("sessions.round-date-taken", await RoundCalls.CodeAsync(response));
+        Assert.Equal(created["localDate"]!.GetValue<string>(), (await RoundCalls.GetAsync(world, round))["localDate"]!.GetValue<string>());
+    }
+
+    private static string WeekLater(System.Text.Json.Nodes.JsonObject round) =>
+        DateOnly.ParseExact(round["localDate"]!.GetValue<string>(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)
+            .AddDays(7).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>The list read makes the series' next round; this is the scheduled round that starts after <paramref name="after"/>.</summary>
+    private static async Task<System.Text.Json.Nodes.JsonObject> NextScheduledAsync(GroupWorld world, DateTimeOffset after)
+    {
+        using var listed = await world.SendAsync(A.Admin, HttpMethod.Get, RoundCalls.RoundsPath(world));
+        var next = (await RoundCalls.JsonAsyncArray(listed))
+            .Select(entry => entry!.AsObject())
+            .Single(entry => entry["status"]!.GetValue<string>() == "scheduled" && entry["startsAt"]!.GetValue<DateTimeOffset>() > after);
+        return next;
+    }
+
     [Fact]
     public async Task Create_RefusesThePastAndTheTwentyFirstRound()
     {

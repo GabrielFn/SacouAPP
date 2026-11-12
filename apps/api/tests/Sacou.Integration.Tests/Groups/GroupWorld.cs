@@ -203,7 +203,7 @@ internal sealed class GroupWorld
     }
 
     private string TokenFor(string subject) =>
-        TestIdToken.Valid(api.Key, FixedTimeProvider.WholeSecondNow()).With("sub", subject).With("user_id", subject).Sign();
+        TestIdToken.Valid(api.Key, DateTimeOffset.FromUnixTimeSeconds(api.Clock.GetUtcNow().ToUnixTimeSeconds())).With("sub", subject).With("user_id", subject).Sign();
 
     private async Task<Guid> RegisterAsync(string subject)
     {

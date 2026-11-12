@@ -44,10 +44,16 @@ internal static class RoundCalls
     }
 
     /// <summary>Attendance on, with a limit and (optionally) the waitlist, written through the Groups settings route as the admin.</summary>
-    public static async Task ConfigureAttendanceAsync(GroupWorld world, int capacity = 12, bool waitlist = true, bool regulars = false)
+    public static async Task ConfigureAttendanceAsync(
+        GroupWorld world, int capacity = 12, bool waitlist = true, bool regulars = false, int? dropInOpensHoursBefore = null)
     {
         var attendance = string.Create(CultureInfo.InvariantCulture,
             $"\"enabled\":true,\"capacityLimited\":true,\"capacity\":{capacity},\"waitlistEnabled\":{Flag(waitlist)},\"regularsEnabled\":{Flag(regulars)}");
+        if (dropInOpensHoursBefore is { } hours)
+        {
+            attendance += string.Create(CultureInfo.InvariantCulture, $",\"dropInWindowEnabled\":true,\"dropInOpensHoursBefore\":{hours}");
+        }
+
         var patch = "{\"settings\":{\"schemaVersion\":1,\"attendance\":{" + attendance + "}}}";
         using var response = await world.SendAsync(GroupActor.Admin, HttpMethod.Patch, world.GroupPath + "/settings", patch);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

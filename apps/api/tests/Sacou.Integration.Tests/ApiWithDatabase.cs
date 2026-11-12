@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Groups.Contracts;
@@ -40,6 +41,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
 
+    /// <summary>The API's clock: the real time, moved to wherever a test sets it (tokens are minted by it too, so they stay valid).</summary>
+    internal ShiftableClock Clock { get; } = new();
+
     /// <summary>
     /// Runs before every <see cref="IGroupMembership.FindActiveAsync"/> of a request, with the 1-based number of
     /// that lookup in the request (1 is the access filter, 2 is the one under the round's lock). Lets a test
@@ -72,6 +76,11 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(HookMembership);
+        builder.ConfigureServices(services =>
+        {
+            _ = services.RemoveAll<TimeProvider>();
+            _ = services.AddSingleton<TimeProvider>(Clock);
+        });
         builder.ConfigureServices(services => services
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => Keys)
