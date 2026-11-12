@@ -16,7 +16,8 @@ Este arquivo é a porta de entrada de toda sessão. Cada sessão começa do zero
 | `docs/dominio/rotacoes.md` | Especificação das regras de rotação e sobreposição (FIVB 2025–28) |
 | `packages/volley-rules/src/formations/formations.json` | Coordenadas das formações (5x1, 6x2, 4x2, Livre) — fonte única, lida pelo TS e pelo C# |
 | `docs/dominio/rotacoes-explorador.html` | Explorador interativo das formações (abrir no navegador) |
-| `design/telas/*.dc.html` | As 33 telas do app (fonte HTML). Títulos e ordem em `design/telas/canvas.json` |
+| `design/mvp/*.dc.html` | **As 30 telas do piloto, só com o que entra no MVP (ADR 0046 e 0047). É a referência das tarefas até o fim do piloto.** Títulos e ordem em `design/mvp/canvas.json` |
+| `design/telas/*.dc.html` | As 33 telas do produto completo, inclusive o que ficou para depois do piloto. Títulos e ordem em `design/telas/canvas.json` |
 | `docs/estado/progresso.md` | Marco atual, tarefas feitas / em andamento / bloqueadas |
 | `docs/estado/pendencias.md` | Pendências herdadas das tarefas (só o orquestrador lê inteiro) |
 | `docs/estado/tarefas/<ID>.md` | Plano detalhado de cada tarefa, escrito pelo analista |
@@ -85,7 +86,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 - Regras do vôlei e do motor sempre com **testes golden compartilhados entre TS e C#**.
 - Eventos nunca carregam dado pessoal (só IDs). Tudo aponta para `MemberId`, nunca `UserId`.
 - **App (`apps/mobile`):** seguir `docs/padroes/frontend.md` (estado com registro único, layout só com unidades relativas, orientado a interfaces, reducer pattern).
-- Telas iguais a `design/telas/`, alvos de toque ≥ 44 px, contraste AA.
+- Telas iguais a `design/mvp/` (no piloto; `design/telas/` é o produto completo), alvos de toque ≥ 44 px, contraste AA.
 
 ## Segredos
 
@@ -100,7 +101,7 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 3. CI verde: build, lint (avisos como erro), testes TS e .NET.
 4. Respeita a arquitetura (DDD enxuto, fatias verticais, domínio sem infraestrutura, eventos sem dado pessoal, glossário).
 5. Clean Code: nomes claros, funções pequenas, sem números soltos, imutabilidade, sem `any`.
-6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais ao design, toque ≥ 44 px, contraste AA, textos pt-BR centralizados.
+6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados.
 7. Sem segredos no código nem nos logs.
 8. Base de conhecimento atualizada (progresso, ADR, domínio, segurança quando aplicável).
 

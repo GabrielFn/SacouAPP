@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Criar grupo · perguntas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:#0F1B2D}a:hover{color:#1F5BFF}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font-size:13px;color:#4A5566}
+.in{height:44px;border-radius:12px;border:1.5px solid rgba(15,27,45,0.25);background:#FFFFFF;padding:0 12px;font-size:15px;font-weight:600;box-sizing:border-box;width:100%;min-width:0}
+.lg{padding:0;margin-bottom:6px;font-size:16px;font-weight:700}
+.lg span{font-family:'Barlow Condensed',sans-serif;font-size:19px;color:#FF5A1F;margin-right:6px}
+.sg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px;border-radius:14px;background:rgba(15,27,45,0.08)}
+.sg button{height:40px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566}
+.sg button[aria-pressed="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center; gap: 4px">
+    <a href="CriarModelo.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span style="font-size: 16px; font-weight: 600">Racha organizado</span>
+    <span style="margin-left: auto; margin-right: 8px; font-size: 14px; color: #4A5566">Passo 2 de 2</span>
+  </header>
+  <div aria-hidden="true" style="margin: 6px 20px 0; height: 4px; border-radius: 2px; background: #FF5A1F"></div>
+
+  <div style="padding: 10px 20px 0; display: flex; flex-direction: column; gap: 10px">
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; line-height: 1">Duas perguntas e pronto</h1>
+
+    <div class="f">
+      <label for="nome" style="font-size: 14px; font-weight: 600; color: #0F1B2D">Nome do grupo</label>
+      <input id="nome" class="in" value="Racha de terça" style="font-size: 16px; font-weight: 500">
+    </div>
+
+    <fieldset style="border: 0; margin: 0; padding: 0">
+      <legend class="lg">Quando e onde?</legend>
+      <div style="display: grid; grid-template-columns: 1.25fr 1.25fr 0.6fr; gap: 8px">
+        <div class="f">
+          <label for="quando">Dia e horário</label>
+          <input id="quando" class="in" value="Terça, 20h30">
+        </div>
+        <div class="f">
+          <label for="local">Local</label>
+          <input id="local" class="in" value="Ginásio Sesc">
+        </div>
+        <div class="f">
+          <label for="vagas">Vagas</label>
+          <input id="vagas" class="in" value="14" inputmode="numeric">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset style="border: 0; margin: 0; padding: 0">
+      <legend class="lg"><span>1</span>Onde vocês jogam?</legend>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <button aria-pressed="true" style="height: 56px; border-radius: 14px; background: #0F1B2D; color: #F6F1E7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+          <svg aria-hidden="true" width="30" height="22" viewBox="0 0 40 30" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="1" width="38" height="28"/><line x1="20" y1="1" x2="20" y2="29" stroke-width="3" stroke="#FFC83D"/><line x1="13" y1="1" x2="13" y2="29"/><line x1="27" y1="1" x2="27" y2="29"/></svg>
+          <span style="font-size: 14px; font-weight: 700">Quadra 6x6</span>
+        </button>
+        <button aria-pressed="false" style="height: 56px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid rgba(15,27,45,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+          <svg aria-hidden="true" width="30" height="22" viewBox="0 0 40 30" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="0" y="0" width="40" height="30" fill="#F3E3C3" stroke="none"/><rect x="3" y="3" width="34" height="24"/><line x1="20" y1="3" x2="20" y2="27" stroke-width="3"/></svg>
+          <span style="font-size: 14px; font-weight: 600">Areia 4x4</span>
+        </button>
+        <button aria-pressed="false" style="height: 56px; border-radius: 14px; background: #FFFFFF; border: 1.5px solid rgba(15,27,45,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+          <svg aria-hidden="true" width="30" height="22" viewBox="0 0 40 30" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="0" y="0" width="40" height="30" fill="#F3E3C3" stroke="none"/><rect x="3" y="3" width="34" height="24"/><line x1="20" y1="3" x2="20" y2="27" stroke-width="3"/></svg>
+          <span style="font-size: 14px; font-weight: 600">Areia 2x2</span>
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset style="border: 0; margin: 0; padding: 0">
+      <legend class="lg"><span>2</span>Tem mensalistas fixos?</legend>
+      <div class="sg">
+        <button aria-pressed="true">Sim</button>
+        <button aria-pressed="false">Não</button>
+      </div>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #4A5566">Mensalistas entram na lista sozinhos toda rodada.</p>
+    </fieldset>
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 24px">
+    <a href="Rodada.dc.html" style="height: 56px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; text-decoration: none">Criar grupo</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

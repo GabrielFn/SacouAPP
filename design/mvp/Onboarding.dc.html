@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Perfil rápido</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.lg{padding:0;margin:0 0 8px;font-size:16px;font-weight:700}
+.lg small{font-size:13px;font-weight:500;color:#4A5566;margin-left:6px}
+.cps{display:flex;flex-wrap:wrap;gap:6px}
+.cp{height:44px;padding:0 14px;border-radius:22px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.18);font-size:15px;font-weight:600;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px}
+.cp[aria-checked="true"],.cp[aria-pressed="true"]{background:#0F1B2D;border-color:#0F1B2D;color:#F6F1E7}
+.nv{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.nv button{min-height:84px;border-radius:14px;background:#FFFFFF;border:1.5px solid rgba(15,27,45,0.18);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px 4px 6px;gap:3px;box-sizing:border-box}
+.nv b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;line-height:1}
+.nv span{font-size:13px;line-height:1.15;text-align:center;color:#4A5566}
+.nv button[aria-checked="true"]{background:#FF5A1F;border-color:#FF5A1F}
+.nv button[aria-checked="true"] span{color:#0F1B2D;font-weight:600}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 28px 20px 0; display: flex; align-items: center; gap: 8px">
+    <svg aria-hidden="true" width="26" height="18" viewBox="0 0 26 18"><rect x="0" y="0" width="7" height="7" rx="1.5" fill="#0F1B2D"/><rect x="9.5" y="0" width="7" height="7" rx="1.5" fill="#0F1B2D"/><rect x="19" y="0" width="7" height="7" rx="1.5" fill="#0F1B2D"/><rect x="0" y="10" width="7" height="7" rx="1.5" fill="#0F1B2D"/><rect x="9.5" y="10" width="7" height="7" rx="1.5" fill="#0F1B2D"/><rect x="19" y="10" width="7" height="7" rx="1.5" fill="#FFC83D"/></svg>
+    <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px">Sacou</span>
+  </header>
+
+  <div style="padding: 14px 20px 0">
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 36px; line-height: 1">Seu perfil de quadra</h1>
+    <p style="margin: 4px 0 0; font-size: 15px; color: #4A5566">Leva 20 segundos. Ajuda no sorteio.</p>
+  </div>
+
+  <div style="padding: 16px 20px 0; display: flex; align-items: center; gap: 14px">
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+      <label for="apelido" style="font-size: 14px; font-weight: 600">Apelido na quadra</label>
+      <input id="apelido" value="João" style="height: 48px; border-radius: 12px; border: 1.5px solid rgba(15,27,45,0.25); background: #FFFFFF; padding: 0 12px; font-size: 16px; font-weight: 600; box-sizing: border-box; width: 100%">
+    </div>
+  </div>
+
+  <fieldset style="border: 0; margin: 18px 0 0; padding: 0 20px">
+    <legend class="lg" style="padding: 0">Posição principal</legend>
+    <div class="cps" role="radiogroup" aria-label="Posição principal">
+      <button class="cp" role="radio" aria-checked="false">Levantador</button>
+      <button class="cp" role="radio" aria-checked="true">Ponteiro</button>
+      <button class="cp" role="radio" aria-checked="false">Oposto</button>
+      <button class="cp" role="radio" aria-checked="false">Central</button>
+      <button class="cp" role="radio" aria-checked="false">Líbero</button>
+      <button class="cp" role="radio" aria-checked="false">Qualquer uma</button>
+    </div>
+  </fieldset>
+
+  <fieldset style="border: 0; margin: 16px 0 0; padding: 0 20px">
+    <legend class="lg" style="padding: 0">Também jogo de<small>pode marcar mais de uma</small></legend>
+    <div class="cps">
+      <button class="cp" aria-pressed="false">Levantador</button>
+      <button class="cp" aria-pressed="true"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oposto</button>
+      <button class="cp" aria-pressed="false">Central</button>
+      <button class="cp" aria-pressed="false">Líbero</button>
+    </div>
+  </fieldset>
+
+  <fieldset style="border: 0; margin: 16px 0 0; padding: 0 20px">
+    <legend class="lg" style="padding: 0">Como você se avalia?<small>é só uma sugestão</small></legend>
+    <div class="nv" role="radiogroup" aria-label="Sugestão de nível de 1 a 5">
+      <button role="radio" aria-checked="false"><b>1</b><span>Tô aprendendo</span></button>
+      <button role="radio" aria-checked="false"><b>2</b><span>Jogo de vez em quando</span></button>
+      <button role="radio" aria-checked="false"><b>3</b><span>Me viro bem</span></button>
+      <button role="radio" aria-checked="true"><b>4</b><span>Sou dos bons da pelada</span></button>
+      <button role="radio" aria-checked="false"><b>5</b><span>Jogo federado</span></button>
+    </div>
+    <p style="margin: 8px 0 0; display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 1.35; color: #4A5566">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex: none; margin-top: 1px"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      O admin do grupo confirma ou ajusta a nota, que só ele vê. Ela é usada no sorteio.
+    </p>
+  </fieldset>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 24px; display: flex; gap: 8px; box-sizing: border-box">
+    <a href="Inicio.dc.html" style="flex: 1; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px">Pular</a>
+    <a href="Inicio.dc.html" style="flex: 2; height: 56px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700">Pronto</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

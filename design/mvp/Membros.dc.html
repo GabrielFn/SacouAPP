@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Membros · nota do admin</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+a{color:#0F1B2D;text-decoration:none}a:hover{color:#1F5BFF}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:4px;border-radius:14px;background:rgba(15,27,45,0.08)}
+.seg button{height:44px;border-radius:11px;font-size:15px;font-weight:500;color:#4A5566}
+.seg button[aria-selected="true"]{background:#FFFFFF;color:#0F1B2D;font-weight:700;box-shadow:0 1px 0 rgba(15,27,45,0.2)}
+.list{margin:0;padding:0;list-style:none;background:#FFFFFF;border-radius:16px;border:1.5px solid rgba(15,27,45,0.1)}
+.list li{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 0 0 12px}
+.list li+li{border-top:1px solid rgba(15,27,45,0.08)}
+.av{width:40px;height:40px;border-radius:20px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;background:#E9E1D1;color:#0F1B2D}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nm{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600}
+.ds{font-size:13px;color:#4A5566;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl{height:22px;padding:0 7px;border-radius:6px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;box-sizing:border-box}
+.nota{min-width:52px;height:48px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.nota b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;line-height:1}
+.nota small{font-size:11px;font-weight:600;line-height:1.2}
+.sug{border:1.5px dashed #9A6A00;background:#FFF8E1;color:#5C3F00}
+.sem{border:1.5px dashed rgba(15,27,45,0.4);color:#4A5566}
+.more{width:44px;height:48px;display:flex;align-items:center;justify-content:center;color:#4A5566;flex:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F6F1E7; font-family: Inter, sans-serif; color: #0F1B2D; box-sizing: border-box">
+
+  <header style="padding: 20px 12px 0; display: flex; align-items: center">
+    <a href="Grupos.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span style="font-size: 14px; color: #4A5566">Racha de terça · você é admin</span>
+  </header>
+
+  <div style="padding: 0 20px; display: flex; align-items: baseline; gap: 10px">
+    <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 36px; line-height: 1">Membros</h1>
+    <span style="font-size: 15px; color: #4A5566">14 na lista</span>
+  </div>
+
+  <div class="seg" role="tablist" aria-label="Tipo de membro" style="margin: 12px 16px 0">
+    <button role="tab" aria-selected="true">Mensalistas (9)</button>
+    <button role="tab" aria-selected="false">Avulsos (5)</button>
+    <button role="tab" aria-selected="false">Convites</button>
+  </div>
+
+  <a href="RevisarNotas.dc.html" style="margin: 10px 16px 0; min-height: 48px; padding: 0 12px; border-radius: 14px; background: #FFF8E1; border: 1.5px solid #E0A400; display: flex; align-items: center; gap: 10px; box-sizing: border-box">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <span style="flex: 1; font-size: 14px"><b>3 notas para confirmar.</b> O sorteio usa a sugestão até lá.</span>
+    <span style="font-size: 14px; font-weight: 700; color: #1340C0">Revisar</span>
+  </a>
+
+  <p style="margin: 10px 20px 8px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4A5566">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+    A nota é usada no sorteio. <b style="color: #0F1B2D">Só admins veem.</b>
+  </p>
+
+  <div style="padding: 0 16px" role="tabpanel" aria-label="Mensalistas">
+    <ul class="list">
+      <li>
+        <span class="av" aria-hidden="true" style="background: #0F1B2D; color: #F6F1E7">JO</span>
+        <span class="who"><span class="nm">João <span class="rl" style="background: #0F1B2D; color: #F6F1E7">Admin</span></span><span class="ds">Ponteiro · mensalista · você</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de João: 3,5. Alterar"><b>3,5</b></a>
+        <button class="more" aria-label="Opções de João"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">MA</span>
+        <span class="who"><span class="nm">Marcos <span class="rl" style="border: 1.5px solid #0F1B2D">Co-admin</span></span><span class="ds">Oposto · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Marcos: 3,0. Alterar"><b>3,0</b></a>
+        <button class="more" aria-label="Opções de Marcos"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">BI</span>
+        <span class="who"><span class="nm">Bia <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Ponteira · líbero · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota sug" aria-label="Bia sugeriu 4,0, ainda sem nota confirmada. Definir"><b>4,0</b><small>sugeriu</small></a>
+        <button class="more" aria-label="Opções de Bia"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">LI</span>
+        <span class="who"><span class="nm">Lia <span class="rl" style="background: #E3EAFF; color: #1340C0">Placar</span></span><span class="ds">Central · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Lia: 3,5. Alterar"><b>3,5</b></a>
+        <button class="more" aria-label="Opções de Lia"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">CA</span>
+        <span class="who"><span class="nm">Caio <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Oposto · central · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota sug" aria-label="Caio sugeriu 4,5, ainda sem nota confirmada. Definir"><b>4,5</b><small>sugeriu</small></a>
+        <button class="more" aria-label="Opções de Caio"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">GA</span>
+        <span class="who"><span class="nm">Gabi <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Levantadora · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Gabi: 4,0. Alterar"><b>4,0</b></a>
+        <button class="more" aria-label="Opções de Gabi"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true" style="background: #FFFFFF; border: 1.5px dashed rgba(15,27,45,0.45); box-sizing: border-box">LE</span>
+        <span class="who"><span class="nm">Léo <span class="rl" style="background: #FFF3CF; border: 1.5px solid #E0A400; color: #0F1B2D">Sem conta</span></span><span class="ds">Ponteiro · mensalista · entrou pelo WhatsApp</span></span>
+        <a href="NotaMembro.dc.html" class="nota sem" aria-label="Léo sem nota. Definir"><b>–</b><small>sem nota</small></a>
+        <button class="more" aria-label="Opções de Léo"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+      <li>
+        <span class="av" aria-hidden="true">NI</span>
+        <span class="who"><span class="nm">Nina <span class="rl" style="background: rgba(15,27,45,0.07); color: #4A5566">Jogador</span></span><span class="ds">Central · mensalista</span></span>
+        <a href="NotaMembro.dc.html" class="nota" aria-label="Nota de Nina: 3,0. Alterar"><b>3,0</b></a>
+        <button class="more" aria-label="Opções de Nina"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </li>
+    </ul>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 24px; background: #FFFFFF; border-top: 2px solid #0F1B2D; display: flex; gap: 8px; box-sizing: border-box">
+    <button style="flex: 1.5; height: 56px; border-radius: 14px; background: #FF5A1F; color: #0F1B2D; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>Convidar por link
+    </button>
+    <button style="flex: 1; height: 56px; border-radius: 14px; border: 1.5px solid #0F1B2D; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h3v3h-3zM17.5 17.5h3v3h-3z"/></svg>QR do grupo
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
