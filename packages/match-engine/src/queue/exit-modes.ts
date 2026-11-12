@@ -93,7 +93,7 @@ function runMode<K extends QueueExitModeKind>(
   context: ExitStepContext,
   mode: ModeOf<K>,
 ): ExitStepResult {
-  const step: QueueExitModeStep<ModeOf<K>> = QUEUE_EXIT_MODE_STEPS[mode.kind as K];
+  const step: QueueExitModeStep<ModeOf<K>> = QUEUE_EXIT_MODE_STEPS[mode.kind];
   return step.run(context, mode);
 }
 

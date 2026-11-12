@@ -1,6 +1,12 @@
+import { readFileSync } from "node:fs";
+
 import { describe } from "vitest";
 
-import { testPlanGolden } from "./queue-golden.test.fixture.js";
+import { type PlanCase, testPlanGolden } from "./queue-golden.test.fixture.js";
+
+const CASES = JSON.parse(
+  readFileSync(new URL("../../golden/queue-modes.json", import.meta.url), "utf8"),
+) as readonly PlanCase[];
 
 /** Literal, never read from the file: a case that disappears must fail. */
 const EXPECTED_IDS: readonly string[] = [
@@ -56,5 +62,5 @@ const EXPECTED_IDS: readonly string[] = [
 ];
 
 describe("queue modes golden", () => {
-  testPlanGolden("queue-modes.json", EXPECTED_IDS);
+  testPlanGolden(CASES, EXPECTED_IDS);
 });

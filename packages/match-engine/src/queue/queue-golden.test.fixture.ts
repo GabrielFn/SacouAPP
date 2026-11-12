@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-
 import { expect, test } from "vitest";
 
 import type { CourtSessionState } from "../score/types.js";
@@ -7,7 +5,7 @@ import { planNextMatch } from "./plan-next-match.js";
 import type { NextMatchInput } from "./types.js";
 
 /** A case of `queue-plans.json` or `queue-modes.json`: the input as the screen may send it. */
-interface PlanCase {
+export interface PlanCase {
   readonly id: string;
   readonly input: {
     readonly state: CourtSessionState;
@@ -21,11 +19,6 @@ interface PlanCase {
   readonly expected: unknown;
 }
 
-function readCases(fileName: string): readonly PlanCase[] {
-  const url = new URL(`../../golden/${fileName}`, import.meta.url);
-  return JSON.parse(readFileSync(url, "utf8")) as readonly PlanCase[];
-}
-
 function planCase({ input }: PlanCase) {
   const { state, ...choice } = input;
   // The file holds modes, criteria and inputs the type forbids, as the screen or a hostile caller may.
@@ -34,9 +27,7 @@ function planCase({ input }: PlanCase) {
 }
 
 /** Runs every case of the file, and checks the list of ids against the literal one. */
-export function testPlanGolden(fileName: string, expectedIds: readonly string[]): void {
-  const cases = readCases(fileName);
-
+export function testPlanGolden(cases: readonly PlanCase[], expectedIds: readonly string[]): void {
   test.each(cases)("$id", (goldenCase) => {
     const outcome = planCase(goldenCase);
 
