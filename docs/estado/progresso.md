@@ -41,6 +41,7 @@
 
 ## Em andamento
 
+- 13/11/2026: teste no celular feito pelo `adb` (6 defeitos, ver [diário de 13/11](sessoes/2026-11-13.md)). Correção dos defeitos 1 a 3 e remoção do cadeado: PR #76, revisor Opus e testador Sonnet aprovaram, merge feito. Paisagem (sempre, decisão do Gabriel) e defeitos de layout na E4.17, com plano em andamento.
 - 12/11/2026, fim do dia: **E3.4 Parte 2 feita** (PR #60: ciclo 1 reprovado, correção com desenvolvedor novo, verificador único e testador aprovaram) e **E2.12 Parte 1 feita** (PR #71). **E4.5 Parte 1 no PR #74** e **E3.17 Parte 1 no PR #73**, os dois com CI verde e **sem revisão**: pausa pedida pelo Gabriel para o teste no celular. Próximo passo no [diário de 12/11](sessoes/2026-11-12.md).
 - Alinhamento dos documentos com os ADRs 0046–0048 (12/11/2026, PR #69, feito). Próximo passo exato no [diário de 12/11](sessoes/2026-11-12.md). **A E4.5 mudou de escopo** (telas de `design/mvp/`, 04a, 18a e 19a–19d): o plano dela precisa ser atualizado antes de retomar a branch. A E2.12 (modos de fila) pode correr em paralelo.
 - Próxima na API: E3.4 (rodadas, recorrência, presença e espera com concorrência).
