@@ -133,3 +133,6 @@ export const CHIP_SEPARATION_PASSES = 48;
 
 /** A pill of the queue in the row of landscape is at most 132 of the 844 of the width wide. */
 export const QUEUE_PILL_MAX_WIDTH_RATIO = 132 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
+
+/** Halves a length: the middle of a chip, a zone or the net. */
+export const HALF = 2;

@@ -33,7 +33,7 @@ function namedQueue(queue: QueueModel, names: DisplayNames): QueueModel {
 
 /**
  * Gives each chip and each queue pill its display name. The twelve players and the queue are
- * compared together: two "Ana" anywhere on the screen become "Ana C." and "Ana B." (ADR 0049).
+ * compared together: two "Ana" anywhere on the screen become "Ana C." and "Ana B." (ADR 0052).
  */
 export function withDisplayNames(
   teams: Teams,

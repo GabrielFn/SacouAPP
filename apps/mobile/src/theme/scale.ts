@@ -16,7 +16,7 @@ import {
 
 /**
  * `windowWidth` is the width of the window held upright, that is its shorter side (`shortSide`): the
- * court turns the phone on its side and the tokens must not grow 2x for it (ADR 0049).
+ * court turns the phone on its side and the tokens must not grow 2x for it (ADR 0052).
  */
 export interface ScaleInput {
   readonly windowWidth: number;

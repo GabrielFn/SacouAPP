@@ -4,11 +4,9 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { DISABLED_OPACITY, LANDSCAPE_WIDTH_WEIGHTS, NET_COLUMN_FLEX } from "../court.data";
+import { DISABLED_OPACITY, HALF, LANDSCAPE_WIDTH_WEIGHTS, NET_COLUMN_FLEX } from "../court.data";
 import { PencilIcon, UndoIcon } from "./CourtIcons";
 import { NetMesh } from "./NetMesh";
-
-const HALF = 2;
 
 export interface NetColumnProps {
   readonly canUndo: boolean;

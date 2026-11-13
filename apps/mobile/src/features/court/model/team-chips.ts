@@ -4,6 +4,7 @@ import {
   CHIP_MAX_WIDTH_RATIOS,
   CHIP_NUMBER_DIGITS,
   COLUMN_LINE_HEIGHT_EM,
+  HALF,
 } from "../court.data";
 import { placeChips, type ChipSpec, type PlacementFrame, type Rect } from "./chip-placement";
 import type { CourtEnd } from "./court-geometry";
@@ -11,7 +12,6 @@ import type { CourtLayout } from "./court-layout";
 import type { PlayerChipModel, TeamPanelModel } from "./court-screen.types";
 import { scoreTextSize } from "./score-display";
 
-const HALF = 2;
 const BOTH_SIDES = 2;
 const BOTTOM_ALIGNED_ENDS: readonly CourtEnd[] = ["right", "bottom"];
 

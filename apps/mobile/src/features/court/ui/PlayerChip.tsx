@@ -4,11 +4,10 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
+import { HALF } from "../court.data";
 import { chipColors } from "../model/chip-colors";
 import type { DrawnChip } from "../model/team-chips";
 import { BallIcon } from "./CourtIcons";
-
-const HALF = 2;
 
 export interface PlayerChipProps {
   /** The chip with its center and width already worked out, in pixels from the corner of the square. */

@@ -1,6 +1,6 @@
 import type { CourtPoint } from "@sacou/volley-rules";
 
-import { CHIP_SEPARATION_PASSES, PERCENT } from "../court.data";
+import { CHIP_SEPARATION_PASSES, HALF, PERCENT } from "../court.data";
 import { placeOnHalfCourt, type CourtEnd } from "./court-geometry";
 
 /** A rectangle in pixels; the origin is the top left corner of the half court square. */
@@ -47,7 +47,6 @@ interface Box {
   readonly y: number;
 }
 
-const HALF = 2;
 /** The packing looks at spots this many pixels apart. */
 const SEARCH_STEP = 3;
 
