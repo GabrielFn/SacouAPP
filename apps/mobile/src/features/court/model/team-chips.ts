@@ -48,7 +48,7 @@ export function chipWidth(chip: PlayerChipModel, input: Pick<TeamChipsInput, "la
   const { tokens, layout } = input;
   const { sizes, spacing, fontSizes } = tokens.court;
   const frame = (spacing.chipPadding + tokens.borderWidths.thick) * BOTH_SIDES;
-  const name = [...chip.displayName].length * tokens.fontSizes.caption * CHIP_CHAR_WIDTH_EM;
+  const name = Array.from(chip.displayName).length * tokens.fontSizes.caption * CHIP_CHAR_WIDTH_EM;
   const number = CHIP_NUMBER_DIGITS * fontSizes.chipNumber * CHIP_CHAR_WIDTH_EM;
   const ball = chip.isServer ? sizes.ballIcon + tokens.spacing.xs : 0;
   const natural = frame + ball + name + tokens.spacing.xs + number;

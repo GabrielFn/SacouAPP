@@ -152,6 +152,9 @@ export const courtSizes = {
   correctIcon: 17,
   flameIcon: 17,
   ballIcon: 14,
+  // The widest the plain pages of the court (menu, corrections, end of set and match) grow, so that
+  // on a phone on its side the text keeps a readable line and the buttons are not a wide strip.
+  sheetMaxWidth: 480,
 } as const;
 
 export const courtFontSizes = {

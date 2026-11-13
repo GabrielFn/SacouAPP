@@ -54,16 +54,19 @@ export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 366, net: 112 } as const;
 export const LANDSCAPE_TOTAL_WIDTH_WEIGHT =
   LANDSCAPE_WIDTH_WEIGHTS.zone * 2 + LANDSCAPE_WIDTH_WEIGHTS.net;
 
-/** In a zone of 366: 12 of margin, the 114 of the column, 8 of gap, and the square of 232 at the net. */
-export const LANDSCAPE_ZONE_RATIOS = { edge: 12 / 366, side: 114 / 366 } as const;
+/**
+ * In a zone of 366: 12 of margin, the column of 122 (114 of text and the 8 of gap that the score may
+ * use, since two digits of 132 are 121 wide) and the square of 232 at the net.
+ */
+export const LANDSCAPE_ZONE_RATIOS = { edge: 12 / 366, side: 122 / 366 } as const;
 
 /** The square is 232 of the 366 of the zone width... */
 export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 232 / 366;
 /** ...and never more than 232 of the 294 of its height. */
 export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 232 / 294;
 
-/** The score is 132 of the 294 of the zone height (45%, produto.md:134). */
-export const LANDSCAPE_SCORE_ZONE_RATIO = 132 / 294;
+/** The score is 45% of the zone height (132 of the 294 of the sketch, produto.md:134). */
+export const LANDSCAPE_SCORE_ZONE_RATIO = 0.45;
 
 /** In the net column: Desfazer takes what Corrigir (64) leaves of the 274 inside the padding. */
 export const NET_COLUMN_FLEX = { undo: 202, correct: 64 } as const;

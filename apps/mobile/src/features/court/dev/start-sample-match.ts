@@ -5,16 +5,18 @@ import type { CourtRuntime } from "../ports/court-runtime";
 import { startCourtMatch, type StartCourtMatchError } from "../session/start-court-match";
 import {
   SAMPLE_MATCH_BEST_OF_THREE,
+  SAMPLE_MATCH_LONG_NAMES,
   SAMPLE_MATCH_ONE_SET,
   SAMPLE_MATCH_WITH_LIBERO,
 } from "./sample-match.data";
 
-export type SampleMatchKind = "one-set" | "best-of-three" | "with-libero";
+export type SampleMatchKind = "one-set" | "best-of-three" | "with-libero" | "long-names";
 
 const SAMPLE_MATCHES: Readonly<Record<SampleMatchKind, MatchStartedPayload>> = {
   "one-set": SAMPLE_MATCH_ONE_SET,
   "best-of-three": SAMPLE_MATCH_BEST_OF_THREE,
   "with-libero": SAMPLE_MATCH_WITH_LIBERO,
+  "long-names": SAMPLE_MATCH_LONG_NAMES,
 };
 
 export interface StartedSampleMatch {

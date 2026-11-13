@@ -13,6 +13,8 @@ import {
   LANDSCAPE_WIDTH_WEIGHTS,
   LANDSCAPE_ZONE_RATIOS,
   QUEUE_PILL_MAX_WIDTH_RATIO,
+  SCORE_DIGIT_WIDTH_EM,
+  SCORE_FULL_SIZE_MAX_DIGITS,
   SCORE_ZONE_RATIO,
 } from "../court.data";
 
@@ -65,17 +67,24 @@ function computeLandscape(input: CourtLayoutInput): LandscapeCourtLayout {
   const height = usable(input.windowHeight, input.insetTop, input.insetBottom);
   const zoneHeight = (height * LANDSCAPE_FLEX_WEIGHTS.middle) / LANDSCAPE_TOTAL_HEIGHT_WEIGHT;
   const zoneWidth = (width * LANDSCAPE_WIDTH_WEIGHTS.zone) / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
+  // A phone less wide than the sketch (640 x 360) needs a wider column for two digits at 45% of the
+  // height, and the square gives up the difference.
+  const scoreColumn =
+    zoneHeight * LANDSCAPE_SCORE_ZONE_RATIO * SCORE_FULL_SIZE_MAX_DIGITS * SCORE_DIGIT_WIDTH_EM;
+  const sideWidth = Math.max(zoneWidth * LANDSCAPE_ZONE_RATIOS.side, scoreColumn);
+  const edgeInset = zoneWidth * LANDSCAPE_ZONE_RATIOS.edge;
   return {
     kind: "landscape",
     zoneHeight,
     zoneWidth,
     netWidth: (width * LANDSCAPE_WIDTH_WEIGHTS.net) / LANDSCAPE_TOTAL_WIDTH_WEIGHT,
-    sideWidth: zoneWidth * LANDSCAPE_ZONE_RATIOS.side,
-    edgeInset: zoneWidth * LANDSCAPE_ZONE_RATIOS.edge,
+    sideWidth,
+    edgeInset,
     queuePillMaxWidth: width * QUEUE_PILL_MAX_WIDTH_RATIO,
     halfCourtSide: Math.min(
       zoneWidth * LANDSCAPE_HALF_COURT_WIDTH_RATIO,
       zoneHeight * LANDSCAPE_HALF_COURT_ZONE_RATIO,
+      zoneWidth - edgeInset - sideWidth,
     ),
     scoreZoneRatio: LANDSCAPE_SCORE_ZONE_RATIO,
   };

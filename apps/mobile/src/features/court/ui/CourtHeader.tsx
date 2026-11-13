@@ -5,7 +5,7 @@ import { useTheme } from "../../../theme/theme-context";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COLUMN_LINE_HEIGHT_EM } from "../court.data";
+import { COLUMN_LINE_HEIGHT_EM, FLUSH } from "../court.data";
 import { CloudOffIcon, MenuDotsIcon } from "./CourtIcons";
 import { SetDots } from "./SetDots";
 
@@ -51,7 +51,7 @@ export function CourtHeader({
       </Text>
       {sets.length === 0 ? null : <SetDots sets={sets} accessibilityLabel={setsLabel} />}
       {hint === undefined ? null : (
-        <View style={{ flex: 1, minWidth: 0, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ flex: 1, minWidth: FLUSH, alignItems: "center", justifyContent: "center" }}>
           <Text
             numberOfLines={1}
             style={{

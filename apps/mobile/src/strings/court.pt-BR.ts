@@ -100,6 +100,7 @@ export const courtStrings = {
     newOneSet: "Nova partida (1 set)",
     newBestOfThree: "Nova partida (melhor de 3)",
     newWithLibero: "Nova partida (com líbero)",
+    newLongNames: "Nova partida (nomes longos)",
     themeSun: "Tema Sol",
     themeNight: "Tema Noite",
     resume: "Continuar partida",

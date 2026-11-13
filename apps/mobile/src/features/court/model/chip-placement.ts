@@ -132,35 +132,42 @@ function separate(first: Box, second: Box, gap: number, strategy: Strategy): rea
   ];
 }
 
+/** Takes every pair once, in order, and each push sees the boxes the pushes before it left. */
 function separateAll(boxes: readonly Box[], gap: number, strategy: Strategy): readonly Box[] {
-  const next = [...boxes];
-  for (let i = 0; i < next.length; i += 1) {
-    for (let j = i + 1; j < next.length; j += 1) {
-      const [first, second] = separate(next[i] as Box, next[j] as Box, gap, strategy);
-      next[i] = first;
-      next[j] = second;
-    }
-  }
-  return next;
+  const pairs = boxes.flatMap((_, i) =>
+    boxes.slice(i + 1).map((__, offset) => [i, i + 1 + offset] as const),
+  );
+  return pairs.reduce((current, [i, j]) => {
+    const [first, second] = separate(current[i] as Box, current[j] as Box, gap, strategy);
+    return current.map((box, index) => (index === i ? first : index === j ? second : box));
+  }, boxes);
 }
 
+function keepInPlace(list: readonly Box[], frame: PlacementFrame): readonly Box[] {
+  return list.map((box) =>
+    clampInto(leaveColumn(clampInto(box, frame.bounds), frame.column), frame.bounds),
+  );
+}
+
+function sameSpots(first: readonly Box[], second: readonly Box[]): boolean {
+  return first.every((box, index) => {
+    const other = second[index];
+    return other !== undefined && box.x === other.x && box.y === other.y;
+  });
+}
+
+/** Pushes and keeps in place, pass after pass, until nothing moves or the passes run out. */
 function settle(
   boxes: readonly Box[],
   frame: PlacementFrame,
   strategy: Strategy,
+  passesLeft: number = CHIP_SEPARATION_PASSES,
 ): readonly Box[] {
-  const keep = (list: readonly Box[]) =>
-    list.map((box) => clampInto(leaveColumn(clampInto(box, frame.bounds), frame.column), frame.bounds));
-  let current = keep(boxes);
-  for (let pass = 0; pass < CHIP_SEPARATION_PASSES; pass += 1) {
-    const moved = keep(separateAll(current, frame.gap, strategy));
-    const still = moved.every((box, index) => box.x === current[index]?.x && box.y === current[index]?.y);
-    current = moved;
-    if (still) {
-      break;
-    }
+  if (passesLeft === 0) {
+    return boxes;
   }
-  return current;
+  const moved = keepInPlace(separateAll(boxes, frame.gap, strategy), frame);
+  return sameSpots(moved, boxes) ? moved : settle(moved, frame, strategy, passesLeft - 1);
 }
 
 function overlapArea(a: Rect, b: Rect): number {
@@ -183,20 +190,15 @@ function coverage(boxes: readonly Box[], column: Rect | null): number {
 
 /** Every spot a box could take inside the bounds, the nearest to where it wanted to be first. */
 function candidatesNear(box: Box, bounds: Rect): readonly Box[] {
-  const spots: Box[] = [];
-  const xs = Math.floor((bounds.right - bounds.left - box.halfWidth * HALF) / SEARCH_STEP);
-  const ys = Math.floor((bounds.bottom - bounds.top - box.halfHeight * HALF) / SEARCH_STEP);
-  for (let i = 0; i <= xs; i += 1) {
-    for (let j = 0; j <= ys; j += 1) {
-      spots.push({
-        ...box,
-        x: bounds.left + box.halfWidth + i * SEARCH_STEP,
-        y: bounds.top + box.halfHeight + j * SEARCH_STEP,
-      });
-    }
-  }
+  const columns = Math.floor((bounds.right - bounds.left - box.halfWidth * HALF) / SEARCH_STEP) + 1;
+  const rows = Math.floor((bounds.bottom - bounds.top - box.halfHeight * HALF) / SEARCH_STEP) + 1;
+  const spots = Array.from({ length: Math.max(0, columns * rows) }, (_, index) => ({
+    ...box,
+    x: bounds.left + box.halfWidth + (index % columns) * SEARCH_STEP,
+    y: bounds.top + box.halfHeight + Math.floor(index / columns) * SEARCH_STEP,
+  }));
   const distance = (spot: Box) => (spot.x - box.x) ** HALF + (spot.y - box.y) ** HALF;
-  return spots.sort((a, b) => distance(a) - distance(b) || a.y - b.y || a.x - b.x);
+  return spots.toSorted((a, b) => distance(a) - distance(b) || a.y - b.y || a.x - b.x);
 }
 
 function isFree(spot: Box, placed: readonly Box[], frame: PlacementFrame): boolean {

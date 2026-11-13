@@ -119,7 +119,8 @@
       "undoIcon": 22,
       "correctIcon": 17,
       "flameIcon": 17,
-      "ballIcon": 14
+      "ballIcon": 14,
+      "sheetMaxWidth": 480
     },
     "fontSizes": {
       "setTitle": 22,

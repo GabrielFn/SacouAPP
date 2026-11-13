@@ -18,18 +18,21 @@ export interface QueueStripProps {
   readonly layout: CourtLayout;
 }
 
-/**
- * Who is waiting, the streak of the team that stays, and the rule of the exit. Upright it has two
- * lines; on its side it is a single row (the sketch of E4.17), with the rule at the right end.
- */
-export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
-  const { colors, tokens } = useTheme();
+export interface QueueTextStyles {
+  readonly text: TextStyle;
+  readonly muted: TextStyle;
+}
+
+export interface QueueWaitingProps extends QueueStripProps {
+  readonly styles: QueueTextStyles;
+}
+
+/** "Na fila", the pills, the "+k" that did not fit and "reservas". */
+function QueueWaiting({ queue, layout, styles }: QueueWaitingProps) {
+  const { tokens } = useTheme();
   const landscape = layout.kind === "landscape";
-  const textStyle: TextStyle = { color: colors.text, fontSize: tokens.fontSizes.small };
-  const mutedStyle: TextStyle = { color: colors.textMuted, fontSize: tokens.fontSizes.caption };
-  const exit = queueExitText(queue);
   const { shown, hidden } = visibleQueuePills(queue, MAX_QUEUE_PILLS);
-  const waiting = (
+  return (
     <View
       accessible={queue !== null}
       accessibilityLabel={queue === null ? undefined : queueLabel(queue)}
@@ -43,7 +46,7 @@ export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
     >
       {queue === null ? null : (
         <>
-          <Text style={{ ...textStyle, fontFamily: fontFamilies.body700 }}>
+          <Text style={{ ...styles.text, fontFamily: fontFamilies.body700 }}>
             {strings.court.queue.title}
           </Text>
           {shown.map(({ key, label }, index) => (
@@ -55,12 +58,12 @@ export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
             />
           ))}
           {hidden === 0 ? null : (
-            <Text style={{ ...textStyle, fontFamily: fontFamilies.body700 }}>
+            <Text style={{ ...styles.text, fontFamily: fontFamilies.body700 }}>
               {strings.court.queue.more(hidden)}
             </Text>
           )}
           {queue.players.length === 0 ? null : (
-            <Text style={{ ...mutedStyle, fontFamily: fontFamilies.body600 }}>
+            <Text style={{ ...styles.muted, fontFamily: fontFamilies.body600 }}>
               {strings.court.queue.reserves}
             </Text>
           )}
@@ -68,7 +71,19 @@ export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
       )}
     </View>
   );
-  const rule = (
+}
+
+export interface QueueRuleProps {
+  readonly queue: QueueModel | null;
+  readonly streak: string | null;
+  readonly styles: QueueTextStyles;
+}
+
+/** The streak of the team that stays and the rule of the exit, which sits at the right end. */
+function QueueRule({ queue, streak, styles }: QueueRuleProps) {
+  const { tokens } = useTheme();
+  const exit = queueExitText(queue);
+  return (
     <>
       {streak === null ? null : (
         <View
@@ -79,16 +94,31 @@ export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
           }}
         >
           <FlameIcon />
-          <Text style={{ ...textStyle, fontFamily: fontFamilies.body600 }}>{streak}</Text>
+          <Text style={{ ...styles.text, fontFamily: fontFamilies.body600 }}>{streak}</Text>
         </View>
       )}
       {exit === null ? null : (
-        <Text style={{ ...mutedStyle, marginLeft: "auto", fontFamily: fontFamilies.body600 }}>
+        <Text style={{ ...styles.muted, marginLeft: "auto", fontFamily: fontFamilies.body600 }}>
           {exit}
         </Text>
       )}
     </>
   );
+}
+
+/**
+ * Who is waiting, the streak of the team that stays, and the rule of the exit. Upright it has two
+ * lines; on its side it is a single row (the sketch of E4.17), with the rule at the right end.
+ */
+export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
+  const { colors, tokens } = useTheme();
+  const landscape = layout.kind === "landscape";
+  const styles: QueueTextStyles = {
+    text: { color: colors.text, fontSize: tokens.fontSizes.small },
+    muted: { color: colors.textMuted, fontSize: tokens.fontSizes.caption },
+  };
+  const waiting = <QueueWaiting queue={queue} streak={streak} layout={layout} styles={styles} />;
+  const rule = <QueueRule queue={queue} streak={streak} styles={styles} />;
   return (
     <View
       style={{

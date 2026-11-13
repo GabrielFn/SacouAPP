@@ -148,7 +148,7 @@ function checkAll(phones: readonly Phone[], ends: readonly CourtEnd[]): readonly
               [false, true].flatMap((hasSetPoint) => {
                 const panel = panelOf({ names: list, phase, system, setterZone, hasSetPoint });
                 const input = { panel, layout: layoutOf(phone), tokens: tokensOf(phone), end };
-                const where = `${String(phone.width)}+${String(phone.insetLeft)} ${end} ${list[0] ?? ""} ${phase} ${system} z${String(setterZone)} sp=${String(hasSetPoint)}`;
+                const where = `${String(phone.width)}+${String(phone.insetLeft)} ${end} ${list[0]} ${phase} ${system} z${String(setterZone)} sp=${String(hasSetPoint)}`;
                 return problemsOf(input).map((problem) => `${where}: ${problem}`);
               }),
             ),

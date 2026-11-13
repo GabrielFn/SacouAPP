@@ -94,3 +94,49 @@ export const SAMPLE_MATCH_WITH_LIBERO: MatchStartedPayload = {
     b: { memberIds: SAMPLE_BLUE_LINEUP },
   },
 };
+
+/** The lineups of the "long names" sample: other ids, so the names of the two samples never mix. */
+export const SAMPLE_LONG_ORANGE_LINEUP: readonly string[] = [
+  "d0000000-0000-4000-8000-000000000001",
+  "d0000000-0000-4000-8000-000000000002",
+  "d0000000-0000-4000-8000-000000000003",
+  "d0000000-0000-4000-8000-000000000004",
+  "d0000000-0000-4000-8000-000000000005",
+  "d0000000-0000-4000-8000-000000000006",
+];
+
+export const SAMPLE_LONG_BLUE_LINEUP: readonly string[] = [
+  "e0000000-0000-4000-8000-000000000001",
+  "e0000000-0000-4000-8000-000000000002",
+  "e0000000-0000-4000-8000-000000000003",
+  "e0000000-0000-4000-8000-000000000004",
+  "e0000000-0000-4000-8000-000000000005",
+  "e0000000-0000-4000-8000-000000000006",
+];
+
+export const SAMPLE_LONG_QUEUE_PLAYERS: readonly string[] = [
+  "c1000000-0000-4000-8000-000000000001",
+  "c1000000-0000-4000-8000-000000000002",
+];
+
+export const SAMPLE_LONG_LIBERO_ID = "d0000000-0000-4000-8000-000000000007";
+
+/** Best of three with the long names and the libero of Laranja, to try every chip at its widest. */
+export const SAMPLE_MATCH_LONG_NAMES: MatchStartedPayload = {
+  ...SAMPLE_MATCH_BEST_OF_THREE,
+  queue: { players: SAMPLE_LONG_QUEUE_PLAYERS, teams: [] },
+  rotations: {
+    a: {
+      bench: [],
+      libero: { memberId: SAMPLE_LONG_LIBERO_ID, replacedIndexes: SAMPLE_MIDDLE_BLOCKER_INDEXES },
+      lineup: SAMPLE_LONG_ORANGE_LINEUP,
+      setterZone: 1,
+      system: "5x1",
+    },
+    b: { bench: [], libero: null, lineup: SAMPLE_LONG_BLUE_LINEUP, setterZone: 5, system: "5x1" },
+  },
+  teams: {
+    a: { memberIds: [...SAMPLE_LONG_ORANGE_LINEUP, SAMPLE_LONG_LIBERO_ID] },
+    b: { memberIds: SAMPLE_LONG_BLUE_LINEUP },
+  },
+};

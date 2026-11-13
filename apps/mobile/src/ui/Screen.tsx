@@ -10,28 +10,56 @@ export interface ScreenProps {
   readonly aboveTabBar?: boolean;
   /** The content scrolls when it is taller than the window. */
   readonly scroll?: boolean;
+  /** The content is centered and never wider than this (the pages of the court on its side). */
+  readonly maxContentWidth?: number;
 }
 
-export function Screen({ children, aboveTabBar = false, scroll = false }: ScreenProps) {
+export function Screen({
+  children,
+  aboveTabBar = false,
+  scroll = false,
+  maxContentWidth,
+}: ScreenProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const content = {
     paddingTop: insets.top + tokens.spacing.xl,
     paddingBottom: (aboveTabBar ? 0 : insets.bottom) + tokens.spacing.xl,
-    paddingHorizontal: tokens.spacing.xl,
+    paddingLeft: insets.left + tokens.spacing.xl,
+    paddingRight: insets.right + tokens.spacing.xl,
     gap: tokens.spacing.l,
   };
+  const body =
+    maxContentWidth === undefined ? (
+      children
+    ) : (
+      <View style={{ width: "100%", maxWidth: maxContentWidth, gap: tokens.spacing.l }}>
+        {children}
+      </View>
+    );
   if (scroll) {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={content}
+        contentContainerStyle={{
+          ...content,
+          alignItems: maxContentWidth === undefined ? undefined : "center",
+        }}
       >
-        {children}
+        {body}
       </ScrollView>
     );
   }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, ...content }}>{children}</View>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        alignItems: maxContentWidth === undefined ? undefined : "center",
+        ...content,
+      }}
+    >
+      {body}
+    </View>
   );
 }

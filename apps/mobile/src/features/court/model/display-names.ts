@@ -16,9 +16,11 @@ interface ParsedName {
   readonly second: string | null;
 }
 
+type Entry = readonly [MemberId, string];
+
 const NAME_SEPARATOR = /\s+/u;
 const COMBINING_MARKS = /\p{M}/gu;
-const INITIAL_LENGTH = 1;
+const ONE = 1;
 
 function parse({ memberId, name }: NamedMember): ParsedName {
   const [first = "", second = null] = name.trim().split(NAME_SEPARATOR);
@@ -30,39 +32,46 @@ function firstNameKey({ first }: ParsedName): string {
   return first.normalize("NFD").replace(COMBINING_MARKS, "").toLowerCase();
 }
 
-function initialsOf(word: string, length: number): string {
-  const letters = [...word].slice(0, length);
-  const [head = "", ...rest] = letters;
+function lettersOf(word: string): readonly string[] {
+  return Array.from(word);
+}
+
+/** The first `length` letters of the second name, the first one upper case ("Ca" of "carolina"). */
+function startOf(word: string, length: number): string {
+  const [head = "", ...rest] = lettersOf(word).slice(0, length);
   return `${head.toLocaleUpperCase("pt-BR")}${rest.join("")}`;
 }
 
+/** "Ana C."; when the start is the whole second name there is nothing left to abbreviate. */
 function withSecond({ first }: ParsedName, second: string, length: number): string {
-  const whole = [...second].length <= length;
-  return `${first} ${initialsOf(second, length)}${whole ? "" : "."}`;
+  const whole = lettersOf(second).length <= length;
+  return `${first} ${startOf(second, length)}${whole ? "" : "."}`;
+}
+
+function labelAt(parsed: ParsedName, length: number): string {
+  return parsed.second === null ? parsed.first : withSecond(parsed, parsed.second, length);
 }
 
 /**
- * Who shares a first name gets the start of the second name ("Ana C."); when that still repeats
- * inside the group, the start grows one letter at a time ("Ana Ca.", "Ana Cl.") until it tells them
- * apart or the second name is whole. A member with a one-word name keeps it as is.
+ * Who shares a first name gets the start of the second name ("Ana C."). Whoever still repeats
+ * another's label gets one more letter at a time ("Ana Ca.", "Ana Cl.") until told apart or the
+ * second name is whole; who is already unique keeps the short label. A one-word name stays as is.
  */
-function disambiguate(group: readonly ParsedName[]): readonly (readonly [MemberId, string])[] {
-  const longest = Math.max(...group.map(({ second }) => [...(second ?? "")].length));
-  const settled = new Map<MemberId, string>();
-  for (let length = INITIAL_LENGTH; length <= longest; length += INITIAL_LENGTH) {
-    const open = group.filter(({ memberId }) => !settled.has(memberId));
-    const labelOf = (parsed: ParsedName) =>
-      parsed.second === null ? parsed.first : withSecond(parsed, parsed.second, length);
-    const labels = open.map(labelOf);
-    open.forEach((parsed, index) => {
-      const label = labels[index] ?? "";
-      const repeated = labels.indexOf(label) !== labels.lastIndexOf(label);
-      if (!repeated || parsed.second === null || length === longest) {
-        settled.set(parsed.memberId, label);
-      }
-    });
-  }
-  return group.map(({ memberId, first }) => [memberId, settled.get(memberId) ?? first] as const);
+function disambiguate(group: readonly ParsedName[]): readonly Entry[] {
+  const longest = Math.max(...group.map(({ second }) => lettersOf(second ?? "").length));
+  const resolve = (open: readonly ParsedName[], length: number): readonly Entry[] => {
+    const labelled = open.map((parsed) => ({ parsed, label: labelAt(parsed, length) }));
+    const isFinal = ({ parsed, label }: (typeof labelled)[number]) =>
+      parsed.second === null ||
+      length >= longest ||
+      labelled.filter((other) => other.label === label).length === ONE;
+    const done = labelled
+      .filter(isFinal)
+      .map(({ parsed, label }) => [parsed.memberId, label] as const);
+    const rest = labelled.filter((item) => !isFinal(item)).map(({ parsed }) => parsed);
+    return rest.length === 0 ? done : [...done, ...resolve(rest, length + ONE)];
+  };
+  return resolve(group, ONE);
 }
 
 /**
@@ -71,16 +80,13 @@ function disambiguate(group: readonly ParsedName[]): readonly (readonly [MemberI
  * always give the same names, whatever the order. The screen reader gets the whole name elsewhere.
  */
 export function displayNamesOf(members: readonly NamedMember[]): DisplayNames {
-  const groups = new Map<string, ParsedName[]>();
-  for (const member of members) {
-    const parsed = parse(member);
-    const key = firstNameKey(parsed);
-    groups.set(key, [...(groups.get(key) ?? []), parsed]);
-  }
-  const entries = [...groups.values()].flatMap((group) =>
-    group.length === 1
+  const parsed = members.map(parse);
+  const keys = [...new Set(parsed.map(firstNameKey))];
+  const entries = keys.flatMap((key) => {
+    const group = parsed.filter((member) => firstNameKey(member) === key);
+    return group.length === ONE
       ? group.map(({ memberId, first }) => [memberId, first] as const)
-      : disambiguate(group),
-  );
+      : disambiguate(group);
+  });
   return new Map(entries);
 }

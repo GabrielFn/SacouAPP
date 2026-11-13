@@ -1,4 +1,5 @@
 import { Stack, useGlobalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 import { useCourtFeedback } from "../../../features/court/hooks/use-court-feedback";
 import { useKeepAwakeWhileMounted } from "../../../features/court/hooks/use-keep-awake-while-mounted";
@@ -24,6 +25,7 @@ export default function CourtLayout() {
   return (
     <ThemeProvider name={themeNameOf(parseCourtTheme(params.theme))}>
       <CourtSessionProvider key={params.courtSessionId} courtSessionId={params.courtSessionId}>
+        <StatusBar hidden />
         <CourtDeviceEffects />
         <Stack screenOptions={{ headerShown: false, gestureEnabled: false }} />
       </CourtSessionProvider>
