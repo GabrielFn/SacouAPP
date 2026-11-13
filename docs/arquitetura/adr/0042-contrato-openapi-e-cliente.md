@@ -36,13 +36,13 @@ Atalho local: `pnpm api:contract` (teste em modo de escrita + gerador). `pnpm ap
 
 **D5 · Portas e adaptadores** (`frontend.md`, regra 3). Interfaces em `apps/mobile/src/services/api/` e `src/services/query/`; implementações em `src/adapters/`, cada uma com o seu falso.
 
-| Porta                                                                              | Real                                                                                                            | Falsa                                                                                                 |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `SacouApi` (15 métodos, tipos de `components["schemas"]`, `Promise<ApiResult<T>>`) | `http-sacou-api.ts` sobre `openapi-fetch`                                                                       | `fake-sacou-api.ts` (respostas programáveis, registro das chamadas)                                   |
-| `IdTokenProvider`                                                                  | E4.3 (Firebase)                                                                                                 | `fake-id-token-provider.ts`: token fixo só com `__DEV__`; no release, `null`, e o app não chama a API |
-| `HttpTransport`                                                                    | `fetch-http-transport.ts` (o único `fetch` do app)                                                              | `fake-http-transport.ts` (fila de respostas)                                                          |
-| `NetworkStatus`                                                                    | `netinfo-network-status.ts` (`@react-native-community/netinfo` `12.0.1`, a do `bundledNativeModules` do SDK 58) | `fake-network-status.ts` (interruptor)                                                                |
-| `KeyValueStore`                                                                    | `sqlite-key-value-store.ts` + `expo-cache-store.ts` (`sacou-cache.db`)                                          | `memory-key-value-store.ts`                                                                           |
+| Porta | Real | Falsa |
+|---|---|---|
+| `SacouApi` (15 métodos, tipos de `components["schemas"]`, `Promise<ApiResult<T>>`) | `http-sacou-api.ts` sobre `openapi-fetch` | `fake-sacou-api.ts` (respostas programáveis, registro das chamadas) |
+| `IdTokenProvider` | E4.3 (Firebase) | `fake-id-token-provider.ts`: token fixo só com `__DEV__`; no release, `null`, e o app não chama a API |
+| `HttpTransport` | `fetch-http-transport.ts` (o único `fetch` do app) | `fake-http-transport.ts` (fila de respostas) |
+| `NetworkStatus` | `netinfo-network-status.ts` (`@react-native-community/netinfo` `12.0.1`, a do `bundledNativeModules` do SDK 58) | `fake-network-status.ts` (interruptor) |
+| `KeyValueStore` | `sqlite-key-value-store.ts` + `expo-cache-store.ts` (`sacou-cache.db`) | `memory-key-value-store.ts` |
 
 O ESLint passa a reprovar o global `fetch` e o import `openapi-fetch` fora de `src/adapters/` (o NetInfo já caía na regra de `@react-native-community/`), com casos no `lint:regression`.
 

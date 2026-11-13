@@ -12,17 +12,17 @@ O motor da partida está pronto (M2), mas o restante do MVP ainda tem muitas tar
 
 Voltam depois do piloto, com dados reais de uso:
 
-| O que sai                                                       | Tarefas                                                                                                        |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Texto do resumo com IA e story                                  | E3.13 e parte da E4.12. O Resumo da rodada sem IA (tela 12) fica no piloto                                     |
-| Foto da cartinha: upload, denúncia e recorte nativo             | E3.14, E4.14. A cartinha do piloto usa avatar                                                                  |
-| ~~Rating Glicko-2~~                                             | Trocado pelo OpenSkill, calculado e escondido no piloto ([ADR 0047](0047-nota-do-admin-e-rating-openskill.md)) |
-| Placar ao vivo com SignalR                                      | Parte da E3.7 e da E4.11. Fica a sincronização                                                                 |
-| Planos e paywall                                                | E3.15, E4.15. O Pro já é liberado no piloto                                                                    |
-| Pix com "já paguei" e confirmação                               | E3.10                                                                                                          |
-| Reivindicação da conta do convidado                             | Parte da E3.5. O convidado entra como avulso                                                                   |
-| Links que abrem o app                                           | E4.16. O link da rodada abre a página web, que já resolve o VOU                                                |
-| Entrega do placar por QR, código de uso único e token sem conta | Parte da E3.8, trocada pela decisão 2                                                                          |
+| O que sai | Tarefas |
+|---|---|
+| Texto do resumo com IA e story | E3.13 e parte da E4.12. O Resumo da rodada sem IA (tela 12) fica no piloto |
+| Foto da cartinha: upload, denúncia e recorte nativo | E3.14, E4.14. A cartinha do piloto usa avatar |
+| ~~Rating Glicko-2~~ | Trocado pelo OpenSkill, calculado e escondido no piloto ([ADR 0047](0047-nota-do-admin-e-rating-openskill.md)) |
+| Placar ao vivo com SignalR | Parte da E3.7 e da E4.11. Fica a sincronização |
+| Planos e paywall | E3.15, E4.15. O Pro já é liberado no piloto |
+| Pix com "já paguei" e confirmação | E3.10 |
+| Reivindicação da conta do convidado | Parte da E3.5. O convidado entra como avulso |
+| Links que abrem o app | E4.16. O link da rodada abre a página web, que já resolve o VOU |
+| Entrega do placar por QR, código de uso único e token sem conta | Parte da E3.8, trocada pela decisão 2 |
 
 Serviços adiados junto: RevenueCat e PostHog. O R2 fica só para os backups (E5.3). A métrica do portão do piloto (E7.2) é contada direto no banco.
 
@@ -31,10 +31,10 @@ Serviços adiados junto: RevenueCat e PostHog. O R2 fica só para os backups (E5
 Substitui "Placar por QR" em `decisoes.md:21`.
 
 - Quem tem o papel Placar (ou Admin, ou Co-admin) pode abrir a quadra e marcar a qualquer momento, sem pedir a ninguém.
-- Se outro celular estiver marcando, o app pede confirmação: _"Outro celular está marcando esta quadra. Último ponto recebido há 4 min: 12 × 10. Se você assumir, ele para de marcar. Continuar?"_ O texto mostra o tempo e o placar do último evento que o servidor recebeu, para quem assume saber se precisa conferir o placar.
-- Ao confirmar, o servidor passa a escrita do stream `CourtSession` para esse celular. O anterior recebe _"Fulano assumiu o placar"_ e fica só olhando.
+- Se outro celular estiver marcando, o app pede confirmação: *"Outro celular está marcando esta quadra. Último ponto recebido há 4 min: 12 × 10. Se você assumir, ele para de marcar. Continuar?"* O texto mostra o tempo e o placar do último evento que o servidor recebeu, para quem assume saber se precisa conferir o placar.
+- Ao confirmar, o servidor passa a escrita do stream `CourtSession` para esse celular. O anterior recebe *"Fulano assumiu o placar"* e fica só olhando.
 - **Continua valendo "um celular escreve por vez".** Dois celulares escrevendo juntos duplicariam pontos (IDs gerados em cada aparelho) e desmontariam rotação e fila. Juntar dois logs da mesma partida automaticamente fica fora do MVP.
-- **Celular antigo que estava sem internet:** quando ele sincroniza, o servidor recusa todos os eventos ainda não enviados a partir da troca, e o app mostra _"X pontos não entraram, porque Fulano assumiu"_. Guardar esses pontos para o admin revisar fica em `docs/ideias.md`.
+- **Celular antigo que estava sem internet:** quando ele sincroniza, o servidor recusa todos os eventos ainda não enviados a partir da troca, e o app mostra *"X pontos não entraram, porque Fulano assumiu"*. Guardar esses pontos para o admin revisar fica em `docs/ideias.md`.
 - Assumir exige internet no celular que assume. Sem sinal, a quadra continua no celular apoiado.
 
 ### 3. Sincronização a cada ponto
@@ -43,7 +43,7 @@ Com sinal, o app envia cada evento logo depois de gravá-lo no SQLite (E4.11), e
 
 ### 4. Modo quadra: paisagem e aviso de bateria
 
-A paisagem continua (E4.17), porque o celular fica apoiado (desenhada e travada no [ADR 0052](0052-modo-quadra-em-paisagem.md)). O aviso de bateria abaixo de 20% continua, mas sugere ligar no carregador ou na power bank em vez de entregar o placar (muda `produto.md:139`).
+A paisagem continua (E4.17), porque o celular fica apoiado. O aviso de bateria abaixo de 20% continua, mas sugere ligar no carregador ou na power bank em vez de entregar o placar (muda `produto.md:139`).
 
 > **Ajuste (11/11/2026, Gabriel):** o Resumo da rodada sem IA voltou para o piloto. Sem ele, o jogador só via os números depois do jogo na tela de fim de partida e no perfil. A E4.12 mostra saldo, vitórias, sequência e MVP do dia, a partir da E3.9. Ficam fora só o texto da IA e o story.
 

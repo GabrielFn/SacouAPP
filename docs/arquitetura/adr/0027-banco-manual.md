@@ -30,11 +30,11 @@
 
 **A E2.10 porta o parser e o aplicador de `LineupChanged`, `isRosterPartition` e o campo `bench` do `MatchStarted`, e roda os golden pelo caminho. `changeLineup` e `substitutePlayer` ficam só em TS.**
 
-| Arquivo em `packages/match-engine/golden/` | O que tem                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bench-events.json`                        | 48 casos no formato de `event-log.json`: tabelas de 7 e 8 jogadores, banco nos dois times, set inteiro, rotação desligada, virada de set, `RevertedTo`, escritores intercalados e rejeições. Campos opcionais `servingPlayer` e `substitutions`, que o C# pode ignorar: o primeiro confere `getCurrentServingPlayer`, e o segundo confere o comando em TS contra o evento gravado |
-| `score-payloads.json`                      | Acrescenta os casos de `LineupChanged` e os de `bench` no `MatchStarted`, com `field` e ordem de validação                                                                                                                                                                                                                                                                        |
-| `rotation-events.json`                     | Migrado só com o acréscimo de `bench`                                                                                                                                                                                                                                                                                                                                             |
+| Arquivo em `packages/match-engine/golden/` | O que tem |
+|---|---|
+| `bench-events.json` | 48 casos no formato de `event-log.json`: tabelas de 7 e 8 jogadores, banco nos dois times, set inteiro, rotação desligada, virada de set, `RevertedTo`, escritores intercalados e rejeições. Campos opcionais `servingPlayer` e `substitutions`, que o C# pode ignorar: o primeiro confere `getCurrentServingPlayer`, e o segundo confere o comando em TS contra o evento gravado |
+| `score-payloads.json` | Acrescenta os casos de `LineupChanged` e os de `bench` no `MatchStarted`, com `field` e ordem de validação |
+| `rotation-events.json` | Migrado só com o acréscimo de `bench` |
 
 Os esperados são decididos à mão, a partir das tabelas do plano, em um script descartável fora do repositório, que não importa o motor. Os casos `d4-*` usam um `initialState` em que o estado saiu de `teams`, porque só assim se distingue conferir `teams` de conferir o estado. Esse estado é inalcançável por replay: a E2.10 carrega o `initialState` do golden sem validar a partição.
 

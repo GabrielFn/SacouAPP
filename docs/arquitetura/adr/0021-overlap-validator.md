@@ -10,10 +10,10 @@
 
 **O que vale em cada caso:**
 
-| Modo           | Recebendo  | Sacando                                               |
-| -------------- | ---------- | ----------------------------------------------------- |
-| `fivb-2025-28` | 7 relações | Nenhuma                                               |
-| `classic`      | 7 relações | 5: o sacador fica fora (`1-behind-2` e `6-left-of-1`) |
+| Modo | Recebendo | Sacando |
+|---|---|---|
+| `fivb-2025-28` | 7 relações | Nenhuma |
+| `classic` | 7 relações | 5: o sacador fica fora (`1-behind-2` e `6-left-of-1`) |
 
 **Modo obrigatório na chamada.** `DEFAULT_OVERLAP_RULE_MODE` existe para a configuração herdada (E3.3), mas o validador não o aplica: configuração esquecida não vira padrão silencioso.
 

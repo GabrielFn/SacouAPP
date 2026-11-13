@@ -60,19 +60,19 @@ O backlog pede varredura de segredos, de dependências vulneráveis e análise e
 
 Valores fictícios, nunca registrados aqui. PRs fechados sem merge, branches apagadas. Os PRs tiveram como base a branch da tarefa, para o diff mostrar só a sonda.
 
-| Teste          | Onde                    | Resultado                                                                                                                                                                                                                  |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1, T2, T4, T5 | PR #9, run 41156493924  | `secrets` e `ci-ok` em `fail`, `verify` pulado. Três achados, com arquivo, commit e regra no log: `sacou-ci-probe`, inclusive na linha com `gitleaks:allow`, e `generic-api-key`. Busca pelos valores no log baixado: nada |
-| T3             | PR #9, run 41156561140  | Valores fora da árvore: `secrets` e `ci-ok` em `fail` pelo histórico. O diff vazio rodou o `verify`, que passou com as auditorias, em Ubuntu                                                                               |
-| T6, T8         | PR #11, run 41156820987 | Checksum errado: `sha256sum` acusa `FAILED`, `Install gitleaks` falha e o passo de varredura fica `skipped`. `lodash` 4.17.20: `Audit npm dependencies` falha; `Audit NuGet` fica `skipped`. `ci-ok` em `fail`             |
-| T9             | PR #12, run 41156886564 | `Newtonsoft.Json` 12.0.3: `NU1903` como erro em `Lint API`, antes do gate; `secrets` verde, `ci-ok` em `fail`                                                                                                              |
-| T7, T14 (PR)   | PR #10, run 41156576221 | Só docs, com a branch da sonda ainda existente: `secrets` e `ci-ok` em `pass`, `verify` pulado                                                                                                                             |
-| T10            | Local                   | Mesmo pacote em projeto fora do repositório: `dotnet list` sai com 0 e o script, com 1. No repositório, o `NU1903` já derruba a restauração, e `dotnet list` sai com 1                                                     |
-| T11            | `pnpm test:tooling`     | Casos do plano e mais: severidade desconhecida, transitivo, exceção de outro advisory, lista de exceções inválida                                                                                                          |
-| T12            | Local                   | `pnpm audit --registry` inalcançável: código 1                                                                                                                                                                             |
-| T13            | Local, sem PR           | `MD5.Create()` reprova o `dotnet build` com `CA5351`; `eval`, `new Function` e `setTimeout` com texto em `lint:regression`, que roda na CI                                                                                 |
-| T15            | Local, sem execução     | O script real do `ci-ok`, lido do `ci.yml`, sai com 1 para `secrets` em `cancelled`, `failure`, `skipped` ou vazio. Não é prova em execução cancelada no GitHub                                                            |
-| T14 (`push`)   | Run 41341746013         | `secrets` e `ci-ok` verdes na execução de `push` da `main` em `6eb61cf`                                                                                                                                                    |
+| Teste | Onde | Resultado |
+|---|---|---|
+| T1, T2, T4, T5 | PR #9, run 41156493924 | `secrets` e `ci-ok` em `fail`, `verify` pulado. Três achados, com arquivo, commit e regra no log: `sacou-ci-probe`, inclusive na linha com `gitleaks:allow`, e `generic-api-key`. Busca pelos valores no log baixado: nada |
+| T3 | PR #9, run 41156561140 | Valores fora da árvore: `secrets` e `ci-ok` em `fail` pelo histórico. O diff vazio rodou o `verify`, que passou com as auditorias, em Ubuntu |
+| T6, T8 | PR #11, run 41156820987 | Checksum errado: `sha256sum` acusa `FAILED`, `Install gitleaks` falha e o passo de varredura fica `skipped`. `lodash` 4.17.20: `Audit npm dependencies` falha; `Audit NuGet` fica `skipped`. `ci-ok` em `fail` |
+| T9 | PR #12, run 41156886564 | `Newtonsoft.Json` 12.0.3: `NU1903` como erro em `Lint API`, antes do gate; `secrets` verde, `ci-ok` em `fail` |
+| T7, T14 (PR) | PR #10, run 41156576221 | Só docs, com a branch da sonda ainda existente: `secrets` e `ci-ok` em `pass`, `verify` pulado |
+| T10 | Local | Mesmo pacote em projeto fora do repositório: `dotnet list` sai com 0 e o script, com 1. No repositório, o `NU1903` já derruba a restauração, e `dotnet list` sai com 1 |
+| T11 | `pnpm test:tooling` | Casos do plano e mais: severidade desconhecida, transitivo, exceção de outro advisory, lista de exceções inválida |
+| T12 | Local | `pnpm audit --registry` inalcançável: código 1 |
+| T13 | Local, sem PR | `MD5.Create()` reprova o `dotnet build` com `CA5351`; `eval`, `new Function` e `setTimeout` com texto em `lint:regression`, que roda na CI |
+| T15 | Local, sem execução | O script real do `ci-ok`, lido do `ci.yml`, sai com 1 para `secrets` em `cancelled`, `failure`, `skipped` ou vazio. Não é prova em execução cancelada no GitHub |
+| T14 (`push`) | Run 41341746013 | `secrets` e `ci-ok` verdes na execução de `push` da `main` em `6eb61cf` |
 
 Os runs de #11 e #12 terminaram antes do fechamento dos PRs, e o resultado foi lido depois nos logs, sem nova sonda. Em T8, o `ci-ok` reprovaria também por causa do `secrets`; o caminho `verify` em `failure` isolado está em T9.
 

@@ -11,11 +11,11 @@ O nível autodeclarado era a semente do Glicko-2. Com o Glicko-2 fora do piloto 
 Comparação feita com a biblioteca `openskill` (Python), num modelo de brinquedo: 24 jogadores com força real conhecida, 14 presentes por rodada, 5 partidas de 25 pontos por rodada, times sorteados, e a chance de vencer o rali dada pela diferença de força média dos times. Métrica: correlação de Spearman entre o rating e a força real, na média de 120 a 200 simulações. O nível declarado tem ruído e 30% dos jogadores se superestimam.
 
 | Rodadas | Por partida | Por rali (β × 10) | Só o nível declarado |
-| ------- | ----------- | ----------------- | -------------------- |
-| 1       | 0,70        | 0,70              | 0,70                 |
-| 5       | 0,75        | 0,74              | 0,70                 |
-| 10      | 0,79        | 0,79              | 0,70                 |
-| 20      | 0,84        | 0,82              | 0,70                 |
+|---|---|---|---|
+| 1 | 0,70 | 0,70 | 0,70 |
+| 5 | 0,75 | 0,74 | 0,70 |
+| 10 | 0,79 | 0,79 | 0,70 |
+| 20 | 0,84 | 0,82 | 0,70 |
 
 Os valores acima partem do nível declarado. Começando com todos iguais, o rating só alcança o nível declarado perto de 10 rodadas. Atualizar por rali com o β padrão piora (0,61 em 20 rodadas), porque o σ cai rápido demais com ralis ruidosos; com β calibrado, só empata. O placar como peso não muda nada com dois times. **Conclusão:** atualizar por partida, e o que mais pesa no início é um bom ponto de partida.
 

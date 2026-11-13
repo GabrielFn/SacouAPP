@@ -6,12 +6,12 @@
 
 **Exceção consciente e estreita a `decisoes.md:26` e ao [ADR 0009](0009-court-session-event-sourcing.md): o side-out é derivado do estado.** Não há evento próprio nem campo novo no `PointScored`, cujo payload continua `{ matchId, setNumber, team }`. Aceita pelo orquestrador; citar no relatório do M2. Aquela regra existe para não manter dois motores (`revisao-mvp.md:121`), e aqui o porte são duas funções de uma linha. O `PointScored` já era a exceção aceita, porque o aplicador soma 1 (ADR 0023). Vale gravar quando a escolha é de alguém ou o resultado não sai do estado: `firstServer`, `setterZones` do set seguinte e as correções da E2.7.
 
-| Opção                                               | Com dois escritores intercalados ou evento atrasado (`eventos.md`)                                                                                                                                                                     | Veredito      |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| Evento próprio `SideOut`, depois do ponto           | Dois celulares veem o mesmo rali e os dois emitem: ou gira duas vezes, ou o segundo é rejeitado e trava o stream. Gravar só um deixa o saque errado. O desfazer pode cair entre o ponto e o giro, e o log dobra nos ralis com side-out | Recusada      |
-| `PointScored` com zona gravada, **com** conferência | A intercalação vira `event-rejected` e trava o stream                                                                                                                                                                                  | Recusada      |
-| `PointScored` com zona gravada, **sem** conferência | Não trava, mas o resultado é errado: `b` gravado com "sem side-out" depois de `a` retomar o saque deixa quem venceu recebendo, sem o saque e sem girar. Um evento forjado escolhe a rotação                                            | Recusada      |
-| **Derivar do estado**                               | Cada ponto é julgado no estado da ordem canônica: sem rejeição, determinístico e coerente. Ninguém forja rotação marcando ponto                                                                                                        | **Escolhida** |
+| Opção | Com dois escritores intercalados ou evento atrasado (`eventos.md`) | Veredito |
+|---|---|---|
+| Evento próprio `SideOut`, depois do ponto | Dois celulares veem o mesmo rali e os dois emitem: ou gira duas vezes, ou o segundo é rejeitado e trava o stream. Gravar só um deixa o saque errado. O desfazer pode cair entre o ponto e o giro, e o log dobra nos ralis com side-out | Recusada |
+| `PointScored` com zona gravada, **com** conferência | A intercalação vira `event-rejected` e trava o stream | Recusada |
+| `PointScored` com zona gravada, **sem** conferência | Não trava, mas o resultado é errado: `b` gravado com "sem side-out" depois de `a` retomar o saque deixa quem venceu recebendo, sem o saque e sem girar. Um evento forjado escolhe a rotação | Recusada |
+| **Derivar do estado** | Cada ponto é julgado no estado da ordem canônica: sem rejeição, determinístico e coerente. Ninguém forja rotação marcando ponto | **Escolhida** |
 
 **Regra derivada.** `team !== currentSet.servingTeam` é side-out: `servingTeam` passa a `team`, e só `rotations[team].setterZone` avança uma casa. Com `team === servingTeam`, só o placar muda.
 
@@ -42,10 +42,10 @@
 
 **A E2.10 porta parsers e aplicadores, mais as funções de `rotation-rules.ts`: `nextSetterZone`, `isSideOut`, `getNextSetFirstServer`, `getLineupBySlot` e `getServingPlayer`. `getCurrentServingPlayer` serve às telas e fica só em TS. Roda `rotation-rules.json` e `rotation-events.json` pelo caminho, além dos golden do ADR 0023.** Comandos ficam só em TS, salvo decisão da E3.7.
 
-| Arquivo em `packages/match-engine/golden/` | Formato                                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rotation-rules.json`                      | `{ id, rule: "zone" \| "side-out" \| "next-first-server", input, expected }`. `zone`: `input { lineup, setterZone }`, `expected { nextSetterZone, lineupBySlot, servingPlayer }`. `side-out`: `input { servingTeam, pointWinner }`, `expected { isSideOut }`. `next-first-server`: `input { firstServer }`, `expected { firstServer }` |
-| `rotation-events.json`                     | Mesmo formato de `event-log.json`                                                                                                                                                                                                                                                                                                      |
+| Arquivo em `packages/match-engine/golden/` | Formato |
+|---|---|
+| `rotation-rules.json` | `{ id, rule: "zone" \| "side-out" \| "next-first-server", input, expected }`. `zone`: `input { lineup, setterZone }`, `expected { nextSetterZone, lineupBySlot, servingPlayer }`. `side-out`: `input { servingTeam, pointWinner }`, `expected { isSideOut }`. `next-first-server`: `input { firstServer }`, `expected { firstServer }` |
+| `rotation-events.json` | Mesmo formato de `event-log.json` |
 
 Os esperados são decididos à mão, sem o motor. Um script descartável, fora do repositório e sem importar o motor, só expandiu a notação curta.
 

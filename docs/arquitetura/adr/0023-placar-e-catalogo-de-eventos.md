@@ -34,11 +34,11 @@
 
 **A E2.10 porta parsers, aplicadores e as funções de `scoring-rules.ts` (`targetPointsForSet`, `setsToWin`, `getSetWinner`, `getSetPointTeams`, `getMatchWinner`), e roda os três golden pelo caminho.** Sem isso, o C# não prova nenhum fim de set, porque o aplicador não calcula regra. Os comandos ficam só em TS, salvo decisão da E3.7.
 
-| Arquivo em `packages/match-engine/golden/` | Formato                                                                                                                      |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `score-rules.json`                         | `{ id, scoring, setNumber, score, setsWon?, expected: { targetPoints, setsToWin, setWinner, setPointTeams, matchWinner? } }` |
-| `score-payloads.json`                      | `{ id, type, payload, expected: { ok: true } \| { ok: false, field } }`                                                      |
-| `score-events.json`                        | Mesmo formato de `event-log.json`                                                                                            |
+| Arquivo em `packages/match-engine/golden/` | Formato |
+|---|---|
+| `score-rules.json` | `{ id, scoring, setNumber, score, setsWon?, expected: { targetPoints, setsToWin, setWinner, setPointTeams, matchWinner? } }` |
+| `score-payloads.json` | `{ id, type, payload, expected: { ok: true } \| { ok: false, field } }` |
+| `score-events.json` | Mesmo formato de `event-log.json` |
 
 Os esperados são decididos à mão, sem o motor, e os arquivos não são gerados pelo código testado. Um script descartável, fora do repositório e sem importar o motor, só expandiu a notação curta em envelopes e casos.
 
