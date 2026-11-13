@@ -59,7 +59,12 @@ export function CourtLandscape({
             onPoint("a");
           }}
         />
-        <NetColumn canUndo={model.canUndo} onUndo={onUndo} onCorrect={onCorrect} />
+        <NetColumn
+          width={layout.netWidth}
+          canUndo={model.canUndo}
+          onUndo={onUndo}
+          onCorrect={onCorrect}
+        />
         <TeamZone
           panel={model.teams.b}
           end="right"

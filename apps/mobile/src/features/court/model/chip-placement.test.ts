@@ -7,7 +7,14 @@ import { placeChips, type ChipSpec, type Rect } from "./chip-placement";
 import type { CourtEnd } from "./court-geometry";
 import { computeCourtLayout, type CourtLayout } from "./court-layout";
 import type { PlayerChipModel, TeamPanelModel } from "./court-screen.types";
-import { layoutTeamChips, placementFrame, type DrawnChip, type TeamChipsInput } from "./team-chips";
+import { CHIP_ZONE_MARGIN } from "../court.data";
+import {
+  layoutTeamChips,
+  placementFrame,
+  squareOrigin,
+  type DrawnChip,
+  type TeamChipsInput,
+} from "./team-chips";
 
 type System = (typeof FORMATION_SYSTEMS)[number];
 
@@ -25,6 +32,7 @@ const PHASES: readonly FormationPhase[] = ["serving", "receiving"];
 const LANDSCAPE_ENDS: readonly CourtEnd[] = ["left", "right"];
 const PORTRAIT_ENDS: readonly CourtEnd[] = ["top", "bottom"];
 const EPSILON = 0.01;
+const HEAVY_TEST_MS = 60_000;
 
 interface Phone {
   readonly width: number;
@@ -161,15 +169,23 @@ function checkAll(phones: readonly Phone[], ends: readonly CourtEnd[]): readonly
 }
 
 describe("chips of every formation in landscape (both teams, three widths and a notch)", () => {
-  test("none covers another, crosses the net, leaves the zone or covers the column", () => {
-    expect(checkAll(LANDSCAPE_PHONES, LANDSCAPE_ENDS)).toEqual([]);
-  });
+  test(
+    "none covers another, crosses the net, leaves the zone or covers the column",
+    () => {
+      expect(checkAll(LANDSCAPE_PHONES, LANDSCAPE_ENDS)).toEqual([]);
+    },
+    HEAVY_TEST_MS,
+  );
 });
 
 describe("chips of every formation in the portrait fallback", () => {
-  test("none covers another, crosses the net, leaves the zone or covers the column", () => {
-    expect(checkAll(PORTRAIT_PHONES, PORTRAIT_ENDS)).toEqual([]);
-  });
+  test(
+    "none covers another, crosses the net, leaves the zone or covers the column",
+    () => {
+      expect(checkAll(PORTRAIT_PHONES, PORTRAIT_ENDS)).toEqual([]);
+    },
+    HEAVY_TEST_MS,
+  );
 
   test("the chip that was cut at the edge (a receiving team, long names) stays inside the zone", () => {
     const phone = PORTRAIT_PHONES[1] as Phone;
@@ -244,5 +260,79 @@ describe("two chips on the same point and the order of the work", () => {
     expect(first && second && overlaps(first, second)).toBe(false);
     expect(placeChips(frame, [...twins].reverse())).toEqual(placed);
     expect(placeChips(frame, twins)).toEqual(placed);
+  });
+});
+
+describe("a team with a libero (seven chips and the badge)", () => {
+  test.each(LANDSCAPE_PHONES)(
+    "none covers another or leaves the zone at $width x $height",
+    (phone) => {
+      const base = panelOf({
+        names: SHORT_NAMES,
+        phase: "receiving",
+        system: "5x1",
+        setterZone: 1,
+        hasSetPoint: false,
+      });
+      const reference = base.chips[4] as PlayerChipModel;
+      const libero: PlayerChipModel = {
+        ...reference,
+        memberId: "m7",
+        name: "Duda",
+        displayName: "Duda",
+        point: { x: 50, y: 92 },
+        isLibero: true,
+        isSetter: false,
+      };
+      const panel = { ...base, chips: [...base.chips, libero] };
+      for (const end of LANDSCAPE_ENDS) {
+        expect(
+          problemsOf({ panel, layout: layoutOf(phone), tokens: tokensOf(phone), end }),
+        ).toEqual([]);
+      }
+    },
+  );
+});
+
+describe("the server stays whole inside the zone", () => {
+  test.each(LANDSCAPE_PHONES)(
+    "with the margin kept from the bar and the queue at $width x $height",
+    (phone) => {
+      for (const end of LANDSCAPE_ENDS) {
+        for (const hasSetPoint of [false, true]) {
+          const panel = panelOf({
+            names: SHORT_NAMES,
+            phase: "serving",
+            system: "5x1",
+            setterZone: 1,
+            hasSetPoint,
+          });
+          const input = { panel, layout: layoutOf(phone), tokens: tokensOf(phone), end } as const;
+          const server = layoutTeamChips(input).find(({ chip }) => chip.isServer) as DrawnChip;
+          const box = boxOf(server, input.tokens.court.sizes.chip);
+          const zone = placementFrame(input).bounds;
+          expect(box.top).toBeGreaterThanOrEqual(zone.top - EPSILON);
+          expect(box.bottom).toBeLessThanOrEqual(zone.bottom + EPSILON);
+          expect(box.left).toBeGreaterThanOrEqual(zone.left - EPSILON);
+          expect(box.right).toBeLessThanOrEqual(zone.right + EPSILON);
+        }
+      }
+    },
+  );
+
+  test("the zone bounds keep a margin from the edges of the zone", () => {
+    const phone = LANDSCAPE_PHONES[1] as Phone;
+    const layout = layoutOf(phone);
+    const panel = panelOf({
+      names: SHORT_NAMES,
+      phase: "serving",
+      system: "5x1",
+      setterZone: 1,
+      hasSetPoint: false,
+    });
+    const frame = placementFrame({ panel, layout, tokens: tokensOf(phone), end: "left" });
+    const origin = squareOrigin(layout, "left");
+    expect(frame.bounds.top).toBeCloseTo(-origin.y + CHIP_ZONE_MARGIN, 3);
+    expect(frame.bounds.bottom).toBeCloseTo(layout.zoneHeight - origin.y - CHIP_ZONE_MARGIN, 3);
   });
 });

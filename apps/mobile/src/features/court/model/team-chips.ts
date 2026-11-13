@@ -3,6 +3,8 @@ import {
   CHIP_CHAR_WIDTH_EM,
   CHIP_MAX_WIDTH_RATIOS,
   CHIP_NUMBER_DIGITS,
+  CHIP_SAFE_NAME_LETTERS,
+  CHIP_ZONE_MARGIN,
   COLUMN_LINE_HEIGHT_EM,
   HALF,
 } from "../court.data";
@@ -21,6 +23,8 @@ export interface DrawnChip {
   readonly x: number;
   readonly y: number;
   readonly width: number;
+  /** The text of the name as drawn: the display name, or shortened to end in "…" when it does not fit. */
+  readonly label: string;
 }
 
 export interface TeamChipsInput {
@@ -34,28 +38,93 @@ function hasBadge(chip: PlayerChipModel): boolean {
   return chip.isSetter || chip.isLibero;
 }
 
-/** The widest a chip gets, from the side of its square: longer names end in "…". */
-export function chipMaxWidth(layout: CourtLayout): number {
-  return layout.halfCourtSide * CHIP_MAX_WIDTH_RATIOS[layout.kind];
+/** What a chip is made of besides the name: padding, borders, the ball of the server, the gap and the number. */
+function chipAround(tokens: ScaledTokens, isServer: boolean): number {
+  const { sizes, spacing, fontSizes } = tokens.court;
+  const frame = (spacing.chipPadding + tokens.borderWidths.thick) * BOTH_SIDES;
+  const number = CHIP_NUMBER_DIGITS * fontSizes.chipNumber * CHIP_CHAR_WIDTH_EM;
+  const ball = isServer ? sizes.ballIcon + tokens.spacing.xs : 0;
+  return frame + ball + tokens.spacing.xs + number;
+}
+
+/**
+ * The widest a chip gets, from the side of its square: longer names end in "…". It never falls
+ * below the room of a name of `CHIP_SAFE_NAME_LETTERS` letters on the chip of the server.
+ */
+export function chipMaxWidth(layout: CourtLayout, tokens: ScaledTokens): number {
+  const safe =
+    chipAround(tokens, true) +
+    CHIP_SAFE_NAME_LETTERS * tokens.fontSizes.caption * CHIP_CHAR_WIDTH_EM;
+  return Math.max(layout.halfCourtSide * CHIP_MAX_WIDTH_RATIOS[layout.kind], safe);
+}
+
+const ELLIPSIS = "…";
+const ABBREVIATION = /^(.+) (\p{L}+\.?)$/u;
+
+/** The font size of the name on a chip: the one the chip draws and the one its width is worked out with. */
+export function chipNameFontSize(tokens: ScaledTokens): number {
+  return tokens.fontSizes.caption;
+}
+
+function lettersIn(text: string): number {
+  return Array.from(text).length;
+}
+
+/** The width of a text at the average letter width of the name font; the chip draws with this same measure. */
+export function chipTextWidth(text: string, tokens: ScaledTokens): number {
+  return lettersIn(text) * chipNameFontSize(tokens) * CHIP_CHAR_WIDTH_EM;
+}
+
+function shortened(text: string, letters: number): string {
+  return `${Array.from(text).slice(0, Math.max(1, letters)).join("")}${ELLIPSIS}`;
+}
+
+/**
+ * The name as drawn within `room` pixels: whole when it fits; otherwise "…" ends it. An abbreviation
+ * ("Ana C.") keeps its last word whole and shortens the first name before it, never the initial.
+ */
+export function fitName(name: string, room: number, tokens: ScaledTokens): string {
+  if (chipTextWidth(name, tokens) <= room) {
+    return name;
+  }
+  const letterWidth = chipNameFontSize(tokens) * CHIP_CHAR_WIDTH_EM;
+  const letters = Math.floor(room / letterWidth);
+  const parts = ABBREVIATION.exec(name);
+  if (parts === null) {
+    return shortened(name, letters - lettersIn(ELLIPSIS));
+  }
+  const [, first = "", last = ""] = parts;
+  const keep = letters - lettersIn(ELLIPSIS) - lettersIn(last) - lettersIn(" ");
+  return `${shortened(first, keep)} ${last}`;
+}
+
+interface ChipSizes {
+  readonly width: number;
+  readonly label: string;
 }
 
 /**
  * The width of a chip without measuring the text after it is drawn: padding, borders, the name at
- * an average letter width, the number of the position and the ball of the server, never more than
- * `chipMaxWidth`. The chip is drawn with this width, so what is placed is what is seen.
+ * an average letter width (a little wide, so the font never cuts it), the number of the position and
+ * the ball of the server, never more than `chipMaxWidth`. A name of up to eight letters always fits.
+ * The chip is drawn with this width and this label, so what is placed is what is seen.
  */
+export function chipSizes(
+  chip: PlayerChipModel,
+  input: Pick<TeamChipsInput, "layout" | "tokens">,
+): ChipSizes {
+  const { tokens, layout } = input;
+  const around = chipAround(tokens, chip.isServer);
+  const room = chipMaxWidth(layout, tokens) - around;
+  const label = fitName(chip.displayName, room, tokens);
+  return { width: around + chipTextWidth(label, tokens), label };
+}
+
 export function chipWidth(
   chip: PlayerChipModel,
   input: Pick<TeamChipsInput, "layout" | "tokens">,
 ): number {
-  const { tokens, layout } = input;
-  const { sizes, spacing, fontSizes } = tokens.court;
-  const frame = (spacing.chipPadding + tokens.borderWidths.thick) * BOTH_SIDES;
-  const name = Array.from(chip.displayName).length * tokens.fontSizes.caption * CHIP_CHAR_WIDTH_EM;
-  const number = CHIP_NUMBER_DIGITS * fontSizes.chipNumber * CHIP_CHAR_WIDTH_EM;
-  const ball = chip.isServer ? sizes.ballIcon + tokens.spacing.xs : 0;
-  const natural = frame + ball + name + tokens.spacing.xs + number;
-  return Math.min(natural, chipMaxWidth(layout));
+  return chipSizes(chip, input).width;
 }
 
 /** The height of the team column, from its lines: it is the part of the zone the chips keep clear of. */
@@ -133,10 +202,17 @@ export function placementFrame(input: TeamChipsInput): PlacementFrame {
     top: { bottom: side },
     bottom: { top: 0 },
   }[end];
+  const margin = CHIP_ZONE_MARGIN;
+  const inner: Rect = {
+    left: zone.left + margin,
+    top: zone.top + margin,
+    right: zone.right - margin,
+    bottom: zone.bottom - margin,
+  };
   return {
     end,
     side,
-    bounds: { ...zone, ...net },
+    bounds: { ...inner, ...net },
     column: shifted(columnRectInZone(input), origin),
     gap: tokens.court.spacing.chipGap,
   };
@@ -146,7 +222,8 @@ export function placementFrame(input: TeamChipsInput): PlacementFrame {
 export function layoutTeamChips(input: TeamChipsInput): readonly DrawnChip[] {
   const { panel, tokens } = input;
   const { sizes, spacing } = tokens.court;
-  const widths = new Map(panel.chips.map((chip) => [chip.memberId, chipWidth(chip, input)]));
+  const fits = new Map(panel.chips.map((chip) => [chip.memberId, chipSizes(chip, input)]));
+  const widths = new Map([...fits].map(([id, fit]) => [id, fit.width]));
   const specs = panel.chips.map<ChipSpec>((chip) => ({
     id: chip.memberId,
     point: chip.point,
@@ -159,6 +236,14 @@ export function layoutTeamChips(input: TeamChipsInput): readonly DrawnChip[] {
     const at = placed.get(chip.memberId);
     return at === undefined
       ? []
-      : [{ chip, x: at.x, y: at.y, width: widths.get(chip.memberId) ?? 0 }];
+      : [
+          {
+            chip,
+            x: at.x,
+            y: at.y,
+            width: widths.get(chip.memberId) ?? 0,
+            label: fits.get(chip.memberId)?.label ?? chip.displayName,
+          },
+        ];
   });
 }

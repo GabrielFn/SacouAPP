@@ -68,6 +68,24 @@ function attackLinePlace(end: CourtEnd, offset: string) {
 }
 
 /**
+ * The square is anchored to the net with the style itself, not with a worked out pixel, so it
+ * touches the net whatever the zone measures at the end; it grows from the net outwards.
+ */
+function squareAnchor(layout: CourtLayout, end: CourtEnd) {
+  const origin = squareOrigin(layout, end);
+  switch (end) {
+    case "left":
+      return { right: FLUSH, top: origin.y };
+    case "right":
+      return { left: FLUSH, top: origin.y };
+    case "top":
+      return { left: origin.x, bottom: FLUSH };
+    case "bottom":
+      return { left: origin.x, top: FLUSH };
+  }
+}
+
+/**
  * The half court of one team with its edges in the team color, the attack line and its players. The
  * chips are not inside the bordered square but beside it, in the same box, so their pixels are the
  * ones the placement worked out.
@@ -75,15 +93,13 @@ function attackLinePlace(end: CourtEnd, offset: string) {
 export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
   const { tokens } = useTheme();
   const color = TEAM_PALETTES[panel.color].fill;
-  const origin = squareOrigin(layout, end);
   const vertical = layout.kind === "landscape";
   const drawn = layoutTeamChips({ panel, layout, tokens, end });
   return (
     <View
       style={{
         position: "absolute",
-        left: origin.x,
-        top: origin.y,
+        ...squareAnchor(layout, end),
         width: layout.halfCourtSide,
         aspectRatio: 1,
       }}

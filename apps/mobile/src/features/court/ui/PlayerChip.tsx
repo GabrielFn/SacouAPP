@@ -6,7 +6,7 @@ import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import { HALF } from "../court.data";
 import { chipColors } from "../model/chip-colors";
-import type { DrawnChip } from "../model/team-chips";
+import { chipNameFontSize, type DrawnChip } from "../model/team-chips";
 import { BallIcon } from "./CourtIcons";
 
 export interface PlayerChipProps {
@@ -16,7 +16,7 @@ export interface PlayerChipProps {
 
 /**
  * A player on the half court. The chip has the width that was placed (never measured after drawing):
- * a name that does not fit ends in "…", and the number of the position and the badges never go.
+ * a name that does not fit is shortened in the model and ends in "…", and the number of the position and the badges never go.
  */
 export function PlayerChip({ drawn }: PlayerChipProps) {
   const { chip } = drawn;
@@ -50,15 +50,15 @@ export function PlayerChip({ drawn }: PlayerChipProps) {
         {chip.isServer ? <BallIcon /> : null}
         <Text
           numberOfLines={1}
-          ellipsizeMode="tail"
+          ellipsizeMode="clip"
           style={{
             flexShrink: 1,
             color: ink,
             fontFamily: fontFamilies.body700,
-            fontSize: tokens.fontSizes.caption,
+            fontSize: chipNameFontSize(tokens),
           }}
         >
-          {chip.displayName}
+          {drawn.label}
         </Text>
         <Text
           tabular

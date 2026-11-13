@@ -4,24 +4,31 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { DISABLED_OPACITY, HALF, LANDSCAPE_WIDTH_WEIGHTS, NET_COLUMN_FLEX } from "../court.data";
+import { FLUSH, HALF, NET_COLUMN_FLEX } from "../court.data";
 import { PencilIcon, UndoIcon } from "./CourtIcons";
 import { NetMesh } from "./NetMesh";
 
 export interface NetColumnProps {
+  /** The exact width of the column, so the zones share what is left and the squares touch the net. */
+  readonly width: number;
   readonly canUndo: boolean;
   readonly onUndo: () => void;
   readonly onCorrect: () => void;
 }
 
-/** The net of the court on its side: a strip between the zones with DESFAZER tall and Corrigir below it. */
-export function NetColumn({ canUndo, onUndo, onCorrect }: NetColumnProps) {
+/**
+ * The net of the court on its side: a strip between the zones with DESFAZER tall and Corrigir below it.
+ * With nothing to undo DESFAZER is a solid muted fill, never see-through, so the mesh does not show in it.
+ */
+export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps) {
   const { colors, tokens } = useTheme();
   const { sizes } = tokens.court;
   return (
     <View
       style={{
-        flex: LANDSCAPE_WIDTH_WEIGHTS.net,
+        width,
+        flexGrow: FLUSH,
+        flexShrink: FLUSH,
         borderLeftWidth: tokens.court.borderWidths.frame,
         borderRightWidth: tokens.court.borderWidths.frame,
         borderColor: colors.text,
@@ -43,11 +50,10 @@ export function NetColumn({ canUndo, onUndo, onCorrect }: NetColumnProps) {
           minHeight: sizes.undoButton,
           minWidth: sizes.menuButton,
           borderRadius: tokens.radii.button,
-          backgroundColor: colors.text,
+          backgroundColor: canUndo ? colors.text : colors.textMuted,
           alignItems: "center",
           justifyContent: "center",
           gap: tokens.spacing.s6,
-          opacity: canUndo ? 1 : DISABLED_OPACITY,
         }}
       >
         <UndoIcon />

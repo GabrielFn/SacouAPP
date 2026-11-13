@@ -7,6 +7,7 @@ import {
   LANDSCAPE_WIDTH_WEIGHTS,
 } from "../court.data";
 import { computeCourtLayout, type CourtLayoutInput } from "./court-layout";
+import { squareOrigin } from "./team-chips";
 import { scoreTextSize } from "./score-display";
 
 const NO_INSETS = { insetTop: 0, insetBottom: 0, insetLeft: 0, insetRight: 0 };
@@ -39,12 +40,12 @@ describe("the landscape layout", () => {
   ] as const;
   const NOTCH = 48;
 
-  test("at the size of the sketch it gives back its pixels", () => {
+  test("at the size of the layout (844 x 390) it gives back its pixels", () => {
     const layout = computeCourtLayout(input(844, 390));
-    expect(layout.zoneWidth).toBeCloseTo(366, 3);
+    expect(layout.zoneWidth).toBeCloseTo(390, 3);
     expect(layout.zoneHeight).toBeCloseTo(294, 3);
     expect(layout.sideWidth).toBeCloseTo(122, 3);
-    expect(layout.halfCourtSide).toBeCloseTo(232, 3);
+    expect(layout.halfCourtSide).toBeCloseTo(262, 3);
   });
 
   test.each(PHONES)("the weights add up to the usable area at $width x $height", (phone) => {
@@ -91,4 +92,30 @@ describe("the landscape layout", () => {
     const cut = computeCourtLayout(input(844, 390, { insetTop: 20, insetBottom: 20 }));
     expect(cut.zoneHeight).toBeLessThan(free.zoneHeight);
   });
+});
+
+describe("the half court touches the net", () => {
+  const SCREENS = [
+    { width: 640, height: 360 },
+    { width: 844, height: 390 },
+    { width: 932, height: 430 },
+    { width: 360, height: 640 },
+    { width: 390, height: 844 },
+  ] as const;
+
+  test.each(SCREENS)(
+    "its edge on the net side is the edge of the net column at $width x $height",
+    (screen) => {
+      const layout = computeCourtLayout(input(screen.width, screen.height));
+      const ends =
+        layout.kind === "landscape" ? (["left", "right"] as const) : (["top", "bottom"] as const);
+      for (const end of ends) {
+        const origin = squareOrigin(layout, end);
+        if (end === "left") expect(origin.x + layout.halfCourtSide).toBe(layout.zoneWidth);
+        if (end === "right") expect(origin.x).toBe(0);
+        if (end === "top") expect(origin.y + layout.halfCourtSide).toBe(layout.zoneHeight);
+        if (end === "bottom") expect(origin.y).toBe(0);
+      }
+    },
+  );
 });

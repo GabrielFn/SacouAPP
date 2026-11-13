@@ -22,3 +22,11 @@ No teste no celular de 13/11/2026 o retrato da quadra teve três defeitos: chips
 - A bateria baixa e "Inverter lados" ficam para a parte 2 (a faixa amarela toma o lugar da fila; "uma vez por quadra aberta", reducer próprio).
 - A fila em uma linha limita a pílula (`QUEUE_PILL_MAX_WIDTH_RATIO`) e continua com `MAX_QUEUE_PILLS`.
 - Sem renderer de componentes no projeto: o layout é conferido por funções puras (`computeCourtLayout`, `placeChips`) e pelo roteiro do celular.
+
+## Ajustes do teste no celular de 13/11/2026 (E4.17)
+
+- **Quadra maior a pedido do Gabriel.** Em 844 x 390 a zona do time passou de 366 para 390 e a rede de 112 para 64 (só o que Desfazer e Corrigir precisam); a margem da zona caiu de 12 para 6. O quadrado da meia quadra foi de 232 para 262 (cerca de 13%; a altura permitiria 280). O limite é a largura: o placar de dois dígitos a 45% da altura da zona (regra de produto) ocupa 121, e a coluna do time não encolhe abaixo disso. Passar de 262 exige reduzir o placar, o que depende do Gabriel.
+- **Encostada na rede.** O quadrado é ancorado à rede pelo próprio estilo (`right: 0` no time da esquerda, `left: 0` no da direita; `bottom`/`top` no retrato) e a coluna da rede tem largura exata (`layout.netWidth`), então não sobra vão; teste de layout com tolerância zero.
+- **Nomes.** A largura estimada usa 0,68 da fonte por letra (a fonte é a mesma, `chipNameFontSize`, nos dois lados); a abreviação "Ana C." encurta o primeiro nome antes da inicial; o limite do chip nunca fica abaixo do necessário para 8 letras; o "…" é o caractere de reticências, calculado no modelo.
+- **Sacador.** Os limites da zona têm margem (`CHIP_ZONE_MARGIN`) das bordas, para o chip não encostar na barra nem na fila.
+- **Desfazer apagado** usa preenchimento sólido (`textMuted`), sem transparência, para a malha da rede não aparecer.
