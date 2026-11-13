@@ -43,7 +43,7 @@ Com sinal, o app envia cada evento logo depois de gravá-lo no SQLite (E4.11), e
 
 ### 4. Modo quadra: paisagem e aviso de bateria
 
-A paisagem continua (E4.17), porque o celular fica apoiado. O aviso de bateria abaixo de 20% continua, mas sugere ligar no carregador ou na power bank em vez de entregar o placar (muda `produto.md:139`).
+A paisagem continua (E4.17), porque o celular fica apoiado (desenhada e travada no [ADR 0052](0052-modo-quadra-em-paisagem.md)). O aviso de bateria abaixo de 20% continua, mas sugere ligar no carregador ou na power bank em vez de entregar o placar (muda `produto.md:139`).
 
 > **Ajuste (11/11/2026, Gabriel):** o Resumo da rodada sem IA voltou para o piloto. Sem ele, o jogador só via os números depois do jogo na tela de fim de partida e no perfil. A E4.12 mostra saldo, vitórias, sequência e MVP do dia, a partir da E3.9. Ficam fora só o texto da IA e o story.
 

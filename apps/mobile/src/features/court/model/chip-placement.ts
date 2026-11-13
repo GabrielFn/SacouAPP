@@ -63,7 +63,9 @@ function edgesOf(box: Box): Rect {
 /** Keeps a box inside the rectangle; a box bigger than it is centered. */
 function clampInto(box: Box, bounds: Rect): Box {
   const fit = (center: number, half: number, low: number, high: number) =>
-    high - low < half * HALF ? (low + high) / HALF : Math.min(high - half, Math.max(low + half, center));
+    high - low < half * HALF
+      ? (low + high) / HALF
+      : Math.min(high - half, Math.max(low + half, center));
   return {
     ...box,
     x: fit(box.x, box.halfWidth, bounds.left, bounds.right),

@@ -65,15 +65,18 @@ describe("the landscape layout", () => {
     expect(layout.zoneWidth * 2 + layout.netWidth).toBeCloseTo(phone.width - NOTCH, 3);
   });
 
-  test.each(PHONES)("the square fits its zone and the column leaves it room at $width x $height", (phone) => {
-    for (const insetLeft of [0, NOTCH]) {
-      const layout = computeCourtLayout(input(phone.width, phone.height, { insetLeft }));
-      expect(layout.halfCourtSide).toBeLessThanOrEqual(layout.zoneHeight + TOLERANCE);
-      expect(layout.edgeInset + layout.sideWidth + layout.halfCourtSide).toBeLessThanOrEqual(
-        layout.zoneWidth + TOLERANCE,
-      );
-    }
-  });
+  test.each(PHONES)(
+    "the square fits its zone and the column leaves it room at $width x $height",
+    (phone) => {
+      for (const insetLeft of [0, NOTCH]) {
+        const layout = computeCourtLayout(input(phone.width, phone.height, { insetLeft }));
+        expect(layout.halfCourtSide).toBeLessThanOrEqual(layout.zoneHeight + TOLERANCE);
+        expect(layout.edgeInset + layout.sideWidth + layout.halfCourtSide).toBeLessThanOrEqual(
+          layout.zoneWidth + TOLERANCE,
+        );
+      }
+    },
+  );
 
   test.each(PHONES)("the score is 45% of the zone or more at $width x $height", (phone) => {
     for (const insetLeft of [0, NOTCH]) {

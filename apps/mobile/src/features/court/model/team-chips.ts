@@ -44,7 +44,10 @@ export function chipMaxWidth(layout: CourtLayout): number {
  * an average letter width, the number of the position and the ball of the server, never more than
  * `chipMaxWidth`. The chip is drawn with this width, so what is placed is what is seen.
  */
-export function chipWidth(chip: PlayerChipModel, input: Pick<TeamChipsInput, "layout" | "tokens">): number {
+export function chipWidth(
+  chip: PlayerChipModel,
+  input: Pick<TeamChipsInput, "layout" | "tokens">,
+): number {
   const { tokens, layout } = input;
   const { sizes, spacing, fontSizes } = tokens.court;
   const frame = (spacing.chipPadding + tokens.borderWidths.thick) * BOTH_SIDES;
@@ -66,8 +69,7 @@ export function columnHeight({ panel, layout, tokens }: Omit<TeamChipsInput, "en
     scoreZoneRatio: layout.scoreZoneRatio,
   }).lineHeight;
   const indicator = panel.hasSetPoint ? tokens.spacing.xs + sizes.tag : tokens.spacing.s6 + line;
-  const rotation =
-    panel.rotation === null ? 0 : (panel.hasSetPoint ? tokens.spacing.xs : 0) + line;
+  const rotation = panel.rotation === null ? 0 : (panel.hasSetPoint ? tokens.spacing.xs : 0) + line;
   return sizes.tag + spacing.scoreGap + score + indicator + rotation;
 }
 
@@ -85,9 +87,15 @@ export interface SquareOrigin {
 export function squareOrigin(layout: CourtLayout, end: CourtEnd): SquareOrigin {
   const { zoneWidth, zoneHeight, halfCourtSide, edgeInset } = layout;
   if (layout.kind === "landscape") {
-    return { x: end === "left" ? zoneWidth - halfCourtSide : 0, y: (zoneHeight - halfCourtSide) / HALF };
+    return {
+      x: end === "left" ? zoneWidth - halfCourtSide : 0,
+      y: (zoneHeight - halfCourtSide) / HALF,
+    };
   }
-  return { x: zoneWidth - edgeInset - halfCourtSide, y: end === "top" ? zoneHeight - halfCourtSide : 0 };
+  return {
+    x: zoneWidth - edgeInset - halfCourtSide,
+    y: end === "top" ? zoneHeight - halfCourtSide : 0,
+  };
 }
 
 /** Where the column of the team stands in its zone, in pixels from the corner of the zone. */
@@ -114,7 +122,10 @@ function shifted(rect: Rect, origin: SquareOrigin): Rect {
 export function placementFrame(input: TeamChipsInput): PlacementFrame {
   const { layout, end, tokens } = input;
   const origin = squareOrigin(layout, end);
-  const zone = shifted({ left: 0, top: 0, right: layout.zoneWidth, bottom: layout.zoneHeight }, origin);
+  const zone = shifted(
+    { left: 0, top: 0, right: layout.zoneWidth, bottom: layout.zoneHeight },
+    origin,
+  );
   const side = layout.halfCourtSide;
   const net: Partial<Rect> = {
     left: { right: side },
@@ -139,12 +150,15 @@ export function layoutTeamChips(input: TeamChipsInput): readonly DrawnChip[] {
   const specs = panel.chips.map<ChipSpec>((chip) => ({
     id: chip.memberId,
     point: chip.point,
-    halfWidth: (widths.get(chip.memberId) ?? 0) / HALF + (hasBadge(chip) ? spacing.badgeOffsetX : 0),
+    halfWidth:
+      (widths.get(chip.memberId) ?? 0) / HALF + (hasBadge(chip) ? spacing.badgeOffsetX : 0),
     halfHeight: sizes.chip / HALF + (hasBadge(chip) ? spacing.badgeOffsetY : 0),
   }));
   const placed = new Map(placeChips(placementFrame(input), specs).map((chip) => [chip.id, chip]));
   return panel.chips.flatMap((chip) => {
     const at = placed.get(chip.memberId);
-    return at === undefined ? [] : [{ chip, x: at.x, y: at.y, width: widths.get(chip.memberId) ?? 0 }];
+    return at === undefined
+      ? []
+      : [{ chip, x: at.x, y: at.y, width: widths.get(chip.memberId) ?? 0 }];
   });
 }

@@ -70,4 +70,3 @@ export function visibleQueuePills(queue: QueueModel | null, limit: number): Visi
   const entries = queue === null ? [] : queuePills(queue);
   return { shown: entries.slice(0, limit), hidden: Math.max(0, entries.length - limit) };
 }
-

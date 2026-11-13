@@ -47,7 +47,6 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
   }

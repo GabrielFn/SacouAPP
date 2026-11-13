@@ -99,7 +99,12 @@ export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
           ...frameWidths(end, tokens.court.borderWidths.frame),
         }}
       >
-        <View style={{ position: "absolute", ...attackLinePlace(end, ratioToPercentText(ATTACK_LINE_RATIO)) }}>
+        <View
+          style={{
+            position: "absolute",
+            ...attackLinePlace(end, ratioToPercentText(ATTACK_LINE_RATIO)),
+          }}
+        >
           <AttackLine color={color} thickness={tokens.borderWidths.thick} vertical={vertical} />
         </View>
       </View>

@@ -41,7 +41,11 @@ describe("display names on the court", () => {
   });
 
   test("accents and case do not tell first names apart", () => {
-    expect(shown("João Pedro", "Joao Lima", "JOÃO silva")).toEqual(["João P.", "Joao L.", "JOÃO S."]);
+    expect(shown("João Pedro", "Joao Lima", "JOÃO silva")).toEqual([
+      "João P.",
+      "Joao L.",
+      "JOÃO S.",
+    ]);
   });
 
   test("extra spaces around and between words are ignored", () => {

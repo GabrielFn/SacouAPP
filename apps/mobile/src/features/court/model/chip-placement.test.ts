@@ -127,7 +127,8 @@ function problemsOf(input: TeamChipsInput): readonly string[] {
     const name = drawn[index]?.chip.displayName ?? "";
     const found: string[] = [];
     if (outside(box, frame.bounds)) found.push(`${name} leaves the zone or crosses the net`);
-    if (frame.column !== null && overlaps(box, frame.column)) found.push(`${name} covers the column`);
+    if (frame.column !== null && overlaps(box, frame.column))
+      found.push(`${name} covers the column`);
     boxes.slice(index + 1).forEach((other, offset) => {
       if (overlaps(box, other)) {
         found.push(`${name} covers ${drawn[index + 1 + offset]?.chip.displayName ?? ""}`);
@@ -179,7 +180,12 @@ describe("chips of every formation in the portrait fallback", () => {
       setterZone: 1,
       hasSetPoint: false,
     });
-    const input = { panel, layout: layoutOf(phone), tokens: tokensOf(phone), end: "bottom" } as const;
+    const input = {
+      panel,
+      layout: layoutOf(phone),
+      tokens: tokensOf(phone),
+      end: "bottom",
+    } as const;
     expect(problemsOf(input)).toEqual([]);
   });
 });

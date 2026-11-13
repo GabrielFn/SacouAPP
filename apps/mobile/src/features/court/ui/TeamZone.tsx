@@ -41,8 +41,7 @@ export function TeamZone({ panel, end, layout, onPoint }: TeamZoneProps) {
         }
       }}
       style={{
-        flex:
-          layout.kind === "landscape" ? LANDSCAPE_WIDTH_WEIGHTS.zone : COURT_FLEX_WEIGHTS.zone,
+        flex: layout.kind === "landscape" ? LANDSCAPE_WIDTH_WEIGHTS.zone : COURT_FLEX_WEIGHTS.zone,
         backgroundColor: colors.background,
       }}
     >
