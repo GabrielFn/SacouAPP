@@ -8,6 +8,7 @@ import {
   LANDSCAPE_HALF_COURT_WIDTH_RATIO,
   LANDSCAPE_HALF_COURT_ZONE_RATIO,
   LANDSCAPE_SCORE_ZONE_RATIO,
+  NET_MIN_WIDTH,
   LANDSCAPE_TOTAL_HEIGHT_WEIGHT,
   LANDSCAPE_TOTAL_WIDTH_WEIGHT,
   LANDSCAPE_WIDTH_WEIGHTS,
@@ -58,6 +59,8 @@ export interface PortraitCourtLayout extends ZoneLayout {
 
 export type CourtLayout = LandscapeCourtLayout | PortraitCourtLayout;
 
+const BOTH_ZONES = 2;
+
 function usable(total: number, start: number, end: number): number {
   return Math.max(0, total - start - end);
 }
@@ -66,8 +69,12 @@ function computeLandscape(input: CourtLayoutInput): LandscapeCourtLayout {
   const width = usable(input.windowWidth, input.insetLeft, input.insetRight);
   const height = usable(input.windowHeight, input.insetTop, input.insetBottom);
   const zoneHeight = (height * LANDSCAPE_FLEX_WEIGHTS.middle) / LANDSCAPE_TOTAL_HEIGHT_WEIGHT;
-  const zoneWidth = (width * LANDSCAPE_WIDTH_WEIGHTS.zone) / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
-  // A phone less wide than the sketch (640 x 360) needs a wider column for two digits at 45% of the
+  const netWidth = Math.max(
+    (width * LANDSCAPE_WIDTH_WEIGHTS.net) / LANDSCAPE_TOTAL_WIDTH_WEIGHT,
+    NET_MIN_WIDTH,
+  );
+  const zoneWidth = (width - netWidth) / BOTH_ZONES;
+  // A phone less wide than the sketch (640 x 360) needs a wider column for two digits at 38% of the
   // height, and the square gives up the difference.
   const scoreColumn =
     zoneHeight * LANDSCAPE_SCORE_ZONE_RATIO * SCORE_FULL_SIZE_MAX_DIGITS * SCORE_DIGIT_WIDTH_EM;
@@ -77,7 +84,7 @@ function computeLandscape(input: CourtLayoutInput): LandscapeCourtLayout {
     kind: "landscape",
     zoneHeight,
     zoneWidth,
-    netWidth: (width * LANDSCAPE_WIDTH_WEIGHTS.net) / LANDSCAPE_TOTAL_WIDTH_WEIGHT,
+    netWidth,
     sideWidth,
     edgeInset,
     queuePillMaxWidth: width * QUEUE_PILL_MAX_WIDTH_RATIO,

@@ -4,7 +4,14 @@ import { createScaledTokens, shortSide } from "../../../theme/scale";
 import { CHIP_SAFE_NAME_LETTERS } from "../court.data";
 import { computeCourtLayout } from "./court-layout";
 import type { PlayerChipModel } from "./court-screen.types";
-import { chipMaxWidth, chipNameFontSize, chipSizes, chipTextWidth, fitName } from "./team-chips";
+import {
+  chipMaxWidth,
+  chipNameFontSize,
+  chipSizes,
+  chipTextWidth,
+  textWidthInEm,
+  fitName,
+} from "./team-chips";
 
 const SCREENS = [
   { width: 640, height: 360 },
@@ -70,7 +77,7 @@ describe("the name on a chip", () => {
       const frame = (tokens.court.spacing.chipPadding + tokens.borderWidths.thick) * 2;
       for (const name of [...NAMES, ...PATTERN_ABBREVIATED]) {
         const { width, label } = chipSizes(chipOf(name), input);
-        const drawnText = Array.from(label).length * chipNameFontSize(tokens) * 0.68;
+        const drawnText = textWidthInEm(label) * chipNameFontSize(tokens);
         expect(chipTextWidth(label, tokens)).toBeCloseTo(drawnText, 6);
         expect(width).toBeGreaterThanOrEqual(frame + chipTextWidth(label, tokens));
         expect(width).toBeLessThanOrEqual(chipMaxWidth(input.layout, tokens) + 0.001);

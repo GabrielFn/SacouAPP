@@ -31,6 +31,13 @@ export const courtPalette = {
   night: { background: "#000000", foreground: "#FFFFFF", muted: "#C8C8C8" },
 } as const;
 
+/**
+ * The fill of a button with nothing to do (DESFAZER with nothing to undo), the same in both themes:
+ * light enough to tell from the black or white of the active button, and 4.5:1 or more against the
+ * white and the black of the labels.
+ */
+export const courtDisabledFill = "#767676";
+
 export const fontFamilies = {
   display600: "BarlowCondensed-SemiBold",
   display700: "BarlowCondensed-Bold",

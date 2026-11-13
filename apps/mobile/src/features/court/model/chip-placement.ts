@@ -47,8 +47,8 @@ interface Box {
   readonly y: number;
 }
 
-/** The packing looks at spots this many pixels apart. */
-const SEARCH_STEP = 3;
+/** The packing looks at spots this many gaps apart: a spot closer than a gap to another is no use. */
+const SEARCH_STEP_GAPS = 2;
 
 function edgesOf(box: Box): Rect {
   return {
@@ -190,13 +190,13 @@ function coverage(boxes: readonly Box[], column: Rect | null): number {
 }
 
 /** Every spot a box could take inside the bounds, the nearest to where it wanted to be first. */
-function candidatesNear(box: Box, bounds: Rect): readonly Box[] {
-  const columns = Math.floor((bounds.right - bounds.left - box.halfWidth * HALF) / SEARCH_STEP) + 1;
-  const rows = Math.floor((bounds.bottom - bounds.top - box.halfHeight * HALF) / SEARCH_STEP) + 1;
+function candidatesNear(box: Box, bounds: Rect, step: number): readonly Box[] {
+  const columns = Math.floor((bounds.right - bounds.left - box.halfWidth * HALF) / step) + 1;
+  const rows = Math.floor((bounds.bottom - bounds.top - box.halfHeight * HALF) / step) + 1;
   const spots = Array.from({ length: Math.max(0, columns * rows) }, (_, index) => ({
     ...box,
-    x: bounds.left + box.halfWidth + (index % columns) * SEARCH_STEP,
-    y: bounds.top + box.halfHeight + Math.floor(index / columns) * SEARCH_STEP,
+    x: bounds.left + box.halfWidth + (index % columns) * step,
+    y: bounds.top + box.halfHeight + Math.floor(index / columns) * step,
   }));
   const distance = (spot: Box) => (spot.x - box.x) ** HALF + (spot.y - box.y) ** HALF;
   return spots.toSorted((a, b) => distance(a) - distance(b) || a.y - b.y || a.x - b.x);
@@ -219,19 +219,25 @@ function isFree(spot: Box, placed: readonly Box[], frame: PlacementFrame): boole
 function packOneByOne(boxes: readonly Box[], frame: PlacementFrame): readonly Box[] {
   return boxes.reduce<readonly Box[]>((placed, box) => {
     const wanted = clampInto(box, frame.bounds);
-    const spot = candidatesNear(wanted, frame.bounds).find((candidate) =>
-      isFree(candidate, placed, frame),
-    );
+    const spot = candidatesNear(
+      wanted,
+      frame.bounds,
+      Math.max(1, frame.gap * SEARCH_STEP_GAPS),
+    ).find((candidate) => isFree(candidate, placed, frame));
     return [...placed, spot ?? wanted];
   }, []);
 }
 
 /** The first way of pushing that leaves nothing covered, then packing one by one, else the least covered. */
 function bestSettlement(boxes: readonly Box[], frame: PlacementFrame): readonly Box[] {
-  const pushed = STRATEGIES.map((strategy) => settle(boxes, frame, strategy));
-  const clean = pushed.find((option) => coverage(option, frame.column) === 0);
-  if (clean !== undefined) {
-    return clean;
+  // Lazy: the next way of pushing is tried only when the one before left something covered.
+  const pushed: (readonly Box[])[] = [];
+  for (const strategy of STRATEGIES) {
+    const option = settle(boxes, frame, strategy);
+    if (coverage(option, frame.column) === 0) {
+      return option;
+    }
+    pushed.push(option);
   }
   const packed = packOneByOne(boxes, frame);
   return [...pushed, packed].reduce((best, option) =>

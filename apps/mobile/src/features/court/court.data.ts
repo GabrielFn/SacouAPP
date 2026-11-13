@@ -49,28 +49,37 @@ export const LANDSCAPE_TOTAL_HEIGHT_WEIGHT =
   LANDSCAPE_FLEX_WEIGHTS.bar + LANDSCAPE_FLEX_WEIGHTS.middle + LANDSCAPE_FLEX_WEIGHTS.queue;
 
 /**
- * The width is shared as: team A 390 | net 64 | team B 390 of 844. The net was 112 wide in the
+ * The width is shared as: team A 382 | net 80 | team B 382 of 844. The net was 112 wide in the
  * approved sketch; the phone test of 13/11/2026 asked for a bigger court (ADR 0052), and the net
- * keeps just what its two buttons need.
+ * keeps what its two buttons need (64 wide in 844 x 390), never less than `NET_MIN_WIDTH`.
  */
-export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 390, net: 64 } as const;
+export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 382, net: 80 } as const;
+
+/**
+ * The net column is never narrower than this: the buttons (44 touch target), the frame of the net
+ * (2 x 3), the air at its sides (2 x 5) and a little breath, so no button spills over a zone.
+ */
+export const NET_MIN_WIDTH = 68;
 
 export const LANDSCAPE_TOTAL_WIDTH_WEIGHT =
   LANDSCAPE_WIDTH_WEIGHTS.zone * 2 + LANDSCAPE_WIDTH_WEIGHTS.net;
 
 /**
- * In a zone of 390: 6 of margin, the column of 122 (the two digits of the score of 132 are 121 wide)
- * and the square of 262 at the net.
+ * In a zone of 382: 4 of margin, the column of 103 (the two digits of the score of 112 are 103 wide)
+ * and the square of 275 at the net.
  */
-export const LANDSCAPE_ZONE_RATIOS = { edge: 6 / 390, side: 122 / 390 } as const;
+export const LANDSCAPE_ZONE_RATIOS = { edge: 4 / 382, side: 103 / 382 } as const;
 
-/** The square is at most 270 of the 390 of the zone width (the column leaves it 262)... */
-export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 270 / 390;
+/** The square is at most 280 of the 382 of the zone width (the column leaves it 275)... */
+export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 280 / 382;
 /** ...and never more than 280 of the 294 of its height, a little room left for the server. */
 export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 280 / 294;
 
-/** The score is 45% of the zone height (132 of the 294 of the sketch, produto.md:134). */
-export const LANDSCAPE_SCORE_ZONE_RATIO = 0.45;
+/**
+ * The score is 38% of the zone height in landscape (112 of the 294), a little less than the 45% of
+ * produto.md:134: the court grew by decision of the product owner on 13/11/2026 (ADR 0052).
+ */
+export const LANDSCAPE_SCORE_ZONE_RATIO = 0.38;
 
 /** In the net column: Desfazer takes what Corrigir (64) leaves of the 274 inside the padding. */
 export const NET_COLUMN_FLEX = { undo: 202, correct: 64 } as const;
@@ -122,13 +131,18 @@ export const MAX_QUEUE_PILLS = 4;
 export const COLUMN_LINE_HEIGHT_EM = 1.35;
 
 /**
- * A chip is at most this fraction of the side of its square wide: 128 of 262 on the layout of the
+ * A chip is at most this fraction of the side of its square wide: 132 of 275 on the layout of the
  * landscape court. The upright court, a fallback with a column that takes most of the zone, has
  * room for less, so its names end in "…" sooner instead of the chips covering each other.
  */
-export const CHIP_MAX_WIDTH_RATIOS = { landscape: 128 / 262, portrait: 0.3 } as const;
+export const CHIP_MAX_WIDTH_RATIOS = { landscape: 132 / 275, portrait: 0.3 } as const;
 /** A letter of the name of a chip is about this wide, as a fraction of its font size (bold, upper and lower). */
-export const CHIP_CHAR_WIDTH_EM = 0.68;
+export const CHIP_CHAR_WIDTH_EM = 0.72;
+/** A wide letter (M, W) in the same measure (Inter Bold: M 0.93, W 1.04). */
+export const CHIP_WIDE_CHAR_WIDTH_EM = 1.04;
+/** An upper case letter, in the same measure ("MARCELO" averages 0.72, the widest ones more). */
+export const CHIP_UPPER_CHAR_WIDTH_EM = 0.9;
+export const CHIP_ELLIPSIS_WIDTH_EM = 1;
 /** Names of up to this many letters are never cut (a test holds it in every layout). */
 export const CHIP_SAFE_NAME_LETTERS = 8;
 /** The air kept between the chips and the edges of the zone (the bar, the queue, the screen). */

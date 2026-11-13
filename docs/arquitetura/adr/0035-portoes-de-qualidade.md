@@ -10,11 +10,11 @@ O `CLAUDE.md` pede funções pequenas, Clean Code e as regras de `docs/padroes/f
 
 **Limiares num lugar só por linguagem.**
 
-| Portão | TS | C# |
-|---|---|---|
-| Complexidade ciclomática | ESLint `complexity` 10 (produção e `scripts/`; testes isentos) | CA1502 10 (`CodeMetricsConfig.txt` na raiz, `AdditionalFiles` no `Directory.Build.props`, `warning` no `.editorconfig`, que vira erro). Vale em todos os projetos, inclusive testes |
-| Tamanho de arquivo | `max-lines` 300; 600 em `*.test.*` e `*.test.fixture.ts`. Conta linhas físicas (`skipBlankLines` e `skipComments` desligados) | `pnpm check:size` (`scripts/check-file-size.mjs`): 300 em `apps/api/src`, 600 em `apps/api/tests`, linhas físicas |
-| Duplicação | `pnpm check:duplication` (`jscpd` 5.4.2, `.jscpd.json`): 50 tokens, `minLines: 1`, qualquer clone reprova | Idem, formato `csharp` |
+| Portão                   | TS                                                                                                                            | C#                                                                                                                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Complexidade ciclomática | ESLint `complexity` 10 (produção e `scripts/`; testes isentos)                                                                | CA1502 10 (`CodeMetricsConfig.txt` na raiz, `AdditionalFiles` no `Directory.Build.props`, `warning` no `.editorconfig`, que vira erro). Vale em todos os projetos, inclusive testes |
+| Tamanho de arquivo       | `max-lines` 300; 600 em `*.test.*` e `*.test.fixture.ts`. Conta linhas físicas (`skipBlankLines` e `skipComments` desligados) | `pnpm check:size` (`scripts/check-file-size.mjs`): 300 em `apps/api/src`, 600 em `apps/api/tests`, linhas físicas                                                                   |
+| Duplicação               | `pnpm check:duplication` (`jscpd` 5.4.2, `.jscpd.json`): 50 tokens, `minLines: 1`, qualquer clone reprova                     | Idem, formato `csharp`                                                                                                                                                              |
 
 As constantes do TS ficam no topo do `eslint.config.mjs`; as do C# no `CodeMetricsConfig.txt` e em `scripts/lib/file-size.mjs`. A mesma conta de linhas (a do `wc -l`) nos dois lados evita duas métricas.
 

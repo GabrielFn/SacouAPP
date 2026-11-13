@@ -2,7 +2,7 @@ import { Pressable, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { fontFamilies } from "../../../theme/tokens.data";
+import { courtDisabledFill, fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import { FLUSH, HALF, NET_COLUMN_FLEX } from "../court.data";
 import { PencilIcon, UndoIcon } from "./CourtIcons";
@@ -18,7 +18,7 @@ export interface NetColumnProps {
 
 /**
  * The net of the court on its side: a strip between the zones with DESFAZER tall and Corrigir below it.
- * With nothing to undo DESFAZER is a solid muted fill, never see-through, so the mesh does not show in it.
+ * With nothing to undo DESFAZER is a solid mid gray fill, never see-through, so the mesh does not show in it.
  */
 export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps) {
   const { colors, tokens } = useTheme();
@@ -50,7 +50,7 @@ export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps)
           minHeight: sizes.undoButton,
           minWidth: sizes.menuButton,
           borderRadius: tokens.radii.button,
-          backgroundColor: canUndo ? colors.text : colors.textMuted,
+          backgroundColor: canUndo ? colors.text : courtDisabledFill,
           alignItems: "center",
           justifyContent: "center",
           gap: tokens.spacing.s6,

@@ -50,7 +50,7 @@ export function PlayerChip({ drawn }: PlayerChipProps) {
         {chip.isServer ? <BallIcon /> : null}
         <Text
           numberOfLines={1}
-          ellipsizeMode="clip"
+          ellipsizeMode="tail"
           style={{
             flexShrink: 1,
             color: ink,

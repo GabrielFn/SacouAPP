@@ -47,7 +47,7 @@
 
 **`PATCH` aceita uma camada parcial do grupo**, com `schemaVersion`: `SettingsParser.ParsePatch` aceita qualquer folha do catálogo e recusa `null` numa folha ou num bloco (o grupo é completo, não herda). O modelo salvo é um retrato (`SettingsParser.ParseSnapshot`): só folhas que não são fato, todas as que o catálogo tem; aplicá-lo copia esses valores e deixa os fatos do grupo. Aplicar um modelo pronto grava `template_key`; aplicar um salvo grava `saved_template_id`; editar uma folha depois não muda o rótulo.
 
-**Erros.** Tudo que o catálogo recusa, e JSON malformado (chave repetida dentro de `settings`, *surrogate* solto no local, fundo demais), sai como 400 `groups.settings-invalid`, sem o caminho. Chave repetida no corpo inteiro é recusada antes, pelo *binder* (400 sem código). A linha do banco que não passa no parser é erro de servidor: 500 genérico, e o log leva só o `groupId`.
+**Erros.** Tudo que o catálogo recusa, e JSON malformado (chave repetida dentro de `settings`, _surrogate_ solto no local, fundo demais), sai como 400 `groups.settings-invalid`, sem o caminho. Chave repetida no corpo inteiro é recusada antes, pelo _binder_ (400 sem código). A linha do banco que não passa no parser é erro de servidor: 500 genérico, e o log leva só o `groupId`.
 
 **Contrato** (`ProducesProblem` em cada rota nova, para o portão do OpenAPI): `GET /settings` (`ViewGroup`), `PATCH /settings`, `POST /settings/apply-template`, `GET /templates`, `POST /templates` e `DELETE /templates/{templateId}` (`ManageSettings`), mais `templateKey` em `POST /v1/groups`. Detalhes em [`docs/dominio/grupos.md`](../../dominio/grupos.md).
 

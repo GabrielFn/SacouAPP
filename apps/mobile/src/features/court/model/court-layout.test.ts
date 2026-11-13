@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { createScaledTokens, shortSide } from "../../../theme/scale";
 import {
   LANDSCAPE_FLEX_WEIGHTS,
   LANDSCAPE_TOTAL_HEIGHT_WEIGHT,
@@ -11,7 +12,7 @@ import { squareOrigin } from "./team-chips";
 import { scoreTextSize } from "./score-display";
 
 const NO_INSETS = { insetTop: 0, insetBottom: 0, insetLeft: 0, insetRight: 0 };
-const MIN_SHARE = 0.45;
+const MIN_SHARE = 0.38;
 const TOLERANCE = 0.0001;
 
 function input(windowWidth: number, windowHeight: number, extra = {}): CourtLayoutInput {
@@ -42,10 +43,10 @@ describe("the landscape layout", () => {
 
   test("at the size of the layout (844 x 390) it gives back its pixels", () => {
     const layout = computeCourtLayout(input(844, 390));
-    expect(layout.zoneWidth).toBeCloseTo(390, 3);
+    expect(layout.zoneWidth).toBeCloseTo(382, 3);
     expect(layout.zoneHeight).toBeCloseTo(294, 3);
-    expect(layout.sideWidth).toBeCloseTo(122, 3);
-    expect(layout.halfCourtSide).toBeCloseTo(262, 3);
+    expect(layout.sideWidth).toBeCloseTo(103, 3);
+    expect(layout.halfCourtSide).toBeCloseTo(275, 3);
   });
 
   test.each(PHONES)("the weights add up to the usable area at $width x $height", (phone) => {
@@ -79,7 +80,7 @@ describe("the landscape layout", () => {
     },
   );
 
-  test.each(PHONES)("the score is 45% of the zone or more at $width x $height", (phone) => {
+  test.each(PHONES)("the score is 38% of the zone or more at $width x $height", (phone) => {
     for (const insetLeft of [0, NOTCH]) {
       const layout = computeCourtLayout(input(phone.width, phone.height, { insetLeft }));
       const { fontSize } = scoreTextSize({ ...layout, score: 18 });
@@ -116,6 +117,30 @@ describe("the half court touches the net", () => {
         if (end === "top") expect(origin.y + layout.halfCourtSide).toBe(layout.zoneHeight);
         if (end === "bottom") expect(origin.y).toBe(0);
       }
+    },
+  );
+});
+
+describe("the net column holds its two buttons", () => {
+  const SCREENS = [
+    { width: 640, height: 360 },
+    { width: 844, height: 390 },
+    { width: 932, height: 430 },
+  ] as const;
+
+  test.each(SCREENS)(
+    "each button is 44 wide or more and stays inside at $width x $height",
+    (screen) => {
+      const layout = computeCourtLayout(input(screen.width, screen.height));
+      if (layout.kind !== "landscape") throw new Error("not landscape");
+      const tokens = createScaledTokens({
+        windowWidth: shortSide(screen.width, screen.height),
+        fontScale: 1,
+      });
+      const around = (tokens.court.borderWidths.frame + tokens.court.spacing.hairGap) * 2;
+      const button = layout.netWidth - around;
+      expect(button).toBeGreaterThanOrEqual(tokens.sizes.minTouchTarget);
+      expect(layout.zoneWidth * 2 + layout.netWidth).toBeCloseTo(screen.width, 3);
     },
   );
 });

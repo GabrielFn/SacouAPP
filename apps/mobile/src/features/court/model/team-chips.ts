@@ -1,6 +1,9 @@
 import type { ScaledTokens } from "../../../theme/scale";
 import {
   CHIP_CHAR_WIDTH_EM,
+  CHIP_ELLIPSIS_WIDTH_EM,
+  CHIP_UPPER_CHAR_WIDTH_EM,
+  CHIP_WIDE_CHAR_WIDTH_EM,
   CHIP_MAX_WIDTH_RATIOS,
   CHIP_NUMBER_DIGITS,
   CHIP_SAFE_NAME_LETTERS,
@@ -52,31 +55,45 @@ function chipAround(tokens: ScaledTokens, isServer: boolean): number {
  * below the room of a name of `CHIP_SAFE_NAME_LETTERS` letters on the chip of the server.
  */
 export function chipMaxWidth(layout: CourtLayout, tokens: ScaledTokens): number {
-  const safe =
-    chipAround(tokens, true) +
-    CHIP_SAFE_NAME_LETTERS * tokens.fontSizes.caption * CHIP_CHAR_WIDTH_EM;
+  const widest = (CHIP_SAFE_NAME_LETTERS - 1) * CHIP_CHAR_WIDTH_EM + CHIP_WIDE_CHAR_WIDTH_EM;
+  const safe = chipAround(tokens, true) + widest * tokens.fontSizes.caption;
   return Math.max(layout.halfCourtSide * CHIP_MAX_WIDTH_RATIOS[layout.kind], safe);
 }
 
 const ELLIPSIS = "…";
-const ABBREVIATION = /^(.+) (\p{L}+\.?)$/u;
+/** A short name is an initial and a dot: "Ana C." (a longer last word is not an abbreviation). */
+const ABBREVIATION = /^(.+) (\p{L}\.)$/u;
+const WIDE_LETTERS = /^[MWmw]$/u;
+const UPPER_LETTER = /^\p{Lu}$/u;
 
 /** The font size of the name on a chip: the one the chip draws and the one its width is worked out with. */
 export function chipNameFontSize(tokens: ScaledTokens): number {
   return tokens.fontSizes.caption;
 }
 
-function lettersIn(text: string): number {
-  return Array.from(text).length;
+function letterEm(letter: string): number {
+  if (letter === ELLIPSIS) return CHIP_ELLIPSIS_WIDTH_EM;
+  if (WIDE_LETTERS.test(letter)) return CHIP_WIDE_CHAR_WIDTH_EM;
+  return UPPER_LETTER.test(letter) ? CHIP_UPPER_CHAR_WIDTH_EM : CHIP_CHAR_WIDTH_EM;
 }
 
-/** The width of a text at the average letter width of the name font; the chip draws with this same measure. */
+/** The width of a text in ems of its font: wide and upper case letters and the "…" count more. */
+export function textWidthInEm(text: string): number {
+  return Array.from(text).reduce((sum, letter) => sum + letterEm(letter), 0);
+}
+
+/** The width of a text on a chip; the chip draws with this same measure and font size. */
 export function chipTextWidth(text: string, tokens: ScaledTokens): number {
-  return lettersIn(text) * chipNameFontSize(tokens) * CHIP_CHAR_WIDTH_EM;
+  return textWidthInEm(text) * chipNameFontSize(tokens);
 }
 
-function shortened(text: string, letters: number): string {
-  return `${Array.from(text).slice(0, Math.max(1, letters)).join("")}${ELLIPSIS}`;
+/** The longest start of the text that, with the "…", fits the room (at least one letter). */
+function shortened(text: string, room: number, tokens: ScaledTokens): string {
+  const letters = Array.from(text);
+  const fits = (count: number) =>
+    chipTextWidth(`${letters.slice(0, count).join("")}${ELLIPSIS}`, tokens) <= room;
+  const count = letters.reduce((best, _, index) => (fits(index + 1) ? index + 1 : best), 1);
+  return `${letters.slice(0, count).join("")}${ELLIPSIS}`;
 }
 
 /**
@@ -87,15 +104,12 @@ export function fitName(name: string, room: number, tokens: ScaledTokens): strin
   if (chipTextWidth(name, tokens) <= room) {
     return name;
   }
-  const letterWidth = chipNameFontSize(tokens) * CHIP_CHAR_WIDTH_EM;
-  const letters = Math.floor(room / letterWidth);
   const parts = ABBREVIATION.exec(name);
   if (parts === null) {
-    return shortened(name, letters - lettersIn(ELLIPSIS));
+    return shortened(name, room, tokens);
   }
   const [, first = "", last = ""] = parts;
-  const keep = letters - lettersIn(ELLIPSIS) - lettersIn(last) - lettersIn(" ");
-  return `${shortened(first, keep)} ${last}`;
+  return `${shortened(first, room - chipTextWidth(` ${last}`, tokens), tokens)} ${last}`;
 }
 
 interface ChipSizes {

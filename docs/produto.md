@@ -17,17 +17,17 @@ Este documento junta a pesquisa de concorrentes e a proposta de UX/UI, já revis
 
 O concorrente real é a lista colada no WhatsApp, não outro app. Os apps de racha no Brasil são de futebol; no vôlei só há apps de técnico ou de súmula, com usabilidade fraca.
 
-| App | Foco | Preço | Lição para o Sacou |
-|---|---|---|---|
-| [Chega+](https://mwm.ai/pt/apps/chega/1084859198) | Futebol, BR | ~R$ 100/mês no Premium | Líder, mas criticado pelo preço, por não ter 2º admin e por bugs |
-| [Pelada+](https://apps.apple.com/BR/app/id1637292238) | Futebol, BR | R$ 6,90–19,90 | Máximo de 2 admins, atributos rasos, bugs a cada versão |
-| [Appito](https://apps.apple.com/BR/app/id1054372715) | Futebol, BR | Grátis | Mapa de quadras falha sem densidade; recorrência exige reconfirmar todos |
-| [PeladaBot](https://mwm.ai/apps/peladabot/6741855212) | Multi, BR | Assinatura | Funciona dentro do WhatsApp ("DENTRO/FORA"); único que cita vôlei |
-| [Volleyball Rotations](https://apps.apple.com/us/app/volleyball-rotations/id1440107449) | Vôlei, técnicos | US$ 6,99/mês | Rotação tem valor, mas o público é técnico, não pelada |
-| [VolleyStation Score](https://apps.apple.com/app/id1614399577) | Vôlei, súmula | — | Nota 2,6: placar no celular falha por usabilidade; corrigir erro estressa |
-| [Volleyball Lineup Tracker](https://apps.apple.com/app/id420162043) | Vôlei, rotação | US$ 5,99 | Gestos escondidos são criticados |
-| [Next Up](https://apps.apple.com/us/app/-/id6443439799) | Pickup, global | Grátis | Funcionar offline e sem conta é valorizado na quadra |
-| [OpenSports](https://mwm.ai/apps/opensports-meetup-for-sports/1056940981) | Pickup, global | Taxa | Melhor modelo de presença + espera + pagamento, sem Pix |
+| App                                                                                     | Foco            | Preço                  | Lição para o Sacou                                                        |
+| --------------------------------------------------------------------------------------- | --------------- | ---------------------- | ------------------------------------------------------------------------- |
+| [Chega+](https://mwm.ai/pt/apps/chega/1084859198)                                       | Futebol, BR     | ~R$ 100/mês no Premium | Líder, mas criticado pelo preço, por não ter 2º admin e por bugs          |
+| [Pelada+](https://apps.apple.com/BR/app/id1637292238)                                   | Futebol, BR     | R$ 6,90–19,90          | Máximo de 2 admins, atributos rasos, bugs a cada versão                   |
+| [Appito](https://apps.apple.com/BR/app/id1054372715)                                    | Futebol, BR     | Grátis                 | Mapa de quadras falha sem densidade; recorrência exige reconfirmar todos  |
+| [PeladaBot](https://mwm.ai/apps/peladabot/6741855212)                                   | Multi, BR       | Assinatura             | Funciona dentro do WhatsApp ("DENTRO/FORA"); único que cita vôlei         |
+| [Volleyball Rotations](https://apps.apple.com/us/app/volleyball-rotations/id1440107449) | Vôlei, técnicos | US$ 6,99/mês           | Rotação tem valor, mas o público é técnico, não pelada                    |
+| [VolleyStation Score](https://apps.apple.com/app/id1614399577)                          | Vôlei, súmula   | —                      | Nota 2,6: placar no celular falha por usabilidade; corrigir erro estressa |
+| [Volleyball Lineup Tracker](https://apps.apple.com/app/id420162043)                     | Vôlei, rotação  | US$ 5,99               | Gestos escondidos são criticados                                          |
+| [Next Up](https://apps.apple.com/us/app/-/id6443439799)                                 | Pickup, global  | Grátis                 | Funcionar offline e sem conta é valorizado na quadra                      |
+| [OpenSports](https://mwm.ai/apps/opensports-meetup-for-sports/1056940981)               | Pickup, global  | Taxa                   | Melhor modelo de presença + espera + pagamento, sem Pix                   |
 
 **Lacunas que ninguém cobre:**
 
@@ -64,7 +64,7 @@ O núcleo é grátis e cobre presença, sorteio, fila, placar e Pix. A configura
 3. **Rodadas:** presença VOU / NÃO VOU (sem "talvez"); lista de espera com promoção automática; mensalista já entra confirmado e só avisa se não for; lista de avulsos abre X horas antes; recorrência automática sem reconfirmar todo mundo; admin adiciona convidado sem conta.
 4. **Cobrança Pix (opcional):** Pix copia e cola gerado a partir da chave do organizador (QR opcional) na própria confirmação; serve só para a diária e a mensalidade do racha, nunca para o Pro; "Já paguei" com confirmação do admin, exibida como "pago (marcado por Fulano)"; lembrete neutro, nunca lista pública de devedores.
 5. **Sorteio:** equilibra nível e posição, evita repetir times; medidor de equilíbrio; trocar e travar duplas; imagem dos times para compartilhar.
-6. **Rating** *(atualizado em 11/11/2026, ADR 0047: OpenSkill por partida, nota inicial do admin, invisível ao jogador e escondido no piloto; foto da cartinha pós-piloto, ADR 0046; vale `decisoes.md`)* **(Glicko-2, separado por modalidade: quadra e areia):** ajustado pelos resultados (conversão para a nota: 1500 = 3,0 e cada 100 pontos valem 0,5, limitado entre 1 e 5; o nível autodeclarado no cadastro é o ponto de partida; os números são ajustados com os dados do piloto), privado no app (o jogador vê só o próprio); na cartinha compartilhável aparece por padrão, e o jogador pode esconder. A borda da cartinha indica a faixa: Bronze até 2,4; Prata de 2,5 a 3,4; Ouro de 3,5 a 4,4; Elite a partir de 4,5. A cartinha usa a foto do jogador com o fundo removido, recortada na silhueta: o recorte é automático no próprio celular (Vision no iOS, ML Kit Subject Segmentation no Android, via módulo nativo do Expo), com pincel para apagar ou restaurar bordas e enquadramento por arrastar e pinça. Se o aparelho não suportar, o recorte é feito no servidor com um modelo de segmentação em ONNX Runtime no .NET. A imagem final é salva em PNG ou WebP com transparência.
+6. **Rating** _(atualizado em 11/11/2026, ADR 0047: OpenSkill por partida, nota inicial do admin, invisível ao jogador e escondido no piloto; foto da cartinha pós-piloto, ADR 0046; vale `decisoes.md`)_ **(Glicko-2, separado por modalidade: quadra e areia):** ajustado pelos resultados (conversão para a nota: 1500 = 3,0 e cada 100 pontos valem 0,5, limitado entre 1 e 5; o nível autodeclarado no cadastro é o ponto de partida; os números são ajustados com os dados do piloto), privado no app (o jogador vê só o próprio); na cartinha compartilhável aparece por padrão, e o jogador pode esconder. A borda da cartinha indica a faixa: Bronze até 2,4; Prata de 2,5 a 3,4; Ouro de 3,5 a 4,4; Elite a partir de 4,5. A cartinha usa a foto do jogador com o fundo removido, recortada na silhueta: o recorte é automático no próprio celular (Vision no iOS, ML Kit Subject Segmentation no Android, via módulo nativo do Expo), com pincel para apagar ou restaurar bordas e enquadramento por arrastar e pinça. Se o aparelho não suportar, o recorte é feito no servidor com um modelo de segmentação em ONNX Runtime no .NET. A imagem final é salva em PNG ou WebP com transparência.
 7. **Fila de times:** quem perde sai; contador de sequência; próximo time entra automaticamente ao fim da partida. Quando há menos gente esperando do que um time completo, a saída é parcial: só sai do time perdedor o número de pessoas que está esperando (ex.: 2 substitutos → saem 2). Quem sai é definido por critério configurável — quem está há mais partidas seguidas (padrão), ordem de chegada, sorteio ou escolha manual. Quem entra assume a posição de quem saiu; com rotação ligada, entra no lugar dela na escalação. Se ninguém está esperando, ninguém sai. Quem sai entra no fim da fila como avulso; quando os avulsos somam um time, ele se forma por ordem de chegada. No MVP, a fila tem só o modo automático: time inteiro quando há time completo esperando, parcial quando não há. "Sempre parcial com N fixo", "sempre time inteiro", "vencedor sai após X vitórias" e o critério por nível ficam para depois (`docs/ideias.md`; decisão do Gabriel em 03/11/2026).
 8. **Placar:** pontos por set, número de sets, tie-break e vantagem configuráveis; desfazer ilimitado; fim de set sempre confirmado.
 9. **Resumo da rodada com IA:** placares, sequências, MVP do dia calculado pelos dados por padrão (saldo de pontos +/− enquanto em quadra, aproveitamento de vitórias, maior sequência e ganho de rating); votação rápida como opção do grupo; ponto individual ("De quem?" ao marcar, para aces e bloqueios) como opção do grupo no Sacou Pro; formatos texto, feed e story.
@@ -74,11 +74,11 @@ O núcleo é grátis e cobre presença, sorteio, fila, placar e Pix. A configura
 
 Tudo pode ser desligado: cobrança, limite de vagas, número de sets (livre, único, md3, md5), pontos por set, tie-break, placar, rotação, fila, sorteio e presença.
 
-| Nível | O que ajusta | Onde fica |
-|---|---|---|
-| Grupo | Todos os padrões | Ajustes → "Como jogamos", em blocos com interruptor mestre |
-| Rodada | Qualquer padrão, só naquele dia | Acordeão "Personalizar esta rodada" |
-| Partida | Pontos, sets e sistema de rotação | Folha de pré-jogo |
+| Nível   | O que ajusta                      | Onde fica                                                  |
+| ------- | --------------------------------- | ---------------------------------------------------------- |
+| Grupo   | Todos os padrões                  | Ajustes → "Como jogamos", em blocos com interruptor mestre |
+| Rodada  | Qualquer padrão, só naquele dia   | Acordeão "Personalizar esta rodada"                        |
+| Partida | Pontos, sets e sistema de rotação | Folha de pré-jogo                                          |
 
 - O mais específico vence. Valor herdado aparece em cinza ("padrão do grupo"); valor sobrescrito ganha ponto laranja ("nesta rodada") e link "Voltar ao padrão".
 - Modelos prontos: Pelada descontraída, Racha organizado, Treino, Areia rei da quadra e Do zero (tudo desligado). O grupo salva os próprios modelos: 1 no plano grátis, ilimitados no Pro.
@@ -123,15 +123,15 @@ Uma aba "Explorar" (Falta 1, mapa) só entra quando houver densidade de usuário
 
 ### Tela de quadra
 
-| Zona (retrato) | Altura | Conteúdo |
-|---|---|---|
-| Barra de status | 6% | Set, sets ganhos, offline, menu |
-| Time A | 34% | Placar gigante, bola de saque, minirrotação 3x2 |
-| Faixa central | 10% | DESFAZER (largura total), sacador, botão Corrigir |
-| Time B | 34% | Igual ao Time A |
-| Fila | 16–18% | Próximo time, regra e sequência, "Entra no saque: Ana" |
+| Zona (retrato)  | Altura | Conteúdo                                               |
+| --------------- | ------ | ------------------------------------------------------ |
+| Barra de status | 6%     | Set, sets ganhos, offline, menu                        |
+| Time A          | 34%    | Placar gigante, bola de saque, minirrotação 3x2        |
+| Faixa central   | 10%    | DESFAZER (largura total), sacador, botão Corrigir      |
+| Time B          | 34%    | Igual ao Time A                                        |
+| Fila            | 16–18% | Próximo time, regra e sequência, "Entra no saque: Ana" |
 
-1. **A zona inteira do time é o botão de ponto**, não um "+1". Números com pelo menos 45% da altura da zona, legíveis a 5 m.
+1. **A zona inteira do time é o botão de ponto**, não um "+1". Números com pelo menos 45% da altura da zona no retrato e 38% na paisagem (o Gabriel preferiu uma quadra maior em 13/11/2026, ADR 0052), legíveis a 5 m.
 2. **Tema Sol:** preto puro sobre branco puro de dia; tema Noite em quadra coberta. Contraste mínimo 7:1. Cor nunca é o único sinal (nome e letra A/B também).
 3. **Proteção contra erro:** bloqueio de 700 ms após cada ponto, toques com a palma ignorados, voltar do Android bloqueado na quadra. Sem trava (cadeado) e sem toast "+1": removidos pelo Gabriel em 13/11/2026 (`decisoes.md`).
 4. **Corrigir sem estresse:** linha do tempo dos últimos 10 pontos; um toque volta àquele estado; trocar sacador e girar time a 1 toque; cada correção mostra o que mudou.
@@ -145,13 +145,13 @@ Nome escolhido: **Sacou**. Na loja, "Sacou: Vôlei, Pelada e Placar" para ganhar
 
 **Tom:** parceiro de quadra, zoeiro e competente ("Lista fechou, 12 de 12. Bora!").
 
-| Token | Uso | Hex |
-|---|---|---|
-| Areia | Fundo do app | #F6F1E7 |
-| Noite de quadra | Texto e fundo escuro | #0F1B2D |
-| Laranja Saque | Marca, botões, sobrescrita | #FF5A1F |
-| Amarelo Bola | Destaque, sacador | #FFC83D |
-| Azul Rede | Secundário, links | #1F5BFF |
+| Token           | Uso                        | Hex     |
+| --------------- | -------------------------- | ------- |
+| Areia           | Fundo do app               | #F6F1E7 |
+| Noite de quadra | Texto e fundo escuro       | #0F1B2D |
+| Laranja Saque   | Marca, botões, sobrescrita | #FF5A1F |
+| Amarelo Bola    | Destaque, sacador          | #FFC83D |
+| Azul Rede       | Secundário, links          | #1F5BFF |
 
 - **Tipografia:** Barlow Condensed para placar e títulos (algarismos tabulares); Inter para a interface, de 15 a 17 pt.
 - **Motivos gráficos:** linhas de quadra nos cantos dos cards, malha diagonal da rede, a grade 3x2 da rotação como ícone.
@@ -170,7 +170,7 @@ Antes de fechar: consultar o INPI (classes 9 e 41), registrar sacou.app e sacou.
 
 A Fase 1 leva o diferencial inteiro ao piloto: quadra com fila e saída parcial, rotação por time com posições no saque e a cartinha com foto recortada. São as 16 telas desenhadas mais 12 que faltam (ver a revisão do MVP).
 
-*[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — diagrama não incluído; vale o texto da seção]*
+_[Diagrama: roadmap · 3 fases, 1 portão (revisado em 30/10) — diagrama não incluído; vale o texto da seção]_
 
 No piloto o Pro fica liberado de graça para os grupos testarem o 5x1. O que exige cobrança pelas lojas ou densidade de usuários fica para as fases seguintes.
 
@@ -178,18 +178,18 @@ No piloto o Pro fica liberado de graça para os grupos testarem o 5x1. O que exi
 
 O jogador nunca paga. O organizador assina o Sacou Pro por grupo, por R$ 9,90 por mês ou R$ 79 por ano, e o núcleo nunca fica atrás do paywall.
 
-| Plano | Inclui | Preço |
-|---|---|---|
-| Grátis | Presença, espera, mensalistas, sorteio, fila, placar, rotação Livre/6x0, Pix copia e cola, multi-admin, 2 resumos de IA por mês | R$ 0 |
-| Sacou Pro (por grupo) | Sistemas de rotação 4x2, 5x1 e 6x2, ponto individual no placar, resumo de IA ilimitado, histórico completo além da temporada atual, ajuste de formações, modelos salvos ilimitados, imagens sem marca d'água | R$ 9,90/mês ou R$ 79/ano |
-| Taxa Pix (futuro) | Baixa automática do pagamento via gateway | R$ 0,50–1,00 por cobrança |
+| Plano                 | Inclui                                                                                                                                                                                                       | Preço                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| Grátis                | Presença, espera, mensalistas, sorteio, fila, placar, rotação Livre/6x0, Pix copia e cola, multi-admin, 2 resumos de IA por mês                                                                              | R$ 0                      |
+| Sacou Pro (por grupo) | Sistemas de rotação 4x2, 5x1 e 6x2, ponto individual no placar, resumo de IA ilimitado, histórico completo além da temporada atual, ajuste de formações, modelos salvos ilimitados, imagens sem marca d'água | R$ 9,90/mês ou R$ 79/ano  |
+| Taxa Pix (futuro)     | Baixa automática do pagamento via gateway                                                                                                                                                                    | R$ 0,50–1,00 por cobrança |
 
 **Revisão de 30/10/2026: dois planos pagos.** O jogador também terá um plano próprio. Preços propostos, a confirmar:
 
-| Plano | Quem paga | Preço proposto | O que entrega |
-|---|---|---|---|
-| Sacou Pro do Grupo | Admin (pode ratear na mensalidade) | R$ 12,90/mês ou R$ 99/ano | Sistemas 4x2/5x1/6x2, ajuste de formações, modelos ilimitados, relatório financeiro; para todos os membros: ponto individual, resumo com IA de todas as rodadas, ranking da temporada com troféus, cartinhas e stories sem marca, histórico do grupo |
-| Sacou+ do Jogador | Cada jogador | R$ 5,90/mês ou R$ 44,90/ano | Cartinha premium (edições especiais, molduras animadas, vídeo, várias fotos), evolução do nível, histórico de todos os grupos, parcerias ("você vence 71% com a Bia"), rendimento por rotação, resumo pessoal com IA e retrospectiva do mês e do ano, comparar com amigos (com consentimento) |
+| Plano              | Quem paga                          | Preço proposto              | O que entrega                                                                                                                                                                                                                                                                                 |
+| ------------------ | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sacou Pro do Grupo | Admin (pode ratear na mensalidade) | R$ 12,90/mês ou R$ 99/ano   | Sistemas 4x2/5x1/6x2, ajuste de formações, modelos ilimitados, relatório financeiro; para todos os membros: ponto individual, resumo com IA de todas as rodadas, ranking da temporada com troféus, cartinhas e stories sem marca, histórico do grupo                                          |
+| Sacou+ do Jogador  | Cada jogador                       | R$ 5,90/mês ou R$ 44,90/ano | Cartinha premium (edições especiais, molduras animadas, vídeo, várias fotos), evolução do nível, histórico de todos os grupos, parcerias ("você vence 71% com a Bia"), rendimento por rotação, resumo pessoal com IA e retrospectiva do mês e do ano, comparar com amigos (com consentimento) |
 
 Regra dos dois planos: nada pago dá vantagem em quadra (sorteio, vagas, fila e rating são iguais para todos). Arquitetura: o controle de acesso passa a ser por grupo (`IGroupPlan`) e por pessoa (`IUserPlan`), ambos via RevenueCat.
 
@@ -211,18 +211,18 @@ Regra dos dois planos: nada pago dá vantagem em quadra (sorteio, vagas, fila e 
 
 A Fase 2 só começa quando 5 grupos reais usarem o app por 4 rodadas seguidas, com pelo menos 60% dos confirmados vindo pelo link, e não pela lista do WhatsApp.
 
-| Risco | Mitigação |
-|---|---|
-| Adoção pela metade (parte do grupo só no WhatsApp) | Admin lança nomes em 2 toques; texto do WhatsApp continua sendo a lista visível |
-| Bugs a cada versão (o que derrubou Chega+ e Pelada+) | Escopo pequeno e testes automatizados da lógica de fila e de cada sistema de rotação |
-| Excesso de configuração | Modelos, funções dormentes, no máximo 5 itens visíveis por bloco |
-| Rotação errada desacredita o app | Livre como padrão, Corrigir visível, testes extensos |
-| Conflito social com o nível | Nota definida pelo admin, que o jogador não vê, e rating escondido (ADR 0047) |
-| Constrangimento ao cobrar | Cobrança opcional, lembrete neutro, sem lista pública de devedores |
-| Tela ilegível ao sol e bateria | Tema Sol, aviso de bateria, entregar placar |
+| Risco                                                                 | Mitigação                                                                                             |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Adoção pela metade (parte do grupo só no WhatsApp)                    | Admin lança nomes em 2 toques; texto do WhatsApp continua sendo a lista visível                       |
+| Bugs a cada versão (o que derrubou Chega+ e Pelada+)                  | Escopo pequeno e testes automatizados da lógica de fila e de cada sistema de rotação                  |
+| Excesso de configuração                                               | Modelos, funções dormentes, no máximo 5 itens visíveis por bloco                                      |
+| Rotação errada desacredita o app                                      | Livre como padrão, Corrigir visível, testes extensos                                                  |
+| Conflito social com o nível                                           | Nota definida pelo admin, que o jogador não vê, e rating escondido (ADR 0047)                         |
+| Constrangimento ao cobrar                                             | Cobrança opcional, lembrete neutro, sem lista pública de devedores                                    |
+| Tela ilegível ao sol e bateria                                        | Tema Sol, aviso de bateria, entregar placar                                                           |
 | Rejeição nas lojas (exclusão de conta, denúncia de foto, privacidade) | Exclusão de conta no app, denúncia e remoção de foto, termos e política de privacidade desde a Fase 1 |
-| Jogador que não quer criar conta | Admin adiciona como convidado sem conta |
-| Recursos de rede sem densidade (Falta 1, mapa) | Fora do roadmap até haver densidade por cidade |
+| Jogador que não quer criar conta                                      | Admin adiciona como convidado sem conta                                                               |
+| Recursos de rede sem densidade (Falta 1, mapa)                        | Fora do roadmap até haver densidade por cidade                                                        |
 
 **Testes com usuários reais:**
 
@@ -241,27 +241,27 @@ Monólito modular em ASP.NET Core (.NET 10), com DDD enxuto: agregados só onde 
 
 ### Stack
 
-| Camada | Escolha |
-|---|---|
-| API | ASP.NET Core .NET 10, Minimal APIs |
-| Banco | PostgreSQL (Neon) + EF Core/Npgsql |
-| Tempo real | SignalR (placar ao vivo, pós-piloto, ADR 0046) |
-| Jobs | Hangfire (rodadas recorrentes, lembretes, outbox) |
-| Login | Firebase Auth: Google, Apple e e-mail com senha; a API valida o token com FirebaseAdmin |
-| Página da rodada | Razor Pages no mesmo projeto, com meta tags para a prévia no WhatsApp |
-| Push | Expo Push Service |
-| Hospedagem | Railway, plano Hobby |
+| Camada           | Escolha                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| API              | ASP.NET Core .NET 10, Minimal APIs                                                      |
+| Banco            | PostgreSQL (Neon) + EF Core/Npgsql                                                      |
+| Tempo real       | SignalR (placar ao vivo, pós-piloto, ADR 0046)                                          |
+| Jobs             | Hangfire (rodadas recorrentes, lembretes, outbox)                                       |
+| Login            | Firebase Auth: Google, Apple e e-mail com senha; a API valida o token com FirebaseAdmin |
+| Página da rodada | Razor Pages no mesmo projeto, com meta tags para a prévia no WhatsApp                   |
+| Push             | Expo Push Service                                                                       |
+| Hospedagem       | Railway, plano Hobby                                                                    |
 
 ### Módulos
 
-| Módulo | Responsabilidade | Modelo |
-|---|---|---|
-| Identity | Usuário, perfil, posições, nível | CRUD |
-| Groups | Membros, papéis, mensalistas, configuração padrão, plano | Agregado Group |
-| Sessions | Presença, vagas, lista de espera, sorteio | Agregado Session |
-| Matches | Placar, fila, rotação, banco | Stream CourtSession (quadra da rodada) com event sourcing; partidas, fila e saída parcial dentro dele |
-| Payments | Pix copia e cola, "já paguei", confirmação | CRUD |
-| Summaries | Resumo da rodada com IA (com cota por grupo); estatísticas, MVP e rating OpenSkill (ADR 0047) ficam num módulo Stats com projeções recalculáveis | Serviço |
+| Módulo    | Responsabilidade                                                                                                                                 | Modelo                                                                                                |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Identity  | Usuário, perfil, posições, nível                                                                                                                 | CRUD                                                                                                  |
+| Groups    | Membros, papéis, mensalistas, configuração padrão, plano                                                                                         | Agregado Group                                                                                        |
+| Sessions  | Presença, vagas, lista de espera, sorteio                                                                                                        | Agregado Session                                                                                      |
+| Matches   | Placar, fila, rotação, banco                                                                                                                     | Stream CourtSession (quadra da rodada) com event sourcing; partidas, fila e saída parcial dentro dele |
+| Payments  | Pix copia e cola, "já paguei", confirmação                                                                                                       | CRUD                                                                                                  |
+| Summaries | Resumo da rodada com IA (com cota por grupo); estatísticas, MVP e rating OpenSkill (ADR 0047) ficam num módulo Stats com projeções recalculáveis | Serviço                                                                                               |
 
 Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a comunicação é pela interface pública do módulo ou por eventos.
 
@@ -276,27 +276,27 @@ Cada módulo tem o próprio schema no Postgres e nunca lê tabelas de outro; a c
 
 **Glossário (português → código):**
 
-| Termo no app | Nome no código |
-|---|---|
-| Grupo | Group |
-| Rodada | Session |
-| Partida | Match |
-| Set | MatchSet |
-| Presença | Attendance |
-| Lista de espera | Waitlist |
-| Mensalista / avulso | Regular / DropIn |
-| Fila de times | TeamQueue |
-| Sorteio | TeamDraw |
-| Placar | Score |
+| Termo no app                 | Nome no código            |
+| ---------------------------- | ------------------------- |
+| Grupo                        | Group                     |
+| Rodada                       | Session                   |
+| Partida                      | Match                     |
+| Set                          | MatchSet                  |
+| Presença                     | Attendance                |
+| Lista de espera              | Waitlist                  |
+| Mensalista / avulso          | Regular / DropIn          |
+| Fila de times                | TeamQueue                 |
+| Sorteio                      | TeamDraw                  |
+| Placar                       | Score                     |
 | Rotação / sistema de rotação | Rotation / RotationSystem |
-| Sacador | ServingPlayer |
-| Side-out | SideOut |
-| Banco | Bench |
-| Levantador / líbero | Setter / Libero |
-| Posição na quadra (1–6) | RotationSlot |
-| Função do jogador | PlayerRole |
-| Nível | SkillLevel |
-| Resumo da rodada | SessionSummary |
+| Sacador                      | ServingPlayer             |
+| Side-out                     | SideOut                   |
+| Banco                        | Bench                     |
+| Levantador / líbero          | Setter / Libero           |
+| Posição na quadra (1–6)      | RotationSlot              |
+| Função do jogador            | PlayerRole                |
+| Nível                        | SkillLevel                |
+| Resumo da rodada             | SessionSummary            |
 
 Termos acrescentados na revisão: Quadra da rodada → CourtSession, Cartinha → PlayerCard, Formação → Formation, Posição no saque → ServeAlignment, Rotação atual → RotationIndex, Saída parcial → PartialExit, Membro do grupo → GroupMember (MemberId).
 
@@ -388,11 +388,11 @@ Expo + TypeScript strict, Expo Router, EAS (Build, Submit, Update), TanStack Que
 
 Os três pontos em que os agentes divergiram foram decididos em 30/10/2026.
 
-| Decisão | Escolha | Consequência |
-|---|---|---|
-| Plataforma | App nativo (React Native/Expo) desde a Fase 1 | Vibração, push e tela ligada no iOS desde o início; a página da rodada continua web, para o jogador confirmar sem instalar |
-| Sistemas 4x2, 5x1, 6x2 | No Sacou Pro | Livre e 6x0 seguem grátis para todos |
-| Preço do Pro | R$ 9,90/mês ou R$ 79/ano | Reajustar com dados depois da tração |
+| Decisão                | Escolha                                       | Consequência                                                                                                               |
+| ---------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Plataforma             | App nativo (React Native/Expo) desde a Fase 1 | Vibração, push e tela ligada no iOS desde o início; a página da rodada continua web, para o jogador confirmar sem instalar |
+| Sistemas 4x2, 5x1, 6x2 | No Sacou Pro                                  | Livre e 6x0 seguem grátis para todos                                                                                       |
+| Preço do Pro           | R$ 9,90/mês ou R$ 79/ano                      | Reajustar com dados depois da tração                                                                                       |
 
 **Ainda em aberto:**
 

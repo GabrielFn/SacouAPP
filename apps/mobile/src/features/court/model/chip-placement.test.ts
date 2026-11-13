@@ -32,7 +32,6 @@ const PHASES: readonly FormationPhase[] = ["serving", "receiving"];
 const LANDSCAPE_ENDS: readonly CourtEnd[] = ["left", "right"];
 const PORTRAIT_ENDS: readonly CourtEnd[] = ["top", "bottom"];
 const EPSILON = 0.01;
-const HEAVY_TEST_MS = 60_000;
 
 interface Phone {
   readonly width: number;
@@ -169,23 +168,15 @@ function checkAll(phones: readonly Phone[], ends: readonly CourtEnd[]): readonly
 }
 
 describe("chips of every formation in landscape (both teams, three widths and a notch)", () => {
-  test(
-    "none covers another, crosses the net, leaves the zone or covers the column",
-    () => {
-      expect(checkAll(LANDSCAPE_PHONES, LANDSCAPE_ENDS)).toEqual([]);
-    },
-    HEAVY_TEST_MS,
-  );
+  test("none covers another, crosses the net, leaves the zone or covers the column", () => {
+    expect(checkAll(LANDSCAPE_PHONES, LANDSCAPE_ENDS)).toEqual([]);
+  });
 });
 
 describe("chips of every formation in the portrait fallback", () => {
-  test(
-    "none covers another, crosses the net, leaves the zone or covers the column",
-    () => {
-      expect(checkAll(PORTRAIT_PHONES, PORTRAIT_ENDS)).toEqual([]);
-    },
-    HEAVY_TEST_MS,
-  );
+  test("none covers another, crosses the net, leaves the zone or covers the column", () => {
+    expect(checkAll(PORTRAIT_PHONES, PORTRAIT_ENDS)).toEqual([]);
+  });
 
   test("the chip that was cut at the edge (a receiving team, long names) stays inside the zone", () => {
     const phone = PORTRAIT_PHONES[1] as Phone;

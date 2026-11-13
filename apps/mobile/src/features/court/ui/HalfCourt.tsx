@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { View } from "react-native";
 import Svg, { Line } from "react-native-svg";
 
@@ -94,7 +95,10 @@ export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
   const { tokens } = useTheme();
   const color = TEAM_PALETTES[panel.color].fill;
   const vertical = layout.kind === "landscape";
-  const drawn = layoutTeamChips({ panel, layout, tokens, end });
+  const drawn = useMemo(
+    () => layoutTeamChips({ panel, layout, tokens, end }),
+    [panel, layout, tokens, end],
+  );
   return (
     <View
       style={{

@@ -8,22 +8,22 @@
 
 **`formationsVersion` em `MatchStarted` e `MatchScore`, em vez de cópia das coordenadas (decisão do Gabriel, `decisoes.md:26`).** A partida grava o número, e o catálogo é imutável por versão. Inteiro ≥ 1 no parser. Ao mudar `formations.json`, sobe `FORMATION_CATALOG_VERSION` e o catálogo anterior fica disponível. Um teste em `volley-rules` guarda o hash do conteúdo do catálogo da versão 1, e é ele que falha em quem editar sem subir a versão. A cópia real das coordenadas entra com o editor do Pro.
 
-| Situação | Comportamento |
-|---|---|
-| Replay com versão desconhecida | Aceito: o evento é aplicado como gravado (caso `s16-unknown-formations-version-*`) |
-| `getTeamServeAlignment` com versão desconhecida | `null`, como rotação desligada: a tela mostra só o time que saca |
-| `startMatch` com versão diferente da atual | Recusado com `unsupported-formations-version`, como `rulesVersion`: uma partida nova nunca nasce sem posições |
+| Situação                                        | Comportamento                                                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Replay com versão desconhecida                  | Aceito: o evento é aplicado como gravado (caso `s16-unknown-formations-version-*`)                            |
+| `getTeamServeAlignment` com versão desconhecida | `null`, como rotação desligada: a tela mostra só o time que saca                                              |
+| `startMatch` com versão diferente da atual      | Recusado com `unsupported-formations-version`, como `rulesVersion`: uma partida nova nunca nasce sem posições |
 
 **A função vem do índice no `lineup`, sem campo novo.** 5x1: `[S, OH1, MB1, OPP, OH2, MB2]`. 6x2 e 4x2: `[S1, OH1, MB1, S2, OH2, MB2]`, com o 2º levantador no índice 3. O giro não muda a função de ninguém, e o estado não representa levantadores fora da diagonal: esse aviso depende da posição declarada, na E4.8.
 
 **`IRotationSystem` é a tabela `ZONE_FORMATIONS`, em `score/constants.data.ts`, sem classe.** Cada sistema e zona dão `{ formationKey, swapPairs }`. A diferença entre sistemas é só dado, então a Strategy do ADR 0011 não tem o que escolher além de uma linha na tabela. Um teste amarra a tabela a `rotationOrder`. O `*` marca `swapPairs: true`:
 
-| `setterZone` | 1 | 6 | 5 | 4 | 3 | 2 |
-|---|---|---|---|---|---|---|
-| 5x1 | 1 | 6 | 5 | 4 | 3 | 2 |
-| 6x2 | 1 | 6 | 5 | 1* | 6* | 5* |
-| 4x2 | 4 | 3 | 2 | 4* | 3* | 2* |
-| livre | 0 | 0 | 0 | 0 | 0 | 0 |
+| `setterZone` | 1   | 6   | 5   | 4   | 3   | 2   |
+| ------------ | --- | --- | --- | --- | --- | --- |
+| 5x1          | 1   | 6   | 5   | 4   | 3   | 2   |
+| 6x2          | 1   | 6   | 5   | 1*  | 6*  | 5*  |
+| 4x2          | 4   | 3   | 2   | 4*  | 3*  | 2*  |
+| livre        | 0   | 0   | 0   | 0   | 0   | 0   |
 
 Na zona 1 do 4x2, o levantador `lineup[0]` está no fundo e `lineup[3]` na rede: é a chave 4, sem troca.
 
@@ -49,9 +49,9 @@ Na zona 1 do 4x2, o levantador `lineup[0]` está no fundo e `lineup[3]` na rede:
 
 **A E2.10 porta `getServeAlignment` e as tabelas `ZONE_FORMATIONS`, `SWAPPED_PAIR_ROLES` e `ACTING_SETTER_ROLES`, sem aritmética própria, e roda `serve-alignment.json` pelo caminho.** `getTeamServeAlignment` e `validateServeAlignment` ficam só em TS, salvo decisão da E3.7.
 
-| Arquivo em `packages/match-engine/golden/` | Formato |
-|---|---|
-| `serve-alignment.json` | `{ id, input: { system, lineup, setterZone, phase }, expected: { formationKey, actingSetter, slots } }`, com `slots["1".."6"] = { memberId, role, point: { x, y } }`. São 48 casos (4 sistemas × 6 zonas × 2 fases, id `6x2-zone-4-receiving`), mais um com `lineup` fora de ordem de UUID |
+| Arquivo em `packages/match-engine/golden/` | Formato                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `serve-alignment.json`                     | `{ id, input: { system, lineup, setterZone, phase }, expected: { formationKey, actingSetter, slots } }`, com `slots["1".."6"] = { memberId, role, point: { x, y } }`. São 48 casos (4 sistemas × 6 zonas × 2 fases, id `6x2-zone-4-receiving`), mais um com `lineup` fora de ordem de UUID |
 
 Os esperados são decididos à mão, com tabelas próprias em um script descartável fora do repositório, que não importa o motor. As coordenadas vêm de `volley-rules/golden/formations.json`.
 

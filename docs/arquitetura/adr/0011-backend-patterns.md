@@ -6,17 +6,17 @@
 
 ## Decisão
 
-| Padrão | Uso |
-|---|---|
-| Strategy | `IRotationSystem`, `IQueueExitCriterion`, `ITeamBalancer`; `IBenchRule` só quando houver regra automática de banco (ADR 0027) |
-| SettingsResolver | Mescla grupo → rodada → partida, folha a folha. **Substituído em parte pelo [ADR 0041](0041-configuracao-herdada-e-modelos.md):** a camada é parcial (folha ausente herda) e nenhuma folha é nula; o catálogo é um JSON único lido por TS e C# |
-| Outbox | Eventos gravados na mesma transação e enviados pelo Hangfire |
-| Idempotência | Eventos com ID gerado no celular; reenvio não duplica |
-| Concorrência otimista | `xmin` como versão, usada na disputa pela última vaga |
-| Result pattern | Erro de regra vira resultado e depois `ProblemDetails`, sem exceção |
-| Autorização por recurso | Policies verificam o papel no grupo (Admin, CoAdmin, Scorekeeper) |
-| CQRS leve | Comandos passam pelo domínio; leituras usam projeções com `AsNoTracking` |
-| Testes golden | JSONs rodados em C# e em TypeScript |
+| Padrão                  | Uso                                                                                                                                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Strategy                | `IRotationSystem`, `IQueueExitCriterion`, `ITeamBalancer`; `IBenchRule` só quando houver regra automática de banco (ADR 0027)                                                                                                                  |
+| SettingsResolver        | Mescla grupo → rodada → partida, folha a folha. **Substituído em parte pelo [ADR 0041](0041-configuracao-herdada-e-modelos.md):** a camada é parcial (folha ausente herda) e nenhuma folha é nula; o catálogo é um JSON único lido por TS e C# |
+| Outbox                  | Eventos gravados na mesma transação e enviados pelo Hangfire                                                                                                                                                                                   |
+| Idempotência            | Eventos com ID gerado no celular; reenvio não duplica                                                                                                                                                                                          |
+| Concorrência otimista   | `xmin` como versão, usada na disputa pela última vaga                                                                                                                                                                                          |
+| Result pattern          | Erro de regra vira resultado e depois `ProblemDetails`, sem exceção                                                                                                                                                                            |
+| Autorização por recurso | Policies verificam o papel no grupo (Admin, CoAdmin, Scorekeeper)                                                                                                                                                                              |
+| CQRS leve               | Comandos passam pelo domínio; leituras usam projeções com `AsNoTracking`                                                                                                                                                                       |
+| Testes golden           | JSONs rodados em C# e em TypeScript                                                                                                                                                                                                            |
 
 **Sem MediatR e sem AutoMapper:** handlers injetados diretamente e mapeamento manual.
 
