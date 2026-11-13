@@ -61,8 +61,8 @@ export function chipMaxWidth(layout: CourtLayout, tokens: ScaledTokens): number 
 }
 
 const ELLIPSIS = "…";
-/** A short name is an initial and a dot: "Ana C." (a longer last word is not an abbreviation). */
-const ABBREVIATION = /^(.+) (\p{L}\.)$/u;
+/** A short name ends in letters and a dot: "Ana C.", "Ana Ca." (a last word without the dot is a name). */
+const ABBREVIATION = /^(.+) (\p{L}+\.)$/u;
 const WIDE_LETTERS = /^[MWmw]$/u;
 const UPPER_LETTER = /^\p{Lu}$/u;
 

@@ -59,6 +59,18 @@ function inputOf({ width, height }: { width: number; height: number }) {
 }
 
 describe("the name on a chip", () => {
+  test.each(SCREENS)(
+    "an abbreviation of two letters is kept whole when the name is cut at $width x $height",
+    (screen) => {
+      const input = inputOf(screen);
+      const labels = ["Guilhermina Ca.", "Guilhermina Cl."].map(
+        (name) => chipSizes(chipOf(name), input).label,
+      );
+      expect(labels[0]?.endsWith(" Ca.")).toBe(true);
+      expect(labels[1]?.endsWith(" Cl.")).toBe(true);
+    },
+  );
+
   test.each(SCREENS)("names of up to eight letters are never cut at $width x $height", (screen) => {
     const input = inputOf(screen);
     for (const name of ["Marcos", "Pedro", "Duda", "Ana", "Jaqueline", "Christian"]) {
