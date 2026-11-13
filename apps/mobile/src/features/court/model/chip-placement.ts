@@ -231,16 +231,16 @@ function packOneByOne(boxes: readonly Box[], frame: PlacementFrame): readonly Bo
 /** The first way of pushing that leaves nothing covered, then packing one by one, else the least covered. */
 function bestSettlement(boxes: readonly Box[], frame: PlacementFrame): readonly Box[] {
   // Lazy: the next way of pushing is tried only when the one before left something covered.
-  const pushed: (readonly Box[])[] = [];
-  for (const strategy of STRATEGIES) {
-    const option = settle(boxes, frame, strategy);
-    if (coverage(option, frame.column) === 0) {
-      return option;
-    }
-    pushed.push(option);
+  const tried = STRATEGIES.reduce<readonly (readonly Box[])[]>((options, strategy) => {
+    const done = options.some((option) => coverage(option, frame.column) === 0);
+    return done ? options : [...options, settle(boxes, frame, strategy)];
+  }, []);
+  const clean = tried.find((option) => coverage(option, frame.column) === 0);
+  if (clean !== undefined) {
+    return clean;
   }
   const packed = packOneByOne(boxes, frame);
-  return [...pushed, packed].reduce((best, option) =>
+  return [...tried, packed].reduce((best, option) =>
     coverage(option, frame.column) < coverage(best, frame.column) ? option : best,
   );
 }
