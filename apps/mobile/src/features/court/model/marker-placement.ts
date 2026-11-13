@@ -1,34 +1,9 @@
-import type { CourtPoint } from "@sacou/volley-rules";
-
 import { HALF, PERCENT } from "../court.data";
 import { placeOnHalfCourt, type CourtEnd } from "./court-geometry";
 
-/** A rectangle in pixels; the origin is the top left corner of the half court square. */
-export interface Rect {
-  readonly left: number;
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-}
+import type { MarkerSpec, NameOption, Rect } from "./marker-placement.types";
 
-/** One way to write a name, with the width it takes. */
-export interface NameOption {
-  readonly text: string;
-  readonly width: number;
-}
-
-/** What a marker needs to be placed: the point of the formation, its circle and the sizes of its name. */
-export interface MarkerSpec {
-  readonly id: string;
-  readonly point: CourtPoint;
-  /** The radius of the circle itself. */
-  readonly radius: number;
-  /** The radius with the room of the badges that stick out of it. */
-  readonly reach: number;
-  /** The name from the whole one to the shortest; the first one that finds room is drawn. */
-  readonly names: readonly NameOption[];
-  readonly nameHeight: number;
-}
+export type { MarkerSpec, NameOption, Rect };
 
 /** Where the name stands around its circle, in the order the sides are tried. */
 export type NameSide =
@@ -49,7 +24,7 @@ const NAME_SIDES: readonly NameSide[] = [
  * The name hugs its circle: the air between them is the gap and at most half a diameter (the radius),
  * tried in these fractions of that slack, the closest first.
  */
-const NAME_SLACK_STEPS = [0, 0.5, 1] as const;
+const NAME_SLACK_STEPS = [0, 1 / HALF, 1] as const;
 
 /** A name that is not nearer to its own circle than to any other costs this much, as if it covered it. */
 const NOT_NEAREST_PENALTY = 4000;
@@ -286,14 +261,10 @@ function roomOf(
 }
 
 /**
- * Where each marker goes. The center of every circle is the point of the formation, turned to the end
- * of the screen: it is never pushed, only a point outside the zone is brought in. The name hugs its circle (at most half a
- * diameter of air) and is nearer to it than to any other circle; it goes below
- * the circle; where that would cover another circle, another name, the column, the net or the edge of
- * the zone, it goes above, then to the right, to the left and to the diagonals, and the first free
- * spot wins. With none free the name is shortened, and with none still the least covered spot is
- * used. Markers are taken from the one with the fewest free spots to the one with the most (then by id) and no random number is used, so the same lineup
- * always gives the same screen.
+ * Where each marker goes: the circle is on its point (only a point outside the zone is brought in)
+ * and the name hugs it, nearer to it than to any other circle. The name is tried whole first, below,
+ * above, at the sides and the diagonals; the first free spot wins, else the cheapest. Markers with
+ * the fewest free spots go first (then by id), with no random number: same lineup, same screen.
  */
 export function placeMarkers(
   frame: PlacementFrame,
