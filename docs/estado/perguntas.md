@@ -25,6 +25,7 @@
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
 
 ## Respondidas
+- **Modo quadra em paisagem (13/11/2026, no teste no celular):** a quadra fica sempre em paisagem, travada; o resto do app continua em retrato. Os defeitos de lógica do teste (fim do set, trava, vibração do fim do set) são corrigidos já, na E4.9; os de layout (nomes sobrepostos, faixa cortada) vão para a paisagem, na E4.17, cujo layout o analista propõe e o Gabriel aprova. Testar com nomes longos.
 - **Revisão das telas do piloto (12/11/2026, pelo celular):** fila com três modos e "vencedor também sai" (resposta 3-2); votação do MVP só de quem jogou, sem votar em si, 24 h, secreta, empate pelo saldo (4-a); areia rei da quadra com duplas ou quartetos, vencedor fica e ranking do dia (5-1). Telas de `design/mvp/` aprovadas, inclusive 09a, 09b e 09c. ADR 0048.
 - **Nota e rating (11/11/2026, pelo celular):** a nota inicial é do admin, e o jogador só sugere; rating OpenSkill por partida, que o jogador não vê e que fica escondido no piloto. ADR 0047.
 - **Escopo do piloto (11/11/2026, pelo celular):** saem texto da IA e story, foto da cartinha, placar ao vivo, planos e paywall, Pix, reivindicação do convidado, links que abrem o app e o QR do placar; o Resumo sem IA fica; o Placar assume a quadra; sincronização a cada ponto. ADR 0046.
