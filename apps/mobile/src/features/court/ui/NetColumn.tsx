@@ -49,6 +49,7 @@ export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps)
           flex: NET_COLUMN_FLEX.undo,
           minHeight: sizes.undoButton,
           minWidth: sizes.menuButton,
+          paddingHorizontal: tokens.court.spacing.hairGap,
           borderRadius: tokens.radii.button,
           backgroundColor: canUndo ? colors.text : courtDisabledFill,
           alignItems: "center",
@@ -63,7 +64,7 @@ export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps)
           style={{
             color: colors.background,
             fontFamily: fontFamilies.display800,
-            fontSize: tokens.fontSizes.displayBrand,
+            fontSize: tokens.fontSizes.caption,
           }}
         >
           {strings.court.strip.undo}
@@ -77,6 +78,7 @@ export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps)
           flex: NET_COLUMN_FLEX.correct,
           minHeight: sizes.menuButton,
           minWidth: sizes.menuButton,
+          paddingHorizontal: tokens.court.spacing.hairGap,
           borderRadius: tokens.radii.button,
           borderWidth: tokens.court.borderWidths.outline,
           borderColor: colors.text,
@@ -90,7 +92,7 @@ export function NetColumn({ width, canUndo, onUndo, onCorrect }: NetColumnProps)
         <Text
           numberOfLines={1}
           adjustsFontSizeToFit
-          style={{ fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.body }}
+          style={{ fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.caption }}
         >
           {strings.court.strip.correct}
         </Text>

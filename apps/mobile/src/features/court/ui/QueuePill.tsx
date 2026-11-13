@@ -20,6 +20,7 @@ export function QueuePill({ position, label, maxWidth = "100%" }: QueuePillProps
       style={{
         height: sizes.pill,
         maxWidth,
+        flexShrink: 1,
         borderRadius: sizes.pill,
         borderWidth: tokens.borderWidths.thick,
         borderColor: palette.black,

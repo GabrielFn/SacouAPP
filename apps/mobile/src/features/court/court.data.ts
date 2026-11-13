@@ -53,7 +53,7 @@ export const LANDSCAPE_TOTAL_HEIGHT_WEIGHT =
 /**
  * The width is shared as: team A 382 | net 80 | team B 382 of 844. The net was 112 wide in the
  * approved sketch; the phone test of 13/11/2026 asked for a bigger court (ADR 0052), and the net
- * keeps what its two buttons need (64 wide in 844 x 390), never less than `NET_MIN_WIDTH`.
+ * keeps what its two buttons need (64 wide in 844 x 390; the words are small so they have air), never less than `NET_MIN_WIDTH`.
  */
 export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 382, net: 80 } as const;
 
@@ -157,8 +157,8 @@ export const LABEL_SAFE_NAME_LETTERS = 8;
 /** The air kept between the circles and names and the edges of the zone (the bar, the queue, the screen). */
 export const MARKER_ZONE_MARGIN = 10;
 
-/** A pill of the queue in the row of landscape is at most 132 of the 844 of the width wide. */
-export const QUEUE_PILL_MAX_WIDTH_RATIO = 132 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
+/** A pill of the queue in the row of landscape is at most 220 of the 844 of the width wide, so a name is cut only when the strip is really full. */
+export const QUEUE_PILL_MAX_WIDTH_RATIO = 220 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
 
 /** Halves a length: the middle of a chip, a zone or the net. */
 export const HALF = 2;
