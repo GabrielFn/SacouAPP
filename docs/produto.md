@@ -125,7 +125,7 @@ Uma aba "Explorar" (Falta 1, mapa) só entra quando houver densidade de usuário
 
 | Zona (retrato) | Altura | Conteúdo |
 |---|---|---|
-| Barra de status | 6% | Set, sets ganhos, trava, offline, menu |
+| Barra de status | 6% | Set, sets ganhos, offline, menu |
 | Time A | 34% | Placar gigante, bola de saque, minirrotação 3x2 |
 | Faixa central | 10% | DESFAZER (largura total), sacador, botão Corrigir |
 | Time B | 34% | Igual ao Time A |
@@ -133,7 +133,7 @@ Uma aba "Explorar" (Falta 1, mapa) só entra quando houver densidade de usuário
 
 1. **A zona inteira do time é o botão de ponto**, não um "+1". Números com pelo menos 45% da altura da zona, legíveis a 5 m.
 2. **Tema Sol:** preto puro sobre branco puro de dia; tema Noite em quadra coberta. Contraste mínimo 7:1. Cor nunca é o único sinal (nome e letra A/B também).
-3. **Proteção contra erro:** trava ligada por padrão, bloqueio de 700 ms após cada ponto, toques com a palma ignorados, toast "+1 Laranja (22–19)".
+3. **Proteção contra erro:** bloqueio de 700 ms após cada ponto, toques com a palma ignorados, voltar do Android bloqueado na quadra. Sem trava (cadeado) e sem toast "+1": removidos pelo Gabriel em 13/11/2026 (`decisoes.md`).
 4. **Corrigir sem estresse:** linha do tempo dos últimos 10 pontos; um toque volta àquele estado; trocar sacador e girar time a 1 toque; cada correção mostra o que mudou.
 5. **Feedback:** vibração no ponto, no side-out, no set point e no fim de set; bipe opcional.
 6. **Tela sempre ligada** durante o modo quadra; aviso de bateria abaixo de 20% sugerindo ligar no carregador ou na power bank (ADR 0046).
