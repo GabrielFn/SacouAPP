@@ -94,13 +94,39 @@ export function fitName(name: string, room: number, tokens: ScaledTokens): strin
   return `${shortened(first, room - nameTextWidth(` ${last}`, tokens), tokens)} ${last}`;
 }
 
-/** The whole name, then the same name shortened to each of the steps of its width, without repeats. */
+const MIN_CUT_LETTERS = 3;
+
+/** An abbreviation whose first name was cut to fewer than three letters reads badly ("A… Ca."). */
+function isBadCut(text: string): boolean {
+  const cut = /^(.*)… \p{L}+\.$/u.exec(text);
+  return cut !== null && Array.from(cut[1] ?? "").length < MIN_CUT_LETTERS;
+}
+
+/**
+ * The whole name, then shorter ones from the widest to the narrowest, without repeats. An
+ * abbreviation first loses the cut of its first name with the suffix (only when three letters stay),
+ * then the suffix altogether: "Ana Ca.", "Ana…".
+ */
 export function nameOptions(name: string, tokens: ScaledTokens): readonly NameOption[] {
   const whole = nameTextWidth(name, tokens);
-  const texts = [name, ...LABEL_SHORTENED_STEPS.map((step) => fitName(name, whole * step, tokens))];
+  const first = ABBREVIATION.exec(name)?.[1];
+  const cuts = LABEL_SHORTENED_STEPS.map((step) => fitName(name, whole * step, tokens)).filter(
+    (text) => !isBadCut(text),
+  );
+  const firstCuts =
+    first === undefined
+      ? []
+      : [
+          first,
+          ...LABEL_SHORTENED_STEPS.map((step) =>
+            shortened(first, nameTextWidth(first, tokens) * step, tokens),
+          ),
+        ];
+  const texts = [name, ...cuts, ...firstCuts];
   return texts
     .filter((text, index) => texts.indexOf(text) === index)
-    .map((text) => ({ text, width: nameTextWidth(text, tokens) }));
+    .map((text) => ({ text, width: nameTextWidth(text, tokens) }))
+    .sort((a, b) => b.width - a.width);
 }
 
 function hasBadge(chip: PlayerChipModel): boolean {

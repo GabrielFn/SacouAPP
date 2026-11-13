@@ -329,3 +329,37 @@ describe("the server stays whole inside the zone", () => {
     expect(frame.bounds.bottom).toBeCloseTo(layout.zoneHeight - origin.y - MARKER_ZONE_MARGIN, 3);
   });
 });
+
+describe("long names on a large landscape screen", () => {
+  const BIG_PHONE: Phone = { width: 2340, height: 1080, insetLeft: 0 };
+  const MIN_READABLE = 9;
+  const FIRST_NAMES = ["Bernardete", "Valentina", "Wellington", "Christopher", "Ana", "Joaquim"];
+  const long = (suffix: string) => FIRST_NAMES.map((first) => `${first} ${suffix}`);
+
+  test("most names stay whole or as 'First I.', and nothing is covered", () => {
+    const readable: boolean[] = [];
+    const problems: string[] = [];
+    for (const [end, suffix] of [
+      ["left", "Ca."],
+      ["right", "P."],
+    ] as const) {
+      const names = long(suffix);
+      const panel = panelOf({
+        names,
+        phase: "receiving",
+        system: "5x1",
+        setterZone: 1,
+        hasSetPoint: false,
+      });
+      const input = { panel, layout: layoutOf(BIG_PHONE), tokens: tokensOf(BIG_PHONE), end };
+      problems.push(...problemsOf(input));
+      layoutTeamMarkers(input).forEach(({ chip, placed }) => {
+        const text = placed.name.text;
+        readable.push(text === chip.displayName || /^\p{L}+ \p{L}\.$/u.test(text));
+        expect(text).not.toMatch(/^\p{L}{1,2}… /u);
+      });
+    }
+    expect(problems).toEqual([]);
+    expect(readable.filter(Boolean).length).toBeGreaterThanOrEqual(MIN_READABLE);
+  });
+});

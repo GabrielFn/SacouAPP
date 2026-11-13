@@ -118,27 +118,6 @@ function rowsOverlap(a: Row, b: { top: number; bottom: number }, air: number): b
   return a.top < b.bottom + air && a.bottom > b.top - air;
 }
 
-/**
- * The half width a name can take around its own circle: it may not reach the circle of a neighbour
- * on its row, and shares the distance to the name of a neighbour that stands on the same row.
- */
-function halfRoomOf(row: Row, rows: readonly Row[], gap: number): number {
-  return rows
-    .filter((other) => other.circle.id !== row.circle.id)
-    .reduce((room, other) => {
-      const distance = Math.abs(other.circle.x - row.circle.x);
-      const circleRows = {
-        top: other.circle.y - other.circle.reach,
-        bottom: other.circle.y + other.circle.reach,
-      };
-      const blockedByCircle = rowsOverlap(row, circleRows, gap)
-        ? distance - other.circle.reach - gap
-        : Infinity;
-      const sharedWithName = rowsOverlap(row, other, gap) ? (distance - gap) / HALF : Infinity;
-      return Math.min(room, blockedByCircle, sharedWithName);
-    }, Infinity);
-}
-
 /** The name stays inside the zone and out of the column of the team, on the side of its circle. */
 function horizontalLimits(row: Row, frame: PlacementFrame): { low: number; high: number } {
   const { left, right } = frame.bounds;
@@ -151,18 +130,45 @@ function horizontalLimits(row: Row, frame: PlacementFrame): { low: number; high:
     : { low: left, high: Math.min(right, column.left) };
 }
 
-function placeName(row: Row, rows: readonly Row[], frame: PlacementFrame): PlacedMarker["name"] {
-  const { low, high } = horizontalLimits(row, frame);
-  const half = Math.min(halfRoomOf(row, rows, frame.gap), row.circle.x - low, high - row.circle.x);
-  const names = row.spec.names;
-  const chosen = names.find((option) => option.width <= half * HALF) ?? names[names.length - 1];
-  const { text, width } = chosen ?? { text: "", width: 0 };
-  const left = keepInside(row.circle.x, width / HALF, low, high) - width / HALF;
-  return {
-    text,
-    side: row.side,
-    box: { left, right: left + width, top: row.top, bottom: row.bottom },
-  };
+function rectAt(row: Row, width: number, limits: { low: number; high: number }): Rect {
+  const left = keepInside(row.circle.x, width / HALF, limits.low, limits.high) - width / HALF;
+  return { left, right: left + width, top: row.top, bottom: row.bottom };
+}
+
+function collides(box: Rect, other: Rect, air: number): boolean {
+  return (
+    overlapArea(box, {
+      ...other,
+      left: other.left - air,
+      right: other.right + air,
+      top: other.top - air,
+      bottom: other.bottom + air,
+    }) > 0
+  );
+}
+
+/**
+ * The longest text whose rectangle, centered on its circle and kept inside the zone, touches no other
+ * circle and no name already placed; the shortest one when none is free.
+ */
+function placeName(
+  row: Row,
+  rows: readonly Row[],
+  placed: readonly Rect[],
+  frame: PlacementFrame,
+): PlacedMarker["name"] {
+  const limits = horizontalLimits(row, frame);
+  const obstacles = [
+    ...rows.filter((other) => other.circle.id !== row.circle.id).map((o) => circleBox(o.circle)),
+    ...placed,
+  ];
+  const options = row.spec.names.length > 0 ? row.spec.names : [{ text: "", width: 0 }];
+  const free = options.find(({ width }) => {
+    const box = rectAt(row, width, limits);
+    return obstacles.every((other) => !collides(box, other, frame.gap));
+  });
+  const chosen = free ?? options.at(-1) ?? { text: "", width: 0 };
+  return { text: chosen.text, side: row.side, box: rectAt(row, chosen.width, limits) };
 }
 
 /**
@@ -181,10 +187,27 @@ export function placeMarkers(
     const side = verticalSide(circle, spec, frame);
     return { circle, spec, side, ...nameRows(circle, side, spec.nameHeight, frame.gap) };
   });
+  const order = [...rows].sort((a, b) => a.circle.y - b.circle.y || a.circle.x - b.circle.x);
+  const names = order.reduce<ReadonlyMap<string, PlacedMarker["name"]>>(
+    (done, row) =>
+      new Map([
+        ...done,
+        [
+          row.spec.id,
+          placeName(
+            row,
+            rows,
+            [...done.values()].map((name) => name.box),
+            frame,
+          ),
+        ],
+      ]),
+    new Map(),
+  );
   return rows.map((row) => ({
     id: row.spec.id,
     x: row.circle.x,
     y: row.circle.y,
-    name: placeName(row, rows, frame),
+    name: names.get(row.spec.id) as PlacedMarker["name"],
   }));
 }
