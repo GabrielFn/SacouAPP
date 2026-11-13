@@ -36,6 +36,9 @@ export const courtStrings = {
     setterLabel: "levantador",
     liberoBadge: "Lí",
     liberoLabel: "líbero",
+    serverLabel: "sacador",
+    markerLabel: (name: string, zone: number, role: string | null) =>
+      `${name}, posição ${String(zone)}${role === null ? "" : `, ${role}`}`,
     teamLetter: { a: "A", b: "B" },
   },
   strip: {

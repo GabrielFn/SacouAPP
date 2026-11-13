@@ -104,7 +104,7 @@
   },
   "courtTokens": {
     "sizes": {
-      "chip": 28,
+      "chip": 30,
       "setDot": 12,
       "badge": 18,
       "tag": 30,
@@ -124,7 +124,7 @@
     },
     "fontSizes": {
       "setTitle": 22,
-      "chipNumber": 11,
+      "chipNumber": 14,
       "badge": 10,
       "tag": 21,
       "tagBadge": 15,
@@ -135,7 +135,6 @@
       "frame": 3
     },
     "spacing": {
-      "chipPadding": 9,
       "hairGap": 5,
       "scoreGap": 22,
       "badgeOffsetX": 6,

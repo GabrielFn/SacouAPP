@@ -143,7 +143,7 @@ export const accessibilityFloors = { touchTarget: 44, hairline: 1 } as const;
 // Measures of the court screens (QuadraSol.dc.html, QuadraNoite.dc.html), in canvas pixels. They are
 // scaled by the window like the other tokens; the touch targets keep the floor of 44.
 export const courtSizes = {
-  chip: 28,
+  chip: 30,
   setDot: 12,
   badge: 18,
   tag: 30,
@@ -166,7 +166,7 @@ export const courtSizes = {
 
 export const courtFontSizes = {
   setTitle: 22,
-  chipNumber: 11,
+  chipNumber: 14,
   badge: 10,
   tag: 21,
   tagBadge: 15,
@@ -176,7 +176,6 @@ export const courtFontSizes = {
 export const courtBorderWidths = { outline: 2.5, frame: 3 } as const;
 
 export const courtSpacing = {
-  chipPadding: 9,
   hairGap: 5,
   scoreGap: 22,
   badgeOffsetX: 6,

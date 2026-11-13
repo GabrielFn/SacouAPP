@@ -1,3 +1,5 @@
+import { accessibilityFloors, courtBorderWidths, courtSpacing } from "../../theme/tokens.data";
+
 // Constants of the court screens. Measures come from QuadraSol.dc.html (390 x 844 canvas).
 
 /**
@@ -55,11 +57,18 @@ export const LANDSCAPE_TOTAL_HEIGHT_WEIGHT =
  */
 export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 382, net: 80 } as const;
 
+/** The two sides of the net column, and the breath a button keeps from them (in canvas pixels). */
+const BOTH_SIDES_OF_THE_NET = 2;
+const NET_BREATH = 4;
+
 /**
- * The net column is never narrower than this: the buttons (44 touch target), the frame of the net
- * (2 x 3), the air at its sides (2 x 5) and a little breath, so no button spills over a zone.
+ * The net column is never narrower than this: the touch target of its buttons, the frame of the net
+ * and the air at its sides on both sides, and a little breath, so no button spills over a zone.
  */
-export const NET_MIN_WIDTH = 68;
+export const NET_MIN_WIDTH =
+  accessibilityFloors.touchTarget +
+  (courtBorderWidths.frame + courtSpacing.hairGap) * BOTH_SIDES_OF_THE_NET +
+  NET_BREATH;
 
 export const LANDSCAPE_TOTAL_WIDTH_WEIGHT =
   LANDSCAPE_WIDTH_WEIGHTS.zone * 2 + LANDSCAPE_WIDTH_WEIGHTS.net;
@@ -131,27 +140,22 @@ export const MAX_QUEUE_PILLS = 4;
 export const COLUMN_LINE_HEIGHT_EM = 1.35;
 
 /**
- * A chip is at most this fraction of the side of its square wide: 132 of 275 on the layout of the
- * landscape court. The upright court, a fallback with a column that takes most of the zone, has
- * room for less, so its names end in "…" sooner instead of the chips covering each other.
+ * The name under a circle is drawn at an average letter width (a little wide, so the font never cuts
+ * it), as a fraction of its font size: lower case, upper case, wide letters (Inter Bold: M 0.93,
+ * W 1.04) and the ellipsis, which measures a whole em in Inter Bold.
  */
-export const CHIP_MAX_WIDTH_RATIOS = { landscape: 132 / 275, portrait: 0.3 } as const;
-/** A letter of the name of a chip is about this wide, as a fraction of its font size (bold, upper and lower). */
-export const CHIP_CHAR_WIDTH_EM = 0.72;
-/** A wide letter (M, W) in the same measure (Inter Bold: M 0.93, W 1.04). */
-export const CHIP_WIDE_CHAR_WIDTH_EM = 1.04;
-/** An upper case letter, in the same measure ("MARCELO" averages 0.72, the widest ones more). */
-export const CHIP_UPPER_CHAR_WIDTH_EM = 0.9;
-export const CHIP_ELLIPSIS_WIDTH_EM = 1;
-/** Names of up to this many letters are never cut (a test holds it in every layout). */
-export const CHIP_SAFE_NAME_LETTERS = 8;
-/** The air kept between the chips and the edges of the zone (the bar, the queue, the screen). */
-export const CHIP_ZONE_MARGIN = 6;
-/** The number of the position is one digit wide, in the same measure. */
-export const CHIP_NUMBER_DIGITS = 1;
-
-/** The chips are pushed apart this many times at most; real lineups settle in far fewer. */
-export const CHIP_SEPARATION_PASSES = 48;
+export const LABEL_CHAR_WIDTH_EM = 0.72;
+export const LABEL_UPPER_CHAR_WIDTH_EM = 0.9;
+export const LABEL_WIDE_CHAR_WIDTH_EM = 1.04;
+export const LABEL_ELLIPSIS_WIDTH_EM = 1;
+/** The line of the name is this high, as a fraction of its font size. */
+export const LABEL_LINE_HEIGHT_EM = 1.2;
+/** When a name finds no room it is tried at these fractions of its width, longest first. */
+export const LABEL_SHORTENED_STEPS = [0.75, 0.55, 0.4, 0.3, 0.2] as const;
+/** Names of up to this many letters are never cut while there is room (a test holds it). */
+export const LABEL_SAFE_NAME_LETTERS = 8;
+/** The air kept between the circles and names and the edges of the zone (the bar, the queue, the screen). */
+export const MARKER_ZONE_MARGIN = 6;
 
 /** A pill of the queue in the row of landscape is at most 132 of the 844 of the width wide. */
 export const QUEUE_PILL_MAX_WIDTH_RATIO = 132 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;

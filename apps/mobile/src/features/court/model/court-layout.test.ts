@@ -8,7 +8,7 @@ import {
   LANDSCAPE_WIDTH_WEIGHTS,
 } from "../court.data";
 import { computeCourtLayout, type CourtLayoutInput } from "./court-layout";
-import { squareOrigin } from "./team-chips";
+import { squareOrigin } from "./team-markers";
 import { scoreTextSize } from "./score-display";
 
 const NO_INSETS = { insetTop: 0, insetBottom: 0, insetLeft: 0, insetRight: 0 };

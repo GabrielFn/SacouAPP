@@ -9,7 +9,7 @@ import { COLUMN_LINE_HEIGHT_EM, FLUSH } from "../court.data";
 import type { CourtEnd } from "../model/court-geometry";
 import type { CourtLayout } from "../model/court-layout";
 import type { TeamPanelModel } from "../model/court-screen.types";
-import { columnOffset } from "../model/team-chips";
+import { columnOffset } from "../model/team-markers";
 import { ScoreNumber } from "./ScoreNumber";
 import { SetPointTag } from "./SetPointTag";
 import { TeamTag } from "./TeamTag";

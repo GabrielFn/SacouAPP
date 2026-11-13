@@ -8,8 +8,8 @@ import { ATTACK_LINE_RATIO, FLUSH } from "../court.data";
 import { ratioToPercentText, type CourtEnd } from "../model/court-geometry";
 import type { CourtLayout } from "../model/court-layout";
 import type { TeamPanelModel } from "../model/court-screen.types";
-import { layoutTeamChips, squareOrigin } from "../model/team-chips";
-import { PlayerChip } from "./PlayerChip";
+import { layoutTeamMarkers, squareOrigin } from "../model/team-markers";
+import { PlayerMarker } from "./PlayerMarker";
 
 const DASH_PATTERN = "6 4";
 const FULL = "100%";
@@ -88,7 +88,7 @@ function squareAnchor(layout: CourtLayout, end: CourtEnd) {
 
 /**
  * The half court of one team with its edges in the team color, the attack line and its players. The
- * chips are not inside the bordered square but beside it, in the same box, so their pixels are the
+ * markers are not inside the bordered square but beside it, in the same box, so their pixels are the
  * ones the placement worked out.
  */
 export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
@@ -96,7 +96,7 @@ export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
   const color = TEAM_PALETTES[panel.color].fill;
   const vertical = layout.kind === "landscape";
   const drawn = useMemo(
-    () => layoutTeamChips({ panel, layout, tokens, end }),
+    () => layoutTeamMarkers({ panel, layout, tokens, end }),
     [panel, layout, tokens, end],
   );
   return (
@@ -129,7 +129,7 @@ export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
         </View>
       </View>
       {drawn.map((item) => (
-        <PlayerChip key={item.chip.memberId} drawn={item} />
+        <PlayerMarker key={item.chip.memberId} drawn={item} team={panel.color} />
       ))}
     </View>
   );
