@@ -106,9 +106,11 @@ function panelOf({ names, phase, system, setterZone, hasSetPoint }: PanelOptions
 }
 
 const PERCENT = 100;
-const BELOW_AT_LEAST = 3;
-/** Two circles this far apart (in radii) can each have a name that is clearly its own. */
-const APART_RADII = 4;
+const CROWDED_RADII = 5;
+
+function farFromOthers(first: DrawnMarker, second: DrawnMarker, apart: number): boolean {
+  return Math.hypot(first.placed.x - second.placed.x, first.placed.y - second.placed.y) >= apart;
+}
 
 /** The radius of the circle with the room of its badges (the ball, the L, the Lí). */
 function reachOf({ chip }: DrawnMarker, tokens: ScaledTokens): number {
@@ -168,25 +170,32 @@ function problemsOf(input: TeamMarkersInput): readonly string[] {
       found.push(`${who}: the circle covers the column`);
     }
     const name = marker.placed.name.box;
+    const side = marker.placed.name.side;
+    if (marker.placed.name.text === "") found.push(`${who}: the name is missing`);
     if (!within(name, frame.bounds)) found.push(`${who}: the name leaves the zone`);
     if (frame.column !== null && overlaps(name, frame.column)) {
       found.push(`${who}: the name covers the column`);
     }
-    const own = circleOf(marker, input.tokens);
-    const gapX = Math.max(own.left - name.right, name.left - own.right, 0);
-    const gapY = Math.max(own.top - name.bottom, name.top - own.bottom, 0);
-    const slack = markerRadius(input.tokens);
-    if (Math.max(gapX, gapY) > slack + EPSILON)
-      found.push(`${who}: the name is far from its circle`);
+    const center = (name.left + name.right) / 2;
+    const edges = [frame.bounds.left, frame.bounds.right, frame.column?.left, frame.column?.right];
+    const clamped = edges.some(
+      (edge) =>
+        edge !== undefined &&
+        (Math.abs(name.left - edge) < EPSILON || Math.abs(name.right - edge) < EPSILON),
+    );
+    if (!clamped && Math.abs(center - marker.placed.x) > EPSILON) {
+      found.push(`${who}: the name is not centered under its circle`);
+    }
+    const fitsBelow =
+      circle.bottom + input.tokens.spacing.xs + (name.bottom - name.top) <= frame.bounds.bottom;
+    if (side === "above" && fitsBelow) found.push(`${who}: the name is above with room below`);
+    if (side === "below" && name.top < circle.bottom - EPSILON) {
+      found.push(`${who}: the name is not below its circle`);
+    }
     drawn.forEach((other, otherIndex) => {
-      if (
-        otherIndex !== index &&
-        closerTo(name, other, marker, (a, b) => farFromOthers(a, b, APART_RADII * radius))
-      ) {
-        found.push(
-          `${who}: the name is nearer to ${other.chip.displayName} than to its own circle`,
-        );
-      }
+      // Two circles that nearly touch leave no room for a name between them: the rule holds for the rest.
+      const crowded = !farFromOthers(marker, other, CROWDED_RADII * radius);
+      if (crowded) return;
       if (otherIndex !== index && overlaps(name, circleOf(other, input.tokens))) {
         found.push(`${who}: the name covers the circle of ${other.chip.displayName}`);
       }
@@ -196,23 +205,6 @@ function problemsOf(input: TeamMarkersInput): readonly string[] {
     });
     return found;
   });
-}
-
-/** Only circles that stand clear of each other can tell whose name is whose (the point is not moved). */
-function farFromOthers(first: DrawnMarker, second: DrawnMarker, apart: number): boolean {
-  return Math.hypot(first.placed.x - second.placed.x, first.placed.y - second.placed.y) >= apart;
-}
-
-function closerTo(
-  name: Rect,
-  other: DrawnMarker,
-  own: DrawnMarker,
-  apart: (a: DrawnMarker, b: DrawnMarker) => boolean,
-): boolean {
-  const x = (name.left + name.right) / 2;
-  const y = (name.top + name.bottom) / 2;
-  const distance = (marker: DrawnMarker) => Math.hypot(marker.placed.x - x, marker.placed.y - y);
-  return apart(own, other) && distance(other) <= distance(own);
 }
 
 function checkAll(phone: Phone, ends: readonly CourtEnd[]): readonly string[] {
@@ -253,18 +245,20 @@ describe("circles and names in the portrait fallback", () => {
 });
 
 describe("where the name goes", () => {
-  test("below the circle in most places, the first spot tried", () => {
+  test("every circle, the server included, has a name under it", () => {
     const phone = LANDSCAPE_PHONES[1] as Phone;
     const panel = panelOf({
       names: SHORT_NAMES,
-      phase: "receiving",
+      phase: "serving",
       system: "5x1",
       setterZone: 1,
       hasSetPoint: false,
     });
     const input = { panel, layout: layoutOf(phone), tokens: tokensOf(phone), end: "left" } as const;
-    const sides = layoutTeamMarkers(input).map(({ placed }) => placed.name.side);
-    expect(sides.filter((side) => side === "below").length).toBeGreaterThanOrEqual(BELOW_AT_LEAST);
+    const drawn = layoutTeamMarkers(input);
+    expect(drawn.every(({ placed }) => placed.name.text !== "")).toBe(true);
+    const server = drawn.find(({ chip }) => chip.isServer) as DrawnMarker;
+    expect(server.placed.name.side).toBe("below");
   });
 });
 

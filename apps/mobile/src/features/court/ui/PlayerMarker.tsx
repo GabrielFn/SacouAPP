@@ -24,8 +24,7 @@ function roleOf(chip: DrawnMarker["chip"]): string | null {
 
 /**
  * A player on the half court: a circle in the color of the team with the number of the position,
- * centered on the exact point of the formation, and the small name under it (or beside it, where
- * under it would cover something). One element for the screen reader: the whole name, the position
+ * centered on the exact point of the formation, and the small name under it (above it, at the bottom edge of the zone). One element for the screen reader: the whole name, the position
  * and the role.
  */
 export function PlayerMarker({ drawn, team }: PlayerMarkerProps) {
