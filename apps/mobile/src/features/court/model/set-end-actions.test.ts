@@ -23,8 +23,9 @@ function pressWithEvent(action: { readonly onPress: unknown }): void {
 describe("buildSetEndActions", () => {
   test("confirming does not pass the touch event as the first server", () => {
     const confirm = vi.fn();
-    const [action] = buildSetEndActions(model(false), LABELS, confirm);
-    pressWithEvent(action!);
+    const actions = buildSetEndActions(model(false), LABELS, confirm);
+    expect(actions).toHaveLength(1);
+    actions.forEach(pressWithEvent);
     expect(confirm).toHaveBeenCalledOnce();
     expect(confirm.mock.calls[0]).toEqual([]);
   });

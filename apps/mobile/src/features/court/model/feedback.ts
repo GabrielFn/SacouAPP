@@ -82,9 +82,11 @@ export function deriveFeedback(
   if (next.completedSets.length > previous.completedSets.length) {
     return confirmsDecidedSet ? [] : ["set-ended"];
   }
-  if (!isOnePointLater(previous, next)) {
-    return [];
-  }
+  return isOnePointLater(previous, next) ? scoredFeedback(previous, next) : [];
+}
+
+/** A point of the same set: the one that decides the set buzzes as its end, any other as a point. */
+function scoredFeedback(previous: MatchScore, next: MatchScore): readonly FeedbackKind[] {
   const winner = decidedWinner(next);
   return winner === null ? pointFeedback(previous, next) : [decidingPointFeedback(next, winner)];
 }

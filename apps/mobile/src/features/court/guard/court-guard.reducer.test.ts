@@ -26,7 +26,9 @@ describe("the back button", () => {
   });
 });
 
-describe("the wait after a point", () => {
+describe("the wait after a point (700 ms)", () => {
+  const accepted = run([{ type: "point-accepted", at: 1000 }]);
+
   test("the zones wait until 700 ms later: 1699 is still blocked and 1700 is free", () => {
     expect(canScore(accepted, 1000)).toBe(false);
     expect(canScore(accepted, 1699)).toBe(false);
