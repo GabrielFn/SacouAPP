@@ -3,9 +3,11 @@ import Svg, { Line } from "react-native-svg";
 
 import { useTheme } from "../../../theme/theme-context";
 import { TEAM_PALETTES } from "../../../theme/team-colors";
-import { ATTACK_LINE_RATIO, COURT_ZONE_RATIOS, FLUSH } from "../court.data";
-import { placeOnHalfCourt, ratioToPercentText, type CourtEnd } from "../model/court-geometry";
+import { ATTACK_LINE_RATIO, FLUSH } from "../court.data";
+import { ratioToPercentText, type CourtEnd } from "../model/court-geometry";
+import type { CourtLayout } from "../model/court-layout";
 import type { TeamPanelModel } from "../model/court-screen.types";
+import { layoutTeamChips, squareOrigin } from "../model/team-chips";
 import { PlayerChip } from "./PlayerChip";
 
 const DASH_PATTERN = "6 4";
@@ -15,23 +17,24 @@ const MIDDLE = "50%";
 export interface HalfCourtProps {
   readonly panel: TeamPanelModel;
   readonly end: CourtEnd;
-  /** The side of the square, in pixels, from the window (see `computeCourtLayout`). */
-  readonly side: number;
+  readonly layout: CourtLayout;
 }
 
 export interface AttackLineProps {
   readonly color: string;
   readonly thickness: number;
+  /** In landscape the line runs up and down, parallel to the net. */
+  readonly vertical: boolean;
 }
 
-function AttackLine({ color, thickness }: AttackLineProps) {
+function AttackLine({ color, thickness, vertical }: AttackLineProps) {
   return (
-    <Svg width={FULL} height={thickness}>
+    <Svg width={vertical ? thickness : FULL} height={vertical ? FULL : thickness}>
       <Line
-        x1="0"
-        x2={FULL}
-        y1={MIDDLE}
-        y2={MIDDLE}
+        x1={vertical ? MIDDLE : "0"}
+        x2={vertical ? MIDDLE : FULL}
+        y1={vertical ? "0" : MIDDLE}
+        y2={vertical ? FULL : MIDDLE}
         stroke={color}
         strokeWidth={thickness}
         strokeDasharray={DASH_PATTERN}
@@ -40,43 +43,68 @@ function AttackLine({ color, thickness }: AttackLineProps) {
   );
 }
 
-/** The half court of one team with its edges in the team color, the attack line and its players. */
-export function HalfCourt({ panel, end, side }: HalfCourtProps) {
+/** The sides of the square that carry the team color: all but the one on the net. */
+function frameWidths(end: CourtEnd, frame: number) {
+  return {
+    borderLeftWidth: end === "right" ? FLUSH : frame,
+    borderRightWidth: end === "left" ? FLUSH : frame,
+    borderTopWidth: end === "bottom" ? FLUSH : frame,
+    borderBottomWidth: end === "top" ? FLUSH : frame,
+  };
+}
+
+/** Where the attack line sits: a third of the square from the net, on the side of the net. */
+function attackLinePlace(end: CourtEnd, offset: string) {
+  switch (end) {
+    case "top":
+      return { left: FLUSH, right: FLUSH, bottom: offset };
+    case "bottom":
+      return { left: FLUSH, right: FLUSH, top: offset };
+    case "left":
+      return { top: FLUSH, bottom: FLUSH, right: offset };
+    case "right":
+      return { top: FLUSH, bottom: FLUSH, left: offset };
+  }
+}
+
+/**
+ * The half court of one team with its edges in the team color, the attack line and its players. The
+ * chips are not inside the bordered square but beside it, in the same box, so their pixels are the
+ * ones the placement worked out.
+ */
+export function HalfCourt({ panel, end, layout }: HalfCourtProps) {
   const { tokens } = useTheme();
   const color = TEAM_PALETTES[panel.color].fill;
-  const frame = tokens.court.borderWidths.frame;
-  const isTop = end === "top";
-  const attackOffset = ratioToPercentText(ATTACK_LINE_RATIO);
-  const edgeOffset = ratioToPercentText(COURT_ZONE_RATIOS.edge);
+  const origin = squareOrigin(layout, end);
+  const vertical = layout.kind === "landscape";
+  const drawn = layoutTeamChips({ panel, layout, tokens, end });
   return (
     <View
       style={{
         position: "absolute",
-        right: edgeOffset,
-        top: isTop ? undefined : FLUSH,
-        bottom: isTop ? FLUSH : undefined,
-        width: side,
+        left: origin.x,
+        top: origin.y,
+        width: layout.halfCourtSide,
         aspectRatio: 1,
-        borderColor: color,
-        borderLeftWidth: frame,
-        borderRightWidth: frame,
-        borderTopWidth: isTop ? frame : FLUSH,
-        borderBottomWidth: isTop ? FLUSH : frame,
       }}
     >
       <View
         style={{
           position: "absolute",
+          top: FLUSH,
+          bottom: FLUSH,
           left: FLUSH,
           right: FLUSH,
-          top: isTop ? undefined : attackOffset,
-          bottom: isTop ? attackOffset : undefined,
+          borderColor: color,
+          ...frameWidths(end, tokens.court.borderWidths.frame),
         }}
       >
-        <AttackLine color={color} thickness={tokens.borderWidths.thick} />
+        <View style={{ position: "absolute", ...attackLinePlace(end, ratioToPercentText(ATTACK_LINE_RATIO)) }}>
+          <AttackLine color={color} thickness={tokens.borderWidths.thick} vertical={vertical} />
+        </View>
       </View>
-      {panel.chips.map((chip) => (
-        <PlayerChip key={chip.memberId} chip={chip} place={placeOnHalfCourt(chip.point, end)} />
+      {drawn.map((item) => (
+        <PlayerChip key={item.chip.memberId} drawn={item} />
       ))}
     </View>
   );

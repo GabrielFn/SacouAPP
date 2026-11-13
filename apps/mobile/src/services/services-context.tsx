@@ -7,6 +7,7 @@ import type { CourtRoster } from "../features/court/ports/court-roster";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
+import type { ScreenOrientation } from "../features/court/ports/screen-orientation";
 import type { NetworkStatus } from "./api/network-status";
 import type { SacouApi } from "./api/sacou-api";
 import type { FontLoader } from "./font-loader";
@@ -19,6 +20,8 @@ export interface Services {
   readonly courtRoster: CourtRoster;
   /** What the phone does for the court: stay awake, buzz, block the back button, keep time. */
   readonly screenAwake: ScreenAwake;
+  /** The court turns the phone on its side and puts it back (E4.17). */
+  readonly screenOrientation: ScreenOrientation;
   readonly courtFeedback: CourtFeedback;
   readonly backGuard: BackGuard;
   readonly reducedMotion: ReducedMotion;

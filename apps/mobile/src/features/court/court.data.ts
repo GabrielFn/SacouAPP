@@ -37,6 +37,37 @@ export const PERCENT = 100;
 export const NET_Y = 0;
 export const END_LINE_Y = 1;
 
+/*
+ * Landscape (E4.17): the court turned on its side, 844 x 390. There is no screen in design/, so the
+ * measures come from the sketch the product owner approved, docs/estado/tarefas/E4.17-paisagem.html.
+ */
+
+/** The height is shared as: bar 44, the middle (zones and net) 294, queue 52 of 390. */
+export const LANDSCAPE_FLEX_WEIGHTS = { bar: 44, middle: 294, queue: 52 } as const;
+
+export const LANDSCAPE_TOTAL_HEIGHT_WEIGHT =
+  LANDSCAPE_FLEX_WEIGHTS.bar + LANDSCAPE_FLEX_WEIGHTS.middle + LANDSCAPE_FLEX_WEIGHTS.queue;
+
+/** The width is shared as: team A 366 | net 112 | team B 366 of 844. */
+export const LANDSCAPE_WIDTH_WEIGHTS = { zone: 366, net: 112 } as const;
+
+export const LANDSCAPE_TOTAL_WIDTH_WEIGHT =
+  LANDSCAPE_WIDTH_WEIGHTS.zone * 2 + LANDSCAPE_WIDTH_WEIGHTS.net;
+
+/** In a zone of 366: 12 of margin, the 114 of the column, 8 of gap, and the square of 232 at the net. */
+export const LANDSCAPE_ZONE_RATIOS = { edge: 12 / 366, side: 114 / 366 } as const;
+
+/** The square is 232 of the 366 of the zone width... */
+export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 232 / 366;
+/** ...and never more than 232 of the 294 of its height. */
+export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 232 / 294;
+
+/** The score is 132 of the 294 of the zone height (45%, produto.md:134). */
+export const LANDSCAPE_SCORE_ZONE_RATIO = 132 / 294;
+
+/** In the net column: Desfazer takes what Corrigir (64) leaves of the 274 inside the padding. */
+export const NET_COLUMN_FLEX = { undo: 202, correct: 64 } as const;
+
 /** The score is at least this fraction of the height of its zone (132 of 288, produto.md:134). */
 export const SCORE_ZONE_RATIO = 132 / 288;
 /** The score keeps full size up to two digits; three or more digits shrink it. */
@@ -65,9 +96,6 @@ export const FLUSH = 0;
 /** After a point the zones ignore taps for this long, against a double tap (produto.md:136). */
 export const POINT_COOLDOWN_MS = 700;
 
-/** How long the toast "+1 Laranja (19-15)" stays in the line of the middle strip. */
-export const POINT_TOAST_MS = 1500;
-
 /** A touch with this many fingers or more is a palm, not a point. */
 export const MIN_PALM_TOUCHES = 2;
 
@@ -82,3 +110,23 @@ export const DISABLED_OPACITY = 0.4;
 
 /** More than this many waiting in the queue and the rest is a "+k": the strip keeps one row. */
 export const MAX_QUEUE_PILLS = 4;
+
+/** The lines of text in the team column have this line height, so its height can be known beforehand. */
+export const COLUMN_LINE_HEIGHT_EM = 1.35;
+
+/**
+ * A chip is at most this fraction of the side of its square wide: 110 of 232 on the sketch of the
+ * landscape court. The upright court, a fallback with a column that takes most of the zone, has
+ * room for less, so its names end in "…" sooner instead of the chips covering each other.
+ */
+export const CHIP_MAX_WIDTH_RATIOS = { landscape: 110 / 232, portrait: 0.3 } as const;
+/** A letter of the name of a chip is about this wide, as a fraction of its font size (bold, upper and lower). */
+export const CHIP_CHAR_WIDTH_EM = 0.6;
+/** The number of the position is one digit wide, in the same measure. */
+export const CHIP_NUMBER_DIGITS = 1;
+
+/** The chips are pushed apart this many times at most; real lineups settle in far fewer. */
+export const CHIP_SEPARATION_PASSES = 48;
+
+/** A pill of the queue in the row of landscape is at most 132 of the 844 of the width wide. */
+export const QUEUE_PILL_MAX_WIDTH_RATIO = 132 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;

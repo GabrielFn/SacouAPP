@@ -66,6 +66,7 @@ describe("the pills that fit in the strip", () => {
     players: Array.from({ length: count }, (_, index) => ({
       memberId: `m${String(index)}`,
       name: `J${String(index)}`,
+      displayName: `J${String(index)}`,
     })),
     exit: "partial" as const,
   });

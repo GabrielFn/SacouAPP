@@ -24,7 +24,6 @@ export function TeamTag({ color, letter, label }: TeamTagProps) {
         backgroundColor: palette.fill,
         flexDirection: "row",
         alignItems: "center",
-        alignSelf: "flex-start",
         gap: tokens.spacing.s6,
         paddingLeft: tokens.spacing.xs,
         paddingRight: tokens.spacing.m,

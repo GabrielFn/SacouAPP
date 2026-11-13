@@ -4,35 +4,38 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { anchorAt, type ScreenPlace } from "../model/court-geometry";
 import { chipColors } from "../model/chip-colors";
-import type { PlayerChipModel } from "../model/court-screen.types";
+import type { DrawnChip } from "../model/team-chips";
 import { BallIcon } from "./CourtIcons";
 
+const HALF = 2;
+
 export interface PlayerChipProps {
-  readonly chip: PlayerChipModel;
-  readonly place: ScreenPlace;
+  /** The chip with its center and width already worked out, in pixels from the corner of the square. */
+  readonly drawn: DrawnChip;
 }
 
-/** A player on the half court. The holder is as wide as the court twice over so the name never wraps. */
-export function PlayerChip({ chip, place }: PlayerChipProps) {
+/**
+ * A player on the half court. The chip has the width that was placed (never measured after drawing):
+ * a name that does not fit ends in "…", and the number of the position and the badges never go.
+ */
+export function PlayerChip({ drawn }: PlayerChipProps) {
+  const { chip } = drawn;
   const { colors, tokens } = useTheme();
   const { sizes, spacing, fontSizes } = tokens.court;
-  const anchor = anchorAt(place);
   const { fill, border, ink, subtleInk } = chipColors(chip, colors);
   return (
     <View
       pointerEvents="none"
       style={{
         position: "absolute",
-        left: anchor.left,
-        top: anchor.top,
-        width: anchor.width,
-        alignItems: "center",
-        transform: [{ translateY: "-50%" }],
+        left: drawn.x - drawn.width / HALF,
+        top: drawn.y - sizes.chip / HALF,
+        width: drawn.width,
       }}
     >
       <View
+        accessibilityLabel={chip.name}
         style={{
           height: sizes.chip,
           paddingHorizontal: spacing.chipPadding,
@@ -48,13 +51,15 @@ export function PlayerChip({ chip, place }: PlayerChipProps) {
         {chip.isServer ? <BallIcon /> : null}
         <Text
           numberOfLines={1}
+          ellipsizeMode="tail"
           style={{
+            flexShrink: 1,
             color: ink,
             fontFamily: fontFamilies.body700,
             fontSize: tokens.fontSizes.caption,
           }}
         >
-          {chip.name}
+          {chip.displayName}
         </Text>
         <Text
           tabular

@@ -1,7 +1,6 @@
 import type { TeamSide } from "@sacou/match-engine";
 import { useEffect, useMemo } from "react";
 
-import type { PlayCommand } from "../../../features/court/session/command-drafts";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
@@ -11,6 +10,7 @@ import {
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
 import { buildSetEndActions } from "../../../features/court/model/set-end-actions";
+import { confirmSetEnd } from "../../../features/court/session/confirm-set-end";
 import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
 import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
@@ -44,15 +44,7 @@ export default function SetEndRoute() {
   }
   const { setEnd } = strings.court;
   const confirm = (firstServer?: TeamSide) => {
-    const command: PlayCommand =
-      firstServer === undefined
-        ? { type: "confirm-set-end" }
-        : { type: "confirm-set-end", firstServer };
-    void dispatch(command).then((result) => {
-      if (!result.ok) {
-        courtFeedback.play("refused");
-      }
-    });
+    void confirmSetEnd({ dispatch, feedback: courtFeedback }, firstServer);
   };
   const confirmActions = buildSetEndActions(model, setEnd, confirm);
   return (

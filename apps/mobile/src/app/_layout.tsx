@@ -7,6 +7,7 @@ import {
 } from "../adapters/expo-court-runtime-opener";
 import { expoHapticsFeedback } from "../adapters/expo-haptics-feedback";
 import { expoKeepAwakeScreen } from "../adapters/expo-keep-awake-screen";
+import { expoScreenOrientation } from "../adapters/expo-screen-orientation";
 import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
@@ -41,6 +42,7 @@ const realServices: Services = {
   // The sample names until the pre-game brings the real roster, which works offline (E4.2, E4.7).
   courtRoster: createSampleRoster(),
   screenAwake: expoKeepAwakeScreen,
+  screenOrientation: expoScreenOrientation,
   courtFeedback: expoHapticsFeedback,
   backGuard: reactNativeBackGuard,
   reducedMotion: createReactNativeReducedMotion(),

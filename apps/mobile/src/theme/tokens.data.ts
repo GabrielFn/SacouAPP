@@ -145,11 +145,9 @@ export const courtSizes = {
   pillBadge: 20,
   undoButton: 54,
   menuButton: 44,
-  lockButton: 44,
   netMesh: 9,
   savedIcon: 15,
   menuIcon: 18,
-  lockIcon: 20,
   undoIcon: 22,
   correctIcon: 17,
   flameIcon: 17,
@@ -173,4 +171,5 @@ export const courtSpacing = {
   scoreGap: 22,
   badgeOffsetX: 6,
   badgeOffsetY: 9,
+  chipGap: 4,
 } as const;
