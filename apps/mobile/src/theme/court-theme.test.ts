@@ -19,8 +19,8 @@ const AA_TEXT = 4.5;
 const AA_LARGE = 3;
 const SCORE_MIN = 7;
 const WIDTHS = [320, canvasWidth, 600];
-/** The touch targets of the court (menu button, lock, DESFAZER and Corrigir). */
-const TOUCH_SIZES = ["menuButton", "lockButton", "undoButton"] as const;
+/** The touch targets of the court (menu button, DESFAZER and Corrigir). */
+const TOUCH_SIZES = ["menuButton", "undoButton"] as const;
 
 function ratio(first: string, second: string): number {
   const result = contrastRatio(first, second);

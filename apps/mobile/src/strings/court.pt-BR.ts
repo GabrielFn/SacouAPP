@@ -20,10 +20,7 @@ export const courtStrings = {
     setTitle: (setNumber: number) => `${String(setNumber)}º set`,
     savedOnPhone: "Salvo no celular",
     menu: "Menu",
-    menuLabelLocked: "Menu. Segure para abrir o menu",
-    menuLabelUnlocked: "Menu",
-    lockLabelLocked: "Tela travada. Segure para destravar",
-    lockLabelUnlocked: "Tela destravada. Toque para travar",
+    menuLabel: "Menu da partida",
     setsLabel: (firstTeam: string, firstSets: number, secondTeam: string, secondSets: number) =>
       `Sets: ${firstTeam} ${String(firstSets)}, ${secondTeam} ${String(secondSets)}`,
   },

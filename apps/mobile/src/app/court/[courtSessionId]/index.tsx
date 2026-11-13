@@ -37,7 +37,8 @@ export default function CourtRoute() {
   // changes, so coming back from the end of the set (same step) does not open it again.
   const { push, replace } = route;
   const focused = useIsFocused();
-  // While locked, the back button of Android stays where it is (only on the court, not on its menu).
+  // The back button of Android stays where it is while the court is in front (not on its menu);
+  // leaving is by the Menu.
   useBackGuard(view.status === "ready" && guard.backBlocked(focused));
   const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
@@ -67,7 +68,6 @@ export default function CourtRoute() {
     <CourtScreen
       model={model}
       toast={toast}
-      locked={guard.locked}
       onPoint={(team) => {
         // The zones wait after a point, even if the engine turns this one down.
         if (guard.acceptPoint()) {
@@ -89,8 +89,6 @@ export default function CourtRoute() {
           }
         });
       }}
-      onUnlock={guard.unlock}
-      onLock={guard.lock}
       onCorrect={() => {
         route.push("corrections");
       }}
