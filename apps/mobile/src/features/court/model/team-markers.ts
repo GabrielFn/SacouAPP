@@ -205,6 +205,7 @@ export function layoutTeamMarkers(input: TeamMarkersInput): readonly DrawnMarker
   const specs = panel.chips.map<MarkerSpec>((chip) => ({
     id: chip.memberId,
     point: chip.point,
+    radius: markerRadius(tokens),
     reach: hasBadge(chip) ? reach : markerRadius(tokens),
     names: nameOptions(chip.displayName, tokens),
     nameHeight: nameFontSize(tokens) * LABEL_LINE_HEIGHT_EM,

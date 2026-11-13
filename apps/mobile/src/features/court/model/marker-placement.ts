@@ -21,7 +21,9 @@ export interface NameOption {
 export interface MarkerSpec {
   readonly id: string;
   readonly point: CourtPoint;
-  /** The radius of the circle, with the room of the badges that stick out of it. */
+  /** The radius of the circle itself. */
+  readonly radius: number;
+  /** The radius with the room of the badges that stick out of it. */
   readonly reach: number;
   /** The name from the whole one to the shortest; the first one that finds room is drawn. */
   readonly names: readonly NameOption[];
@@ -43,9 +45,14 @@ const NAME_SIDES: readonly NameSide[] = [
   "aboveLeft",
 ];
 
-/** The name is tried next to the circle (ring 0) and then one and two lines of name farther away (rings 1 and 2). */
-const NAME_RING_COUNT = 3;
-const NAME_RINGS: readonly number[] = Array.from({ length: NAME_RING_COUNT }, (_, ring) => ring);
+/**
+ * The name hugs its circle: the air between them is the gap and at most half a diameter (the radius),
+ * tried in these fractions of that slack, the closest first.
+ */
+const NAME_SLACK_STEPS = [0, 0.5, 1] as const;
+
+/** A name that is not nearer to its own circle than to any other costs this much, as if it covered it. */
+const NOT_NEAREST_PENALTY = 4000;
 
 export interface PlacedMarker {
   readonly id: string;
@@ -74,8 +81,12 @@ export interface PlacementFrame {
 /** Covering a circle costs more than covering a name or an edge: the name gives way first. */
 const CIRCLE_WEIGHT = 10;
 
+/** A name always stays in view: sticking out of the zone costs more than reading as another's. */
+const OUTSIDE_WEIGHT = 100;
+
 interface Circle {
   readonly id: string;
+  readonly radius: number;
   readonly x: number;
   readonly y: number;
   readonly reach: number;
@@ -91,6 +102,8 @@ interface Candidate {
   readonly side: NameSide;
   readonly box: Rect;
   readonly covered: number;
+  /** The center of the name is nearer to its own circle than to any other. */
+  readonly nearest: boolean;
 }
 
 function keepInside(center: number, half: number, low: number, high: number): number {
@@ -139,6 +152,7 @@ function circleAt(spec: MarkerSpec, frame: PlacementFrame): Circle {
   const place = placeOnHalfCourt(spec.point, frame.end);
   const wanted: Circle = {
     id: spec.id,
+    radius: spec.radius,
     reach: spec.reach,
     x: (place.x / PERCENT) * frame.side,
     y: (place.y / PERCENT) * frame.side,
@@ -207,7 +221,15 @@ function coverageOf(
   const onCircles = circles.reduce((sum, c) => sum + overlapArea(padded, circleBox(c)), 0);
   const onNames = names.reduce((sum, other) => sum + overlapArea(padded, other), 0);
   const onColumn = frame.column === null ? 0 : overlapArea(padded, frame.column);
-  return onCircles * CIRCLE_WEIGHT + onNames + onColumn + outsideArea(box, frame.bounds);
+  const outside = outsideArea(box, frame.bounds);
+  return onCircles * CIRCLE_WEIGHT + outside * OUTSIDE_WEIGHT + onNames + onColumn;
+}
+
+function isNearest(box: Rect, circle: Circle, others: readonly Circle[]): boolean {
+  const centerX = (box.left + box.right) / HALF;
+  const centerY = (box.top + box.bottom) / HALF;
+  const distanceTo = (c: Circle) => Math.hypot(c.x - centerX, c.y - centerY);
+  return others.every((other) => distanceTo(circle) < distanceTo(other));
 }
 
 function candidatesOf(
@@ -218,47 +240,73 @@ function candidatesOf(
   frame: PlacementFrame,
 ): readonly Candidate[] {
   const others = circles.filter(({ id }) => id !== circle.id);
+  const slack = Math.max(0, spec.radius - frame.gap);
   return spec.names.flatMap((option) =>
-    NAME_RINGS.flatMap((ring) =>
+    NAME_SLACK_STEPS.flatMap((step) =>
       NAME_SIDES.map<Candidate>((side) => {
         const size = { width: option.width, height: spec.nameHeight };
-        const distance = frame.gap + ring * (spec.nameHeight + frame.gap);
-        const box = nameBox(circle, side, size, distance);
-        return { text: option.text, side, box, covered: coverageOf(box, others, names, frame) };
+        const box = nameBox(circle, side, size, frame.gap + step * slack);
+        const nearest = isNearest(box, circle, others);
+        const covered = coverageOf(box, others, names, frame);
+        return { text: option.text, side, box, covered, nearest };
       }),
     ),
   );
 }
 
+/** What a spot costs: what it covers, and a great deal more when the name would read as another's. */
+function costOf({ covered, nearest }: Candidate): number {
+  return covered + (nearest ? 0 : NOT_NEAREST_PENALTY);
+}
+
 /**
- * The first free spot (the whole name first, below the circle first), else the one that covers the
- * least, and a circle is never covered by choice: the name is what gives way.
+ * The first free spot that belongs to its circle (the whole name first, below the circle first),
+ * else the one that costs the least; the name is always drawn, and a circle is never covered by
+ * choice: the name is what gives way.
  */
 function chooseName(candidates: readonly Candidate[]): Candidate {
-  const free = candidates.find(({ covered }) => covered === 0);
+  const free = candidates.find((candidate) => costOf(candidate) === 0);
   if (free !== undefined) {
     return free;
   }
-  return candidates.reduce((best, next) => (next.covered < best.covered ? next : best));
+  return candidates.reduce((best, next) => (costOf(next) < costOf(best) ? next : best));
+}
+
+/** How many spots the whole name has without any other name in the way: the fewer, the earlier it is placed. */
+function roomOf(
+  spec: MarkerSpec,
+  circle: Circle,
+  circles: readonly Circle[],
+  frame: PlacementFrame,
+) {
+  const whole = spec.names.slice(0, 1);
+  return candidatesOf({ ...spec, names: whole }, circle, circles, [], frame).filter(
+    (candidate) => costOf(candidate) === 0,
+  ).length;
 }
 
 /**
  * Where each marker goes. The center of every circle is the point of the formation, turned to the end
- * of the screen: it is never pushed, only a point outside the zone is brought in. The name goes below
+ * of the screen: it is never pushed, only a point outside the zone is brought in. The name hugs its circle (at most half a
+ * diameter of air) and is nearer to it than to any other circle; it goes below
  * the circle; where that would cover another circle, another name, the column, the net or the edge of
  * the zone, it goes above, then to the right, to the left and to the diagonals, and the first free
  * spot wins. With none free the name is shortened, and with none still the least covered spot is
- * used. Markers are taken in the order of their id and no random number is used, so the same lineup
+ * used. Markers are taken from the one with the fewest free spots to the one with the most (then by id) and no random number is used, so the same lineup
  * always gives the same screen.
  */
 export function placeMarkers(
   frame: PlacementFrame,
   markers: readonly MarkerSpec[],
 ): readonly PlacedMarker[] {
-  const ordered = [...markers].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const circles = ordered.map((spec) => circleAt(spec, frame));
-  return ordered.reduce<readonly PlacedMarker[]>((done, spec, index) => {
-    const circle = circles[index] as Circle;
+  const byId = [...markers].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const circles = byId.map((spec) => circleAt(spec, frame));
+  const room = new Map(
+    byId.map((spec, index) => [spec.id, roomOf(spec, circles[index] as Circle, circles, frame)]),
+  );
+  const ordered = [...byId].sort((a, b) => (room.get(a.id) ?? 0) - (room.get(b.id) ?? 0));
+  return ordered.reduce<readonly PlacedMarker[]>((done, spec) => {
+    const circle = circles[byId.indexOf(spec)] as Circle;
     const taken = done.map(({ name }) => name.box);
     const choice = chooseName(candidatesOf(spec, circle, circles, taken, frame));
     const name = { text: choice.text, side: choice.side, box: choice.box };

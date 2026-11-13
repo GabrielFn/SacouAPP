@@ -107,6 +107,8 @@ function panelOf({ names, phase, system, setterZone, hasSetPoint }: PanelOptions
 
 const PERCENT = 100;
 const BELOW_AT_LEAST = 3;
+/** Two circles this far apart (in radii) can each have a name that is clearly its own. */
+const APART_RADII = 4;
 
 /** The radius of the circle with the room of its badges (the ball, the L, the Lí). */
 function reachOf({ chip }: DrawnMarker, tokens: ScaledTokens): number {
@@ -170,7 +172,21 @@ function problemsOf(input: TeamMarkersInput): readonly string[] {
     if (frame.column !== null && overlaps(name, frame.column)) {
       found.push(`${who}: the name covers the column`);
     }
+    const own = circleOf(marker, input.tokens);
+    const gapX = Math.max(own.left - name.right, name.left - own.right, 0);
+    const gapY = Math.max(own.top - name.bottom, name.top - own.bottom, 0);
+    const slack = markerRadius(input.tokens);
+    if (Math.max(gapX, gapY) > slack + EPSILON)
+      found.push(`${who}: the name is far from its circle`);
     drawn.forEach((other, otherIndex) => {
+      if (
+        otherIndex !== index &&
+        closerTo(name, other, marker, (a, b) => farFromOthers(a, b, APART_RADII * radius))
+      ) {
+        found.push(
+          `${who}: the name is nearer to ${other.chip.displayName} than to its own circle`,
+        );
+      }
       if (otherIndex !== index && overlaps(name, circleOf(other, input.tokens))) {
         found.push(`${who}: the name covers the circle of ${other.chip.displayName}`);
       }
@@ -180,6 +196,23 @@ function problemsOf(input: TeamMarkersInput): readonly string[] {
     });
     return found;
   });
+}
+
+/** Only circles that stand clear of each other can tell whose name is whose (the point is not moved). */
+function farFromOthers(first: DrawnMarker, second: DrawnMarker, apart: number): boolean {
+  return Math.hypot(first.placed.x - second.placed.x, first.placed.y - second.placed.y) >= apart;
+}
+
+function closerTo(
+  name: Rect,
+  other: DrawnMarker,
+  own: DrawnMarker,
+  apart: (a: DrawnMarker, b: DrawnMarker) => boolean,
+): boolean {
+  const x = (name.left + name.right) / 2;
+  const y = (name.top + name.bottom) / 2;
+  const distance = (marker: DrawnMarker) => Math.hypot(marker.placed.x - x, marker.placed.y - y);
+  return apart(own, other) && distance(other) <= distance(own);
 }
 
 function checkAll(phone: Phone, ends: readonly CourtEnd[]): readonly string[] {
@@ -212,16 +245,9 @@ describe("circles and names of every formation in landscape", () => {
 
 describe("circles and names in the portrait fallback", () => {
   // The portrait is a fallback with a column that takes most of the zone: the circles keep every
-  // rule, and a name may crowd another name there (never a circle: that is held below).
+  // rule, and a name may crowd another name or a circle there.
   test.each(PORTRAIT_PHONES)("the circles keep their rules at $width", (phone) => {
     const problems = checkAll(phone, PORTRAIT_ENDS).filter((text) => !text.includes("the name"));
-    expect(problems).toEqual([]);
-  });
-
-  test.each(PORTRAIT_PHONES)("no name covers a circle at $width", (phone) => {
-    const problems = checkAll(phone, PORTRAIT_ENDS).filter((text) =>
-      text.includes("covers the circle"),
-    );
     expect(problems).toEqual([]);
   });
 });

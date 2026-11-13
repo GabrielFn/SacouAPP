@@ -155,7 +155,7 @@ export const LABEL_SHORTENED_STEPS = [0.75, 0.55, 0.4, 0.3, 0.2] as const;
 /** Names of up to this many letters are never cut while there is room (a test holds it). */
 export const LABEL_SAFE_NAME_LETTERS = 8;
 /** The air kept between the circles and names and the edges of the zone (the bar, the queue, the screen). */
-export const MARKER_ZONE_MARGIN = 6;
+export const MARKER_ZONE_MARGIN = 10;
 
 /** A pill of the queue in the row of landscape is at most 132 of the 844 of the width wide. */
 export const QUEUE_PILL_MAX_WIDTH_RATIO = 132 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
