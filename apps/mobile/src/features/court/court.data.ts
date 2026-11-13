@@ -62,15 +62,6 @@ export const MIN_STREAK_TO_SHOW = 1;
 /** An edge flush with its parent: styles do not take bare numbers, so zero has a name. */
 export const FLUSH = 0;
 
-/**
- * How long the Menu button is held to open the menu (decision of the plan; the lock itself arrives
- * with the device resources in part 3 of E4.9).
- */
-export const HOLD_TO_OPEN_MENU_MS = 800;
-
-/** How long the lock is held to unlock the screen. */
-export const HOLD_TO_UNLOCK_MS = 800;
-
 /** After a point the zones ignore taps for this long, against a double tap (produto.md:136). */
 export const POINT_COOLDOWN_MS = 700;
 

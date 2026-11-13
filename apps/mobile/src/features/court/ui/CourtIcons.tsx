@@ -42,35 +42,6 @@ export function MenuDotsIcon({ color }: CourtIconProps) {
   );
 }
 
-const LOCK_BODY = "M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z";
-const SHACKLE_CLOSED = "M8 11V8a4 4 0 0 1 8 0v3";
-const SHACKLE_OPEN = "M8 11V8a4 4 0 0 1 7.6-1.7";
-
-export interface PadlockProps extends CourtIconProps {
-  readonly shackle: string;
-}
-
-function Padlock({ color, shackle }: PadlockProps) {
-  const { colors, tokens } = useTheme();
-  const size = tokens.court.sizes.lockIcon;
-  const stroke = color ?? colors.text;
-  return (
-    <Svg width={size} height={size} viewBox={VIEW_BOX} fill="none" stroke={stroke}>
-      <Path d={LOCK_BODY} strokeWidth={STROKE_ICON} />
-      <Path d={shackle} strokeWidth={STROKE_ICON} />
-    </Svg>
-  );
-}
-
-export function LockIcon({ color }: CourtIconProps) {
-  return <Padlock color={color} shackle={SHACKLE_CLOSED} />;
-}
-
-/** The lock with the shackle open: the screen is unlocked. */
-export function UnlockIcon({ color }: CourtIconProps) {
-  return <Padlock color={color} shackle={SHACKLE_OPEN} />;
-}
-
 export function UndoIcon({ color }: CourtIconProps) {
   const { colors, tokens } = useTheme();
   const size = tokens.court.sizes.undoIcon;

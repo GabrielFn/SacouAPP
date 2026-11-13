@@ -15,27 +15,18 @@ function run(actions: readonly CourtGuardAction[], from = INITIAL_COURT_GUARD): 
   return actions.reduce(courtGuardReducer, from);
 }
 
-describe("the lock", () => {
-  test("the court opens locked", () => {
-    expect(INITIAL_COURT_GUARD).toEqual({ locked: true, cooldownUntil: null, toastUntil: null });
+describe("the back button", () => {
+  test("the court starts with no wait and no toast", () => {
+    expect(INITIAL_COURT_GUARD).toEqual({ cooldownUntil: null, toastUntil: null });
   });
 
-  test("unlock opens it and lock closes it again", () => {
-    const unlocked = run([{ type: "unlock" }]);
-    expect(unlocked.locked).toBe(false);
-    expect(run([{ type: "lock" }], unlocked).locked).toBe(true);
-  });
-
-  test("the back button is blocked only while locked and on the court", () => {
+  test("is blocked while the court is in front, free when it is not", () => {
     expect(isBackBlocked(INITIAL_COURT_GUARD, true)).toBe(true);
     expect(isBackBlocked(INITIAL_COURT_GUARD, false)).toBe(false);
-    expect(isBackBlocked(run([{ type: "unlock" }]), true)).toBe(false);
   });
 });
 
-describe("the wait after a point (700 ms)", () => {
-  const accepted = run([{ type: "point-accepted", at: 1000 }]);
-
+describe("the wait after a point", () => {
   test("the zones wait until 700 ms later: 1699 is still blocked and 1700 is free", () => {
     expect(canScore(accepted, 1000)).toBe(false);
     expect(canScore(accepted, 1699)).toBe(false);
@@ -90,7 +81,7 @@ describe("time passing", () => {
       { type: "point-recorded", at: 0 },
     ]);
     const afterWait = courtGuardReducer(state, { type: "tick", at: 700 });
-    expect(afterWait).toEqual({ locked: true, cooldownUntil: null, toastUntil: 1500 });
+    expect(afterWait).toEqual({ cooldownUntil: null, toastUntil: 1500 });
     expect(courtGuardReducer(afterWait, { type: "tick", at: 1500 })).toEqual(INITIAL_COURT_GUARD);
   });
 

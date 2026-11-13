@@ -16,13 +16,10 @@ export interface CourtScreenProps {
   readonly model: CourtScreenModel;
   /** The toast of the last point; it takes the place of the line of the strip while it shows. */
   readonly toast: string | null;
-  readonly locked: boolean;
   readonly onPoint: (team: TeamSide) => void;
   readonly onUndo: () => void;
   readonly onCorrect: () => void;
   readonly onOpenMenu: () => void;
-  readonly onUnlock: () => void;
-  readonly onLock: () => void;
 }
 
 function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
@@ -33,13 +30,10 @@ function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
 export function CourtScreen({
   model,
   toast,
-  locked,
   onPoint,
   onUndo,
   onCorrect,
   onOpenMenu,
-  onUnlock,
-  onLock,
 }: CourtScreenProps) {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
@@ -63,10 +57,7 @@ export function CourtScreen({
         setNumber={model.setNumber}
         sets={dotColors(model)}
         setsLabel={setsLabel(model)}
-        locked={locked}
         onOpenMenu={onOpenMenu}
-        onUnlock={onUnlock}
-        onLock={onLock}
       />
       <TeamZone
         panel={model.teams.a}

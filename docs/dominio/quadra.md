@@ -68,7 +68,7 @@ Código em `features/court/ui` (componentes), `features/court/model` (seletores,
 
 Cada recurso tem uma interface em `features/court/ports/` (`ScreenAwake`, `CourtFeedback`, `BackGuard`, `ReducedMotion`, `Clock`), uma implementação real em `src/adapters/` e uma falsa para os testes. O app injeta as reais em `app/_layout.tsx` (`Services`).
 
-**Trava.** Ligada ao entrar na quadra e ao reabrir o app (`INITIAL_COURT_GUARD`). Com ela ligada: o **Menu** só abre **segurando** (800 ms, `HOLD_TO_OPEN_MENU_MS`); **segurar o cadeado** (800 ms, `HOLD_TO_UNLOCK_MS`) destrava; o botão voltar do Android fica bloqueado (só na quadra, com ela em foco: no fim do set e no menu o voltar funciona). Com ela desligada: o Menu abre com um toque, o voltar funciona, e o cadeado aberto trava de novo com um toque. Os rótulos de acessibilidade dizem a ação: "Tela travada. Segure para destravar", "Tela destravada. Toque para travar", "Menu. Segure para abrir o menu". O estado vive em `guard/court-guard.reducer.ts` (reducer puro, `switch` exaustivo): `locked`, `cooldownUntil` e `toastUntil`; ações `lock`, `unlock`, `point-accepted`, `point-recorded`, `undo-accepted` e `tick`. Um timer no hook `useCourtGuard` só acorda o componente quando algo vence; o reducer limpa.
+**Proteção da quadra (sem trava).** O cadeado foi **removido em 13/11/2026 por decisão do Gabriel**: o usuário não saberia que precisa segurar o cadeado (teste no celular da E4.9). O **Menu** abre com um toque simples, sempre (rótulo "Menu da partida"). O botão voltar do Android fica bloqueado enquanto a quadra estiver em foco (`isBackBlocked` depende só de `focused`); no fim do set e no menu o voltar funciona, e sair é pelo Menu → "Sair do modo quadra". O estado vive em `guard/court-guard.reducer.ts` (reducer puro, `switch` exaustivo): `cooldownUntil` e `toastUntil`; ações `point-accepted`, `point-recorded`, `undo-accepted` e `tick`. Um timer no hook `useCourtGuard` só acorda o componente quando algo vence; o reducer limpa.
 
 **Bloqueio depois do ponto.** `POINT_COOLDOWN_MS` = 700 ms, contado do toque aceito (`point-accepted`), nas duas zonas. DESFAZER nunca é bloqueado e não conta como ponto. O bloqueio vale também se o motor recusar o ponto.
 
@@ -85,8 +85,8 @@ Cada recurso tem uma interface em `features/court/ports/` (`ScreenAwake`, `Court
 | `point` | um ponto no mesmo set | `impactAsync` leve |
 | `side-out` | o ponto trocou o saque | `impactAsync` médio |
 | `set-point` | um time passou a ter set point | `notificationAsync` Warning |
-| `set-ended` | `confirm-set-end` que abre outro set | `notificationAsync` Success |
-| `match-ended` | a partida terminou (inclusive o set decisivo) | `notificationAsync` Success |
+| `set-ended` | o ponto que decide um set de série (a confirmação do fim do set é silenciosa) | `notificationAsync` Success |
+| `match-ended` | o ponto que decide a partida (inclusive o set decisivo; confirmar é silencioso) | `notificationAsync` Success |
 | `refused` | o motor recusou o comando | `notificationAsync` Error |
 
 Desfazer não vibra como ponto (o placar volta). Bipe: fora (nenhuma tela o liga).

@@ -1,5 +1,7 @@
 import {
   getSetPointTeams,
+  getSetWinner,
+  setsToWin,
   type CourtSessionState,
   type MatchScore,
   type TeamSide,
@@ -30,6 +32,19 @@ function isOnePointLater(before: MatchScore, after: MatchScore): boolean {
   );
 }
 
+/** The set is won on the court but not confirmed yet: the engine still holds it as the current set. */
+function decidedWinner(match: MatchScore): TeamSide | null {
+  const set = match.currentSet;
+  return set === null ? null : getSetWinner(set.score, set.targetPoints, match.scoring.winMargin);
+}
+
+/** What the deciding point means: the end of the match, or only the end of a set of a series. */
+function decidingPointFeedback(match: MatchScore, winner: TeamSide): FeedbackKind {
+  return match.setsWon[winner] + ONE_POINT >= setsToWin(match.scoring.bestOf)
+    ? "match-ended"
+    : "set-ended";
+}
+
 function pointFeedback(before: MatchScore, after: MatchScore): readonly FeedbackKind[] {
   const sideOut = before.currentSet?.servingTeam !== after.currentSet?.servingTeam;
   const alreadyAtSetPoint = setPointSides(before);
@@ -54,18 +69,24 @@ export function deriveFeedback(
   before: CourtSessionState,
   after: CourtSessionState,
 ): readonly FeedbackKind[] {
-  if (after.finishedMatches.length > before.finishedMatches.length) {
-    return ["match-ended"];
-  }
   const { currentMatch: previous } = before;
   const { currentMatch: next } = after;
+  // The buzz already played at the point that decided the set: confirming it is silent.
+  const confirmsDecidedSet = previous !== null && decidedWinner(previous) !== null;
+  if (after.finishedMatches.length > before.finishedMatches.length) {
+    return confirmsDecidedSet ? [] : ["match-ended"];
+  }
   if (previous === null || next === null || !sameMatch(previous, next)) {
     return [];
   }
   if (next.completedSets.length > previous.completedSets.length) {
-    return ["set-ended"];
+    return confirmsDecidedSet ? [] : ["set-ended"];
   }
-  return isOnePointLater(previous, next) ? pointFeedback(previous, next) : [];
+  if (!isOnePointLater(previous, next)) {
+    return [];
+  }
+  const winner = decidedWinner(next);
+  return winner === null ? pointFeedback(previous, next) : [decidingPointFeedback(next, winner)];
 }
 
 /** The one the phone plays: the strongest of the list, or `null` for nothing. */
