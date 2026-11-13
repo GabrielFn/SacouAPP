@@ -12,6 +12,8 @@ export type FeedbackKind =
   "point" | "side-out" | "set-point" | "set-ended" | "match-ended" | "refused";
 
 const ONE_POINT = 1;
+/** One set more for the winner of the point that decides it. */
+const ONE_SET = 1;
 
 function setPointSides(match: MatchScore): readonly TeamSide[] {
   const set = match.currentSet;
@@ -40,7 +42,7 @@ function decidedWinner(match: MatchScore): TeamSide | null {
 
 /** What the deciding point means: the end of the match, or only the end of a set of a series. */
 function decidingPointFeedback(match: MatchScore, winner: TeamSide): FeedbackKind {
-  return match.setsWon[winner] + ONE_POINT >= setsToWin(match.scoring.bestOf)
+  return match.setsWon[winner] + ONE_SET >= setsToWin(match.scoring.bestOf)
     ? "match-ended"
     : "set-ended";
 }

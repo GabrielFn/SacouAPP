@@ -37,7 +37,8 @@ export default function CourtRoute() {
   // changes, so coming back from the end of the set (same step) does not open it again.
   const { push, replace } = route;
   const focused = useIsFocused();
-  // The back button of Android stays where it is while the court is in front; leaving is by the Menu (only on the court, not on its menu).
+  // The back button of Android stays where it is while the court is in front (not on its menu);
+  // leaving is by the Menu.
   useBackGuard(view.status === "ready" && guard.backBlocked(focused));
   const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
