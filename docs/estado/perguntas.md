@@ -25,6 +25,7 @@
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
 
 ## Respondidas
+- **Tamanho da quadra na paisagem (13/11/2026):** placar com cerca de 38% da altura da zona (era 45%) para a meia quadra crescer cerca de 20%; a meia quadra encosta na rede. ADR 0052.
 - **Sem trava na quadra (13/11/2026):** o cadeado sai ("ele não vai saber que tem que segurar o cadeado"). O Menu abre com um toque; o voltar do Android continua bloqueado na quadra (padrão do orquestrador), e sair é pelo Menu. Feito na correção da E4.9.
 - **Paisagem da E4.17 (13/11/2026):** layout do esboço aprovado, telas filhas da quadra também em paisagem, sem o toast "+1", nomes com primeiro nome + inicial quando repetem, "Inverter lados" só com a quadra aberta, aviso de bateria some com "Entendi" ou no carregador. Detalhes em `docs/estado/tarefas/E4.17.md`, seção 8.
 - **Modo quadra em paisagem (13/11/2026, no teste no celular):** a quadra fica sempre em paisagem, travada; o resto do app continua em retrato. Os defeitos de lógica do teste (fim do set, trava, vibração do fim do set) são corrigidos já, na E4.9; os de layout (nomes sobrepostos, faixa cortada) vão para a paisagem, na E4.17, cujo layout o analista propõe e o Gabriel aprova. Testar com nomes longos.
