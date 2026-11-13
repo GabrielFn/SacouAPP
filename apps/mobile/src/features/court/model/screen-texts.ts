@@ -1,5 +1,6 @@
 import type { TeamSide } from "@sacou/match-engine";
 
+import type { TeamColorName } from "../../../theme/team-colors";
 import { strings } from "../../../strings/pt-BR";
 import type { CourtScreenModel, QueueModel } from "./court-screen.types";
 
@@ -13,6 +14,11 @@ export function hintText({ hint, teams }: CourtScreenModel): string {
     case "next-point-closes":
       return strings.court.strip.nextPointCloses;
   }
+}
+
+/** The color of whoever won each set, `null` for the set still open: the dots of the bar. */
+export function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
+  return model.dots.map(({ winner }) => (winner === null ? null : model.teams[winner].color));
 }
 
 /** "Laranja venceu 2 seguidas", or `null` with no streak. */

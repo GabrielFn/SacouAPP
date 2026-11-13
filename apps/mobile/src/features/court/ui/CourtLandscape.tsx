@@ -1,29 +1,20 @@
-import type { TeamSide } from "@sacou/match-engine";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
-import type { TeamColorName } from "../../../theme/team-colors";
 import { LANDSCAPE_FLEX_WEIGHTS } from "../court.data";
 import type { LandscapeCourtLayout } from "../model/court-layout";
 import type { CourtScreenModel } from "../model/court-screen.types";
-import { hintText, setsLabel, streakText } from "../model/screen-texts";
+import { dotColors, hintText, setsLabel, streakText } from "../model/screen-texts";
+import type { CourtHandlers } from "./court-handlers";
 import { CourtHeader } from "./CourtHeader";
 import { NetColumn } from "./NetColumn";
 import { QueueStrip } from "./QueueStrip";
 import { TeamZone } from "./TeamZone";
 
-export interface CourtLandscapeProps {
+export interface CourtLandscapeProps extends CourtHandlers {
   readonly model: CourtScreenModel;
   readonly layout: LandscapeCourtLayout;
-  readonly onPoint: (team: TeamSide) => void;
-  readonly onUndo: () => void;
-  readonly onCorrect: () => void;
-  readonly onOpenMenu: () => void;
-}
-
-function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
-  return model.dots.map(({ winner }) => (winner === null ? null : model.teams[winner].color));
 }
 
 /**
