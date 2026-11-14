@@ -16,7 +16,8 @@ public sealed class TeamDrawOracleTests
     private const int MaxPlayersOnTwoTeams = 16;
     private const ulong GeneratorSeed = 0x5AC0;
     private const int VarietySeeds = 20;
-    private const int TimeLimitMilliseconds = 200;
+    /// <summary>About 60 ms in Debug on a quiet machine; the margin covers a CI runner busy with the other test projects.</summary>
+    private const int TimeLimitMilliseconds = 1000;
     private const int TimedRuns = 5;
 
     [Fact]

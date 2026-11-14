@@ -7,6 +7,7 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 - **Grupo** (`Group`): `GroupId` (UUID v7), nome (`GroupName`) e data de criação. Tem os membros dentro.
 - **Nome do grupo:** sem espaços nas pontas; de 1 a 60 caracteres como a pessoa os vê (um emoji conta como um), e no máximo 240 pontos de código (60 emojis de família, com 5 pontos cada, não cabem: 48 cabem); sem quebra de linha, caractere de controle, caractere invisível (espaço de largura zero, marca de ordem de bytes) ou de direção (`U+202E`). O *zero-width joiner* só vale entre emojis (👩‍💻). Também recusa: caractere não atribuído, de uso privado ou *surrogate* solto; os preenchimentos que aparecem como espaço (U+115F, U+1160, U+3164, U+FFA0, U+2800); mais de 4 acentos ou marcas empilhados no mesmo caractere; nome sem nenhuma letra, número ou símbolo ("..."). O texto é normalizado para NFC antes de tudo, então "Vôlei" digitado com o acento separado é gravado igual ao composto. Nome já gravado é mostrado como está, mesmo que a regra fique mais estrita. Pode conter nome de pessoa ("Racha do João"): nunca vai para log.
 - **Membro** (`GroupMember`): `MemberId` (um por pessoa por grupo, para sempre), conta (`UserId`, vazio só para o convidado da E3.5), papel, tipo, situação, entrada e saída.
+- **Convidado** (`Guest`, E3.5, [ADR 0053](../arquitetura/adr/0053-convidado-sem-conta.md)): um membro comum sem conta, sempre Jogador, avulso e ativo, criado pelo admin ou co-admin (tela 21a). O nome (`GuestName`, a regra do apelido: de 1 a 20 caracteres, até 80 pontos de código) e a posição opcional (uma das 5 concretas, nunca "Qualquer uma") ficam em `groups.guests`, nunca em `groups.members`. Não é único no grupo. Conta nos 300 membros ativos. Nunca vira Placar, Co-admin ou Admin (`groups.role-needs-account`) nem mensalista. Removido, a linha do nome é apagada na hora e o histórico mostra "Ex-jogador". Entrar numa rodada é a rota de presença do admin (E3.4), uma segunda chamada.
 - **Papéis** (`GroupRole`): Admin, Co-admin, Placar (`Scorekeeper`), Jogador (`Player`). Um por membro. Vários admins são permitidos.
 - **Tipo** (`MemberType`): mensalista (`Regular`) ou avulso (`DropIn`). Convidado é sempre avulso.
 - **Situação** (`MembershipStatus`): ativo, saiu (`Left`), removido (`Removed`). A linha nunca é apagada; "Ex-jogador" é como o histórico mostra quem apagou a conta (E3.16), não uma situação daqui.
@@ -41,6 +42,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `ManageRounds` (criar, editar e cancelar rodada, parar a série, mexer na lista de presença; E3.4) | sim | sim | não | não |
 | `RespondAttendance` (responder "vou" ou "não vou" por si; E3.4) | sim | sim | sim | sim |
 | `ManageMemberLevels` (ver e dar a nota de cada membro e ver a sugestão dele; E3.17, [perfil-e-nota.md](perfil-e-nota.md)) | sim | sim | não | não |
+| `ManageGuests` (adicionar e corrigir convidado sem conta; E3.5) | sim | sim | não | não |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
 
@@ -63,10 +65,12 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `GET /v1/groups` | Usuário registrado | 200 `[{ groupId, name, role, memberType }]`, só ativos, na ordem de entrada |
 | `GET /v1/groups/{groupId}` | `ViewGroup` | 200 `{ groupId, name, memberId, role, memberType, activeMembers }` |
 | `PATCH /v1/groups/{groupId}` `{ name }` | `RenameGroup` | 200 `{ groupId, name }` |
-| `GET /v1/groups/{groupId}/members` | `ViewGroup` | 200 `[{ memberId, role, memberType, hasAccount, isMe, joinedAt, nickname, primaryPosition, otherPositions }]`, só ativos; sem perfil, `nickname` e `primaryPosition` nulos e `otherPositions` `[]` (E3.17) |
+| `GET /v1/groups/{groupId}/members` | `ViewGroup` | 200 `[{ memberId, role, memberType, hasAccount, isMe, joinedAt, nickname, primaryPosition, otherPositions }]`, só ativos; sem perfil, `nickname` e `primaryPosition` nulos e `otherPositions` `[]` (E3.17); o convidado vem com `hasAccount: false`, o nome em `nickname` e a posição dele (E3.5). `Cache-Control: no-store` |
 | `PUT /v1/groups/{groupId}/members/{memberId}/role` `{ role }` | `AssignBasicRole` no filtro; `AssignAdminRole` no agregado quando o alvo ou o papel novo é Admin ou Co-admin | 200 `{ memberId, role }` |
 | `PUT /v1/groups/{groupId}/members/{memberId}/type` `{ memberType }` | `ChangeMemberType` | 200 `{ memberId, memberType }` |
-| `DELETE /v1/groups/{groupId}/members/{memberId}` | `RemoveMember` no filtro; `RemoveAdmin` no agregado quando o alvo é Admin ou Co-admin | 204 |
+| `DELETE /v1/groups/{groupId}/members/{memberId}` | `RemoveMember` no filtro; `RemoveAdmin` no agregado quando o alvo é Admin ou Co-admin | 204; com um convidado, a linha do nome é apagada na mesma transação |
+| `POST /v1/groups/{groupId}/guests` `{ requestId, name, primaryPosition?, level? }` | `ManageGuests` (e `ManageMemberLevels` com `level`) | 201 `{ memberId }`; o mesmo `requestId` no mesmo grupo dá 200 com o mesmo `memberId`, sem mudar nada |
+| `PUT /v1/groups/{groupId}/guests/{memberId}` `{ name, primaryPosition }` | `ManageGuests` | 200 `{ memberId, name, primaryPosition }`, com `Cache-Control: no-store`; os dois campos são obrigatórios e `primaryPosition: null` limpa a posição |
 | `POST /v1/groups/{groupId}/leave` | `Leave` | 204 |
 | `POST /v1/groups/{groupId}/invites` | `ManageInvites` | 201 `{ inviteId, token, expiresAt }`, a única vez que o token sai |
 | `GET /v1/groups/{groupId}/invites` | `ManageInvites` | 200 `[{ inviteId, createdAt, createdBy, expiresAt, useCount }]`, só os válidos, do mais antigo ao mais novo |
@@ -105,7 +109,7 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.forbidden` | 403 | Membro sem a permissão |
 | `groups.membership-limit` | 409 | A pessoa já está em 100 grupos ativos |
 | `groups.member-limit` | 409 | O grupo já tem 300 membros ativos |
-| `groups.member-not-found` | 404 | O alvo não é membro ativo deste grupo: inexistente, de outro grupo, saiu ou foi removido, todos iguais |
+| `groups.member-not-found` | 404 | O alvo não é membro ativo deste grupo: inexistente, de outro grupo, saiu ou foi removido, todos iguais; na correção de convidado, também um membro com conta |
 | `groups.last-admin` | 409 | A mudança deixaria o grupo sem Admin ativo |
 | `groups.use-leave` | 400 | Remover a si mesmo; o caminho é "sair" |
 | `groups.regular-needs-account` | 400 | Mensalista sem conta (convidado, E3.5) |
@@ -118,3 +122,6 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.template-name-invalid` | 400 | Nome do modelo fora de 1 a 40 caracteres visíveis |
 | `groups.template-limit` | 409 | O grupo já tem 20 modelos salvos |
 | `groups.level-invalid` | 400 | Nota fora da escala (1,0 a 5,0 de meio em meio ponto), lote vazio, com mais de 50 itens ou com membro repetido (E3.17) |
+| `groups.guest-name-invalid` | 400 | Nome do convidado fora da regra do apelido (E3.5) |
+| `groups.guest-invalid` | 400 | Posição do convidado fora das 5, ou `requestId` zerado (E3.5) |
+| `groups.role-needs-account` | 400 | Papel diferente de Jogador para um convidado sem conta (E3.5) |

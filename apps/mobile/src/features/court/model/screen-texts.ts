@@ -2,6 +2,7 @@ import type { TeamSide } from "@sacou/match-engine";
 
 import type { TeamColorName } from "../../../theme/team-colors";
 import { strings } from "../../../strings/pt-BR";
+import { sidesOf } from "./court-sides";
 import type { CourtScreenModel, QueueModel } from "./court-screen.types";
 
 /** The line in the middle strip. */
@@ -28,12 +29,6 @@ export function streakText({ streak }: CourtScreenModel): string | null {
 
 function setsWon(model: CourtScreenModel, side: TeamSide): number {
   return model.dots.filter(({ winner }) => winner === side).length;
-}
-
-/** What a screen reader says for the dots of the header. */
-export function setsLabel(model: CourtScreenModel): string {
-  const { a, b } = model.teams;
-  return strings.court.header.setsLabel(a.label, setsWon(model, "a"), b.label, setsWon(model, "b"));
 }
 
 export function queueExitText(queue: QueueModel | null): string | null {
@@ -75,4 +70,16 @@ export interface VisibleQueuePills {
 export function visibleQueuePills(queue: QueueModel | null, limit: number): VisibleQueuePills {
   const entries = queue === null ? [] : queuePills(queue);
   return { shown: entries.slice(0, limit), hidden: Math.max(0, entries.length - limit) };
+}
+
+/** What a screen reader says for the dots of the header: the team drawn first (left or top) is named first. */
+export function setsLabel(model: CourtScreenModel, inverted = false): string {
+  const { left, right } = sidesOf(inverted);
+  const { teams } = model;
+  return strings.court.header.setsLabel(
+    teams[left].label,
+    setsWon(model, left),
+    teams[right].label,
+    setsWon(model, right),
+  );
 }

@@ -19,4 +19,4 @@ O sorteio equilibra os times pela nota do admin, pela sugestão do jogador ou po
 - Sem internet, sem sorteio (pergunta 54): o app avisa no piloto.
 - Os casos golden do sorteio (`TeamDrawGoldenTests`) fixam a diferença, as travas, as reservas e o determinismo, nunca quem cai em cada time (a não ser os pares travados), para que uma busca melhor não os quebre. O caminho exato e a busca local são comparados com um oráculo de força bruta (500 casos de 2 times, 200 de 3 times de 4).
 - O projeto de testes só embute arquivos das pastas `golden/` dos pacotes (regra de arquitetura); por isso os casos do sorteio ficam no código do teste, não num `draw.json` ao lado dele.
-- A busca local não garante o ótimo acima de 16 jogadores em casos raros; o teste de 36 jogadores confere que nenhuma troca de dois jogadores melhora e que roda abaixo de 200 ms.
+- A busca local não garante o ótimo acima de 16 jogadores em casos raros; o teste de 36 jogadores confere que nenhuma troca de dois jogadores melhora e mede o tempo (cerca de 60 ms em Debug; o teste aceita até 1 s, o mais rápido de 5, porque a CI roda os projetos de teste em paralelo e 200 ms falhou com a máquina ocupada).

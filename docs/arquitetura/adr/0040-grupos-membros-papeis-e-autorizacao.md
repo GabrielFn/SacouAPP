@@ -65,3 +65,5 @@ Família nova entra nesta tabela. **Ordem das travas:** grupo (`FOR UPDATE` de D
 > **Nota (E3.4, ADR 0043):** `MemberId` mora agora em `Sacou.Shared.Members` (Groups e Sessions o usam). `GroupPermission` ganhou `ManageRounds` e `RespondAttendance` (4 × 12); o contrato ganhou `GroupCapability`, `Allows` e `ListActiveAsync`.
 
 > **Nota (E3.17, parte 2, [ADR 0051](0051-perfil-do-jogador-e-nota-do-admin.md)):** `GroupPermission` ganhou `ManageMemberLevels` (Admin e Co-admin; 4 × 13). A escrita de nota usa a trava do grupo desta decisão (D8), lendo só os membros, sem os convites; nenhuma família nova de trava.
+
+> **Nota (E3.5, [ADR 0053](0053-convidado-sem-conta.md)):** `GroupPermission` ganhou `ManageGuests` (Admin e Co-admin; 4 × 14). O convidado é um `GroupMember` com `UserId` nulo (D1 desta decisão), criado e corrigido sob a trava do grupo (D8); o nome fica em `groups.guests`.

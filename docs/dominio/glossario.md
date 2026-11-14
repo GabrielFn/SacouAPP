@@ -21,7 +21,7 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Conta (pessoa que entrou no app) | `User` (`UserId`) | Módulo Identity (E3.1). `UserId` é interno (UUID v7) e nunca vai a evento ([ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)) |
 | Identidade do login | `AuthSubject` | UID do Firebase (`sub` do ID token), 1 a 128 caracteres ASCII visíveis, sensível a maiúsculas |
 | Mensalista / avulso | `Regular` / `DropIn` | Valores de `MemberType` |
-| Convidado | A definir (E3.5) | Sempre avulso, nunca mensalista |
+| Convidado | `Guest`, um `GroupMember` sem conta (`UserId` nulo) | Sempre Jogador e avulso, nunca mensalista; nome em `groups.guests` ([ADR 0053](../arquitetura/adr/0053-convidado-sem-conta.md)) |
 | Ex-jogador | A definir (E3.16) | Como quem excluiu a conta aparece no histórico |
 | Admin / Co-admin / Placar (papéis) | `Admin` / `CoAdmin` / `Scorekeeper` | Valores de `GroupRole`; permissões em [grupos.md](grupos.md) |
 | Configuração do grupo ("Como jogamos") | `GroupSettings` | Documento completo; toda folha tem valor ([configuracao.md](configuracao.md), ADR 0041) |

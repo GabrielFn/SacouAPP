@@ -55,4 +55,13 @@ internal static class GroupErrors
 
     /// <summary>A level off the scale, or a batch that is empty, too long or names a member twice. Which one stays out of the body.</summary>
     public static readonly Error LevelInvalid = new("groups.level-invalid", ErrorKind.Validation);
+
+    /// <summary>The guest's name broke the rule of the nickname (ADR 0053, D3).</summary>
+    public static readonly Error GuestNameInvalid = new("groups.guest-name-invalid", ErrorKind.Validation);
+
+    /// <summary>A guest body the JSON reader accepted but the rule did not: a position off the list or a correction that changes nothing.</summary>
+    public static readonly Error GuestInvalid = new("groups.guest-invalid", ErrorKind.Validation);
+
+    /// <summary>Only a player may be without an account: scorekeeper, co-admin and admin need someone with the app (ADR 0053, D8).</summary>
+    public static readonly Error RoleNeedsAccount = new("groups.role-needs-account", ErrorKind.Validation);
 }

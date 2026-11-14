@@ -4,6 +4,8 @@
 export const apiErrorCodes = [
   "groups.forbidden",
   "groups.group-not-found",
+  "groups.guest-invalid",
+  "groups.guest-name-invalid",
   "groups.invite-invalid",
   "groups.invite-limit",
   "groups.invite-not-found",
@@ -15,6 +17,7 @@ export const apiErrorCodes = [
   "groups.membership-limit",
   "groups.name-invalid",
   "groups.regular-needs-account",
+  "groups.role-needs-account",
   "groups.settings-invalid",
   "groups.template-limit",
   "groups.template-name-invalid",
