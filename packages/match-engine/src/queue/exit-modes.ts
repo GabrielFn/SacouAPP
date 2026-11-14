@@ -23,10 +23,10 @@ type ModeOf<K extends QueueExitModeKind> = Extract<QueueExitMode, { readonly kin
 
 /** The mode of E2.6: the loser leaves whole and goes to the singles, or the singles replace some. */
 const automaticStep: QueueExitModeStep<ModeOf<"automatic">> = {
-  run: (context) =>
-    context.pool.teams.length > 0
-      ? ok(enterFirstTeam(context, ({ memberIds }) => ({ players: memberIds, teams: [] })))
-      : replaceBySingles(context, "kept"),
+  run: (context) => {
+    const entered = enterFirstTeam(context, ({ memberIds }) => ({ players: memberIds, teams: [] }));
+    return entered === null ? replaceBySingles(context, "kept") : ok(entered);
+  },
 };
 
 /**
@@ -39,10 +39,10 @@ function rebuildWithSingles(context: ExitStepContext): ExitStepResult {
 
 /** The team leaves whole and goes back to the end of the teams of the queue, never to the singles. */
 const wholeTeamStep: QueueExitModeStep<ModeOf<"whole-team">> = {
-  run: (context) =>
-    context.pool.teams.length > 0
-      ? ok(enterFirstTeam(context, (left: TeamRoster) => ({ players: [], teams: [left] })))
-      : rebuildWithSingles(context),
+  run: (context) => {
+    const entered = enterFirstTeam(context, (left: TeamRoster) => ({ players: [], teams: [left] }));
+    return entered === null ? rebuildWithSingles(context) : ok(entered);
+  },
 };
 
 /**

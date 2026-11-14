@@ -74,10 +74,18 @@ export interface QueueExitCandidates {
 
 /**
  * The Strategy `IQueueExitCriterion` (`decisoes.md:28`): the members who leave, `count` of them, in
- * the order of the criterion; `null` when the input does not allow a choice.
+ * the order of the criterion; `null` when the input does not allow a choice. The input is read as
+ * received, because the screen or a hostile caller may send anything (`QueueExitCriterionInputs`
+ * is what a valid one holds).
  */
-export interface QueueExitCriterion<I> {
-  readonly choose: (candidates: QueueExitCandidates, input: I) => readonly MemberId[] | null;
+export interface QueueExitCriterion {
+  readonly choose: (candidates: QueueExitCandidates, input: object) => readonly MemberId[] | null;
+}
+
+/** The criterion of the group with the input of one side: the loser's or the winner's. */
+export interface QueueSideChoice {
+  readonly criterion: QueueExitCriterionKey;
+  readonly criterionInput: unknown;
 }
 
 /**

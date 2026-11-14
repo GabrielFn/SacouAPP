@@ -10,11 +10,11 @@ import type {
 } from "../score/types.js";
 import { getConsecutiveMatches } from "./consecutive-matches.js";
 import { chooseOutgoing } from "./exit-criteria.js";
-import type { PartialExit, PartialExitPlace, QueueExitChoice } from "./types.js";
+import type { PartialExit, PartialExitPlace, QueueSideChoice } from "./types.js";
 
 /** One team leaving, by the mode of the group, against the queue that is left (ADR 0050). */
 export interface ExitStepContext {
-  readonly choice: QueueExitChoice;
+  readonly choice: QueueSideChoice;
   readonly pool: TeamQueue;
   readonly roster: TeamRoster;
   readonly rotation: TeamState | null;
@@ -44,12 +44,18 @@ export function stayStep({ pool, roster, rotation }: ExitStepContext): ExitStepO
   return { entered: false, exits: [], leaving: NO_ONE, pool, roster, rotation };
 }
 
-/** The first team of the queue takes the side, with its rotation off for E4.7. */
+/**
+ * The first team of the queue takes the side, with its rotation off for E4.7; `null` when no team
+ * waits.
+ */
 export function enterFirstTeam(
   { pool, roster }: ExitStepContext,
   leaving: (left: TeamRoster) => TeamQueue,
-): ExitStepOutcome {
-  const [entering, ...waiting] = pool.teams as readonly [TeamRoster, ...TeamRoster[]];
+): ExitStepOutcome | null {
+  const [entering, ...waiting] = pool.teams;
+  if (entering === undefined) {
+    return null;
+  }
   return {
     entered: true,
     exits: [],
@@ -115,9 +121,9 @@ export function replaceMembers(
   const outgoing = memberIds.filter((id) => chosen.includes(id));
   const incomingFor = (id: MemberId) => incoming[outgoing.indexOf(id)] ?? id;
   const kept = rotationAfter === "kept" ? context.rotation : null;
-  const exits: readonly PartialExit[] = outgoing.map((id, index) => ({
+  const exits: readonly PartialExit[] = outgoing.map((id) => ({
     consecutiveMatches: getConsecutiveMatches(state, id),
-    incoming: incoming[index] as MemberId,
+    incoming: incomingFor(id),
     outgoing: id,
     place: placeOf(id, memberIds, kept),
     side,
