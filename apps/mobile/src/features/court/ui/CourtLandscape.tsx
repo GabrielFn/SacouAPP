@@ -3,16 +3,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
 import { LANDSCAPE_FLEX_WEIGHTS } from "../court.data";
+import { sidesOf } from "../model/court-sides";
 import type { LandscapeCourtLayout } from "../model/court-layout";
 import type { CourtScreenModel } from "../model/court-screen.types";
 import { dotColors, hintText, setsLabel, streakText } from "../model/screen-texts";
 import type { CourtHandlers } from "./court-handlers";
+import type { CourtExtras } from "./court-extras";
+import { BatteryBanner } from "./BatteryBanner";
 import { CourtHeader } from "./CourtHeader";
 import { NetColumn } from "./NetColumn";
 import { QueueStrip } from "./QueueStrip";
 import { TeamZone } from "./TeamZone";
 
-export interface CourtLandscapeProps extends CourtHandlers {
+export interface CourtLandscapeProps extends CourtHandlers, CourtExtras {
   readonly model: CourtScreenModel;
   readonly layout: LandscapeCourtLayout;
 }
@@ -28,9 +31,12 @@ export function CourtLandscape({
   onUndo,
   onCorrect,
   onOpenMenu,
+  inverted = false,
+  battery = null,
 }: CourtLandscapeProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const sides = sidesOf(inverted);
   return (
     <View
       style={{
@@ -52,11 +58,11 @@ export function CourtLandscape({
       />
       <View style={{ flex: LANDSCAPE_FLEX_WEIGHTS.middle, flexDirection: "row" }}>
         <TeamZone
-          panel={model.teams.a}
+          panel={model.teams[sides.left]}
           end="left"
           layout={layout}
           onPoint={() => {
-            onPoint("a");
+            onPoint(sides.left);
           }}
         />
         <NetColumn
@@ -66,15 +72,19 @@ export function CourtLandscape({
           onCorrect={onCorrect}
         />
         <TeamZone
-          panel={model.teams.b}
+          panel={model.teams[sides.right]}
           end="right"
           layout={layout}
           onPoint={() => {
-            onPoint("b");
+            onPoint(sides.right);
           }}
         />
       </View>
-      <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
+      {battery === null ? (
+        <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
+      ) : (
+        <BatteryBanner level={battery.level} onDismiss={battery.onDismiss} />
+      )}
     </View>
   );
 }

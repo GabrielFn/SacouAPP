@@ -60,6 +60,11 @@ export const courtStrings = {
     fullExit: "perde sai",
   },
   roster: { unknownPlayer: "Jogador", orange: "Laranja", blue: "Azul" },
+  battery: {
+    warning: (percent: number) =>
+      `Bateria em ${String(percent)}%. Ligue o celular no carregador ou na power bank.`,
+    dismiss: "Entendi",
+  },
   storageError: {
     title: "Não conseguimos abrir o armazenamento",
     body: "O app não conseguiu abrir o banco de dados do celular. Nada foi apagado. Tente de novo; se continuar, feche e abra o app.",
@@ -92,6 +97,9 @@ export const courtStrings = {
     title: "Menu da partida",
     leave: "Sair do modo quadra",
     close: "Fechar",
+    flipSides: "Inverter lados",
+    flipSidesLabel: (inverted: boolean) =>
+      inverted ? "Inverter lados, lados invertidos" : "Inverter lados, lados normais",
   },
   correctionsPlaceholder: {
     title: "Corrigir",

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { createFakeBatteryMonitor } from "./fake-battery-monitor";
 import { createFakeBackGuard } from "./fake-back-guard";
 import { createFakeClock } from "./fake-clock";
 import { createFakeCourtFeedback } from "./fake-court-feedback";
@@ -50,5 +51,16 @@ describe("the fakes keep the contract of the ports", () => {
     stop();
     motion.set(false);
     expect(heard).toEqual([true]);
+  });
+
+  test("the battery tells the current reading at once, each change, and nothing after the stop", () => {
+    const battery = createFakeBatteryMonitor({ level: 0.5, charging: false });
+    const heard: (number | null)[] = [];
+    const stop = battery.subscribe((reading) => heard.push(reading.level));
+    battery.set({ level: 0.1, charging: false });
+    stop();
+    battery.set({ level: 0.05, charging: false });
+    expect(heard).toEqual([0.5, 0.1]);
+    expect(battery.listenerCount()).toBe(0);
   });
 });

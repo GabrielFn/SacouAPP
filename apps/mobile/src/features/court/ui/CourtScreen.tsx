@@ -3,17 +3,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
 import { COURT_FLEX_WEIGHTS } from "../court.data";
+import { sidesOf } from "../model/court-sides";
 import { computeCourtLayout } from "../model/court-layout";
 import type { CourtScreenModel } from "../model/court-screen.types";
 import { dotColors, hintText, setsLabel, streakText } from "../model/screen-texts";
+import { BatteryBanner } from "./BatteryBanner";
 import { CenterStrip } from "./CenterStrip";
 import type { CourtHandlers } from "./court-handlers";
+import type { CourtExtras } from "./court-extras";
 import { CourtHeader } from "./CourtHeader";
 import { CourtLandscape } from "./CourtLandscape";
 import { QueueStrip } from "./QueueStrip";
 import { TeamZone } from "./TeamZone";
 
-export interface CourtScreenProps extends CourtHandlers {
+export interface CourtScreenProps extends CourtHandlers, CourtExtras {
   readonly model: CourtScreenModel;
 }
 
@@ -22,10 +25,19 @@ export interface CourtScreenProps extends CourtHandlers {
  * layout: on its side it is the landscape court (the court locks the phone that way); upright is
  * the fallback for a tablet that ignores the lock, a split screen or a lock that failed.
  */
-export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: CourtScreenProps) {
+export function CourtScreen({
+  model,
+  onPoint,
+  onUndo,
+  onCorrect,
+  onOpenMenu,
+  inverted = false,
+  battery = null,
+}: CourtScreenProps) {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const sides = sidesOf(inverted);
   const layout = computeCourtLayout({
     windowWidth: width,
     windowHeight: height,
@@ -43,6 +55,8 @@ export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: C
         onUndo={onUndo}
         onCorrect={onCorrect}
         onOpenMenu={onOpenMenu}
+        inverted={inverted}
+        battery={battery}
       />
     );
   }
@@ -63,11 +77,11 @@ export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: C
         onOpenMenu={onOpenMenu}
       />
       <TeamZone
-        panel={model.teams.a}
+        panel={model.teams[sides.left]}
         end="top"
         layout={layout}
         onPoint={() => {
-          onPoint("a");
+          onPoint(sides.left);
         }}
       />
       <CenterStrip
@@ -77,14 +91,18 @@ export function CourtScreen({ model, onPoint, onUndo, onCorrect, onOpenMenu }: C
         onCorrect={onCorrect}
       />
       <TeamZone
-        panel={model.teams.b}
+        panel={model.teams[sides.right]}
         end="bottom"
         layout={layout}
         onPoint={() => {
-          onPoint("b");
+          onPoint(sides.right);
         }}
       />
-      <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
+      {battery === null ? (
+        <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
+      ) : (
+        <BatteryBanner level={battery.level} onDismiss={battery.onDismiss} />
+      )}
     </View>
   );
 }
