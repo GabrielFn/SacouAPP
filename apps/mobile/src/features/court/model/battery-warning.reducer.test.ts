@@ -52,6 +52,21 @@ describe("batteryWarningReducer", () => {
     expect(run([reading(0.18), { type: "dismissed" }, reading(0.05)])).toEqual({ status: "done" });
   });
 
+  test("charging at 19% then unplugged at 18% shows", () => {
+    expect(run([reading(0.19, true), reading(0.18, false)])).toEqual({
+      status: "showing",
+      level: 0.18,
+    });
+  });
+
+  test("a court opened already at 10% shows on the first reading, and only once across the menu", () => {
+    const shown = run([reading(0.1)]);
+    expect(shown).toEqual({ status: "showing", level: 0.1 });
+    // The menu and back remount the screen, not the layout that keeps this state: a new reading changes nothing.
+    expect(batteryWarningReducer(shown, reading(0.1))).toEqual(shown);
+    expect(run([reading(0.1), { type: "dismissed" }, reading(0.1)])).toEqual({ status: "done" });
+  });
+
   test("dismissing before it showed changes nothing", () => {
     expect(run([{ type: "dismissed" }])).toEqual({ status: "watching" });
   });

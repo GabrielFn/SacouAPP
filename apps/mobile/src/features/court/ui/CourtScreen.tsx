@@ -72,7 +72,7 @@ export function CourtScreen({
         weight={COURT_FLEX_WEIGHTS.bar}
         setNumber={model.setNumber}
         sets={dotColors(model)}
-        setsLabel={setsLabel(model)}
+        setsLabel={setsLabel(model, inverted)}
         onOpenMenu={onOpenMenu}
       />
       <TeamZone

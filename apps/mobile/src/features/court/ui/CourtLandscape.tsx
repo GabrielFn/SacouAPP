@@ -51,7 +51,7 @@ export function CourtLandscape({
         weight={LANDSCAPE_FLEX_WEIGHTS.bar}
         setNumber={model.setNumber}
         sets={dotColors(model)}
-        setsLabel={setsLabel(model)}
+        setsLabel={setsLabel(model, inverted)}
         hint={hintText(model)}
         onOpenMenu={onOpenMenu}
       />

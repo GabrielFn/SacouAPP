@@ -32,19 +32,28 @@ async function readBattery(): Promise<BatteryReading> {
 export const expoBatteryMonitor: BatteryMonitor = {
   read: readBattery,
   subscribe(listener) {
-    // Each listener tells one half of the reading: nothing is emitted before both halves are known.
-    const watch = { value: { reading: null as BatteryReading | null, active: true } };
-    const update = (change: Partial<BatteryReading>): void => {
-      const { reading, active } = watch.value;
-      if (!active || reading === null) return;
-      const next = { ...reading, ...change };
-      watch.value = { reading: next, active };
-      listener(next);
+    // Each listener tells one half of the reading. A change before the first read is kept and the
+    // first read fills only what no change has told yet, so a stale read never wins.
+    const watch = {
+      value: {
+        reading: null as BatteryReading | null,
+        told: {} as Partial<BatteryReading>,
+        active: true,
+      },
     };
-    void readBattery().then((reading) => {
-      if (!watch.value.active) return;
-      watch.value = { reading, active: true };
+    const emit = (reading: BatteryReading): void => {
+      watch.value = { ...watch.value, reading };
       listener(reading);
+    };
+    const update = (change: Partial<BatteryReading>): void => {
+      const { reading, told, active } = watch.value;
+      if (!active) return;
+      watch.value = { reading, told: { ...told, ...change }, active };
+      if (reading !== null) emit({ ...reading, ...change });
+    };
+    void readBattery().then((read) => {
+      if (!watch.value.active) return;
+      emit({ ...read, ...watch.value.told });
     });
     const levelSub = addBatteryLevelListener(({ batteryLevel }) => {
       update({ level: levelOf(batteryLevel) });

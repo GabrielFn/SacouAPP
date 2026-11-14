@@ -16,6 +16,6 @@ export function BottomStrip({ model, layout, battery }: BottomStripProps) {
   return battery === null ? (
     <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
   ) : (
-    <BatteryBanner level={battery.level} onDismiss={battery.onDismiss} />
+    <BatteryBanner layout={layout} level={battery.level} onDismiss={battery.onDismiss} />
   );
 }

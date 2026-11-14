@@ -5,15 +5,26 @@ const battery = vi.hoisted(() => ({
   level: -1,
   state: 1,
   failing: false,
+  gate: null as Promise<void> | null,
+  levelListener: null as ((event: { batteryLevel: number }) => void) | null,
+  stateListener: null as ((event: { batteryState: number }) => void) | null,
 }));
 
 vi.mock("expo-battery", () => ({
   BatteryState: { UNKNOWN: 0, UNPLUGGED: 1, CHARGING: 2, FULL: 3 },
-  getBatteryLevelAsync: () =>
-    battery.failing ? Promise.reject(new Error("no battery")) : Promise.resolve(battery.level),
+  getBatteryLevelAsync: async () => {
+    await battery.gate;
+    return battery.failing ? Promise.reject(new Error("no battery")) : battery.level;
+  },
   getBatteryStateAsync: () => Promise.resolve(battery.state),
-  addBatteryLevelListener: () => ({ remove: () => undefined }),
-  addBatteryStateListener: () => ({ remove: () => undefined }),
+  addBatteryLevelListener: (fn: (event: { batteryLevel: number }) => void) => {
+    battery.levelListener = fn;
+    return { remove: () => undefined };
+  },
+  addBatteryStateListener: (fn: (event: { batteryState: number }) => void) => {
+    battery.stateListener = fn;
+    return { remove: () => undefined };
+  },
 }));
 
 describe("expoBatteryMonitor.read", () => {
@@ -21,6 +32,7 @@ describe("expoBatteryMonitor.read", () => {
     battery.level = 0.5;
     battery.state = 1;
     battery.failing = false;
+    battery.gate = null;
   });
 
   test("an emulator level of -1 is an unknown level, not a real zero", async () => {
@@ -49,5 +61,30 @@ describe("expoBatteryMonitor.read", () => {
   test("a failing read means nothing to warn about", async () => {
     battery.failing = true;
     expect(await expoBatteryMonitor.read()).toEqual({ level: null, charging: false });
+  });
+});
+
+describe("expoBatteryMonitor.subscribe", () => {
+  test("a change before the first read is applied and the stale read does not overwrite it", async () => {
+    battery.level = 0.5;
+    battery.state = 1;
+    const release: { open: () => void } = { open: () => undefined };
+    battery.gate = new Promise<void>((resolve) => {
+      release.open = () => {
+        resolve();
+      };
+    });
+    const readings: unknown[] = [];
+    const stop = expoBatteryMonitor.subscribe((reading) => readings.push(reading));
+    battery.levelListener?.({ batteryLevel: 0.1 });
+    battery.stateListener?.({ batteryState: 2 });
+    expect(readings).toEqual([]);
+    release.open();
+    await vi.waitFor(() => {
+      expect(readings).toEqual([{ level: 0.1, charging: true }]);
+    });
+    battery.levelListener?.({ batteryLevel: 0.09 });
+    expect(readings.at(-1)).toEqual({ level: 0.09, charging: true });
+    stop();
   });
 });

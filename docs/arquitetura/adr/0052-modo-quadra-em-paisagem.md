@@ -36,5 +36,7 @@ No teste no celular de 13/11/2026 o retrato da quadra teve três defeitos: chips
 
 ## Parte 2: "Inverter lados" e aviso de bateria
 
+Decisão do orquestrador: o placar de sets do cabeçalho (`setsLabel`) segue os lados desenhados; com os lados invertidos, o time da esquerda vem primeiro. O alerta de bateria tem o mesmo peso de flex da fila, para a quadra não se mover.
+
 - **Inverter lados** é um booleano num contexto do layout da quadra (`court-sides-context`), sem persistência: sobrevive à ida ao menu e some ao fechar a quadra. Não entra no log de eventos. Só o desenho espelha: as bolinhas continuam nos pontos da formação (o time da esquerda usa `end="left"`, o da direita `end="right"`) e o toque na zona da esquerda pontua o time que está lá. `sidesOf` decide quem fica em cada lado.
 - **Bateria** passa pela porta `BatteryMonitor` (adaptador `expo-battery`, SDK 58, sem permissão e incluído no Expo Go). O reducer `batteryWarningReducer` mostra o aviso **uma vez** por quadra aberta abaixo de 20% (`BATTERY_WARNING_LEVEL`) sem carregador, e só fecha com "Entendi" ou ao ligar o carregador. Nível desconhecido (emulador, -1) nunca avisa. O aviso ocupa o lugar da fila; a leitura não sai do aparelho.

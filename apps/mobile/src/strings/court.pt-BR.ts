@@ -61,8 +61,7 @@ export const courtStrings = {
   },
   roster: { unknownPlayer: "Jogador", orange: "Laranja", blue: "Azul" },
   battery: {
-    warning: (percent: number) =>
-      `Bateria em ${String(percent)}%. Ligue o celular no carregador ou na power bank.`,
+    warning: (percent: number) => `Bateria em ${String(percent)}%. Ligue o carregador.`,
     dismiss: "Entendi",
   },
   storageError: {
