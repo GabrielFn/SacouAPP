@@ -115,9 +115,9 @@ public sealed class MemberLevelsBehaviourTests(IntegrationDatabase database) : I
         Assert.Equal(LevelCalls.LevelInvalid, await SettingsCalls.CodeAsync(response));
     }
 
-    /// <summary>Fifty items fit in the 4 KB cap and pass; fifty-one are refused by the rule; a body over the cap never reaches it.</summary>
+    /// <summary>Fifty items fit in the 4 KB cap and pass; fifty-one are refused by the rule (the 413 over the cap is in GroupsMemberRequestTests, on Kestrel).</summary>
     [Fact]
-    public async Task Batch_OfFiftyFits_FiftyOneIsInvalid_AndOverTheCapIs413()
+    public async Task Batch_OfFiftyFits_AndFiftyOneOrRepeatedIsInvalid()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
@@ -133,14 +133,12 @@ public sealed class MemberLevelsBehaviourTests(IntegrationDatabase database) : I
         using var full = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fifty);
         using var tooMany = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fiftyOne);
         using var twice = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), repeated);
-        using var huge = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fifty.Replace("]}", $$"""],"padding":"{{new string('x', BodyCap)}}"}""", StringComparison.Ordinal));
 
         Assert.True(fifty.Length < BodyCap);
         Assert.Equal(HttpStatusCode.OK, full.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, tooMany.StatusCode);
         Assert.Equal(LevelCalls.LevelInvalid, await SettingsCalls.CodeAsync(tooMany));
         Assert.Equal(LevelCalls.LevelInvalid, await SettingsCalls.CodeAsync(twice));
-        Assert.Equal(HttpStatusCode.RequestEntityTooLarge, huge.StatusCode);
         Assert.Equal(MaxBatch, await LevelCalls.CountAsync(api.ConnectionString, world.GroupId));
         Assert.Equal(new LevelState(null, world.MemberIds[A.Admin]), await LevelCalls.ReadAsync(api.ConnectionString, targets[MaxBatch - 1]));
     }
