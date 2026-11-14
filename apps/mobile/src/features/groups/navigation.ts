@@ -1,5 +1,6 @@
 import type { Href } from "expo-router";
 
+import { createRoundHref } from "../rounds/navigation";
 import { isFromScratch, serializeCustomBlocks, type GroupOrigin } from "./model/custom-blocks";
 
 export type PendingGroupScreen = "createGroup" | "members" | "settings";
@@ -29,7 +30,7 @@ export function groupSettingsHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/settings", params: { groupId } };
 }
 
-/** Where "Criar grupo" goes next: the settings, until the members (E4.5 part 2) and the round (E4.6). */
+/** Where "Criar grupo" goes next: "Nova rodada" with the pattern the group just got (E4.6, question 48). */
 export function afterCreateGroupHref(groupId: string): Href {
-  return groupSettingsHref(groupId);
+  return createRoundHref(groupId);
 }

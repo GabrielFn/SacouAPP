@@ -4572,6 +4572,7 @@
       "RoundSummaryResponse": {
         "required": [
           "roundId",
+          "seriesId",
           "localDate",
           "localTime",
           "startsAt",
@@ -4586,6 +4587,13 @@
         "properties": {
           "roundId": {
             "type": "string",
+            "format": "uuid"
+          },
+          "seriesId": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "localDate": {

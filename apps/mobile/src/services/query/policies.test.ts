@@ -64,6 +64,16 @@ describe("cacheEffectsOf (P5, golden)", () => {
       { type: "settingsForbidden", groupId: G },
       [`invalidate groups/${G}`, `invalidate groups/${G}/settings`],
     ],
+    ...(["round-created", "round-updated"] as const).map(
+      (type): [MutationEvent, readonly string[]] => [
+        { type, groupId: G, roundId: "r1", round: {} },
+        [`set groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+      ],
+    ),
+    [
+      { type: "attendance-changed", groupId: G, roundId: "r1" },
+      [`invalidate groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+    ],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
         [{ type, groupId: G, targetIsMe: false }, [`invalidate groups/${G}/members`]],
@@ -130,6 +140,12 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.group(G), true],
     [queryKeys.members(G), true],
     [queryKeys.settings(G), true],
+    [queryKeys.rounds(G), true],
+    [queryKeys.round(G, "round-1"), true],
+    [["groups", G, "members", "extra"], false],
+    [["groups", G, "settings", "round-1"], false],
+    [["groups", G, "rounds", 1], false],
+    [["groups", G, "rounds", "round-1", "extra"], false],
     [queryKeys.invites(G), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],

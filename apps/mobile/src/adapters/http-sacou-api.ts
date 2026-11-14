@@ -11,6 +11,7 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createRoundOperations } from "./http-round-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
 import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
 import type { IdTokenProvider } from "../services/api/id-token-provider";
@@ -37,7 +38,7 @@ interface FetchOutcome<T> {
   readonly response: Response;
 }
 
-type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
+export type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
 
 /** The transport failed (no network, timeout): `offline`. Anything else thrown is `unexpected`. */
 class NetworkFailure extends Error {}
@@ -274,5 +275,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/preview", { ...init, body: { token } })),
     acceptInvite: (token) =>
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
+    ...createRoundOperations(client, execute),
   };
 }

@@ -12,6 +12,7 @@ import { expoScreenOrientation } from "../adapters/expo-screen-orientation";
 import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
+import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
 import { expoFontLoader } from "../adapters/expo-font-loader";
 import { bindAppStateFocus } from "../adapters/app-state-focus";
 import { expoAppVersion } from "../adapters/expo-app-version";
@@ -56,6 +57,7 @@ const realServices: Services = {
     idTokens: idTokenProvider,
   }),
   networkStatus,
+  shareSheet: reactNativeShareSheet,
   cacheSession: createCacheSession(queryClient, cachePersister),
 };
 

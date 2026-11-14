@@ -6,7 +6,7 @@ using Sacou.Shared.Text;
 namespace Sacou.Modules.Sessions.Domain;
 
 /// <summary>
-/// Where the round happens: free text, 0 to 80 characters, trimmed and in NFC, nothing invisible. The same
+/// Where the round happens: free text, 0 to 80 characters (counted as in TypeScript: no mark, joiner or skin tone counts), trimmed and in NFC, nothing invisible. The same
 /// rule family as <c>schedule.venue</c> (shared <see cref="DisplayText"/>). It may name a person: never
 /// logged (docs/seguranca/dados-pessoais.md).
 /// </summary>
@@ -32,9 +32,19 @@ internal sealed record Venue
         }
 
         var normalized = trimmed.Normalize(NormalizationForm.FormC);
-        return DisplayText.IsAllowedName(normalized, SessionLimits.MaxVenueLength, SessionLimits.MaxVenueCodePoints, SessionLimits.MaxMarksPerCharacter)
+        return IsAllowed(normalized)
             ? Result.Success(new Venue(normalized))
             : Result.Failure<Venue>(RoundErrors.RoundInvalid);
+    }
+
+    /// <summary>The same answer as <c>checkDisplayText</c> in TypeScript (shared golden, ADR 0054).</summary>
+    private static bool IsAllowed(string normalized)
+    {
+        var runes = normalized.EnumerateRunes().ToArray();
+        return DisplayText.IsWithinCountedLength(runes, SessionLimits.MaxVenueLength)
+            && DisplayText.HasOnlyVisibleText(normalized)
+            && DisplayText.HasVisibleContent(normalized)
+            && DisplayText.HasFewMarksInARow(runes, SessionLimits.MaxMarksPerCharacter);
     }
 
     /// <summary>Read back from the database: shown as it is, never turned into an error.</summary>

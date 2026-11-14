@@ -91,9 +91,10 @@ internal sealed record MeResponse(Guid MemberId, AttendanceStatus? Status, int? 
     }
 }
 
-/// <summary>One line of the list of rounds (tela 06): counts and the caller's own place, not the lists.</summary>
+/// <summary>One line of the list of rounds (tela 06): counts and the caller's own place, not the lists. <c>SeriesId</c> lets the app see whether the group already repeats weekly.</summary>
 internal sealed record RoundSummaryResponse(
     Guid RoundId,
+    Guid? SeriesId,
     string LocalDate,
     string LocalTime,
     DateTimeOffset StartsAt,
@@ -110,6 +111,7 @@ internal sealed record RoundSummaryResponse(
         ArgumentNullException.ThrowIfNull(resolved);
         return new RoundSummaryResponse(
             round.Id.Value,
+            round.SeriesId?.Value,
             RoundFormat.Date(round.Slot.Date),
             RoundFormat.Time(round.Slot.Time),
             round.Slot.StartsAt,

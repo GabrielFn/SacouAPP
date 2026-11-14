@@ -12,6 +12,8 @@ import type { ScreenOrientation } from "../features/court/ports/screen-orientati
 import type { NetworkStatus } from "./api/network-status";
 import type { SacouApi } from "./api/sacou-api";
 import type { FontLoader } from "./font-loader";
+import type { ShareSheet } from "./share/share-sheet";
+
 import type { CacheSession } from "./query/cache-persister";
 
 export interface Services {
@@ -34,6 +36,8 @@ export interface Services {
   /** The API, typed by the contract (E4.2). Its answers live only in the TanStack cache, never here. */
   readonly sacouApi: SacouApi;
   readonly networkStatus: NetworkStatus;
+  /** The system share sheet, for the round message (E4.6). */
+  readonly shareSheet: ShareSheet;
   /** Sign-out clears the server cache, in memory and in `sacou-cache.db` (E4.3 calls it). */
   readonly cacheSession: CacheSession;
 }

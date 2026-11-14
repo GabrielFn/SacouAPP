@@ -6,6 +6,10 @@
         <PackageReference Include="xunit.v3.mtp-v2" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/settings-resolver.json" LogicalName="golden/settings-resolver.json" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../../src/Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />
     </ItemGroup>
     <ItemGroup>

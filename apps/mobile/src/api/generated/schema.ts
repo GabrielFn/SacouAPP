@@ -709,6 +709,8 @@ export interface components {
     RoundSummaryResponse: {
       /** Format: uuid */
       roundId: string;
+      /** Format: uuid */
+      seriesId: null | string;
       localDate: string;
       localTime: string;
       /** Format: date-time */
