@@ -160,3 +160,9 @@ export const QUEUE_PILL_MAX_WIDTH_RATIO = 220 / LANDSCAPE_TOTAL_WIDTH_WEIGHT;
 
 /** Halves a length: the middle of a chip, a zone or the net. */
 export const HALF = 2;
+
+/** Below this battery level (0 to 1) the court suggests plugging the phone in (ADR 0046). */
+export const BATTERY_WARNING_LEVEL = 0.2;
+
+/** The battery level is shown as a percentage of this. */
+export const PERCENT_BASE = 100;

@@ -3,6 +3,7 @@ import { Button, type ButtonVariant } from "./Button";
 export interface ScreenAction {
   readonly label: string;
   readonly variant?: ButtonVariant;
+  readonly accessibilityLabel?: string;
   readonly onPress: () => void;
 }
 
@@ -14,8 +15,14 @@ export interface ActionButtonsProps {
 export function ActionButtons({ actions }: ActionButtonsProps) {
   return (
     <>
-      {actions.map(({ label, variant, onPress }) => (
-        <Button key={label} label={label} variant={variant} onPress={onPress} />
+      {actions.map(({ label, variant, accessibilityLabel, onPress }) => (
+        <Button
+          key={label}
+          label={label}
+          variant={variant}
+          accessibilityLabel={accessibilityLabel}
+          onPress={onPress}
+        />
       ))}
     </>
   );

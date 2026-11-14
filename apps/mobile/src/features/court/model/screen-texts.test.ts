@@ -21,6 +21,7 @@ describe("the texts of screen 09 are those of the design", () => {
     expect(zoneLabel(model.teams.b)).toBe("Ponto para Azul. Placar 15. Azul em recepção");
     expect(hintText(model)).toBe("Posições no momento do saque");
     expect(setsLabel(model)).toBe("Sets: Laranja 1, Azul 0");
+    expect(setsLabel(model, true)).toBe("Sets: Azul 0, Laranja 1");
     expect(strings.court.header.setTitle(model.setNumber)).toBe("2º set");
   });
 
