@@ -27,6 +27,7 @@ function buildChips({ alignment, serverId, roster }: ChipContext): readonly Play
     return {
       memberId,
       name: roster.nameOf(memberId),
+      displayName: roster.nameOf(memberId),
       zone,
       point,
       isServer: memberId === serverId,

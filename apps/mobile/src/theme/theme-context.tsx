@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useWindowDimensions } from "react-native";
 
-import { createScaledTokens, type ScaledTokens } from "./scale";
+import { createScaledTokens, shortSide, type ScaledTokens } from "./scale";
 import { themes, type Theme, type ThemeName } from "./themes";
 
 export interface ThemeContextValue {
@@ -19,14 +19,14 @@ export interface ThemeProviderProps {
 
 /** The active theme name is a prop: the single place where the choice is stored. */
 export function ThemeProvider({ name, children }: ThemeProviderProps) {
-  const { width, fontScale } = useWindowDimensions();
+  const { width, height, fontScale } = useWindowDimensions();
   const value = useMemo<ThemeContextValue>(
     () => ({
       name,
       colors: themes[name],
-      tokens: createScaledTokens({ windowWidth: width, fontScale }),
+      tokens: createScaledTokens({ windowWidth: shortSide(width, height), fontScale }),
     }),
-    [name, width, fontScale],
+    [name, width, height, fontScale],
   );
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

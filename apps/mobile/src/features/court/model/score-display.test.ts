@@ -4,7 +4,7 @@ import { COURT_ZONE_RATIOS, SCORE_ZONE_RATIO } from "../court.data";
 import { computeCourtLayout } from "./court-layout";
 import { countDigits, scoreTextSize } from "./score-display";
 
-const NO_INSETS = { insetTop: 0, insetBottom: 0 };
+const NO_INSETS = { insetTop: 0, insetBottom: 0, insetLeft: 0, insetRight: 0 };
 const SCREENS = [
   { windowWidth: 320, windowHeight: 568 },
   { windowWidth: 390, windowHeight: 844 },
@@ -110,6 +110,8 @@ describe("the layout from the window", () => {
       windowHeight: 844,
       insetTop: 40,
       insetBottom: 20,
+      insetLeft: 0,
+      insetRight: 0,
     });
     expect(cut.zoneHeight).toBeLessThan(free.zoneHeight);
   });
@@ -135,6 +137,8 @@ describe("the layout from the window", () => {
       windowHeight: 50,
       insetTop: 40,
       insetBottom: 40,
+      insetLeft: 0,
+      insetRight: 0,
     });
     expect(layout.zoneHeight).toBe(0);
   });

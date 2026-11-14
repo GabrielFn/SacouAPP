@@ -31,6 +31,13 @@ export const courtPalette = {
   night: { background: "#000000", foreground: "#FFFFFF", muted: "#C8C8C8" },
 } as const;
 
+/**
+ * The fill of a button with nothing to do (DESFAZER with nothing to undo), the same in both themes:
+ * light enough to tell from the black or white of the active button, and 4.5:1 or more against the
+ * white and the black of the labels.
+ */
+export const courtDisabledFill = "#767676";
+
 export const fontFamilies = {
   display600: "BarlowCondensed-SemiBold",
   display700: "BarlowCondensed-Bold",
@@ -136,7 +143,7 @@ export const accessibilityFloors = { touchTarget: 44, hairline: 1 } as const;
 // Measures of the court screens (QuadraSol.dc.html, QuadraNoite.dc.html), in canvas pixels. They are
 // scaled by the window like the other tokens; the touch targets keep the floor of 44.
 export const courtSizes = {
-  chip: 28,
+  chip: 30,
   setDot: 12,
   badge: 18,
   tag: 30,
@@ -145,20 +152,21 @@ export const courtSizes = {
   pillBadge: 20,
   undoButton: 54,
   menuButton: 44,
-  lockButton: 44,
   netMesh: 9,
   savedIcon: 15,
   menuIcon: 18,
-  lockIcon: 20,
   undoIcon: 22,
   correctIcon: 17,
   flameIcon: 17,
   ballIcon: 14,
+  // The widest the plain pages of the court (menu, corrections, end of set and match) grow, so that
+  // on a phone on its side the text keeps a readable line and the buttons are not a wide strip.
+  sheetMaxWidth: 480,
 } as const;
 
 export const courtFontSizes = {
   setTitle: 22,
-  chipNumber: 11,
+  chipNumber: 14,
   badge: 10,
   tag: 21,
   tagBadge: 15,
@@ -168,9 +176,9 @@ export const courtFontSizes = {
 export const courtBorderWidths = { outline: 2.5, frame: 3 } as const;
 
 export const courtSpacing = {
-  chipPadding: 9,
   hairGap: 5,
   scoreGap: 22,
   badgeOffsetX: 6,
   badgeOffsetY: 9,
+  chipGap: 4,
 } as const;

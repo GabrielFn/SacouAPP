@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import catalog from "../../../../../../packages/volley-rules/src/formations/formations.json";
-import { anchorAt, placeOnHalfCourt, ratioToPercentText, toPercentText } from "./court-geometry";
+import { placeOnHalfCourt, ratioToPercentText, toPercentText } from "./court-geometry";
 import { selectCourtScreen } from "./court-screen.selectors";
 import { ROSTER, screen09 } from "./screen-scenarios.test.fixture";
 
@@ -36,12 +36,21 @@ describe("placing a point on the half court", () => {
     expect(placeOnHalfCourt({ x: 0.8, y: 1.1 }, "top").y).toBeLessThan(0);
   });
 
-  test("the holder of a chip is twice as wide as the court and centered on the point", () => {
-    expect(anchorAt({ x: 30, y: 62.5 })).toEqual({
-      left: "-70.00%",
-      top: "62.50%",
-      width: "200.00%",
-    });
+  test("landscape: the team on the left has its net on the right and its right hand down", () => {
+    const nearNetOnRight = placeOnHalfCourt({ x: 0.9, y: 0.1 }, "left");
+    expect(nearNetOnRight.x).toBeCloseTo(90);
+    expect(nearNetOnRight.y).toBeCloseTo(90);
+    expect(placeOnHalfCourt({ x: 0.8, y: 1.1 }, "left").x).toBeLessThan(0);
+  });
+
+  test("landscape: the team on the right has its net on the left and its right hand up", () => {
+    const nearNetOnRight = placeOnHalfCourt({ x: 0.9, y: 0.1 }, "right");
+    expect(nearNetOnRight.x).toBeCloseTo(10);
+    expect(nearNetOnRight.y).toBeCloseTo(10);
+    expect(placeOnHalfCourt({ x: 0.8, y: 1.1 }, "right").x).toBeGreaterThan(100);
+  });
+
+  test("the percent texts keep two decimals", () => {
     expect(toPercentText(33.333)).toBe("33.33%");
     expect(ratioToPercentText(0.5)).toBe("50.00%");
   });

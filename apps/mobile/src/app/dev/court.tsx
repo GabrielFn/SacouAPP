@@ -100,6 +100,12 @@ export default function DevCourtScreen() {
           void start("with-libero");
         }}
       />
+      <Button
+        label={dev.newLongNames}
+        onPress={() => {
+          void start("long-names");
+        }}
+      />
       {openSession === null ? null : (
         <>
           <Button

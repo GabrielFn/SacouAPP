@@ -10,7 +10,10 @@ export type CourtPhase = "no-match" | "playing" | "set-decided" | "match-ended";
 
 export interface PlayerChipModel {
   readonly memberId: MemberId;
+  /** The full name, for the screen reader. */
   readonly name: string;
+  /** What the chip draws: the first name, or "Ana C." when another player has the same one. */
+  readonly displayName: string;
   readonly zone: RotationSlot;
   readonly point: CourtPoint;
   readonly isServer: boolean;
@@ -44,7 +47,10 @@ export interface SetDotModel {
 
 export interface QueuedPlayerModel {
   readonly memberId: MemberId;
+  /** The full name, for the screen reader. */
   readonly name: string;
+  /** What the pill draws (see `PlayerChipModel.displayName`). */
+  readonly displayName: string;
 }
 
 export interface QueuedTeamModel {

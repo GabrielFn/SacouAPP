@@ -11,8 +11,6 @@ import {
   selectCourtScreen,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
-import { selectLastPoint } from "../../../features/court/model/point-toast";
-import { pointToastText } from "../../../features/court/model/screen-texts";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
@@ -49,15 +47,6 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-  const lastPoint = useMemo(
-    () => (timeline === null ? null : selectLastPoint(timeline)),
-    [timeline],
-  );
-  const toast =
-    guard.toastVisible && model !== null && lastPoint !== null
-      ? pointToastText(model, lastPoint)
-      : null;
-
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
   }
@@ -67,14 +56,11 @@ export default function CourtRoute() {
   return (
     <CourtScreen
       model={model}
-      toast={toast}
       onPoint={(team) => {
         // The zones wait after a point, even if the engine turns this one down.
         if (guard.acceptPoint()) {
           void dispatch({ type: "score-point", team }).then((result) => {
-            if (result.ok) {
-              guard.recordPoint();
-            } else {
+            if (!result.ok) {
               courtFeedback.play("refused");
             }
           });

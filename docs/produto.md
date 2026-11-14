@@ -131,7 +131,7 @@ Uma aba "Explorar" (Falta 1, mapa) só entra quando houver densidade de usuário
 | Time B | 34% | Igual ao Time A |
 | Fila | 16–18% | Próximo time, regra e sequência, "Entra no saque: Ana" |
 
-1. **A zona inteira do time é o botão de ponto**, não um "+1". Números com pelo menos 45% da altura da zona, legíveis a 5 m.
+1. **A zona inteira do time é o botão de ponto**, não um "+1". Números com pelo menos 45% da altura da zona no retrato e 38% na paisagem (o Gabriel preferiu uma quadra maior em 13/11/2026, ADR 0052), legíveis a 5 m.
 2. **Tema Sol:** preto puro sobre branco puro de dia; tema Noite em quadra coberta. Contraste mínimo 7:1. Cor nunca é o único sinal (nome e letra A/B também).
 3. **Proteção contra erro:** bloqueio de 700 ms após cada ponto, toques com a palma ignorados, voltar do Android bloqueado na quadra. Sem trava (cadeado) e sem toast "+1": removidos pelo Gabriel em 13/11/2026 (`decisoes.md`).
 4. **Corrigir sem estresse:** linha do tempo dos últimos 10 pontos; um toque volta àquele estado; trocar sacador e girar time a 1 toque; cada correção mostra o que mudou.
