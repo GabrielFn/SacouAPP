@@ -62,25 +62,36 @@ function QueueRuleForm({ groupId, ready, bannerText }: QueueRuleFormProps) {
   );
 }
 
+interface QueueRuleLoadingProps {
+  readonly groupId: string;
+  readonly failureText: string | null;
+  readonly onRetry: () => void;
+}
+
+function QueueRuleLoading({ groupId, failureText, onRetry }: QueueRuleLoadingProps) {
+  return (
+    <Screen>
+      <BackBar title={texts.title} fallbackHref={groupSettingsHref(groupId)} look="heading" />
+      {failureText === null ? (
+        <LoadingState accessibilityLabel={screen.loading} />
+      ) : (
+        <EmptyState
+          alert
+          title={screen.errorTitle}
+          body={failureText}
+          actions={[{ label: screen.retry, variant: "secondary", onPress: onRetry }]}
+        />
+      )}
+    </Screen>
+  );
+}
+
 /** Screen 18a, "Regra da fila": the draft lives here and "Salvar regra" sends it in one request. */
 export function QueueRuleScreen({ groupId }: QueueRuleScreenProps) {
   const { ready, failure, bannerText, retry } = useSettingsData(groupId, NO_PENDING);
-  if (ready === null) {
-    return (
-      <Screen>
-        <BackBar title={texts.title} fallbackHref={groupSettingsHref(groupId)} look="heading" />
-        {failure === null ? (
-          <LoadingState accessibilityLabel={screen.loading} />
-        ) : (
-          <EmptyState
-            alert
-            title={screen.errorTitle}
-            body={failure.text}
-            actions={[{ label: screen.retry, variant: "secondary", onPress: retry }]}
-          />
-        )}
-      </Screen>
-    );
-  }
-  return <QueueRuleForm groupId={groupId} ready={ready} bannerText={bannerText} />;
+  return ready === null ? (
+    <QueueRuleLoading groupId={groupId} failureText={failure?.text ?? null} onRetry={retry} />
+  ) : (
+    <QueueRuleForm groupId={groupId} ready={ready} bannerText={bannerText} />
+  );
 }
