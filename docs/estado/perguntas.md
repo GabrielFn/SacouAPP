@@ -76,3 +76,6 @@
 
 ## Decidido pelo orquestrador
 - **CI verde antes da E0.4:** ver [ADR 0003](../arquitetura/adr/0003-local-validation-before-ci.md).
+
+## 14/11/2026: cobrança do GitHub Actions
+- **Pergunta:** desde 14/11, madrugada, todo job da CI cai em 2 s com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra (#81 e #82 prontos). Opções: 1) o Gabriel acerta o pagamento ou o limite em GitHub → Settings → Billing and plans (recomendado); 2) outra saída que ele escolher. **Aguardando.**
