@@ -1,5 +1,6 @@
 export { applyTemplate, defaultGroupSettings } from "./apply-template.js";
 export * from "./constants.data.js";
+export { checkDisplayText } from "./display-text.js";
 export { deriveMatchRules } from "./derive-match-rules.js";
 export { countLayerChanges, normalizeLayer } from "./normalize-layer.js";
 export { parseSettingsCatalog } from "./parse-catalog.js";
