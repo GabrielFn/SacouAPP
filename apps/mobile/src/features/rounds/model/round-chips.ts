@@ -35,31 +35,34 @@ export function roundChips(
     label,
     highlighted: sourceOf(path) === ROUND_SOURCE,
   });
-  const result: RoundChip[] = [
+  const scoring: readonly RoundChip[] = values.scoring.enabled
+    ? [
+        chip("points", chips.points(values.scoring.pointsPerSet), "scoring.pointsPerSet"),
+        chip(
+          "sets",
+          values.scoring.bestOf === BEST_OF_ONE ? chips.oneSet : chips.bestOf(values.scoring.bestOf),
+          "scoring.bestOf",
+        ),
+      ]
+    : [];
+  const queue: readonly RoundChip[] = values.queue.enabled
+    ? [
+        chip("queue", chips.queue, "queue.enabled"),
+        ...(values.queue.exitMode === WHOLE_TEAM_EXIT
+          ? []
+          : [chip("exit", chips.partialExit, "queue.exitMode")]),
+      ]
+    : [];
+  const rotation: readonly RoundChip[] =
+    options.withRotation && values.rotation.enabled
+      ? [chip("rotation", chips.rotationSystems[values.rotation.system] ?? "", "rotation.system")]
+      : [];
+  return [
     chip("modality", chips.modalities[values.format.modality] ?? "", "format.modality"),
+    ...scoring,
+    ...queue,
+    ...rotation,
   ];
-  if (values.scoring.enabled) {
-    result.push(chip("points", chips.points(values.scoring.pointsPerSet), "scoring.pointsPerSet"));
-    result.push(
-      chip(
-        "sets",
-        values.scoring.bestOf === BEST_OF_ONE ? chips.oneSet : chips.bestOf(values.scoring.bestOf),
-        "scoring.bestOf",
-      ),
-    );
-  }
-  if (values.queue.enabled) {
-    result.push(chip("queue", chips.queue, "queue.enabled"));
-    if (values.queue.exitMode !== WHOLE_TEAM_EXIT) {
-      result.push(chip("exit", chips.partialExit, "queue.exitMode"));
-    }
-  }
-  if (options.withRotation && values.rotation.enabled) {
-    result.push(
-      chip("rotation", chips.rotationSystems[values.rotation.system] ?? "", "rotation.system"),
-    );
-  }
-  return result;
 }
 
 /** The reading of the `sources` map the server sends (a plain record by path). */

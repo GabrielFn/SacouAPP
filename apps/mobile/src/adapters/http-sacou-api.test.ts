@@ -22,6 +22,14 @@ const MEMBER = "8a4c2f0e-2222-4c3b-9d2e-000000000002";
 const TEMPLATE = "8a4c2f0e-4444-4c3b-9d2e-000000000004";
 const INVITE = "8a4c2f0e-3333-4c3b-9d2e-000000000003";
 const INVITE_TOKEN = "invite-token-Qw7";
+const ROUND = "8a4c2f0e-5555-4c3b-9d2e-000000000005";
+const ROUND_BODY = {
+  localDate: "2026-11-17",
+  localTime: "20:30",
+  venue: "Ginásio Sesc",
+  settings: null,
+  repeatWeekly: true,
+};
 const NOW = Date.parse("2026-11-10T12:00:00Z");
 
 function setup(options: { baseUrl?: string | null; tokens?: FakeIdTokenProvider } = {}) {
@@ -220,6 +228,54 @@ const OPERATIONS: readonly Operation[] = [
     "/v1/invites/accept",
     { token: INVITE_TOKEN },
   ],
+  [
+    "listRounds",
+    (a) => a.listRounds(GROUP),
+    "GET",
+    "/v1/groups/{groupId}/rounds",
+    `/v1/groups/${GROUP}/rounds`,
+    null,
+  ],
+  [
+    "getRound",
+    (a) => a.getRound(GROUP, ROUND),
+    "GET",
+    "/v1/groups/{groupId}/rounds/{roundId}",
+    `/v1/groups/${GROUP}/rounds/${ROUND}`,
+    null,
+  ],
+  [
+    "createRound",
+    (a) => a.createRound(GROUP, ROUND_BODY),
+    "POST",
+    "/v1/groups/{groupId}/rounds",
+    `/v1/groups/${GROUP}/rounds`,
+    ROUND_BODY,
+  ],
+  [
+    "updateRound",
+    (a) => a.updateRound(GROUP, ROUND, { localDate: null, localTime: "19:00", venue: null, settings: {} }),
+    "PATCH",
+    "/v1/groups/{groupId}/rounds/{roundId}",
+    `/v1/groups/${GROUP}/rounds/${ROUND}`,
+    { localDate: null, localTime: "19:00", venue: null, settings: {} },
+  ],
+  [
+    "respondAttendance",
+    (a) => a.respondAttendance(GROUP, ROUND, "going"),
+    "PUT",
+    "/v1/groups/{groupId}/rounds/{roundId}/attendance/me",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/attendance/me`,
+    { response: "going" },
+  ],
+  [
+    "setMemberAttendance",
+    (a) => a.setMemberAttendance({ groupId: GROUP, roundId: ROUND, memberId: MEMBER }, "notGoing"),
+    "PUT",
+    "/v1/groups/{groupId}/rounds/{roundId}/attendance/{memberId}",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/attendance/${MEMBER}`,
+    { response: "notGoing" },
+  ],
 ];
 
 afterEach(() => {
@@ -227,8 +283,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 21 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(21);
+  test("the table covers the 27 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(27);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {

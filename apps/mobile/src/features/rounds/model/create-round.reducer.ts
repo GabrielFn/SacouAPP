@@ -50,32 +50,42 @@ function withoutPath(layer: RoundLayer, path: PersonalizePath): RoundLayer {
   return Object.fromEntries(Object.entries(layer).filter(([key]) => key !== path));
 }
 
+type Handlers = {
+  readonly [T in CreateRoundAction["type"]]: (
+    state: CreateRoundState,
+    action: Extract<CreateRoundAction, { readonly type: T }>,
+  ) => CreateRoundState;
+};
+
+/** One handler per action: a new action without a handler does not compile, the same guarantee as an exhaustive switch. */
+const HANDLERS: Handlers = {
+  init: (_state, action) => action.state,
+  "date-picked": (state, action) => ({ ...state, localDate: action.localDate, sheet: NO_SHEET }),
+  "time-picked": (state, action) => ({ ...state, localTime: action.localTime }),
+  "venue-changed": (state, action) => ({ ...state, venue: action.venue }),
+  "capacity-changed": (state, action) => ({
+    ...state,
+    capacityText: action.text.replace(NOT_A_DIGIT, ""),
+  }),
+  "sheet-opened": (state, action) => ({ ...state, sheet: action.sheet }),
+  "sheet-closed": (state) => ({ ...state, sheet: NO_SHEET }),
+  "layer-set": (state, action) => ({
+    ...state,
+    layer: { ...state.layer, [action.path]: action.value },
+    sheet: NO_SHEET,
+  }),
+  "layer-reset": (state, action) => ({ ...state, layer: withoutPath(state.layer, action.path) }),
+  "repeat-toggled": (state) => ({ ...state, repeatWeekly: !state.repeatWeekly }),
+  "personalize-toggled": (state) => ({ ...state, personalizeOpen: !state.personalizeOpen }),
+};
+
 export function createRoundReducer(
   state: CreateRoundState,
   action: CreateRoundAction,
 ): CreateRoundState {
-  switch (action.type) {
-    case "init":
-      return action.state;
-    case "date-picked":
-      return { ...state, localDate: action.localDate, sheet: NO_SHEET };
-    case "time-picked":
-      return { ...state, localTime: action.localTime };
-    case "venue-changed":
-      return { ...state, venue: action.venue };
-    case "capacity-changed":
-      return { ...state, capacityText: action.text.replace(NOT_A_DIGIT, "") };
-    case "sheet-opened":
-      return { ...state, sheet: action.sheet };
-    case "sheet-closed":
-      return { ...state, sheet: NO_SHEET };
-    case "layer-set":
-      return { ...state, layer: { ...state.layer, [action.path]: action.value }, sheet: NO_SHEET };
-    case "layer-reset":
-      return { ...state, layer: withoutPath(state.layer, action.path) };
-    case "repeat-toggled":
-      return { ...state, repeatWeekly: !state.repeatWeekly };
-    case "personalize-toggled":
-      return { ...state, personalizeOpen: !state.personalizeOpen };
-  }
+  const handle = HANDLERS[action.type] as (
+    current: CreateRoundState,
+    received: CreateRoundAction,
+  ) => CreateRoundState;
+  return handle(state, action);
 }

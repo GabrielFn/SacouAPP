@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
-import type { GroupRole, Round } from "../../../services/api/sacou-api";
+import type { GroupRole, Member, Round } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { BackIcon } from "../../../ui/Icons";
@@ -37,12 +37,15 @@ const { detail } = strings.rounds;
 export interface RoundBodyProps {
   readonly round: Round;
   readonly settings: RoundSettingsView;
-  readonly waitlist: string;
+  readonly members: readonly Member[];
 }
 
 /** Everything under the title of screen 06: pills, panel, waitlist or the canceled strip. */
-function RoundBody({ round, settings, waitlist }: RoundBodyProps) {
+function RoundBody({ round, settings, members }: RoundBodyProps) {
   const { tokens } = useTheme();
+  const waitlist = settings.values.attendance.waitlistEnabled
+    ? waitlistLine(rosterOf(round.waitlist, members))
+    : "";
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
     withRotation: false,
   });
@@ -69,7 +72,11 @@ function RoundBody({ round, settings, waitlist }: RoundBodyProps) {
 }
 
 /** "Sortear times" and "Abrir quadra" appear when their screens exist (D1). */
-function RoundFooter({ actions }: { readonly actions: readonly PendingRoundScreen[] }) {
+export interface RoundFooterProps {
+  readonly actions: readonly PendingRoundScreen[];
+}
+
+function RoundFooter({ actions }: RoundFooterProps) {
   return (
     <>
       {actions.includes("court") ? <Button label={detail.openCourt} onPress={noAction} /> : null}
@@ -84,6 +91,48 @@ function noAction(): void {
   // The destinations (E4.7 and the court) take over these buttons when they exist.
 }
 
+export interface RoundHeaderProps {
+  readonly roleText: string;
+}
+
+/** Back and "Você é admin". */
+function RoundHeader({ roleText }: RoundHeaderProps) {
+  const router = useRouter();
+  const { tokens } = useTheme();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
+      <IconButton
+        accessibilityLabel={strings.a11y.back}
+        onPress={() => {
+          if (router.canGoBack()) router.back();
+          else router.replace(groupsHref);
+        }}
+      >
+        <BackIcon />
+      </IconButton>
+      <Text variant="bodyStrong">{roleText}</Text>
+    </View>
+  );
+}
+
+export interface RoundLoadingProps {
+  readonly failure: Error | null;
+  readonly onRetry: () => void;
+}
+
+/** The wait for the round, or the reason it could not be read. */
+function RoundLoading({ failure, onRetry }: RoundLoadingProps) {
+  if (failure === null) return <LoadingState accessibilityLabel={detail.loading} />;
+  return (
+    <EmptyState
+      alert
+      title={detail.loadError}
+      body={errorTextOf(failure)}
+      actions={[{ label: detail.retry, variant: "secondary", onPress: onRetry }]}
+    />
+  );
+}
+
 export interface AdminRoundScreenProps {
   readonly groupId: string;
   readonly roundId: string;
@@ -94,60 +143,31 @@ export interface AdminRoundScreenProps {
  * until the player's screen (26) arrives in the next part.
  */
 export function AdminRoundScreen({ groupId, roundId }: AdminRoundScreenProps) {
-  const router = useRouter();
   const { tokens } = useTheme();
   const group = useGroup(groupId);
   const round = useRound(groupId, roundId);
   const members = useGroupMembers(groupId);
   const settings = round.data === undefined ? null : roundSettingsOf(round.data);
   if (group.data === undefined || round.data === undefined) {
-    const failed = group.error ?? round.error;
     return (
       <Screen>
-        {failed === null ? (
-          <LoadingState accessibilityLabel={detail.loading} />
-        ) : (
-          <EmptyState
-            alert
-            title={detail.loadError}
-            body={errorTextOf(failed)}
-            actions={[
-              {
-                label: detail.retry,
-                variant: "secondary",
-                onPress: () => {
-                  void group.refetch();
-                  void round.refetch();
-                },
-              },
-            ]}
-          />
-        )}
+        <RoundLoading
+          failure={group.error ?? round.error}
+          onRetry={() => {
+            void group.refetch();
+            void round.refetch();
+          }}
+        />
       </Screen>
     );
   }
   const role: GroupRole = group.data.role;
-  const waitlist = waitlistLine(
-    rosterOf(round.data.waitlist, members.data ?? []),
-  );
-  const showWaitlist = settings?.values.attendance.waitlistEnabled === true;
   const actions = managesRounds(role)
     ? footerActions(PENDING_ROUND_SCREENS, isCanceled(round.data))
     : [];
   return (
     <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-        <IconButton
-          accessibilityLabel={strings.a11y.back}
-          onPress={() => {
-            if (router.canGoBack()) router.back();
-            else router.replace(groupsHref);
-          }}
-        >
-          <BackIcon />
-        </IconButton>
-        <Text variant="bodyStrong">{roleHeader(role)}</Text>
-      </View>
+      <RoundHeader roleText={roleHeader(role)} />
       <View style={{ gap: tokens.spacing.xs }}>
         <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
           {group.data.name}
@@ -157,7 +177,7 @@ export function AdminRoundScreen({ groupId, roundId }: AdminRoundScreenProps) {
       {settings === null ? (
         <ErrorStrip text={detail.loadError} />
       ) : (
-        <RoundBody round={round.data} settings={settings} waitlist={showWaitlist ? waitlist : ""} />
+        <RoundBody round={round.data} settings={settings} members={members.data ?? []} />
       )}
     </Screen>
   );

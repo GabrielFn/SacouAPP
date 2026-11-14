@@ -78,16 +78,20 @@ function capacityRangeText(): string {
   return errors.capacityInvalid(capacity?.min ?? 0, capacity?.max ?? 0);
 }
 
+function isCapacityInRange(text: string): boolean {
+  const capacity = field("attendance.capacity");
+  const value = WHOLE_NUMBER.test(text) ? Number(text) : Number.NaN;
+  return (
+    Number.isInteger(value) &&
+    value >= (capacity?.min ?? 0) &&
+    value <= (capacity?.max ?? Number.MAX_SAFE_INTEGER)
+  );
+}
+
 function capacityError(group: GroupSettings, state: CreateRoundState): string | null {
   const text = state.capacityText.trim();
   if (text === "") return group.attendance.capacityLimited ? capacityRangeText() : null;
-  const capacity = field("attendance.capacity");
-  const value = WHOLE_NUMBER.test(text) ? Number(text) : Number.NaN;
-  const inRange =
-    Number.isInteger(value) &&
-    value >= (capacity?.min ?? 0) &&
-    value <= (capacity?.max ?? Number.MAX_SAFE_INTEGER);
-  return inRange ? null : capacityRangeText();
+  return isCapacityInRange(text) ? null : capacityRangeText();
 }
 
 function dateError(now: Date, localDate: string): string | null {

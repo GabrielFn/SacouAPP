@@ -11,6 +11,7 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createRoundOperations } from "./http-round-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
 import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
 import type { IdTokenProvider } from "../services/api/id-token-provider";
@@ -37,7 +38,7 @@ interface FetchOutcome<T> {
   readonly response: Response;
 }
 
-type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
+export type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
 
 /** The transport failed (no network, timeout): `offline`. Anything else thrown is `unexpected`. */
 class NetworkFailure extends Error {}
@@ -105,7 +106,6 @@ function authInit(token: string): AuthInit {
 }
 
 const group = (groupId: string) => ({ params: { path: { groupId } } });
-const round = (groupId: string, roundId: string) => ({ params: { path: { groupId, roundId } } });
 const member = (ref: MemberRef) => ({
   params: { path: { groupId: ref.groupId, memberId: ref.memberId } },
 });
@@ -275,39 +275,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/preview", { ...init, body: { token } })),
     acceptInvite: (token) =>
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
-    listRounds: (groupId) =>
-      execute((init) => client.GET("/v1/groups/{groupId}/rounds", { ...init, ...group(groupId) })),
-    getRound: (groupId, roundId) =>
-      execute((init) =>
-        client.GET("/v1/groups/{groupId}/rounds/{roundId}", { ...init, ...round(groupId, roundId) }),
-      ),
-    createRound: (groupId, body) =>
-      execute((init) =>
-        client.POST("/v1/groups/{groupId}/rounds", { ...init, ...group(groupId), body }),
-      ),
-    updateRound: (groupId, roundId, body) =>
-      execute((init) =>
-        client.PATCH("/v1/groups/{groupId}/rounds/{roundId}", {
-          ...init,
-          ...round(groupId, roundId),
-          body,
-        }),
-      ),
-    respondAttendance: (groupId, roundId, response) =>
-      execute((init) =>
-        client.PUT("/v1/groups/{groupId}/rounds/{roundId}/attendance/me", {
-          ...init,
-          ...round(groupId, roundId),
-          body: { response },
-        }),
-      ),
-    setMemberAttendance: (ref, response) =>
-      execute((init) =>
-        client.PUT("/v1/groups/{groupId}/rounds/{roundId}/attendance/{memberId}", {
-          ...init,
-          params: { path: { groupId: ref.groupId, roundId: ref.roundId, memberId: ref.memberId } },
-          body: { response },
-        }),
-      ),
+    ...createRoundOperations(client, execute),
   };
 }

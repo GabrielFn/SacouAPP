@@ -194,7 +194,7 @@ export function PersonalizeSection({ group, model }: PersonalizeSectionProps) {
         <Text variant="bodyStrong" style={{ flex: 1 }}>
           {create.personalize}
         </Text>
-        {count > 0 ? <Text variant="caption">{create.changes(count)}</Text> : null}
+        {count === 0 ? null : <Text variant="caption">{create.changes(count)}</Text>}
         <ChevronDownIcon color={colors.text} />
       </Pressable>
       {personalizeOpen
