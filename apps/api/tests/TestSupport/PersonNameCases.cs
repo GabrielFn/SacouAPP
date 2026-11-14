@@ -39,9 +39,9 @@ internal static class PersonNameCases
         FourMarks,
     };
 
-    public static TheoryData<string?> Refused { get; } = new()
+    /// <summary>Null is not here (theory data holds no null); each test checks it on its own.</summary>
+    public static TheoryData<string> Refused { get; } = new()
     {
-        null,
         string.Empty,
         "   ",
         new string('a', 21),

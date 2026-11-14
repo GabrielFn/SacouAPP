@@ -19,10 +19,10 @@ internal sealed partial record Group
     /// Adds a guest, or answers with the one an earlier request with the same <paramref name="requestId"/> created:
     /// a resend changes nothing, even with another name (D5). Order: the actor, the permission, the resend, the
     /// member limit (guests and accounts count together, D11). A <paramref name="level"/> is written in the same
-    /// change; null leaves the guest unreviewed (D6).
+    /// change; null leaves the guest unreviewed, and the draw uses 3,0 (D6).
     /// </summary>
     public Result<GuestAdmission> AddGuest(
-        MemberId actorId, Guid requestId, GuestProfile profile, GuestLevel? level, DateTimeOffset now)
+        MemberId actorId, Guid requestId, GuestProfile profile, SkillLevel? level, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(profile);
         var actor = FindActive(actorId);
@@ -55,18 +55,18 @@ internal sealed partial record Group
         var change = new GroupChange(this with { Members = Members.Add(member), Guests = Guests.Add(guest) }, [member])
         {
             ChangedGuests = [guest],
-            NewLevels = level is null ? [] : [new MemberLevel(member.Id, Id, level.Level, actor.Id, now)],
+            NewLevels = level is null ? [] : [new MemberLevel(member.Id, Id, level, actor.Id, now)],
         };
         return Result.Success(new GuestAdmission(guest, Created: true, change));
     }
 
     /// <summary>
-    /// Corrects an active guest's name or position (D9). A target with an account, removed or of another group is the
+    /// Replaces an active guest's name and position (D9). A target with an account, removed or of another group is the
     /// same <c>groups.member-not-found</c>. The same values again are a success that writes nothing.
     /// </summary>
-    public Result<GroupChange> CorrectGuest(MemberId actorId, MemberId targetId, GuestCorrection correction)
+    public Result<GroupChange> CorrectGuest(MemberId actorId, MemberId targetId, GuestProfile profile)
     {
-        ArgumentNullException.ThrowIfNull(correction);
+        ArgumentNullException.ThrowIfNull(profile);
         var actor = FindActive(actorId);
         if (actor is null)
         {
@@ -84,7 +84,7 @@ internal sealed partial record Group
             return Result.Failure<GroupChange>(GroupErrors.MemberNotFound);
         }
 
-        var corrected = guest with { Profile = correction.ApplyTo(guest.Profile) };
+        var corrected = guest with { Profile = profile };
         return corrected == guest
             ? Unchanged()
             : Result.Success(new GroupChange(this with { Guests = Guests.Replace(guest, corrected) }, []) { ChangedGuests = [corrected] });
@@ -97,9 +97,6 @@ internal sealed partial record Group
         RemovedGuests = [guestId],
     };
 }
-
-/// <summary>The level the admin gave a new guest: a value on the scale, or null for "Não sei" (reviewed, without a value).</summary>
-internal sealed record GuestLevel(SkillLevel? Level);
 
 /// <summary>The guest a request found or created, and what the store writes: nothing when <see cref="Created"/> is false.</summary>
 internal sealed record GuestAdmission(Guest Guest, bool Created, GroupChange Change);

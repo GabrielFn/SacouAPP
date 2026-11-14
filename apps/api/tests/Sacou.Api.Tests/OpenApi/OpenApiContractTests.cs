@@ -38,6 +38,8 @@ public sealed class OpenApiContractTests
         "get /v1/groups/{groupId}/member-levels ListMemberLevels",
         "put /v1/groups/{groupId}/member-levels/{memberId} SetMemberLevel",
         "put /v1/groups/{groupId}/member-levels SetMemberLevels",
+        "post /v1/groups/{groupId}/guests AddGuest",
+        "put /v1/groups/{groupId}/guests/{memberId} CorrectGuest",
         "post /v1/groups/{groupId}/rounds CreateRound",
         "get /v1/groups/{groupId}/rounds ListRounds",
         "get /v1/groups/{groupId}/rounds/{roundId} GetRound",

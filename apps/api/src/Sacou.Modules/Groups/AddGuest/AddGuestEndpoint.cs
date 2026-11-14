@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -46,12 +45,13 @@ internal static class AddGuestEndpoint
 
 /// <summary>
 /// The request id (a UUID the app makes once per opening of screen 21a) and the name must be there; the position is
-/// one of the five, and the level a JSON number on the scale or null for "Não sei" (ADR 0039, ADR 0053 D6).
+/// one of the five, and the level a JSON number on the scale; without it the guest waits for a level and the draw
+/// uses 3,0 (ADR 0039, ADR 0053 D6).
 /// </summary>
 internal sealed record AddGuestRequest(
     [property: JsonRequired] Guid RequestId,
     [property: JsonRequired] string? Name,
-    string? PrimaryPosition,
-    JsonElement Level);
+    string? PrimaryPosition = null,
+    [property: JsonNumberHandling(JsonNumberHandling.Strict)] decimal? Level = null);
 
 internal sealed record AddGuestResponse(Guid MemberId);

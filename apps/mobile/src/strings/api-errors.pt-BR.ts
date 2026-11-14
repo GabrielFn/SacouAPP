@@ -13,6 +13,8 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "O grupo já tem o máximo de convites ativos. Revogue um antes de criar outro.",
   "groups.invite-not-found": "Esse convite não existe mais.",
   "groups.last-admin": "O grupo precisa de pelo menos um admin. Promova outra pessoa antes.",
+  "groups.guest-invalid": "Confira a posição do convidado e tente de novo.",
+  "groups.guest-name-invalid": "Escreva o nome ou apelido do convidado, com até 20 letras.",
   "groups.level-invalid": "Escolha uma nota de 1 a 5, de meio em meio ponto, ou Não sei.",
   "groups.member-limit": "O grupo já está com o número máximo de membros.",
   "groups.member-not-found": "Essa pessoa não faz mais parte do grupo.",
@@ -21,6 +23,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "Você já está no número máximo de grupos. Saia de algum para entrar neste.",
   "groups.name-invalid": "Escolha um nome de até 60 letras, sem deixar em branco.",
   "groups.regular-needs-account": "Só quem tem conta no Sacou pode ser mensalista.",
+  "groups.role-needs-account": "Convidado sem conta só pode ser jogador.",
   "groups.settings-invalid":
     "Alguma configuração não é válida. Confira os valores e tente de novo.",
   "groups.template-limit":

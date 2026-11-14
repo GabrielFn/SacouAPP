@@ -19,14 +19,15 @@ public sealed class NicknameTests
 
     [Theory]
     [MemberData(nameof(PersonNameCases.Refused), MemberType = typeof(PersonNameCases))]
-    public void SharedTable_RefusedNames_AreRefused(string? nickname)
+    public void SharedTable_RefusedNames_AreRefused(string nickname)
     {
         Assert.Equal(ProfileErrors.NicknameInvalid, Nickname.Create(nickname).Error);
     }
 
     [Fact]
-    public void LoneSurrogate_IsRefused()
+    public void NullOrLoneSurrogate_IsRefused()
     {
+        Assert.Equal(ProfileErrors.NicknameInvalid, Nickname.Create(null).Error);
         Assert.Equal(ProfileErrors.NicknameInvalid, Nickname.Create(PersonNameCases.LoneSurrogate).Error);
     }
 
