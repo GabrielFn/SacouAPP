@@ -51,6 +51,7 @@ internal static class ContractValues
         GroupCapability.ViewGroup => GroupPermission.ViewGroup,
         GroupCapability.ManageRounds => GroupPermission.ManageRounds,
         GroupCapability.RespondAttendance => GroupPermission.RespondAttendance,
+        GroupCapability.DrawTeams => GroupPermission.DrawTeams,
         _ => throw new ArgumentOutOfRangeException(nameof(capability), capability, "Every capability needs a domain permission."),
     };
 

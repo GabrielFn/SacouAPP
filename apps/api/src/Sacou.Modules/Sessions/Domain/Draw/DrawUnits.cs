@@ -10,6 +10,8 @@ internal sealed record DrawUnit(ImmutableArray<DrawPlayer> Players)
     public int Size => Players.Length;
 
     public int SumTenths => Players.Sum(player => player.LevelTenths);
+
+    public override string ToString() => nameof(DrawUnit);
 }
 
 /// <summary>
