@@ -13,6 +13,8 @@ public sealed class OpenApiContractTests
     private static readonly string[] ExpectedOperations =
     [
         "post /v1/me SignIn",
+        "get /v1/me/profile GetMyProfile",
+        "put /v1/me/profile SaveMyProfile",
         "post /v1/groups CreateGroup",
         "get /v1/groups ListMyGroups",
         "post /v1/invites/preview PreviewInvite",

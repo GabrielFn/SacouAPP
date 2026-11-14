@@ -16,7 +16,7 @@ internal sealed record GroupName
 {
     public const int MaxLength = 60;
     public const int MaxCodePoints = 240;
-    public const int MaxMarksPerCharacter = 4;
+    public const int MaxMarksPerCharacter = DisplayText.MaxMarksPerCharacter;
 
     private GroupName(string value) => Value = value;
 

@@ -9,6 +9,9 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Grupo | `Group` (`GroupId`) | Agregado com os membros dentro ([grupos.md](grupos.md), ADR 0040) |
 | Nome do grupo | `GroupName` | 1 a 60 caracteres visíveis, até 240 pontos de código; nunca em log |
 | Membro do grupo | `GroupMember` (`MemberId`) | Tudo aponta para `MemberId`, nunca `UserId`. Um por pessoa por grupo, para sempre; entre módulos viaja como `Guid` (ADR 0040) |
+| Perfil do jogador | `PlayerProfile` | Um por pessoa, no Identity, igual em todos os grupos (ADR 0051) |
+| Apelido | `Nickname` | 1 a 20 caracteres visíveis, até 80 pontos de código; não é único; nunca em log |
+| Posição | `PlayingPosition` | `setter`, `outsideHitter`, `opposite`, `middleBlocker`, `libero`; a principal (`PrimaryPosition`) aceita também `any`. Não confundir com `RotationSlot` nem `CourtPoint` |
 | Papel no grupo | `GroupRole` | `Admin`, `CoAdmin`, `Scorekeeper`, `Player`. Não confundir com `PlayerRole` (função em quadra) |
 | Jogador (papel) | `Player` | Papel sem poderes de gestão |
 | Permissão no grupo | `GroupPermission` | O que um papel pode fazer; cada rota de grupo exige exatamente uma ([grupos.md](grupos.md)) |
@@ -96,7 +99,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 
 | Termo no app | Nome no código | Nota |
 |---|---|---|
-| Nível | `SkillLevel` | 1–5, privado |
+| Nível | `SkillLevel` | 1–5, de meio em meio ponto, guardado em décimos (10 a 50); privado. Value object em `Sacou.Shared.Levels` (ADR 0051) |
+| Nível sugerido | `SuggestedLevel` | O que a pessoa diz de si na tela 27; só ela e os admins dos grupos dela veem ([perfil-e-nota.md](perfil-e-nota.md)) |
 | Cartinha | `PlayerCard` | |
 | Faixa da cartinha | A definir (E1.3) | Bronze, Prata, Ouro, Elite |
 

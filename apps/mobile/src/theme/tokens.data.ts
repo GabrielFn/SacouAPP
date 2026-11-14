@@ -24,6 +24,9 @@ export const nightAlpha = {
   field: 0.25,
   dashed: 0.4,
   badge: 0.07,
+  // Off track of the switch, darker than the canvas (0.22) to reach 3:1 against the card (WCAG 1.4.11).
+  trackOff: 0.5,
+  segment: 0.08,
 } as const;
 
 export const courtPalette = {
@@ -114,9 +117,33 @@ export const sizes = {
   backIcon: 24,
   // Group card (Grupos.dc.html .main, .foot, .role) and the round list card of the home.
   groupCardMin: 128,
-  homeCardMin: 112,
   cardFooter: 46,
   roleBadge: 26,
+  // Switch (AjustesGrupo.dc.html .sw/.tr): track, knob and a touch target taller than the track.
+  switchTrackWidth: 50,
+  switchTrackHeight: 30,
+  switchKnob: 24,
+  switchInset: 3,
+  switchTargetWidth: 58,
+  switchTarget: 44,
+  // Create group (CriarModelo.dc.html, CriarPerguntas.dc.html).
+  templateOptionMin: 84,
+  templateOptionZeroMin: 60,
+  templateIconWidth: 44,
+  templateIconHeight: 56,
+  selectedBadge: 28,
+  courtOption: 56,
+  segment: 44,
+  progressBar: 4,
+  // Settings rows and the rotation systems grid.
+  settingRowMin: 48,
+  blockHeaderMin: 56,
+  systemButton: 56,
+  proBadge: 22,
+  sheetHandle: 4,
+  chevronIcon: 20,
+  courtIconWidth: 30,
+  courtIconHeight: 22,
 } as const;
 
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */
@@ -129,6 +156,12 @@ export const interactiveHeights = [
   sizes.chip,
   sizes.tabItem,
   sizes.cardFooter,
+  sizes.switchTarget,
+  sizes.segment,
+  sizes.systemButton,
+  sizes.templateOptionMin,
+  sizes.courtOption,
+  sizes.blockHeaderMin,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.

@@ -1,9 +1,13 @@
 import { courtStrings } from "./court.pt-BR";
+import { createGroupStrings } from "./create-group.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
+import { settingsStrings } from "./settings.pt-BR";
 
 export const strings = {
   court: courtStrings,
   groups: groupsStrings,
+  createGroup: createGroupStrings,
+  settings: settingsStrings,
   appName: "Sacou",
   a11y: { createGroup: "Criar grupo", back: "Voltar", logo: "Logo do Sacou" },
   catalog: {

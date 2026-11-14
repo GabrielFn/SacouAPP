@@ -62,7 +62,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `GET /v1/groups` | Usuário registrado | 200 `[{ groupId, name, role, memberType }]`, só ativos, na ordem de entrada |
 | `GET /v1/groups/{groupId}` | `ViewGroup` | 200 `{ groupId, name, memberId, role, memberType, activeMembers }` |
 | `PATCH /v1/groups/{groupId}` `{ name }` | `RenameGroup` | 200 `{ groupId, name }` |
-| `GET /v1/groups/{groupId}/members` | `ViewGroup` | 200 `[{ memberId, role, memberType, hasAccount, isMe, joinedAt }]`, só ativos |
+| `GET /v1/groups/{groupId}/members` | `ViewGroup` | 200 `[{ memberId, role, memberType, hasAccount, isMe, joinedAt, nickname, primaryPosition, otherPositions }]`, só ativos; sem perfil, `nickname` e `primaryPosition` nulos e `otherPositions` `[]` (E3.17) |
 | `PUT /v1/groups/{groupId}/members/{memberId}/role` `{ role }` | `AssignBasicRole` no filtro; `AssignAdminRole` no agregado quando o alvo ou o papel novo é Admin ou Co-admin | 200 `{ memberId, role }` |
 | `PUT /v1/groups/{groupId}/members/{memberId}/type` `{ memberType }` | `ChangeMemberType` | 200 `{ memberId, memberType }` |
 | `DELETE /v1/groups/{groupId}/members/{memberId}` | `RemoveMember` no filtro; `RemoveAdmin` no agregado quando o alvo é Admin ou Co-admin | 204 |
@@ -87,7 +87,7 @@ A configuração (E3.3, [ADR 0041](../arquitetura/adr/0041-configuracao-herdada-
 
 O QR do grupo (tela 19) é o mesmo link do convite, desenhado no app (E4.5); a API não gera imagem. O link vale até ser revogado (pergunta 17) e serve para muitas pessoas. O token tem 43 caracteres e só aparece na resposta que cria o convite: o app guarda o link que gerou; noutro aparelho, gera outro. A prévia e o aceite recebem o token no corpo, nunca no endereço; o link público leva o token depois do `#` (E4.16). Revogado, expirado, inexistente ou malformado dão a mesma resposta (`groups.invite-invalid`). Quando quem criou o link sai, é removido ou vira Placar ou Jogador, os links dele morrem na mesma hora; o Admin que vira Co-admin mantém os seus. Revogação, aceite e mudanças de membros passam pela mesma trava do grupo: um aceite nunca conta uso depois da revogação.
 
-Papéis e tipos saem como texto: `admin`, `coAdmin`, `scorekeeper`, `player`; `regular`, `dropIn`. A lista de membros não tem nome (o perfil é da E3.17).
+Papéis e tipos saem como texto: `admin`, `coAdmin`, `scorekeeper`, `player`; `regular`, `dropIn`. Desde a E3.17, a lista de membros tem o apelido e as posições do perfil da pessoa, lidos do Identity numa consulta só (`Identity.Contracts.IPlayerProfiles`), e nunca nível de nenhum tipo, para nenhum papel ([perfil-e-nota.md](perfil-e-nota.md)).
 
 ## Códigos de erro
 

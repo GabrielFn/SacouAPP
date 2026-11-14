@@ -1,3 +1,5 @@
+import type { SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
+
 import type { components } from "../../api/generated/schema";
 import type { ApiResult } from "./api-result";
 
@@ -9,6 +11,13 @@ export type Member = Schemas["MemberResponse"];
 export type Invite = Schemas["InviteResponse"];
 export type GroupRole = Schemas["GroupRole"];
 export type MemberType = Schemas["MemberType"];
+export type GroupSettingsDocument = Schemas["GroupSettingsResponse"];
+export type SavedTemplate = Schemas["SavedTemplateResponse"];
+
+/** The template to copy onto the group: one of the ready-made ones, or one the group saved. */
+export type TemplateChoice =
+  | { readonly kind: "ready"; readonly key: SettingsTemplateKey }
+  | { readonly kind: "saved"; readonly templateId: string };
 
 export interface MemberRef {
   readonly groupId: string;
@@ -22,9 +31,22 @@ export interface MemberRef {
 export interface SacouApi {
   signIn(): Promise<ApiResult<Schemas["SignInResponse"]>>;
   listMyGroups(): Promise<ApiResult<readonly MyGroup[]>>;
-  createGroup(name: string): Promise<ApiResult<Schemas["CreateGroupResponse"]>>;
+  createGroup(
+    name: string,
+    templateKey: SettingsTemplateKey,
+  ): Promise<ApiResult<Schemas["CreateGroupResponse"]>>;
   getGroup(groupId: string): Promise<ApiResult<Group>>;
   renameGroup(groupId: string, name: string): Promise<ApiResult<Schemas["RenameGroupResponse"]>>;
+  getGroupSettings(groupId: string): Promise<ApiResult<GroupSettingsDocument>>;
+  /** A partial layer: the server merges it leaf by leaf and answers the whole document. */
+  updateGroupSettings(
+    groupId: string,
+    layer: SettingsLayer,
+  ): Promise<ApiResult<GroupSettingsDocument>>;
+  applyTemplate(groupId: string, choice: TemplateChoice): Promise<ApiResult<GroupSettingsDocument>>;
+  listTemplates(groupId: string): Promise<ApiResult<readonly SavedTemplate[]>>;
+  saveTemplate(groupId: string, name: string): Promise<ApiResult<SavedTemplate>>;
+  deleteTemplate(groupId: string, templateId: string): Promise<ApiResult<null>>;
   listMembers(groupId: string): Promise<ApiResult<readonly Member[]>>;
   changeMemberRole(
     member: MemberRef,

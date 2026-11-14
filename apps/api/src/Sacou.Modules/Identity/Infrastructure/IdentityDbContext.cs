@@ -11,9 +11,12 @@ internal sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> opti
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<PlayerProfileRow> PlayerProfiles => Set<PlayerProfileRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new PlayerProfileConfiguration());
     }
 }

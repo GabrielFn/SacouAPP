@@ -10,6 +10,8 @@ export interface ScreenProps {
   readonly aboveTabBar?: boolean;
   /** The content scrolls when it is taller than the window. */
   readonly scroll?: boolean;
+  /** Fixed at the foot, under the scrolling content (the main button of a form). */
+  readonly footer?: ReactNode;
   /** The content is centered and never wider than this (the pages of the court on its side). */
   readonly maxContentWidth?: number;
 }
@@ -18,17 +20,19 @@ export function Screen({
   children,
   aboveTabBar = false,
   scroll = false,
+  footer,
   maxContentWidth,
 }: ScreenProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const content = {
     paddingTop: insets.top + tokens.spacing.xl,
-    paddingBottom: (aboveTabBar ? 0 : insets.bottom) + tokens.spacing.xl,
+    paddingBottom: (aboveTabBar || footer ? 0 : insets.bottom) + tokens.spacing.xl,
     paddingLeft: insets.left + tokens.spacing.xl,
     paddingRight: insets.right + tokens.spacing.xl,
     gap: tokens.spacing.l,
   };
+  const centered = maxContentWidth === undefined ? undefined : "center";
   const body =
     maxContentWidth === undefined ? (
       children
@@ -37,13 +41,37 @@ export function Screen({
         {children}
       </View>
     );
+  if (footer) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ ...content, alignItems: centered }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {body}
+        </ScrollView>
+        <View
+          style={{
+            paddingLeft: insets.left + tokens.spacing.xl,
+            paddingRight: insets.right + tokens.spacing.xl,
+            paddingTop: tokens.spacing.m,
+            paddingBottom: insets.bottom + tokens.spacing.xl,
+            gap: tokens.spacing.s10,
+          }}
+        >
+          {footer}
+        </View>
+      </View>
+    );
+  }
   if (scroll) {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
         contentContainerStyle={{
           ...content,
-          alignItems: maxContentWidth === undefined ? undefined : "center",
+          alignItems: centered,
         }}
       >
         {body}
@@ -55,7 +83,7 @@ export function Screen({
       style={{
         flex: 1,
         backgroundColor: colors.background,
-        alignItems: maxContentWidth === undefined ? undefined : "center",
+        alignItems: centered,
         ...content,
       }}
     >

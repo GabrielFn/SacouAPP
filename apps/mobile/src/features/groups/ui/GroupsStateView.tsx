@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { apiErrorText } from "../../../services/api/api-error-text";
 import type { MyGroup } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
-import type { ScreenAction } from "../../../ui/ActionButtons";
 import { EmptyState } from "../../../ui/EmptyState";
 import { LoadingState } from "../../../ui/LoadingState";
 import type { GroupsViewState } from "../model/groups-view-state";
@@ -13,7 +12,8 @@ export interface GroupsStateViewProps {
   readonly onRetry: () => void;
   /** What the screen shows when there are groups; each screen draws its own. */
   readonly renderList: (groups: readonly MyGroup[]) => ReactNode;
-  readonly emptyActions?: readonly ScreenAction[];
+  /** The empty list offers "Criar grupo". */
+  readonly onCreateGroup: () => void;
 }
 
 const { states } = strings.groups;
@@ -23,7 +23,7 @@ export function GroupsStateView({
   state,
   onRetry,
   renderList,
-  emptyActions,
+  onCreateGroup,
 }: GroupsStateViewProps) {
   switch (state.kind) {
     case "loading":
@@ -41,7 +41,11 @@ export function GroupsStateView({
       );
     case "empty":
       return (
-        <EmptyState title={states.emptyTitle} body={states.emptyBody} actions={emptyActions} />
+        <EmptyState
+          title={states.emptyTitle}
+          body={states.emptyBody}
+          actions={[{ label: strings.groups.createGroup, onPress: onCreateGroup }]}
+        />
       );
     case "list":
       return renderList(state.groups);

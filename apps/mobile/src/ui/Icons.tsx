@@ -143,3 +143,30 @@ export function Logo({ size }: LogoProps) {
     </Svg>
   );
 }
+
+const CHEVRON_STROKE_WIDTH = 2.2;
+
+export interface ChevronProps extends IconProps {
+  readonly path: string;
+}
+
+function Chevron({ color, path }: ChevronProps) {
+  const { colors, tokens } = useTheme();
+  return (
+    <StrokeIcon
+      color={color ?? colors.textMuted}
+      size={tokens.sizes.chevronIcon}
+      strokeWidth={CHEVRON_STROKE_WIDTH}
+    >
+      <Path d={path} />
+    </StrokeIcon>
+  );
+}
+
+export function ChevronDownIcon({ color }: IconProps) {
+  return <Chevron color={color} path="M6 9l6 6 6-6" />;
+}
+
+export function ChevronRightIcon({ color }: IconProps) {
+  return <Chevron color={color} path="M9 6l6 6-6 6" />;
+}
