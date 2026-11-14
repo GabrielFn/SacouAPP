@@ -58,14 +58,12 @@ internal sealed class DrawCriterion : IQueueExitCriterion
     {
     }
 
-    public ImmutableArray<string>? Choose(QueueExitCandidates candidates, RawObject input)
-    {
-        var order = QueueExitCriteria.UniqueMemberIds(input, "drawOrder");
-        var isPermutation = order is { } drawn
-            && drawn.Length == candidates.MemberIds.Length
-            && drawn.All(memberId => candidates.MemberIds.Contains(memberId, StringComparer.Ordinal));
-        return isPermutation ? [.. order!.Value.Take(candidates.Count)] : null;
-    }
+    public ImmutableArray<string>? Choose(QueueExitCandidates candidates, RawObject input) =>
+        QueueExitCriteria.UniqueMemberIds(input, "drawOrder") is { } order
+        && order.Length == candidates.MemberIds.Length
+        && order.All(memberId => candidates.MemberIds.Contains(memberId, StringComparer.Ordinal))
+            ? [.. order.Take(candidates.Count)]
+            : null;
 }
 
 /// <summary>Exactly as many as leave, all of the losing team.</summary>
@@ -77,14 +75,12 @@ internal sealed class ManualCriterion : IQueueExitCriterion
     {
     }
 
-    public ImmutableArray<string>? Choose(QueueExitCandidates candidates, RawObject input)
-    {
-        var choice = QueueExitCriteria.UniqueMemberIds(input, "chosen");
-        var isValid = choice is { } chosen
-            && chosen.Length == candidates.Count
-            && chosen.All(memberId => candidates.MemberIds.Contains(memberId, StringComparer.Ordinal));
-        return isValid ? choice : null;
-    }
+    public ImmutableArray<string>? Choose(QueueExitCandidates candidates, RawObject input) =>
+        QueueExitCriteria.UniqueMemberIds(input, "chosen") is { } chosen
+        && chosen.Length == candidates.Count
+        && chosen.All(memberId => candidates.MemberIds.Contains(memberId, StringComparer.Ordinal))
+            ? chosen
+            : null;
 }
 
 /// <summary>The criteria by key, compared by UTF-16 code unit: a <c>switch</c>, never a dictionary (ADR 0033, D10).</summary>
