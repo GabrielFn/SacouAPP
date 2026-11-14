@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 
 import { LOGO_ASPECT, LOGO_CELLS, LOGO_VIEW_BOX } from "../theme/logo.data";
 import { iconStroke } from "../theme/tokens.data";
@@ -178,4 +178,39 @@ export function ChevronDownIcon({ color }: IconProps) {
 
 export function ChevronRightIcon({ color }: IconProps) {
   return <Chevron color={color} path="M9 6l6 6-6 6" />;
+}
+
+/** The "⋯" of a member row (Membros.dc.html .more): three filled dots. */
+export function MoreIcon({ color }: IconProps) {
+  const { colors, tokens } = useTheme();
+  const fill = color ?? colors.textMuted;
+  return (
+    <Svg width={tokens.sizes.chevronIcon} height={tokens.sizes.chevronIcon} viewBox={VIEW_BOX}>
+      <Circle cx="5" cy="12" r="2" fill={fill} />
+      <Circle cx="12" cy="12" r="2" fill={fill} />
+      <Circle cx="19" cy="12" r="2" fill={fill} />
+    </Svg>
+  );
+}
+
+export function LinkIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.chevronIcon} strokeWidth={HEADER_STROKE_WIDTH}>
+      <Path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1" />
+      <Path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" />
+    </StrokeIcon>
+  );
+}
+
+export function QrIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.chevronIcon} strokeWidth={NAV_STROKE_WIDTH}>
+      <Rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" />
+      <Rect x="14" y="3.5" width="6.5" height="6.5" rx="1" />
+      <Rect x="3.5" y="14" width="6.5" height="6.5" rx="1" />
+      <Path d="M14 14h3v3h-3zM17.5 17.5h3v3h-3z" />
+    </StrokeIcon>
+  );
 }

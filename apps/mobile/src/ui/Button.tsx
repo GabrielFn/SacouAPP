@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pressable } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
@@ -7,7 +8,14 @@ import { fontFamilies } from "../theme/tokens.data";
 
 import { Text } from "./Text";
 
-export type ButtonVariant = "primary" | "secondary" | "link";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "link"
+  | "outline"
+  | "danger"
+  | "dangerOutline"
+  | "dangerText";
 
 export interface ButtonProps {
   readonly label: string;
@@ -17,15 +25,29 @@ export interface ButtonProps {
   readonly accessibilityLabel?: string;
   /** Looks off, tells the screen reader and never calls `onPress`. */
   readonly disabled?: boolean;
+  /** An icon before the label, drawn in the color of the label. */
+  readonly renderIcon?: (color: string) => ReactNode;
 }
 
 const DISABLED_OPACITY = 0.6;
 
-function lookOf(variant: ButtonVariant, colors: Theme) {
+interface ButtonLook {
+  readonly background: string;
+  readonly foreground: string;
+  /** The color of the outline, or `null` for none. */
+  readonly border: string | null;
+}
+
+function lookOf(variant: ButtonVariant, colors: Theme): ButtonLook {
+  const none = "transparent";
   return {
-    primary: { background: colors.primary, foreground: colors.onPrimary },
-    secondary: { background: colors.text, foreground: colors.background },
-    link: { background: "transparent", foreground: colors.link },
+    primary: { background: colors.primary, foreground: colors.onPrimary, border: null },
+    secondary: { background: colors.text, foreground: colors.background, border: null },
+    link: { background: none, foreground: colors.link, border: null },
+    outline: { background: none, foreground: colors.text, border: colors.text },
+    danger: { background: colors.danger, foreground: colors.surface, border: null },
+    dangerOutline: { background: none, foreground: colors.danger, border: colors.danger },
+    dangerText: { background: none, foreground: colors.danger, border: null },
   }[variant];
 }
 
@@ -45,6 +67,7 @@ export function Button({
   fill = false,
   accessibilityLabel,
   disabled = false,
+  renderIcon,
 }: ButtonProps) {
   const { colors, tokens } = useTheme();
   const isLink = variant === "link";
@@ -59,14 +82,19 @@ export function Button({
       style={{
         opacity: disabled ? DISABLED_OPACITY : 1,
         flex: fill ? 1 : undefined,
+        flexDirection: "row",
+        gap: tokens.spacing.s,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: look.background,
+        borderWidth: look.border === null ? undefined : tokens.borderWidths.thin,
+        borderColor: look.border ?? look.background,
         minHeight: tokens.sizes.primaryButton,
         borderRadius: tokens.radii.button,
         paddingHorizontal: tokens.spacing.xl,
       }}
     >
+      {renderIcon === undefined ? null : renderIcon(look.foreground)}
       <Text style={labelStyleOf(isLink, look.foreground, tokens)}>{label}</Text>
     </Pressable>
   );

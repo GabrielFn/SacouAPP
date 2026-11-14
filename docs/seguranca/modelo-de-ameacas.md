@@ -249,6 +249,19 @@ Implementado na E4.2 ([ADR 0042](../arquitetura/adr/0042-contrato-openapi-e-clie
 | I | `code` desconhecido de uma API mais nova mostrado como texto livre | Só `code` do catálogo gerado vira `problem`; o resto vira `unexpected`, com texto genérico (P1) |
 | D | API fora do ar derrubando o app em laço de retentativas | Consultas repetem no máximo 2 vezes, só em `offline`, `unavailable` e 5xx; o 503 respeita `Retry-After`, limitado a 60 s; tempo limite de 15 s por requisição |
 
+### 12.1 Convite no app (E4.5, Parte 2)
+
+Telas 19 e 19d ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-convite-no-app.md), D7). O token do convite sai uma vez, na resposta de `createInvite`, e no aparelho fica em um lugar só: a porta `InviteLinkStore`.
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| I | Token lido do armazenamento do aparelho por outro app ou copiado em backup | `expo-secure-store` (Keystore no Android, Keychain no iOS com `WHEN_UNLOCKED_THIS_DEVICE_ONLY`), uma chave por grupo (`sacou.invite.<groupId>`, só com ID seguro) e um índice só com os IDs dos grupos, para o `clearAll()`. Leitura que falha ou conteúdo ilegível vale como "nada guardado": gera outro link. `clearSession()` chama `clearAll()` no logout (E4.3 liga). Sair do grupo ou virar Placar ou Jogador apaga a cópia (o servidor já matou o link) |
+| I | Token no cache do Query, no reducer, em parâmetro de rota ou em log | O token nasce no resultado de uma única mutação (`gcTime: 0`), vai para o `InviteLinkStore` e o link é montado na hora de desenhar. As chaves de consulta só têm IDs; a lista de convites (`["groups", id, "invites"]`) não tem token e não é persistida. A rota da 19d só leva o `groupId`. Nenhum adaptador chama `console`. Teste: o `JSON.stringify` do cache do Query depois de criar e reaproveitar o link não contém o token |
+| I | Token na área de transferência | Só o "Copiar" escreve lá (porta `Clipboard`, `expo-clipboard`); outros apps e o teclado podem ler, e o Android 13+ mostra a prévia. Risco aceito: é o que a pessoa pediu, e o link é revogável na própria tela e na aba "Convites" |
+| I | Token em log de servidor ou de proxy pelo endereço | O link é `{base}/c#{token}`: o navegador não envia o fragmento. "Mandar no WhatsApp" usa `whatsapp://send?text=`, nunca `wa.me` (que, sem o app, abriria o navegador com o token na URL); sem WhatsApp, cai na folha de compartilhar do sistema, que entrega o texto sem passar por servidor do Sacou. A base (`EXPO_PUBLIC_INVITE_BASE_URL`) é só origem `https:` (`http:` só em `__DEV__`), sem caminho, query nem fragmento; sem ela, os botões de convite somem |
+| I | Token mostrado na tela e no QR para quem está perto | A tela mostra só o host e 6 caracteres do token (`sacou.app/c#K7fQ2x…`); o QR leva o link inteiro, porque é feito para ser lido na quadra (pedido do canvas). O componente do QR recebe só a matriz, nunca o texto. Risco aceito, como o do link repassado (seção 2) |
+| E | Botões de papel dando a alguém um poder que quem age não tem | A regra é do servidor (seção 2); o app só desliga os chips que a tabela da resposta 16 proíbe (`memberActions`, testado) e não chama a API ao tocar no papel atual. Convidado sem conta só tem "Jogador" e "Avulso" |
+
 ## 13. Rodadas e presença (E3.4)
 
 | Superfície | Ameaça | Mitigação |

@@ -161,6 +161,12 @@ export const sizes = {
   memberRowMin: 56,
 } as const;
 
+/**
+ * The invite QR (Convidar.dc.html): its frame takes 236 of the 390 of the canvas, and the quiet zone is
+ * the 4 modules of the QR standard (ADR 0049, D7).
+ */
+export const qrLayout = { width: "60%", margin: 4 } as const;
+
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */
 export const dayStripBasis = "22%";
 
