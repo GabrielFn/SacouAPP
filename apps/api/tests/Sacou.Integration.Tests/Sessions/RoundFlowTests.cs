@@ -90,6 +90,22 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(HttpStatusCode.NoContent, again.StatusCode);
     }
 
+    /// <summary>E4.6: the list tells which rounds belong to a series, so the app does not offer a second weekly series.</summary>
+    [Fact]
+    public async Task List_CarriesTheSeriesIdOfEachRound_AndNullForAOneOffRound()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var weekly = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(repeat: true));
+        var oneOff = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(date: RoundCalls.FutureDate(5)));
+
+        using var listed = await world.SendAsync(A.Admin, HttpMethod.Get, RoundCalls.RoundsPath(world));
+        var rounds = (await RoundCalls.JsonAsyncArray(listed)).Select(round => round!.AsObject()).ToList();
+
+        Assert.Equal(weekly["seriesId"]!.GetValue<string>(), rounds.Single(round => round["roundId"]!.GetValue<string>() == weekly["roundId"]!.GetValue<string>())["seriesId"]!.GetValue<string>());
+        Assert.Null(rounds.Single(round => round["roundId"]!.GetValue<string>() == oneOff["roundId"]!.GetValue<string>())["seriesId"]);
+    }
+
     /// <summary>F1: the whole week of a racha, on a clock the test moves: mensalistas in, the drop-in window, the waitlist, and the next round.</summary>
     [Fact]
     public async Task WeeklyRacha_RunsFromTheMensalistasToTheNextRound()
