@@ -1,6 +1,8 @@
 import { Stack, useGlobalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
+import { BatteryWarningProvider } from "../../../features/court/hooks/battery-warning-context";
+import { CourtSidesProvider } from "../../../features/court/hooks/court-sides-context";
 import { useCourtFeedback } from "../../../features/court/hooks/use-court-feedback";
 import { useKeepAwakeWhileMounted } from "../../../features/court/hooks/use-keep-awake-while-mounted";
 import { useLandscapeWhileMounted } from "../../../features/court/hooks/use-landscape-while-mounted";
@@ -27,7 +29,11 @@ export default function CourtLayout() {
       <CourtSessionProvider key={params.courtSessionId} courtSessionId={params.courtSessionId}>
         <StatusBar hidden />
         <CourtDeviceEffects />
-        <Stack screenOptions={{ headerShown: false, gestureEnabled: false }} />
+        <CourtSidesProvider>
+          <BatteryWarningProvider>
+            <Stack screenOptions={{ headerShown: false, gestureEnabled: false }} />
+          </BatteryWarningProvider>
+        </CourtSidesProvider>
       </CourtSessionProvider>
     </ThemeProvider>
   );

@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 
+import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
@@ -22,6 +23,8 @@ export interface Services {
   readonly screenAwake: ScreenAwake;
   /** The court turns the phone on its side and puts it back (E4.17). */
   readonly screenOrientation: ScreenOrientation;
+  /** The court warns once when the battery is low (E4.17). */
+  readonly batteryMonitor: BatteryMonitor;
   readonly courtFeedback: CourtFeedback;
   readonly backGuard: BackGuard;
   readonly reducedMotion: ReducedMotion;
