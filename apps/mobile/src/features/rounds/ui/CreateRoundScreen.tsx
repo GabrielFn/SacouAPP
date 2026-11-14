@@ -133,6 +133,7 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
           {model.errorText !== null ? <ErrorStrip text={model.errorText} /> : null}
           <Button
             label={model.pending ? create.publishing : create.publish}
+            disabled={model.publishDisabled}
             onPress={model.publish}
           />
         </>

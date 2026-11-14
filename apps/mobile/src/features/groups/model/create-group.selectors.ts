@@ -111,6 +111,20 @@ export function canSubmit(state: CreateGroupState, origin: GroupOrigin): boolean
   return state.submit.kind === "idle" && Object.keys(errors).length === 0;
 }
 
+/** "Criar grupo" is off while the form is invalid, already sent, or a call is on the way. */
+export function isSubmitDisabled(
+  state: CreateGroupState,
+  origin: GroupOrigin,
+  pending: boolean,
+): boolean {
+  return pending || !canSubmit(state, origin);
+}
+
+/** "Tentar de novo" is off while its call is on the way, or when there is nothing to retry. */
+export function isRetryDisabled(state: CreateGroupState, pending: boolean): boolean {
+  return pending || state.submit.kind !== "created-without-settings";
+}
+
 export function isScheduleChosen(state: CreateGroupState): boolean {
   return state.scheduleWeekday !== null && state.scheduleTime !== null;
 }

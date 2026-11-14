@@ -20,6 +20,7 @@ import {
 } from "./create-round.reducer";
 import {
   canPublish,
+  isPublishDisabled,
   createRoundErrors,
   createRoundRequest,
   firstRoundDate,
@@ -265,6 +266,13 @@ describe("what is refused", () => {
 
   test("the first state can be published", () => {
     expect(canPublish(group, initial(), MONDAY_MORNING)).toBe(true);
+  });
+
+  test("'Publicar' is off when the form is invalid or a call is on the way", () => {
+    const invalid = edit({ venue: "x".repeat(81) });
+    expect(isPublishDisabled(group, initial(), MONDAY_MORNING, false)).toBe(false);
+    expect(isPublishDisabled(group, initial(), MONDAY_MORNING, true)).toBe(true);
+    expect(isPublishDisabled(group, invalid, MONDAY_MORNING, false)).toBe(true);
   });
 });
 

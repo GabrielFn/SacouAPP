@@ -18,6 +18,8 @@ import {
   createGroupErrors,
   createGroupPatch,
   hasPatch,
+  isRetryDisabled,
+  isSubmitDisabled,
   normalizeText,
 } from "./create-group.selectors";
 
@@ -202,6 +204,20 @@ describe("createGroupErrors", () => {
   test("once submitted it cannot be submitted again", () => {
     const created = createGroupReducer(canvas(), { type: "group-created", groupId: "g" });
     expect(canSubmit(created, RACHA)).toBe(false);
+  });
+
+  test("'Criar grupo' is off for an invalid form or while a call is on the way", () => {
+    const empty = typed(RACHA, { type: "name-changed", name: "" });
+    expect(isSubmitDisabled(canvas(), RACHA, false)).toBe(false);
+    expect(isSubmitDisabled(canvas(), RACHA, true)).toBe(true);
+    expect(isSubmitDisabled(empty, RACHA, false)).toBe(true);
+  });
+
+  test("'Tentar de novo' is off while pending or when no group waits for its settings", () => {
+    const created = createGroupReducer(canvas(), { type: "group-created", groupId: "g" });
+    expect(isRetryDisabled(created, false)).toBe(false);
+    expect(isRetryDisabled(created, true)).toBe(true);
+    expect(isRetryDisabled(canvas(), false)).toBe(true);
   });
 });
 

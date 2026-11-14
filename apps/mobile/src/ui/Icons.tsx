@@ -15,6 +15,7 @@ export interface LogoProps {
 
 const VIEW_BOX = "0 0 24 24";
 const PLUS_PATH = "M12 5v14M5 12h14";
+const MINUS_PATH = "M5 12h14";
 const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
 const NAV_STROKE_WIDTH = 2;
 const HEADER_STROKE_WIDTH = 2.2;
@@ -94,7 +95,7 @@ export function BackIcon({ color }: IconProps) {
   );
 }
 
-export function PlusIcon({ color }: IconProps) {
+function CrossIcon({ color, path }: IconProps & { readonly path: string }) {
   const { colors, tokens } = useTheme();
   return (
     <Svg
@@ -104,13 +105,21 @@ export function PlusIcon({ color }: IconProps) {
       fill="none"
     >
       <Path
-        d={PLUS_PATH}
+        d={path}
         stroke={color ?? colors.text}
         strokeWidth={iconStroke.plus}
         strokeLinecap="round"
       />
     </Svg>
   );
+}
+
+export function PlusIcon({ color }: IconProps) {
+  return <CrossIcon color={color} path={PLUS_PATH} />;
+}
+
+export function MinusIcon({ color }: IconProps) {
+  return <CrossIcon color={color} path={MINUS_PATH} />;
 }
 
 export function CheckIcon({ color }: IconProps) {

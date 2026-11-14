@@ -1,4 +1,4 @@
-import { parseGroupSettings, SETTINGS_CATALOG } from "@sacou/match-engine";
+import { defaultGroupSettings, parseGroupSettings, SETTINGS_CATALOG } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
 import { strings } from "../../../strings/pt-BR";
@@ -16,6 +16,7 @@ import {
   templateOrigin,
   type CustomBlock,
 } from "./custom-blocks";
+import { draftOf, queueRuleSummary } from "./queue-rule";
 import { SETTINGS_SCREEN } from "./settings-layout";
 
 const { templates, fields, choices, queueRule } = strings.settings;
@@ -121,8 +122,8 @@ describe("screen 18", () => {
     expect(Object.keys(strings.settings.blocks)).not.toContain("money");
   });
 
-  test("the queue rule says Automático, with no touch", () => {
-    expect(queueRule.value).toBe("Automático");
+  test("the queue rule line says Automático for the default document", () => {
+    expect(queueRuleSummary(draftOf(defaultGroupSettings()))).toBe(queueRule.summary.automatic);
     const rule = SETTINGS_SCREEN.flatMap(({ rows }) => rows).find(
       ({ row }) => row.kind === "queue-rule",
     );

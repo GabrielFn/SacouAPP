@@ -126,6 +126,9 @@ export const sizes = {
   switchInset: 3,
   switchTargetWidth: 58,
   switchTarget: 44,
+  // Radio of the queue rule (RegraFila.dc.html .rd): the ring, and the thick border of the chosen one.
+  radioDot: 24,
+  radioDotSelectedBorder: 7,
   // Create group (CriarModelo.dc.html, CriarPerguntas.dc.html).
   templateOptionMin: 84,
   templateOptionZeroMin: 60,

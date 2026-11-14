@@ -30,6 +30,10 @@ export function groupSettingsHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/settings", params: { groupId } };
 }
 
+export function queueRuleHref(groupId: string): Href {
+  return { pathname: "/groups/[groupId]/queue-rule", params: { groupId } };
+}
+
 /** Where "Criar grupo" goes next: "Nova rodada" with the pattern the group just got (E4.6, question 48). */
 export function afterCreateGroupHref(groupId: string): Href {
   return createRoundHref(groupId);
