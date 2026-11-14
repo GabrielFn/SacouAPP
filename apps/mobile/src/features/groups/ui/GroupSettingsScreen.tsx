@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+
 import { strings } from "../../../strings/pt-BR";
 import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
@@ -7,6 +9,7 @@ import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { useGroupSettingsScreen } from "../hooks/use-group-settings-screen";
 import { templateLabelText } from "../model/group-settings.selectors";
+import { queueRuleHref } from "../navigation";
 import { SETTINGS_SCREEN } from "../model/settings-layout";
 import { SettingsBlockView } from "./SettingsBlockView";
 import { SettingsHeader } from "./SettingsHeader";
@@ -21,6 +24,7 @@ export interface GroupSettingsScreenProps {
 
 /** Screen 18, "Como jogamos": the rules of the group, saved on each touch (D4). */
 export function GroupSettingsScreen({ groupId }: GroupSettingsScreenProps) {
+  const router = useRouter();
   const model = useGroupSettingsScreen(groupId);
   const { ready, form } = model;
   if (ready === null) {
@@ -65,6 +69,9 @@ export function GroupSettingsScreen({ groupId }: GroupSettingsScreenProps) {
           onLeafChange={model.changeLeaf}
           onOpenField={model.openField}
           onOpenSchedule={model.openSchedule}
+          onOpenQueueRule={() => {
+            router.push(queueRuleHref(groupId));
+          }}
         />
       ))}
       <SettingsSheets model={model} ready={ready} />

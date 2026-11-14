@@ -13,7 +13,11 @@ export interface ButtonProps {
   readonly variant?: ButtonVariant;
   readonly fill?: boolean;
   readonly accessibilityLabel?: string;
+  /** Looks off, tells the screen reader and never calls `onPress`. */
+  readonly disabled?: boolean;
 }
+
+const DISABLED_OPACITY = 0.6;
 
 export function Button({
   label,
@@ -21,6 +25,7 @@ export function Button({
   variant = "primary",
   fill = false,
   accessibilityLabel,
+  disabled = false,
 }: ButtonProps) {
   const { colors, tokens } = useTheme();
   const isLink = variant === "link";
@@ -33,8 +38,11 @@ export function Button({
     <Pressable
       accessibilityRole={isLink ? "link" : "button"}
       accessibilityLabel={accessibilityLabel ?? label}
-      onPress={onPress}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={disabled ? undefined : onPress}
       style={{
+        opacity: disabled ? DISABLED_OPACITY : 1,
         flex: fill ? 1 : undefined,
         alignItems: "center",
         justifyContent: "center",

@@ -145,9 +145,45 @@ export const settingsStrings = {
   },
   queueRule: {
     label: "Regra",
-    value: "Automático",
-    accessibility: "Regra da fila: automático",
+    accessibility: (summary: string) => `Regra da fila: ${summary}. Trocar`,
     help: "Só sai do perdedor quem vai ser substituído.",
+    summary: {
+      automatic: "Automático",
+      wholeTeam: "Sempre o time inteiro",
+      fixedCount: (count: number) => `Número fixo: ${String(count)}`,
+      winnerExits: (wins: number) => `vencedor sai após ${String(wins)}`,
+    },
+  },
+  queueRuleScreen: {
+    title: "Regra da fila",
+    subtitle: (groupName: string) => `${groupName} · quem sai quando um time perde`,
+    loserTitle: "Do time que perdeu",
+    automatic: {
+      title: "Automático",
+      body: "Sai o time inteiro se há um time esperando. Se só há avulsos, saem tantos quanto esperam.",
+    },
+    wholeTeam: {
+      title: "Sempre o time inteiro",
+      body: "O perdedor sai inteiro, mesmo com pouca gente esperando.",
+    },
+    fixedCount: {
+      title: "Número fixo",
+      body: "Sai sempre o mesmo número do perdedor.",
+      radioLabel: "Número fixo de jogadores",
+      less: "Menos jogadores",
+      more: "Mais jogadores",
+      unit: "saem por partida",
+    },
+    winner: {
+      title: "Vencedor também sai",
+      body: "Depois de algumas vitórias seguidas, para ninguém dominar a noite.",
+      less: "Menos vitórias",
+      more: "Mais vitórias",
+      unit: "vitórias seguidas",
+    },
+    save: "Salvar regra",
+    saving: "Salvando",
+    readOnly: "Só admins e co-admins mudam a regra da fila.",
   },
   rotationHelp: {
     libero: "Líbero só vale nos sistemas 5x1 e 6x2.",

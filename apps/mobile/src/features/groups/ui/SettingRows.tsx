@@ -76,10 +76,11 @@ export interface ValueRowProps {
   readonly value: string;
   readonly editable: boolean;
   readonly onPress: () => void;
+  readonly accessibilityLabel?: string;
 }
 
 /** A line with a value at the right that opens a sheet; read only, it is plain text. */
-export function ValueRow({ label, value, editable, onPress }: ValueRowProps) {
+export function ValueRow({ label, value, editable, onPress, accessibilityLabel }: ValueRowProps) {
   const { colors, tokens } = useTheme();
   return (
     <RowFrame>
@@ -88,7 +89,7 @@ export function ValueRow({ label, value, editable, onPress }: ValueRowProps) {
       </Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={screen.editValue(label, value)}
+        accessibilityLabel={accessibilityLabel ?? screen.editValue(label, value)}
         accessibilityState={{ disabled: !editable }}
         disabled={!editable}
         onPress={onPress}
@@ -114,22 +115,23 @@ export function ValueRow({ label, value, editable, onPress }: ValueRowProps) {
   );
 }
 
-/** The fixed rule of the queue: "Perde sai" is the only one of the MVP, so it is not touchable. */
-export function QueueRuleRow() {
-  const { colors } = useTheme();
+export interface QueueRuleRowProps {
+  readonly summary: string;
+  readonly editable: boolean;
+  readonly onPress: () => void;
+}
+
+/** The rule of the queue in one line; for admins it opens screen 18a. */
+export function QueueRuleRow({ summary, editable, onPress }: QueueRuleRowProps) {
   return (
     <>
-      <RowFrame>
-        <Text variant="bodyStrong" style={{ flex: 1 }}>
-          {queueRule.label}
-        </Text>
-        <Text
-          accessibilityLabel={queueRule.accessibility}
-          style={{ color: colors.textMuted, fontFamily: fontFamilies.body600 }}
-        >
-          {queueRule.value}
-        </Text>
-      </RowFrame>
+      <ValueRow
+        label={queueRule.label}
+        value={summary}
+        editable={editable}
+        onPress={onPress}
+        accessibilityLabel={queueRule.accessibility(summary)}
+      />
       <HelpLine text={queueRule.help} />
     </>
   );

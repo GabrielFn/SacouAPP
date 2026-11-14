@@ -40,7 +40,11 @@ function CreateGroupFooter({ model, onKeep }: CreateGroupFooterProps) {
       {submit.kind === "created-without-settings" ? (
         <>
           <ErrorStrip text={partial.title} />
-          <Button label={partial.retry} onPress={model.retrySettings} />
+          <Button
+            label={partial.retry}
+            disabled={model.retryDisabled}
+            onPress={model.retrySettings}
+          />
           <Button
             label={partial.keep}
             variant="link"
@@ -50,12 +54,7 @@ function CreateGroupFooter({ model, onKeep }: CreateGroupFooterProps) {
           />
         </>
       ) : (
-        <Button
-          label={step2.submit}
-          onPress={() => {
-            if (model.canSubmit && !model.pending) model.submit();
-          }}
-        />
+        <Button label={step2.submit} disabled={model.submitDisabled} onPress={model.submit} />
       )}
     </>
   );

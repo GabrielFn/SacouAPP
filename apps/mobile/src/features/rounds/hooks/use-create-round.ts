@@ -14,6 +14,7 @@ import {
 } from "../model/create-round.reducer";
 import {
   canPublish,
+  isPublishDisabled,
   createRoundErrors,
   createRoundRequest,
   groupValueOf,
@@ -38,6 +39,7 @@ export interface CreateRoundModel {
   readonly dispatch: (action: CreateRoundAction) => void;
   readonly errors: CreateRoundErrors;
   readonly canPublish: boolean;
+  readonly publishDisabled: boolean;
   readonly resolved: ReturnType<typeof resolvedPreview>;
   readonly repeatText: string;
   /** True while the call is on the way: the button is off, against a double tap. */
@@ -68,6 +70,7 @@ export function useCreateRound(
     dispatch,
     errors,
     canPublish: ready,
+    publishDisabled: isPublishDisabled(settings, state, now, mutation.isPending),
     resolved: resolvedPreview(settings, state),
     repeatText: repeatSummary(settings, state, formatTime),
     pending: mutation.isPending,
