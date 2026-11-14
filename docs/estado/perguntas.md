@@ -80,7 +80,7 @@
 - **CI verde antes da E0.4:** ver [ADR 0003](../arquitetura/adr/0003-local-validation-before-ci.md).
 
 ## 14/11/2026: cobrança do GitHub Actions
-- **Pergunta:** desde 14/11, madrugada, todo job da CI cai em 2 s com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra (#81 e #82 prontos). Opções: 1) o Gabriel acerta o pagamento ou o limite em GitHub → Settings → Billing and plans (recomendado); 2) outra saída que ele escolher. **Aguardando.**
+- **Pergunta:** desde 14/11, madrugada, todo job da CI cai em 2 s com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra (#81 e #82 prontos). **Resposta (14/11):** o Gabriel mudou o plano no GitHub; a CI voltou no mesmo dia.
 
 ## 14/11/2026: E4.6 (rodadas no app), padrões adotados, nenhuma trava a Parte 1
 Detalhes e opções no fim de `docs/estado/tarefas/E4.6.md`. Os números 43 e 44 são da E3.5 (PR #82).
@@ -89,3 +89,12 @@ Detalhes e opções no fim de `docs/estado/tarefas/E4.6.md`. Os números 43 e 44
 47. Ver e tirar alguém da lista na tela 06: **padrão: tocar em "N confirmados" abre a lista, cada linha com "Tirar" e confirmação.**
 48. "Criar grupo" leva à tela 20 ("Nova rodada"), não à 06, pois o grupo novo ainda não tem rodada: **padrão adotado.**
 49. "Abrir no WhatsApp do grupo" (tela 26): **padrão: esconder no piloto**, ideia do campo de link em `docs/ideias.md`.
+
+## 14/11/2026: respostas do Gabriel ("concordo com as recomendações")
+- 43 a 49: valem os padrões adotados (opção 1 em cada uma).
+- 50. Círculo colado na rede cai sob a coluna "Desfazer"/"Corrigir": **(1) empurrar o mínimo para fora da coluna, como hoje** (`leaveColumn` em `marker-placement.ts`); é a única exceção à regra "o círculo nunca sai do lugar" (ADR 0052).
+- 51. "Inverter lados" fecha o menu sozinho: **sim** (feito no PR #81).
+- Nome do sacador escondido sob a faixa da fila com os lados invertidos: **aceito, não corrigir** ("é um problema muito pequeno para perdermos tempo").
+
+## 14/11/2026: E3.6 (sorteio), respostas do Gabriel: todas as recomendações
+52. Reservas são os últimos a confirmar. 53. Com menos de dois times completos, dois times de n/2. 54. O sorteio exige internet no piloto. 55. Medidor: ≤ 0,2 "ótimo", ≤ 0,5 "bom", acima "desequilibrado". 56. A API aceita "separados", mas a tela 07 do piloto só tem "Travar dupla"; equilibrar por posição fica para depois. Detalhes em `docs/estado/tarefas/E3.6.md`, seção 7.

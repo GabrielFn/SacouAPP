@@ -13,6 +13,8 @@ import {
 } from "../model/create-group.reducer";
 import {
   canSubmit,
+  isRetryDisabled,
+  isSubmitDisabled,
   createGroupErrors,
   createGroupPatch,
   hasPatch,
@@ -26,6 +28,8 @@ export interface CreateGroupModel {
   readonly dispatch: (action: CreateGroupAction) => void;
   readonly errors: CreateGroupErrors;
   readonly canSubmit: boolean;
+  readonly submitDisabled: boolean;
+  readonly retryDisabled: boolean;
   /** True while a call is on the way: the button is off, against a double tap. */
   readonly pending: boolean;
   /** The text of the last refusal of the server, or `null`. */
@@ -71,12 +75,15 @@ export function useCreateGroup(
     },
   });
 
+  const pending = create.isPending || retry.isPending;
   return {
     state,
     dispatch,
     errors: createGroupErrors(state, origin),
     canSubmit: canSubmit(state, origin),
-    pending: create.isPending || retry.isPending,
+    submitDisabled: isSubmitDisabled(state, origin, pending),
+    retryDisabled: isRetryDisabled(state, pending),
+    pending,
     errorText: create.isError || retry.isError ? errorTextOf(retry.error ?? create.error) : null,
     submit: () => {
       create.mutate();

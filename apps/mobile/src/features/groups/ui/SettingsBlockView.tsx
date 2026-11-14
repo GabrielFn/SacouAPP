@@ -9,6 +9,7 @@ import {
   isProLeaf,
   liberoNote,
 } from "../model/group-settings.selectors";
+import { queueRuleSummary } from "../model/queue-rule";
 import { scheduleText } from "../model/schedule-text";
 import { leafOf } from "../model/settings-patch";
 import { visibleRows, type BlockSpec, type RowSpec } from "../model/settings-layout";
@@ -27,6 +28,7 @@ export interface SettingsBlockViewProps {
   readonly onLeafChange: (path: SettingsPath, value: SettingsValue) => void;
   readonly onOpenField: (path: ShownPath) => void;
   readonly onOpenSchedule: () => void;
+  readonly onOpenQueueRule: () => void;
 }
 
 interface BlockText {
@@ -94,6 +96,7 @@ function RowView({
   onLeafChange,
   onOpenField,
   onOpenSchedule,
+  onOpenQueueRule,
 }: RowViewProps) {
   switch (row.kind) {
     case "switch":
@@ -152,6 +155,12 @@ function RowView({
         />
       );
     case "queue-rule":
-      return <QueueRuleRow />;
+      return (
+        <QueueRuleRow
+          summary={queueRuleSummary(settings.queue)}
+          editable={editable}
+          onPress={onOpenQueueRule}
+        />
+      );
   }
 }

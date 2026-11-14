@@ -131,6 +131,16 @@ export function canPublish(group: GroupSettings, state: CreateRoundState, now: D
   );
 }
 
+/** "Publicar" is off while the form is invalid or a call is on the way. */
+export function isPublishDisabled(
+  group: GroupSettings,
+  state: CreateRoundState,
+  now: Date,
+  pending: boolean,
+): boolean {
+  return pending || !canPublish(group, state, now);
+}
+
 /** How many leaves of the "Personalizar" list differ from the group: the "N mudanças". */
 export function layerChangeCount(state: CreateRoundState): number {
   return Object.keys(state.layer).length;
