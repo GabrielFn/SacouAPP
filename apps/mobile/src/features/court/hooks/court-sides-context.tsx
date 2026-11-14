@@ -11,7 +11,11 @@ const CourtSidesContext = createContext<CourtSidesControl | null>(null);
  * "Inverter lados" lives as long as the court layout does: it survives a trip to the menu and is gone
  * when the court closes. It is not part of the match, so it is not in the event log.
  */
-export function CourtSidesProvider({ children }: { readonly children: ReactNode }) {
+export interface CourtSidesProviderProps {
+  readonly children: ReactNode;
+}
+
+export function CourtSidesProvider({ children }: CourtSidesProviderProps) {
   const [inverted, setInverted] = useState(false);
   const toggle = useCallback(() => {
     setInverted((current) => !current);

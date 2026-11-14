@@ -33,15 +33,17 @@ export const expoBatteryMonitor: BatteryMonitor = {
   read: readBattery,
   subscribe(listener) {
     // Each listener tells one half of the reading: nothing is emitted before both halves are known.
-    const watch = { reading: null as BatteryReading | null, active: true };
+    const watch = { value: { reading: null as BatteryReading | null, active: true } };
     const update = (change: Partial<BatteryReading>): void => {
-      if (!watch.active || watch.reading === null) return;
-      watch.reading = { ...watch.reading, ...change };
-      listener(watch.reading);
+      const { reading, active } = watch.value;
+      if (!active || reading === null) return;
+      const next = { ...reading, ...change };
+      watch.value = { reading: next, active };
+      listener(next);
     };
     void readBattery().then((reading) => {
-      if (!watch.active) return;
-      watch.reading = reading;
+      if (!watch.value.active) return;
+      watch.value = { reading, active: true };
       listener(reading);
     });
     const levelSub = addBatteryLevelListener(({ batteryLevel }) => {
@@ -51,7 +53,7 @@ export const expoBatteryMonitor: BatteryMonitor = {
       update({ charging: isCharging(batteryState) });
     });
     return () => {
-      watch.active = false;
+      watch.value = { ...watch.value, active: false };
       levelSub.remove();
       stateSub.remove();
     };

@@ -6,13 +6,12 @@ import { LANDSCAPE_FLEX_WEIGHTS } from "../court.data";
 import { sidesOf } from "../model/court-sides";
 import type { LandscapeCourtLayout } from "../model/court-layout";
 import type { CourtScreenModel } from "../model/court-screen.types";
-import { dotColors, hintText, setsLabel, streakText } from "../model/screen-texts";
+import { dotColors, hintText, setsLabel } from "../model/screen-texts";
 import type { CourtHandlers } from "./court-handlers";
 import type { CourtExtras } from "./court-extras";
-import { BatteryBanner } from "./BatteryBanner";
+import { BottomStrip } from "./BottomStrip";
 import { CourtHeader } from "./CourtHeader";
 import { NetColumn } from "./NetColumn";
-import { QueueStrip } from "./QueueStrip";
 import { TeamZone } from "./TeamZone";
 
 export interface CourtLandscapeProps extends CourtHandlers, CourtExtras {
@@ -80,11 +79,7 @@ export function CourtLandscape({
           }}
         />
       </View>
-      {battery === null ? (
-        <QueueStrip queue={model.queue} streak={streakText(model)} layout={layout} />
-      ) : (
-        <BatteryBanner level={battery.level} onDismiss={battery.onDismiss} />
-      )}
+      <BottomStrip model={model} layout={layout} battery={battery} />
     </View>
   );
 }

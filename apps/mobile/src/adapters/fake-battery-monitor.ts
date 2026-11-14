@@ -10,24 +10,29 @@ export function createFakeBatteryMonitor(
   initial: BatteryReading = { level: 1, charging: false },
 ): FakeBatteryMonitor {
   const state = {
-    reading: initial,
-    listeners: [] as readonly ((reading: BatteryReading) => void)[],
+    value: {
+      reading: initial,
+      listeners: [] as readonly ((reading: BatteryReading) => void)[],
+    },
   };
   return {
-    read: () => Promise.resolve(state.reading),
+    read: () => Promise.resolve(state.value.reading),
     subscribe(listener) {
-      state.listeners = [...state.listeners, listener];
-      listener(state.reading);
+      state.value = { ...state.value, listeners: [...state.value.listeners, listener] };
+      listener(state.value.reading);
       return () => {
-        state.listeners = state.listeners.filter((other) => other !== listener);
+        state.value = {
+          ...state.value,
+          listeners: state.value.listeners.filter((other) => other !== listener),
+        };
       };
     },
     set(reading) {
-      state.reading = reading;
-      state.listeners.forEach((listener) => {
+      state.value = { ...state.value, reading };
+      state.value.listeners.forEach((listener) => {
         listener(reading);
       });
     },
-    listenerCount: () => state.listeners.length,
+    listenerCount: () => state.value.listeners.length,
   };
 }
