@@ -150,8 +150,6 @@ export const LABEL_WIDE_CHAR_WIDTH_EM = 1.04;
 export const LABEL_ELLIPSIS_WIDTH_EM = 1;
 /** The line of the name is this high, as a fraction of its font size. */
 export const LABEL_LINE_HEIGHT_EM = 1.2;
-/** When a name finds no room it is tried at these fractions of its width, longest first. */
-export const LABEL_SHORTENED_STEPS = [0.75, 0.55, 0.4, 0.3, 0.2] as const;
 /** Names of up to this many letters are never cut while there is room (a test holds it). */
 export const LABEL_SAFE_NAME_LETTERS = 8;
 /** The air kept between the circles and names and the edges of the zone (the bar, the queue, the screen). */

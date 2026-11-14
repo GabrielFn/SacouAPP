@@ -5,7 +5,6 @@ import {
   LABEL_CHAR_WIDTH_EM,
   LABEL_ELLIPSIS_WIDTH_EM,
   LABEL_LINE_HEIGHT_EM,
-  LABEL_SHORTENED_STEPS,
   LABEL_UPPER_CHAR_WIDTH_EM,
   LABEL_WIDE_CHAR_WIDTH_EM,
   MARKER_ZONE_MARGIN,
@@ -94,38 +93,37 @@ export function fitName(name: string, room: number, tokens: ScaledTokens): strin
   return `${shortened(first, room - nameTextWidth(` ${last}`, tokens), tokens)} ${last}`;
 }
 
+/** A cut name keeps at least three letters before the "…" ("Fir…"); fewer reads badly. */
 const MIN_CUT_LETTERS = 3;
+const WORDS = /\s+/u;
 
-/** An abbreviation whose first name was cut to fewer than three letters reads badly ("A… Ca."). */
-function isBadCut(text: string): boolean {
-  const cut = /^(.*)… \p{L}+\.$/u.exec(text);
-  return cut !== null && Array.from(cut[1] ?? "").length < MIN_CUT_LETTERS;
+/** The start of a word with the "…", from one letter short down to three letters. */
+function cutsOf(word: string): readonly string[] {
+  const letters = Array.from(word);
+  return letters
+    .map((_, index) => letters.length - 1 - index)
+    .filter((count) => count >= MIN_CUT_LETTERS)
+    .map((count) => `${letters.slice(0, count).join("")}${ELLIPSIS}`);
 }
 
 /**
- * The whole name, then shorter ones from the widest to the narrowest, without repeats. An
- * abbreviation first loses the cut of its first name with the suffix (only when three letters stay),
- * then the suffix altogether: "Ana Ca.", "Ana…".
+ * The whole name, then shorter ones from the widest to the narrowest, without repeats: "First I."
+ * (the initial of the last name), the first name alone, and the first name cut to no fewer than
+ * three letters ("Fir…").
  */
 export function nameOptions(name: string, tokens: ScaledTokens): readonly NameOption[] {
-  const whole = nameTextWidth(name, tokens);
-  const first = ABBREVIATION.exec(name)?.[1];
-  const cuts = LABEL_SHORTENED_STEPS.map((step) => fitName(name, whole * step, tokens)).filter(
-    (text) => !isBadCut(text),
-  );
-  const firstCuts =
-    first === undefined
-      ? []
-      : [
-          first,
-          ...LABEL_SHORTENED_STEPS.map((step) =>
-            shortened(first, nameTextWidth(first, tokens) * step, tokens),
-          ),
-        ];
-  const texts = [name, ...cuts, ...firstCuts];
+  const words = name
+    .trim()
+    .split(WORDS)
+    .filter((word) => word !== "");
+  const first = words[0] ?? name;
+  const last = words.length > 1 ? words.at(-1) : undefined;
+  const initial = last === undefined ? [] : [`${first} ${Array.from(last)[0] ?? ""}.`];
+  const texts = [name, ...initial, first, ...cutsOf(first)];
   return texts
     .filter((text, index) => texts.indexOf(text) === index)
     .map((text) => ({ text, width: nameTextWidth(text, tokens) }))
+    .filter((option, index, all) => index === 0 || option.width <= (all[0]?.width ?? 0))
     .sort((a, b) => b.width - a.width);
 }
 

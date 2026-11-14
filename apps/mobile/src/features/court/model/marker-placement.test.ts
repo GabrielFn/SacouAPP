@@ -7,7 +7,7 @@ import { MARKER_ZONE_MARGIN } from "../court.data";
 import { placeOnHalfCourt, type CourtEnd } from "./court-geometry";
 import { computeCourtLayout, type CourtLayout } from "./court-layout";
 import type { PlayerChipModel, TeamPanelModel } from "./court-screen.types";
-import type { Rect } from "./marker-placement";
+import { placeMarkers, type Rect } from "./marker-placement";
 import {
   layoutTeamMarkers,
   markerRadius,
@@ -106,7 +106,6 @@ function panelOf({ names, phase, system, setterZone, hasSetPoint }: PanelOptions
 }
 
 const PERCENT = 100;
-const CROWDED_RADII = 5;
 
 function farFromOthers(first: DrawnMarker, second: DrawnMarker, apart: number): boolean {
   return Math.hypot(first.placed.x - second.placed.x, first.placed.y - second.placed.y) >= apart;
@@ -146,8 +145,11 @@ function within(box: Rect, bounds: Rect): boolean {
   );
 }
 
-/** What is wrong with the markers of one team: nothing, when every rule holds. */
-function problemsOf(input: TeamMarkersInput): readonly string[] {
+/**
+ * What is wrong with the markers of one team: nothing, when every rule holds. With `squeezed`, a name
+ * may touch a circle so close to its own that no line of name fits between them (small screens).
+ */
+function problemsOf(input: TeamMarkersInput, squeezed = true): readonly string[] {
   const drawn = layoutTeamMarkers(input);
   const frame = placementFrame(input);
   return drawn.flatMap((marker, index) => {
@@ -176,27 +178,21 @@ function problemsOf(input: TeamMarkersInput): readonly string[] {
     if (frame.column !== null && overlaps(name, frame.column)) {
       found.push(`${who}: the name covers the column`);
     }
-    const center = (name.left + name.right) / 2;
-    const edges = [frame.bounds.left, frame.bounds.right, frame.column?.left, frame.column?.right];
-    const clamped = edges.some(
-      (edge) =>
-        edge !== undefined &&
-        (Math.abs(name.left - edge) < EPSILON || Math.abs(name.right - edge) < EPSILON),
-    );
-    if (!clamped && Math.abs(center - marker.placed.x) > EPSILON) {
-      found.push(`${who}: the name is not centered under its circle`);
+    if (name.left > marker.placed.x + EPSILON || name.right < marker.placed.x - EPSILON) {
+      found.push(`${who}: the name is not across its circle`);
     }
-    const fitsBelow =
-      circle.bottom + input.tokens.spacing.xs + (name.bottom - name.top) <= frame.bounds.bottom;
-    if (side === "above" && fitsBelow) found.push(`${who}: the name is above with room below`);
-    if (side === "below" && name.top < circle.bottom - EPSILON) {
-      found.push(`${who}: the name is not below its circle`);
-    }
+    const attached =
+      side === "below"
+        ? Math.abs(name.top - (circle.bottom + frame.gap)) < EPSILON
+        : Math.abs(name.bottom - (circle.top - frame.gap)) < EPSILON;
+    if (!attached) found.push(`${who}: the name is not right ${side} its circle`);
     drawn.forEach((other, otherIndex) => {
-      // Two circles that nearly touch leave no room for a name between them: the rule holds for the rest.
-      const crowded = !farFromOthers(marker, other, CROWDED_RADII * radius);
-      if (crowded) return;
-      if (otherIndex !== index && overlaps(name, circleOf(other, input.tokens))) {
+      if (otherIndex === index) return;
+      // A circle almost on this one (the formation stacks them) may touch its name.
+      const apart = radius + reachOf(other, input.tokens) + frame.gap;
+      const room = squeezed ? frame.gap + (name.bottom - name.top) : 0;
+      const tolerated = !farFromOthers(marker, other, apart + room);
+      if (!tolerated && overlaps(name, circleOf(other, input.tokens))) {
         found.push(`${who}: the name covers the circle of ${other.chip.displayName}`);
       }
       if (otherIndex > index && overlaps(name, other.placed.name.box)) {
@@ -336,30 +332,58 @@ describe("long names on a large landscape screen", () => {
   const FIRST_NAMES = ["Bernardete", "Valentina", "Wellington", "Christopher", "Ana", "Joaquim"];
   const long = (suffix: string) => FIRST_NAMES.map((first) => `${first} ${suffix}`);
 
-  test("most names stay whole or as 'First I.', and nothing is covered", () => {
-    const readable: boolean[] = [];
-    const problems: string[] = [];
-    for (const [end, suffix] of [
-      ["left", "Ca."],
-      ["right", "P."],
-    ] as const) {
-      const names = long(suffix);
-      const panel = panelOf({
-        names,
-        phase: "receiving",
-        system: "5x1",
-        setterZone: 1,
-        hasSetPoint: false,
-      });
-      const input = { panel, layout: layoutOf(BIG_PHONE), tokens: tokensOf(BIG_PHONE), end };
-      problems.push(...problemsOf(input));
-      layoutTeamMarkers(input).forEach(({ chip, placed }) => {
-        const text = placed.name.text;
-        readable.push(text === chip.displayName || /^\p{L}+ \p{L}\.$/u.test(text));
-        expect(text).not.toMatch(/^\p{L}{1,2}… /u);
-      });
-    }
-    expect(problems).toEqual([]);
-    expect(readable.filter(Boolean).length).toBeGreaterThanOrEqual(MIN_READABLE);
+  const ROTATIONS = PHASES.flatMap((phase) =>
+    SETTER_ZONES.map((setterZone) => ({ phase, setterZone })),
+  );
+
+  test.each(ROTATIONS)(
+    "5x1 $phase z$setterZone: names whole or 'First I.', attached, nothing covered",
+    ({ phase, setterZone }) => {
+      const readable: boolean[] = [];
+      const problems: string[] = [];
+      for (const [end, suffix] of [
+        ["left", "Ca."],
+        ["right", "P."],
+      ] as const) {
+        const names = long(suffix);
+        const panel = panelOf({ names, phase, system: "5x1", setterZone, hasSetPoint: false });
+        const input = { panel, layout: layoutOf(BIG_PHONE), tokens: tokensOf(BIG_PHONE), end };
+        problems.push(...problemsOf(input, false).map((problem) => `${end}: ${problem}`));
+        layoutTeamMarkers(input).forEach(({ chip, placed }) => {
+          const text = placed.name.text;
+          readable.push(text === chip.displayName || /^\p{L}+ \p{L}\.$/u.test(text));
+          expect(text).not.toMatch(/^\p{L}{1,2}…/u);
+        });
+      }
+      expect(problems).toEqual([]);
+      expect(readable).toHaveLength(12);
+      expect(readable.filter(Boolean).length).toBeGreaterThanOrEqual(MIN_READABLE);
+    },
+  );
+});
+
+describe("two circles on nearly the same point", () => {
+  test("both stay on their points and their names go to opposite sides", () => {
+    const frame = {
+      end: "left",
+      side: 300,
+      bounds: { left: 0, top: 0, right: 300, bottom: 300 },
+      column: null,
+      gap: 4,
+    } as const;
+    const spec = (id: string, x: number) => ({
+      id,
+      point: { x, y: 0.5 },
+      radius: 15,
+      reach: 15,
+      names: [{ text: id, width: 60 }],
+      nameHeight: 16,
+    });
+    const [first, second] = placeMarkers(frame, [spec("one", 0.5), spec("two", 0.52)]);
+    const wanted = (x: number) => placeOnHalfCourt({ x, y: 0.5 }, "left");
+    expect(first?.x).toBeCloseTo((wanted(0.5).x / PERCENT) * frame.side, 6);
+    expect(second?.x).toBeCloseTo((wanted(0.52).x / PERCENT) * frame.side, 6);
+    expect(first?.name.side).not.toBe(second?.name.side);
+    expect(overlaps(first?.name.box as Rect, second?.name.box as Rect)).toBe(false);
   });
 });

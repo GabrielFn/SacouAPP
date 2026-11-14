@@ -1,5 +1,7 @@
 import { HALF, PERCENT } from "../court.data";
 import { placeOnHalfCourt, type CourtEnd } from "./court-geometry";
+import { pickCompatible } from "./name-search";
+import { collides, coveredArea, overlapArea, within } from "./rect-geometry";
 
 import type { MarkerSpec, NameOption, Rect } from "./marker-placement.types";
 
@@ -46,12 +48,6 @@ function keepInside(center: number, half: number, low: number, high: number): nu
     : Math.min(high - half, Math.max(low + half, center));
 }
 
-function overlapArea(a: Rect, b: Rect): number {
-  const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
-  const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
-  return width > 0 && height > 0 ? width * height : 0;
-}
-
 function circleBox({ x, y, reach }: Circle): Rect {
   return { left: x - reach, right: x + reach, top: y - reach, bottom: y + reach };
 }
@@ -75,7 +71,7 @@ function leaveColumn(circle: Circle, column: Rect | null): Circle {
 }
 
 /**
- * The circle stands at the point of the formation. Only a point that falls outside the zone (the
+ * The circle stands exactly at the point of the formation. Only a point that falls outside the zone (the
  * server, behind the end line) is brought in, whole, and out of the column of the team.
  */
 function circleAt(spec: MarkerSpec, frame: PlacementFrame): Circle {
@@ -94,10 +90,29 @@ function circleAt(spec: MarkerSpec, frame: PlacementFrame): Circle {
   });
   return inside(leaveColumn(inside(wanted), frame.column));
 }
+/** Two circles closer than this sit almost on one another: a name may touch the other one. */
+function nearlyOnTop(a: Circle, b: Circle, gap: number): boolean {
+  return Math.hypot(a.x - b.x, a.y - b.y) < a.reach + b.reach + gap;
+}
 
-function verticalSide(circle: Circle, spec: MarkerSpec, frame: PlacementFrame): NameSide {
-  const bottom = circle.y + circle.reach + frame.gap + spec.nameHeight;
-  return bottom <= frame.bounds.bottom ? "below" : "above";
+/** How the name sits across its circle: centered, or reaching out to one side from its edge. */
+type Alignment = "center" | "start" | "end";
+
+const SIDES: readonly NameSide[] = ["below", "above"];
+const ALIGNMENTS: readonly Alignment[] = ["center", "start", "end"];
+
+interface Slot {
+  readonly side: NameSide;
+  readonly alignment: Alignment;
+}
+
+const SLOTS: readonly Slot[] = SIDES.flatMap((side) =>
+  ALIGNMENTS.map((alignment) => ({ side, alignment })),
+);
+
+interface Row {
+  readonly circle: Circle;
+  readonly spec: MarkerSpec;
 }
 
 function nameRows(circle: Circle, side: NameSide, height: number, gap: number) {
@@ -106,108 +121,151 @@ function nameRows(circle: Circle, side: NameSide, height: number, gap: number) {
     : { top: circle.y - circle.reach - gap - height, bottom: circle.y - circle.reach - gap };
 }
 
-interface Row {
-  readonly circle: Circle;
-  readonly spec: MarkerSpec;
-  readonly side: NameSide;
-  readonly top: number;
-  readonly bottom: number;
+function startOf(circle: Circle, width: number, alignment: Alignment): number {
+  if (alignment === "start") return circle.x - circle.radius;
+  if (alignment === "end") return circle.x + circle.radius - width;
+  return circle.x - width / HALF;
 }
 
-function rowsOverlap(a: Row, b: { top: number; bottom: number }, air: number): boolean {
-  return a.top < b.bottom + air && a.bottom > b.top - air;
+/** The name in a slot, pushed back inside the zone at most. */
+function nameBox(row: Row, width: number, slot: Slot, frame: PlacementFrame): Rect {
+  const { left: low, right: high } = frame.bounds;
+  const start = Math.min(high - width, Math.max(low, startOf(row.circle, width, slot.alignment)));
+  return {
+    left: start,
+    right: start + width,
+    ...nameRows(row.circle, slot.side, row.spec.nameHeight, frame.gap),
+  };
 }
 
-/** The name stays inside the zone and out of the column of the team, on the side of its circle. */
-function horizontalLimits(row: Row, frame: PlacementFrame): { low: number; high: number } {
-  const { left, right } = frame.bounds;
-  const { column } = frame;
-  if (column === null || !rowsOverlap(row, column, 0)) {
-    return { low: left, high: right };
-  }
-  return row.circle.x >= (column.left + column.right) / HALF
-    ? { low: Math.max(left, column.right), high: right }
-    : { low: left, high: Math.min(right, column.left) };
+/** What a name must not touch: the circles around it (not one almost on its own) and the names placed. */
+function obstaclesOf(row: Row, rows: readonly Row[], frame: PlacementFrame): readonly Rect[] {
+  return rows
+    .filter(({ circle }) => circle.id !== row.circle.id)
+    .filter(({ circle }) => !nearlyOnTop(circle, row.circle, frame.gap))
+    .map(({ circle }) => circleBox(circle));
 }
 
-function rectAt(row: Row, width: number, limits: { low: number; high: number }): Rect {
-  const left = keepInside(row.circle.x, width / HALF, limits.low, limits.high) - width / HALF;
-  return { left, right: left + width, top: row.top, bottom: row.bottom };
-}
-
-function collides(box: Rect, other: Rect, air: number): boolean {
+/** A name may stand there: inside the zone, out of the column and across its own circle. */
+function fitsZone(box: Rect, row: Row, frame: PlacementFrame): boolean {
   return (
-    overlapArea(box, {
-      ...other,
-      left: other.left - air,
-      right: other.right + air,
-      top: other.top - air,
-      bottom: other.bottom + air,
-    }) > 0
+    within(box, frame.bounds) &&
+    box.left <= row.circle.x &&
+    box.right >= row.circle.x &&
+    (frame.column === null || overlapArea(box, frame.column) === 0)
+  );
+}
+
+const NO_NAME: NameOption = { text: "", width: 0 };
+
+function optionsOf(row: Row): readonly NameOption[] {
+  return row.spec.names.length > 0 ? row.spec.names : [NO_NAME];
+}
+
+/** When nothing is free: the shortest name, centered below its circle, or above it at the bottom. */
+function lastResort(row: Row, frame: PlacementFrame): PlacedMarker["name"] {
+  const option = optionsOf(row).at(-1) ?? NO_NAME;
+  const below = nameBox(row, option.width, SLOTS[0] as Slot, frame);
+  const side: NameSide = below.bottom <= frame.bounds.bottom ? "below" : "above";
+  const slot: Slot = { side, alignment: "center" };
+  return { text: option.text, side, box: nameBox(row, option.width, slot, frame) };
+}
+
+type PlacedName = PlacedMarker["name"];
+
+/**
+ * Every free way to write and put the name among the circles alone, best first: the longest text,
+ * below its circle before above it (a name flips to the other side before it is shortened),
+ * centered before reaching out from an edge of its circle.
+ */
+function candidatesOf(
+  row: Row,
+  rows: readonly Row[],
+  frame: PlacementFrame,
+): readonly PlacedName[] {
+  const obstacles = obstaclesOf(row, rows, frame);
+  const named = (option: NameOption) =>
+    SLOTS.map((slot) => ({
+      text: option.text,
+      side: slot.side,
+      box: nameBox(row, option.width, slot, frame),
+    })).filter(({ box }) => fitsZone(box, row, frame));
+  const free = optionsOf(row).flatMap((option) =>
+    named(option).filter(({ box }) => coveredArea(box, obstacles, frame.gap) === 0),
+  );
+  // Squeezed between circles, when no other way is left: the shortest name, over as little of
+  // them as it can (a name over a circle reads better than two names over each other).
+  const area = (name: PlacedName) => coveredArea(name.box, obstacles, frame.gap);
+  const squeezed = named(optionsOf(row).at(-1) ?? NO_NAME)
+    .filter((name) => area(name) > 0)
+    .sort((a, b) => area(a) - area(b));
+  return [...free, ...squeezed];
+}
+
+function clearOf(name: PlacedName, placed: readonly PlacedName[], gap: number): boolean {
+  return placed.every((other) => !collides(name.box, other.box, gap));
+}
+
+interface Choice {
+  readonly row: Row;
+  readonly candidates: readonly PlacedName[];
+}
+
+/** Without a full solution: each marker in turn takes its first candidate still free. */
+function greedy(choices: readonly Choice[], frame: PlacementFrame): readonly PlacedName[] {
+  return choices.reduce<readonly PlacedName[]>(
+    (placed, { row, candidates }) => [
+      ...placed,
+      candidates.find((name) => clearOf(name, placed, frame.gap)) ?? lastResort(row, frame),
+    ],
+    [],
+  );
+}
+
+function byId(a: { readonly id: string }, b: { readonly id: string }): number {
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+/** The whole name with the fewest free ways first, then the one with the fewest ways at all. */
+function byRoom(a: Choice, b: Choice): number {
+  const whole = (choice: Choice) =>
+    choice.candidates.filter(({ text }) => text === optionsOf(choice.row)[0]?.text).length;
+  return (
+    whole(a) - whole(b) ||
+    a.candidates.length - b.candidates.length ||
+    a.row.circle.y - b.row.circle.y ||
+    a.row.circle.x - b.row.circle.x ||
+    byId(a.row.spec, b.row.spec)
   );
 }
 
 /**
- * The longest text whose rectangle, centered on its circle and kept inside the zone, touches no other
- * circle and no name already placed; the shortest one when none is free.
- */
-function placeName(
-  row: Row,
-  rows: readonly Row[],
-  placed: readonly Rect[],
-  frame: PlacementFrame,
-): PlacedMarker["name"] {
-  const limits = horizontalLimits(row, frame);
-  const obstacles = [
-    ...rows.filter((other) => other.circle.id !== row.circle.id).map((o) => circleBox(o.circle)),
-    ...placed,
-  ];
-  const options = row.spec.names.length > 0 ? row.spec.names : [{ text: "", width: 0 }];
-  const free = options.find(({ width }) => {
-    const box = rectAt(row, width, limits);
-    return obstacles.every((other) => !collides(box, other, frame.gap));
-  });
-  const chosen = free ?? options.at(-1) ?? { text: "", width: 0 };
-  return { text: chosen.text, side: row.side, box: rectAt(row, chosen.width, limits) };
-}
-
-/**
- * Where each marker goes: the circle is on its point (only a point outside the zone is brought in)
- * and the name is centered directly below it, or directly above it at the bottom edge. The name is
- * the whole one when it fits the width around its circle, else the longest shortened one that does;
- * it is always drawn and kept inside the zone. No random number: same lineup, same screen.
+ * Where each marker goes: the circle is exactly on its point (only a point outside the zone is
+ * brought in; two circles on nearly the same point overlap, as on the court) and the name is
+ * attached to it, directly below or directly above, across its circle. Each name takes the longest
+ * text that touches no other circle and no other name; the names with the least room choose first.
+ * No random number: same lineup, same screen.
  */
 export function placeMarkers(
   frame: PlacementFrame,
   markers: readonly MarkerSpec[],
 ): readonly PlacedMarker[] {
-  const byId = [...markers].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  const rows = byId.map<Row>((spec) => {
-    const circle = circleAt(spec, frame);
-    const side = verticalSide(circle, spec, frame);
-    return { circle, spec, side, ...nameRows(circle, side, spec.nameHeight, frame.gap) };
-  });
-  const order = [...rows].sort((a, b) => a.circle.y - b.circle.y || a.circle.x - b.circle.x);
-  const names = order.reduce<ReadonlyMap<string, PlacedMarker["name"]>>(
-    (done, row) =>
-      new Map([
-        ...done,
-        [
-          row.spec.id,
-          placeName(
-            row,
-            rows,
-            [...done.values()].map((name) => name.box),
-            frame,
-          ),
-        ],
-      ]),
-    new Map(),
-  );
+  const rows = [...markers]
+    .sort(byId)
+    .map<Row>((spec) => ({ circle: circleAt(spec, frame), spec }));
+  const choices = rows
+    .map<Choice>((row) => ({ row, candidates: candidatesOf(row, rows, frame) }))
+    .sort(byRoom);
+  const found =
+    pickCompatible(
+      choices.map(({ candidates }) => candidates),
+      (a, b) => collides(a.box, b.box, frame.gap),
+    ) ?? greedy(choices, frame);
+  const names = new Map(choices.map(({ row }, index) => [row.spec.id, found[index]]));
   return rows.map((row) => ({
     id: row.spec.id,
     x: row.circle.x,
     y: row.circle.y,
-    name: names.get(row.spec.id) as PlacedMarker["name"],
+    name: names.get(row.spec.id) ?? lastResort(row, frame),
   }));
 }
