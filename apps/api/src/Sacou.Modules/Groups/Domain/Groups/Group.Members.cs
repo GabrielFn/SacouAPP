@@ -31,6 +31,11 @@ internal sealed partial record Group
             return Result.Failure<GroupChange>(GroupErrors.Forbidden);
         }
 
+        if (!target.HasAccount && role != GroupRole.Player)
+        {
+            return Result.Failure<GroupChange>(GroupErrors.RoleNeedsAccount);
+        }
+
         return target.Role == role ? Unchanged() : ReplaceAndRevokeInvites(target, target with { Role = role }, now);
     }
 
@@ -73,9 +78,13 @@ internal sealed partial record Group
         }
 
         var permission = target.Role.IsAdministrative() ? GroupPermission.RemoveAdmin : GroupPermission.RemoveMember;
-        return RolePermissions.Allows(actor.Role, permission)
-            ? ReplaceAndRevokeInvites(target, target.Remove(now), now)
-            : Result.Failure<GroupChange>(GroupErrors.Forbidden);
+        if (!RolePermissions.Allows(actor.Role, permission))
+        {
+            return Result.Failure<GroupChange>(GroupErrors.Forbidden);
+        }
+
+        var removed = ReplaceAndRevokeInvites(target, target.Remove(now), now);
+        return removed.IsFailure || target.HasAccount ? removed : Result.Success(ForgetGuest(removed.Value, target.Id));
     }
 
     public Result<GroupChange> Leave(MemberId actorId, DateTimeOffset now)

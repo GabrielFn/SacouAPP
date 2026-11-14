@@ -13,6 +13,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+        <Compile Include="../TestSupport/PersonNameCases.cs" Link="TestSupport/PersonNameCases.cs" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/settings-resolver.json" LogicalName="golden/settings-resolver.json" />
     </ItemGroup>
 </Project>

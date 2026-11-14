@@ -29,6 +29,10 @@ internal sealed record GroupMember(
     public static GroupMember Joining(UserId user, DateTimeOffset now) =>
         new(MemberId.New(now), user, GroupRole.Player, MemberType.DropIn, MembershipStatus.Active, now, LeftAt: null);
 
+    /// <summary>A guest without an account (ADR 0053, D1): a player and a drop-in for ever, with a member id of its own.</summary>
+    public static GroupMember Guest(DateTimeOffset now) =>
+        new(MemberId.New(now), UserId: null, GroupRole.Player, MemberType.DropIn, MembershipStatus.Active, now, LeftAt: null);
+
     /// <summary>
     /// Someone who left, back through an invite: the same id, so the same history, but as a new player and
     /// drop-in. A role is never restored, so an admin who left never comes back an admin (ADR 0040, D9).
