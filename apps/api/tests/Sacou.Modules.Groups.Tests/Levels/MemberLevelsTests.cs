@@ -123,6 +123,22 @@ public sealed class MemberLevelsTests
         Assert.Equal(MemberLevelLimits.MaxBatch, full.Value.Levels.Length);
     }
 
+    /// <summary>The limit is a contract (4 KB body): pinned to the literal, not to the constant under test.</summary>
+    [Fact]
+    public void BatchLimit_IsExactlyFifty()
+    {
+        const int Fifty = 50;
+        var world = GroupBuilder.WithFounder();
+        var targets = Enumerable.Range(0, Fifty + 1).Select(_ => world.Add(GroupRole.Player)).ToList();
+        var actor = world.Founder.Id;
+
+        var atLimit = MemberLevels.Set(Context(world), actor, [.. targets.Take(Fifty).Select(target => Assign(target.Id, FourAndAHalf))], Later);
+        var over = MemberLevels.Set(Context(world), actor, [.. targets.Select(target => Assign(target.Id, FourAndAHalf))], Later);
+
+        Assert.True(atLimit.IsSuccess);
+        Assert.Equal(GroupErrors.LevelInvalid, over.Error);
+    }
+
     /// <summary>All or nothing: one bad target among three fails the whole batch, with nothing to write.</summary>
     [Fact]
     public void OneBadTargetInABatch_FailsTheWholeBatch()
