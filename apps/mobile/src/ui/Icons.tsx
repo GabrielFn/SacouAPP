@@ -95,7 +95,7 @@ export function BackIcon({ color }: IconProps) {
   );
 }
 
-export function PlusIcon({ color }: IconProps) {
+function CrossIcon({ color, path }: IconProps & { readonly path: string }) {
   const { colors, tokens } = useTheme();
   return (
     <Svg
@@ -105,7 +105,7 @@ export function PlusIcon({ color }: IconProps) {
       fill="none"
     >
       <Path
-        d={PLUS_PATH}
+        d={path}
         stroke={color ?? colors.text}
         strokeWidth={iconStroke.plus}
         strokeLinecap="round"
@@ -114,23 +114,12 @@ export function PlusIcon({ color }: IconProps) {
   );
 }
 
+export function PlusIcon({ color }: IconProps) {
+  return <CrossIcon color={color} path={PLUS_PATH} />;
+}
+
 export function MinusIcon({ color }: IconProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <Svg
-      width={tokens.sizes.plusIcon}
-      height={tokens.sizes.plusIcon}
-      viewBox={VIEW_BOX}
-      fill="none"
-    >
-      <Path
-        d={MINUS_PATH}
-        stroke={color ?? colors.text}
-        strokeWidth={iconStroke.plus}
-        strokeLinecap="round"
-      />
-    </Svg>
-  );
+  return <CrossIcon color={color} path={MINUS_PATH} />;
 }
 
 export function CheckIcon({ color }: IconProps) {

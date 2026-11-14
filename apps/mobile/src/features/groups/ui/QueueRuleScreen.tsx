@@ -5,9 +5,7 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { BackBar } from "../../../ui/BackBar";
 import { Button } from "../../../ui/Button";
-import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
-import { LoadingState } from "../../../ui/LoadingState";
 import { OfflineBanner } from "../../../ui/OfflineBanner";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
@@ -15,9 +13,10 @@ import { useQueueRuleForm } from "../hooks/use-queue-rule-form";
 import { useSettingsData } from "../hooks/use-settings-data";
 import { groupSettingsHref } from "../navigation";
 import type { SettingsReady } from "../model/settings-screen-state";
+import { QueueRuleLoading } from "./QueueRuleLoading";
 import { LoserOptions, WinnerOptions } from "./QueueRuleOptions";
 
-const { queueRuleScreen: texts, screen } = strings.settings;
+const { queueRuleScreen: texts } = strings.settings;
 const NO_PENDING = {};
 
 export interface QueueRuleScreenProps {
@@ -58,30 +57,6 @@ function QueueRuleForm({ groupId, ready, bannerText }: QueueRuleFormProps) {
         <LoserOptions draft={draft} editable={ready.canManage} dispatch={form.dispatch} />
         <WinnerOptions draft={draft} editable={ready.canManage} dispatch={form.dispatch} />
       </View>
-    </Screen>
-  );
-}
-
-export interface QueueRuleLoadingProps {
-  readonly groupId: string;
-  readonly failureText: string | null;
-  readonly onRetry: () => void;
-}
-
-function QueueRuleLoading({ groupId, failureText, onRetry }: QueueRuleLoadingProps) {
-  return (
-    <Screen>
-      <BackBar title={texts.title} fallbackHref={groupSettingsHref(groupId)} look="heading" />
-      {failureText === null ? (
-        <LoadingState accessibilityLabel={screen.loading} />
-      ) : (
-        <EmptyState
-          alert
-          title={screen.errorTitle}
-          body={failureText}
-          actions={[{ label: screen.retry, variant: "secondary", onPress: onRetry }]}
-        />
-      )}
     </Screen>
   );
 }
