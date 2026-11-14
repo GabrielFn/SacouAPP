@@ -1,6 +1,6 @@
 # Perfil do jogador e nota do admin
 
-Regras da E3.17 ([ADR 0051](../arquitetura/adr/0051-perfil-do-jogador-e-nota-do-admin.md), [ADR 0047](../arquitetura/adr/0047-nota-do-admin-e-rating-openskill.md)). A parte 1 entrega o perfil; a nota do admin chega na parte 2 e completa este arquivo.
+Regras da E3.17 ([ADR 0051](../arquitetura/adr/0051-perfil-do-jogador-e-nota-do-admin.md), [ADR 0047](../arquitetura/adr/0047-nota-do-admin-e-rating-openskill.md)). A parte 1 entregou o perfil; a parte 2, a nota do admin.
 
 ## Perfil (`PlayerProfile`, Identity)
 
@@ -37,17 +37,36 @@ A forma das telas no feminino ("Ponteira", "Levantadora") depende da pergunta 41
 
 De 1,0 a 5,0, de meio em meio ponto, guardado em décimos inteiros (10 a 50, de 5 em 5), como o `levelTenths` de [player-card.md](player-card.md). O padrão de quem não tem nota nem sugestão é 3,0. No JSON, é um número: `4`, `4.0`, `4.50` e `45e-1` valem 4,0 ou 4,5; `4.25`, `0.5`, `5.5`, `-0`, `"4.5"` (texto), `true` e `1e400` são recusados com 400 (nunca 500, nunca arredondados). A sugestão do perfil aceita meios pontos, embora a tela 27 só ofereça inteiros. Nível sugerido fora da escala é `identity.profile-invalid`; `null` é "não informado".
 
+## Nota do admin (`MemberLevel`, Groups)
+
+- **Uma por membro, por grupo** (`groups.member_levels`): um `MemberId` já é de uma pessoa num grupo. Não separa quadra e areia: o grupo já dá o contexto, e a separação é do rating calculado (E3.9).
+- **Quem dá:** Admin e Co-admin (`ManageMemberLevels`), a **qualquer membro ativo**, inclusive admins e a si mesmo (ADR 0047: "de cada membro"; a tela 19 mostra a nota do João, que é o admin). A nota não dá poder no grupo, então não segue a regra de alvo dos papéis.
+- **Escala:** a do `SkillLevel`, ou `null` para **"Não sei"**. A linha existe quando o admin revisou o membro: sem linha é "pendente" (`reviewed: false`, a tela 19 conta "N notas para confirmar"); linha com nota nula é "Não sei" (`reviewed: true`, `adminLevel: null`).
+- **Escrita:** uma (`PUT .../member-levels/{memberId}`) ou em lote (`PUT .../member-levels`, de 1 a 50, sem repetir membro, **tudo ou nada**). O último vence; a mesma nota de novo é sucesso e renova a hora. Alvo de outro grupo, que saiu, removido ou inexistente: o mesmo 404 `groups.member-not-found`.
+- **Quem saiu e volta:** a linha fica; quem volta pelo link tem o mesmo `MemberId` e a mesma nota.
+- **Nunca** na resposta: quem deu a nota nem quando.
+
+## Resolução para o sorteio (`MemberLevelResolver`)
+
+A nota do admin; senão, a sugestão do perfil; senão, 3,0. "Não sei" e "pendente" caem na sugestão ou em 3,0. A origem (`Admin`, `Suggested`, `Default`) acompanha o valor, para o σ do rating (E3.9). Só no servidor, pelo contrato `Groups.Contracts.IMemberLevels`, sem rota HTTP; a E3.6 decide como mostrar a nota ao admin no sorteio.
+
+| Nota do admin | Sugestão | Resultado | Origem |
+|---|---|---|---|
+| 3,5 | 4,0 | 3,5 | Admin |
+| "Não sei" ou pendente | 4,5 | 4,5 | Suggested |
+| "Não sei" ou pendente | nenhuma (ou convidado sem conta) | 3,0 | Default |
+
 ## Quem vê o quê
 
 A privacidade é pela rota, nunca por campo condicional.
 
-| Dado | Própria pessoa (`/me/profile`) | Qualquer membro ativo (`.../members`) |
-|---|---|---|
-| Apelido, posições | sim | sim |
-| Sugestão do próprio nível | sim (a sua) | **nunca** |
-| Nota do admin | **nunca** | **nunca** |
+| Dado | Própria pessoa (`/me/profile`) | Qualquer membro ativo (`.../members`) | Admin e Co-admin (`.../member-levels`) | Placar e Jogador |
+|---|---|---|---|---|
+| Apelido, posições | sim | sim | sim (via `members`) | sim (via `members`) |
+| Sugestão do próprio nível | sim (a sua) | **nunca** | sim, de cada membro | **nunca** (403 na rota de notas) |
+| Nota do admin | **nunca** | **nunca** | sim | **nunca** (403) |
 
-A lista de membros tem o mesmo corpo para todos os papéis e nunca tem campo de nível. A sugestão e a nota de cada membro só saem da rota de notas dos admins e co-admins (parte 2).
+A lista de membros tem o mesmo corpo para todos os papéis e nunca tem campo de nível. A rota de notas nunca entra no cache do app (E4.5).
 
 ## Erros
 
@@ -57,3 +76,6 @@ A lista de membros tem o mesmo corpo para todos os papéis e nunca tem campo de 
 | `identity.profile-invalid` | 400 | Posições ou nível sugerido fora da regra |
 | `identity.profile-not-found` | 404 | A pessoa nunca salvou o perfil |
 | `identity.user-not-registered` | 403 | Login válido, mas `POST /v1/me` nunca rodou |
+| `groups.level-invalid` | 400 | Nota fora da escala, lote vazio, com mais de 50 itens ou com membro repetido |
+| `groups.member-not-found` | 404 | Alvo da nota que não é membro ativo deste grupo |
+| `groups.forbidden` | 403 | Placar ou Jogador na rota de notas |

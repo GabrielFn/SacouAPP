@@ -20,9 +20,9 @@ public sealed class GroupRouteGuardTests
 
     /// <summary>
     /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites, and the six
-    /// of the settings and the saved templates: the guard must see them, or it checks nothing.
+    /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
     /// </summary>
-    private const int GroupRoutes = 16;
+    private const int GroupRoutes = 19;
     private const int RoundRoutes = 8;
 
     private const string Development = "Development";

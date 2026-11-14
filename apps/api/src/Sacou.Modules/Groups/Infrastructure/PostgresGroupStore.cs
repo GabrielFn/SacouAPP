@@ -153,10 +153,7 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
     /// <summary>The group row is locked first, always: the lock order of ADR 0040, D7 (group before person).</summary>
     private async Task<Group?> LockAndLoadAsync(GroupId group, CancellationToken cancellationToken)
     {
-        var locked = await database.Database
-            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM groups.groups WHERE id = {group.Value} FOR UPDATE")
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        if (locked.Count == 0)
+        if (!await GroupRowLock.TryLockAsync(database, group, cancellationToken).ConfigureAwait(false))
         {
             return null;
         }

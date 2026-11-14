@@ -16,6 +16,7 @@ internal static class GroupsDatabase
             options, configuration.GetConnectionString(ConnectionStringName) ?? string.Empty));
         services.AddScoped<IGroupStore, PostgresGroupStore>();
         services.AddScoped<IGroupSettingsStore, PostgresGroupSettingsStore>();
+        services.AddScoped<IMemberLevelStore, PostgresMemberLevelStore>();
         return services;
     }
 

@@ -1,7 +1,7 @@
+using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Identity.Domain.Profiles;
-using Sacou.Modules.Identity.Infrastructure;
 
-namespace Sacou.Modules.Identity.Contracts;
+namespace Sacou.Modules.Identity.Infrastructure;
 
 /// <summary><see cref="IPlayerProfiles"/> over the store: one query for the whole list, never one per user.</summary>
 internal sealed class StorePlayerProfiles(IPlayerProfileStore store) : IPlayerProfiles

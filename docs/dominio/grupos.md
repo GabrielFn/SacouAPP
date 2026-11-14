@@ -24,7 +24,7 @@ Regras do módulo Groups (E3.2). Decisões e motivos no [ADR 0040](../arquitetur
 
 ## Permissões
 
-Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão (4 papéis × 12 permissões). `ManageSettings` (E3.3) é do Co-admin também, pelo padrão adotado da pergunta 23; ver a configuração é `ViewGroup`, então o jogador vê "25 pontos · 1 set".
+Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas não mexe em quem é Admin ou Co-admin. Fonte em código: `RolePermissions`; teste com esta tabela escrita à mão (4 papéis × 13 permissões). `ManageSettings` (E3.3) é do Co-admin também, pelo padrão adotado da pergunta 23; ver a configuração é `ViewGroup`, então o jogador vê "25 pontos · 1 set".
 
 | Permissão (`GroupPermission`) | Admin | Co-admin | Placar | Jogador |
 |---|---|---|---|---|
@@ -40,6 +40,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `ManageSettings` (mudar a configuração padrão, aplicar e salvar modelos) | sim | sim | não | não |
 | `ManageRounds` (criar, editar e cancelar rodada, parar a série, mexer na lista de presença; E3.4) | sim | sim | não | não |
 | `RespondAttendance` (responder "vou" ou "não vou" por si; E3.4) | sim | sim | sim | sim |
+| `ManageMemberLevels` (ver e dar a nota de cada membro e ver a sugestão dele; E3.17, [perfil-e-nota.md](perfil-e-nota.md)) | sim | sim | não | não |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
 
@@ -76,6 +77,9 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `GET /v1/groups/{groupId}/templates` | `ManageSettings` | 200 `[{ templateId, name, createdAt }]`, do mais antigo ao mais novo |
 | `POST /v1/groups/{groupId}/templates` `{ name }` | `ManageSettings` | 201 `{ templateId, name, createdAt }`, o retrato dos campos que não são fato |
 | `DELETE /v1/groups/{groupId}/templates/{templateId}` | `ManageSettings` | 204; a segunda vez e o modelo de outro grupo dão 404 |
+| `GET /v1/groups/{groupId}/member-levels` | `ManageMemberLevels` | 200 `[{ memberId, adminLevel, reviewed, suggestedLevel }]`, um por membro ativo, na ordem de entrada (E3.17) |
+| `PUT /v1/groups/{groupId}/member-levels/{memberId}` `{ level }` | `ManageMemberLevels` | 200 `{ memberId, adminLevel, reviewed: true }`; `level` nulo é "Não sei" |
+| `PUT /v1/groups/{groupId}/member-levels` `{ levels: [{ memberId, level }] }` | `ManageMemberLevels` | 200 `[{ memberId, adminLevel, reviewed: true }]`, na ordem do pedido; de 1 a 50 itens, tudo ou nada |
 | `POST /v1/invites/preview` `{ token }` | Usuário registrado | 200 `{ groupName, activeMembers, alreadyMember }` |
 | `POST /v1/invites/accept` `{ token }` | Usuário registrado | 201 `{ groupId, memberId }` (entrou ou voltou) ou 200 (já era membro ativo) |
 
@@ -113,3 +117,4 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.template-not-found` | 400 / 404 | Criar grupo com chave desconhecida (400); aplicar ou apagar modelo inexistente ou de outro grupo (404) |
 | `groups.template-name-invalid` | 400 | Nome do modelo fora de 1 a 40 caracteres visíveis |
 | `groups.template-limit` | 409 | O grupo já tem 20 modelos salvos |
+| `groups.level-invalid` | 400 | Nota fora da escala (1,0 a 5,0 de meio em meio ponto), lote vazio, com mais de 50 itens ou com membro repetido (E3.17) |
