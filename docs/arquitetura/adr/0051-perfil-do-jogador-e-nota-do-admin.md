@@ -1,6 +1,6 @@
 # ADR 0051 · Perfil do jogador e nota do membro definida pelo admin
 
-**Status:** aceito em parte (12/11/2026): a parte 1 da E3.17 (perfil e apelido na lista de membros). A parte 2 (nota do admin) completa as decisões D2, D3 e D8 a D10 deste registro. **Tarefa:** E3.17. **Plano:** [`docs/estado/tarefas/E3.17.md`](../../estado/tarefas/E3.17.md).
+**Status:** aceito (12/11/2026, parte 1: perfil e apelido na lista de membros; 13/11/2026, parte 2: nota do admin, decisões D2, D3 e D8 a D10). **Tarefa:** E3.17. **Plano:** [`docs/estado/tarefas/E3.17.md`](../../estado/tarefas/E3.17.md).
 
 ## Contexto
 
@@ -26,11 +26,30 @@ O ADR 0047 tirou o nível autodeclarado do papel de nota definitiva: o jogador s
 
 **Rotas.** `GET` e `PUT /v1/me/profile`, fora do filtro de grupo e na lista fechada do teste de guarda das rotas (ADR 0040, D4), com o limite de corpo de 4 KB, `ApiJson` e `ProblemDetails` com `code`. As 4 chaves do `PUT` são obrigatórias (`JsonRequired`); `primaryPosition` e `suggestedLevel` podem ser nulos. Códigos novos: `identity.nickname-invalid`, `identity.profile-invalid`, `identity.profile-not-found`. A lista de membros ganhou `nickname`, `primaryPosition` e `otherPositions`, acréscimos compatíveis na `/v1` (ADR 0042).
 
+## Decisões da parte 2
+
+**D2 · A nota do admin mora no Groups, por membro.** Tabela própria `groups.member_levels`: `member_id` (chave), `group_id`, `level_tenths` (`smallint`, nulo para "Não sei"), `set_by_member_id` e `set_at`, com `CHECK` da escala e índice `ix_member_levels_group`. FKs só dentro do módulo (para `groups.members` e `groups.groups`, `RESTRICT`), nenhuma para o Identity. Não em `groups.members`: as colunas da lista de membros ficam travadas e nenhuma leitura dela alcança a nota. A linha existe quando o admin revisou o membro e fica quando ele sai. Um teste de modelo trava as 5 colunas.
+
+**D3 · Uma nota por grupo, sem separar quadra e areia.** O grupo dá o contexto; a separação é do rating (E3.9). Mudar depois é acrescentar `modality` à chave.
+
+**D8 · Permissão `ManageMemberLevels`.** Admin e Co-admin; lê e grava. Alvo: qualquer membro ativo, admins e o próprio ator inclusive, porque a nota não dá poder no grupo. Tabela de permissões em 4 × 13, testada à mão; matriz HTTP de 30 linhas, também à mão.
+
+**D9 · Contrato `Groups.Contracts.IMemberLevels.ResolveAsync(groupId, memberIds)`.** Devolve `ResolvedLevel(MemberId, LevelTenths, LevelSource)` para cada id que é membro do grupo (qualquer situação), na ordem de entrada; id de outro grupo fica de fora, e grupo inexistente dá lista vazia. A regra pura `MemberLevelResolver` (nota, senão sugestão, senão 30) tem a tabela golden só em C#, porque não há lado TS; se o sorteio rodar no app, a E3.6 exporta a tabela. Duas consultas ao banco e uma chamada a `IPlayerProfiles`, nunca uma por membro.
+
+**D10 (nota) · Concorrência.** Toda escrita de nota abre uma transação explícita, trava a linha de `groups.groups` (`FOR UPDATE`, a mesma trava das escritas de membro do ADR 0040, D8), lê só os membros do grupo e julga quem age e cada alvo na regra pura `MemberLevels.Set`; depois grava cada nota com `INSERT ... ON CONFLICT (member_id) DO UPDATE ... WHERE member_levels.group_id = EXCLUDED.group_id`. Um rebaixamento ou uma remoção que entra depois do filtro vence (testes C1 e C2); escritas simultâneas no mesmo alvo ou lote e individual juntos deixam uma linha por membro (C3 e C4). Nenhuma família nova de trava.
+
+**Linha fora da escala.** O `CHECK` garante a escala, mas, diferente do perfil (que confia nele e usa `.Value`), o store da nota não lança com uma linha corrompida: pula a linha e registra um aviso sem id nem valor. O membro aparece como pendente, o que é seguro (o admin vê e revisa de novo), em vez de derrubar a lista ou o sorteio com 500.
+
+**D12 · Eventos (complemento).** Um teste de arquitetura reprova tipo dos namespaces de eventos (`CourtSessions` e `CourtSessionJson`) que dependa do módulo Identity, de `Sacou.Shared.Levels` ou de tipo de fora chamado `Nickname`, `PlayerProfile` ou `MemberLevel`; um caso plantado (`UsesSkillLevel`) prova que a regra reprova.
+
+**Rotas da parte 2.** `GET .../member-levels`, `PUT .../member-levels/{memberId}` `{ level }` e `PUT .../member-levels` `{ levels }`, no filtro de grupo, com o limite de corpo de 4 KB, `ApiJson` e `JsonNumberHandling.Strict` no nível. As respostas nunca trazem quem deu a nota nem quando. Código novo: `groups.level-invalid` (400). O teste de tipos aceita `AdminLevel` só nas duas respostas de nota, e `SuggestedLevel` só nelas e na do próprio perfil.
+
 ## Consequências
 
 - O app (E4.3) lê e grava o perfil; a lista de membros (E4.5, E4.6) mostra o apelido sem outra chamada.
 - O Identity passa a depender de `Sacou.Http` (como o Groups), para o `ToHttpResult` e o `ProblemDetails`.
-- Risco aceito: a sugestão é única por pessoa, então o admin de um grupo novo verá a autoavaliação feita para outro (parte 2; a tela 27 avisa).
+- Risco aceito: a sugestão é única por pessoa, então o admin de um grupo novo vê a autoavaliação feita para outro (a tela 27 avisa).
+- Risco aceito: o "Confirmar todas" de mais de 50 pendentes vira várias chamadas, sem atomicidade entre elas (E4.5).
 - Risco aceito: apelidos repetidos e homóglifos no mesmo grupo.
 
 ## Alternativas descartadas

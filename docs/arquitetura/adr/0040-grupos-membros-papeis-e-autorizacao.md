@@ -63,3 +63,5 @@ Família nova entra nesta tabela. **Ordem das travas:** grupo (`FOR UPDATE` de D
 - **Convites carregados no agregado:** toda escrita do grupo lê todos os convites dele, revogados inclusive. Cada um exige um admin criando; o volume de um racha é minúsculo. Se crescer, carregar só os abertos e o alvo da revogação (rever na E5.3, com o limite de requisições de criar convite, prévia e aceite).
 
 > **Nota (E3.4, ADR 0043):** `MemberId` mora agora em `Sacou.Shared.Members` (Groups e Sessions o usam). `GroupPermission` ganhou `ManageRounds` e `RespondAttendance` (4 × 12); o contrato ganhou `GroupCapability`, `Allows` e `ListActiveAsync`.
+
+> **Nota (E3.17, parte 2, [ADR 0051](0051-perfil-do-jogador-e-nota-do-admin.md)):** `GroupPermission` ganhou `ManageMemberLevels` (Admin e Co-admin; 4 × 13). A escrita de nota usa a trava do grupo desta decisão (D8), lendo só os membros, sem os convites; nenhuma família nova de trava.
