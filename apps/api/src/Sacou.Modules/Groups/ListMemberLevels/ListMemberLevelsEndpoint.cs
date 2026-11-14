@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Net.Http.Headers;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Groups.Domain.Levels;
@@ -19,6 +20,8 @@ namespace Sacou.Modules.Groups.ListMemberLevels;
 /// </summary>
 internal static class ListMemberLevelsEndpoint
 {
+    private const string NoStore = "no-store";
+
     public const string Name = "ListMemberLevels";
     public const string Route = "/member-levels";
 
@@ -31,6 +34,7 @@ internal static class ListMemberLevelsEndpoint
     private static async Task<Ok<IReadOnlyList<MemberLevelResponse>>> HandleAsync(
         HttpContext context, IGroupStore store, IMemberLevelStore levels, IPlayerProfiles profiles, CancellationToken cancellationToken)
     {
+        context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var access = context.GroupAccess();
         var members = await store.ListActiveMembersAsync(access.GroupId, cancellationToken).ConfigureAwait(false);
         var byMember = (await levels.ListAsync(access.GroupId, cancellationToken).ConfigureAwait(false)).ToDictionary(level => level.MemberId);

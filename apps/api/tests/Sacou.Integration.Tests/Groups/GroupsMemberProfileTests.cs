@@ -81,7 +81,8 @@ public sealed class GroupsMemberProfileTests(IntegrationDatabase database) : IAs
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains(members, member => member["nickname"]?.GetValue<string>() == "Caio");
         Assert.All(members, member => Assert.DoesNotContain(member, field => field.Key.Contains(LevelWord, StringComparison.OrdinalIgnoreCase)));
-        Assert.DoesNotContain(MarkerLevel, text, StringComparison.Ordinal);
+        // As a JSON value (":4.5"): the bare "4.5" also matches a timestamp such as "44.58", which flaked the test.
+        Assert.DoesNotContain(":" + MarkerLevel, text, StringComparison.Ordinal);
     }
 
     /// <summary>No N+1: the list asks Identity once, for every member at once, whatever the size of the group.</summary>
