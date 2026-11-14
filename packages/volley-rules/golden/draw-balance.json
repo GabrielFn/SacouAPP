@@ -1,0 +1,48 @@
+[
+  {
+    "id": "screen-07-two-teams",
+    "source": "Tela 07: somas 220 e 225 em times de 6 (36,67 e 37,5)",
+    "teamsLevelsTenths": [
+      [40, 40, 35, 35, 40, 30],
+      [45, 40, 40, 35, 35, 30]
+    ],
+    "expected": { "averagesTenths": [37, 38], "differenceTenths": 1 }
+  },
+  {
+    "id": "half-up-35.5",
+    "source": "Meio para cima: 355 em 10 jogadores dá 35,5, mostrado 3,6",
+    "teamsLevelsTenths": [
+      [40, 40, 40, 40, 40, 30, 30, 30, 30, 35],
+      [35, 35, 35, 35, 35, 35, 35, 35, 35, 35]
+    ],
+    "expected": { "averagesTenths": [36, 35], "differenceTenths": 1 }
+  },
+  {
+    "id": "three-teams-highest-minus-lowest",
+    "source": "Três times: a diferença é a maior média menos a menor, em qualquer ordem",
+    "teamsLevelsTenths": [
+      [35, 35],
+      [40, 40],
+      [30, 30]
+    ],
+    "expected": { "averagesTenths": [35, 40, 30], "differenceTenths": 10 }
+  },
+  {
+    "id": "exact-36.4-and-35.6-round-equal",
+    "source": "Médias exatas 36,4 e 35,6 arredondam para 3,6 e 3,6: a tela mostra diferença 0",
+    "teamsLevelsTenths": [
+      [36, 37, 36, 36, 37],
+      [35, 36, 36, 36, 35]
+    ],
+    "expected": { "averagesTenths": [36, 36], "differenceTenths": 0 }
+  },
+  {
+    "id": "equal-teams",
+    "source": "Todos 3,0: diferença 0",
+    "teamsLevelsTenths": [
+      [30, 30, 30, 30],
+      [30, 30, 30, 30]
+    ],
+    "expected": { "averagesTenths": [30, 30], "differenceTenths": 0 }
+  }
+]

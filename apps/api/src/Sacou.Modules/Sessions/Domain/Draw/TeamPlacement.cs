@@ -9,7 +9,8 @@ internal enum PlacementPattern
 
 /// <summary>
 /// Places the units on the teams in a given order, backtracking when a team is full or a "separar" lock forbids it,
-/// so it finds a valid split whenever one exists. Empty teams are interchangeable: only the first one is tried.
+/// so it finds a valid split whenever one exists. Units with locks go first; empty teams are interchangeable, so
+/// only the first one is tried.
 /// The result is the team of each unit, numbered by the first unit of each team (<see cref="Canonical"/>).
 /// </summary>
 internal sealed class TeamPlacement
@@ -39,8 +40,13 @@ internal sealed class TeamPlacement
     /// <summary>Null when no split respects the locks.</summary>
     public static int[]? Place(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern)
     {
-        var placement = new TeamPlacement(units, layout, order, pattern);
+        ArgumentNullException.ThrowIfNull(units);
+        ArgumentNullException.ThrowIfNull(order);
+        var placement = new TeamPlacement(units, layout, [.. order.Where(IsConstrained), .. order.Where(unit => !IsConstrained(unit))], pattern);
         return placement.PlaceFrom(0) ? Canonical(placement._teamOfUnit) : null;
+
+        // A player alone and free of locks always fits the room left, so the search only ever backtracks over the others.
+        bool IsConstrained(int unit) => units.Units[unit].Size > 1 || units.HasApartLock(unit);
     }
 
     /// <summary>The same split always reads the same: team 0 holds the first unit, team 1 the first unit not in team 0...</summary>
