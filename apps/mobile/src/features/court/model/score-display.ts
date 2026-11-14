@@ -14,6 +14,8 @@ export interface ScoreSizeInput {
   readonly zoneHeight: number;
   readonly sideWidth: number;
   readonly score: number;
+  /** The fraction of the zone height at full size; defaults to the one of the upright court. */
+  readonly scoreZoneRatio?: number;
 }
 
 export interface ScoreTextSize {
@@ -37,9 +39,14 @@ function digitRatio(digits: number): number {
  * There is no ceiling on the score. Up to two digits the number is 45% of the height of its zone
  * (produto.md:134); from three digits it shrinks, and it never gets wider than the side column.
  */
-export function scoreTextSize({ zoneHeight, sideWidth, score }: ScoreSizeInput): ScoreTextSize {
+export function scoreTextSize({
+  zoneHeight,
+  sideWidth,
+  score,
+  scoreZoneRatio = SCORE_ZONE_RATIO,
+}: ScoreSizeInput): ScoreTextSize {
   const digits = countDigits(score);
-  const wanted = zoneHeight * SCORE_ZONE_RATIO * digitRatio(digits);
+  const wanted = zoneHeight * scoreZoneRatio * digitRatio(digits);
   const fontSize = Math.min(wanted, sideWidth / (digits * SCORE_DIGIT_WIDTH_EM));
   return {
     fontSize,

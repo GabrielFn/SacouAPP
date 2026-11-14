@@ -15,7 +15,7 @@ export interface CourtPlaceholderProps {
 export function CourtPlaceholder({ title, lines, actions }: CourtPlaceholderProps) {
   const { tokens } = useTheme();
   return (
-    <Screen>
+    <Screen scroll maxContentWidth={tokens.court.sizes.sheetMaxWidth}>
       <Text variant="display" displaySize="displayTitleSmall" accessibilityRole="header">
         {title}
       </Text>

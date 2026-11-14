@@ -14,6 +14,10 @@ import {
   spacing,
 } from "./tokens.data";
 
+/**
+ * `windowWidth` is the width of the window held upright, that is its shorter side (`shortSide`): the
+ * court turns the phone on its side and the tokens must not grow 2x for it (ADR 0052).
+ */
 export interface ScaleInput {
   readonly windowWidth: number;
   readonly fontScale: number;
@@ -45,6 +49,11 @@ function mapValues<T extends Readonly<Record<string, number>>>(
 ): NumberMap<T> {
   const entries = Object.entries(source).map(([key, value]) => [key, convert(value)] as const);
   return Object.fromEntries(entries) as NumberMap<T>;
+}
+
+/** The side of the window the scale is measured by: the width of the phone upright, in any rotation. */
+export function shortSide(windowWidth: number, windowHeight: number): number {
+  return Math.min(windowWidth, windowHeight);
 }
 
 export function scaleFactor(windowWidth: number): number {

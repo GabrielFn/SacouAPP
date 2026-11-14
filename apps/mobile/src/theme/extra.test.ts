@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { fakeFontLoader } from "../adapters/fake-font-loader";
 import type { FontLoader } from "../services/font-loader";
 import { contrastRatio, parseHex } from "./contrast";
-import { createScaledTokens, scaleFactor } from "./scale";
+import { createScaledTokens, scaleFactor, shortSide } from "./scale";
 import { THEME_ROLES, themes } from "./themes";
 import { accessibilityFloors, canvasWidth, fontScaleCap, scaleLimits } from "./tokens.data";
 
@@ -161,5 +161,36 @@ describe("floors are pinned to literal WCAG values (not self-referential)", () =
     const tokens = createScaledTokens({ windowWidth: 280, fontScale: 2 });
     for (const key of INTERACTIVE) expect(tokens.sizes[key]).toBeGreaterThanOrEqual(44);
     expect(tokens.borderWidths.thin).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("scale by the shorter side of the window (landscape court)", () => {
+  const PHONES = [
+    { width: 360, height: 640 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+  ] as const;
+
+  it.each(PHONES)("a $width x $height phone gives the same tokens upright and on its side", (p) => {
+    const upright = createScaledTokens({
+      windowWidth: shortSide(p.width, p.height),
+      fontScale: 1,
+    });
+    const sideways = createScaledTokens({
+      windowWidth: shortSide(p.height, p.width),
+      fontScale: 1,
+    });
+    expect(sideways).toEqual(upright);
+  });
+
+  it("keeps the touch target and hairline floors on a 640 x 360 phone on its side", () => {
+    const { court, borderWidths } = createScaledTokens({
+      windowWidth: shortSide(640, 360),
+      fontScale: 1,
+    });
+    expect(court.sizes.menuButton).toBeGreaterThanOrEqual(44);
+    expect(court.sizes.undoButton).toBeGreaterThanOrEqual(44);
+    expect(court.borderWidths.frame).toBeGreaterThanOrEqual(1);
+    expect(borderWidths.thick).toBeGreaterThanOrEqual(1);
   });
 });

@@ -36,6 +36,9 @@ export const courtStrings = {
     setterLabel: "levantador",
     liberoBadge: "Lí",
     liberoLabel: "líbero",
+    serverLabel: "sacador",
+    markerLabel: (name: string, zone: number, role: string | null) =>
+      `${name}, posição ${String(zone)}${role === null ? "" : `, ${role}`}`,
     teamLetter: { a: "A", b: "B" },
   },
   strip: {
@@ -44,8 +47,6 @@ export const courtStrings = {
     positions: "Posições no momento do saque",
     oneMorePoint: (team: string) => `Mais um ponto e o ${team} fecha o set`,
     nextPointCloses: "Quem fizer o próximo ponto fecha o set",
-    pointToast: (team: string, own: number, other: number) =>
-      `+1 ${team} (${String(own)}–${String(other)})`,
   },
   queue: {
     title: "Na fila",
@@ -102,6 +103,7 @@ export const courtStrings = {
     newOneSet: "Nova partida (1 set)",
     newBestOfThree: "Nova partida (melhor de 3)",
     newWithLibero: "Nova partida (com líbero)",
+    newLongNames: "Nova partida (nomes longos)",
     themeSun: "Tema Sol",
     themeNight: "Tema Noite",
     resume: "Continuar partida",

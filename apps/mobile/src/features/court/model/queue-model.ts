@@ -9,7 +9,11 @@ export function selectQueue(queue: TeamQueue, roster: CourtRoster): QueueModel |
     return null;
   }
   const players = (members: readonly MemberId[]) =>
-    members.map((memberId) => ({ memberId, name: roster.nameOf(memberId) }));
+    members.map((memberId) => ({
+      memberId,
+      name: roster.nameOf(memberId),
+      displayName: roster.nameOf(memberId),
+    }));
   return {
     teams: queue.teams.map((team) => ({
       key: team.memberIds.join(),

@@ -6,24 +6,18 @@ import {
   courtGuardReducer,
   INITIAL_COURT_GUARD,
   isBackBlocked,
-  isToastVisible,
   nextDeadline,
 } from "../guard/court-guard.reducer";
 
 export interface UseCourtGuard {
-  readonly toastVisible: boolean;
   /** Is the back button of the phone blocked, with the court in front or not. */
   readonly backBlocked: (focused: boolean) => boolean;
   /** Starts the wait after a tap that went through; `false` while the zones are still waiting. */
   readonly acceptPoint: () => boolean;
-  readonly recordPoint: () => void;
   readonly acceptUndo: () => void;
 }
 
-/**
- * The wait after a point and the toast. The state is the reducer's; one timer wakes the
- * component when the next thing expires, and the reducer clears it.
- */
+/** The wait after a point. The state is the reducer's; one timer clears it when it expires. */
 export function useCourtGuard(): UseCourtGuard {
   const { clock } = useServices();
   const [state, dispatch] = useReducer(courtGuardReducer, INITIAL_COURT_GUARD);
@@ -54,12 +48,8 @@ export function useCourtGuard(): UseCourtGuard {
   }, [state, clock]);
 
   return {
-    toastVisible: isToastVisible(state, clock.now()),
     backBlocked: (focused) => isBackBlocked(state, focused),
     acceptPoint,
-    recordPoint: useCallback(() => {
-      dispatch({ type: "point-recorded", at: clock.now() });
-    }, [clock]),
     acceptUndo: useCallback(() => {
       dispatch({ type: "undo-accepted" });
     }, []),
