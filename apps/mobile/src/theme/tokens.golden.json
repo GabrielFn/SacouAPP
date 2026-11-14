@@ -127,7 +127,7 @@
   },
   "courtTokens": {
     "sizes": {
-      "chip": 28,
+      "chip": 30,
       "setDot": 12,
       "badge": 18,
       "tag": 30,
@@ -136,19 +136,18 @@
       "pillBadge": 20,
       "undoButton": 54,
       "menuButton": 44,
-      "lockButton": 44,
       "netMesh": 9,
       "savedIcon": 15,
       "menuIcon": 18,
-      "lockIcon": 20,
       "undoIcon": 22,
       "correctIcon": 17,
       "flameIcon": 17,
-      "ballIcon": 14
+      "ballIcon": 14,
+      "sheetMaxWidth": 480
     },
     "fontSizes": {
       "setTitle": 22,
-      "chipNumber": 11,
+      "chipNumber": 14,
       "badge": 10,
       "tag": 21,
       "tagBadge": 15,
@@ -159,11 +158,11 @@
       "frame": 3
     },
     "spacing": {
-      "chipPadding": 9,
       "hairGap": 5,
       "scoreGap": 22,
       "badgeOffsetX": 6,
-      "badgeOffsetY": 9
+      "badgeOffsetY": 9,
+      "chipGap": 4
     },
     "pulseYellow": "#FFE08A"
   }

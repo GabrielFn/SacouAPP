@@ -5,8 +5,8 @@ import { useTheme } from "../../../theme/theme-context";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COURT_FLEX_WEIGHTS, HOLD_TO_OPEN_MENU_MS, HOLD_TO_UNLOCK_MS } from "../court.data";
-import { CloudOffIcon, LockIcon, MenuDotsIcon, UnlockIcon } from "./CourtIcons";
+import { COLUMN_LINE_HEIGHT_EM, FLUSH } from "../court.data";
+import { CloudOffIcon, MenuDotsIcon } from "./CourtIcons";
 import { SetDots } from "./SetDots";
 
 export interface CourtHeaderProps {
@@ -14,32 +14,29 @@ export interface CourtHeaderProps {
   /** Empty for a single set: the dots are hidden. */
   readonly sets: readonly (TeamColorName | null)[];
   readonly setsLabel: string;
-  readonly locked: boolean;
-  /** Held on the Menu button while locked, tapped while unlocked (revisao-mvp.md:40). */
+  /** A plain tap on the Menu button. */
   readonly onOpenMenu: () => void;
-  /** Held on the lock while locked. */
-  readonly onUnlock: () => void;
-  /** Tapped on the open lock. */
-  readonly onLock: () => void;
+  /** The share of the height of the screen the bar takes, in the weights of its layout. */
+  readonly weight: number;
+  /** The line in the middle of the bar (landscape); in the upright court it is in the strip. */
+  readonly hint?: string;
 }
 
-/** The bar on top: set, sets won, "saved on the phone", the Menu button and the lock. */
+/** The bar on top: set, sets won, "saved on the phone", and the Menu button. */
 export function CourtHeader({
   setNumber,
   sets,
   setsLabel,
-  locked,
   onOpenMenu,
-  onUnlock,
-  onLock,
+  weight,
+  hint,
 }: CourtHeaderProps) {
   const { colors, tokens } = useTheme();
   const { sizes, fontSizes } = tokens.court;
-  const LockGlyph = locked ? LockIcon : UnlockIcon;
   return (
     <View
       style={{
-        flex: COURT_FLEX_WEIGHTS.bar,
+        flex: weight,
         minHeight: sizes.menuButton,
         flexDirection: "row",
         alignItems: "center",
@@ -53,9 +50,24 @@ export function CourtHeader({
         {strings.court.header.setTitle(setNumber)}
       </Text>
       {sets.length === 0 ? null : <SetDots sets={sets} accessibilityLabel={setsLabel} />}
+      {hint === undefined ? null : (
+        <View style={{ flex: 1, minWidth: FLUSH, alignItems: "center", justifyContent: "center" }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              color: colors.textMuted,
+              fontFamily: fontFamilies.body600,
+              fontSize: tokens.fontSizes.body,
+              lineHeight: tokens.fontSizes.body * COLUMN_LINE_HEIGHT_EM,
+            }}
+          >
+            {hint}
+          </Text>
+        </View>
+      )}
       <View
         style={{
-          marginLeft: "auto",
+          marginLeft: hint === undefined ? "auto" : undefined,
           flexDirection: "row",
           alignItems: "center",
           gap: tokens.court.spacing.hairGap,
@@ -74,12 +86,8 @@ export function CourtHeader({
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={
-          locked ? strings.court.header.menuLabelLocked : strings.court.header.menuLabelUnlocked
-        }
-        delayLongPress={HOLD_TO_OPEN_MENU_MS}
-        onPress={locked ? undefined : onOpenMenu}
-        onLongPress={locked ? onOpenMenu : undefined}
+        accessibilityLabel={strings.court.header.menuLabel}
+        onPress={onOpenMenu}
         style={{
           minHeight: sizes.menuButton,
           minWidth: sizes.menuButton,
@@ -102,23 +110,6 @@ export function CourtHeader({
         >
           {strings.court.header.menu}
         </Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={
-          locked ? strings.court.header.lockLabelLocked : strings.court.header.lockLabelUnlocked
-        }
-        delayLongPress={HOLD_TO_UNLOCK_MS}
-        onPress={locked ? undefined : onLock}
-        onLongPress={locked ? onUnlock : undefined}
-        style={{
-          minHeight: sizes.lockButton,
-          minWidth: sizes.lockButton,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <LockGlyph />
       </Pressable>
     </View>
   );

@@ -11,8 +11,6 @@ import {
   selectCourtScreen,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
-import { selectLastPoint } from "../../../features/court/model/point-toast";
-import { pointToastText } from "../../../features/court/model/screen-texts";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
@@ -37,7 +35,8 @@ export default function CourtRoute() {
   // changes, so coming back from the end of the set (same step) does not open it again.
   const { push, replace } = route;
   const focused = useIsFocused();
-  // While locked, the back button of Android stays where it is (only on the court, not on its menu).
+  // The back button of Android stays where it is while the court is in front (not on its menu);
+  // leaving is by the Menu.
   useBackGuard(view.status === "ready" && guard.backBlocked(focused));
   const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
@@ -48,15 +47,6 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-  const lastPoint = useMemo(
-    () => (timeline === null ? null : selectLastPoint(timeline)),
-    [timeline],
-  );
-  const toast =
-    guard.toastVisible && model !== null && lastPoint !== null
-      ? pointToastText(model, lastPoint)
-      : null;
-
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
   }
@@ -66,15 +56,11 @@ export default function CourtRoute() {
   return (
     <CourtScreen
       model={model}
-      toast={toast}
-      locked={guard.locked}
       onPoint={(team) => {
         // The zones wait after a point, even if the engine turns this one down.
         if (guard.acceptPoint()) {
           void dispatch({ type: "score-point", team }).then((result) => {
-            if (result.ok) {
-              guard.recordPoint();
-            } else {
+            if (!result.ok) {
               courtFeedback.play("refused");
             }
           });
@@ -89,8 +75,6 @@ export default function CourtRoute() {
           }
         });
       }}
-      onUnlock={guard.unlock}
-      onLock={guard.lock}
       onCorrect={() => {
         route.push("corrections");
       }}

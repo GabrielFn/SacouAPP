@@ -45,22 +45,27 @@ describe("what the phone does between two states", () => {
     expect(deriveFeedback(atSetPoint, stateOf(scenario))).toEqual(["point"]);
   });
 
-  test("the point that decides the set is only a point", async () => {
-    const [before, after] = await around("a".repeat(24), (scenario) => score(scenario, "a"));
-    expect(deriveFeedback(before, after)).toEqual(["point"]);
+  test("the point that decides a set of a series is set-ended", async () => {
+    const scenario = await startScenario();
+    await score(scenario, "a".repeat(24));
+    const before = stateOf(scenario);
+    await score(scenario, "a");
+    expect(deriveFeedback(before, stateOf(scenario))).toEqual(["set-ended"]);
   });
 
-  test("confirming the end of a set of a series is set-ended", async () => {
+  test("the point that decides the match is match-ended", async () => {
+    const [before, after] = await around("a".repeat(24), (scenario) => score(scenario, "a"));
+    expect(deriveFeedback(before, after)).toEqual(["match-ended"]);
+  });
+
+  test("confirming a set that was already decided is silent", async () => {
     const scenario = await startScenario();
     await score(scenario, "a".repeat(25));
     const before = stateOf(scenario);
     await confirmSet(scenario);
-    expect(deriveFeedback(before, stateOf(scenario))).toEqual(["set-ended"]);
-  });
-
-  test("confirming the end of the deciding set is match-ended", async () => {
-    const [before, after] = await around("a".repeat(25), (scenario) => confirmSet(scenario));
-    expect(deriveFeedback(before, after)).toEqual(["match-ended"]);
+    expect(deriveFeedback(before, stateOf(scenario))).toEqual([]);
+    const [decided, finished] = await around("a".repeat(25), (s) => confirmSet(s));
+    expect(deriveFeedback(decided, finished)).toEqual([]);
   });
 
   test("an undo does not buzz like a point", async () => {

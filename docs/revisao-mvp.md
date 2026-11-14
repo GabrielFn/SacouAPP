@@ -37,7 +37,7 @@ As prioridades altas são só ajuste de dados nas telas existentes e vão virar 
 | Média | 03 Início | "3 rodadas essa semana" não conta a rodada ao vivo; cards abrem a página web | Contar 4; criar o detalhe da rodada no app para o jogador |
 | Média | 06 Rodada | "13/18 pagaram" mistura mensalistas e avulsos | Separar avulsos e mensalidade do mês |
 | Média | 08 Pré-jogo | "Partida 1" contra "2 seguidas" na quadra; banco aparece com time de 6; sem tie-break | "Partida 3"; banco só com mais de 6; mostrar tie-break |
-| Média | 09/10 Quadra | Sem menu (escalação, trocar jogador, entregar placar, encerrar); set point só no tema Noite | Menu atrás do cadeado; set point também no Sol, com contraste |
+| Média | 09/10 Quadra | Sem menu (escalação, trocar jogador, entregar placar, encerrar); set point só no tema Noite | Menu com um toque (o cadeado saiu em 13/11/2026, `decisoes.md`); set point também no Sol, com contraste |
 | Média | 12 Resumo | "Crie seu grupo" para quem já é admin; números não fecham com a fila | CTA só para quem não é admin; "calculado pelo placar"; ajustar números |
 | Média | 07 Sorteio | Chips de 36 px usados para tocar e trocar | Mínimo de 44–48 px |
 | Baixa | 14/15 | "jogos" x "partidas", "sequência" x "maior sequência"; contas do Perfil não fecham | Padronizar termos e fechar as contas |

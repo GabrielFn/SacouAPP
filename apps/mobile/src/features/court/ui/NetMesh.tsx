@@ -1,17 +1,29 @@
+import { View } from "react-native";
 import Svg, { Defs, Line, Pattern, Rect } from "react-native-svg";
 
 import { useTheme } from "../../../theme/theme-context";
-import { NET_MESH, NET_MESH_PATTERN_ID } from "../court.data";
+import { FLUSH, NET_MESH, NET_MESH_PATTERN_ID } from "../court.data";
 
 const FULL = "100%";
 const FILL = `url(#${NET_MESH_PATTERN_ID})`;
 
+export interface NetMeshProps {
+  /** `vertical` is the net of the landscape court: a strip as tall as its column, in the middle of it. */
+  readonly orientation?: "horizontal" | "vertical";
+}
+
 /** The net: two crossing diagonal lines every 7 units, in the line color (QuadraSol.dc.html:34). */
-export function NetMesh() {
+export function NetMesh({ orientation = "horizontal" }: NetMeshProps) {
   const { colors, tokens } = useTheme();
   const { period, line } = NET_MESH;
-  return (
-    <Svg width={FULL} height={tokens.court.sizes.netMesh} accessibilityElementsHidden>
+  const thickness = tokens.court.sizes.netMesh;
+  const vertical = orientation === "vertical";
+  const mesh = (
+    <Svg
+      width={vertical ? thickness : FULL}
+      height={vertical ? FULL : thickness}
+      accessibilityElementsHidden
+    >
       <Defs>
         <Pattern
           id={NET_MESH_PATTERN_ID}
@@ -25,5 +37,22 @@ export function NetMesh() {
       </Defs>
       <Rect width={FULL} height={FULL} fill={FILL} />
     </Svg>
+  );
+  return vertical ? (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        top: FLUSH,
+        bottom: FLUSH,
+        left: FLUSH,
+        right: FLUSH,
+        alignItems: "center",
+      }}
+    >
+      {mesh}
+    </View>
+  ) : (
+    mesh
   );
 }

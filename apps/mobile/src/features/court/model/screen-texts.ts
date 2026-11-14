@@ -1,8 +1,8 @@
 import type { TeamSide } from "@sacou/match-engine";
 
+import type { TeamColorName } from "../../../theme/team-colors";
 import { strings } from "../../../strings/pt-BR";
 import type { CourtScreenModel, QueueModel } from "./court-screen.types";
-import type { LastPoint } from "./point-toast";
 
 /** The line in the middle strip. */
 export function hintText({ hint, teams }: CourtScreenModel): string {
@@ -14,6 +14,11 @@ export function hintText({ hint, teams }: CourtScreenModel): string {
     case "next-point-closes":
       return strings.court.strip.nextPointCloses;
   }
+}
+
+/** The color of whoever won each set, `null` for the set still open: the dots of the bar. */
+export function dotColors(model: CourtScreenModel): readonly (TeamColorName | null)[] {
+  return model.dots.map(({ winner }) => (winner === null ? null : model.teams[winner].color));
 }
 
 /** "Laranja venceu 2 seguidas", or `null` with no streak. */
@@ -56,7 +61,7 @@ export interface QueuePillText {
 export function queuePills(queue: QueueModel): readonly QueuePillText[] {
   return [
     ...queue.teams.map(({ key }, index) => ({ key, label: strings.court.queue.team(index + 1) })),
-    ...queue.players.map(({ memberId, name }) => ({ key: memberId, label: name })),
+    ...queue.players.map(({ memberId, displayName }) => ({ key: memberId, label: displayName })),
   ];
 }
 
@@ -70,9 +75,4 @@ export interface VisibleQueuePills {
 export function visibleQueuePills(queue: QueueModel | null, limit: number): VisibleQueuePills {
   const entries = queue === null ? [] : queuePills(queue);
   return { shown: entries.slice(0, limit), hidden: Math.max(0, entries.length - limit) };
-}
-
-/** The toast of the last point, "+1 Laranja (19–15)": it takes the place of the line of the strip. */
-export function pointToastText(model: CourtScreenModel, point: LastPoint): string {
-  return strings.court.strip.pointToast(model.teams[point.side].label, point.own, point.other);
 }

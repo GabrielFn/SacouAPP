@@ -5,10 +5,11 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COURT_ZONE_RATIOS, FLUSH } from "../court.data";
-import { ratioToPercentText, type CourtEnd } from "../model/court-geometry";
+import { COLUMN_LINE_HEIGHT_EM, FLUSH } from "../court.data";
+import type { CourtEnd } from "../model/court-geometry";
 import type { CourtLayout } from "../model/court-layout";
 import type { TeamPanelModel } from "../model/court-screen.types";
+import { columnOffset } from "../model/team-markers";
 import { ScoreNumber } from "./ScoreNumber";
 import { SetPointTag } from "./SetPointTag";
 import { TeamTag } from "./TeamTag";
@@ -40,7 +41,11 @@ function rotationText(panel: TeamPanelModel): string | null {
 function useSideLines({ panel, layout }: TeamSideColumnProps): readonly SideLine[] {
   const { colors, tokens } = useTheme();
   const { spacing } = tokens;
-  const phaseStyle: TextStyle = { color: colors.textMuted, fontSize: tokens.fontSizes.caption };
+  const phaseStyle: TextStyle = {
+    color: colors.textMuted,
+    fontSize: tokens.fontSizes.caption,
+    lineHeight: tokens.fontSizes.caption * COLUMN_LINE_HEIGHT_EM,
+  };
   const rotation = rotationText(panel);
   const indicator: SideLine = panel.hasSetPoint
     ? { key: "set-point", node: <SetPointTag />, gapBefore: spacing.xs }
@@ -72,6 +77,7 @@ function useSideLines({ panel, layout }: TeamSideColumnProps): readonly SideLine
           score={panel.score}
           zoneHeight={layout.zoneHeight}
           sideWidth={layout.sideWidth}
+          scoreZoneRatio={layout.scoreZoneRatio}
           color={panel.hasSetPoint ? colors.scoreHighlight : colors.text}
         />
       ),
@@ -91,25 +97,40 @@ function useSideLines({ panel, layout }: TeamSideColumnProps): readonly SideLine
       ];
 }
 
-/** The team on the bottom reads the other way round, so the gaps move to the other side of each line. */
+/**
+ * The team at the top (or on the left) reads top-down from the top edge; the one at the bottom (or
+ * on the right) reads the other way round from the bottom edge, so the gaps move to the other side
+ * of each line. The column of the team on the right hugs its right edge.
+ */
 export function TeamSideColumn(props: TeamSideColumnProps) {
   const { tokens } = useTheme();
-  const isTop = props.end === "top";
+  const { end, layout } = props;
+  const fromTop = end === "top" || end === "left";
+  const onRight = end === "right";
   const lines = useSideLines(props);
-  const ordered = isTop ? lines : [...lines].reverse();
+  const ordered = fromTop ? lines : [...lines].reverse();
+  const offset = columnOffset(layout, tokens);
+  const align = onRight ? "flex-end" : "flex-start";
   return (
     <View
       style={{
         position: "absolute",
-        left: ratioToPercentText(COURT_ZONE_RATIOS.edge),
-        width: ratioToPercentText(COURT_ZONE_RATIOS.side),
-        top: isTop ? tokens.spacing.s14 : undefined,
-        bottom: isTop ? undefined : tokens.spacing.s14,
-        alignItems: "flex-start",
+        left: onRight ? undefined : layout.edgeInset,
+        right: onRight ? layout.edgeInset : undefined,
+        width: layout.sideWidth,
+        top: fromTop ? offset : undefined,
+        bottom: fromTop ? undefined : offset,
+        alignItems: align,
       }}
     >
       {ordered.map(({ key, node, gapBefore }) => (
-        <View key={key} style={isTop ? { marginTop: gapBefore } : { marginBottom: gapBefore }}>
+        <View
+          key={key}
+          style={{
+            alignItems: align,
+            ...(fromTop ? { marginTop: gapBefore } : { marginBottom: gapBefore }),
+          }}
+        >
           {node}
         </View>
       ))}

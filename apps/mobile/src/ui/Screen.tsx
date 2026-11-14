@@ -12,30 +12,49 @@ export interface ScreenProps {
   readonly scroll?: boolean;
   /** Fixed at the foot, under the scrolling content (the main button of a form). */
   readonly footer?: ReactNode;
+  /** The content is centered and never wider than this (the pages of the court on its side). */
+  readonly maxContentWidth?: number;
 }
 
-export function Screen({ children, aboveTabBar = false, scroll = false, footer }: ScreenProps) {
+export function Screen({
+  children,
+  aboveTabBar = false,
+  scroll = false,
+  footer,
+  maxContentWidth,
+}: ScreenProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const content = {
     paddingTop: insets.top + tokens.spacing.xl,
     paddingBottom: (aboveTabBar || footer ? 0 : insets.bottom) + tokens.spacing.xl,
-    paddingHorizontal: tokens.spacing.xl,
+    paddingLeft: insets.left + tokens.spacing.xl,
+    paddingRight: insets.right + tokens.spacing.xl,
     gap: tokens.spacing.l,
   };
+  const centered = maxContentWidth === undefined ? undefined : "center";
+  const body =
+    maxContentWidth === undefined ? (
+      children
+    ) : (
+      <View style={{ width: "100%", maxWidth: maxContentWidth, gap: tokens.spacing.l }}>
+        {children}
+      </View>
+    );
   if (footer) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={content}
+          contentContainerStyle={{ ...content, alignItems: centered }}
           keyboardShouldPersistTaps="handled"
         >
-          {children}
+          {body}
         </ScrollView>
         <View
           style={{
-            paddingHorizontal: tokens.spacing.xl,
+            paddingLeft: insets.left + tokens.spacing.xl,
+            paddingRight: insets.right + tokens.spacing.xl,
             paddingTop: tokens.spacing.m,
             paddingBottom: insets.bottom + tokens.spacing.xl,
             gap: tokens.spacing.s10,
@@ -50,13 +69,25 @@ export function Screen({ children, aboveTabBar = false, scroll = false, footer }
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={content}
+        contentContainerStyle={{
+          ...content,
+          alignItems: centered,
+        }}
       >
-        {children}
+        {body}
       </ScrollView>
     );
   }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, ...content }}>{children}</View>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        alignItems: centered,
+        ...content,
+      }}
+    >
+      {body}
+    </View>
   );
 }

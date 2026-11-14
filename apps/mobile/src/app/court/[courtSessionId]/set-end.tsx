@@ -9,17 +9,16 @@ import {
   selectSetEnd,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
+import { buildSetEndActions } from "../../../features/court/model/set-end-actions";
+import { confirmSetEnd } from "../../../features/court/session/confirm-set-end";
 import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
-import type { ScreenAction } from "../../../ui/ActionButtons";
 import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
-
-const SIDES: readonly TeamSide[] = ["a", "b"];
 
 /** Placeholder of screen 25 (E4.10): confirms the end of the set, and takes the toss of the decider. */
 export default function SetEndRoute() {
   const route = useCourtRoute();
-  const { courtRoster } = useServices();
+  const { courtRoster, courtFeedback } = useServices();
   const { view, dispatch } = useCourtSession();
   const timeline = view.status === "ready" ? view.timeline : null;
   const model = useMemo(
@@ -45,20 +44,9 @@ export default function SetEndRoute() {
   }
   const { setEnd } = strings.court;
   const confirm = (firstServer?: TeamSide) => {
-    void dispatch(
-      firstServer === undefined
-        ? { type: "confirm-set-end" }
-        : { type: "confirm-set-end", firstServer },
-    );
+    void confirmSetEnd({ dispatch, feedback: courtFeedback }, firstServer);
   };
-  const confirmActions: readonly ScreenAction[] = model.needsFirstServer
-    ? SIDES.map((side) => ({
-        label: setEnd.serves(model.scores[side].label),
-        onPress: () => {
-          confirm(side);
-        },
-      }))
-    : [{ label: setEnd.confirm, onPress: confirm }];
+  const confirmActions = buildSetEndActions(model, setEnd, confirm);
   return (
     <CourtPlaceholder
       title={setEnd.title(model.setNumber)}

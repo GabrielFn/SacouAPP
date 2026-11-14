@@ -22,6 +22,7 @@ import type {
 } from "./court-screen.types";
 import { selectHintLine } from "./hint-line";
 import { selectQueue } from "./queue-model";
+import { withDisplayNames } from "./screen-display-names";
 import { buildTeamPanel } from "./team-panel";
 import { selectWinStreak } from "./win-streak";
 
@@ -68,15 +69,16 @@ export function selectCourtScreen(
     return null;
   }
   const streak = selectWinStreak(state);
+  const { teams, queue } = withDisplayNames(
+    { a: buildTeamPanel(match, set, "a", roster), b: buildTeamPanel(match, set, "b", roster) },
+    selectQueue(state.queue, roster),
+  );
   return {
     phase: selectCourtPhase(state),
     setNumber: set.setNumber,
     dots: selectDots(match),
-    teams: {
-      a: buildTeamPanel(match, set, "a", roster),
-      b: buildTeamPanel(match, set, "b", roster),
-    },
-    queue: selectQueue(state.queue, roster),
+    teams,
+    queue,
     streak:
       streak === null
         ? null

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Pressable } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
-import { COURT_FLEX_WEIGHTS } from "../court.data";
+import { COURT_FLEX_WEIGHTS, LANDSCAPE_WIDTH_WEIGHTS } from "../court.data";
 import { isPalmTouch, nextPeakTouches } from "../guard/palm";
 import type { CourtEnd } from "../model/court-geometry";
 import type { CourtLayout } from "../model/court-layout";
@@ -40,10 +40,13 @@ export function TeamZone({ panel, end, layout, onPoint }: TeamZoneProps) {
           onPoint();
         }
       }}
-      style={{ flex: COURT_FLEX_WEIGHTS.zone, backgroundColor: colors.background }}
+      style={{
+        flex: layout.kind === "landscape" ? LANDSCAPE_WIDTH_WEIGHTS.zone : COURT_FLEX_WEIGHTS.zone,
+        backgroundColor: colors.background,
+      }}
     >
       <TeamSideColumn panel={panel} end={end} layout={layout} />
-      <HalfCourt panel={panel} end={end} side={layout.halfCourtSide} />
+      <HalfCourt panel={panel} end={end} layout={layout} />
     </Pressable>
   );
 }

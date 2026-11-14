@@ -55,7 +55,6 @@ export function SetPointTag() {
       style={{
         height: sizes.tag,
         borderRadius: sizes.tag,
-        alignSelf: "flex-start",
         justifyContent: "center",
         paddingHorizontal: tokens.spacing.m,
         backgroundColor,
