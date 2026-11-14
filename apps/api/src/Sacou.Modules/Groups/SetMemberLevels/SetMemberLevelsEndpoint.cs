@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Net.Http.Headers;
 using Sacou.Http;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Domain.Groups;
@@ -19,6 +20,8 @@ namespace Sacou.Modules.Groups.SetMemberLevels;
 /// </summary>
 internal static class SetMemberLevelsEndpoint
 {
+    private const string NoStore = "no-store";
+
     public const string Name = "SetMemberLevels";
     public const string Route = "/member-levels";
 
@@ -37,6 +40,7 @@ internal static class SetMemberLevelsEndpoint
             return Result.Failure<MemberLevelChange>(GroupErrors.LevelInvalid).ToHttpResult(MemberLevelSetResponse.ListOf);
         }
 
+        context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var access = context.GroupAccess();
         RequestedLevel[] requested = [.. items.Select(item => new RequestedLevel(item!.MemberId, item.Level))];
         var changed = await handler.HandleAsync(access.GroupId, access.Member.Id, requested, cancellationToken).ConfigureAwait(false);
