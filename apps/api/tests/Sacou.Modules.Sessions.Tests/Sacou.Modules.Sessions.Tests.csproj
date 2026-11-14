@@ -13,7 +13,6 @@
         <ProjectReference Include="../../src/Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/draw-balance.json" LogicalName="golden/draw-balance.json" />
     </ItemGroup>
 </Project>
