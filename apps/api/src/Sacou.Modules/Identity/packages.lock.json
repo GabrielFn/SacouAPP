@@ -240,6 +240,12 @@
           "System.Composition.Runtime": "9.0.0"
         }
       },
+      "sacou.http": {
+        "type": "Project",
+        "dependencies": {
+          "Sacou.Shared": "[1.0.0, )"
+        }
+      },
       "sacou.shared": {
         "type": "Project"
       },

@@ -11,6 +11,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
+        <ProjectReference Include="../../Sacou.Http/Sacou.Http.csproj" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Sacou.Modules.Identity.Tests" />

@@ -53,6 +53,9 @@ const member: Member = {
   hasAccount: true,
   isMe: true,
   joinedAt: "2026-11-01T10:00:00Z",
+  nickname: "Caio",
+  primaryPosition: "setter",
+  otherPositions: ["libero"],
 };
 
 function programmed(): FakeSacouApi {
