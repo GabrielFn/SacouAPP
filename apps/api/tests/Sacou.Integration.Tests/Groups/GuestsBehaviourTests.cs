@@ -58,15 +58,16 @@ public sealed class GuestsBehaviourTests(IntegrationDatabase database) : IAsyncL
         Assert.Contains(new ResolvedLevel(rated, 45, LevelSource.Admin), levels);
     }
 
-    /// <summary>H2 and D4: a full round without a waitlist refuses the guest; the guest stays in the group.</summary>
+    /// <summary>H2 and D4: a full round (two spots, the minimum) without a waitlist refuses the guest; the guest stays in the group.</summary>
     [Fact]
     public async Task FullRound_RefusesTheGuest_WhoStaysInTheGroup()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1, waitlist: false);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2, waitlist: false);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
         Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, world.MemberIds[A.Player], going: true));
+        Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, world.MemberIds[A.CoAdmin], going: true));
         var guest = await GuestCalls.CreateAsync(world);
 
         Assert.Equal(HttpStatusCode.Conflict, await RoundCalls.SetAsync(world, round, guest, going: true));
@@ -230,15 +231,18 @@ public sealed class GuestsBehaviourTests(IntegrationDatabase database) : IAsyncL
         var world = await GroupWorld.CreateAsync(api, client);
         await RoundCalls.ConfigureAttendanceAsync(world);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
-        var guest = await GuestCalls.CreateAsync(world, Leo, level: "2.0");
+        // The database is shared by every test class: the name searched for must exist only in this test.
+        var marker = "Léo " + Guid.NewGuid().ToString("N")[..12];
+        var guest = await GuestCalls.CreateAsync(world, marker, level: "2.0");
         Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, guest, going: true));
+        Assert.Equal(["guests.name"], await GuestCalls.FindTextAsync(api.ConnectionString, marker));
 
         using var removed = await world.SendAsync(A.Admin, HttpMethod.Delete, world.MemberPath(guest));
         using var correctedAfter = await world.SendAsync(A.Admin, HttpMethod.Put, GuestCalls.GuestPath(world, guest), GuestCalls.CorrectBody("Volta", null));
 
         Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
         Assert.Null(await GuestCalls.ReadAsync(api.ConnectionString, guest));
-        Assert.Empty(await GuestCalls.FindTextAsync(api.ConnectionString, "Canário"));
+        Assert.Empty(await GuestCalls.FindTextAsync(api.ConnectionString, marker));
         Assert.Equal("removed", (await MemberRows.ReadAsync(api.ConnectionString, guest)).Status);
         Assert.Contains(await RoundCalls.RowsAsync(api.ConnectionString, round), row => row.MemberId == guest);
         Assert.DoesNotContain(guest, (await GuestCalls.MembersAsync(world)).Keys);

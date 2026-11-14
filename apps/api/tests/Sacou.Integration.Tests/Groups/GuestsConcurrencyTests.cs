@@ -36,8 +36,9 @@ public sealed class GuestsConcurrencyTests(IntegrationDatabase database) : IAsyn
         for (var repetition = 0; repetition < Repetitions; repetition++)
         {
             var world = await WorldAsync();
-            await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1);
+            await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2);
             var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
+            Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, world.MemberIds[A.Player], going: true));
             var guest = await GuestCalls.CreateAsync(world);
             var dropIn = await world.AddPersonAsync();
 
@@ -45,7 +46,7 @@ public sealed class GuestsConcurrencyTests(IntegrationDatabase database) : IAsyn
                 async () => Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, guest, going: true)),
                 async () => Assert.Equal(HttpStatusCode.OK, (await RoundCalls.RespondAsync(world, dropIn.Subject, round, going: true)).Status));
 
-            var rows = await RoundCalls.RowsAsync(api.ConnectionString, round);
+            var rows = (await RoundCalls.RowsAsync(api.ConnectionString, round)).Where(row => row.MemberId != world.MemberIds[A.Player]).ToList();
             Assert.Equal(["going", "waitlisted"], rows.Select(row => row.Status).Order(StringComparer.Ordinal));
             Assert.Equal(new[] { guest, dropIn.MemberId }.Order(), rows.Select(row => row.MemberId).Order());
         }
@@ -118,16 +119,17 @@ public sealed class GuestsConcurrencyTests(IntegrationDatabase database) : IAsyn
         }
     }
 
-    /// <summary>C5: a guest going is removed from the group; the next write on the round lets it go and promotes the first in line.</summary>
+    /// <summary>C5: two spots, the guest and a player going, a co-admin first in line. The guest is removed; the next write lets it go and promotes the co-admin.</summary>
     [Fact]
     public async Task RemovedGuestWhoWasGoing_GivesItsSpotToTheFirstInLine()
     {
         var world = await WorldAsync();
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
         var guest = await GuestCalls.CreateAsync(world);
         Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, guest, going: true));
         Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, world.MemberIds[A.Player], going: true));
+        Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, world.MemberIds[A.CoAdmin], going: true));
         using var removed = await world.SendAsync(A.Admin, HttpMethod.Delete, world.MemberPath(guest));
         Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
 
@@ -136,6 +138,7 @@ public sealed class GuestsConcurrencyTests(IntegrationDatabase database) : IAsyn
         var rows = (await RoundCalls.RowsAsync(api.ConnectionString, round)).ToDictionary(row => row.MemberId, row => row.Status);
         Assert.Equal("not_going", rows[guest]);
         Assert.Equal("going", rows[world.MemberIds[A.Player]]);
+        Assert.Equal("going", rows[world.MemberIds[A.CoAdmin]]);
         Assert.Equal("waitlisted", rows[world.MemberIds[A.Scorekeeper]]);
     }
 
