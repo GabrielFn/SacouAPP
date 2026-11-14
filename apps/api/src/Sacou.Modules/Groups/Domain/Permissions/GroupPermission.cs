@@ -15,4 +15,7 @@ internal enum GroupPermission
     ManageSettings,
     ManageRounds,
     RespondAttendance,
+
+    /// <summary>Reads and writes the admin's private level of each member (ADR 0047, ADR 0051 D8).</summary>
+    ManageMemberLevels,
 }

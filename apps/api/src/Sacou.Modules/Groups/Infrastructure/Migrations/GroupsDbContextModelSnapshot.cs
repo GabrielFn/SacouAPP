@@ -154,6 +154,43 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.MemberLevelRow", b =>
+                {
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<short?>("LevelTenths")
+                        .HasColumnType("smallint")
+                        .HasColumnName("level_tenths");
+
+                    b.Property<DateTimeOffset>("SetAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("set_at");
+
+                    b.Property<Guid>("SetByMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_by_member_id");
+
+                    b.HasKey("MemberId")
+                        .HasName("pk_member_levels");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_member_levels_group");
+
+                    b.HasIndex("SetByMemberId")
+                        .HasDatabaseName("ix_member_levels_set_by_member_id");
+
+                    b.ToTable("member_levels", "groups", t =>
+                        {
+                            t.HasCheckConstraint("ck_member_levels_level", "level_tenths IS NULL OR (level_tenths BETWEEN 10 AND 50 AND level_tenths % 5 = 0)");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.MemberRow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,6 +338,30 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_invites_groups");
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.MemberLevelRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.GroupRow", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_member_levels_groups");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithOne()
+                        .HasForeignKey("Sacou.Modules.Groups.Infrastructure.MemberLevelRow", "MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_member_levels_members");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithMany()
+                        .HasForeignKey("SetByMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_member_levels_set_by");
                 });
 
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.MemberRow", b =>

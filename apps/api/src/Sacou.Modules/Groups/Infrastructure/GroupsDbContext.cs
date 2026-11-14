@@ -18,6 +18,8 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
 
     public DbSet<SavedTemplateRow> SavedTemplates => Set<SavedTemplateRow>();
 
+    public DbSet<MemberLevelRow> MemberLevels => Set<MemberLevelRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -26,5 +28,6 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
         modelBuilder.ApplyConfiguration(new InviteConfiguration());
         modelBuilder.ApplyConfiguration(new GroupSettingsConfiguration());
         modelBuilder.ApplyConfiguration(new SavedTemplateConfiguration());
+        modelBuilder.ApplyConfiguration(new MemberLevelConfiguration());
     }
 }
