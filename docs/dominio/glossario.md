@@ -33,7 +33,8 @@ Termo do app (pt-BR) e nome fixo no código (inglês). Fontes: `produto.md:279-3
 | Série de rodadas ("Repetir toda semana") | `RoundSeries` | Dia da semana e hora local; cada ocorrência nasce herdando o grupo |
 | Presença | `Attendance` | Uma por membro por rodada; estados `Going`, `NotGoing`, `Waitlisted`, `Promoted` |
 | Lista de espera | `Waitlist` | A posição é calculada pela ordem (`Sequence`), nunca gravada |
-| Sorteio | `TeamDraw` | |
+| Sorteio | `TeamDraw` | Só no servidor, determinístico pela semente ([sorteio.md](sorteio.md), ADR 0055) |
+| Travar dupla / Separar | `DrawLock` (`Together`, `Apart`) | Trava entre dois jogadores dos times; `together` forma blocos (`DrawUnit`) |
 | Resumo da rodada | `SessionSummary` | |
 
 ## Quadra e partida
