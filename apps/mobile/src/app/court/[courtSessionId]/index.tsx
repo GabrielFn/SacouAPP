@@ -1,6 +1,8 @@
 import { useIsFocused } from "expo-router";
 import { useEffect, useMemo } from "react";
 
+import { useCourtBatteryWarning } from "../../../features/court/hooks/battery-warning-context";
+import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
 import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
 import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
@@ -20,6 +22,8 @@ export default function CourtRoute() {
   const route = useCourtRoute();
   const { courtRoster, courtFeedback } = useServices();
   const guard = useCourtGuard();
+  const { inverted } = useCourtSides();
+  const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
   const timeline = view.status === "ready" ? view.timeline : null;
   const phase = useMemo(
@@ -56,6 +60,12 @@ export default function CourtRoute() {
   return (
     <CourtScreen
       model={model}
+      inverted={inverted}
+      battery={
+        warning.state.status === "showing"
+          ? { level: warning.state.level, onDismiss: warning.dismiss }
+          : null
+      }
       onPoint={(team) => {
         // The zones wait after a point, even if the engine turns this one down.
         if (guard.acceptPoint()) {

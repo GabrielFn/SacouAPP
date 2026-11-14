@@ -83,6 +83,18 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
         return [.. rows.Select(RowMapping.ToMember)];
     }
 
+    public async Task<IReadOnlyList<RosterEntry>> ListActiveRosterAsync(GroupId group, CancellationToken cancellationToken)
+    {
+        var rows = await ActiveMembers()
+            .Where(member => member.GroupId == group.Value)
+            .GroupJoin(database.Guests.AsNoTracking(), member => member.Id, guest => guest.MemberId, (member, guests) => new { member, guests })
+            .SelectMany(pair => pair.guests.DefaultIfEmpty(), (pair, guest) => new { pair.member, guest })
+            .OrderBy(pair => pair.member.JoinedAt).ThenBy(pair => pair.member.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(pair => new RosterEntry(
+            RowMapping.ToMember(pair.member), pair.guest is null || pair.member.UserId is not null ? null : RowMapping.ToGuestProfile(pair.guest)))];
+    }
+
     public async Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken)
     {
         var active = ColumnValues.ActiveStatus;
@@ -148,6 +160,31 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
             var row = RowMapping.ToRow(before.Id, invite);
             _ = before.Invites.Any(known => known.Id == invite.Id) ? database.Invites.Update(row) : database.Invites.Add(row);
         }
+
+        WriteGuests(before, change);
+        database.MemberLevels.AddRange(change.NewLevels.Select(RowMapping.ToRow));
+    }
+
+    /// <summary>
+    /// A guest row is written whole or deleted by its key. An update or a delete that touches no row makes
+    /// <c>SaveChanges</c> throw, so a row that vanished under the lock is never a silent success.
+    /// </summary>
+    private void WriteGuests(Group before, GroupChange change)
+    {
+        foreach (var guest in change.ChangedGuests)
+        {
+            var row = RowMapping.ToRow(before.Id, guest);
+            _ = before.Guests.Any(known => known.MemberId == guest.MemberId) ? database.Guests.Update(row) : database.Guests.Add(row);
+        }
+
+        foreach (var removed in change.RemovedGuests)
+        {
+            var known = before.Guests.SingleOrDefault(guest => guest.MemberId == removed);
+            if (known is not null)
+            {
+                database.Guests.Remove(RowMapping.ToRow(before.Id, known));
+            }
+        }
     }
 
     /// <summary>The group row is locked first, always: the lock order of ADR 0040, D7 (group before person).</summary>
@@ -167,9 +204,14 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
             .Where(invite => invite.GroupId == group.Value)
             .OrderBy(invite => invite.CreatedAt).ThenBy(invite => invite.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var guests = await database.Guests.AsNoTracking()
+            .Where(guest => guest.GroupId == group.Value)
+            .OrderBy(guest => guest.CreatedAt).ThenBy(guest => guest.MemberId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
         return new Group(group, RowMapping.ToName(row.Name), row.CreatedAt, [.. members.Select(RowMapping.ToMember)])
         {
             Invites = [.. invites.Select(RowMapping.ToInvite)],
+            Guests = [.. guests.Select(RowMapping.ToGuest)],
         };
     }
 

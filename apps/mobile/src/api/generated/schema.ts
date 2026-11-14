@@ -305,6 +305,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/guests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["AddGuest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/groups/{groupId}/guests/{memberId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["CorrectGuest"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}/rounds": {
     parameters: {
       query?: never;
@@ -414,6 +446,18 @@ export interface components {
       /** Format: uuid */
       memberId: string;
     };
+    AddGuestRequest: {
+      /** Format: uuid */
+      requestId: string;
+      name: null | string;
+      primaryPosition?: null | string;
+      /** Format: double */
+      level?: null | number;
+    };
+    AddGuestResponse: {
+      /** Format: uuid */
+      memberId: string;
+    };
     ApiProblem: {
       type?: string;
       title: string;
@@ -456,6 +500,10 @@ export interface components {
       /** Format: uuid */
       memberId: string;
       memberType: components["schemas"]["MemberType"];
+    };
+    CorrectGuestRequest: {
+      name: null | string;
+      primaryPosition: null | string;
     };
     CreateGroupRequest: {
       name: null | string;
@@ -515,6 +563,12 @@ export interface components {
       savedTemplateId: null | string;
       /** Format: date-time */
       updatedAt: string;
+    };
+    GuestResponse: {
+      /** Format: uuid */
+      memberId: string;
+      name: string;
+      primaryPosition: null | components["schemas"]["PlayingPosition"];
     };
     InviteResponse: {
       /** Format: uuid */
@@ -587,6 +641,8 @@ export interface components {
       /** Format: double */
       suggestedLevel: null | number;
     };
+    /** @enum {string} */
+    PlayingPosition: "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero";
     PreviewInviteRequest: {
       token: null | string;
     };
@@ -2589,6 +2645,185 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MemberLevelSetResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  AddGuest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddGuestRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddGuestResponse"];
+        };
+      };
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddGuestResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  CorrectGuest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        memberId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CorrectGuestRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GuestResponse"];
         };
       };
       /** @description A body that does not bind (no code), or a rule refusal (with code). */

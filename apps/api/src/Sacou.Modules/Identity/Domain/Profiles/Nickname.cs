@@ -1,4 +1,3 @@
-using System.Text;
 using Sacou.Shared.Results;
 using Sacou.Shared.Text;
 
@@ -13,26 +12,18 @@ namespace Sacou.Modules.Identity.Domain.Profiles;
 /// </summary>
 internal sealed record Nickname
 {
-    public const int MaxLength = 20;
-    public const int MaxCodePoints = 80;
+    public const int MaxLength = PersonName.MaxLength;
+    public const int MaxCodePoints = PersonName.MaxCodePoints;
 
     private Nickname(string value) => Value = value;
 
     public string Value { get; }
 
-    public static Result<Nickname> Create(string? value)
-    {
-        var trimmed = value?.Trim();
-        if (trimmed is null || !DisplayText.IsWellFormed(trimmed))
-        {
-            return Result.Failure<Nickname>(ProfileErrors.NicknameInvalid);
-        }
-
-        var normalized = trimmed.Normalize(NormalizationForm.FormC);
-        return DisplayText.IsAllowedName(normalized, MaxLength, MaxCodePoints, DisplayText.MaxMarksPerCharacter)
+    /// <summary>The rule is <see cref="PersonName"/>, shared with the guest's name (ADR 0053, D3).</summary>
+    public static Result<Nickname> Create(string? value) =>
+        PersonName.Normalize(value) is { } normalized
             ? Result.Success(new Nickname(normalized))
             : Result.Failure<Nickname>(ProfileErrors.NicknameInvalid);
-    }
 
     /// <summary>A nickname read back from the database: shown as stored, even if the rule tightened since.</summary>
     internal static Nickname FromStored(string stored)

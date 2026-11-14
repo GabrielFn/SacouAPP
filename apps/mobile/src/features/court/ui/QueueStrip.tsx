@@ -4,7 +4,8 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { COURT_FLEX_WEIGHTS, LANDSCAPE_FLEX_WEIGHTS, MAX_QUEUE_PILLS } from "../court.data";
+import { MAX_QUEUE_PILLS } from "../court.data";
+import { bottomStripWeight } from "../model/bottom-strip-weight";
 import type { CourtLayout } from "../model/court-layout";
 import type { QueueModel } from "../model/court-screen.types";
 import { queueExitText, queueLabel, visibleQueuePills } from "../model/screen-texts";
@@ -122,7 +123,7 @@ export function QueueStrip({ queue, streak, layout }: QueueStripProps) {
   return (
     <View
       style={{
-        flex: landscape ? LANDSCAPE_FLEX_WEIGHTS.queue : COURT_FLEX_WEIGHTS.queue,
+        flex: bottomStripWeight(layout),
         justifyContent: landscape ? "center" : "space-between",
         borderTopWidth: tokens.court.borderWidths.frame,
         borderColor: colors.text,

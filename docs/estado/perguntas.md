@@ -22,6 +22,8 @@
 40. Apelido obrigatório? A tela 27 tem "Pular" (E3.17): (1) o app grava o primeiro nome do login, editável, e pede o apelido a quem entrou por e-mail antes de entrar num grupo; (2) "Sem apelido"; (3) obrigatório. **Recomendação e padrão adotado: 1** (a API serve às três; muda só a E4.3).
 41. Posições no feminino nas telas 19 e 19b, sem gênero na API (E3.17): **recomendação e padrão adotado: masculino no piloto, ajustar as telas.**
 42. A exportação da E3.16 inclui a nota dada pelo admin? (E3.17): **recomendação e padrão adotado: não; a dúvida de LGPD vai para a E6.2.**
+43. Texto da tela 21a ("pode criar a conta depois") promete a reivindicação, que ficou para depois do piloto (E3.5): (1) trocar por "Ele entra como avulso nesta rodada"; quem criar a conta começa um histórico novo; (2) manter o texto e juntar à mão; (3) antecipar a reivindicação. **Recomendação e padrão adotado: 1** (muda só o texto na E4.6).
+44. Ao remover um convidado (E3.5): (1) o nome é apagado na hora e o histórico mostra "Ex-jogador"; (2) o nome fica enquanto o grupo existir. **Recomendação e padrão adotado: 1** (minimização, igual à exclusão de conta da E3.16).
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
 30. Tela de membros antes dos nomes (E4.5, 10/11/2026): (1) mostrar "Você" e "Membro desde 12 out" e esconder "Remover outra pessoa" até haver nome (E3.17); (2) liberar o remover mesmo sem nome; (3) fazer a E3.17 antes. **Recomendação e padrão adotado: opção 1.**
 31. Pix antes da E3.10 (E4.5, 10/11/2026): (1) esconder chave e forma até a E3.10; (2) mostrar o campo sem guardar; (3) pôr a E3.10 antes da E4.5. **Recomendação e padrão adotado: opção 1.**
@@ -76,3 +78,14 @@
 
 ## Decidido pelo orquestrador
 - **CI verde antes da E0.4:** ver [ADR 0003](../arquitetura/adr/0003-local-validation-before-ci.md).
+
+## 14/11/2026: cobrança do GitHub Actions
+- **Pergunta:** desde 14/11, madrugada, todo job da CI cai em 2 s com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra (#81 e #82 prontos). Opções: 1) o Gabriel acerta o pagamento ou o limite em GitHub → Settings → Billing and plans (recomendado); 2) outra saída que ele escolher. **Aguardando.**
+
+## 14/11/2026: E4.6 (rodadas no app), padrões adotados, nenhuma trava a Parte 1
+Detalhes e opções no fim de `docs/estado/tarefas/E4.6.md`. Os números 43 e 44 são da E3.5 (PR #82).
+45. "Publicar e compartilhar no WhatsApp" antes da página da rodada (E3.12): **padrão: publicar e abrir o WhatsApp com o texto da rodada, sem link até a E3.12.**
+46. Estados da presença que a tela 26 não desenha (sem resposta, espera, janela fechada, começada, cancelada): **padrão: o mesmo cartão escuro com título e linha da tabela D7.**
+47. Ver e tirar alguém da lista na tela 06: **padrão: tocar em "N confirmados" abre a lista, cada linha com "Tirar" e confirmação.**
+48. "Criar grupo" leva à tela 20 ("Nova rodada"), não à 06, pois o grupo novo ainda não tem rodada: **padrão adotado.**
+49. "Abrir no WhatsApp do grupo" (tela 26): **padrão: esconder no piloto**, ideia do campo de link em `docs/ideias.md`.

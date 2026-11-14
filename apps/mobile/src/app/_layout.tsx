@@ -7,6 +7,7 @@ import {
 } from "../adapters/expo-court-runtime-opener";
 import { expoHapticsFeedback } from "../adapters/expo-haptics-feedback";
 import { expoKeepAwakeScreen } from "../adapters/expo-keep-awake-screen";
+import { expoBatteryMonitor } from "../adapters/expo-battery-monitor";
 import { expoScreenOrientation } from "../adapters/expo-screen-orientation";
 import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
@@ -44,6 +45,7 @@ const realServices: Services = {
   courtRoster: createSampleRoster(),
   screenAwake: expoKeepAwakeScreen,
   screenOrientation: expoScreenOrientation,
+  batteryMonitor: expoBatteryMonitor,
   courtFeedback: expoHapticsFeedback,
   backGuard: reactNativeBackGuard,
   reducedMotion: createReactNativeReducedMotion(),

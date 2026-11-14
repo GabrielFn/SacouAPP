@@ -25,6 +25,7 @@ public sealed class GroupsModelTests : IDisposable
     [InlineData(typeof(GroupSettingsRow), "group_settings", "group_id,saved_template_id,schema_version,settings,template_key,updated_at,updated_by_member_id")]
     [InlineData(typeof(SavedTemplateRow), "saved_templates", "created_at,created_by_member_id,group_id,id,name,schema_version,settings")]
     [InlineData(typeof(MemberLevelRow), "member_levels", "group_id,level_tenths,member_id,set_at,set_by_member_id")]
+    [InlineData(typeof(GuestRow), "guests", "created_at,group_id,member_id,name,primary_position,request_id")]
     public void Tables_KeepExactlyTheirColumns(Type row, string table, string columns)
     {
         var entity = Entity(row);
@@ -95,6 +96,28 @@ public sealed class GroupsModelTests : IDisposable
         Assert.Equal(["member_id"], levels.FindPrimaryKey()!.Properties.Select(property => property.GetColumnName()));
         var byGroup = Assert.Single(levels.GetIndexes(), index => index.GetDatabaseName() == "ix_member_levels_group");
         Assert.Equal(["group_id"], byGroup.Properties.Select(property => property.GetColumnName()));
+    }
+
+    /// <summary>
+    /// ADR 0053, D2 and D5: the name capped at 80 code points, the five positions, one guest per request id in a group,
+    /// and a row that follows its member and its group, so deleting either never stops on this table.
+    /// </summary>
+    [Fact]
+    public void Guests_PinTheNameAndPositions_AndOneRowPerRequest()
+    {
+        var guests = Entity(typeof(GuestRow));
+        var checks = guests.GetCheckConstraints().ToDictionary(check => check.Name!, check => check.Sql);
+
+        Assert.Equal("char_length(name) BETWEEN 1 AND 80", checks["ck_guests_name"]);
+        Assert.Equal(
+            "primary_position IS NULL OR primary_position IN ('libero', 'middleBlocker', 'opposite', 'outsideHitter', 'setter')",
+            checks["ck_guests_primary_position"]);
+        Assert.Equal(["member_id"], guests.FindPrimaryKey()!.Properties.Select(property => property.GetColumnName()));
+        var byRequest = Assert.Single(guests.GetIndexes(), index => index.GetDatabaseName() == "ux_guests_group_request");
+        Assert.True(byRequest.IsUnique);
+        Assert.Equal(["group_id", "request_id"], byRequest.Properties.Select(property => property.GetColumnName()));
+        Assert.All(guests.GetForeignKeys(), key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
+        Assert.Equal(2, guests.GetForeignKeys().Count());
     }
 
     public void Dispose() => context.Dispose();
