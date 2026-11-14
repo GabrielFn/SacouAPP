@@ -35,6 +35,14 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
   "sessions.attendance-disabled": "A presença está desligada nesta rodada.",
+  "sessions.draw-lock-invalid":
+    "Só dá para travar duas pessoas diferentes que estão nos times, sem repetir, até 24 travas.",
+  "sessions.draw-lock-too-large": "Tem gente demais travada junta para caber num time.",
+  "sessions.draw-locks-conflict": "Duas pessoas estão travadas juntas e separadas ao mesmo tempo.",
+  "sessions.draw-locks-unsatisfiable":
+    "Não dá para montar os times respeitando todas as travas. Tire uma e sorteie de novo.",
+  "sessions.draw-not-enough-players": "O sorteio precisa de pelo menos 4 confirmados.",
+  "sessions.draw-reserves-invalid": "Confira os reservas: cada um uma vez, só quem confirmou.",
   "sessions.drop-in-window-closed":
     "A lista ainda não abriu para avulsos. Tente de novo mais perto da rodada.",
   "sessions.member-not-found": "Essa pessoa não faz parte deste grupo.",
