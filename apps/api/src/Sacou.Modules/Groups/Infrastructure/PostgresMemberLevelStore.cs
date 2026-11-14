@@ -82,10 +82,7 @@ internal sealed partial class PostgresMemberLevelStore(GroupsDbContext database,
     /// <summary>The group row first, as every member write does; then only the members, without the invites.</summary>
     private async Task<MemberLevelContext?> LockAndLoadAsync(GroupId group, CancellationToken cancellationToken)
     {
-        var locked = await database.Database
-            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM groups.groups WHERE id = {group.Value} FOR UPDATE")
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        if (locked.Count == 0)
+        if (!await GroupRowLock.TryLockAsync(database, group, cancellationToken).ConfigureAwait(false))
         {
             return null;
         }
