@@ -24,7 +24,7 @@ export interface QueueRuleScreenProps {
   readonly groupId: string;
 }
 
-interface QueueRuleFormProps {
+export interface QueueRuleFormProps {
   readonly groupId: string;
   readonly ready: SettingsReady;
   readonly bannerText: string | null;
@@ -62,7 +62,7 @@ function QueueRuleForm({ groupId, ready, bannerText }: QueueRuleFormProps) {
   );
 }
 
-interface QueueRuleLoadingProps {
+export interface QueueRuleLoadingProps {
   readonly groupId: string;
   readonly failureText: string | null;
   readonly onRetry: () => void;

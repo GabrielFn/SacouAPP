@@ -1,6 +1,8 @@
 import { Pressable } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
+import type { ScaledTokens } from "../theme/scale";
+import type { Theme } from "../theme/themes";
 import { fontFamilies } from "../theme/tokens.data";
 
 import { Text } from "./Text";
@@ -19,6 +21,23 @@ export interface ButtonProps {
 
 const DISABLED_OPACITY = 0.6;
 
+function lookOf(variant: ButtonVariant, colors: Theme) {
+  return {
+    primary: { background: colors.primary, foreground: colors.onPrimary },
+    secondary: { background: colors.text, foreground: colors.background },
+    link: { background: "transparent", foreground: colors.link },
+  }[variant];
+}
+
+function labelStyleOf(isLink: boolean, foreground: string, tokens: ScaledTokens) {
+  return {
+    color: foreground,
+    fontFamily: isLink ? fontFamilies.body600 : fontFamilies.body700,
+    fontSize: isLink ? tokens.fontSizes.link : tokens.fontSizes.button,
+    textDecorationLine: isLink ? ("underline" as const) : ("none" as const),
+  };
+}
+
 export function Button({
   label,
   onPress,
@@ -29,11 +48,7 @@ export function Button({
 }: ButtonProps) {
   const { colors, tokens } = useTheme();
   const isLink = variant === "link";
-  const look = {
-    primary: { background: colors.primary, foreground: colors.onPrimary },
-    secondary: { background: colors.text, foreground: colors.background },
-    link: { background: "transparent", foreground: colors.link },
-  }[variant];
+  const look = lookOf(variant, colors);
   return (
     <Pressable
       accessibilityRole={isLink ? "link" : "button"}
@@ -52,16 +67,7 @@ export function Button({
         paddingHorizontal: tokens.spacing.xl,
       }}
     >
-      <Text
-        style={{
-          color: look.foreground,
-          fontFamily: isLink ? fontFamilies.body600 : fontFamilies.body700,
-          fontSize: isLink ? tokens.fontSizes.link : tokens.fontSizes.button,
-          textDecorationLine: isLink ? "underline" : "none",
-        }}
-      >
-        {label}
-      </Text>
+      <Text style={labelStyleOf(isLink, look.foreground, tokens)}>{label}</Text>
     </Pressable>
   );
 }

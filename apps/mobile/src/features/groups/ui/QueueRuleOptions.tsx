@@ -16,7 +16,7 @@ import type { QueueRuleAction } from "../model/queue-rule.reducer";
 
 const { queueRuleScreen: texts } = strings.settings;
 
-interface RadioDotProps {
+export interface RadioDotProps {
   readonly selected: boolean;
 }
 
@@ -36,7 +36,7 @@ function RadioDot({ selected }: RadioDotProps) {
   );
 }
 
-interface OptionTextProps {
+export interface OptionTextProps {
   readonly title: string;
   readonly body: string;
 }
@@ -51,7 +51,7 @@ function OptionText({ title, body }: OptionTextProps) {
   );
 }
 
-interface ModeOptionProps {
+export interface ModeOptionProps {
   readonly mode: ExitMode;
   readonly selected: boolean;
   readonly editable: boolean;

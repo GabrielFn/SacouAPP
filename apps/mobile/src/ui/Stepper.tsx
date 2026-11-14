@@ -18,7 +18,7 @@ export interface StepperProps {
 const STEP = 1;
 const DISABLED_OPACITY = 0.4;
 
-interface StepButtonProps {
+export interface StepButtonProps {
   readonly label: string;
   readonly enabled: boolean;
   readonly onPress: () => void;
