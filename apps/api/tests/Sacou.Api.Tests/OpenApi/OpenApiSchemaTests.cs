@@ -21,6 +21,7 @@ public sealed partial class OpenApiSchemaTests
     [Theory]
     [InlineData(typeof(GroupRole), new[] { "admin", "coAdmin", "scorekeeper", "player" })]
     [InlineData(typeof(MemberType), new[] { "regular", "dropIn" })]
+    [InlineData(typeof(Sacou.Modules.Identity.Contracts.PrimaryPosition), new[] { "any", "setter", "outsideHitter", "opposite", "middleBlocker", "libero" })]
     public async Task Enum_values_are_what_the_api_serializes(Type enumType, string[] wire)
     {
         var schema = OpenApiNodes.Schemas(await ContractDocument.ParsedAsync())[enumType.Name]!;
@@ -31,6 +32,28 @@ public sealed partial class OpenApiSchemaTests
         Assert.Equal("string", (string?)schema["type"]);
         Assert.Equal(serialized, schema["enum"]!.AsArray().Select(value => (string)value!));
         Assert.Equal(wire, serialized);
+    }
+
+    /// <summary>A list of enums has no component of its own: every `otherPositions` describes its items inline (E3.17).</summary>
+    [Theory]
+    [InlineData("MemberResponse")]
+    [InlineData("MyProfileResponse")]
+    [InlineData("SaveMyProfileRequest")]
+    public async Task Position_lists_carry_the_wire_values_of_each_item(string schemaName)
+    {
+        var schemas = OpenApiNodes.Schemas(await ContractDocument.ParsedAsync());
+        var enumType = typeof(Sacou.Modules.Identity.Contracts.PlayingPosition);
+        var options = ContractDocument.ApiJsonOptions();
+
+        var items = schemas[schemaName]!["properties"]!["otherPositions"]!["items"]!;
+
+        Assert.Equal("string", (string?)items["type"]);
+        Assert.Equal(
+            ["setter", "outsideHitter", "opposite", "middleBlocker", "libero"],
+            Enum.GetValues(enumType).Cast<object>().Select(value => JsonSerializer.Serialize(value, enumType, options).Trim('"')));
+        Assert.Equal(
+            ["setter", "outsideHitter", "opposite", "middleBlocker", "libero"],
+            items["enum"]!.AsArray().Select(value => (string)value!));
     }
 
     [Fact]

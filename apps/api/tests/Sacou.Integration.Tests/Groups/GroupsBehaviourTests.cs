@@ -69,7 +69,7 @@ public sealed class GroupsBehaviourTests(IntegrationDatabase database) : IAsyncL
         Assert.Equal(["admin", "coAdmin", "scorekeeper", "player"], members.Select(member => member["role"]!.GetValue<string>()));
         Assert.Single(members, member => member["isMe"]!.GetValue<bool>());
         Assert.Equal("player", members.Single(member => member["isMe"]!.GetValue<bool>())["role"]!.GetValue<string>());
-        Assert.All(members, member => Assert.Equal(["hasAccount", "isMe", "joinedAt", "memberId", "memberType", "role"], Keys(member)));
+        Assert.All(members, member => Assert.Equal(["hasAccount", "isMe", "joinedAt", "memberId", "memberType", "nickname", "otherPositions", "primaryPosition", "role"], Keys(member)));
         Assert.All(world.Users.Values, user => Assert.DoesNotContain(user.ToString(), text, StringComparison.OrdinalIgnoreCase));
         Assert.All(world.Subjects.Values, subject => Assert.DoesNotContain(subject, text, StringComparison.Ordinal));
     }

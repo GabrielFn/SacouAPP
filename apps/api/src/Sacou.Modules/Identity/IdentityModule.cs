@@ -5,12 +5,17 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Identity.Authentication;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Identity.CurrentUsers;
+using Sacou.Modules.Identity.GetMyProfile;
 using Sacou.Modules.Identity.Infrastructure;
+using Sacou.Modules.Identity.SaveMyProfile;
 using Sacou.Modules.Identity.SignIn;
 
 namespace Sacou.Modules.Identity;
 
-/// <summary>Login and users: Firebase ID token check, <c>identity.users</c> and <c>POST /v1/me</c> (ADR 0036, ADR 0037).</summary>
+/// <summary>
+/// Login, users and profiles: Firebase ID token check, <c>identity.users</c>, <c>POST /v1/me</c> (ADR 0036, ADR 0037)
+/// and the person's profile, <c>/v1/me/profile</c> (ADR 0051).
+/// </summary>
 public static class IdentityModule
 {
     /// <summary>The default authentication scheme of the API.</summary>
@@ -28,11 +33,13 @@ public static class IdentityModule
         services.AddScoped<SignInHandler>();
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddScoped<SaveMyProfileHandler>();
+        services.AddScoped<IPlayerProfiles, StorePlayerProfiles>();
         return services;
     }
 
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints) =>
-        endpoints.MapSignIn();
+        endpoints.MapSignIn().MapGetMyProfile().MapSaveMyProfile();
 
     /// <summary>Applies the Identity migrations. The API calls it when <c>Database:MigrateOnStartup</c> is true.</summary>
     public static Task MigrateAsync(IServiceProvider services, CancellationToken cancellationToken = default) =>

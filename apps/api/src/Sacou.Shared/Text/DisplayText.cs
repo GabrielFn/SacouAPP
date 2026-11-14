@@ -11,6 +11,9 @@ namespace Sacou.Shared.Text;
 /// </summary>
 public static class DisplayText
 {
+    /// <summary>The combining marks a character of a name may carry: the group name, the template name and the nickname share it.</summary>
+    public const int MaxMarksPerCharacter = 4;
+
     private const int ZeroWidthJoiner = 0x200D;
 
     /// <summary>Letters or symbols by category that render as blank space.</summary>

@@ -17,6 +17,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/me/profile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetMyProfile"];
+    put: operations["SaveMyProfile"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups": {
     parameters: {
       query?: never;
@@ -391,7 +407,8 @@ export interface components {
     AttendanceResponse: "going" | "notGoing";
     /** @enum {string} */
     AttendanceSource: "self" | "admin" | "regular";
-    AttendanceStatus: unknown;
+    /** @enum {string} */
+    AttendanceStatus: "going" | "notGoing" | "waitlisted" | "promoted";
     ChangeMemberRoleRequest: {
       role: components["schemas"]["GroupRole"];
     };
@@ -490,6 +507,9 @@ export interface components {
       isMe: boolean;
       /** Format: date-time */
       joinedAt: string;
+      nickname: null | string;
+      primaryPosition: null | components["schemas"]["PrimaryPosition"];
+      otherPositions: ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
     };
     /**
      * @description Mensalista (MemberType.Regular) or avulso (MemberType.DropIn).
@@ -512,6 +532,13 @@ export interface components {
       role: components["schemas"]["GroupRole"];
       memberType: components["schemas"]["MemberType"];
     };
+    MyProfileResponse: {
+      nickname: string;
+      primaryPosition: null | components["schemas"]["PrimaryPosition"];
+      otherPositions: ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
+      /** Format: double */
+      suggestedLevel: null | number;
+    };
     PreviewInviteRequest: {
       token: null | string;
     };
@@ -521,6 +548,8 @@ export interface components {
       activeMembers: number;
       alreadyMember: boolean;
     };
+    /** @enum {string} */
+    PrimaryPosition: "any" | "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero";
     ProblemDetails: {
       type?: string;
       title: string;
@@ -597,6 +626,14 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    SaveMyProfileRequest: {
+      nickname: null | string;
+      primaryPosition: null | components["schemas"]["PrimaryPosition"];
+      otherPositions:
+        null | ("setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero")[];
+      /** Format: double */
+      suggestedLevel: null | number;
+    };
     SaveTemplateRequest: {
       name: null | string;
     };
@@ -669,6 +706,133 @@ export interface operations {
         content: {
           "application/problem+json": components["schemas"]["ProblemDetails"];
         };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetMyProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyProfileResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  SaveMyProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SaveMyProfileRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyProfileResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
