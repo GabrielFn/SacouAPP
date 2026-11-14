@@ -79,3 +79,11 @@
 
 ## 14/11/2026: cobrança do GitHub Actions
 - **Pergunta:** desde 14/11, madrugada, todo job da CI cai em 2 s com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra (#81 e #82 prontos). Opções: 1) o Gabriel acerta o pagamento ou o limite em GitHub → Settings → Billing and plans (recomendado); 2) outra saída que ele escolher. **Aguardando.**
+
+## 14/11/2026: E4.6 (rodadas no app), padrões adotados, nenhuma trava a Parte 1
+Detalhes e opções no fim de `docs/estado/tarefas/E4.6.md`. Os números 43 e 44 são da E3.5 (PR #82).
+45. "Publicar e compartilhar no WhatsApp" antes da página da rodada (E3.12): **padrão: publicar e abrir o WhatsApp com o texto da rodada, sem link até a E3.12.**
+46. Estados da presença que a tela 26 não desenha (sem resposta, espera, janela fechada, começada, cancelada): **padrão: o mesmo cartão escuro com título e linha da tabela D7.**
+47. Ver e tirar alguém da lista na tela 06: **padrão: tocar em "N confirmados" abre a lista, cada linha com "Tirar" e confirmação.**
+48. "Criar grupo" leva à tela 20 ("Nova rodada"), não à 06, pois o grupo novo ainda não tem rodada: **padrão adotado.**
+49. "Abrir no WhatsApp do grupo" (tela 26): **padrão: esconder no piloto**, ideia do campo de link em `docs/ideias.md`.
