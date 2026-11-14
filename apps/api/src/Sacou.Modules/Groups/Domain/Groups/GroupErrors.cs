@@ -52,4 +52,7 @@ internal static class GroupErrors
     public static readonly Error TemplateNameInvalid = new("groups.template-name-invalid", ErrorKind.Validation);
 
     public static readonly Error TemplateLimit = new("groups.template-limit", ErrorKind.Conflict);
+
+    /// <summary>A level off the scale, or a batch that is empty, too long or names a member twice. Which one stays out of the body.</summary>
+    public static readonly Error LevelInvalid = new("groups.level-invalid", ErrorKind.Validation);
 }

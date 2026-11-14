@@ -13,6 +13,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "O grupo já tem o máximo de convites ativos. Revogue um antes de criar outro.",
   "groups.invite-not-found": "Esse convite não existe mais.",
   "groups.last-admin": "O grupo precisa de pelo menos um admin. Promova outra pessoa antes.",
+  "groups.level-invalid": "Escolha uma nota de 1 a 5, de meio em meio ponto, ou Não sei.",
   "groups.member-limit": "O grupo já está com o número máximo de membros.",
   "groups.member-not-found": "Essa pessoa não faz mais parte do grupo.",
   "groups.member-removed": "Você foi removido deste grupo e não pode voltar por este link.",

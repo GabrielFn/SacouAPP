@@ -169,6 +169,16 @@ public sealed class PlantedViolationTests
         Assert.Contains(details, detail => detail.Contains(dependency, StringComparison.Ordinal));
     }
 
+    /// <summary>ADR 0051, D12: the planted event type that holds a level is reported, and nothing else in the namespace is.</summary>
+    [Fact]
+    public void CourtSessions_WithALevel_IsReported()
+    {
+        var violations = ArchitectureDependencyRules.PersonalDataTypeViolations(Assemblies.FixturesArchitecture.Value, CourtSessionsNamespace);
+
+        Assert.Equal([CourtSessionsNamespace + ".UsesSkillLevel"], violations.Select(violation => violation.DeclaringType).Distinct());
+        Assert.Contains(violations, violation => violation.Detail.Contains("Sacou.Shared.Levels.SkillLevel", StringComparison.Ordinal));
+    }
+
     [Fact]
     public void CourtSessions_WithImmutableCollections_IsNotReported()
     {

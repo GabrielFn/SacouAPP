@@ -81,6 +81,12 @@ internal sealed class WithNicknameParameter(string nickname)
     internal int Length { get; } = nickname.Length;
 }
 
+// An event that would carry a level (ADR 0051, D12).
+internal sealed class UsesSkillLevel
+{
+    internal int Tenths() => Sacou.Shared.Levels.SkillLevel.Default.Tenths;
+}
+
 // The general domain rule covers the court sessions too: these must be reported by it.
 internal sealed class UsesEnvironmentInCourtSessions
 {

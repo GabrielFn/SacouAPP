@@ -22,6 +22,7 @@ internal static class RolePermissions
         GroupPermission.RemoveMember,
         GroupPermission.ManageSettings,
         GroupPermission.ManageRounds,
+        GroupPermission.ManageMemberLevels,
     ]);
 
     private static readonly ImmutableHashSet<GroupPermission> Everything = DayToDay.Union(

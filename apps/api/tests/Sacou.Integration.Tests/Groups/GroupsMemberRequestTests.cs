@@ -96,6 +96,7 @@ public sealed class GroupsMemberRequestTests(IntegrationDatabase database) : IAs
     [InlineData("PATCH", "{group}")]
     [InlineData("PUT", "{player}/role")]
     [InlineData("PUT", "{player}/type")]
+    [InlineData("PUT", "{group}/member-levels")]
     public async Task OversizedBody_IsRefusedByTheServer(string method, string route)
     {
         using var client = api.CreateClient();

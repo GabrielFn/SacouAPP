@@ -24,6 +24,7 @@ public sealed class GroupsModelTests : IDisposable
     [InlineData(typeof(InviteRow), "invites", "created_at,created_by_member_id,expires_at,group_id,id,revoked_at,token_hash,use_count")]
     [InlineData(typeof(GroupSettingsRow), "group_settings", "group_id,saved_template_id,schema_version,settings,template_key,updated_at,updated_by_member_id")]
     [InlineData(typeof(SavedTemplateRow), "saved_templates", "created_at,created_by_member_id,group_id,id,name,schema_version,settings")]
+    [InlineData(typeof(MemberLevelRow), "member_levels", "group_id,level_tenths,member_id,set_at,set_by_member_id")]
     public void Tables_KeepExactlyTheirColumns(Type row, string table, string columns)
     {
         var entity = Entity(row);
@@ -81,6 +82,19 @@ public sealed class GroupsModelTests : IDisposable
         var hashIndex = Assert.Single(invites.GetIndexes(), index => index.GetDatabaseName() == "ux_invites_token_hash");
         Assert.True(hashIndex.IsUnique);
         Assert.Contains(invites.GetCheckConstraints(), check => check.Sql == "octet_length(token_hash) = 32");
+    }
+
+    /// <summary>ADR 0051, D2: the scale in tenths, nullable for "Não sei", and an index to list one group's levels.</summary>
+    [Fact]
+    public void MemberLevels_PinTheScale_AndIndexTheGroup()
+    {
+        var levels = Entity(typeof(MemberLevelRow));
+        var checks = levels.GetCheckConstraints().ToDictionary(check => check.Name!, check => check.Sql);
+
+        Assert.Equal("level_tenths IS NULL OR (level_tenths BETWEEN 10 AND 50 AND level_tenths % 5 = 0)", checks["ck_member_levels_level"]);
+        Assert.Equal(["member_id"], levels.FindPrimaryKey()!.Properties.Select(property => property.GetColumnName()));
+        var byGroup = Assert.Single(levels.GetIndexes(), index => index.GetDatabaseName() == "ix_member_levels_group");
+        Assert.Equal(["group_id"], byGroup.Properties.Select(property => property.GetColumnName()));
     }
 
     public void Dispose() => context.Dispose();

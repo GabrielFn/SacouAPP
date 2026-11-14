@@ -16,17 +16,17 @@ public sealed class GroupsSchemaTests(IntegrationDatabase database) : IAsyncLife
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
     [Fact]
-    public async Task Migration_CreatesTheFiveTablesWithTheirConstraints()
+    public async Task Migration_CreatesTheSixTablesWithTheirConstraints()
     {
         await using var connection = await OpenAsync();
 
         Assert.Equal(
-            ["__ef_migrations_history", "group_settings", "groups", "invites", "members", "saved_templates"],
+            ["__ef_migrations_history", "group_settings", "groups", "invites", "member_levels", "members", "saved_templates"],
             await ReadAsync(connection, "SELECT table_name FROM information_schema.tables WHERE table_schema = 'groups' ORDER BY table_name"));
         Assert.Equal(
             [
                 "ck_group_settings_document", "ck_group_settings_one_template", "ck_group_settings_schema_version", "ck_group_settings_template_key",
-                "ck_groups_name_length", "ck_invites_token_hash_length", "ck_invites_use_count", "ck_members_left_at", "ck_members_member_type",
+                "ck_groups_name_length", "ck_invites_token_hash_length", "ck_invites_use_count", "ck_member_levels_level", "ck_members_left_at", "ck_members_member_type",
                 "ck_members_role", "ck_members_status", "ck_saved_templates_document", "ck_saved_templates_name_length", "ck_saved_templates_schema_version",
             ],
             await ReadAsync(connection, "SELECT conname FROM pg_constraint WHERE contype = 'c' AND connamespace = 'groups'::regnamespace ORDER BY conname"));
@@ -35,7 +35,8 @@ public sealed class GroupsSchemaTests(IntegrationDatabase database) : IAsyncLife
             await ReadAsync(connection, "SELECT indexname FROM pg_indexes WHERE schemaname = 'groups' AND indexdef LIKE 'CREATE UNIQUE INDEX%' AND indexname LIKE 'ux_%' ORDER BY indexname"));
         Assert.Equal(
             [
-                "fk_group_settings_groups", "fk_group_settings_members", "fk_invites_groups", "fk_invites_members", "fk_members_groups",
+                "fk_group_settings_groups", "fk_group_settings_members", "fk_invites_groups", "fk_invites_members",
+                "fk_member_levels_groups", "fk_member_levels_members", "fk_member_levels_set_by", "fk_members_groups",
                 "fk_saved_templates_groups", "fk_saved_templates_members",
             ],
             await ReadAsync(connection, "SELECT conname FROM pg_constraint WHERE contype = 'f' AND connamespace = 'groups'::regnamespace ORDER BY conname"));

@@ -273,6 +273,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/member-levels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ListMemberLevels"];
+    put: operations["SetMemberLevels"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/groups/{groupId}/member-levels/{memberId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["SetMemberLevel"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}/rounds": {
     parameters: {
       query?: never;
@@ -498,6 +530,22 @@ export interface components {
     };
     JsonElement: unknown;
     JsonNode: unknown;
+    MemberLevelResponse: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: double */
+      adminLevel: null | number;
+      reviewed: boolean;
+      /** Format: double */
+      suggestedLevel: null | number;
+    };
+    MemberLevelSetResponse: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: double */
+      adminLevel: null | number;
+      reviewed: boolean;
+    };
     MemberResponse: {
       /** Format: uuid */
       memberId: string;
@@ -636,6 +684,19 @@ export interface components {
     };
     SaveTemplateRequest: {
       name: null | string;
+    };
+    SetMemberLevelItem: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: double */
+      level: null | number;
+    };
+    SetMemberLevelRequest: {
+      /** Format: double */
+      level: null | number;
+    };
+    SetMemberLevelsRequest: {
+      levels: null | components["schemas"]["SetMemberLevelItem"][];
     };
     SignInResponse: {
       /** Format: uuid */
@@ -2308,6 +2369,234 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  ListMemberLevels: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemberLevelResponse"][];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  SetMemberLevels: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMemberLevelsRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemberLevelSetResponse"][];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  SetMemberLevel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        memberId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMemberLevelRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemberLevelSetResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description Not signed in, or the ID token was refused. */
       401: {
