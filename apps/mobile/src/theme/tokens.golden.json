@@ -60,9 +60,30 @@
     "tabIcon": 22,
     "backIcon": 24,
     "groupCardMin": 128,
-    "homeCardMin": 112,
     "cardFooter": 46,
-    "roleBadge": 26
+    "roleBadge": 26,
+    "switchTrackWidth": 50,
+    "switchTrackHeight": 30,
+    "switchKnob": 24,
+    "switchInset": 3,
+    "switchTargetWidth": 58,
+    "switchTarget": 44,
+    "templateOptionMin": 84,
+    "templateOptionZeroMin": 60,
+    "templateIconWidth": 44,
+    "templateIconHeight": 56,
+    "selectedBadge": 28,
+    "courtOption": 56,
+    "segment": 44,
+    "progressBar": 4,
+    "settingRowMin": 48,
+    "blockHeaderMin": 56,
+    "systemButton": 56,
+    "proBadge": 22,
+    "sheetHandle": 4,
+    "chevronIcon": 20,
+    "courtIconWidth": 30,
+    "courtIconHeight": 22
   },
   "radii": {
     "field": 12,
@@ -83,7 +104,9 @@
     "chip": 0.18,
     "field": 0.25,
     "dashed": 0.4,
-    "badge": 0.07
+    "badge": 0.07,
+    "trackOff": 0.5,
+    "segment": 0.08
   },
   "fontSizes": {
     "displayBrand": 24,

@@ -181,13 +181,55 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   return {
     signIn: () => execute((init) => client.POST("/v1/me", init)),
     listMyGroups: () => execute((init) => client.GET("/v1/groups", init)),
-    createGroup: (name) =>
-      execute((init) => client.POST("/v1/groups", { ...init, body: { name } })),
+    createGroup: (name, templateKey) =>
+      execute((init) => client.POST("/v1/groups", { ...init, body: { name, templateKey } })),
     getGroup: (groupId) =>
       execute((init) => client.GET("/v1/groups/{groupId}", { ...init, ...group(groupId) })),
     renameGroup: (groupId, name) =>
       execute((init) =>
         client.PATCH("/v1/groups/{groupId}", { ...init, ...group(groupId), body: { name } }),
+      ),
+    getGroupSettings: (groupId) =>
+      execute((init) =>
+        client.GET("/v1/groups/{groupId}/settings", { ...init, ...group(groupId) }),
+      ),
+    updateGroupSettings: (groupId, layer) =>
+      execute((init) =>
+        client.PATCH("/v1/groups/{groupId}/settings", {
+          ...init,
+          ...group(groupId),
+          body: { settings: layer },
+        }),
+      ),
+    applyTemplate: (groupId, choice) =>
+      execute((init) =>
+        client.POST("/v1/groups/{groupId}/settings/apply-template", {
+          ...init,
+          ...group(groupId),
+          body:
+            choice.kind === "ready"
+              ? { templateKey: choice.key, savedTemplateId: null }
+              : { templateKey: null, savedTemplateId: choice.templateId },
+        }),
+      ),
+    listTemplates: (groupId) =>
+      execute((init) =>
+        client.GET("/v1/groups/{groupId}/templates", { ...init, ...group(groupId) }),
+      ),
+    saveTemplate: (groupId, name) =>
+      execute((init) =>
+        client.POST("/v1/groups/{groupId}/templates", {
+          ...init,
+          ...group(groupId),
+          body: { name },
+        }),
+      ),
+    deleteTemplate: (groupId, templateId) =>
+      executeEmpty((init) =>
+        client.DELETE("/v1/groups/{groupId}/templates/{templateId}", {
+          ...init,
+          params: { path: { groupId, templateId } },
+        }),
       ),
     listMembers: (groupId) =>
       execute((init) => client.GET("/v1/groups/{groupId}/members", { ...init, ...group(groupId) })),

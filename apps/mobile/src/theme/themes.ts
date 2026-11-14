@@ -20,6 +20,8 @@ export const THEME_ROLES = [
   "serverOutline",
   "queueSurface",
   "badgeSurface",
+  "trackOff",
+  "segmentSurface",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -49,6 +51,8 @@ export const appTheme = {
   serverOutline: palette.night,
   queueSurface: palette.sand,
   badgeSurface: nightWithAlpha(nightAlpha.badge),
+  trackOff: nightWithAlpha(nightAlpha.trackOff),
+  segmentSurface: nightWithAlpha(nightAlpha.segment),
 } as const satisfies Theme;
 
 /**
@@ -87,6 +91,8 @@ function courtTheme(colors: CourtColors): Theme {
     serverOutline: colors.serverOutline,
     queueSurface: colors.queueSurface,
     badgeSurface: colors.background,
+    trackOff: colors.muted,
+    segmentSurface: colors.background,
   };
 }
 

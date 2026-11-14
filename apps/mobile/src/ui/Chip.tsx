@@ -10,14 +10,18 @@ export interface ChipProps {
   readonly selected: boolean;
   readonly onPress: () => void;
   readonly kind?: "radio" | "toggle";
+  readonly disabled?: boolean;
 }
 
-export function Chip({ label, selected, onPress, kind = "radio" }: ChipProps) {
+export function Chip({ label, selected, onPress, kind = "radio", disabled = false }: ChipProps) {
   const { colors, tokens } = useTheme();
   return (
     <Pressable
       accessibilityRole={kind === "radio" ? "radio" : "checkbox"}
-      accessibilityState={kind === "radio" ? { selected } : { checked: selected }}
+      accessibilityState={
+        kind === "radio" ? { selected, disabled } : { checked: selected, disabled }
+      }
+      disabled={disabled}
       onPress={onPress}
       style={{
         minHeight: tokens.sizes.chip,

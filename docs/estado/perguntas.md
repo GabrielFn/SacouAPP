@@ -23,6 +23,10 @@
 41. Posições no feminino nas telas 19 e 19b, sem gênero na API (E3.17): **recomendação e padrão adotado: masculino no piloto, ajustar as telas.**
 42. A exportação da E3.16 inclui a nota dada pelo admin? (E3.17): **recomendação e padrão adotado: não; a dúvida de LGPD vai para a E6.2.**
 27. Até quando o jogador responde a presença (E3.4, 10/11/2026): até o horário da rodada; depois, só o admin. **Recomendação e padrão adotado.**
+30. Tela de membros antes dos nomes (E4.5, 10/11/2026): (1) mostrar "Você" e "Membro desde 12 out" e esconder "Remover outra pessoa" até haver nome (E3.17); (2) liberar o remover mesmo sem nome; (3) fazer a E3.17 antes. **Recomendação e padrão adotado: opção 1.**
+31. Pix antes da E3.10 (E4.5, 10/11/2026): (1) esconder chave e forma até a E3.10; (2) mostrar o campo sem guardar; (3) pôr a E3.10 antes da E4.5. **Recomendação e padrão adotado: opção 1.**
+32. Destino de "Criar grupo" (E4.5, 10/11/2026): (1) membros (tela 19), para convidar; (2) "Como jogamos" (tela 18); (3) lista de grupos. **Recomendação e padrão adotado: opção 1** (tela 18 até a Parte 2; tela 06 quando a E4.6 chegar).
+33. Endereço do link de convite (E4.5, 10/11/2026): precisa de um domínio (conta, com você). (1) `EXPO_PUBLIC_INVITE_BASE_URL`, cadastrada quando houver domínio; sem ela, os botões de convite somem; (2) esquema do app `sacou://convite#token` até lá (só abre em quem já tem o app). **Recomendação e padrão adotado: opção 1.**
 
 ## Respondidas
 - **Sem trava na quadra (13/11/2026):** o cadeado sai ("ele não vai saber que tem que segurar o cadeado"). O Menu abre com um toque; o voltar do Android continua bloqueado na quadra (padrão do orquestrador), e sair é pelo Menu. Feito na correção da E4.9.

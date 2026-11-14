@@ -2,7 +2,13 @@ import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { ApiFailure, type ApiError } from "../api/api-error";
-import { cacheEffectsOf, groupGoneEffects, isConflict, type MutationEvent } from "./invalidation";
+import {
+  cacheEffectsOf,
+  conflictEffects,
+  groupGoneEffects,
+  isConflict,
+  type MutationEvent,
+} from "./invalidation";
 import { cacheBuster, isPersistedKey, shouldPersistQuery } from "./persist-policy";
 import { queryKeys } from "./query-keys";
 import { queryRetryDelay, shouldRetryQuery } from "./retry-policy";
@@ -52,6 +58,12 @@ describe("cacheEffectsOf (P5, golden)", () => {
     [{ type: "leaveGroup", groupId: G }, [`remove groups/${G}`, "invalidate groups"]],
     [{ type: "createInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
     [{ type: "revokeInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
+    [{ type: "settingsReplaced", groupId: G, view: {} }, [`set groups/${G}/settings`]],
+    [{ type: "templatesChanged", groupId: G }, [`invalidate groups/${G}/templates`]],
+    [
+      { type: "settingsForbidden", groupId: G },
+      [`invalidate groups/${G}`, `invalidate groups/${G}/settings`],
+    ],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
         [{ type, groupId: G, targetIsMe: false }, [`invalidate groups/${G}/members`]],
@@ -64,9 +76,32 @@ describe("cacheEffectsOf (P5, golden)", () => {
   ];
 
   test.each(golden)("%o", (event, expected) => {
-    expect(cacheEffectsOf(event).map(({ action, key }) => `${action} ${key.join("/")}`)).toEqual(
-      expected,
-    );
+    expect(
+      cacheEffectsOf(event).map((effect) => `${effect.action} ${effect.key.join("/")}`),
+    ).toEqual(expected);
+  });
+
+  test.each([
+    ["groups.last-admin", `groups/${G}/members`],
+    ["groups.invite-limit", `groups/${G}/invites`],
+    ["groups.template-limit", `groups/${G}/templates`],
+  ] as const)("a 409 %s makes %s stale", (code, key) => {
+    const effects = conflictEffects(G, failure({ kind: "problem", status: 409, code }));
+    expect(effects.map((effect) => `${effect.action} ${effect.key.join("/")}`)).toEqual([
+      `invalidate ${key}`,
+    ]);
+  });
+
+  test("a 409 without a rule that says what is old, or another status, touches nothing", () => {
+    expect(
+      conflictEffects(
+        G,
+        failure({ kind: "problem", status: 409, code: "groups.membership-limit" }),
+      ),
+    ).toEqual([]);
+    expect(
+      conflictEffects(G, failure({ kind: "problem", status: 403, code: "groups.last-admin" })),
+    ).toEqual([]);
   });
 
   test("a 409 refreshes; other errors do not", () => {
@@ -94,7 +129,9 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.groups(), true],
     [queryKeys.group(G), true],
     [queryKeys.members(G), true],
+    [queryKeys.settings(G), true],
     [queryKeys.invites(G), false],
+    [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [["groups", G, "members", "extra"], false],
     [["groups", 1], false],
