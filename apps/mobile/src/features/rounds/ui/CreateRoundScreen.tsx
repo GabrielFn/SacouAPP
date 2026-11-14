@@ -12,8 +12,7 @@ import { Button } from "../../../ui/Button";
 import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
 import { FieldFrame } from "../../../ui/FieldFrame";
-import { BackIcon } from "../../../ui/Icons";
-import { IconButton } from "../../../ui/IconButton";
+import { BackBar } from "../../../ui/BackBar";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { Switch } from "../../../ui/Switch";
@@ -139,18 +138,7 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
         </>
       }
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-        <IconButton
-          accessibilityLabel={strings.a11y.back}
-          onPress={() => {
-            if (router.canGoBack()) router.back();
-            else router.replace(groupsHref);
-          }}
-        >
-          <BackIcon />
-        </IconButton>
-        <Text variant="bodyStrong">{groupName}</Text>
-      </View>
+      <BackBar title={groupName} fallbackHref={groupsHref} />
       <View style={{ gap: tokens.spacing.xs }}>
         <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
           {create.title}

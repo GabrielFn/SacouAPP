@@ -40,7 +40,9 @@ export function roundChips(
         chip("points", chips.points(values.scoring.pointsPerSet), "scoring.pointsPerSet"),
         chip(
           "sets",
-          values.scoring.bestOf === BEST_OF_ONE ? chips.oneSet : chips.bestOf(values.scoring.bestOf),
+          values.scoring.bestOf === BEST_OF_ONE
+            ? chips.oneSet
+            : chips.bestOf(values.scoring.bestOf),
           "scoring.bestOf",
         ),
       ]

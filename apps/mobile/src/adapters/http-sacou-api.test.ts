@@ -254,7 +254,13 @@ const OPERATIONS: readonly Operation[] = [
   ],
   [
     "updateRound",
-    (a) => a.updateRound(GROUP, ROUND, { localDate: null, localTime: "19:00", venue: null, settings: {} }),
+    (a) =>
+      a.updateRound(GROUP, ROUND, {
+        localDate: null,
+        localTime: "19:00",
+        venue: null,
+        settings: {},
+      }),
     "PATCH",
     "/v1/groups/{groupId}/rounds/{roundId}",
     `/v1/groups/${GROUP}/rounds/${ROUND}`,

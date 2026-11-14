@@ -1,15 +1,13 @@
-import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
 import type { GroupRole, Member, Round } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { BackIcon } from "../../../ui/Icons";
+import { BackBar } from "../../../ui/BackBar";
 import { Button } from "../../../ui/Button";
 import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
-import { IconButton } from "../../../ui/IconButton";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
@@ -91,30 +89,6 @@ function noAction(): void {
   // The destinations (E4.7 and the court) take over these buttons when they exist.
 }
 
-export interface RoundHeaderProps {
-  readonly roleText: string;
-}
-
-/** Back and "Você é admin". */
-function RoundHeader({ roleText }: RoundHeaderProps) {
-  const router = useRouter();
-  const { tokens } = useTheme();
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-      <IconButton
-        accessibilityLabel={strings.a11y.back}
-        onPress={() => {
-          if (router.canGoBack()) router.back();
-          else router.replace(groupsHref);
-        }}
-      >
-        <BackIcon />
-      </IconButton>
-      <Text variant="bodyStrong">{roleText}</Text>
-    </View>
-  );
-}
-
 export interface RoundLoadingProps {
   readonly failure: Error | null;
   readonly onRetry: () => void;
@@ -167,7 +141,7 @@ export function AdminRoundScreen({ groupId, roundId }: AdminRoundScreenProps) {
     : [];
   return (
     <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
-      <RoundHeader roleText={roleHeader(role)} />
+      <BackBar title={roleHeader(role)} fallbackHref={groupsHref} />
       <View style={{ gap: tokens.spacing.xs }}>
         <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
           {group.data.name}

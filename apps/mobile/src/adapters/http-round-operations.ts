@@ -29,7 +29,10 @@ export function createRoundOperations(
       execute((init) => client.GET("/v1/groups/{groupId}/rounds", { ...init, ...group(groupId) })),
     getRound: (groupId, roundId) =>
       execute((init) =>
-        client.GET("/v1/groups/{groupId}/rounds/{roundId}", { ...init, ...round(groupId, roundId) }),
+        client.GET("/v1/groups/{groupId}/rounds/{roundId}", {
+          ...init,
+          ...round(groupId, roundId),
+        }),
       ),
     createRound: (groupId, body) =>
       execute((init) =>

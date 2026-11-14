@@ -117,7 +117,11 @@ describe("the pills of 'Como vai ser'", () => {
   });
 
   test("one set reads '1 set' and a whole-team exit has no partial pill", () => {
-    const group = withLeaf(withLeaf(resolved(), "scoring.bestOf", 1), "queue.exitMode", "whole-team");
+    const group = withLeaf(
+      withLeaf(resolved(), "scoring.bestOf", 1),
+      "queue.exitMode",
+      "whole-team",
+    );
     const labels = roundChips(group, () => undefined, { withRotation: false }).map((c) => c.label);
     expect(labels).toEqual(["6x6", "25 pontos", "1 set", "Perde sai"]);
   });

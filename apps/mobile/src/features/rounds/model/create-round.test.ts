@@ -31,13 +31,7 @@ import {
   visiblePersonalizePaths,
 } from "./create-round.selectors";
 import { roundChips, sourceReader } from "./round-chips";
-import {
-  dateLabel,
-  isoDateOf,
-  nextRoundDate,
-  pickableDates,
-  startOf,
-} from "./round-dates";
+import { dateLabel, isoDateOf, nextRoundDate, pickableDates, startOf } from "./round-dates";
 
 const TUESDAY = 2;
 
@@ -196,8 +190,7 @@ describe("the canvas scenario: Sets to 'Melhor de 3'", () => {
 
 describe("spots", () => {
   const group = rachaDeTerca();
-  const withText = (text: string) =>
-    run(initial(), { type: "capacity-changed", text });
+  const withText = (text: string) => run(initial(), { type: "capacity-changed", text });
 
   test("14, the group's own number, writes nothing in the layer", () => {
     expect(roundLayerOf(group, withText("14"))).toBeNull();
@@ -323,9 +316,9 @@ describe("the reducer", () => {
     expect(run(state, { type: "time-picked", localTime: "19:00" }).localTime).toBe("19:00");
     expect(run(state, { type: "venue-changed", venue: "Quadra 2" }).venue).toBe("Quadra 2");
     expect(run(state, { type: "personalize-toggled" }).personalizeOpen).toBe(true);
-    expect(
-      run(state, { type: "sheet-opened", sheet: { kind: "date" } }).sheet,
-    ).toEqual({ kind: "date" });
+    expect(run(state, { type: "sheet-opened", sheet: { kind: "date" } }).sheet).toEqual({
+      kind: "date",
+    });
     expect(
       run(state, { type: "sheet-opened", sheet: { kind: "time" } }, { type: "sheet-closed" }).sheet,
     ).toEqual({ kind: "none" });

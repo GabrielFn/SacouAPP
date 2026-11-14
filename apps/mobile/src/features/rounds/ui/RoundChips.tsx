@@ -45,7 +45,9 @@ export function RoundChips({ chips: list, legend = false }: RoundChipsProps) {
             key={chip.key}
             accessible
             accessibilityLabel={
-              chip.highlighted ? `${chip.label}, ${strings.rounds.create.onlyThisRound}` : chip.label
+              chip.highlighted
+                ? `${chip.label}, ${strings.rounds.create.onlyThisRound}`
+                : chip.label
             }
             style={{
               flexDirection: "row",

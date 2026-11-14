@@ -117,7 +117,9 @@ export function createRoundErrors(
     date,
     time: timeError(now, state, date !== null),
     venue:
-      checkDisplayText(normalizeVenue(state.venue), maxLength) === null ? null : errors.venueInvalid,
+      checkDisplayText(normalizeVenue(state.venue), maxLength) === null
+        ? null
+        : errors.venueInvalid,
     capacity: group.attendance.enabled ? capacityError(group, state) : null,
   };
 }

@@ -33,7 +33,9 @@ export function parseIsoDate(text: string): Date | null {
 }
 
 /** `{ hours, minutes }` of `HH:mm`, or `null`. */
-export function parseTime(text: string): { readonly hours: number; readonly minutes: number } | null {
+export function parseTime(
+  text: string,
+): { readonly hours: number; readonly minutes: number } | null {
   const match = HOUR_MINUTE.exec(text);
   if (match === null) return null;
   const [, hours = "", minutes = ""] = match;

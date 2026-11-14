@@ -198,9 +198,7 @@ export function PersonalizeSection({ group, model }: PersonalizeSectionProps) {
         <ChevronDownIcon color={colors.text} />
       </Pressable>
       {personalizeOpen
-        ? paths.map((path) => (
-            <PersonalizeRow key={path} path={path} group={group} model={model} />
-          ))
+        ? paths.map((path) => <PersonalizeRow key={path} path={path} group={group} model={model} />)
         : null}
       <SettingSheet group={group} model={model} />
     </View>
