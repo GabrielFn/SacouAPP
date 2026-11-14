@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Sacou.Modules.Groups.Domain.Guests;
 using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
 
@@ -7,7 +8,8 @@ namespace Sacou.Modules.Groups.Domain.Groups;
 /// <summary>
 /// The group aggregate, with its members inside (<c>produto.md:260</c>). Immutable: every change returns a
 /// new value. Members are never deleted, only marked as left or removed (ADR 0012, ADR 0040). The member
-/// rules are in <c>Group.Members.cs</c>, the invite rules in <c>Group.Invites.cs</c>.
+/// rules are in <c>Group.Members.cs</c>, the invite rules in <c>Group.Invites.cs</c>, the guest rules in
+/// <c>Group.Guests.cs</c>.
 /// </summary>
 internal sealed partial record Group(GroupId Id, GroupName Name, DateTimeOffset CreatedAt, ImmutableArray<GroupMember> Members)
 {
@@ -17,6 +19,9 @@ internal sealed partial record Group(GroupId Id, GroupName Name, DateTimeOffset 
 
     /// <summary>Every invite of the group, revoked and expired ones too, so revoking twice is still a success.</summary>
     public ImmutableArray<GroupInvite> Invites { get; init; } = [];
+
+    /// <summary>The profile of every active guest without an account; a removed guest has none (ADR 0053, D9).</summary>
+    public ImmutableArray<Guest> Guests { get; init; } = [];
 
     public IEnumerable<GroupMember> ActiveMembers => Members.Where(member => member.IsActive);
 

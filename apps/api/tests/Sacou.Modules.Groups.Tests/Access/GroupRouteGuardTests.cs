@@ -22,7 +22,7 @@ public sealed class GroupRouteGuardTests
     /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites, and the six
     /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
     /// </summary>
-    private const int GroupRoutes = 19;
+    private const int GroupRoutes = 21;
     private const int RoundRoutes = 8;
 
     private const string Development = "Development";
@@ -63,6 +63,26 @@ public sealed class GroupRouteGuardTests
                 ["GET /v1/groups/{groupId:guid}/templates"] = GroupPermission.ManageSettings,
                 ["POST /v1/groups/{groupId:guid}/templates"] = GroupPermission.ManageSettings,
                 ["DELETE /v1/groups/{groupId:guid}/templates/{templateId:guid}"] = GroupPermission.ManageSettings,
+            },
+            declared);
+    }
+
+    /// <summary>E3.5 (ADR 0053, D7): both guest routes declare <c>ManageGuests</c>, exactly one permission each.</summary>
+    [Fact]
+    public async Task RealApi_GuestRoutesDeclareManageGuests()
+    {
+        await using var api = new ClosedDatabaseApi(Production);
+        var declared = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
+            .Where(endpoint => endpoint.RoutePattern.RawText!.Contains("/guests", StringComparison.Ordinal))
+            .ToDictionary(
+                endpoint => $"{string.Join(',', endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()!.HttpMethods)} {endpoint.RoutePattern.RawText}",
+                endpoint => Assert.Single(endpoint.Metadata.OfType<GroupPermissionMetadata>()).Permission);
+
+        Assert.Equal(
+            new Dictionary<string, GroupPermission>
+            {
+                ["POST /v1/groups/{groupId:guid}/guests"] = GroupPermission.ManageGuests,
+                ["PUT /v1/groups/{groupId:guid}/guests/{memberId:guid}"] = GroupPermission.ManageGuests,
             },
             declared);
     }

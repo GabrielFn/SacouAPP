@@ -44,6 +44,7 @@ const EXPECTED_IDS: readonly string[] = [
   "a14-attribution-in-a-decided-set",
   "a15-attribution-in-a-closed-set",
   "a16-attribution-after-the-end-of-the-match-is-rejected",
+  "a17-a-guest-without-an-account-plays-and-scores-by-member-id",
 ];
 
 function parseEnvelopes(events: readonly unknown[]): readonly EventEnvelope[] {

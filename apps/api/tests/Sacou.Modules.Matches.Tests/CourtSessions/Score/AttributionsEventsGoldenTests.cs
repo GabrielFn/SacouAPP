@@ -12,7 +12,7 @@ namespace Sacou.Modules.Matches.Tests.CourtSessions.Score;
 /// <summary>Port of the golden test of <c>attributions-events.json</c>, reading the same file. The state, the active events and who scored each point.</summary>
 public sealed class AttributionsEventsGoldenTests
 {
-    private const int GoldenCaseCount = 16;
+    private const int GoldenCaseCount = 17;
 
     private static readonly string[] GoldenIds =
     [
@@ -32,6 +32,7 @@ public sealed class AttributionsEventsGoldenTests
         "a14-attribution-in-a-decided-set",
         "a15-attribution-in-a-closed-set",
         "a16-attribution-after-the-end-of-the-match-is-rejected",
+        "a17-a-guest-without-an-account-plays-and-scores-by-member-id",
     ];
 
     private static readonly IReadOnlyList<JsonElement> Cases = GoldenFile.ReadEmbeddedCases("attributions-events.json");

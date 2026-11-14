@@ -1,4 +1,6 @@
+using Sacou.Modules.Groups.Domain.Guests;
 using Sacou.Modules.Groups.Domain.Permissions;
+using Sacou.Modules.Identity.Contracts;
 using DomainRole = Sacou.Modules.Groups.Domain.Members.GroupRole;
 using DomainType = Sacou.Modules.Groups.Domain.Members.MemberType;
 
@@ -21,6 +23,27 @@ internal static class ContractValues
         DomainType.Regular => MemberType.Regular,
         DomainType.DropIn => MemberType.DropIn,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Every member type needs a public twin."),
+    };
+
+    /// <summary>A guest's position, in the public enum of the player's profile, so the member list has one shape (ADR 0053, D10).</summary>
+    public static PlayingPosition ToContract(GuestPosition position) => position switch
+    {
+        GuestPosition.Setter => PlayingPosition.Setter,
+        GuestPosition.OutsideHitter => PlayingPosition.OutsideHitter,
+        GuestPosition.Opposite => PlayingPosition.Opposite,
+        GuestPosition.MiddleBlocker => PlayingPosition.MiddleBlocker,
+        GuestPosition.Libero => PlayingPosition.Libero,
+        _ => throw new ArgumentOutOfRangeException(nameof(position), position, "Every guest position needs a public twin."),
+    };
+
+    public static PrimaryPosition ToPrimary(GuestPosition position) => position switch
+    {
+        GuestPosition.Setter => PrimaryPosition.Setter,
+        GuestPosition.OutsideHitter => PrimaryPosition.OutsideHitter,
+        GuestPosition.Opposite => PrimaryPosition.Opposite,
+        GuestPosition.MiddleBlocker => PrimaryPosition.MiddleBlocker,
+        GuestPosition.Libero => PrimaryPosition.Libero,
+        _ => throw new ArgumentOutOfRangeException(nameof(position), position, "Every guest position needs a public twin."),
     };
 
     public static GroupPermission ToDomain(GroupCapability capability) => capability switch

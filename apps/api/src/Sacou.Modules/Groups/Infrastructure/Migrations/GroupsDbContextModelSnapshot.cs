@@ -96,6 +96,48 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GuestRow", b =>
+                {
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PrimaryPosition")
+                        .HasColumnType("text")
+                        .HasColumnName("primary_position");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
+                    b.HasKey("MemberId")
+                        .HasName("pk_guests");
+
+                    b.HasIndex("GroupId", "RequestId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_guests_group_request");
+
+                    b.ToTable("guests", "groups", t =>
+                        {
+                            t.HasCheckConstraint("ck_guests_name", "char_length(name) BETWEEN 1 AND 80");
+
+                            t.HasCheckConstraint("ck_guests_primary_position", "primary_position IS NULL OR primary_position IN ('libero', 'middleBlocker', 'opposite', 'outsideHitter', 'setter')");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.InviteRow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -321,6 +363,23 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_group_settings_members");
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GuestRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.GroupRow", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_guests_groups");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithOne()
+                        .HasForeignKey("Sacou.Modules.Groups.Infrastructure.GuestRow", "MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_guests_members");
                 });
 
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.InviteRow", b =>

@@ -20,6 +20,8 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
 
     public DbSet<MemberLevelRow> MemberLevels => Set<MemberLevelRow>();
 
+    public DbSet<GuestRow> Guests => Set<GuestRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -29,5 +31,6 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
         modelBuilder.ApplyConfiguration(new GroupSettingsConfiguration());
         modelBuilder.ApplyConfiguration(new SavedTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new MemberLevelConfiguration());
+        modelBuilder.ApplyConfiguration(new GuestConfiguration());
     }
 }

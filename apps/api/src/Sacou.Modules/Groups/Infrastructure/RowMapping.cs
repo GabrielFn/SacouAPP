@@ -1,7 +1,9 @@
 using Sacou.Shared.Members;
 using Sacou.Shared.Persistence;
 using Sacou.Modules.Groups.Domain.Groups;
+using Sacou.Modules.Groups.Domain.Guests;
 using Sacou.Modules.Groups.Domain.Invites;
+using Sacou.Modules.Groups.Domain.Levels;
 using Sacou.Modules.Groups.Domain.Members;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -36,6 +38,31 @@ internal static class RowMapping
         EnumColumns.Parse(ColumnValues.Statuses, row.Status),
         row.JoinedAt,
         row.LeftAt);
+
+    public static GuestRow ToRow(GroupId group, Guest guest) => new()
+    {
+        MemberId = guest.MemberId.Value,
+        GroupId = group.Value,
+        Name = guest.Profile.Name.Value,
+        PrimaryPosition = guest.Profile.Position is { } position ? GuestPositions.Names[position] : null,
+        RequestId = guest.RequestId,
+        CreatedAt = guest.CreatedAt,
+    };
+
+    public static Guest ToGuest(GuestRow row) => new(new MemberId(row.MemberId), ToGuestProfile(row), row.RequestId, row.CreatedAt);
+
+    public static GuestProfile ToGuestProfile(GuestRow row) => new(
+        GuestName.FromStored(row.Name),
+        row.PrimaryPosition is { } position ? EnumColumns.Parse(GuestPositions.Names, position) : null);
+
+    public static MemberLevelRow ToRow(MemberLevel level) => new()
+    {
+        MemberId = level.MemberId.Value,
+        GroupId = level.GroupId.Value,
+        LevelTenths = level.Level is { } value ? checked((short)value.Tenths) : null,
+        SetByMemberId = level.SetBy.Value,
+        SetAt = level.SetAt,
+    };
 
     public static InviteRow ToRow(GroupId group, GroupInvite invite) => new()
     {

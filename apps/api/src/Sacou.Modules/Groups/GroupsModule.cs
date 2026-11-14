@@ -1,3 +1,5 @@
+using Sacou.Modules.Groups.AddGuest;
+using Sacou.Modules.Groups.CorrectGuest;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +50,7 @@ public static class GroupsModule
         services.AddScoped<ApplyTemplateHandler>();
         services.AddScoped<SaveTemplateHandler>();
         services.AddScoped<SetMemberLevelsHandler>();
+        services.AddScoped<AddGuestHandler>();
         services.AddSingleton<IInviteTokenGenerator, RandomInviteTokenGenerator>();
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
         services.AddScoped<IGroupSettingsReader, StoreGroupSettingsReader>();
@@ -81,7 +84,9 @@ public static class GroupsModule
             .MapDeleteSavedTemplate()
             .MapListMemberLevels()
             .MapSetMemberLevel()
-            .MapSetMemberLevels();
+            .MapSetMemberLevels()
+            .MapAddGuest()
+            .MapCorrectGuest();
         return endpoints;
     }
 

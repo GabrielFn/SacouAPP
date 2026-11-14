@@ -1,4 +1,5 @@
 using Sacou.Modules.Groups.Domain.Groups;
+using Sacou.Modules.Groups.Domain.Guests;
 using Sacou.Modules.Groups.Domain.Invites;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Settings;
@@ -8,6 +9,9 @@ namespace Sacou.Modules.Groups.Infrastructure;
 
 /// <summary>A group the person is an active member of, with that membership.</summary>
 internal sealed record MemberGroup(GroupId GroupId, GroupName Name, GroupMember Member);
+
+/// <summary>An active member and, for a guest without an account, the name and position the admin typed (ADR 0053, D10).</summary>
+internal sealed record RosterEntry(GroupMember Member, GuestProfile? Guest);
 
 /// <summary>What the group detail shows besides the caller's membership.</summary>
 internal sealed record GroupOverview(GroupId GroupId, GroupName Name, int ActiveMembers);
@@ -42,6 +46,9 @@ internal interface IGroupStore
 
     /// <summary>Active members only, in the order they joined.</summary>
     Task<IReadOnlyList<GroupMember>> ListActiveMembersAsync(GroupId group, CancellationToken cancellationToken);
+
+    /// <summary>Active members only, in the order they joined, each guest with its profile, in one query.</summary>
+    Task<IReadOnlyList<RosterEntry>> ListActiveRosterAsync(GroupId group, CancellationToken cancellationToken);
 
     /// <summary>
     /// Renames only while <paramref name="renamer"/> is still an active member whose role may rename, checked
