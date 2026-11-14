@@ -138,7 +138,7 @@ public sealed class GuestsConcurrencyTests(IntegrationDatabase database) : IAsyn
         var rows = (await RoundCalls.RowsAsync(api.ConnectionString, round)).ToDictionary(row => row.MemberId, row => row.Status);
         Assert.Equal("not_going", rows[guest]);
         Assert.Equal("going", rows[world.MemberIds[A.Player]]);
-        Assert.Equal("going", rows[world.MemberIds[A.CoAdmin]]);
+        Assert.Equal("promoted", rows[world.MemberIds[A.CoAdmin]]);
         Assert.Equal("waitlisted", rows[world.MemberIds[A.Scorekeeper]]);
     }
 
