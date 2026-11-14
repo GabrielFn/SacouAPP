@@ -9,6 +9,7 @@ import {
 } from "../../features/groups/model/groups-list.selectors";
 import {
   createGroupHref,
+  groupMembersHref,
   groupSettingsHref,
   PENDING_GROUP_SCREENS,
 } from "../../features/groups/navigation";
@@ -52,8 +53,9 @@ export default function GroupsScreen() {
                 model={groupCardModel(group)}
                 actions={groupCardActions(group.role, PENDING_GROUP_SCREENS)}
                 onAction={(action, groupId) => {
-                  // "members" has no screen until E4.5 part 2: the card does not offer it (PENDING_GROUP_SCREENS).
-                  if (action === "settings") router.push(groupSettingsHref(groupId));
+                  router.push(
+                    action === "members" ? groupMembersHref(groupId) : groupSettingsHref(groupId),
+                  );
                 }}
               />
             ))}

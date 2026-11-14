@@ -13,6 +13,11 @@ import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
 import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
+import { expoClipboard } from "../adapters/expo-clipboard";
+import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
+import { reactNativeExternalLink } from "../adapters/react-native-external-link";
+import { secureStoreInviteLinkStore } from "../adapters/secure-store-invite-link-store";
+import { buildInviteBaseUrl } from "../config/invite-url";
 import { expoFontLoader } from "../adapters/expo-font-loader";
 import { bindAppStateFocus } from "../adapters/app-state-focus";
 import { expoAppVersion } from "../adapters/expo-app-version";
@@ -58,6 +63,11 @@ const realServices: Services = {
   }),
   networkStatus,
   shareSheet: reactNativeShareSheet,
+  clipboard: expoClipboard,
+  externalLink: reactNativeExternalLink,
+  qrEncoder: qrcodeGeneratorEncoder,
+  inviteLinkStore: secureStoreInviteLinkStore,
+  inviteBaseUrl: buildInviteBaseUrl(__DEV__),
   cacheSession: createCacheSession(queryClient, cachePersister),
 };
 

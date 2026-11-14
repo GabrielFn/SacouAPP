@@ -32,3 +32,13 @@ export function groupMembersQuery(api: SacouApi, groupId: string) {
     staleTime: GROUP_STALE_MS,
   });
 }
+
+/** Off for who cannot manage invites: the API would answer 403. Never persisted (D5); no token in it. */
+export function groupInvitesQuery(api: SacouApi, groupId: string, enabled: boolean) {
+  return queryOptions({
+    queryKey: queryKeys.invites(groupId),
+    queryFn: () => unwrap(api.listInvites(groupId)),
+    staleTime: 0,
+    enabled,
+  });
+}

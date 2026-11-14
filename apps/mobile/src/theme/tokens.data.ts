@@ -15,6 +15,11 @@ export const palette = {
   highlight: "#F3E3C3",
   // The light end of the set point tag pulse (QuadraNoite.dc.html:16).
   ballYellowLight: "#FFE08A",
+  // Members and invite (Membros.dc.html, Convidar.dc.html): the avatar, the blue Placar badge and red danger.
+  avatarSurface: "#E9E1D1",
+  infoFill: "#E3EAFF",
+  infoText: "#1340C0",
+  danger: "#B42318",
 } as const;
 
 export const nightAlpha = {
@@ -149,6 +154,11 @@ export const sizes = {
   courtIconHeight: 22,
   // Round screens (CriarRodada.dc.html, Rodada.dc.html): the orange dot of a leaf set only for the round.
   highlightDot: 8,
+  // Members (Membros.dc.html .av, .more) and the invite QR frame (Convidar.dc.html).
+  avatar: 40,
+  moreButtonWidth: 44,
+  moreButtonHeight: 48,
+  memberRowMin: 56,
 } as const;
 
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */
@@ -167,6 +177,8 @@ export const interactiveHeights = [
   sizes.templateOptionMin,
   sizes.courtOption,
   sizes.blockHeaderMin,
+  sizes.moreButtonWidth,
+  sizes.moreButtonHeight,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.
