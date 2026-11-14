@@ -42,8 +42,7 @@ export interface InviteScreenModel {
 }
 
 type LinkStep =
-  | { readonly kind: "open" }
-  | { readonly kind: "regenerate"; readonly inviteId: string };
+  { readonly kind: "open" } | { readonly kind: "regenerate"; readonly inviteId: string };
 
 interface ViewInput {
   readonly baseUrl: string | null;

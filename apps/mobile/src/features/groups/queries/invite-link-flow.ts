@@ -21,7 +21,11 @@ export interface InviteFlowDeps {
 }
 
 /** A failed write of the copy does not lose the link: it is shown now, and another is made next time. */
-async function keep(store: InviteLinkStore, groupId: string, link: StoredInviteLink): Promise<void> {
+async function keep(
+  store: InviteLinkStore,
+  groupId: string,
+  link: StoredInviteLink,
+): Promise<void> {
   try {
     await store.save(groupId, link);
   } catch {
@@ -52,7 +56,7 @@ export async function openInviteLink(
 ): Promise<StoredInviteLink> {
   const stored = await deps.store.read(groupId);
   if (stored !== null) {
-    const invites = await deps.client.fetchQuery(groupInvitesQuery(deps.api, groupId, true));
+    const invites = await deps.client.query(groupInvitesQuery(deps.api, groupId, true));
     if (invites.some((invite) => invite.inviteId === stored.inviteId)) return stored;
     await deps.store.remove(groupId);
   }

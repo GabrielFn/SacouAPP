@@ -18,14 +18,23 @@ import {
   sendInviteOnWhatsApp,
 } from "./invite-link-flow";
 
-const OLD: StoredInviteLink = { inviteId: "old", token: "OLD-TOKEN-0123456789-abcdefghijklmnopqrstu" };
+const OLD: StoredInviteLink = {
+  inviteId: "old",
+  token: "OLD-TOKEN-0123456789-abcdefghijklmnopqrstu",
+};
 const NEW_TOKEN = "NEW-TOKEN-0123456789-abcdefghijklmnopqrstu";
 
 const problem = (status: number, code: string): ApiError =>
   ({ kind: "problem", status, code }) as ApiError;
 
 function listed(inviteId: string): Invite {
-  return { inviteId, createdAt: "2026-11-10T12:00:00Z", createdBy: "a", expiresAt: null, useCount: 0 };
+  return {
+    inviteId,
+    createdAt: "2026-11-10T12:00:00Z",
+    createdBy: "a",
+    expiresAt: null,
+    useCount: 0,
+  };
 }
 
 function setup(stored: StoredInviteLink | null) {

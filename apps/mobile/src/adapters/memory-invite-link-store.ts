@@ -1,7 +1,4 @@
-import type {
-  InviteLinkStore,
-  StoredInviteLink,
-} from "../features/groups/ports/invite-link-store";
+import type { InviteLinkStore, StoredInviteLink } from "../features/groups/ports/invite-link-store";
 
 export interface MemoryInviteLinkStore extends InviteLinkStore {
   /** What is stored now, by group. */
@@ -14,33 +11,34 @@ export interface MemoryInviteLinkStore extends InviteLinkStore {
 export function createMemoryInviteLinkStore(
   initial: Readonly<Record<string, StoredInviteLink>> = {},
 ): MemoryInviteLinkStore {
-  const state = { links: initial, calls: [] as readonly string[] };
+  const links = { value: initial };
+  const log = { value: [] as readonly string[] };
   const record = (call: string) => {
-    state.calls = [...state.calls, call];
+    log.value = [...log.value, call];
   };
   return {
     read: (groupId) => {
       record(`read:${groupId}`);
-      return Promise.resolve(state.links[groupId] ?? null);
+      return Promise.resolve(links.value[groupId] ?? null);
     },
     save: (groupId, link) => {
       record(`save:${groupId}`);
-      state.links = { ...state.links, [groupId]: link };
+      links.value = { ...links.value, [groupId]: link };
       return Promise.resolve();
     },
     remove: (groupId) => {
       record(`remove:${groupId}`);
-      state.links = Object.fromEntries(
-        Object.entries(state.links).filter(([id]) => id !== groupId),
+      links.value = Object.fromEntries(
+        Object.entries(links.value).filter(([id]) => id !== groupId),
       );
       return Promise.resolve();
     },
     clearAll: () => {
       record("clearAll");
-      state.links = {};
+      links.value = {};
       return Promise.resolve();
     },
-    snapshot: () => state.links,
-    calls: () => state.calls,
+    snapshot: () => links.value,
+    calls: () => log.value,
   };
 }

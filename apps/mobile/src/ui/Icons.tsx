@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Svg, { Circle, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import { LOGO_ASPECT, LOGO_CELLS, LOGO_VIEW_BOX } from "../theme/logo.data";
 import { iconStroke } from "../theme/tokens.data";
@@ -207,9 +207,9 @@ export function QrIcon({ color }: IconProps) {
   const { tokens } = useTheme();
   return (
     <StrokeIcon color={color} size={tokens.sizes.chevronIcon} strokeWidth={NAV_STROKE_WIDTH}>
-      <Rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" />
-      <Rect x="14" y="3.5" width="6.5" height="6.5" rx="1" />
-      <Rect x="3.5" y="14" width="6.5" height="6.5" rx="1" />
+      <Path d="M4.5 3.5h4.5a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-4.5a1 1 0 0 1-1-1v-4.5a1 1 0 0 1 1-1z" />
+      <Path d="M15 3.5h4.5a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-4.5a1 1 0 0 1-1-1v-4.5a1 1 0 0 1 1-1z" />
+      <Path d="M4.5 14h4.5a1 1 0 0 1 1 1v4.5a1 1 0 0 1-1 1h-4.5a1 1 0 0 1-1-1v-4.5a1 1 0 0 1 1-1z" />
       <Path d="M14 14h3v3h-3zM17.5 17.5h3v3h-3z" />
     </StrokeIcon>
   );

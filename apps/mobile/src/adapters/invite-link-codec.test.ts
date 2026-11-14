@@ -1,12 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { qrPath } from "../ui/qr-path";
-import {
-  decodeIndex,
-  decodeInviteLink,
-  encodeInviteLink,
-  inviteKeyOf,
-} from "./invite-link-codec";
+import { decodeIndex, decodeInviteLink, encodeInviteLink, inviteKeyOf } from "./invite-link-codec";
 import { qrcodeGeneratorEncoder } from "./qrcode-generator-encoder";
 
 const GROUP = "8a4c2f0e-1111-4c3b-9d2e-000000000001";

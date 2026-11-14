@@ -36,7 +36,8 @@ export const membersStrings = {
     needsAccount: "Precisa ter conta",
     leave: "Sair do grupo",
     leaveConfirmTitle: "Sair do grupo?",
-    leaveConfirmBody: "Você deixa de ver as rodadas deste grupo. Para voltar, precisa de um link novo.",
+    leaveConfirmBody:
+      "Você deixa de ver as rodadas deste grupo. Para voltar, precisa de um link novo.",
     leaveConfirm: "Sair",
     cancel: "Cancelar",
   },

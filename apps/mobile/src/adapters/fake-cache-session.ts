@@ -6,12 +6,12 @@ export interface FakeCacheSession extends CacheSession {
 }
 
 export function createFakeCacheSession(): FakeCacheSession {
-  const state = { count: 0 };
+  const state = { value: 0 };
   return {
     clearSession: () => {
-      state.count += 1;
+      state.value += 1;
       return Promise.resolve();
     },
-    cleared: () => state.count,
+    cleared: () => state.value,
   };
 }

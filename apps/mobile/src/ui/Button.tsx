@@ -9,13 +9,7 @@ import { fontFamilies } from "../theme/tokens.data";
 import { Text } from "./Text";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "link"
-  | "outline"
-  | "danger"
-  | "dangerOutline"
-  | "dangerText";
+  "primary" | "secondary" | "link" | "outline" | "danger" | "dangerOutline" | "dangerText";
 
 export interface ButtonProps {
   readonly label: string;
@@ -60,6 +54,28 @@ function labelStyleOf(isLink: boolean, foreground: string, tokens: ScaledTokens)
   };
 }
 
+function containerStyleOf(
+  look: ButtonLook,
+  disabled: boolean,
+  fill: boolean,
+  tokens: ScaledTokens,
+) {
+  return {
+    opacity: disabled ? DISABLED_OPACITY : 1,
+    flex: fill ? 1 : undefined,
+    flexDirection: "row" as const,
+    gap: tokens.spacing.s,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: look.background,
+    borderWidth: look.border === null ? undefined : tokens.borderWidths.thin,
+    borderColor: look.border ?? look.background,
+    minHeight: tokens.sizes.primaryButton,
+    borderRadius: tokens.radii.button,
+    paddingHorizontal: tokens.spacing.xl,
+  };
+}
+
 export function Button({
   label,
   onPress,
@@ -79,20 +95,7 @@ export function Button({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={disabled ? undefined : onPress}
-      style={{
-        opacity: disabled ? DISABLED_OPACITY : 1,
-        flex: fill ? 1 : undefined,
-        flexDirection: "row",
-        gap: tokens.spacing.s,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: look.background,
-        borderWidth: look.border === null ? undefined : tokens.borderWidths.thin,
-        borderColor: look.border ?? look.background,
-        minHeight: tokens.sizes.primaryButton,
-        borderRadius: tokens.radii.button,
-        paddingHorizontal: tokens.spacing.xl,
-      }}
+      style={containerStyleOf(look, disabled, fill, tokens)}
     >
       {renderIcon === undefined ? null : renderIcon(look.foreground)}
       <Text style={labelStyleOf(isLink, look.foreground, tokens)}>{label}</Text>

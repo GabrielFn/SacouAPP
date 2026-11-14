@@ -1,7 +1,6 @@
 /** What waits for a "yes" on screen 19: leaving the group, or revoking one invite. */
 export type MembersConfirm =
-  | { readonly kind: "leave" }
-  | { readonly kind: "revoke-invite"; readonly inviteId: string };
+  { readonly kind: "leave" } | { readonly kind: "revoke-invite"; readonly inviteId: string };
 
 /**
  * The local state of screen 19 (frontend.md, rule 4): which row has the sheet 19c open and what waits

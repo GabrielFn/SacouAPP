@@ -12,7 +12,11 @@ import { LoadingState } from "../../../ui/LoadingState";
 import { QrCode } from "../../../ui/QrCode";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
-import { useInviteScreen, type InviteScreenModel, type ReadyInvite } from "../hooks/use-invite-screen";
+import {
+  useInviteScreen,
+  type InviteScreenModel,
+  type ReadyInvite,
+} from "../hooks/use-invite-screen";
 import { groupMembersHref } from "../navigation";
 import { useGroup } from "../queries/use-group-queries";
 
@@ -112,7 +116,9 @@ function InviteBody({ groupName, model }: InviteBodyProps) {
   const { view } = model;
   switch (view.kind) {
     case "unavailable":
-      return <EmptyState title={texts.unavailableTitle} body={texts.unavailableBody} actions={[]} />;
+      return (
+        <EmptyState title={texts.unavailableTitle} body={texts.unavailableBody} actions={[]} />
+      );
     case "loading":
       return <LoadingState accessibilityLabel={texts.loading} />;
     case "failed":

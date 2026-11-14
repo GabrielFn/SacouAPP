@@ -1,4 +1,4 @@
-import qrcode from "qrcode-generator";
+import createQrCode from "qrcode-generator";
 
 import type { QrEncoder, QrMatrix } from "../services/qr/qr-encoder";
 
@@ -8,7 +8,7 @@ const ERROR_CORRECTION = "M";
 
 export const qrcodeGeneratorEncoder: QrEncoder = {
   encode: (text): QrMatrix => {
-    const code = qrcode(AUTO_VERSION, ERROR_CORRECTION);
+    const code = createQrCode(AUTO_VERSION, ERROR_CORRECTION);
     code.addData(text, "Byte");
     code.make();
     const size = code.getModuleCount();

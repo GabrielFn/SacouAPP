@@ -25,7 +25,11 @@ function badgeColors(look: BadgeLook, colors: Theme): BadgeColors {
     case "player":
       return { background: colors.badgeSurface, foreground: colors.textMuted, border: null };
     case "noAccount":
-      return { background: colors.waitingFill, foreground: colors.text, border: colors.waitingBorder };
+      return {
+        background: colors.waitingFill,
+        foreground: colors.text,
+        border: colors.waitingBorder,
+      };
   }
 }
 
