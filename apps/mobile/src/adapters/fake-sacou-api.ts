@@ -44,6 +44,12 @@ function defaults(): Answers {
     revokeInvite: none,
     previewInvite: none,
     acceptInvite: none,
+    listRounds: none,
+    getRound: none,
+    createRound: none,
+    updateRound: none,
+    respondAttendance: none,
+    setMemberAttendance: none,
   };
 }
 
@@ -55,9 +61,11 @@ export function createFakeSacouApi(): FakeSacouApi {
   function answer<K extends SacouApiOperation>(
     operation: K,
     args: readonly unknown[],
-  ): Promise<Answers[K]> {
+  ): ReturnType<SacouApi[K]> {
     log.value = [...log.value, { operation, args }];
-    return Promise.resolve(answers.value[operation]);
+    // Read as `unknown` first: the union of every answer is too large for the compiler to index.
+    const programmed: Readonly<Record<SacouApiOperation, unknown>> = answers.value;
+    return Promise.resolve(programmed[operation]) as ReturnType<SacouApi[K]>;
   }
 
   const api: SacouApi = {
@@ -82,6 +90,13 @@ export function createFakeSacouApi(): FakeSacouApi {
     revokeInvite: (groupId, inviteId) => answer("revokeInvite", [groupId, inviteId]),
     previewInvite: (token) => answer("previewInvite", [token]),
     acceptInvite: (token) => answer("acceptInvite", [token]),
+    listRounds: (groupId) => answer("listRounds", [groupId]),
+    getRound: (groupId, roundId) => answer("getRound", [groupId, roundId]),
+    createRound: (groupId, body) => answer("createRound", [groupId, body]),
+    updateRound: (groupId, roundId, body) => answer("updateRound", [groupId, roundId, body]),
+    respondAttendance: (groupId, roundId, response) =>
+      answer("respondAttendance", [groupId, roundId, response]),
+    setMemberAttendance: (member, response) => answer("setMemberAttendance", [member, response]),
   };
 
   return {

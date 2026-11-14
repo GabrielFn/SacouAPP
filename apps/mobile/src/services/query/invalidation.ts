@@ -11,6 +11,15 @@ export type MutationEvent =
   /** The server answered with the whole settings document: it replaces the cached one (ADR 0049). */
   | { readonly type: "settingsReplaced"; readonly groupId: string; readonly view: unknown }
   | { readonly type: "templatesChanged"; readonly groupId: string }
+  /** The server answered with the whole round: it replaces the cached detail (ADR 0054). */
+  | {
+      readonly type: "round-created" | "round-updated";
+      readonly groupId: string;
+      readonly roundId: string;
+      readonly round: unknown;
+    }
+  /** The place of the others moved: only the server knows how, so the detail is read again. */
+  | { readonly type: "attendance-changed"; readonly groupId: string; readonly roundId: string }
   /** A change of the settings was refused for lack of permission: the role is stale. */
   | { readonly type: "settingsForbidden"; readonly groupId: string }
   | {
@@ -42,6 +51,27 @@ function memberEffects(event: MemberEvent): readonly CacheEffect[] {
   return event.targetIsMe ? [members, invalidate(queryKeys.groups())] : [members];
 }
 
+type RoundEvent = Extract<
+  MutationEvent,
+  { readonly type: "round-created" | "round-updated" | "attendance-changed" }
+>;
+
+function isRoundEvent(event: MutationEvent): event is RoundEvent {
+  return (
+    event.type === "round-created" ||
+    event.type === "round-updated" ||
+    event.type === "attendance-changed"
+  );
+}
+
+function roundEffects(event: RoundEvent): readonly CacheEffect[] {
+  const list = invalidate(queryKeys.rounds(event.groupId));
+  const detail = queryKeys.round(event.groupId, event.roundId);
+  return event.type === "attendance-changed"
+    ? [invalidate(detail), list]
+    : [{ action: "set", key: detail, data: event.round }, list];
+}
+
 function isSettingsEvent(event: MutationEvent): event is SettingsEvent {
   return (
     event.type === "settingsReplaced" ||
@@ -68,6 +98,7 @@ function settingsEffects(event: SettingsEvent): readonly CacheEffect[] {
 export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
   if (isMemberEvent(event)) return memberEffects(event);
   if (isSettingsEvent(event)) return settingsEffects(event);
+  if (isRoundEvent(event)) return roundEffects(event);
   switch (event.type) {
     case "createGroup":
     case "acceptInvite":
