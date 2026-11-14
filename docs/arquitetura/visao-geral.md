@@ -128,6 +128,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0049](adr/0049-ajustes-do-grupo-e-convite-no-app.md) | Ajustes do grupo salvos na hora, criar grupo e convite no app |
 | [0050](adr/0050-modos-de-fila.md) | Modos de fila e "vencedor também sai" no planejador |
 | [0051](adr/0051-perfil-do-jogador-e-nota-do-admin.md) | Perfil do jogador e nota do membro definida pelo admin |
+| [0055](adr/0055-sorteio-no-servidor.md) | Sorteio equilibrado no servidor, com semente própria |
 
 ## Matriz: `decisoes.md` → ADR
 

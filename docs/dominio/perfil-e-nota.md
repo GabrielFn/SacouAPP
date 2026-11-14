@@ -48,7 +48,7 @@ De 1,0 a 5,0, de meio em meio ponto, guardado em décimos inteiros (10 a 50, de 
 
 ## Resolução para o sorteio (`MemberLevelResolver`)
 
-A nota do admin; senão, a sugestão do perfil; senão, 3,0. "Não sei" e "pendente" caem na sugestão ou em 3,0. A origem (`Admin`, `Suggested`, `Default`) acompanha o valor, para o σ do rating (E3.9). Só no servidor, pelo contrato `Groups.Contracts.IMemberLevels`, sem rota HTTP; a E3.6 decide como mostrar a nota ao admin no sorteio.
+A nota do admin; senão, a sugestão do perfil; senão, 3,0. "Não sei" e "pendente" caem na sugestão ou em 3,0. A origem (`Admin`, `Suggested`, `Default`) acompanha o valor, para o σ do rating (E3.9). Só no servidor, pelo contrato `Groups.Contracts.IMemberLevels`, sem rota HTTP. O sorteio que usa o valor está em [sorteio.md](sorteio.md) (E3.6, ADR 0055).
 
 | Nota do admin | Sugestão | Resultado | Origem |
 |---|---|---|---|
