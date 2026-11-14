@@ -133,7 +133,7 @@ public sealed class MemberLevelsBehaviourTests(IntegrationDatabase database) : I
         using var full = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fifty);
         using var tooMany = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fiftyOne);
         using var twice = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), repeated);
-        using var huge = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fifty.Replace("null", "null" + new string(' ', BodyCap / MaxBatch), StringComparison.Ordinal));
+        using var huge = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), fifty.Replace("]}", $$"""],"padding":"{{new string('x', BodyCap)}}"}""", StringComparison.Ordinal));
 
         Assert.True(fifty.Length < BodyCap);
         Assert.Equal(HttpStatusCode.OK, full.StatusCode);

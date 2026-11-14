@@ -21,7 +21,7 @@ public sealed class GroupsSchemaTests(IntegrationDatabase database) : IAsyncLife
         await using var connection = await OpenAsync();
 
         Assert.Equal(
-            ["__ef_migrations_history", "group_settings", "groups", "invites", "members", "saved_templates"],
+            ["__ef_migrations_history", "group_settings", "groups", "invites", "member_levels", "members", "saved_templates"],
             await ReadAsync(connection, "SELECT table_name FROM information_schema.tables WHERE table_schema = 'groups' ORDER BY table_name"));
         Assert.Equal(
             [
