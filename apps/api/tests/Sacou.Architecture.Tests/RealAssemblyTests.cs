@@ -76,6 +76,15 @@ public sealed class RealAssemblyTests
             module => ArchitectureReflectionRules.PersonalDataNameViolations(module, namespacePrefix)));
     }
 
+    /// <summary>ADR 0051, D12: no event type references the profile, the nickname or a level.</summary>
+    [Theory]
+    [InlineData(CourtSessionsNamespace)]
+    [InlineData(CourtSessionJsonNamespace)]
+    public void CourtSessions_NeverReferenceTheProfileOrALevel(string namespacePrefix)
+    {
+        ViolationAssert.None(ArchitectureDependencyRules.PersonalDataTypeViolations(Assemblies.RealArchitecture.Value, namespacePrefix));
+    }
+
     [Fact]
     public void Domain_HasNoPInvoke()
     {

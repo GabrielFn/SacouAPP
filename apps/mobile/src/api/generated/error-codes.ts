@@ -8,6 +8,7 @@ export const apiErrorCodes = [
   "groups.invite-limit",
   "groups.invite-not-found",
   "groups.last-admin",
+  "groups.level-invalid",
   "groups.member-limit",
   "groups.member-not-found",
   "groups.member-removed",

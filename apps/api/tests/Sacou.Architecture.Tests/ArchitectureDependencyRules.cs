@@ -65,6 +65,10 @@ internal static partial class ArchitectureDependencyRules
     /// Clock, randomness, identity, threads and hash-ordered collections: the court session state must
     /// depend only on the events (ADR 0033, D10). Other domains may still use them, so this is scoped.
     /// </summary>
+    private static readonly string[] PersonalDataNamespaces = ["Sacou.Modules.Identity", "Sacou.Shared.Levels"];
+
+    private static readonly string[] PersonalDataTypeNames = ["Nickname", "PlayerProfile", "MemberLevel"];
+
     private static readonly HashSet<string> NonDeterministicTypes =
     [
         "System.DateTime",
@@ -105,6 +109,20 @@ internal static partial class ArchitectureDependencyRules
             where NonDeterministicTypes.Contains(OpenTypeName(dependency.FullName))
             select new Violation(type.FullName, $"Court session domain depends on {dependency.FullName}")];
 
+    /// <summary>
+    /// Types under the namespace that depend on the profile or the level (ADR 0051, D12): events carry only ids, so no
+    /// event type may reach the Identity module, the shared level scale or a type named for a nickname, a profile or a
+    /// member level outside the namespace (inside it, the name rule of the members applies).
+    /// </summary>
+    internal static IReadOnlyList<Violation> PersonalDataTypeViolations(
+        ArchUnitNET.Domain.Architecture architecture,
+        string namespacePrefix) =>
+        [.. from type in architecture.Types
+            where IsInNamespace(type.FullName, namespacePrefix)
+            from dependency in type.GetTypeDependencies()
+            where !IsInNamespace(dependency.FullName, namespacePrefix) && IsPersonalDataType(dependency.FullName)
+            select new Violation(type.FullName, $"Event type depends on {dependency.FullName}")];
+
     internal static IReadOnlyList<Violation> ModuleBoundaryViolations(ArchUnitNET.Domain.Architecture architecture) =>
         [.. from type in architecture.Types
             let origin = ModuleNamePattern().Match(type.FullName)
@@ -142,6 +160,10 @@ internal static partial class ArchitectureDependencyRules
             && target.Groups[1].Value != originModule
             && !ContractsNamespacePattern().IsMatch(dependency);
     }
+
+    private static bool IsPersonalDataType(string fullName) =>
+        PersonalDataNamespaces.Any(prefix => IsInNamespace(fullName, prefix))
+        || PersonalDataTypeNames.Any(name => fullName.Contains(name, StringComparison.Ordinal));
 
     private static bool IsInNamespace(string fullName, string namespacePrefix) =>
         fullName.StartsWith(namespacePrefix + ".", StringComparison.Ordinal);
