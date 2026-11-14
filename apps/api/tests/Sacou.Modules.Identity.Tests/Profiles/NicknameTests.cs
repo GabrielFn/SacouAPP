@@ -61,6 +61,14 @@ public sealed class NicknameTests
     {
         Assert.True(Nickname.Create(new string('a', Nickname.MaxLength)).IsSuccess);
         Assert.Equal(ProfileErrors.NicknameInvalid, Nickname.Create(new string('a', Nickname.MaxLength + 1)).Error);
+
+    [Fact]
+    public void TheLimitIsTwentyOnTheWire_NotJustTheConstant()
+    {
+        Assert.Equal(20, Nickname.MaxLength);
+        Assert.True(Nickname.Create(new string('a', 20)).IsSuccess);
+        Assert.True(Nickname.Create(new string('a', 21)).IsFailure);
+    }
     }
 
     [Fact]
