@@ -19,6 +19,13 @@ export type TemplateChoice =
   | { readonly kind: "ready"; readonly key: SettingsTemplateKey }
   | { readonly kind: "saved"; readonly templateId: string };
 
+export type Round = Schemas["RoundResponse"];
+export type RoundSummary = Schemas["RoundSummaryResponse"];
+export type CreateRoundBody = Schemas["CreateRoundRequest"];
+export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
+export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
+export type AttendanceResponse = Schemas["AttendanceResponse"];
+
 export interface MemberRef {
   readonly groupId: string;
   readonly memberId: string;
@@ -64,6 +71,20 @@ export interface SacouApi {
   revokeInvite(groupId: string, inviteId: string): Promise<ApiResult<null>>;
   previewInvite(token: string): Promise<ApiResult<Schemas["PreviewInviteResponse"]>>;
   acceptInvite(token: string): Promise<ApiResult<Schemas["AcceptInviteResponse"]>>;
+  listRounds(groupId: string): Promise<ApiResult<readonly RoundSummary[]>>;
+  getRound(groupId: string, roundId: string): Promise<ApiResult<Round>>;
+  createRound(groupId: string, body: CreateRoundBody): Promise<ApiResult<Round>>;
+  updateRound(groupId: string, roundId: string, body: UpdateRoundBody): Promise<ApiResult<Round>>;
+  respondAttendance(
+    groupId: string,
+    roundId: string,
+    response: AttendanceResponse,
+  ): Promise<ApiResult<AttendanceAnswer>>;
+  /** Marks another member (admin and co-admin only): the server decides the place. */
+  setMemberAttendance(
+    member: MemberRef & { readonly roundId: string },
+    response: AttendanceResponse,
+  ): Promise<ApiResult<AttendanceAnswer>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

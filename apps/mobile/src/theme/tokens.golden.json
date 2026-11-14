@@ -83,7 +83,8 @@
     "sheetHandle": 4,
     "chevronIcon": 20,
     "courtIconWidth": 30,
-    "courtIconHeight": 22
+    "courtIconHeight": 22,
+    "highlightDot": 8
   },
   "radii": {
     "field": 12,

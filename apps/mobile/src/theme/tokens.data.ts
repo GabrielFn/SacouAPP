@@ -144,6 +144,8 @@ export const sizes = {
   chevronIcon: 20,
   courtIconWidth: 30,
   courtIconHeight: 22,
+  // Round screens (CriarRodada.dc.html, Rodada.dc.html): the orange dot of a leaf set only for the round.
+  highlightDot: 8,
 } as const;
 
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */

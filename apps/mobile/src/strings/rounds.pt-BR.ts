@@ -1,0 +1,113 @@
+/** Texts of the round screens (20 and 06). Dinheiro, "Pro" and the "Avulso" field are not here (ADR 0046). */
+const weekdayShort: Readonly<Record<number, string>> = {
+  1: "Seg",
+  2: "Ter",
+  3: "Qua",
+  4: "Qui",
+  5: "Sex",
+  6: "Sáb",
+  7: "Dom",
+};
+
+const modalities: Readonly<Record<string, string>> = {
+  "indoor-6x6": "6x6",
+  "beach-4x4": "4x4",
+  "beach-2x2": "2x2",
+};
+
+const rotationSystems: Readonly<Record<string, string>> = {
+  livre: "Livre / 6x0",
+  "4x2": "4x2",
+  "5x1": "5x1",
+  "6x2": "6x2",
+};
+
+export const roundsStrings = {
+  weekdayShort,
+  chips: {
+    modalities,
+    rotationSystems,
+    points: (points: number) => `${String(points)} pontos`,
+    oneSet: "1 set",
+    bestOf: (sets: number) => `Melhor de ${String(sets)}`,
+    queue: "Perde sai",
+    partialExit: "Saída parcial",
+    legend: "Cinza vem do grupo.",
+    legendOrange: "Ponto laranja vale só nesta rodada.",
+  },
+  create: {
+    title: "Nova rodada",
+    subtitle: "Veio com o padrão do grupo. Mude só o que precisar.",
+    day: "Dia",
+    time: "Horário",
+    venue: "Local",
+    capacity: "Vagas",
+    capacityPlaceholder: "Sem limite",
+    howItGoes: "Como vai ser",
+    personalize: "Personalizar esta rodada",
+    changes: (count: number) => (count === 1 ? "1 mudança" : `${String(count)} mudanças`),
+    fromGroup: "do grupo",
+    onlyThisRound: "só nesta rodada",
+    groupDefault: (value: string) => `padrão do grupo: ${value}`,
+    resetToDefault: "Voltar ao padrão",
+    repeat: "Repetir toda semana",
+    repeatSummary: (every: string, time: string) => `${every}, ${time}.`,
+    regularsConfirmed: "Mensalistas já confirmados.",
+    publish: "Publicar e compartilhar no WhatsApp",
+    publishing: "Publicando…",
+    pickDay: "Escolher o dia",
+    pickTime: "Escolher o horário",
+    timeHint: "Use 24 horas, por exemplo 20:30.",
+    confirm: "Confirmar",
+    cancel: "Cancelar",
+    loading: "Carregando o padrão do grupo",
+    retry: "Tentar de novo",
+    loadError: "Não deu para carregar o padrão do grupo.",
+    offline: "Sem conexão. A rodada não foi publicada.",
+    errors: {
+      datePast: "Escolha uma data que ainda não passou.",
+      dateTooFar: "Escolha uma data dentro dos próximos 365 dias.",
+      timeInvalid: "Use o formato 20:30.",
+      timePast: "Esse horário já passou hoje.",
+      venueInvalid: "Use só letras, números e símbolos comuns, em até 80 caracteres.",
+      capacityInvalid: (min: number, max: number) =>
+        `Use um número de vagas de ${String(min)} a ${String(max)}.`,
+    },
+  },
+  settingTitles: {
+    "scoring.bestOf": "Sets",
+    "scoring.pointsPerSet": "Pontos por set",
+    "rotation.system": "Rotação",
+  },
+  setBestOf: (sets: number) => (sets === 1 ? "1 set" : `Melhor de ${String(sets)}`),
+  share: {
+    text: (title: string, when: string, venue: string, capacity: string) =>
+      `${title} · ${when}${venue === "" ? "" : ` · ${venue}`}${capacity === "" ? "" : ` · ${capacity}`}. Confirma no app Sacou.`,
+    spots: (capacity: number) => `${String(capacity)} vagas`,
+  },
+  detail: {
+    youAreAdmin: "Você é admin",
+    youAreCoAdmin: "Você é co-admin",
+    youAreScorekeeper: "Você é placar",
+    youArePlayer: "Você é jogador",
+    subtitle: (date: string, time: string, venue: string) =>
+      venue === "" ? `${date} · ${time}` : `${date} · ${time} · ${venue}`,
+    confirmedOf: (going: number, capacity: number) => `${String(going)}/${String(capacity)}`,
+    confirmedCount: (going: number) => String(going),
+    confirmedLabel: "confirmados",
+    waitlistCount: (count: number) => String(count),
+    waitlistLabel: "na espera",
+    waitlistTitle: "Espera",
+    noName: "Sem apelido",
+    canceled: "Rodada cancelada",
+    loading: "Carregando a rodada",
+    retry: "Tentar de novo",
+    loadError: "Não deu para carregar a rodada.",
+    notFound: "Essa rodada não existe mais.",
+    backToGroups: "Voltar aos grupos",
+    drawTimes: "Sortear times",
+    openCourt: "Abrir quadra",
+    back: "Voltar",
+    playerPlaceholder: "A rodada aparece aqui para jogadores em breve.",
+  },
+} as const;

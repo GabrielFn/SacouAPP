@@ -16,6 +16,38 @@ public static class DisplayText
 
     private const int ZeroWidthJoiner = 0x200D;
 
+    private const int FirstSkinTone = 0x1F3FB;
+    private const int LastSkinTone = 0x1F3FF;
+
+    /// <summary>The settings text count: 4 code points per counted character, as in TypeScript.</summary>
+    private const int MaxCodePointsPerCountedCharacter = 4;
+
+    /// <summary>
+    /// Characters counted as code points that are not marks, joiners or skin tones (the same count as the
+    /// TypeScript twin, which cannot use <c>Intl</c>), and at most 4 code points per allowed character.
+    /// </summary>
+    public static bool IsWithinCountedLength(Rune[] runes, int maxLength) =>
+        runes.Count(CountsAsCharacter) <= maxLength && runes.Length <= maxLength * MaxCodePointsPerCountedCharacter;
+
+    private static bool CountsAsCharacter(Rune rune) =>
+        !IsZeroWidthJoiner(rune) && rune.Value is < FirstSkinTone or > LastSkinTone && !IsMark(rune);
+
+    /// <summary>Against "zalgo" text: no character carries more than <paramref name="maxMarks"/> marks in a row.</summary>
+    public static bool HasFewMarksInARow(Rune[] runes, int maxMarks)
+    {
+        var run = 0;
+        foreach (var rune in runes)
+        {
+            run = IsMark(rune) ? run + 1 : 0;
+            if (run > maxMarks)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>Letters or symbols by category that render as blank space.</summary>
     private static readonly HashSet<int> BlankFillers = [0x115F, 0x1160, 0x3164, 0xFFA0, 0x2800];
 

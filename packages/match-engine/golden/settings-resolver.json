@@ -3158,6 +3158,112 @@
     }
   },
   {
+    "id": "V10-venue-family-emoji",
+    "kind": "parse-group",
+    "description": "A family emoji is text",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "Quadra \ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V10-venue-skin-tone-not-counted",
+    "kind": "parse-group",
+    "description": "80 hands with a skin tone count 80, not 160",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd\ud83d\udc4d\ud83c\udffd"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V10-venue-80-with-emoji",
+    "kind": "parse-group",
+    "description": "79 letters and an emoji are 80 characters",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u26bd"
+      }
+    },
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "V10-venue-81-refused",
+    "kind": "parse-group",
+    "description": "81 characters are too many",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.out-of-range",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V10-venue-loose-joiner",
+    "kind": "parse-group",
+    "description": "A joiner outside an emoji sequence is hidden",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "a\u200db"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V10-venue-zero-width-space",
+    "kind": "parse-group",
+    "description": "A zero-width space is hidden",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "a\u200bb"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
+    "id": "V10-venue-decomposed",
+    "kind": "parse-group",
+    "description": "A decomposed text is not in NFC",
+    "document": {
+      "template": "do-zero",
+      "set": {
+        "schedule.venue": "e\u0301"
+      }
+    },
+    "expected": {
+      "ok": false,
+      "code": "settings.invalid-text",
+      "path": "schedule.venue"
+    }
+  },
+  {
     "id": "V7-round-monthly-fee",
     "kind": "parse-layer",
     "description": "The monthly fee is only of the group",
