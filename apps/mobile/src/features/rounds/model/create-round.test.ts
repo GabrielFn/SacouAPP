@@ -88,6 +88,10 @@ describe("nextRoundDate", () => {
     expect(nextRoundDate(at(3, 20, 29), TUESDAY, "20:30")).toBe(TUESDAY_DATE);
   });
 
+  test("at the exact start time the round has not started after now, so it is next week's", () => {
+    expect(nextRoundDate(at(3, 20, 30), TUESDAY, "20:30")).toBe("2026-11-10");
+  });
+
   test("a group without a fixed day gets tomorrow", () => {
     expect(nextRoundDate(at(3, 20, 31), null, "20:30")).toBe("2026-11-04");
   });
