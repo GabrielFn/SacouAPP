@@ -126,7 +126,8 @@ public sealed class DrawTeamsTests(IntegrationDatabase database) : IAsyncLifetim
         foreach (var read in new[] { roundRead, memberList })
         {
             Assert.Equal(HttpStatusCode.OK, read.StatusCode);
-            Assert.DoesNotContain("level", await read.Content.ReadAsStringAsync(TestContext.Current.CancellationToken), StringComparison.OrdinalIgnoreCase);
+            // A property named like a level ("level", "levelTenths"); the round's settings carry "balanceByLevel", which is no level.
+            Assert.DoesNotContain("\"level", await read.Content.ReadAsStringAsync(TestContext.Current.CancellationToken), StringComparison.OrdinalIgnoreCase);
         }
     }
 
