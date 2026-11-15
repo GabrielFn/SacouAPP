@@ -27,7 +27,13 @@ internal static class LocalSearch
             var start = TeamPlacement.Place(units, layout, StartOrder(units, random, restart), PlacementPattern.Serpentine);
             if (start is null)
             {
-                return null;
+                // The first start failing means no split, or none within the step cap; a later one failing only skips it.
+                if (bestScore is null)
+                {
+                    return null;
+                }
+
+                continue;
             }
 
             var split = TeamPlacement.Canonical(Improve(units, layout, start));

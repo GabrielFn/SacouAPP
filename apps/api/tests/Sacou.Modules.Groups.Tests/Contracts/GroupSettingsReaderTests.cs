@@ -81,7 +81,7 @@ public sealed class GroupSettingsReaderTests
     {
         var group = Snapshot(("draw.enabled", true));
 
-        var rules = Reader().ResolveRound(group, $$"""{"schemaVersion":1,"draw":{"balanceByLevel":true},"format":{"modality":"{{modality}}"}}""").Value.Draw;
+        var rules = Reader().ResolveRound(group, $$$"""{"schemaVersion":1,"draw":{"balanceByLevel":true},"format":{"modality":"{{{modality}}}"}}""").Value.Draw;
 
         Assert.Equal(new DrawRules(true, true, playersPerTeam), rules);
         Assert.Equal(new DrawRules(false, false, 6), Reader().ResolveRound(Snapshot(), null).Value.Draw);

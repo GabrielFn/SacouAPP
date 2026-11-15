@@ -9,9 +9,10 @@ internal enum PlacementPattern
 
 /// <summary>
 /// Places the units on the teams in a given order, backtracking when a team is full or a "separar" lock forbids it,
-/// so it finds a valid split whenever one exists. Units with locks go first; empty teams are interchangeable, so
+/// so it finds a valid split whenever one exists. Units with locks go first, the most "separar" locks first; empty teams are interchangeable, so
 /// only the first one is tried.
 /// The result is the team of each unit, numbered by the first unit of each team (<see cref="Canonical"/>).
+/// The backtracking stops after <see cref="DrawLimits.MaxPlacementSteps"/> steps: locks that hard to place answer as unsatisfiable.
 /// </summary>
 internal sealed class TeamPlacement
 {
@@ -26,9 +27,12 @@ internal sealed class TeamPlacement
     private readonly PlacementPattern _pattern;
     private readonly int[] _teamOfUnit;
     private readonly int[] _load;
+    private readonly int _maxSteps;
+    private int _steps;
 
-    private TeamPlacement(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern)
+    private TeamPlacement(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern, int maxSteps)
     {
+        _maxSteps = maxSteps;
         _units = units;
         _layout = layout;
         _order = order;
@@ -37,12 +41,20 @@ internal sealed class TeamPlacement
         _load = new int[layout.TeamCount];
     }
 
-    /// <summary>Null when no split respects the locks.</summary>
-    public static int[]? Place(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern)
+    /// <summary>Null when no split respects the locks, or none was found within <see cref="DrawLimits.MaxPlacementSteps"/>.</summary>
+    public static int[]? Place(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern) =>
+        Place(units, layout, order, pattern, DrawLimits.MaxPlacementSteps);
+
+    /// <summary>With another ceiling of steps, for the tests of the ceiling.</summary>
+    internal static int[]? Place(DrawUnits units, TeamLayout layout, IReadOnlyList<int> order, PlacementPattern pattern, int maxSteps)
     {
         ArgumentNullException.ThrowIfNull(units);
         ArgumentNullException.ThrowIfNull(order);
-        var placement = new TeamPlacement(units, layout, [.. order.Where(IsConstrained), .. order.Where(unit => !IsConstrained(unit))], pattern);
+        // The most constrained first (most "separar" locks, then the biggest), keeping the given order among equals.
+        var constrained = order.Where(IsConstrained)
+            .OrderByDescending(units.ApartCount)
+            .ThenByDescending(unit => units.Units[unit].Size);
+        var placement = new TeamPlacement(units, layout, [.. constrained, .. order.Where(unit => !IsConstrained(unit))], pattern, maxSteps);
         return placement.PlaceFrom(0) ? Canonical(placement._teamOfUnit) : null;
 
         // A player alone and free of locks always fits the room left, so the search only ever backtracks over the others.
@@ -66,6 +78,11 @@ internal sealed class TeamPlacement
         if (position == _order.Count)
         {
             return true;
+        }
+
+        if (++_steps > _maxSteps)
+        {
+            return false;
         }
 
         var unit = _order[position];

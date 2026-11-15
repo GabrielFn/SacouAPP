@@ -13,7 +13,7 @@ namespace Sacou.Modules.Groups.Tests.Domain;
 public sealed class RolePermissionsTests
 {
     private const int RoleCount = 4;
-    private const int PermissionCount = 14;
+    private const int PermissionCount = 15;
 
     public static readonly TheoryData<string, string, bool> Table = new()
     {

@@ -3509,6 +3509,129 @@
           }
         }
       }
+    },
+    "/v1/groups/{groupId}/rounds/{roundId}/draw": {
+      "post": {
+        "tags": [
+          "DrawTeamsEndpoint"
+        ],
+        "operationId": "DrawTeams",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrawTeamsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawTeamsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3881,6 +4004,139 @@
           },
           "repeatWeekly": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DrawLockKind": {
+        "enum": [
+          "together",
+          "apart"
+        ],
+        "type": "string"
+      },
+      "DrawLockRequest": {
+        "required": [
+          "first",
+          "second",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "second": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DrawLockKind"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DrawnPlayerResponse": {
+        "required": [
+          "memberId",
+          "levelTenths"
+        ],
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "levelTenths": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DrawnTeamResponse": {
+        "required": [
+          "number",
+          "members",
+          "averageTenths"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DrawnPlayerResponse"
+            }
+          },
+          "averageTenths": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DrawTeamsRequest": {
+        "type": "object",
+        "properties": {
+          "locks": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/DrawLockRequest"
+            }
+          },
+          "reserves": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "DrawTeamsResponse": {
+        "required": [
+          "seed",
+          "playersPerTeam",
+          "teams",
+          "reserves",
+          "differenceTenths"
+        ],
+        "type": "object",
+        "properties": {
+          "seed": {
+            "type": "string"
+          },
+          "playersPerTeam": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DrawnTeamResponse"
+            }
+          },
+          "reserves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DrawnPlayerResponse"
+            }
+          },
+          "differenceTenths": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -4927,6 +5183,7 @@
     "identity.subject-invalid",
     "identity.user-not-registered",
     "sessions.attendance-disabled",
+    "sessions.draw-disabled",
     "sessions.draw-lock-invalid",
     "sessions.draw-lock-too-large",
     "sessions.draw-locks-conflict",

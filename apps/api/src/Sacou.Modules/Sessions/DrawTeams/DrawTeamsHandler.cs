@@ -36,15 +36,10 @@ internal sealed class DrawTeamsHandler(
         }
 
         var drawn = TeamDraw.Run(input.Value);
-        RoundLog.Drew(
-            logger,
-            access.GroupId.Value,
-            id.Value,
-            drawn.IsSuccess ? Drawn : drawn.Error.Code,
-            input.Value.Players.Length,
-            drawn.IsSuccess ? drawn.Value.Teams.Length : 0,
-            input.Value.Locks.Length,
-            (long)time.GetElapsedTime(started).TotalMilliseconds);
+        var elapsedMs = (long)time.GetElapsedTime(started).TotalMilliseconds;
+        var result = drawn.IsSuccess ? Drawn : drawn.Error.Code;
+        var teams = drawn.IsSuccess ? drawn.Value.Teams.Length : 0;
+        RoundLog.Drew(logger, access.GroupId.Value, id.Value, result, input.Value.Players.Length, teams, input.Value.Locks.Length, elapsedMs);
         return drawn.IsSuccess
             ? Result.Success(DrawTeamsResponse.From(drawn.Value))
             : Result.Failure<DrawTeamsResponse>(drawn.Error);

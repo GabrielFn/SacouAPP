@@ -1,10 +1,11 @@
 using System.Globalization;
 using Sacou.Modules.Sessions.Domain.Draw;
+using Sacou.Modules.Sessions.DrawTeams;
 using Xunit;
 
 namespace Sacou.Modules.Sessions.Tests.Draw;
 
-/// <summary>The levels are private (ADR 0055): no draw value prints a level, a sum or an average, so none reaches a log.</summary>
+/// <summary>The levels are private (ADR 0055): no draw value, nor the route's answer, prints a level, a sum or an average, so none reaches a log.</summary>
 public sealed class DrawPrintingTests
 {
     private const int Level = 45;
@@ -21,6 +22,10 @@ public sealed class DrawPrintingTests
             { DrawFixture.ScreenSevenInput(), nameof(DrawInput) },
             { DrawScore.Of([Level, Level + 1], [1, 1]), nameof(DrawScore) },
             { new DrawUnit([player]), nameof(DrawUnit) },
+            { DrawTeamsResponse.From(result), nameof(DrawTeamsResponse) },
+            { DrawnTeamResponse.From(result.Teams[0]), nameof(DrawnTeamResponse) },
+            { DrawnPlayerResponse.From(player), nameof(DrawnPlayerResponse) },
+            { new DrawTeamsRequest(null, null), nameof(DrawTeamsRequest) },
         };
     }
 

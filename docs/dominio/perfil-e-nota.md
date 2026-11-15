@@ -48,7 +48,7 @@ De 1,0 a 5,0, de meio em meio ponto, guardado em décimos inteiros (10 a 50, de 
 
 ## Resolução para o sorteio (`MemberLevelResolver`)
 
-A nota do admin; senão, a sugestão do perfil; senão, 3,0. "Não sei" e "pendente" caem na sugestão ou em 3,0. A origem (`Admin`, `Suggested`, `Default`) acompanha o valor, para o σ do rating (E3.9). Só no servidor, pelo contrato `Groups.Contracts.IMemberLevels`, sem rota HTTP. O sorteio que usa o valor está em [sorteio.md](sorteio.md) (E3.6, ADR 0055).
+A nota do admin; senão, a sugestão do perfil; senão, 3,0. "Não sei" e "pendente" caem na sugestão ou em 3,0. A origem (`Admin`, `Suggested`, `Default`) acompanha o valor, para o σ do rating (E3.9). Só no servidor, pelo contrato `Groups.Contracts.IMemberLevels`, sem rota HTTP própria (o resultado resolvido sai só no sorteio, abaixo). O sorteio que usa o valor está em [sorteio.md](sorteio.md) (E3.6, ADR 0055).
 
 | Nota do admin | Sugestão | Resultado | Origem |
 |---|---|---|---|
@@ -67,6 +67,8 @@ A privacidade é pela rota, nunca por campo condicional.
 | Nota do admin | **nunca** | **nunca** | sim | **nunca** (403) |
 
 A lista de membros tem o mesmo corpo para todos os papéis e nunca tem campo de nível. A rota de notas nunca entra no cache do app (E4.5).
+
+O sorteio (`POST .../rounds/{roundId}/draw`, E3.6) também devolve, só a Admin e Co-admin e com `no-store`, o nível **já resolvido** de cada confirmado, sem a origem: o admin não sabe por ali se o valor é a sua nota, a sugestão ou 3,0 ([sorteio.md](sorteio.md#rota)).
 
 ## Erros
 

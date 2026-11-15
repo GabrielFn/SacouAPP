@@ -11,7 +11,7 @@ namespace Sacou.Modules.Sessions.DrawTeams;
 /// The body: the locks of screen 07 and, after a "Trocar" between a team and the bench, the reserve queue. Both
 /// optional; <c>{}</c> is a plain draw. A field the record does not declare is a 400 (ADR 0039).
 /// </summary>
-internal sealed record DrawTeamsRequest(IReadOnlyList<DrawLockRequest?>? Locks, IReadOnlyList<Guid>? Reserves)
+internal sealed record DrawTeamsRequest(IReadOnlyList<DrawLockRequest?>? Locks = null, IReadOnlyList<Guid>? Reserves = null)
 {
     /// <summary>A null item is a refused lock, like any other the domain refuses.</summary>
     public Result<ImmutableArray<DrawLock>> ToLocks()
