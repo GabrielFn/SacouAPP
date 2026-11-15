@@ -41,6 +41,25 @@ public sealed class MemberLevelsBehaviourTests(IntegrationDatabase database) : I
         Assert.Equal("""{"adminLevel":3.5,"reviewed":true,"suggestedLevel":4.5}""", Without(items[3]!, "memberId"));
     }
 
+    /// <summary>The levels of others are private: no cache along the way keeps the list nor a write.</summary>
+    [Fact]
+    public async Task LevelRoutes_AnswerWithNoStore()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var player = world.MemberIds[A.Player];
+
+        using var list = await world.SendAsync(A.Admin, HttpMethod.Get, LevelCalls.ListPath(world));
+        using var single = await LevelCalls.SetAsync(world, A.Admin, player, "3.5");
+        using var batch = await world.SendAsync(A.Admin, HttpMethod.Put, LevelCalls.ListPath(world), LevelCalls.Batch((player, "4")));
+
+        foreach (var response in new[] { list, single, batch })
+        {
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
+        }
+    }
+
     [Fact]
     public async Task Writes_AnswerTheLevelAsStored_AndTheBatchInTheOrderAsked()
     {

@@ -59,7 +59,7 @@ internal static class GroupErrors
     /// <summary>The guest's name broke the rule of the nickname (ADR 0053, D3).</summary>
     public static readonly Error GuestNameInvalid = new("groups.guest-name-invalid", ErrorKind.Validation);
 
-    /// <summary>A guest body the JSON reader accepted but the rule did not: a position off the list or a correction that changes nothing.</summary>
+    /// <summary>A guest body the JSON reader accepted but the rule did not: a position off the list or a request id that is empty. A correction that changes nothing is not an error: it succeeds and writes nothing.</summary>
     public static readonly Error GuestInvalid = new("groups.guest-invalid", ErrorKind.Validation);
 
     /// <summary>Only a player may be without an account: scorekeeper, co-admin and admin need someone with the app (ADR 0053, D8).</summary>
