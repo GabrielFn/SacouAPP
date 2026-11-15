@@ -21,8 +21,7 @@ export interface InviteFlowDeps {
 }
 
 export type LinkStep =
-  | { readonly kind: "open" }
-  | { readonly kind: "regenerate"; readonly inviteId: string };
+  { readonly kind: "open" } | { readonly kind: "regenerate"; readonly inviteId: string };
 
 /** The cache drops the result of the link mutation, and so the token, as soon as the screen leaves. */
 const DROP_WHEN_UNUSED = 0;
