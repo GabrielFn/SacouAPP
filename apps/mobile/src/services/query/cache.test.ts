@@ -20,6 +20,7 @@ import {
 import {
   groupMembersQuery,
   groupQuery,
+  memberLevelsQuery,
   myGroupsQuery,
 } from "../../features/groups/queries/group-queries";
 import { apiErrorOf } from "../api/api-error";
@@ -34,7 +35,6 @@ import {
 import { PERSISTED_CACHE_MAX_AGE_MS } from "./persist-policy";
 import { bindOnlineManager, createSacouQueryClient } from "./query-client";
 import { queryKeys } from "./query-keys";
-import { memberLevelsQuery } from "../../features/groups/queries/group-queries";
 
 const G = "8a4c2f0e-1111-4c3b-9d2e-000000000001";
 const VERSION = "1.0.0";

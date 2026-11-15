@@ -96,11 +96,28 @@ function settingsEffects(event: SettingsEvent): readonly CacheEffect[] {
   }
 }
 
+type ChildEvent = Extract<
+  MutationEvent,
+  { readonly type: "createInvite" | "revokeInvite" | "memberLevelsChanged" }
+>;
+
+/** The one list under the group that each of these writes makes stale. */
+const STALE_CHILD: Readonly<Record<ChildEvent["type"], (groupId: string) => SacouQueryKey>> = {
+  createInvite: queryKeys.invites,
+  revokeInvite: queryKeys.invites,
+  memberLevelsChanged: queryKeys.memberLevels,
+};
+
+function isChildEvent(event: MutationEvent): event is ChildEvent {
+  return event.type in STALE_CHILD;
+}
+
 /** What each mutation makes stale, pure and tested as a golden table (P5). */
 export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
   if (isMemberEvent(event)) return memberEffects(event);
   if (isSettingsEvent(event)) return settingsEffects(event);
   if (isRoundEvent(event)) return roundEffects(event);
+  if (isChildEvent(event)) return [invalidate(STALE_CHILD[event.type](event.groupId))];
   switch (event.type) {
     case "createGroup":
     case "acceptInvite":
@@ -109,11 +126,6 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
       return [invalidate(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
     case "leaveGroup":
       return [remove(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
-    case "createInvite":
-    case "revokeInvite":
-      return [invalidate(queryKeys.invites(event.groupId))];
-    case "memberLevelsChanged":
-      return [invalidate(queryKeys.memberLevels(event.groupId))];
   }
 }
 

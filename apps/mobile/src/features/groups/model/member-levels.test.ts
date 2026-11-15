@@ -125,8 +125,9 @@ describe("the sheet 19a on screen 19 (D9)", () => {
       level: null,
       confirm: { kind: "remove", memberId: "b" },
     });
-    expect(membersScreenReducer(initialMembersScreenState, { type: "level-drafted", tenths: 40 }))
-      .toEqual(initialMembersScreenState);
+    expect(
+      membersScreenReducer(initialMembersScreenState, { type: "level-drafted", tenths: 40 }),
+    ).toEqual(initialMembersScreenState);
   });
 
   test("a member who left closes the sheet by itself", () => {

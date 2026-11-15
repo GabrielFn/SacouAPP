@@ -92,6 +92,69 @@ function LevelRow({ text, disabled, onPress }: LevelRowProps) {
   );
 }
 
+export interface TypeSectionProps {
+  readonly selected: MemberType;
+  readonly regularBlocked: boolean;
+  readonly disabled: boolean;
+  readonly onType: (memberType: MemberType) => void;
+}
+
+function TypeSection({ selected, regularBlocked, disabled, onType }: TypeSectionProps) {
+  const { tokens } = useTheme();
+  return (
+    <View style={{ gap: tokens.spacing.s }}>
+      <Text variant="bodyStrong">{sheet.type}</Text>
+      <SegmentedControl
+        options={TYPE_OPTIONS}
+        selected={selected}
+        accessibilityLabel={sheet.type}
+        disabled={disabled || regularBlocked}
+        onSelect={onType}
+      />
+      {regularBlocked ? <Text variant="muted">{sheet.needsAccount}</Text> : null}
+    </View>
+  );
+}
+
+export interface ExitSectionProps {
+  readonly options: MemberSheet;
+  readonly pending: boolean;
+  readonly onLeave: () => void;
+  readonly onRemove: () => void;
+}
+
+/** "Remover do grupo" on another row (question 30), "Sair do grupo" on the own one. */
+function ExitSection({ options, pending, onLeave, onRemove }: ExitSectionProps) {
+  const { tokens } = useTheme();
+  if (options.canRemove) {
+    return (
+      <View style={{ gap: tokens.spacing.s }}>
+        <Button
+          label={sheet.remove}
+          variant="dangerOutline"
+          disabled={pending}
+          onPress={onRemove}
+        />
+        <Text variant="muted" style={{ textAlign: "center" }}>
+          {sheet.removeHelp}
+        </Text>
+      </View>
+    );
+  }
+  if (!options.canLeave) return null;
+  return (
+    <View style={{ gap: tokens.spacing.s }}>
+      <Button
+        label={sheet.leave}
+        variant="dangerOutline"
+        disabled={pending || options.lastAdmin}
+        onPress={onLeave}
+      />
+      {options.lastAdmin ? <Text variant="muted">{sheet.lastAdmin}</Text> : null}
+    </View>
+  );
+}
+
 export interface MemberOptionsSheetProps {
   readonly sheet: MemberSheet | null;
   /** A write is on its way: the choices wait for it. */
@@ -118,7 +181,6 @@ export function MemberOptionsSheet({
   onLevel,
   onRemove,
 }: MemberOptionsSheetProps) {
-  const { tokens } = useTheme();
   if (options === null) return null;
   const { target } = options;
   const model = memberRowModel(target);
@@ -136,19 +198,14 @@ export function MemberOptionsSheet({
         />
       )}
       {options.type === null ? null : (
-        <View style={{ gap: tokens.spacing.s }}>
-          <Text variant="bodyStrong">{sheet.type}</Text>
-          <SegmentedControl
-            options={TYPE_OPTIONS}
-            selected={target.memberType}
-            accessibilityLabel={sheet.type}
-            disabled={pending || options.type.regularBlocked}
-            onSelect={(memberType) => {
-              onType(target, memberType);
-            }}
-          />
-          {options.type.regularBlocked ? <Text variant="muted">{sheet.needsAccount}</Text> : null}
-        </View>
+        <TypeSection
+          selected={target.memberType}
+          regularBlocked={options.type.regularBlocked}
+          disabled={pending}
+          onType={(memberType) => {
+            onType(target, memberType);
+          }}
+        />
       )}
       {options.showsLevel && levelText !== null ? (
         <LevelRow
@@ -159,32 +216,14 @@ export function MemberOptionsSheet({
           }}
         />
       ) : null}
-      {options.canRemove ? (
-        <View style={{ gap: tokens.spacing.s }}>
-          <Button
-            label={sheet.remove}
-            variant="dangerOutline"
-            disabled={pending}
-            onPress={() => {
-              onRemove(target);
-            }}
-          />
-          <Text variant="muted" style={{ textAlign: "center" }}>
-            {sheet.removeHelp}
-          </Text>
-        </View>
-      ) : null}
-      {options.canLeave ? (
-        <View style={{ gap: tokens.spacing.s }}>
-          <Button
-            label={sheet.leave}
-            variant="dangerOutline"
-            disabled={pending || options.lastAdmin}
-            onPress={onLeave}
-          />
-          {options.lastAdmin ? <Text variant="muted">{sheet.lastAdmin}</Text> : null}
-        </View>
-      ) : null}
+      <ExitSection
+        options={options}
+        pending={pending}
+        onLeave={onLeave}
+        onRemove={() => {
+          onRemove(target);
+        }}
+      />
     </BottomSheet>
   );
 }

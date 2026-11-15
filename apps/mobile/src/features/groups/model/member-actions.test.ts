@@ -108,6 +108,8 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
       roles: null,
       type: null,
       canLeave: true,
+      canRemove: false,
+      showsLevel: false,
       lastAdmin: false,
     });
   });

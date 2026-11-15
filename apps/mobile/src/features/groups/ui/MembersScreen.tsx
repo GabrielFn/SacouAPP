@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
 import { useServices } from "../../../services/services-context";
@@ -11,8 +11,7 @@ import { Button } from "../../../ui/Button";
 import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
-import { LinkIcon, LockIcon, QrIcon, WarningIcon } from "../../../ui/Icons";
-import { LevelSheet } from "../../../ui/LevelSheet";
+import { LinkIcon, QrIcon } from "../../../ui/Icons";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { TabSwitch } from "../../../ui/TabSwitch";
@@ -29,96 +28,11 @@ import {
   type MembersTab,
 } from "../model/members.selectors";
 import { groupInviteHref, groupRatingsHref, groupsHref } from "../navigation";
+import { LevelNotices, MemberLevelDialog } from "./MemberLevelParts";
 import { MemberOptionsSheet } from "./MemberOptionsSheet";
 import { InvitesList, MembersList } from "./MembersLists";
 
 const texts = strings.members;
-const ratingTexts = strings.ratings;
-
-export interface PendingLevelsStripProps {
-  readonly count: number;
-  readonly onReview: () => void;
-}
-
-/** "3 notas para confirmar. O sorteio usa a sugestão até lá." with "Revisar" (opens 19b). */
-function PendingLevelsStrip({ count, onReview }: PendingLevelsStripProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={ratingTexts.pendingLabel(count)}
-      onPress={onReview}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.s10,
-        minHeight: tokens.sizes.levelBadgeHeight,
-        paddingHorizontal: tokens.spacing.m,
-        borderRadius: tokens.radii.button,
-        backgroundColor: colors.noticeFill,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.waitingBorder,
-      }}
-    >
-      <WarningIcon />
-      <Text style={{ flex: 1 }}>
-        <Text variant="bodyStrong">{ratingTexts.pending.count(count)}</Text>
-        {` ${ratingTexts.pending.body}`}
-      </Text>
-      <Text variant="bodyStrong" style={{ color: colors.infoText }}>
-        {ratingTexts.pending.review}
-      </Text>
-    </Pressable>
-  );
-}
-
-/** "A nota é usada no sorteio. Só admins veem." */
-function LevelPrivacyLine() {
-  const { tokens } = useTheme();
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s6 }}>
-      <LockIcon />
-      <Text variant="muted" style={{ flex: 1 }}>
-        {`${ratingTexts.privacyRow} `}
-        <Text variant="bodyStrong">{ratingTexts.privacyRowStrong}</Text>
-      </Text>
-    </View>
-  );
-}
-
-export interface MemberLevelDialogProps {
-  readonly model: MembersScreenModel;
-}
-
-/** The sheet 19a over screen 19: the draft is in the reducer of the screen, the level in the cache. */
-function MemberLevelDialog({ model }: MemberLevelDialogProps) {
-  const sheet = model.levelSheet;
-  if (sheet === null) return null;
-  const row = memberRowModel(sheet.target);
-  const { level } = sheet;
-  return (
-    <LevelSheet
-      visible
-      name={row.title}
-      detail={row.detail}
-      initials={row.initials}
-      dashedAvatar={row.dashedAvatar}
-      suggestion={level.kind === "suggested" ? level.tenths : null}
-      value={sheet.shown}
-      pending={model.pending}
-      errorText={model.errorText}
-      onChange={(tenths) => {
-        model.dispatch({ type: "level-drafted", tenths });
-      }}
-      onSave={(tenths) => {
-        model.saveLevel(sheet.target.memberId, tenths);
-      }}
-      onClose={() => {
-        model.dispatch({ type: "level-closed" });
-      }}
-    />
-  );
-}
 
 export interface InviteFooterProps {
   readonly onInvite: () => void;
@@ -280,6 +194,8 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
   const tabs = membersTabs(group.data.role);
   const shownTab = tabs.includes(tab) ? tab : "regular";
   const showInvite = model.canInvite && inviteBaseUrl !== null;
+  // The sheet 19a shows its own refusal; the screen does not repeat it under the sheet.
+  const screenError = model.levelSheet === null ? model.errorText : null;
   return (
     <Screen
       scroll
@@ -306,18 +222,15 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
         onSelect={setTab}
         accessibilityLabel={texts.tabs.label}
       />
-      {model.levelOf !== null && model.pendingCount > 0 ? (
-        <PendingLevelsStrip
-          count={model.pendingCount}
+      {model.levelOf === null ? null : (
+        <LevelNotices
+          pendingCount={model.pendingCount}
           onReview={() => {
             router.push(groupRatingsHref(groupId));
           }}
         />
-      ) : null}
-      {model.levelOf === null ? null : <LevelPrivacyLine />}
-      {model.errorText === null || model.levelSheet !== null ? null : (
-        <ErrorStrip text={model.errorText} />
       )}
+      {screenError === null ? null : <ErrorStrip text={screenError} />}
       {shownTab === "invites" ? (
         <InvitesList
           invites={model.invites}

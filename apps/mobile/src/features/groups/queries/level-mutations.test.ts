@@ -44,7 +44,7 @@ describe("who asks for the levels (ADR 0047)", () => {
   test("an admin asks, and the answer is never written to the persisted cache", async () => {
     const { fake, client } = setup();
     fake.respond("listMemberLevels", apiOk(LEVELS));
-    await client.fetchQuery(memberLevelsQuery(fake.api, GROUP, canManageLevels("coAdmin")));
+    await client.query(memberLevelsQuery(fake.api, GROUP, canManageLevels("coAdmin")));
     const query = client.getQueryCache().find({ queryKey: queryKeys.memberLevels(GROUP) });
     expect(query?.state.data).toEqual(LEVELS);
     expect(query === undefined ? true : shouldPersistQuery(query)).toBe(false);

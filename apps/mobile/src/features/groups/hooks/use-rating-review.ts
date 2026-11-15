@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useReducer } from "react";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
-import type { MemberLevelItem } from "../../../services/api/sacou-api";
+import type { Member, MemberLevel, MemberLevelItem } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 import { useServices } from "../../../services/services-context";
 import { canManageLevels } from "../model/member-actions";
@@ -15,7 +15,11 @@ import {
   type RatingReviewAction,
   type RatingReviewState,
 } from "../model/rating-review.reducer";
-import { confirmAllMutation, setLevelMutation } from "../queries/level-mutations";
+import {
+  confirmAllMutation,
+  setLevelMutation,
+  type ConfirmAllOutcome,
+} from "../queries/level-mutations";
 import { useGroup, useGroupMembers, useMemberLevels } from "../queries/use-group-queries";
 
 export interface RatingReviewModel {
@@ -45,6 +49,27 @@ export function confirmAllItems(
   );
 }
 
+function cardsOf(
+  members: readonly Member[] | undefined,
+  levels: readonly MemberLevel[] | undefined,
+): readonly ReviewCard[] {
+  return members === undefined || levels === undefined
+    ? []
+    : reviewCards(sortMembers(members), levels);
+}
+
+/** The text of the last refusal, or how many levels of "Confirmar todas" did not go in. */
+export function reviewErrorText(
+  oneError: unknown,
+  allError: unknown,
+  outcome: ConfirmAllOutcome | undefined,
+): string | null {
+  const failure = oneError ?? allError ?? null;
+  if (failure !== null) return errorTextOf(failure);
+  const failed = outcome?.failed ?? 0;
+  return failed > 0 ? strings.ratings.review.partial(failed) : null;
+}
+
 /** Screen 19b: the cards come from the cache, only the drafts live in the reducer (D9). */
 export function useRatingReview(groupId: string): RatingReviewModel {
   const { sacouApi } = useServices();
@@ -57,10 +82,7 @@ export function useRatingReview(groupId: string): RatingReviewModel {
   const [state, dispatch] = useReducer(ratingReviewReducer, initialRatingReviewState);
   const one = useMutation(setLevelMutation(deps, groupId));
   const all = useMutation(confirmAllMutation(deps, groupId));
-  const cards =
-    allowed && members.data !== undefined && levels.data !== undefined
-      ? reviewCards(sortMembers(members.data), levels.data)
-      : [];
+  const cards = allowed ? cardsOf(members.data, levels.data) : [];
   const sent = (memberIds: readonly string[]) => {
     dispatch({ type: "sent", memberIds });
   };
@@ -71,8 +93,6 @@ export function useRatingReview(groupId: string): RatingReviewModel {
       },
     });
   };
-  const partial = all.data?.failed ?? 0;
-  const failure = one.isError ? one.error : all.isError ? all.error : null;
   return {
     group,
     members,
@@ -82,12 +102,7 @@ export function useRatingReview(groupId: string): RatingReviewModel {
     state,
     dispatch,
     pending: one.isPending || all.isPending,
-    errorText:
-      failure !== null
-        ? errorTextOf(failure)
-        : partial > 0
-          ? strings.ratings.review.partial(partial)
-          : null,
+    errorText: reviewErrorText(one.error, all.error, all.data),
     confirmOne: (card) => {
       const memberId = card.member.memberId;
       send(reviewItem(memberId, draftOf(state, memberId), card.suggestion));

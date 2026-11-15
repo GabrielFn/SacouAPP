@@ -49,6 +49,11 @@ const onlyConfirm = (confirm: MembersConfirm): MembersScreenState => ({
   confirm,
 });
 
+/** A draft without an open sheet is dropped: nobody is being rated. */
+function withDraft(state: MembersScreenState, tenths: LevelTenths): MembersScreenState {
+  return state.level === null ? state : { ...state, level: { ...state.level, draft: tenths } };
+}
+
 export function membersScreenReducer(
   state: MembersScreenState,
   action: MembersScreenAction,
@@ -65,9 +70,7 @@ export function membersScreenReducer(
         confirm: null,
       };
     case "level-drafted":
-      return state.level === null
-        ? state
-        : { ...state, level: { ...state.level, draft: action.tenths } };
+      return withDraft(state, action.tenths);
     case "level-closed":
       return { ...state, level: null };
     case "leave-asked":

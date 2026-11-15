@@ -157,6 +157,37 @@ function ConfirmButton({ label, disabled, onPress }: ConfirmButtonProps) {
   );
 }
 
+/** What the screen can show yet: nothing for Placar and Jogador, a wait, or the cards. */
+export type ReviewGate =
+  | { readonly kind: "forbidden" }
+  | { readonly kind: "waiting"; readonly failure: Error | null }
+  | { readonly kind: "ready" };
+
+export function reviewGate(model: RatingReviewModel): ReviewGate {
+  const { group, members, levels } = model;
+  if (group.data !== undefined && !model.allowed) return { kind: "forbidden" };
+  const loaded =
+    group.data !== undefined && members.data !== undefined && levels.data !== undefined;
+  return loaded
+    ? { kind: "ready" }
+    : { kind: "waiting", failure: group.error ?? members.error ?? levels.error };
+}
+
+export interface ReviewGateViewProps {
+  readonly gate: Exclude<ReviewGate, { readonly kind: "ready" }>;
+}
+
+function ReviewGateView({ gate }: ReviewGateViewProps) {
+  if (gate.kind === "forbidden") {
+    return <EmptyState title={texts.notAllowedTitle} body={texts.notAllowed} />;
+  }
+  return gate.failure === null ? (
+    <LoadingState accessibilityLabel={texts.loading} />
+  ) : (
+    <EmptyState alert title={texts.loadError} body={errorTextOf(gate.failure)} />
+  );
+}
+
 export interface RatingReviewScreenProps {
   readonly groupId: string;
 }
@@ -165,31 +196,19 @@ export interface RatingReviewScreenProps {
 export function RatingReviewScreen({ groupId }: RatingReviewScreenProps) {
   const { tokens } = useTheme();
   const model = useRatingReview(groupId);
-  const { group, members, levels } = model;
+  const { group } = model;
   const back = (
     <BackBar
       title={texts.header(group.data?.name ?? "")}
       fallbackHref={groupMembersHref(groupId)}
     />
   );
-  if (group.data !== undefined && !model.allowed) {
+  const gate = reviewGate(model);
+  if (gate.kind !== "ready") {
     return (
       <Screen>
         {back}
-        <EmptyState title={texts.notAllowedTitle} body={texts.notAllowed} />
-      </Screen>
-    );
-  }
-  if (group.data === undefined || members.data === undefined || levels.data === undefined) {
-    const failure = group.error ?? members.error ?? levels.error;
-    return (
-      <Screen>
-        {back}
-        {failure === null ? (
-          <LoadingState accessibilityLabel={texts.loading} />
-        ) : (
-          <EmptyState alert title={texts.loadError} body={errorTextOf(failure)} />
-        )}
+        <ReviewGateView gate={gate} />
       </Screen>
     );
   }
