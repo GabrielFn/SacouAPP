@@ -1,6 +1,6 @@
 # ADR 0049 · Ajustes do grupo e convite no app
 
-**Status:** aceito (10/11/2026), Parte 1. **Tarefa:** E4.5. Plano: [`E4.5.md`](../../estado/tarefas/E4.5.md). A Parte 2 (membros, convite e QR) acrescenta as decisões D7 abaixo.
+**Status:** aceito (10/11/2026), Parte 1; Parte 2 em 14/11/2026. **Tarefa:** E4.5. Plano: [`E4.5.md`](../../estado/tarefas/E4.5.md). A Parte 2 (membros, convite e QR) acrescenta as decisões D7 abaixo.
 
 ## Contexto
 
@@ -20,7 +20,7 @@ A E4.5 liga o app às rotas de configuração do grupo da E3.3 ([ADR 0041](0041-
 - **Criar grupo** faz `POST /v1/groups` com `templateKey` e depois um `PATCH` só com as folhas que diferem do modelo (`normalizeLayer`). Se o `PATCH` falhar, o grupo já existe: a tela oferece repetir só o `PATCH` ("Tentar de novo") ou seguir ("Seguir assim"). Botão desligado durante a chamada (a API não tem chave de idempotência).
 - O modelo escolhido na tela 04 viaja como parâmetro da rota (`?template=`), conferido na tela 05. Para "Do zero" a rota leva também `&blocks=attendance,queue` (a lista da tela 04a, na ordem da tela, vazia se nenhum bloco). Parâmetro ilegível (modelo desconhecido, bloco desconhecido ou repetido, "Do zero" sem `blocks`) volta para a tela 04.
 - **Dinheiro fora do piloto (ADR 0046):** a tela 05 não pergunta "Cobra?" nem valores, a tela 18 não tem o bloco Dinheiro, e o app não lê nem escreve `money.*`. O documento continua com as folhas; o "Racha organizado" segue com `money.enabled` ligado, escondido na interface, para a E3.10 do pós-piloto. O tipo `ShownPath` (todo `SettingsPath` menos `money.*`) faz o compilador impedir uma linha ou texto de dinheiro. `money-text.ts` foi apagado.
-- Depois de criar o grupo a tela vai para "Como jogamos" (pergunta 32) até a Parte 2 e a E4.6.
+- Depois de criar o grupo a tela vai para "Nova rodada" (tela 20, E4.6, pergunta 48), não para Membros.
 - **"Livre / 6x0":** um botão só para o sistema `livre` (resposta do Gabriel em 30/10/2026). O "6x0" não existe no catálogo (`settings.unknown-value`), então o rótulo do `livre` é "Livre / 6x0" e os sistemas continuam os 4 do catálogo.
 - A linha "Regra" da fila vira link para a tela 18a (D10, Parte 4) e mostra o resumo da regra ("Automático · vencedor sai após 3").
 
@@ -37,6 +37,22 @@ A E4.5 liga o app às rotas de configuração do grupo da E3.3 ([ADR 0041](0041-
 - `MutationEvent` ganha `settingsReplaced` (com o documento, para `setQueryData`), `templatesChanged` e `settingsForbidden` (403 no meio: invalida o grupo e a configuração, e a tela vira só leitura sozinha). O efeito de cache ganha a ação `set`.
 - `isConflict` passa a ser usado: `conflictEffects` mostra o texto do `code`, não repete e invalida só a consulta que o conflito diz estar velha (`last-admin` → `members`, `invite-limit` → `invites`, `template-limit` → `templates`).
 - Quem não tem `ManageSettings` vê a tela só para leitura e não chama `listTemplates` (`enabled: false`), então o 403 não sai.
+
+## Decisão (Parte 2): membros e convite
+
+**D6 · Tela 19 e folha 19c, antes dos nomes (E3.17).** Linha com avatar neutro (tracejado sem conta), "Você" ou "Membro desde 12 out", o selo do papel ("Sem conta" amarelo para o convidado) e "Mensalista · você". Ordem: você, Admin, Co-admin, Placar, Jogador, e quem entrou antes. Abas "Mensalistas (N)", "Avulsos (N)" e "Convites" (só com `ManageInvites`; para os outros, `listInvites` nem é chamado) em `useState`, anunciadas como abas (`ui/TabSwitch`). A folha 19c vem de `memberActions(me, target, members)`, puro: os chips de papel que quem age não pode dar ficam desligados; convidado sem conta só tem "Jogador" e "Avulso"; o último Admin não sai nem se rebaixa ("Promova outro admin antes"); o Co-admin não se rebaixa; Placar e Jogador só abrem a própria linha, com "Sair do grupo". "Remover" de outra pessoa fica escondido até a Parte 3 (pergunta 30). O reducer da tela (`members-screen.reducer.ts`) guarda só a linha da folha aberta e a confirmação pendente (sair, revogar); a folha é derivada da lista do cache a cada render. As escritas de membro rodam em fila por grupo (`scope: members-<groupId>`). Depois de sair, a tela vai para a lista de grupos.
+
+**D7 · Tela 19d, convite (sensível).**
+
+- **Um lugar para o token:** a porta `InviteLinkStore` (`read`, `save`, `remove`, `clearAll`), real sobre `expo-secure-store` com uma chave por grupo e um índice dos grupos (o armazenamento do sistema não lista as próprias chaves), falsa em memória. O token nasce no resultado da única mutação da tela (`gcTime: 0`), que também é quem o segura na memória enquanto a tela está aberta; nunca no cache do Query, no reducer, em parâmetro de rota ou em log. O link é montado na hora de desenhar, copiar ou mandar.
+- **Ao abrir:** se há link guardado e o `inviteId` ainda está em `listInvites`, usa ele; senão, apaga a cópia e cria outro. Uma falha ao gravar a cópia não perde o link: ele aparece, e outro é criado na próxima visita.
+- **Desativar e gerar outro:** revoga o mostrado (um `invite-not-found` conta como feito), apaga a cópia e cria outro, nessa ordem; recusa no meio mostra o erro e "Tentar de novo", que relê o guardado. "Revogar" na aba "Convites" apaga a cópia quando é o mesmo convite. Sair do grupo ou virar Placar ou Jogador apaga a cópia (o servidor já matou os links).
+- **Formato e endereço:** `{base}/c#{token}`, com a base em `EXPO_PUBLIC_INVITE_BASE_URL` (pergunta 33), só origem `https:` (`http:` só em `__DEV__`); valor ausente ou inválido não derruba o app, como faz o da API: só esconde os botões de convite da 19 e a 19d diz que o link fica disponível depois. A tela mostra `sacou.app/c#K7fQ2x…` (6 caracteres do token).
+- **Copiar:** porta `Clipboard` (`setText`), real com `expo-clipboard`. Mostra "Link copiado" até o link mudar.
+- **WhatsApp:** porta `ExternalLink` (`open(url)` devolve `false` quando nenhum app abre), real sobre `Linking.openURL`, sem `canOpenURL`. `whatsapp://send?text=`; sem WhatsApp, a `ShareSheet` da E4.6 recebe a mesma mensagem. Nunca `wa.me`.
+- **QR:** porta `QrEncoder` sobre `qrcode-generator` (JS puro, versão exata), nível M, versão automática (link de 63 bytes → versão 5, 37 módulos); `ui/QrCode.tsx` recebe só a matriz e desenha um caminho SVG com margem de 4 módulos, `#0F1B2D` sobre branco, 60% da largura com `aspectRatio: 1`.
+- **Sessão:** `clearSession({ cacheSession, inviteLinkStore })` limpa o cache do servidor e chama `clearAll()`; a E4.3 liga ao logout.
+- **Componentes novos:** `ui/TabSwitch`, `ui/ConfirmSheet`, `ui/QrCode`, variantes `outline`, `danger`, `dangerOutline` e `dangerText` e ícone opcional no `ui/Button`, ícones `MoreIcon`, `LinkIcon` e `QrIcon`; cores `avatarSurface`, `infoFill`/`infoText` (selo Placar) e `danger` (`#B42318`), todas conferidas para AA.
 
 ## Alternativas descartadas
 

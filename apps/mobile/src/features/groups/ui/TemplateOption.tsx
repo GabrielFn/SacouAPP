@@ -4,6 +4,7 @@ import { Pressable, View } from "react-native";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
+import { HeadedBlock } from "../../../ui/HeadedBlock";
 import { CheckIcon } from "../../../ui/Icons";
 import { ProBadge } from "../../../ui/ProBadge";
 import { Text } from "../../../ui/Text";
@@ -59,17 +60,20 @@ export function TemplateOption({ templateKey, pro, selected, onSelect }: Templat
       }}
     >
       <TemplateIcon templateKey={templateKey} />
-      <View style={{ flex: 1, gap: tokens.spacing.xs }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-          <Text variant="title" style={{ fontSize: tokens.fontSizes.button }}>
-            {text.name}
-          </Text>
-          {pro ? <ProBadge /> : null}
-        </View>
+      <HeadedBlock
+        heading={
+          <>
+            <Text variant="title" style={{ fontSize: tokens.fontSizes.button }}>
+              {text.name}
+            </Text>
+            {pro ? <ProBadge /> : null}
+          </>
+        }
+      >
         <Text variant="muted" style={{ fontFamily: fontFamilies.body400 }}>
           {text.line}
         </Text>
-      </View>
+      </HeadedBlock>
       {selected ? <SelectedBadge /> : null}
     </Pressable>
   );

@@ -22,6 +22,10 @@ export const THEME_ROLES = [
   "badgeSurface",
   "trackOff",
   "segmentSurface",
+  "avatarSurface",
+  "infoFill",
+  "infoText",
+  "danger",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -53,6 +57,10 @@ export const appTheme = {
   badgeSurface: nightWithAlpha(nightAlpha.badge),
   trackOff: nightWithAlpha(nightAlpha.trackOff),
   segmentSurface: nightWithAlpha(nightAlpha.segment),
+  avatarSurface: palette.avatarSurface,
+  infoFill: palette.infoFill,
+  infoText: palette.infoText,
+  danger: palette.danger,
 } as const satisfies Theme;
 
 /**
@@ -93,6 +101,11 @@ function courtTheme(colors: CourtColors): Theme {
     badgeSurface: colors.background,
     trackOff: colors.muted,
     segmentSurface: colors.background,
+    // The court has no member rows: the same colors as the app, for a complete theme.
+    avatarSurface: palette.avatarSurface,
+    infoFill: palette.infoFill,
+    infoText: palette.infoText,
+    danger: palette.danger,
   };
 }
 

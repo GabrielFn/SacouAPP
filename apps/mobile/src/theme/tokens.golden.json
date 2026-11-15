@@ -32,6 +32,22 @@
     "waitingBorder": {
       "hex": "#E0A400",
       "source": "Inicio.dc.html:65"
+    },
+    "avatarSurface": {
+      "hex": "#E9E1D1",
+      "source": "Membros.dc.html:23"
+    },
+    "infoFill": {
+      "hex": "#E3EAFF",
+      "source": "Membros.dc.html:93"
+    },
+    "infoText": {
+      "hex": "#1340C0",
+      "source": "Membros.dc.html:93"
+    },
+    "danger": {
+      "hex": "#B42318",
+      "source": "Convidar.dc.html:36"
     }
   },
   "court": {
@@ -86,7 +102,11 @@
     "chevronIcon": 20,
     "courtIconWidth": 30,
     "courtIconHeight": 22,
-    "highlightDot": 8
+    "highlightDot": 8,
+    "avatar": 40,
+    "moreButtonWidth": 44,
+    "moreButtonHeight": 48,
+    "memberRowMin": 56
   },
   "radii": {
     "field": 12,
