@@ -8,10 +8,10 @@ import { ErrorStrip } from "../../../ui/ErrorStrip";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
-import { useAddPlayer } from "../hooks/use-add-player";
-import { addableMembers, type AddableRow } from "../model/addable-members";
-import { capacityHint } from "../model/capacity-hint";
-import { roundSettingsOf, statsCells } from "../model/round-detail";
+import { useAddPlayer, type AddPlayerModel } from "../hooks/use-add-player";
+import type { AddableRow } from "../model/addable-members";
+import { roundSettingsOf } from "../model/round-detail";
+import { addPlayerView, type AddPlayerView } from "../model/round-screen-view";
 import { roundHref } from "../navigation";
 import { RoundLoading } from "./RoundHeading";
 
@@ -69,6 +69,58 @@ function AddableRowView({ row, adding, disabled, onAdd }: AddableRowViewProps) {
   );
 }
 
+export interface AddableListProps {
+  readonly view: AddPlayerView;
+  readonly model: AddPlayerModel;
+}
+
+/** "Ainda não confirmaram": the rows, or why there is none. */
+function AddableList({ view, model }: AddableListProps) {
+  const { colors, tokens } = useTheme();
+  if (view.rows.length === 0) {
+    return <Text variant="muted">{model.search.trim() === "" ? add.nobodyLeft : add.noMatch}</Text>;
+  }
+  return (
+    <View
+      style={{
+        borderRadius: tokens.radii.card,
+        borderWidth: tokens.borderWidths.thin,
+        borderColor: colors.borderCard,
+        backgroundColor: colors.surface,
+        overflow: "hidden",
+      }}
+    >
+      {view.rows.map((row) => (
+        <AddableRowView
+          key={row.memberId}
+          row={row}
+          adding={model.addingId === row.memberId}
+          disabled={view.blocked || model.addingId !== null}
+          onAdd={() => {
+            model.add(row.memberId);
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+export interface AddFeedbackProps {
+  readonly text: string | null;
+  readonly failed: boolean;
+}
+
+/** "Davi entrou na espera (2º).", or the text of the refusal. */
+function AddFeedback({ text, failed }: AddFeedbackProps) {
+  if (text === null) return null;
+  if (failed) return <ErrorStrip text={text} />;
+  return (
+    <Text variant="bodyStrong" accessibilityLiveRegion="polite">
+      {text}
+    </Text>
+  );
+}
+
 export interface AddPlayerScreenProps {
   readonly groupId: string;
   readonly roundId: string;
@@ -77,7 +129,7 @@ export interface AddPlayerScreenProps {
 /** Screen 21: the admin adds who confirmed on WhatsApp; the server decides spot or waitlist (D8). */
 export function AddPlayerScreen({ groupId, roundId }: AddPlayerScreenProps) {
   const router = useRouter();
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
   const model = useAddPlayer(groupId, roundId);
   const close = () => {
     if (router.canGoBack()) router.back();
@@ -98,11 +150,7 @@ export function AddPlayerScreen({ groupId, roundId }: AddPlayerScreenProps) {
     );
   }
   const settings = roundSettingsOf(round.data);
-  const waitlistEnabled = settings?.values.attendance.waitlistEnabled ?? false;
-  const hint = capacityHint(round.data, waitlistEnabled);
-  const rows = addableMembers(members.data ?? [], round.data, model.search);
-  const count = settings === null ? [] : statsCells(round.data, settings.values);
-  const blocked = hint?.canAdd === false;
+  const view = addPlayerView(round.data, settings, members.data ?? [], model.search);
   return (
     <Screen scroll>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: tokens.spacing.s }}>
@@ -110,7 +158,7 @@ export function AddPlayerScreen({ groupId, roundId }: AddPlayerScreenProps) {
           <Text variant="title" accessibilityRole="header">
             {add.title}
           </Text>
-          <Text variant="muted">{add.subtitle(group.data.name, count[0]?.value ?? "")}</Text>
+          <Text variant="muted">{add.subtitle(group.data.name, view.confirmed)}</Text>
         </View>
         <Button label={add.close} variant="link" onPress={close} />
       </View>
@@ -121,42 +169,12 @@ export function AddPlayerScreen({ groupId, roundId }: AddPlayerScreenProps) {
         onChangeText={model.setSearch}
         autoCapitalize="none"
       />
-      {model.feedback === null ? null : model.failed ? (
-        <ErrorStrip text={model.feedback} />
-      ) : (
-        <Text variant="bodyStrong" accessibilityLiveRegion="polite">
-          {model.feedback}
-        </Text>
-      )}
+      <AddFeedback text={model.feedback} failed={model.failed} />
       <Text variant="bodyStrong" accessibilityRole="header">
         {add.notYet}
       </Text>
-      {rows.length === 0 ? (
-        <Text variant="muted">{model.search.trim() === "" ? add.nobodyLeft : add.noMatch}</Text>
-      ) : (
-        <View
-          style={{
-            borderRadius: tokens.radii.card,
-            borderWidth: tokens.borderWidths.thin,
-            borderColor: colors.borderCard,
-            backgroundColor: colors.surface,
-            overflow: "hidden",
-          }}
-        >
-          {rows.map((row) => (
-            <AddableRowView
-              key={row.memberId}
-              row={row}
-              adding={model.addingId === row.memberId}
-              disabled={blocked || model.addingId !== null}
-              onAdd={() => {
-                model.add(row.memberId);
-              }}
-            />
-          ))}
-        </View>
-      )}
-      {hint === null ? null : <Text variant="muted">{hint.text}</Text>}
+      <AddableList view={view} model={model} />
+      {view.hint === null ? null : <Text variant="muted">{view.hint.text}</Text>}
     </Screen>
   );
 }

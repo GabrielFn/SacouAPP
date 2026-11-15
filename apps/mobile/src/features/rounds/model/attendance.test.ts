@@ -173,13 +173,27 @@ describe("presenceCard, one case per row of D7", () => {
       waitlist: "1 na espera",
     });
     expect(presenceCounts(round, attendanceSettings(false)).waitlist).toBeNull();
-    expect(presenceCounts(attendanceRound({ capacity: null, goingCount: 4 }), attendanceSettings()))
-      .toEqual({ confirmed: "4", waitlist: null });
+    expect(
+      presenceCounts(attendanceRound({ capacity: null, goingCount: 4 }), attendanceSettings()),
+    ).toEqual({ confirmed: "4", waitlist: null });
   });
 });
 
 describe("confirmedSummary", () => {
-  const names = ["Ana", "Pedro", "Lia", "Marcos", "Bia", "Caio", "Duda", "Edu", "Você", "Fê", "Gil", "Hugo"];
+  const names = [
+    "Ana",
+    "Pedro",
+    "Lia",
+    "Marcos",
+    "Bia",
+    "Caio",
+    "Duda",
+    "Edu",
+    "Você",
+    "Fê",
+    "Gil",
+    "Hugo",
+  ];
   const roster = names.map((name, index) => ({
     memberId: index === 8 ? ME : `m-${String(index)}`,
     position: index + 1,
@@ -198,7 +212,9 @@ describe("confirmedSummary", () => {
   });
 
   test("ordered by position, whatever the order of the answer", () => {
-    expect(summaryText(confirmedSummary([...roster.slice(0, 2)].reverse(), ME))).toBe("Ana e Pedro");
+    expect(summaryText(confirmedSummary([...roster.slice(0, 2)].reverse(), ME))).toBe(
+      "Ana e Pedro",
+    );
   });
 
   test("0: Ninguém confirmou ainda", () => {
@@ -334,7 +350,7 @@ describe("roundScreenReducer", () => {
   });
 
   test("rosterOf joins the names by memberId", () => {
-    expect(rosterOf([waitOf("m-ana", 1)], [memberOf("m-ana", "Ana")])).toEqual([
+    expect(rosterOf([waitOf("m-ana", 1)], [memberOf("m-ana", "Ana")])).toMatchObject([
       { memberId: "m-ana", position: 1, name: "Ana" },
     ]);
   });

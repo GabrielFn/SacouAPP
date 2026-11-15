@@ -13,10 +13,7 @@ import {
   type RoundScreenState,
 } from "../model/round-screen.reducer";
 import { roundListText } from "../model/round-list-text";
-import {
-  respondAttendanceMutation,
-  setMemberAttendanceMutation,
-} from "../queries/round-mutations";
+import { respondAttendanceMutation, setMemberAttendanceMutation } from "../queries/round-mutations";
 import { useRound } from "../queries/use-round-queries";
 
 export interface RoundListInput {

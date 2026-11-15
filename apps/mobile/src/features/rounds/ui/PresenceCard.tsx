@@ -21,7 +21,13 @@ export function PresenceCard({ view, counts, going }: PresenceCardProps) {
   return (
     <View
       accessible
-      accessibilityLabel={[presence.section, view.title, view.line, counts.confirmed, counts.waitlist]
+      accessibilityLabel={[
+        presence.section,
+        view.title,
+        view.line,
+        counts.confirmed,
+        counts.waitlist,
+      ]
         .filter((part) => part !== null)
         .join(". ")}
       style={{

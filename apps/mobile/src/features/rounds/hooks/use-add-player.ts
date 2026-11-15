@@ -46,7 +46,7 @@ export function useAddPlayer(groupId: string, roundId: string): AddPlayerModel {
     add: (memberId) => {
       if (!mutation.isPending) mutation.mutate({ memberId, response: "going" });
     },
-    addingId: mutation.isPending ? (mutation.variables?.memberId ?? null) : null,
+    addingId: mutation.isPending ? mutation.variables.memberId : null,
     feedback,
     failed: mutation.isError,
   };

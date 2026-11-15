@@ -21,7 +21,7 @@ import {
   statsCells,
   type RoundSettingsView,
 } from "../model/round-detail";
-import { rosterOf, waitlistLine } from "../model/roster";
+import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
 import { addPlayerHref, PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
@@ -108,71 +108,52 @@ export interface AdminRoundScreenProps {
   readonly model: RoundScreenModel;
 }
 
-/** Screen 06, for who manages the rounds: the counts, the list with "Tirar" and "Copiar lista". */
-export function AdminRoundScreen({
-  groupId,
-  group,
-  round,
-  settings,
-  members,
-  model,
-}: AdminRoundScreenProps) {
-  const router = useRouter();
+export interface AdminHeaderProps {
+  readonly role: Group["role"];
+  readonly canCopy: boolean;
+  readonly copied: boolean;
+  readonly onCopy: () => void;
+}
+
+/** "Você é admin" with the back button, and "Copiar lista" on the right (Rodada.dc.html). */
+function AdminHeader({ role, canCopy, copied, onCopy }: AdminHeaderProps) {
   const { tokens } = useTheme();
-  const { state, dispatch } = model;
-  const waitlistEnabled = settings?.values.attendance.waitlistEnabled ?? false;
-  const waitlist = waitlistEnabled ? waitlistLine(rosterOf(round.waitlist, members)) : "";
-  const going = rosterOf(round.going, members);
-  const canCopy = settings?.values.attendance.enabled === true && !isCanceled(round);
-  const actions = footerActions(PENDING_ROUND_SCREENS, isCanceled(round));
-  const removing = state.sheet.kind === "remove" ? state.sheet.memberId : null;
-  const removingName =
-    going.find((entry) => entry.memberId === removing)?.name ?? detail.noName;
-  const close = () => {
-    dispatch({ type: "sheet-closed" });
-  };
   return (
-    <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
+    <>
       <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
         <View style={{ flex: 1 }}>
-          <BackBar title={roleHeader(group.role)} fallbackHref={groupsHref} />
+          <BackBar title={roleHeader(role)} fallbackHref={groupsHref} />
         </View>
-        {canCopy ? (
-          <Button
-            label={detail.copyList}
-            variant="link"
-            onPress={() => {
-              model.copyList({ groupName: group.name, round, members, waitlistEnabled });
-            }}
-          />
-        ) : null}
+        {canCopy ? <Button label={detail.copyList} variant="link" onPress={onCopy} /> : null}
       </View>
-      {state.copied ? (
+      {copied ? (
         <Text variant="muted" accessibilityLiveRegion="polite">
           {detail.listCopied}
         </Text>
       ) : null}
-      <RoundHeading groupName={group.name} round={round} />
-      {settings === null ? (
-        <ErrorStrip text={detail.loadError} />
-      ) : (
-        <RoundBody
-          round={round}
-          settings={settings}
-          waitlist={waitlist}
-          onOpenConfirmed={() => {
-            dispatch({ type: "confirmed-opened" });
-          }}
-          onAdd={() => {
-            router.push(addPlayerHref(groupId, round.roundId));
-          }}
-        />
-      )}
-      {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
+    </>
+  );
+}
+
+export interface RemoveSheetsProps {
+  readonly round: Round;
+  readonly roster: RosterView;
+  readonly model: RoundScreenModel;
+}
+
+/** The list with "Tirar" and its confirmation, one sheet at a time (question 47). */
+function RemoveSheets({ round, roster, model }: RemoveSheetsProps) {
+  const { state, dispatch } = model;
+  const removing = state.sheet.kind === "remove" ? state.sheet.memberId : null;
+  const close = () => {
+    dispatch({ type: "sheet-closed" });
+  };
+  return (
+    <>
       <ConfirmedSheet
         visible={state.sheet.kind === "confirmed"}
-        going={going}
-        waitlistLine={waitlist}
+        going={roster.going}
+        waitlistLine={roster.waitlist}
         meId={round.me.memberId}
         removing={model.removing}
         onRemove={
@@ -187,9 +168,7 @@ export function AdminRoundScreen({
       <ConfirmSheet
         visible={removing !== null}
         title={confirmed.removeTitle}
-        body={confirmed.removeBody(
-          removing === round.me.memberId ? confirmed.youRow : removingName,
-        )}
+        body={confirmed.removeBody(removalName(roster.going, removing ?? "", round.me.memberId))}
         confirmLabel={confirmed.removeConfirm}
         cancelLabel={confirmed.cancel}
         onConfirm={() => {
@@ -197,6 +176,55 @@ export function AdminRoundScreen({
         }}
         onCancel={close}
       />
+    </>
+  );
+}
+
+/** Screen 06, for who manages the rounds: the counts, the list with "Tirar" and "Copiar lista". */
+export function AdminRoundScreen({
+  groupId,
+  group,
+  round,
+  settings,
+  members,
+  model,
+}: AdminRoundScreenProps) {
+  const router = useRouter();
+  const roster = rosterView(round, settings, members);
+  const actions = footerActions(PENDING_ROUND_SCREENS, isCanceled(round));
+  return (
+    <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
+      <AdminHeader
+        role={group.role}
+        canCopy={canCopyList(round, settings)}
+        copied={model.state.copied}
+        onCopy={() => {
+          model.copyList({
+            groupName: group.name,
+            round,
+            members,
+            waitlistEnabled: roster.waitlistEnabled,
+          });
+        }}
+      />
+      <RoundHeading groupName={group.name} round={round} />
+      {settings === null ? (
+        <ErrorStrip text={detail.loadError} />
+      ) : (
+        <RoundBody
+          round={round}
+          settings={settings}
+          waitlist={roster.waitlist}
+          onOpenConfirmed={() => {
+            model.dispatch({ type: "confirmed-opened" });
+          }}
+          onAdd={() => {
+            router.push(addPlayerHref(groupId, round.roundId));
+          }}
+        />
+      )}
+      {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
+      <RemoveSheets round={round} roster={roster} model={model} />
     </Screen>
   );
 }

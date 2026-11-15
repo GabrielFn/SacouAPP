@@ -14,13 +14,14 @@ import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { confirmedSummary, summaryText } from "../model/confirmed-summary";
 import {
   holdsSpot,
-  presenceCard,
   presenceCounts,
   type PresenceActions,
+  type PresenceCardView,
 } from "../model/presence-card";
 import { roundChips, sourceReader } from "../model/round-chips";
 import { roleHeader, type RoundSettingsView } from "../model/round-detail";
-import { rosterOf, waitlistLine, type RosterEntry } from "../model/roster";
+import type { RosterEntry } from "../model/roster";
+import { playerPresence, rosterView, type RosterView } from "../model/round-screen-view";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { PresenceCard } from "./PresenceCard";
 import { RoundChips } from "./RoundChips";
@@ -151,6 +152,42 @@ function ConfirmedBlock({ going, meId, waitlist, onSeeAll }: ConfirmedBlockProps
   );
 }
 
+export interface PlayerBodyProps {
+  readonly round: Round;
+  readonly settings: RoundSettingsView | null;
+  readonly card: PresenceCardView | null;
+  readonly roster: RosterView;
+  readonly onSeeAll: () => void;
+}
+
+/** The pills, the "Sua presença" card and the confirmed of screen 26. */
+function PlayerBody({ round, settings, card, roster, onSeeAll }: PlayerBodyProps) {
+  if (settings === null) return <ErrorStrip text={detail.loadError} />;
+  const chips = roundChips(settings.values, sourceReader(settings.sources), {
+    withRotation: false,
+  });
+  return (
+    <>
+      <RoundChips chips={chips} legend={false} />
+      {card === null ? null : (
+        <>
+          <PresenceCard
+            view={card}
+            counts={presenceCounts(round, settings.values)}
+            going={holdsSpot(round)}
+          />
+          <ConfirmedBlock
+            going={roster.going}
+            meId={round.me.memberId}
+            waitlist={roster.waitlist}
+            onSeeAll={onSeeAll}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
 export interface PlayerRoundScreenProps {
   readonly group: Group;
   readonly round: Round;
@@ -160,25 +197,23 @@ export interface PlayerRoundScreenProps {
 }
 
 /** Screen 26, for the player and the scorekeeper: the own answer and who is going (D7). */
-export function PlayerRoundScreen({ group, round, settings, members, model }: PlayerRoundScreenProps) {
+export function PlayerRoundScreen({
+  group,
+  round,
+  settings,
+  members,
+  model,
+}: PlayerRoundScreenProps) {
   const { state, dispatch } = model;
-  const values = settings?.values ?? null;
-  const waitlistEnabled = values?.attendance.waitlistEnabled ?? false;
-  const waitlistRoster = waitlistEnabled ? rosterOf(round.waitlist, members) : [];
-  const waitlist = waitlistLine(waitlistRoster);
-  const going = rosterOf(round.going, members);
-  const myType = members.find((member) => member.isMe)?.memberType ?? null;
-  const card =
-    values === null || !values.attendance.enabled
-      ? null
-      : presenceCard({ round, values, waitlist: waitlistRoster, myType, now: model.now });
+  const roster = rosterView(round, settings, members);
+  const card = playerPresence(round, settings, members, model.now);
   const close = () => {
     dispatch({ type: "sheet-closed" });
   };
   return (
     <Screen
       footer={
-        card === null || card.actions.kind === "none" ? undefined : (
+        card === null ? undefined : (
           <PresenceFooter
             actions={card.actions}
             pending={model.responding}
@@ -192,34 +227,20 @@ export function PlayerRoundScreen({ group, round, settings, members, model }: Pl
     >
       <BackBar title={roleHeader(group.role)} fallbackHref={groupsHref} />
       <RoundHeading groupName={group.name} round={round} />
-      {settings === null ? (
-        <ErrorStrip text={detail.loadError} />
-      ) : (
-        <RoundChips
-          chips={roundChips(settings.values, sourceReader(settings.sources), {
-            withRotation: false,
-          })}
-          legend={false}
-        />
-      )}
-      {card === null || values === null ? null : (
-        <>
-          <PresenceCard view={card} counts={presenceCounts(round, values)} going={holdsSpot(round)} />
-          <ConfirmedBlock
-            going={going}
-            meId={round.me.memberId}
-            waitlist={waitlist}
-            onSeeAll={() => {
-              dispatch({ type: "confirmed-opened" });
-            }}
-          />
-        </>
-      )}
+      <PlayerBody
+        round={round}
+        settings={settings}
+        card={card}
+        roster={roster}
+        onSeeAll={() => {
+          dispatch({ type: "confirmed-opened" });
+        }}
+      />
       {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
       <ConfirmedSheet
         visible={state.sheet.kind === "confirmed"}
-        going={going}
-        waitlistLine={waitlist}
+        going={roster.going}
+        waitlistLine={roster.waitlist}
         meId={round.me.memberId}
         onRemove={null}
         removing={false}

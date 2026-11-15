@@ -1,4 +1,5 @@
 import type { Member, MemberType, Round } from "../../../services/api/sacou-api";
+import { membersStrings } from "../../../strings/members.pt-BR";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import type { MemberAttendanceResult } from "../queries/round-mutations";
 import { initialOf } from "./confirmed-summary";
@@ -30,8 +31,10 @@ function nameOf(member: Member): string {
 }
 
 function detailOf(member: Member): string {
-  if (!member.hasAccount) return add.noAccount;
-  return member.memberType === "regular" ? add.regular : add.dropIn;
+  // The member type labels of screen 19: the rounds texts never say "Avulso" (the field left the pilot).
+  const { row } = membersStrings;
+  if (!member.hasAccount) return row.noAccount;
+  return member.memberType === "regular" ? row.regular : row.dropIn;
 }
 
 function placedIds(round: Round): ReadonlySet<string> {
@@ -63,7 +66,12 @@ export function addableMembers(
     .sort(compareMembers)
     .map((member) => {
       const name = nameOf(member);
-      return { memberId: member.memberId, name, initial: initialOf(name), detail: detailOf(member) };
+      return {
+        memberId: member.memberId,
+        name,
+        initial: initialOf(name),
+        detail: detailOf(member),
+      };
     });
 }
 

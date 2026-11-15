@@ -5,6 +5,8 @@ const { confirmed: texts, detail } = roundsStrings;
 
 /** Four others and "você", the five avatars of RodadaJogador.dc.html. */
 const NAMES_SHOWN = 5;
+/** The name before the last takes " e " when nothing follows. */
+const NEXT_TO_LAST = 2;
 
 /** One piece of the line; `strong` is "você", in bold. */
 export interface SummaryPart {
@@ -41,7 +43,11 @@ function shownNames(roster: readonly RosterEntry[], meId: string): readonly Show
 function joined(names: readonly ShownName[], rest: number): readonly SummaryPart[] {
   const parts = names.flatMap((shown, index): SummaryPart[] => {
     const isLast = index === names.length - 1;
-    const separator = isLast ? "" : rest === 0 && index === names.length - 2 ? " e " : ", ";
+    const separator = isLast
+      ? ""
+      : rest === 0 && index === names.length - NEXT_TO_LAST
+        ? " e "
+        : ", ";
     const name: SummaryPart = { text: shown.name, strong: shown.isMe };
     return separator === "" ? [name] : [name, { text: separator, strong: false }];
   });
@@ -65,6 +71,8 @@ export function summaryText(summary: ConfirmedSummary): string {
 
 /** The first letter of a name, in capitals; "?" for a name without letters. */
 export function initialOf(name: string): string {
-  const first = [...name.trim()][0];
-  return first === undefined ? texts.noInitial : first.toLocaleUpperCase("pt-BR");
+  const first = name.trim().codePointAt(0);
+  return first === undefined
+    ? texts.noInitial
+    : String.fromCodePoint(first).toLocaleUpperCase("pt-BR");
 }
