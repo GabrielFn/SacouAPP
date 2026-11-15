@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useServices } from "../../../services/services-context";
-import { groupMembersQuery, groupQuery, myGroupsQuery } from "./group-queries";
+import { groupInvitesQuery, groupMembersQuery, groupQuery, myGroupsQuery } from "./group-queries";
 import { groupSettingsQuery, groupTemplatesQuery } from "./group-settings-queries";
 
 // The data stays only in the query cache (frontend.md, rule 1): these hooks return the query as it is.
@@ -30,4 +30,10 @@ export function useGroupSettings(groupId: string) {
 export function useGroupTemplates(groupId: string, enabled: boolean) {
   const { sacouApi } = useServices();
   return useQuery(groupTemplatesQuery(sacouApi, groupId, enabled));
+}
+
+/** Off for who cannot manage invites (E4.5, D6): the list is never asked for them. */
+export function useGroupInvites(groupId: string, enabled: boolean) {
+  const { sacouApi } = useServices();
+  return useQuery(groupInvitesQuery(sacouApi, groupId, enabled));
 }

@@ -1,0 +1,85 @@
+import type { GroupRole, Member } from "../../../services/api/sacou-api";
+
+export const ROLES: readonly GroupRole[] = ["admin", "coAdmin", "scorekeeper", "player"];
+
+/** A chip of the role: the current one is marked; a role who acts cannot give is off, not hidden. */
+export type ChipState = "current" | "enabled" | "disabled";
+
+export interface RoleChip {
+  readonly role: GroupRole;
+  readonly state: ChipState;
+}
+
+export interface TypeChoice {
+  /** "Mensalista" is off with "Precisa ter conta" for a guest without an account. */
+  readonly regularBlocked: boolean;
+}
+
+/** What the sheet 19c offers for one row (E4.5, D6; the table of answer 16 in `grupos.md`). */
+export interface MemberSheet {
+  readonly target: Member;
+  /** `null`: the section is not shown (a scorekeeper or a player on its own row). */
+  readonly roles: readonly RoleChip[] | null;
+  readonly type: TypeChoice | null;
+  /** Own row: "Sair do grupo". Removing someone else waits for the names (question 30). */
+  readonly canLeave: boolean;
+  /** The only admin: leaving and demoting itself are off, with "Promova outro admin antes". */
+  readonly lastAdmin: boolean;
+}
+
+const isAdminRole = (role: GroupRole) => role === "admin" || role === "coAdmin";
+
+function chips(current: GroupRole, allowed: (role: GroupRole) => boolean): readonly RoleChip[] {
+  return ROLES.map((role) => ({
+    role,
+    state: role === current ? "current" : allowed(role) ? "enabled" : "disabled",
+  }));
+}
+
+/** Whom an admin or co-admin may give each role to, for another person. */
+function allowedForOther(me: GroupRole, target: GroupRole): (role: GroupRole) => boolean {
+  if (me === "admin") return () => true;
+  // A co-admin moves only between Placar and Jogador, and never touches an admin or a co-admin.
+  return (role) => !isAdminRole(target) && !isAdminRole(role);
+}
+
+function ownSheet(me: Member, members: readonly Member[]): MemberSheet {
+  const admins = members.filter((member) => member.role === "admin").length;
+  const lastAdmin = me.role === "admin" && admins <= 1;
+  if (!isAdminRole(me.role)) {
+    return { target: me, roles: null, type: null, canLeave: true, lastAdmin };
+  }
+  // An admin demotes itself only with another admin; a co-admin never does (it leaves).
+  const roles = chips(me.role, () => me.role === "admin" && !lastAdmin);
+  return {
+    target: me,
+    roles,
+    type: { regularBlocked: !me.hasAccount },
+    canLeave: true,
+    lastAdmin,
+  };
+}
+
+/** The sheet of a row, or `null` when the row has no "⋯" for who looks (a player on someone else). */
+export function memberActions(
+  me: Member,
+  target: Member,
+  members: readonly Member[],
+): MemberSheet | null {
+  if (target.memberId === me.memberId) return ownSheet(me, members);
+  if (!isAdminRole(me.role)) return null;
+  const allowed = allowedForOther(me.role, target.role);
+  // A guest without an account is always Jogador (`groups.role-needs-account`).
+  return {
+    target,
+    roles: chips(target.role, (role) => allowed(role) && (target.hasAccount || role === "player")),
+    type: { regularBlocked: !target.hasAccount },
+    canLeave: false,
+    lastAdmin: false,
+  };
+}
+
+/** Who becomes Placar or Jogador loses its invites on the server; the phone forgets its copy. */
+export function losesInvites(role: GroupRole): boolean {
+  return !isAdminRole(role);
+}

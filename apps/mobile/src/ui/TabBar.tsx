@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { strings } from "../strings/pt-BR";
 import { useTheme } from "../theme/theme-context";
 import { fontFamilies } from "../theme/tokens.data";
 
@@ -17,6 +18,8 @@ export function TabBarFrame({ children }: TabBarFrameProps) {
   const insets = useSafeAreaInsets();
   return (
     <View
+      accessibilityRole="tablist"
+      accessibilityLabel={strings.groups.tabs.navigation}
       style={{
         flexDirection: "row",
         backgroundColor: colors.background,
