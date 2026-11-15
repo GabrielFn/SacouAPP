@@ -85,7 +85,11 @@ export function SignInButtons({
         accessibilityState={{ disabled: busy }}
         disabled={busy}
         onPress={onEmail}
-        style={{ minHeight: tokens.sizes.linkButton, alignItems: "center", justifyContent: "center" }}
+        style={{
+          minHeight: tokens.sizes.linkButton,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <Text
           style={{

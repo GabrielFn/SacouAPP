@@ -1,4 +1,4 @@
-import Svg, { Defs, Line, Path, Pattern, Rect } from "react-native-svg";
+import Svg, { Defs, Line, Path, Pattern } from "react-native-svg";
 
 import { loginColors } from "../../../theme/login-colors";
 import {
@@ -17,7 +17,16 @@ const FLUSH = 0;
 const MESH_ID = "login-net-mesh";
 const LEFT = BACKDROP_COURT.x;
 const RIGHT = BACKDROP_COURT.x + BACKDROP_COURT.width;
-const CELL = BACKDROP_MESH.cell;
+const CELL = String(BACKDROP_MESH.cell);
+
+/** A rectangle as a path: `Rect` takes its corner through props that the SVG types mark deprecated. */
+function boxPath(x: number, y: number, width: number, height: number): string {
+  return `M${String(x)} ${String(y)}h${String(width)}v${String(height)}h${String(-width)}z`;
+}
+
+const COURT_PATH = boxPath(LEFT, BACKDROP_COURT.y, BACKDROP_COURT.width, BACKDROP_COURT.height);
+const MESH_PATH = boxPath(LEFT, BACKDROP_MESH.y, BACKDROP_COURT.width, BACKDROP_MESH.height);
+const MESH_CROSS = `M0 0L${CELL} ${CELL}M${CELL} 0L0 ${CELL}`;
 
 /** The court lines and the net behind the login: decoration only, hidden from the screen reader. */
 export function CourtBackdrop() {
@@ -31,19 +40,16 @@ export function CourtBackdrop() {
       fill="none"
     >
       <Defs>
-        <Pattern id={MESH_ID} width={CELL} height={CELL} patternUnits="userSpaceOnUse">
-          <Path
-            d={`M0 0L${String(CELL)} ${String(CELL)}M${String(CELL)} 0L0 ${String(CELL)}`}
-            stroke={loginColors.mesh}
-            strokeWidth={BACKDROP_MESH.stroke}
-          />
+        <Pattern
+          id={MESH_ID}
+          width={BACKDROP_MESH.cell}
+          height={BACKDROP_MESH.cell}
+          patternUnits="userSpaceOnUse"
+        >
+          <Path d={MESH_CROSS} stroke={loginColors.mesh} strokeWidth={BACKDROP_MESH.stroke} />
         </Pattern>
       </Defs>
-      <Rect
-        {...BACKDROP_COURT}
-        stroke={loginColors.courtLine}
-        strokeWidth={BACKDROP_LINE_WIDTH}
-      />
+      <Path d={COURT_PATH} stroke={loginColors.courtLine} strokeWidth={BACKDROP_LINE_WIDTH} />
       {BACKDROP_ATTACK_LINES_Y.map((y) => (
         <Line
           key={y}
@@ -55,13 +61,7 @@ export function CourtBackdrop() {
           strokeWidth={BACKDROP_LINE_WIDTH}
         />
       ))}
-      <Rect
-        x={LEFT}
-        y={BACKDROP_MESH.y}
-        width={BACKDROP_COURT.width}
-        height={BACKDROP_MESH.height}
-        fill={`url(#${MESH_ID})`}
-      />
+      <Path d={MESH_PATH} fill={`url(#${MESH_ID})`} />
       <Line
         x1={LEFT}
         y1={BACKDROP_NET_Y}

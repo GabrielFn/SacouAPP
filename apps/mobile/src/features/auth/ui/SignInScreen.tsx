@@ -62,7 +62,11 @@ export function SignInScreen() {
               backgroundColor: colors.borderChip,
             }}
           />
-          <Text accessibilityRole="header" style={{ fontSize: tokens.fontSizes.sheetTitle }} variant="title">
+          <Text
+            accessibilityRole="header"
+            style={{ fontSize: tokens.fontSizes.sheetTitle }}
+            variant="title"
+          >
             {auth.sheetTitle}
           </Text>
           <Text variant="muted" style={{ fontSize: tokens.fontSizes.body }}>

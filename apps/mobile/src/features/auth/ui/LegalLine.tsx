@@ -31,9 +31,7 @@ function LegalWord({ label, url, onOpen }: LegalWordProps) {
       }}
       style={{ minHeight: tokens.sizes.minTouchTarget, justifyContent: "center" }}
     >
-      <Text
-        style={{ ...look, fontFamily: fontFamilies.body600, textDecorationLine: "underline" }}
-      >
+      <Text style={{ ...look, fontFamily: fontFamilies.body600, textDecorationLine: "underline" }}>
         {label}
       </Text>
     </Pressable>

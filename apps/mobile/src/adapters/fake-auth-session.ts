@@ -60,29 +60,29 @@ const SIGNS_IN: ReadonlySet<FakeAuthMethod> = new Set([
 /** The `AuthSession` of the tests and of the catalog: scripted results, no network. */
 export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): FakeAuthSession {
   const listeners = createListeners();
-  const state = {
-    snapshot: options.initial ?? ({ status: "signedOut", reason: null } as SessionSnapshot),
-    failures: new Map<FakeAuthMethod, AuthFailure>() as ReadonlyMap<FakeAuthMethod, AuthFailure>,
-    calls: [] as readonly FakeAuthCall[],
+  const snapshot: { value: SessionSnapshot } = {
+    value: options.initial ?? { status: "signedOut", reason: null },
   };
+  const failures: { value: ReadonlyMap<FakeAuthMethod, AuthFailure> } = { value: new Map() };
+  const calls: { value: readonly FakeAuthCall[] } = { value: [] };
   const supported = new Set(options.supported ?? ["google", "password"]);
   const account = options.account ?? FAKE_ACCOUNT;
 
   function record(call: FakeAuthCall): void {
-    state.calls = [...state.calls, call];
+    calls.value = [...calls.value, call];
     options.onCall?.(call);
   }
 
-  function emit(snapshot: SessionSnapshot): void {
-    state.snapshot = snapshot;
+  function emit(next: SessionSnapshot): void {
+    snapshot.value = next;
     listeners.notify();
   }
 
   function run(method: FakeAuthMethod): Promise<AuthResult> {
     record({ method });
-    const failure = state.failures.get(method);
+    const failure = failures.value.get(method);
     if (failure !== undefined) {
-      state.failures = new Map([...state.failures].filter(([key]) => key !== method));
+      failures.value = new Map([...failures.value].filter(([key]) => key !== method));
       return Promise.resolve(err(failure));
     }
     if (SIGNS_IN.has(method)) emit({ status: "signedIn", account });
@@ -91,7 +91,7 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
 
   return {
     subscribe: (listener) => listeners.add(listener),
-    snapshot: () => state.snapshot,
+    snapshot: () => snapshot.value,
     supports: (provider) => supported.has(provider),
     signInWithGoogle: () => run("signInWithGoogle"),
     signInWithApple: () => run("signInWithApple"),
@@ -100,7 +100,7 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
     sendPasswordReset: () => run("sendPasswordReset"),
     getIdToken({ forceRefresh }) {
       record({ method: "getIdToken", forceRefresh });
-      return Promise.resolve(state.snapshot.status === "signedIn" ? FAKE_SESSION_TOKEN : null);
+      return Promise.resolve(snapshot.value.status === "signedIn" ? FAKE_SESSION_TOKEN : null);
     },
     signOut(reason) {
       record({ method: "signOut", reason });
@@ -112,9 +112,9 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
       return Promise.resolve();
     },
     fail(method, failure) {
-      state.failures = new Map([...state.failures, [method, failure]]);
+      failures.value = new Map([...failures.value, [method, failure]]);
     },
     emit,
-    calls: () => state.calls,
+    calls: () => calls.value,
   };
 }

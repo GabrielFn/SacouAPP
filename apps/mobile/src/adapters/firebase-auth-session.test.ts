@@ -38,12 +38,12 @@ function userView(providerIds: readonly string[], forced: boolean[] = []): Fireb
 
 function fakeSdk(): FakeSdk {
   const listeners: ((user: FirebaseUserView | null) => void)[] = [];
-  const failure: { code: string | null } = { code: null };
+  const failure: { current: string | null } = { current: null };
   const log: string[] = [];
   const run = (name: string) => {
     log.push(name);
-    const { code } = failure;
-    failure.code = null;
+    const code = failure.current;
+    failure.current = null;
     return code === null ? Promise.resolve() : Promise.reject(sdkError(code));
   };
   return {
@@ -58,7 +58,7 @@ function fakeSdk(): FakeSdk {
       });
     },
     failNext(code) {
-      failure.code = code;
+      failure.current = code;
     },
     signInWithGoogleIdToken: (idToken) => run(`google:${idToken === GOOGLE_TOKEN ? "ok" : "?"}`),
     signInWithEmail: () => run("email"),

@@ -153,7 +153,9 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   async function tokenFor(state: AttemptState): Promise<ApiResult<string | null>> {
     try {
       return apiOk(
-        state.renewedToken ? await renewToken() : await idTokens.getIdToken({ forceRefresh: false }),
+        state.renewedToken
+          ? await renewToken()
+          : await idTokens.getIdToken({ forceRefresh: false }),
       );
     } catch {
       // The SDK could not renew the token (no network): the session is not over (ADR 0057, D5).

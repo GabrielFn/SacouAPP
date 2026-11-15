@@ -4,15 +4,10 @@ import { Button } from "../../../ui/Button";
 import { SegmentedControl, type SegmentOption } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
-import { useEmailSignIn } from "../hooks/use-email-sign-in";
+import { useEmailSignIn, type EmailSignInModel } from "../hooks/use-email-sign-in";
 import { authFailureText } from "../model/auth-failure-text";
 import type { EmailMode } from "../model/email-sign-in.reducer";
-import {
-  canSubmit,
-  MAX_EMAIL_LENGTH,
-  passwordTooShort,
-  showsEmailError,
-} from "../model/email-sign-in.selectors";
+import { canSubmit, MAX_EMAIL_LENGTH, showsEmailError } from "../model/email-sign-in.selectors";
 
 export interface EmailSignInSheetProps {
   readonly onClose: () => void;
@@ -30,6 +25,44 @@ const SUBMIT_LABEL: Readonly<Record<EmailMode, string>> = {
   signUp: emailSheet.signUp,
   reset: emailSheet.sendReset,
 };
+
+export interface SheetAlertProps {
+  readonly text: string | null;
+}
+
+/** A refusal or a confirmation, read aloud as it appears. */
+function SheetAlert({ text }: SheetAlertProps) {
+  if (text === null) return null;
+  return (
+    <Text variant="bodyStrong" accessibilityRole="alert" accessibilityLiveRegion="polite">
+      {text}
+    </Text>
+  );
+}
+
+export interface PasswordFieldProps {
+  readonly model: EmailSignInModel;
+}
+
+/** The password, filled by the password manager; a new one when creating the account. */
+function PasswordField({ model }: PasswordFieldProps) {
+  const creating = model.state.mode === "signUp";
+  return (
+    <TextField
+      label={emailSheet.passwordLabel}
+      value={model.state.password}
+      onChangeText={model.changePassword}
+      secureTextEntry
+      autoCapitalize="none"
+      autoCorrect={false}
+      autoComplete={creating ? "new-password" : "password"}
+      textContentType={creating ? "newPassword" : "password"}
+      returnKeyType="go"
+      onSubmitEditing={model.submit}
+      help={creating ? emailSheet.passwordRule : undefined}
+    />
+  );
+}
 
 /**
  * The e-mail sheet (question 61, in the style of screen 30a). It is mounted only while open, so the
@@ -69,32 +102,9 @@ export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
         maxLength={MAX_EMAIL_LENGTH}
         error={showsEmailError(state) ? emailSheet.emailInvalid : undefined}
       />
-      {resetting ? null : (
-        <TextField
-          label={emailSheet.passwordLabel}
-          value={state.password}
-          onChangeText={model.changePassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete={state.mode === "signUp" ? "new-password" : "password"}
-          textContentType={state.mode === "signUp" ? "newPassword" : "password"}
-          returnKeyType="go"
-          onSubmitEditing={model.submit}
-          help={state.mode === "signUp" ? emailSheet.passwordRule : undefined}
-          error={passwordTooShort(state) && state.password !== "" ? emailSheet.passwordRule : undefined}
-        />
-      )}
-      {failure === null ? null : (
-        <Text variant="bodyStrong" accessibilityRole="alert" accessibilityLiveRegion="polite">
-          {failure}
-        </Text>
-      )}
-      {state.resetSent ? (
-        <Text variant="bodyStrong" accessibilityRole="alert" accessibilityLiveRegion="polite">
-          {emailSheet.resetSent}
-        </Text>
-      ) : null}
+      {resetting ? null : <PasswordField model={model} />}
+      <SheetAlert text={failure} />
+      <SheetAlert text={state.resetSent ? emailSheet.resetSent : null} />
       <Button
         label={SUBMIT_LABEL[state.mode]}
         onPress={model.submit}

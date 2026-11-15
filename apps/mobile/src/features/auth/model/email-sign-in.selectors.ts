@@ -23,7 +23,7 @@ export function showsEmailError(state: EmailSignInState): boolean {
 }
 
 function passwordLength(state: EmailSignInState): number {
-  return [...state.password].length;
+  return state.password.length;
 }
 
 /** Only creating an account checks the length; signing in sends what was typed. */

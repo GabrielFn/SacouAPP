@@ -9,12 +9,15 @@ describe("parseGoogleWebClientId", () => {
     expect(parseGoogleWebClientId(id)).toBe(id);
   });
 
-  test.each([undefined, "", "abc", "123-abc.apps.googleusercontent.com.evil", " 1-a.apps.googleusercontent.com"])(
-    "%j hides the Google button",
-    (raw) => {
-      expect(parseGoogleWebClientId(raw)).toBeNull();
-    },
-  );
+  test.each([
+    undefined,
+    "",
+    "abc",
+    "123-abc.apps.googleusercontent.com.evil",
+    " 1-a.apps.googleusercontent.com",
+  ])("%j hides the Google button", (raw) => {
+    expect(parseGoogleWebClientId(raw)).toBeNull();
+  });
 });
 
 describe("parseLegalUrl", () => {
@@ -22,10 +25,14 @@ describe("parseLegalUrl", () => {
     expect(parseLegalUrl("https://sacou.app/termos")).toBe("https://sacou.app/termos");
   });
 
-  test.each([undefined, "", "http://sacou.app/termos", "javascript:alert(1)", "https://", "https://a b"])(
-    "%j is not offered",
-    (raw) => {
-      expect(parseLegalUrl(raw)).toBeNull();
-    },
-  );
+  test.each([
+    undefined,
+    "",
+    "http://sacou.app/termos",
+    "javascript:alert(1)",
+    "https://",
+    "https://a b",
+  ])("%j is not offered", (raw) => {
+    expect(parseLegalUrl(raw)).toBeNull();
+  });
 });

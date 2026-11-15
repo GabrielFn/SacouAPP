@@ -71,36 +71,34 @@ async function attempt(action: () => Promise<void>): Promise<AuthResult> {
  */
 export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDeps): AuthSession {
   const listeners = createListeners();
-  const state = {
-    snapshot: { status: "unknown" } as SessionSnapshot,
-    user: null as FirebaseUserView | null,
-    pendingReason: null as SignOutReason | null,
-  };
-  const ready: { resolve: () => void } = { resolve: () => undefined };
+  const snapshot: { value: SessionSnapshot } = { value: { status: "unknown" } };
+  const currentUser: { value: FirebaseUserView | null } = { value: null };
+  const pendingReason: { value: SignOutReason | null } = { value: null };
+  const ready: { current: () => void } = { current: () => undefined };
   const firstState = new Promise<void>((resolve) => {
-    ready.resolve = resolve;
+    ready.current = resolve;
   });
 
+  /** Asked by `signOut`, or else fallen elsewhere while signed in (`expired`), or never open. */
   function reasonOfSignOut(): SignOutReason | null {
-    const reason =
-      state.pendingReason ?? (state.snapshot.status === "signedIn" ? "expired" : null);
-    state.pendingReason = null;
+    const reason = pendingReason.value ?? (snapshot.value.status === "signedIn" ? "expired" : null);
+    pendingReason.value = null;
     return reason;
   }
 
   sdk.onAuthStateChanged((user) => {
-    state.snapshot =
+    snapshot.value =
       user === null
         ? { status: "signedOut", reason: reasonOfSignOut() }
         : { status: "signedIn", account: accountOf(user) };
-    state.user = user;
-    ready.resolve();
+    currentUser.value = user;
+    ready.current();
     listeners.notify();
   });
 
   return {
     subscribe: (listener) => listeners.add(listener),
-    snapshot: () => state.snapshot,
+    snapshot: () => snapshot.value,
     supports: (provider) => (provider === "google" ? google !== null : provider === "password"),
     async signInWithGoogle() {
       if (google === null) return err("provider-unavailable");
@@ -116,17 +114,17 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
     sendPasswordReset: (email) => attempt(() => sdk.sendPasswordReset(email)),
     async getIdToken({ forceRefresh }) {
       await firstState;
-      const { user } = state;
+      const user = currentUser.value;
       // A failed renewal rejects: the API client treats it as no network, not as a session over.
       return user === null ? null : user.getIdToken(forceRefresh);
     },
     async signOut(reason) {
-      state.pendingReason = reason;
+      pendingReason.value = reason;
       try {
         await sdk.signOut();
       } catch {
         // Nobody was signed in: nothing to end in the SDK.
-        state.pendingReason = null;
+        pendingReason.value = null;
       }
     },
     async forgetProviderAccount() {

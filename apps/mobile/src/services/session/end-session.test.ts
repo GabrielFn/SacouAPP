@@ -21,6 +21,9 @@ import { queryKeys } from "../query/query-keys";
 import { createSessionEnder, sessionIdTokens } from "./end-session";
 
 const BASE = "https://api.example";
+/** Three calls, each refused before and after the renewal. */
+const CALLS = 3;
+const REFUSALS = CALLS + CALLS;
 const VERSION = "1.0.0";
 const GROUP_A = "8a4c2f0e-1111-4c3b-9d2e-0000000000aa";
 const SIGNED_IN = {
@@ -101,17 +104,17 @@ describe("endSession", () => {
 
   test("a query in flight during the exit does not write the cache again", async () => {
     const harness = setup();
-    const answer: { resolve: (groups: unknown) => void } = { resolve: () => undefined };
+    const answer: { current: (groups: unknown) => void } = { current: () => undefined };
     const observer = new QueryObserver(harness.client, {
       queryKey: queryKeys.groups(),
       queryFn: () =>
         new Promise((resolve) => {
-          answer.resolve = resolve;
+          answer.current = resolve;
         }),
     });
     const unsubscribe = observer.subscribe(() => undefined);
     await harness.ender.end("signedOut");
-    answer.resolve([{ groupId: GROUP_A }]);
+    answer.current([{ groupId: GROUP_A }]);
     await Promise.resolve();
     expect(harness.client.getQueryData(queryKeys.groups())).toBeUndefined();
     unsubscribe();
@@ -199,7 +202,7 @@ describe("the API client and the session", () => {
   test("three calls refused twice end the session once, with the expired line", async () => {
     const harness = setup();
     const { client, http } = api(harness);
-    http.enqueue(...Array.from({ length: 6 }, unauthorized));
+    http.enqueue(...Array.from({ length: REFUSALS }, unauthorized));
     await Promise.all([client.listMyGroups(), client.listMyGroups(), client.listMyGroups()]);
     await harness.ender.end("expired");
     expect(signOutCount(harness)).toBe(1);

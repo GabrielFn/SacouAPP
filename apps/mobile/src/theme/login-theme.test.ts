@@ -10,6 +10,7 @@ const MEDIUM = 390;
 const LARGE = 600;
 const HEX_BASE = 16;
 const HEX_PAIR = 2;
+const THIRD_CHANNEL = 5;
 const CHANNEL_MAX = 255;
 
 function ratio(first: string, second: string): number {
@@ -21,7 +22,7 @@ function ratio(first: string, second: string): number {
 /** The translucent sand over the night, as the screen shows it. */
 function blend(foreground: string, background: string, alpha: number): string {
   const channels = (hex: string) =>
-    [1, 1 + HEX_PAIR, 1 + HEX_PAIR * 2].map((at) =>
+    [1, 1 + HEX_PAIR, THIRD_CHANNEL].map((at) =>
       Number.parseInt(hex.slice(at, at + HEX_PAIR), HEX_BASE),
     );
   const top = channels(foreground);

@@ -26,7 +26,11 @@ export interface SessionEnder {
  * calls in flight are cancelled, so none writes the cache again; then the cache, the invite links and,
  * last, the account of the Google picker, so the next login asks which account.
  */
-export function createSessionEnder({ authSession, queries, stores }: SessionEnderDeps): SessionEnder {
+export function createSessionEnder({
+  authSession,
+  queries,
+  stores,
+}: SessionEnderDeps): SessionEnder {
   const running: { current: Promise<void> | null } = { current: null };
   const cleaned = { value: false };
   authSession.subscribe(() => {
