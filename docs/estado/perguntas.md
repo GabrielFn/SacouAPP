@@ -109,3 +109,9 @@ Detalhes e opções em `docs/estado/tarefas/E4.3.md`, seção "O que precisa do 
 62. Termos e Política: **padrão adotado: links por variável; o piloto com jogadores reais só abre com a E6.1 publicada.**
 - Também: a E4.3 Parte 3 (telas 30a e 30b) depende da E3.16 (API de exportar e excluir), que é do M6. Para fechar o M3, **recomendado: adiantar a E3.16 para o M3.**
 - **Respostas do Gabriel (15/11):** 57: **versionar o `google-services.json`** (contra a recomendação e a pergunta 8; a restrição da chave de API ao pacote `com.sacou.app` e ao SHA-1, passo (d), passa a ser obrigatória antes do commit do arquivo, e o gitleaks precisa de exceção só para esse arquivo, com leitura obrigatória do revisor). 58: **piloto só no Android**. 59: **gerar arquivo e abrir a folha de compartilhar**. E3.16: **adiantada para o M3**. 60 a 62: valem os padrões adotados.
+
+## 15/11/2026: E3.16 (exportar e excluir a conta), perguntas 63 a 65, padrões adotados
+Detalhes em `docs/estado/tarefas/E3.16.md`, seção 9. Nenhuma trava a Parte 1. O ADR 0056 fica com a E3.16 e o da E4.3 passa a 0057.
+63. Quem apaga a conta no Firebase: **padrão: o app chama `user.delete()` depois do 204; a API guarda o hash do UID e responde 410 a um login posterior.** A alternativa (FirebaseAdmin na API) pediria o segredo `SACOU_FIREBASE_SERVICE_ACCOUNT` e trava a Parte 2.
+64. O último membro com conta exclui a conta e o grupo tem convidados sem conta: **padrão: os nomes dos convidados são apagados.**
+65. Exportar exige login recente: **padrão: não, só excluir.**
