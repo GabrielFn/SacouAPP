@@ -42,3 +42,16 @@ export function groupInvitesQuery(api: SacouApi, groupId: string, enabled: boole
     enabled,
   });
 }
+
+/**
+ * The admin's levels and the suggestions (ADR 0047): off for Placar and Jogador, so the route is never
+ * called for them; outside the persisted allow list, so they live only in memory while the app runs.
+ */
+export function memberLevelsQuery(api: SacouApi, groupId: string, enabled: boolean) {
+  return queryOptions({
+    queryKey: queryKeys.memberLevels(groupId),
+    queryFn: () => unwrap(api.listMemberLevels(groupId)),
+    staleTime: 0,
+    enabled,
+  });
+}

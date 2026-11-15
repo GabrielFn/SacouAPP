@@ -8,6 +8,8 @@ export type MutationEvent =
   | { readonly type: "createGroup" | "acceptInvite" }
   | { readonly type: "renameGroup" | "leaveGroup"; readonly groupId: string }
   | { readonly type: "createInvite" | "revokeInvite"; readonly groupId: string }
+  /** A level was set: the levels are read again (never persisted, ADR 0047). */
+  | { readonly type: "memberLevelsChanged"; readonly groupId: string }
   /** The server answered with the whole settings document: it replaces the cached one (ADR 0049). */
   | { readonly type: "settingsReplaced"; readonly groupId: string; readonly view: unknown }
   | { readonly type: "templatesChanged"; readonly groupId: string }
@@ -110,6 +112,8 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "createInvite":
     case "revokeInvite":
       return [invalidate(queryKeys.invites(event.groupId))];
+    case "memberLevelsChanged":
+      return [invalidate(queryKeys.memberLevels(event.groupId))];
   }
 }
 

@@ -62,13 +62,58 @@ export function shortDay(isoDateTime: string): string {
 
 export type BadgeLook = GroupRole | "noAccount";
 
+const { positions, guestOrigin } = strings.ratings;
+const INITIALS_LENGTH = 2;
+const INITIAL_CHARACTER = /[\p{L}\p{N}]/gu;
+
+/** The nickname (E3.17), or "Você" / "Membro desde 12 out" for who never saved a profile. */
+export function memberName(member: Member): string {
+  if (member.nickname !== null) return member.nickname;
+  return member.isMe ? row.you : row.since(shortDay(member.joinedAt));
+}
+
+/** "JO" for João: the first two letters or digits; `null` (the neutral avatar) without a nickname. */
+export function initialsOf(member: Member): string | null {
+  if (member.nickname === null) return null;
+  const letters = member.nickname.match(INITIAL_CHARACTER) ?? [];
+  const initials = letters.slice(0, INITIALS_LENGTH).join("").toLocaleUpperCase("pt-BR");
+  return initials === "" ? null : initials;
+}
+
+/** "Ponteiro · líbero": the main position first, the others in lower case, as the API orders them. */
+export function positionsText(member: Member): readonly string[] {
+  if (member.primaryPosition === null) return [];
+  const others = member.otherPositions.map((position) =>
+    positions[position].toLocaleLowerCase("pt-BR"),
+  );
+  return [positions[member.primaryPosition], ...others];
+}
+
+function typeText(member: Member, afterPositions: boolean): string {
+  const type = member.memberType === "regular" ? row.regular : row.dropIn;
+  return afterPositions ? type.toLocaleLowerCase("pt-BR") : type;
+}
+
+/** "Ponteiro · mensalista · você", "Ponteira · líbero · mensalista", "Avulso · entrou pelo WhatsApp". */
+export function memberDetail(member: Member): string {
+  const shown = positionsText(member);
+  return [
+    ...shown,
+    typeText(member, shown.length > 0),
+    ...(member.isMe ? [row.youSuffix] : []),
+    ...(member.hasAccount ? [] : [guestOrigin]),
+  ].join(row.separator);
+}
+
 export interface MemberRowModel {
   readonly memberId: string;
-  /** "Você", or "Membro desde 12 out" until the names arrive (E3.17, question 30). */
+  /** The nickname, or "Você" / "Membro desde 12 out" for who never saved a profile. */
   readonly title: string;
+  /** `null`: the neutral avatar with the person icon. */
+  readonly initials: string | null;
   readonly badgeLabel: string;
   readonly badgeLook: BadgeLook;
-  /** "Mensalista · você", "Avulso". */
+  /** "Ponteiro · mensalista · você". */
   readonly detail: string;
   /** A guest without an account has the dashed avatar. */
   readonly dashedAvatar: boolean;
@@ -76,16 +121,19 @@ export interface MemberRowModel {
 }
 
 export function memberRowModel(member: Member): MemberRowModel {
-  const title = member.isMe ? row.you : row.since(shortDay(member.joinedAt));
-  const type = member.memberType === "regular" ? row.regular : row.dropIn;
+  const title = memberName(member);
   return {
     memberId: member.memberId,
     title,
+    initials: initialsOf(member),
     badgeLabel: member.hasAccount ? roleLabel(member.role) : row.noAccount,
     badgeLook: member.hasAccount ? member.role : "noAccount",
-    detail: member.isMe ? [type, row.youSuffix].join(row.separator) : type,
+    detail: memberDetail(member),
     dashedAvatar: !member.hasAccount,
-    optionsLabel: member.isMe ? row.yourOptions : row.options(title.toLowerCase()),
+    optionsLabel:
+      member.isMe && member.nickname === null
+        ? row.yourOptions
+        : row.options(member.nickname ?? title.toLowerCase()),
   };
 }
 

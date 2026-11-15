@@ -127,3 +127,57 @@ describe("the invites tab", () => {
     ]);
   });
 });
+
+describe("a row with the names (E3.17, Membros.dc.html)", () => {
+  test("João: Ponteiro · mensalista · você", () => {
+    const joao = member("j", "admin", {
+      isMe: true,
+      memberType: "regular",
+      nickname: "João",
+      primaryPosition: "outsideHitter",
+    });
+    expect(memberRowModel(joao)).toMatchObject({
+      title: "João",
+      initials: "JO",
+      detail: "Ponteiro · mensalista · você",
+      optionsLabel: "Opções de João",
+    });
+  });
+
+  test("Bia: the other positions in lower case, in the order of the API", () => {
+    const bia = member("b", "player", {
+      memberType: "regular",
+      nickname: "Bia",
+      primaryPosition: "outsideHitter",
+      otherPositions: ["libero"],
+    });
+    expect(memberRowModel(bia).detail).toBe("Ponteiro · líbero · mensalista");
+  });
+
+  test("Léo, a guest: Sem conta and entrou pelo WhatsApp", () => {
+    const leo = member("l", "player", {
+      hasAccount: false,
+      nickname: "Léo",
+      primaryPosition: "outsideHitter",
+    });
+    const model = memberRowModel(leo);
+    expect([model.title, model.badgeLabel, model.detail].join(" · ")).toBe(
+      "Léo · Sem conta · Ponteiro · avulso · entrou pelo WhatsApp",
+    );
+  });
+
+  test("any position reads Qualquer uma; no profile keeps the neutral avatar", () => {
+    const any = member("a", "player", { nickname: "Ana", primaryPosition: "any" });
+    expect(memberRowModel(any).detail).toBe("Qualquer uma · avulso");
+    expect(memberRowModel(member("n", "player")).initials).toBeNull();
+  });
+
+  test.each([
+    ["élan", "ÉL"],
+    ["  42 bola", "42"],
+    ["🏐 Rafa", "RA"],
+    ["🏐🏐", null],
+  ])("the initials of %s are %s", (nickname, initials) => {
+    expect(memberRowModel(member("x", "player", { nickname })).initials).toBe(initials);
+  });
+});

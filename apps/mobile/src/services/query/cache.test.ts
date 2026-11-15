@@ -34,6 +34,7 @@ import {
 import { PERSISTED_CACHE_MAX_AGE_MS } from "./persist-policy";
 import { bindOnlineManager, createSacouQueryClient } from "./query-client";
 import { queryKeys } from "./query-keys";
+import { memberLevelsQuery } from "../../features/groups/queries/group-queries";
 
 const G = "8a4c2f0e-1111-4c3b-9d2e-000000000001";
 const VERSION = "1.0.0";
@@ -65,6 +66,10 @@ function programmed(): FakeSacouApi {
   fake.respond("listMembers", apiOk([member]));
   fake.respond("signIn", apiOk({ userId: USER_ID }));
   fake.respond("listInvites", apiOk([]));
+  fake.respond(
+    "listMemberLevels",
+    apiOk([{ memberId: "m1", adminLevel: 3.5, reviewed: true, suggestedLevel: 4 }]),
+  );
   fake.respond("createInvite", apiOk({ inviteId: "i1", token: INVITE_TOKEN, expiresAt: null }));
   return fake;
 }
@@ -99,6 +104,7 @@ async function loadAll(client: QueryClient, fake: FakeSacouApi): Promise<void> {
     queryKey: queryKeys.invites(G),
     queryFn: () => unwrap(fake.api.listInvites(G)),
   });
+  await client.query(memberLevelsQuery(fake.api, G, true));
 }
 
 function stored(store: MemoryKeyValueStore): string {
@@ -131,6 +137,9 @@ describe("persist and restore (Q2, Q5)", () => {
     expect(restored.getQueryData(queryKeys.members(G))).toEqual([member]);
     expect(restored.getQueryData(queryKeys.me())).toBeUndefined();
     expect(restored.getQueryData(queryKeys.invites(G))).toBeUndefined();
+    expect(restored.getQueryData(queryKeys.memberLevels(G))).toBeUndefined();
+    expect(stored(store)).not.toContain("adminLevel");
+    expect(stored(store)).not.toContain("suggestedLevel");
   });
 
   test("the written cache has no token, no userId and no invite token", async () => {

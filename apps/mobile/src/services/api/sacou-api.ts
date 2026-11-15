@@ -13,6 +13,11 @@ export type GroupRole = Schemas["GroupRole"];
 export type MemberType = Schemas["MemberType"];
 export type GroupSettingsDocument = Schemas["GroupSettingsResponse"];
 export type SavedTemplate = Schemas["SavedTemplateResponse"];
+/** The admin's level of a member and its own suggestion: private, admin and co-admin only (ADR 0047). */
+export type MemberLevel = Schemas["MemberLevelResponse"];
+export type MemberLevelSet = Schemas["MemberLevelSetResponse"];
+/** A level on the wire: 1.0 to 5.0 by half points, or `null` for "Não sei" (`perfil-e-nota.md`). */
+export type MemberLevelItem = Schemas["SetMemberLevelItem"];
 
 /** The template to copy onto the group: one of the ready-made ones, or one the group saved. */
 export type TemplateChoice =
@@ -65,6 +70,14 @@ export interface SacouApi {
   ): Promise<ApiResult<Schemas["ChangeMemberTypeResponse"]>>;
   removeMember(member: MemberRef): Promise<ApiResult<null>>;
   leaveGroup(groupId: string): Promise<ApiResult<null>>;
+  /** Admin and co-admin only (403 for the others): never asked for them, never persisted (ADR 0047). */
+  listMemberLevels(groupId: string): Promise<ApiResult<readonly MemberLevel[]>>;
+  setMemberLevel(member: MemberRef, level: number | null): Promise<ApiResult<MemberLevelSet>>;
+  /** From 1 to 50 members, all or nothing. */
+  setMemberLevels(
+    groupId: string,
+    levels: readonly MemberLevelItem[],
+  ): Promise<ApiResult<readonly MemberLevelSet[]>>;
   /** The invite token comes back only here, in the result of the mutation, never in a query. */
   createInvite(groupId: string): Promise<ApiResult<Schemas["CreateInviteResponse"]>>;
   listInvites(groupId: string): Promise<ApiResult<readonly Invite[]>>;
