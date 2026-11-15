@@ -4,6 +4,7 @@ import {
   canManageInvites,
   inviteRows,
   memberRowModel,
+  shownTabOf,
   membersHeader,
   membersOfTab,
   membersTabs,
@@ -180,4 +181,9 @@ describe("a row with the names (E3.17, Membros.dc.html)", () => {
   ])("the initials of %s are %s", (nickname, initials) => {
     expect(memberRowModel(member("x", "player", { nickname })).initials).toBe(initials);
   });
+});
+
+test("a tab that does not exist for the role falls back to Mensalistas", () => {
+  expect(shownTabOf(["regular", "dropIn"], "invites")).toBe("regular");
+  expect(shownTabOf(["regular", "dropIn", "invites"], "invites")).toBe("invites");
 });

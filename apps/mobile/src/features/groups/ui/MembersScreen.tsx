@@ -20,10 +20,10 @@ import { useMembersScreen, type MembersScreenModel } from "../hooks/use-members-
 import { optionsLevelText } from "../model/member-levels";
 import {
   memberName,
-  memberRowModel,
   membersHeader,
   membersOfTab,
   membersTabs,
+  shownTabOf,
   tabLabel,
   type MembersTab,
 } from "../model/members.selectors";
@@ -192,7 +192,7 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
     );
   }
   const tabs = membersTabs(group.data.role);
-  const shownTab = tabs.includes(tab) ? tab : "regular";
+  const shownTab = shownTabOf(tabs, tab);
   const showInvite = model.canInvite && inviteBaseUrl !== null;
   // The sheet 19a shows its own refusal; the screen does not repeat it under the sheet.
   const screenError = model.levelSheet === null ? model.errorText : null;

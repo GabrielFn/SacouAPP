@@ -32,6 +32,11 @@ export function membersTabs(role: GroupRole): readonly MembersTab[] {
   return canManageInvites(role) ? ["regular", "dropIn", "invites"] : ["regular", "dropIn"];
 }
 
+/** The tab asked for, or the first one when it does not exist for this role (the invites, demoted). */
+export function shownTabOf(tabs: readonly MembersTab[], wanted: MembersTab): MembersTab {
+  return tabs.includes(wanted) ? wanted : "regular";
+}
+
 export function membersOfTab(members: readonly Member[], tab: MembersTab): readonly Member[] {
   if (tab === "invites") return [];
   return sortMembers(members.filter((member) => member.memberType === tab));
