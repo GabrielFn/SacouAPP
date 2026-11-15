@@ -64,15 +64,15 @@ describe("cacheEffectsOf (P5, golden)", () => {
       { type: "settingsForbidden", groupId: G },
       [`invalidate groups/${G}`, `invalidate groups/${G}/settings`],
     ],
-    ...(["round-created", "round-updated"] as const).map(
+    ...(["roundCreated", "roundUpdated"] as const).map(
       (type): [MutationEvent, readonly string[]] => [
         { type, groupId: G, roundId: "r1", round: {} },
-        [`set groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+        [`set groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
       ],
     ),
     [
-      { type: "attendance-changed", groupId: G, roundId: "r1" },
-      [`invalidate groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+      { type: "attendanceChanged", groupId: G, roundId: "r1" },
+      [`invalidate groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
     ],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [

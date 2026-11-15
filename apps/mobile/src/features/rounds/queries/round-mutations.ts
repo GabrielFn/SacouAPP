@@ -22,7 +22,7 @@ export function createRoundMutation(api: SacouApi, client: QueryClient, groupId:
     onSuccess: (round: { readonly roundId: string }) => {
       applyCacheEffects(
         client,
-        cacheEffectsOf({ type: "round-created", groupId, roundId: round.roundId, round }),
+        cacheEffectsOf({ type: "roundCreated", groupId, roundId: round.roundId, round }),
       );
     },
   };
