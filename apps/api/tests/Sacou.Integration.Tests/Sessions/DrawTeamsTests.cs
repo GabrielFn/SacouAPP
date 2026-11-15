@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json.Nodes;
 using Sacou.Integration.Tests.Groups;
 using Sacou.Integration.Tests.Identity;
+using Sacou.Shared.Levels;
 using Xunit;
 using A = Sacou.Integration.Tests.Groups.GroupActor;
 
@@ -42,10 +43,10 @@ public sealed class DrawTeamsTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(TeamOfTwo, body["playersPerTeam"]!.GetValue<int>());
         var drawn = body["teams"]!.AsArray().SelectMany(team => team!["members"]!.AsArray()).ToList();
         Assert.Equal(members.Order(), drawn.Select(player => player!["memberId"]!.GetValue<Guid>()).Order());
-        Assert.All(drawn, player => Assert.Equal(30, player!["levelTenths"]!.GetValue<int>()));
+        Assert.All(drawn, player => Assert.Equal(SkillLevel.DefaultTenths, player!["levelTenths"]!.GetValue<int>()));
     }
 
-    /// <summary>S2: the scorekeeper and the player are forbidden; who is not a member gets the group's 404.</summary>
+    /// <summary>S2: the scorekeeper and the player are forbidden; who is not a member gets the group's 404. Every refusal is no-store too.</summary>
     [Theory]
     [InlineData(A.Scorekeeper, HttpStatusCode.Forbidden, RoundCalls.Forbidden)]
     [InlineData(A.Player, HttpStatusCode.Forbidden, RoundCalls.Forbidden)]
@@ -66,6 +67,7 @@ public sealed class DrawTeamsTests(IntegrationDatabase database) : IAsyncLifetim
 
         Assert.Equal(status, response.StatusCode);
         Assert.Equal(code, await RoundCalls.CodeAsync(response));
+        Assert.Equal(DrawCalls.NoStore, response.Headers.CacheControl?.ToString());
         Assert.DoesNotContain("levelTenths", await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken), StringComparison.OrdinalIgnoreCase);
     }
 
@@ -174,7 +176,7 @@ public sealed class DrawTeamsTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.All(new[] { tooFew, off, cancelled }, response => Assert.Equal(HttpStatusCode.Conflict, response.StatusCode));
     }
 
-    /// <summary>S7: a body the strict reading refuses is a 400, never a 500 and never a default lock.</summary>
+    /// <summary>S7: a body the strict reading refuses is a 400, never a 500 and never a default lock, and still no-store.</summary>
     [Theory]
     [InlineData("{")]
     [InlineData("")]
@@ -197,6 +199,7 @@ public sealed class DrawTeamsTests(IntegrationDatabase database) : IAsyncLifetim
         using var response = await DrawCalls.DrawAsync(world, round, body: body);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(DrawCalls.NoStore, response.Headers.CacheControl?.ToString());
     }
 
     /// <summary>S7: locks and reserves the domain refuses keep their codes, with no name or level in the answer.</summary>

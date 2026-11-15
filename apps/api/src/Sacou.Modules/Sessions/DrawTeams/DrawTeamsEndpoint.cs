@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Net.Http.Headers;
 using Sacou.Http;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Access;
@@ -13,7 +12,8 @@ namespace Sacou.Modules.Sessions.DrawTeams;
 /// <summary>
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/draw</c> <c>{ locks?, reserves? }</c> (<c>DrawTeams</c>): the balanced
 /// draw of the confirmed players (docs/dominio/sorteio.md, ADR 0055). The answer carries the private levels, so only
-/// the admin and the co-admin reach it, and always with <c>Cache-Control: no-store</c>. Nothing is stored:
+/// the admin and the co-admin reach it, and every answer, errors included, carries <c>Cache-Control: no-store</c>
+/// (<see cref="NoStore"/>). Nothing is stored:
 /// "Sortear de novo" is another call.
 /// </summary>
 internal static class DrawTeamsEndpoint
@@ -21,12 +21,11 @@ internal static class DrawTeamsEndpoint
     public const string Name = "DrawTeams";
     public const string Route = "/rounds/{roundId:guid}/draw";
 
-    private const string NoStore = "no-store";
-
     public static RouteGroupBuilder MapDrawTeams(this RouteGroupBuilder group)
     {
         group.MapPost(Route, HandleAsync).WithName(Name)
             .RequireCapability(GroupCapability.DrawTeams)
+            .WithNoStore()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
@@ -35,7 +34,6 @@ internal static class DrawTeamsEndpoint
     private static async Task<Results<Ok<DrawTeamsResponse>, ProblemHttpResult>> HandleAsync(
         Guid roundId, DrawTeamsRequest request, HttpContext context, DrawTeamsHandler handler, CancellationToken cancellationToken)
     {
-        context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var drawn = await handler.HandleAsync(context.RoundAccess(), new RoundId(roundId), request, cancellationToken).ConfigureAwait(false);
         return drawn.ToHttpResult(draw => TypedResults.Ok(draw));
     }
