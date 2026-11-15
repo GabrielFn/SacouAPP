@@ -4,6 +4,9 @@ packages:
 
 allowBuilds:
   unrs-resolver: false
+  # Postinstall scripts of the JS Firebase SDK that @react-native-firebase pulls in; not needed (E4.3).
+  "@firebase/util": false
+  protobufjs: false
 
 # Advisory fix, see docs/seguranca/varredura-ci.md.
 overrides:
