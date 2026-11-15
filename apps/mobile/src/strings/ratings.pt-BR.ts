@@ -17,6 +17,8 @@ export const ratingsStrings = {
       `${name} sugeriu ${level}, ainda sem nota confirmada. Definir`,
     noneLabel: (name: string) => `${name} sem nota. Definir`,
   },
+  pendingLabel: (total: number) =>
+    `${total === 1 ? "1 nota para confirmar" : `${String(total)} notas para confirmar`}. Revisar`,
   pending: {
     count: (total: number) =>
       total === 1 ? "1 nota para confirmar." : `${String(total)} notas para confirmar.`,
@@ -27,6 +29,7 @@ export const ratingsStrings = {
   privacyRowStrong: "Só admins veem.",
   optionsRow: {
     title: "Nota do sorteio",
+    label: (text: string) => `Nota do sorteio: ${text}. Alterar`,
     confirmed: (level: string) => level,
     suggested: (level: string) => `${level} · sugerida`,
     unknown: "Não sei · definir",
