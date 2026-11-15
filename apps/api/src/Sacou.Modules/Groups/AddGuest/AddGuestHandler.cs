@@ -38,11 +38,13 @@ internal sealed class AddGuestHandler(IGroupStore store, TimeProvider time)
         }
 
         var now = time.GetUtcNow();
+        GuestAdmission? admission = null;
         var changed = await store.ExecuteInGroupLockAsync(
             group,
             locked =>
             {
                 var admitted = locked.AddGuest(actor, request.RequestId, profile.Value, level?.Value, now);
+                admission = admitted.IsSuccess ? admitted.Value : null;
                 return admitted.IsSuccess ? Result.Success(admitted.Value.Change) : Result.Failure<GroupChange>(admitted.Error);
             },
             cancellationToken).ConfigureAwait(false);
@@ -51,7 +53,6 @@ internal sealed class AddGuestHandler(IGroupStore store, TimeProvider time)
             return Result.Failure<AddedGuest>(changed.Error);
         }
 
-        var guest = changed.Value.Group.Guests.Single(known => known.RequestId == request.RequestId);
-        return Result.Success(new AddedGuest(guest.MemberId, Created: !changed.Value.ChangedGuests.IsEmpty));
+        return Result.Success(new AddedGuest(admission!.Guest.MemberId, admission.Created));
     }
 }
