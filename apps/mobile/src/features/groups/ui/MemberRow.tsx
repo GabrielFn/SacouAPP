@@ -3,9 +3,12 @@ import { Pressable, View } from "react-native";
 import type { Theme } from "../../../theme/themes";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
+import { HeadedBlock } from "../../../ui/HeadedBlock";
 import { MoreIcon, PersonIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import type { BadgeLook, MemberRowModel } from "../model/members.selectors";
+
+import { ListRowFrame } from "./ListRowFrame";
 
 interface BadgeColors {
   readonly background: string;
@@ -75,15 +78,7 @@ export interface MemberRowProps {
 export function MemberRow({ model, onOptions }: MemberRowProps) {
   const { colors, tokens } = useTheme();
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.s10,
-        minHeight: tokens.sizes.memberRowMin,
-        paddingLeft: tokens.spacing.m,
-      }}
-    >
+    <ListRowFrame>
       <View
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
@@ -101,17 +96,20 @@ export function MemberRow({ model, onOptions }: MemberRowProps) {
       >
         <PersonIcon color={colors.textMuted} />
       </View>
-      <View style={{ flex: 1, gap: tokens.spacing.xs }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
-            {model.title}
-          </Text>
-          <MemberBadge label={model.badgeLabel} look={model.badgeLook} />
-        </View>
+      <HeadedBlock
+        heading={
+          <>
+            <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {model.title}
+            </Text>
+            <MemberBadge label={model.badgeLabel} look={model.badgeLook} />
+          </>
+        }
+      >
         <Text variant="muted" numberOfLines={1}>
           {model.detail}
         </Text>
-      </View>
+      </HeadedBlock>
       {onOptions === null ? null : (
         <Pressable
           accessibilityRole="button"
@@ -127,6 +125,6 @@ export function MemberRow({ model, onOptions }: MemberRowProps) {
           <MoreIcon />
         </Pressable>
       )}
-    </View>
+    </ListRowFrame>
   );
 }

@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
@@ -6,6 +6,8 @@ import { fontFamilies } from "../../../theme/tokens.data";
 import { LinkIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import type { InviteRowModel } from "../model/members.selectors";
+
+import { ListRowFrame } from "./ListRowFrame";
 
 export interface InviteRowProps {
   readonly model: InviteRowModel;
@@ -17,15 +19,7 @@ export interface InviteRowProps {
 export function InviteRow({ model, disabled, onRevoke }: InviteRowProps) {
   const { colors, tokens } = useTheme();
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.s10,
-        minHeight: tokens.sizes.memberRowMin,
-        paddingLeft: tokens.spacing.m,
-      }}
-    >
+    <ListRowFrame>
       <LinkIcon color={colors.textMuted} />
       <Text style={{ flex: 1 }}>{model.text}</Text>
       <Pressable
@@ -44,6 +38,6 @@ export function InviteRow({ model, disabled, onRevoke }: InviteRowProps) {
           {strings.members.invites.revoke}
         </Text>
       </Pressable>
-    </View>
+    </ListRowFrame>
   );
 }
