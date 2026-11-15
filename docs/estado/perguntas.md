@@ -108,3 +108,4 @@ Detalhes e opções em `docs/estado/tarefas/E4.3.md`, seção "O que precisa do 
 61. Folha de e-mail e senha e topo da tela 02 sem canvas: **padrão adotado: os textos do plano.**
 62. Termos e Política: **padrão adotado: links por variável; o piloto com jogadores reais só abre com a E6.1 publicada.**
 - Também: a E4.3 Parte 3 (telas 30a e 30b) depende da E3.16 (API de exportar e excluir), que é do M6. Para fechar o M3, **recomendado: adiantar a E3.16 para o M3.**
+- **Respostas do Gabriel (15/11):** 57: **versionar o `google-services.json`** (contra a recomendação e a pergunta 8; a restrição da chave de API ao pacote `com.sacou.app` e ao SHA-1, passo (d), passa a ser obrigatória antes do commit do arquivo, e o gitleaks precisa de exceção só para esse arquivo, com leitura obrigatória do revisor). 58: **piloto só no Android**. 59: **gerar arquivo e abrir a folha de compartilhar**. E3.16: **adiantada para o M3**. 60 a 62: valem os padrões adotados.
