@@ -13,8 +13,11 @@ internal static class LocalSearch
     private const int ByLevelEvery = 2;
     private const int EnoughChoices = 8;
 
-    /// <summary>Null when no split respects the locks.</summary>
-    public static int[]? Find(DrawUnits units, TeamLayout layout, SeededRandom random)
+    /// <summary>
+    /// Null when no split respects the locks or the <paramref name="budget"/> ran out before the first one; once it
+    /// runs out later, the search stops with the best split found so far.
+    /// </summary>
+    public static int[]? Find(DrawUnits units, TeamLayout layout, SeededRandom random, PlacementBudget budget)
     {
         ArgumentNullException.ThrowIfNull(units);
         ArgumentNullException.ThrowIfNull(layout);
@@ -24,16 +27,16 @@ internal static class LocalSearch
         var lowest = LowestPossibleGap(units, layout);
         for (var restart = 0; restart < DrawLimits.SearchRestarts && !IsSettled(bestScore, lowest, best.Count); restart++)
         {
-            var start = TeamPlacement.Place(units, layout, StartOrder(units, random, restart), PlacementPattern.Serpentine);
+            var start = TeamPlacement.Place(units, layout, StartOrder(units, random, restart), PlacementPattern.Serpentine, budget);
             if (start is null)
             {
-                // The first start failing means no split, or none within the step cap; a later one failing only skips it.
+                // The placement finds a split whenever one exists, so after a first one a start only fails on the budget.
                 if (bestScore is null)
                 {
                     return null;
                 }
 
-                continue;
+                break;
             }
 
             var split = TeamPlacement.Canonical(Improve(units, layout, start));

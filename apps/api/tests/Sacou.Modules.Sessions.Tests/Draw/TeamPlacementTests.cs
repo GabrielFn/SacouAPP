@@ -4,7 +4,7 @@ using static Sacou.Modules.Sessions.Tests.Draw.DrawFixture;
 
 namespace Sacou.Modules.Sessions.Tests.Draw;
 
-/// <summary>The ceiling of steps of the placement within the "separar" locks (ADR 0055, part 2).</summary>
+/// <summary>The budget of steps of the placement within the "separar" locks, one per draw (ADR 0055, part 2).</summary>
 public sealed class TeamPlacementTests
 {
     private const int Level = 30;
@@ -14,6 +14,9 @@ public sealed class TeamPlacementTests
     private const int RandomCases = 100;
     private const int MinLockedPlayers = 12;
     private const int LockedPlayersSpread = 13;
+    private const int ThreeTeamsOfFour = 3 * BeachFour;
+    private const int StartsWithinTheBudget = 2;
+    private const int SpareSteps = 3;
 
     /// <summary>Far below <see cref="DrawLimits.MaxPlacementSteps"/>: the worst case measured took 1.184 steps.</summary>
     private const int TightCeiling = 10_000;
@@ -23,8 +26,8 @@ public sealed class TeamPlacementTests
     {
         var (units, layout) = Draw(Indoor * 2, Indoor, [Apart(Member(1), Member(2))]);
 
-        Assert.NotNull(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.InTurn));
-        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.InTurn, maxSteps: 1));
+        Assert.NotNull(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.InTurn, PlacementBudget.ForADraw()));
+        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.InTurn, new PlacementBudget(1)));
     }
 
     /// <summary>The longest odd cycle that fits in 24 locks, in two teams of 12: no split, found well within a tight ceiling.</summary>
@@ -34,8 +37,8 @@ public sealed class TeamPlacementTests
         DrawLock[] cycle = [.. Enumerable.Range(1, LongestOddCycle).Select(member => Apart(Member(member), Member((member % LongestOddCycle) + 1)))];
         var (units, layout) = Draw(TwelvePerTeam * 2, TwelvePerTeam, cycle);
 
-        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, int.MaxValue));
-        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, TightCeiling));
+        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, Unlimited()));
+        Assert.Null(TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, new PlacementBudget(TightCeiling)));
     }
 
     /// <summary>
@@ -51,12 +54,41 @@ public sealed class TeamPlacementTests
         {
             var (units, layout) = Draw(players, Indoor, RandomApart(random, MinLockedPlayers + (trial % LockedPlayersSpread)));
 
-            var unlimited = TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, int.MaxValue);
-            var tight = TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, TightCeiling);
+            var unlimited = TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, Unlimited());
+            var tight = TeamPlacement.Place(units, layout, Order(units), PlacementPattern.Serpentine, new PlacementBudget(TightCeiling));
 
             Assert.Equal(unlimited, tight);
         }
     }
+
+    /// <summary>
+    /// Without locks a start spends one step per unit. With room for two starts and a few steps, the first start
+    /// succeeds and the third runs out: the search stops there and keeps the best split, spending no more.
+    /// </summary>
+    [Fact]
+    public void TheBudgetIsShared_ALateStartRunningOut_KeepsTheBestSoFar()
+    {
+        var (units, layout) = Draw(ThreeTeamsOfFour, BeachFour, []);
+        var stepsPerStart = units.Units.Length;
+        var budget = new PlacementBudget((StartsWithinTheBudget * stepsPerStart) + SpareSteps);
+
+        var split = LocalSearch.Find(units, layout, new SeededRandom(Seed), budget);
+
+        Assert.NotNull(split);
+        Assert.True(budget.IsSpent);
+        Assert.False(budget.TrySpend());
+    }
+
+    [Fact]
+    public void TheBudgetRunningOut_BeforeTheFirstSplit_IsNoSplit()
+    {
+        var (units, layout) = Draw(ThreeTeamsOfFour, BeachFour, []);
+
+        Assert.NotNull(LocalSearch.Find(units, layout, new SeededRandom(Seed), new PlacementBudget(units.Units.Length)));
+        Assert.Null(LocalSearch.Find(units, layout, new SeededRandom(Seed), new PlacementBudget(units.Units.Length - 1)));
+    }
+
+    private static PlacementBudget Unlimited() => new(int.MaxValue);
 
     private static DrawLock[] RandomApart(SeededRandom random, int lockedPlayers)
     {

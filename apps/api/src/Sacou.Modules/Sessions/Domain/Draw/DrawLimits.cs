@@ -15,8 +15,9 @@ internal static class DrawLimits
     public const int MaxPlayersForExactSplit = 16;
 
     /// <summary>
-    /// Ceiling of the backtracking that places the units within the "separar" locks (<see cref="TeamPlacement"/>):
-    /// beyond it the locks answer <c>sessions.draw-locks-unsatisfiable</c>, so no body makes the search run for long.
+    /// Steps of the backtracking that places the units within the "separar" locks (<see cref="TeamPlacement"/>) that one
+    /// draw may spend, across every start of the search (<see cref="PlacementBudget"/>). Spent before a first split, the
+    /// locks answer <c>sessions.draw-locks-unsatisfiable</c>; spent later, the search keeps the best split found.
     /// Measured in ADR 0055.
     /// </summary>
     public const int MaxPlacementSteps = 100_000;
