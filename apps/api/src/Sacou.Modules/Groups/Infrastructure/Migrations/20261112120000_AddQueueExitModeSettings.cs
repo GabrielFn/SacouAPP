@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Sacou.Modules.Groups.Infrastructure.Migrations
 {
     /// <summary>
-    /// The queue modes of E2.12 (ADR 0050) add four leaves to the <c>queue</c> block of the catalog. A document
-    /// saved before them would be refused as <c>settings.missing-field</c>, so each one gets the defaults of the
-    /// catalog, keeping any leaf it already has. The <c>schemaVersion</c> does not change: the leaves are new.
+    /// The queue modes of E2.12 (ADR 0050) add four leaves to the <c>queue</c> block of the catalog. A group
+    /// document saved before them would be refused as <c>settings.missing-field</c>; a saved template would be
+    /// read without them. Each one gets the defaults of the catalog, keeping any leaf it already has. The <c>schemaVersion</c> does not change: the leaves are new.
     /// Data only, so there is no target model: the schema and the model snapshot stay as they were.
     /// </summary>
     [DbContext(typeof(GroupsDbContext))]

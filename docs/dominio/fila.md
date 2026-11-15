@@ -52,7 +52,7 @@ Em todos os modos valem a regra 1 (sem vencedor ou ninguém esperando: ninguém 
 | `whole-team` | O perdedor sai inteiro e volta para o **fim dos times da fila, como time**, sem se misturar aos avulsos; o primeiro time entra no lado dele | O time é remontado: entram `k = min(avulsos, time)` avulsos, o critério escolhe os `k` do perdedor que descansam, e a rotação fica a montar (pergunta P2 da E2.12) |
 | `fixed-count` (N de 1 a 24, `queue.fixedExitCount`) | A fila vira uma só: times da fila em ordem, membro a membro, depois os avulsos. Saem `k = min(N, time, quem espera)` pelo critério, e os `k` primeiros dessa fila entram no lugar deles. O que sobra da fila, mais quem saiu, vira avulsos, e os avulsos formam times de novo | Igual |
 
-**"Fila menor que N":** saem só tantos quantos esperam. **N maior que o time:** sai o time todo, cada um com herdeiro no lugar (é saída parcial, a rotação continua).
+**`fixed-count` remonta todos os times da fila:** como a fila vira uma linha, um time que esperava (da areia, ou de tamanho diferente de `playersPerTeam`) se desfaz e é reagrupado em blocos de `playersPerTeam`; a ordem plana se preserva, então quem entra no plano seguinte não muda. **"Fila menor que N":** saem só tantos quantos esperam. **N maior que o time:** sai o time todo, cada um com herdeiro no lugar (é saída parcial, a rotação continua).
 
 ## Vencedor também sai (E2.12)
 
