@@ -1,5 +1,6 @@
 import type { Member, MemberType, Round } from "../../../services/api/sacou-api";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
+import type { MemberAttendanceResult } from "../queries/round-mutations";
 import { initialOf } from "./confirmed-summary";
 
 const { add, detail } = roundsStrings;
@@ -64,4 +65,14 @@ export function addableMembers(
       const name = nameOf(member);
       return { memberId: member.memberId, name, initial: initialOf(name), detail: detailOf(member) };
     });
+}
+
+/** "Davi entrou na lista." or "Davi entrou na espera (2º).": the place the server gave. */
+export function addedText(result: MemberAttendanceResult, members: readonly Member[]): string {
+  const member = members.find((candidate) => candidate.memberId === result.memberId);
+  const name = member?.isMe === true ? add.you : (member?.nickname ?? detail.noName);
+  const { status, position } = result.answer;
+  return status === "waitlisted" && position !== null
+    ? add.waitlisted(name, position)
+    : add.added(name);
 }

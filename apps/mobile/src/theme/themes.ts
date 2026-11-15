@@ -26,6 +26,9 @@ export const THEME_ROLES = [
   "infoFill",
   "infoText",
   "danger",
+  "panelSurface",
+  "onPanel",
+  "panelAccent",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -61,6 +64,10 @@ export const appTheme = {
   infoFill: palette.infoFill,
   infoText: palette.infoText,
   danger: palette.danger,
+  // The dark panel of the round (Rodada.dc.html, RodadaJogador.dc.html): sand text, yellow counts.
+  panelSurface: palette.night,
+  onPanel: palette.sand,
+  panelAccent: palette.ballYellow,
 } as const satisfies Theme;
 
 /**
@@ -106,6 +113,9 @@ function courtTheme(colors: CourtColors): Theme {
     infoFill: palette.infoFill,
     infoText: palette.infoText,
     danger: palette.danger,
+    panelSurface: palette.night,
+    onPanel: palette.sand,
+    panelAccent: palette.ballYellow,
   };
 }
 
