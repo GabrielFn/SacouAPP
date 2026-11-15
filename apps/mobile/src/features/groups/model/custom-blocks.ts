@@ -31,9 +31,18 @@ export const READY_TEMPLATES: readonly SettingsTemplateKey[] = SETTINGS_TEMPLATE
   (key) => key !== FROM_SCRATCH,
 );
 
-/** The switch leaf of a block: the one thing screen 04a turns on. */
+/** The switch leaf of each block: the one thing screen 04a turns on. */
+const ENABLED_PATHS: Readonly<Record<CustomBlock, SettingsPath>> = {
+  attendance: "attendance.enabled",
+  scoring: "scoring.enabled",
+  queue: "queue.enabled",
+  rotation: "rotation.enabled",
+  draw: "draw.enabled",
+  mvp: "mvp.enabled",
+};
+
 export function enabledPath(block: CustomBlock): SettingsPath {
-  return `${block}.enabled` as SettingsPath;
+  return ENABLED_PATHS[block];
 }
 
 function isCustomBlock(value: string): value is CustomBlock {
