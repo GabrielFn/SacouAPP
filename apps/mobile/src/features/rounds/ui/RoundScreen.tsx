@@ -1,4 +1,3 @@
-import { Screen } from "../../../ui/Screen";
 import { useRoundScreen } from "../hooks/use-round-screen";
 import { managesRounds, roundSettingsOf } from "../model/round-detail";
 import { AdminRoundScreen } from "./AdminRoundScreen";
@@ -18,17 +17,7 @@ export function RoundScreen({ groupId, roundId }: RoundScreenProps) {
   const model = useRoundScreen(groupId, roundId);
   const { group, round, members } = model;
   if (group.data === undefined || round.data === undefined) {
-    return (
-      <Screen>
-        <RoundLoading
-          failure={group.error ?? round.error}
-          onRetry={() => {
-            void group.refetch();
-            void round.refetch();
-          }}
-        />
-      </Screen>
-    );
+    return <RoundLoading queries={[group, round]} />;
   }
   const settings = roundSettingsOf(round.data);
   const memberList = members.data ?? [];

@@ -6,6 +6,7 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { EmptyState } from "../../../ui/EmptyState";
 import { LoadingState } from "../../../ui/LoadingState";
+import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { roundSubtitle } from "../model/round-detail";
 
@@ -29,20 +30,39 @@ export function RoundHeading({ groupName, round }: RoundHeadingProps) {
   );
 }
 
-export interface RoundLoadingProps {
-  readonly failure: Error | null;
-  readonly onRetry: () => void;
+/** A query the loading screen waits for and can read again. */
+export interface RetryableQuery {
+  readonly error: Error | null;
+  readonly refetch: () => Promise<unknown>;
 }
 
-/** The wait for the round, or the reason it could not be read. */
-export function RoundLoading({ failure, onRetry }: RoundLoadingProps) {
-  if (failure === null) return <LoadingState accessibilityLabel={detail.loading} />;
+export interface RoundLoadingProps {
+  readonly queries: readonly RetryableQuery[];
+}
+
+/** The wait for the round, or the reason it could not be read, with "Tentar de novo" for every query. */
+export function RoundLoading({ queries }: RoundLoadingProps) {
+  const failure = queries.find((query) => query.error !== null)?.error ?? null;
   return (
-    <EmptyState
-      alert
-      title={detail.loadError}
-      body={errorTextOf(failure)}
-      actions={[{ label: detail.retry, variant: "secondary", onPress: onRetry }]}
-    />
+    <Screen>
+      {failure === null ? (
+        <LoadingState accessibilityLabel={detail.loading} />
+      ) : (
+        <EmptyState
+          alert
+          title={detail.loadError}
+          body={errorTextOf(failure)}
+          actions={[
+            {
+              label: detail.retry,
+              variant: "secondary",
+              onPress: () => {
+                queries.forEach((query) => void query.refetch());
+              },
+            },
+          ]}
+        />
+      )}
+    </Screen>
   );
 }

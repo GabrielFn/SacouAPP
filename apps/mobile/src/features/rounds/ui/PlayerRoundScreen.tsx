@@ -1,156 +1,23 @@
-import { View } from "react-native";
-
-import type { AttendanceResponse, Group, Member, Round } from "../../../services/api/sacou-api";
+import type { Group, Member, Round } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
-import { useTheme } from "../../../theme/theme-context";
 import { BackBar } from "../../../ui/BackBar";
-import { Button } from "../../../ui/Button";
 import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
 import { Screen } from "../../../ui/Screen";
-import { Text } from "../../../ui/Text";
 import { groupsHref } from "../../groups/navigation";
 import type { RoundScreenModel } from "../hooks/use-round-screen";
-import { confirmedSummary, summaryText } from "../model/confirmed-summary";
-import {
-  holdsSpot,
-  presenceCounts,
-  type PresenceActions,
-  type PresenceCardView,
-} from "../model/presence-card";
+import { holdsSpot, presenceCounts, type PresenceCardView } from "../model/presence-card";
 import { roundChips, sourceReader } from "../model/round-chips";
 import { roleHeader, type RoundSettingsView } from "../model/round-detail";
-import type { RosterEntry } from "../model/roster";
 import { playerPresence, rosterView, type RosterView } from "../model/round-screen-view";
+import { ConfirmedBlock } from "./ConfirmedBlock";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { PresenceCard } from "./PresenceCard";
+import { PresenceFooter } from "./PresenceFooter";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 
-const { presence, confirmed, detail } = strings.rounds;
-
-export interface PresenceFooterProps {
-  readonly actions: PresenceActions;
-  readonly pending: boolean;
-  readonly onRespond: (response: AttendanceResponse) => void;
-  readonly onAskLeave: () => void;
-}
-
-/** "VOU" and "Não vou", or "Não vou mais" with its warning (RodadaJogador.dc.html). */
-function PresenceFooter({ actions, pending, onRespond, onAskLeave }: PresenceFooterProps) {
-  switch (actions.kind) {
-    case "none":
-      return null;
-    case "answer":
-      return (
-        <>
-          <Button
-            label={presence.goingAction}
-            disabled={!actions.canGo || pending}
-            onPress={() => {
-              onRespond("going");
-            }}
-          />
-          <Button
-            label={presence.notGoingAction}
-            variant="outline"
-            disabled={pending}
-            onPress={() => {
-              onRespond("notGoing");
-            }}
-          />
-        </>
-      );
-    case "leave":
-      return (
-        <>
-          <Button
-            label={actions.label}
-            variant="outline"
-            disabled={pending}
-            onPress={() => {
-              if (actions.needsConfirm) onAskLeave();
-              else onRespond("notGoing");
-            }}
-          />
-          {actions.warning === null ? null : (
-            <Text variant="muted" style={{ textAlign: "center" }}>
-              {actions.warning}
-            </Text>
-          )}
-        </>
-      );
-  }
-}
-
-export interface ConfirmedBlockProps {
-  readonly going: readonly RosterEntry[];
-  readonly meId: string;
-  readonly waitlist: string;
-  readonly onSeeAll: () => void;
-}
-
-/** The white card "Confirmados" with the avatars, the line of names and the waitlist. */
-function ConfirmedBlock({ going, meId, waitlist, onSeeAll }: ConfirmedBlockProps) {
-  const { colors, tokens } = useTheme();
-  const summary = confirmedSummary(going, meId);
-  return (
-    <View
-      style={{
-        gap: tokens.spacing.s,
-        padding: tokens.spacing.m,
-        borderRadius: tokens.radii.card,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        backgroundColor: colors.surface,
-      }}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text variant="bodyStrong" accessibilityRole="header" style={{ flex: 1 }}>
-          {confirmed.title}
-        </Text>
-        {going.length === 0 ? null : (
-          <Button label={confirmed.seeAll(going.length)} variant="link" onPress={onSeeAll} />
-        )}
-      </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.m }}>
-        <View
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          style={{ flexDirection: "row", gap: tokens.spacing.xs }}
-        >
-          {summary.initials.map((initial, index) => (
-            <View
-              key={`${initial}-${String(index)}`}
-              style={{
-                width: tokens.sizes.avatar,
-                aspectRatio: 1,
-                borderRadius: tokens.radii.pill,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: colors.avatarSurface,
-              }}
-            >
-              <Text variant="bodyStrong">{initial}</Text>
-            </View>
-          ))}
-        </View>
-        <Text variant="muted" accessibilityLabel={summaryText(summary)} style={{ flex: 1 }}>
-          {summary.parts.map((part, index) =>
-            part.strong ? (
-              <Text key={String(index)} variant="bodyStrong">
-                {part.text}
-              </Text>
-            ) : (
-              part.text
-            ),
-          )}
-        </Text>
-      </View>
-      {waitlist === "" ? null : <Text variant="muted">{confirmed.waitlist(waitlist)}</Text>}
-    </View>
-  );
-}
+const { presence, detail } = strings.rounds;
 
 export interface PlayerBodyProps {
   readonly round: Round;
