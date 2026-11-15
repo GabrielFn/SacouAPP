@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions.Access;
+using Sacou.Modules.Sessions.AccountData;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.CancelRound;
 using Sacou.Modules.Sessions.CreateRound;
@@ -35,6 +37,9 @@ public static class SessionsModule
         services.AddScoped<RespondAttendanceHandler>();
         services.AddScoped<SetMemberAttendanceHandler>();
         services.AddScoped<StopSeriesHandler>();
+        // The person's own attendances, for the export of the Identity (E3.16, ADR 0056, D6).
+        services.AddScoped<IAccountAttendanceReader, PostgresAccountAttendanceReader>();
+        services.AddScoped<IAccountExportSection, SessionsExportSection>();
         return services;
     }
 

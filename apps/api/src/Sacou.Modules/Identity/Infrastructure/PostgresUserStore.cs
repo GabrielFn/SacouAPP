@@ -19,6 +19,16 @@ internal sealed class PostgresUserStore(IdentityDbContext database) : IUserStore
         return ids.Count == 0 ? null : new UserId(ids[0]);
     }
 
+    public async Task<DateTimeOffset?> FindCreatedAtAsync(UserId user, CancellationToken cancellationToken)
+    {
+        var found = await database.Users.AsNoTracking()
+            .Where(row => row.Id == user)
+            .Select(row => (DateTimeOffset?)row.CreatedAt)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        return found;
+    }
+
     public async Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken)
     {
         var inserted = await database.Database
