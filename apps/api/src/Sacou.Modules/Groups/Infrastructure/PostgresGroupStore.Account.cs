@@ -9,13 +9,20 @@ internal sealed partial class PostgresGroupStore
 {
     public async Task<IReadOnlyList<AccountMembership>> ListMembershipsOfUserAsync(UserId user, CancellationToken cancellationToken)
     {
-        var rows = await database.Members.AsNoTracking()
-            .Where(member => member.UserId == user.Value)
+        var rows = await WithGroupNamesAsync(
+            database.Members.AsNoTracking().Where(member => member.UserId == user.Value), cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(row => new AccountMembership(row.GroupId, row.Name, row.Member))];
+    }
+
+    /// <summary>The members with the name of their group, in the order they joined: the person's groups, active or all.</summary>
+    private async Task<IReadOnlyList<(GroupId GroupId, GroupName Name, GroupMember Member)>> WithGroupNamesAsync(
+        IQueryable<MemberRow> members, CancellationToken cancellationToken)
+    {
+        var rows = await members
             .Join(database.Groups.AsNoTracking(), member => member.GroupId, group => group.Id, (member, group) => new { member, group.Name })
             .OrderBy(pair => pair.member.JoinedAt).ThenBy(pair => pair.member.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return [.. rows.Select(pair => new AccountMembership(
-            new GroupId(pair.member.GroupId), RowMapping.ToName(pair.Name), RowMapping.ToMember(pair.member)))];
+        return [.. rows.Select(pair => (new GroupId(pair.member.GroupId), RowMapping.ToName(pair.Name), RowMapping.ToMember(pair.member)))];
     }
 
     public async Task<IReadOnlyList<Group>> ListGroupsWhereActiveAdminAsync(UserId user, CancellationToken cancellationToken)
