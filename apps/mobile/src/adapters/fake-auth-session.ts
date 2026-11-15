@@ -32,6 +32,8 @@ export interface FakeAuthSessionOptions {
   /** The account a successful login opens. */
   readonly account?: AccountView;
   readonly supported?: readonly AuthProvider[];
+  /** Told of every call as it happens, to check the order against other fakes. */
+  readonly onCall?: (call: FakeAuthCall) => void;
 }
 
 export interface FakeAuthSession extends AuthSession {
@@ -68,6 +70,7 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
 
   function record(call: FakeAuthCall): void {
     state.calls = [...state.calls, call];
+    options.onCall?.(call);
   }
 
   function emit(snapshot: SessionSnapshot): void {
