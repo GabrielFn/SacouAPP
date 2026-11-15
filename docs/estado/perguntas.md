@@ -98,3 +98,13 @@ Detalhes e opções no fim de `docs/estado/tarefas/E4.6.md`. Os números 43 e 44
 
 ## 14/11/2026: E3.6 (sorteio), respostas do Gabriel: todas as recomendações
 52. Reservas são os últimos a confirmar. 53. Com menos de dois times completos, dois times de n/2. 54. O sorteio exige internet no piloto. 55. Medidor: ≤ 0,2 "ótimo", ≤ 0,5 "bom", acima "desequilibrado". 56. A API aceita "separados", mas a tela 07 do piloto só tem "Travar dupla"; equilibrar por posição fica para depois. Detalhes em `docs/estado/tarefas/E3.6.md`, seção 7.
+
+## 15/11/2026: E4.3 (login, perfil rápido e conta), perguntas 57 a 62
+Detalhes e opções em `docs/estado/tarefas/E4.3.md`, seção "O que precisa do Gabriel". A Parte 1 (código e testes com o falso) e a Parte 2 andam antes das respostas.
+57. Acessos no Firebase e no Google Cloud (provedores, SHA-1/SHA-256, `google-services.json`, restrição da chave) e como o build recebe o arquivo: **recomendado: variáveis do EAS e `.env` local apontando para `D:\segredos\sacou\`.**
+58. iOS e "Entrar com Apple" no piloto (US$ 99/ano): **recomendado: piloto só no Android.**
+59. Exportar dados sem e-mail: **recomendado: gerar o arquivo e abrir a folha de compartilhar.**
+60. "Nome" na tela 30: **padrão adotado: trocar por "Apelido".**
+61. Folha de e-mail e senha e topo da tela 02 sem canvas: **padrão adotado: os textos do plano.**
+62. Termos e Política: **padrão adotado: links por variável; o piloto com jogadores reais só abre com a E6.1 publicada.**
+- Também: a E4.3 Parte 3 (telas 30a e 30b) depende da E3.16 (API de exportar e excluir), que é do M6. Para fechar o M3, **recomendado: adiantar a E3.16 para o M3.**
