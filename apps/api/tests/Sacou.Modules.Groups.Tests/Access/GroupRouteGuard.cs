@@ -23,6 +23,8 @@ internal static class GroupRouteGuard
         "POST /v1/me",
         "GET /v1/me/profile",
         "PUT /v1/me/profile",
+        "GET /v1/me/export",
+        "GET /v1/me/deletion-blockers",
         "POST /v1/groups",
         "GET /v1/groups",
         "POST /v1/invites/preview",

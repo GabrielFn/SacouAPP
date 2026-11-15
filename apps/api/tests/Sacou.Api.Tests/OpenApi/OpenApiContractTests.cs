@@ -15,6 +15,8 @@ public sealed class OpenApiContractTests
         "post /v1/me SignIn",
         "get /v1/me/profile GetMyProfile",
         "put /v1/me/profile SaveMyProfile",
+        "get /v1/me/export ExportMyData",
+        "get /v1/me/deletion-blockers GetDeletionBlockers",
         "post /v1/groups CreateGroup",
         "get /v1/groups ListMyGroups",
         "post /v1/invites/preview PreviewInvite",
