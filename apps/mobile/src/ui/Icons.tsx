@@ -11,6 +11,8 @@ export interface IconProps {
 
 export interface LogoProps {
   readonly size: number;
+  /** The five plain squares; the text color of the theme by default (light on the night of the login). */
+  readonly color?: string;
 }
 
 const VIEW_BOX = "0 0 24 24";
@@ -142,12 +144,12 @@ export function CheckIcon({ color }: IconProps) {
   );
 }
 
-export function Logo({ size }: LogoProps) {
+export function Logo({ size, color }: LogoProps) {
   const { colors } = useTheme();
   return (
     <Svg width={size} height={size * LOGO_ASPECT} viewBox={LOGO_VIEW_BOX}>
       {LOGO_CELLS.map(({ key, d, highlight }) => (
-        <Path key={key} d={d} fill={highlight ? colors.accent : colors.text} />
+        <Path key={key} d={d} fill={highlight ? colors.accent : (color ?? colors.text)} />
       ))}
     </Svg>
   );

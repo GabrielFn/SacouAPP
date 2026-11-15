@@ -150,10 +150,21 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
 
   const signInCall: Call<unknown> = (init) => client.POST("/v1/me", init);
 
+  async function tokenFor(state: AttemptState): Promise<ApiResult<string | null>> {
+    try {
+      return apiOk(
+        state.renewedToken ? await renewToken() : await idTokens.getIdToken({ forceRefresh: false }),
+      );
+    } catch {
+      // The SDK could not renew the token (no network): the session is not over (ADR 0057, D5).
+      return apiErr({ kind: "offline" });
+    }
+  }
+
   async function run<T>(call: Call<T>, state: AttemptState): Promise<ApiResult<T>> {
-    const token = state.renewedToken
-      ? await renewToken()
-      : await idTokens.getIdToken({ forceRefresh: false });
+    const tokenResult = await tokenFor(state);
+    if (!tokenResult.ok) return tokenResult;
+    const token = tokenResult.value;
     if (token === null) return giveUp({ kind: "session-expired" });
     const result = await attempt(call, token);
     if (result.ok) return result;

@@ -67,6 +67,10 @@ export const fontSizes = {
   displayMedium: 32,
   statusPill: 14,
   link: 16,
+  // The login (Login.dc.html:25, 34, 47): the brand, the title of the sheet and the Termos line.
+  legal: 12,
+  sheetTitle: 20,
+  loginBrand: 28,
   displayTitleSmall: 36,
   displayTitle: 40,
   displayTitleLarge: 44,
@@ -96,6 +100,8 @@ export const radii = {
   statusPill: 15,
   tabPill: 15,
   roleBadge: 13,
+  // The top of the light sheet of the login (Login.dc.html:39).
+  sheet: 24,
 } as const;
 
 export const borderWidths = { thin: 1.5, thick: 2 } as const;
@@ -159,6 +165,10 @@ export const sizes = {
   moreButtonWidth: 44,
   moreButtonHeight: 48,
   memberRowMin: 56,
+  // Login (Login.dc.html): the white circle of the G, and the 48 of "Usar e-mail e senha".
+  googleBadge: 30,
+  linkButton: 48,
+  loginLogo: 34,
 } as const;
 
 /**
@@ -185,10 +195,15 @@ export const interactiveHeights = [
   sizes.blockHeaderMin,
   sizes.moreButtonWidth,
   sizes.moreButtonHeight,
+  sizes.linkButton,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.
 export const nightRgb = "15, 27, 45";
+
+// Channels of palette.sand, for the court drawn behind the login (Login.dc.html:17-22, 33).
+export const sandRgb = "246, 241, 231";
+export const sandAlpha = { courtLine: 0.1, net: 0.22, mesh: 0.25, heroMuted: 0.8 } as const;
 
 // Canvas frame width (design/telas): the base of the scale. Accessibility floors are in dp.
 export const canvasWidth = 390;

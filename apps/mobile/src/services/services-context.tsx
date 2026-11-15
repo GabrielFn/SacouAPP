@@ -10,7 +10,9 @@ import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
 import type { ScreenOrientation } from "../features/court/ports/screen-orientation";
 import type { InviteLinkStore } from "../features/groups/ports/invite-link-store";
+import type { LegalLinks } from "../config/legal-links";
 import type { NetworkStatus } from "./api/network-status";
+import type { AuthSession } from "./auth/auth-session";
 import type { SacouApi } from "./api/sacou-api";
 import type { Clipboard } from "./clipboard/clipboard";
 import type { FontLoader } from "./font-loader";
@@ -19,6 +21,7 @@ import type { QrEncoder } from "./qr/qr-encoder";
 import type { ShareSheet } from "./share/share-sheet";
 
 import type { CacheSession } from "./query/cache-persister";
+import type { SessionEnder } from "./session/end-session";
 
 export interface Services {
   readonly fontLoader: FontLoader;
@@ -51,8 +54,14 @@ export interface Services {
   readonly inviteLinkStore: InviteLinkStore;
   /** The origin of the invite links, or `null` until there is a domain: the invite buttons hide. */
   readonly inviteBaseUrl: string | null;
-  /** Sign-out clears the server cache, in memory and in `sacou-cache.db` (E4.3 calls it). */
+  /** Sign-out clears the server cache, in memory and in `sacou-cache.db` (through `sessionEnder`). */
   readonly cacheSession: CacheSession;
+  /** The session of the person on this phone; its state lives only in the SDK (ADR 0057, D2). */
+  readonly authSession: AuthSession;
+  /** The one way out of a session: Sair, the expired session, a session ended elsewhere (D4). */
+  readonly sessionEnder: SessionEnder;
+  /** Terms and privacy policy, or `null` each until E6.1 publishes them (question 62). */
+  readonly legalLinks: LegalLinks;
 }
 
 const ServicesContext = createContext<Services | null>(null);
