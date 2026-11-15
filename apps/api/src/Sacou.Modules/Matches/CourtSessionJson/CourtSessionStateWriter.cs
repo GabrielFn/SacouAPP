@@ -128,7 +128,7 @@ internal static class CourtSessionStateWriter
         writer.WriteEndObject();
     }
 
-    private static void WriteTeamState(Utf8JsonWriter writer, TeamState? teamState)
+    internal static void WriteTeamState(Utf8JsonWriter writer, TeamState? teamState)
     {
         if (teamState is null)
         {
@@ -182,7 +182,7 @@ internal static class CourtSessionStateWriter
         writer.WriteEndObject();
     }
 
-    private static void WriteQueue(Utf8JsonWriter writer, TeamQueue queue)
+    internal static void WriteQueue(Utf8JsonWriter writer, TeamQueue queue)
     {
         writer.WriteStartObject();
         WriteTexts(writer, "players", queue.Players);
@@ -196,7 +196,7 @@ internal static class CourtSessionStateWriter
         writer.WriteEndObject();
     }
 
-    private static void WriteRoster(Utf8JsonWriter writer, TeamRoster roster)
+    internal static void WriteRoster(Utf8JsonWriter writer, TeamRoster roster)
     {
         writer.WriteStartObject();
         WriteTexts(writer, "memberIds", roster.MemberIds);
@@ -222,7 +222,7 @@ internal static class CourtSessionStateWriter
         writer.WriteEndArray();
     }
 
-    private static void WriteText(Utf8JsonWriter writer, string key, string text)
+    internal static void WriteText(Utf8JsonWriter writer, string key, string text)
     {
         writer.WritePropertyName(key);
         WriteTextValue(writer, text);

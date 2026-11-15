@@ -22,6 +22,8 @@
         <EmbeddedResource Include="../../../../packages/match-engine/golden/attributions-events.json" LogicalName="golden/attributions-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/corrections-events.json" LogicalName="golden/corrections-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/queue-events.json" LogicalName="golden/queue-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/queue-plans.json" LogicalName="golden/queue-plans.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/queue-modes.json" LogicalName="golden/queue-modes.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-events.json" LogicalName="golden/libero-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/bench-events.json" LogicalName="golden/bench-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/rotation-events.json" LogicalName="golden/rotation-events.json" />

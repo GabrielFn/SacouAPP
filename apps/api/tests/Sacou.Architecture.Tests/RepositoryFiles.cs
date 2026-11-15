@@ -50,6 +50,8 @@ internal static partial class RepositoryFiles
         "packages/match-engine/golden/libero-alignment.json",
         "packages/match-engine/golden/libero-events.json",
         "packages/match-engine/golden/queue-events.json",
+        "packages/match-engine/golden/queue-plans.json",
+        "packages/match-engine/golden/queue-modes.json",
         "packages/match-engine/golden/corrections-events.json",
         "packages/match-engine/golden/attributions-events.json",
         "packages/match-engine/golden/stats-events.json",

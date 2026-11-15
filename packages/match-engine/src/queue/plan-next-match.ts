@@ -23,8 +23,8 @@ import type {
   NextMatchPlan,
   NextMatchResult,
   QueueCommandError,
-  QueueExitChoice,
   QueueRefusalCode,
+  QueueSideChoice,
   WinnerLeaving,
 } from "./types.js";
 
@@ -96,11 +96,9 @@ function exitOrder(winner: TeamSide, winnerLeaves: boolean): readonly TeamSide[]
 }
 
 /** The loser chooses with `criterionInput`, and the winner with `winnerCriterionInput`. */
-function choiceFor(input: NextMatchInput, isWinner: boolean): QueueExitChoice {
+function choiceFor(input: NextMatchInput, isWinner: boolean): QueueSideChoice {
   const { criterion, criterionInput, winnerCriterionInput } = input;
-  const sideInput = isWinner ? winnerCriterionInput : criterionInput;
-  // The key and the input stay correlated: both come from the same member of the union.
-  return { criterion, criterionInput: sideInput } as QueueExitChoice;
+  return { criterion, criterionInput: isWinner ? winnerCriterionInput : criterionInput };
 }
 
 interface SideStep {

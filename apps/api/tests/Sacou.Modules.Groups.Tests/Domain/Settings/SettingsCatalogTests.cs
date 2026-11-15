@@ -16,6 +16,20 @@ public sealed class SettingsCatalogTests
     private const int MinSetPoints = 1;
     private const int MaxSetPoints = 99;
 
+    /// <summary>
+    /// Written by hand from <c>QueueExitLimits</c> of the Matches module and <c>queue/constants.data.ts</c>
+    /// (ADR 0050): a module never sees the internals of another, so the same values are checked against the
+    /// engine constants in <c>NextMatchPlannerTests</c> of the Matches module and in <c>settings.test.ts</c>.
+    /// </summary>
+    private static readonly string[] ExitModeKinds = ["automatic", "whole-team", "fixed-count"];
+    private const string DefaultExitMode = "automatic";
+    private const int MinFixedExitCount = 1;
+    private const int MaxFixedExitCount = 24;
+    private const int DefaultFixedExitCount = 2;
+    private const int MinWinnerExitWins = 1;
+    private const int MaxWinnerExitWins = 10;
+    private const int DefaultWinnerExitWins = 3;
+
     [Fact]
     public void Capacity_IsCappedByTheMembersOfAGroup()
     {
@@ -30,6 +44,22 @@ public sealed class SettingsCatalogTests
         Assert.All(
             new[] { Field("scoring.pointsPerSet"), Field("scoring.tieBreakPoints") },
             field => Assert.Equal((MinSetPoints, MaxSetPoints), ((int)field.Min, (int)field.Max)));
+    }
+
+    [Fact]
+    public void QueueModeRanges_AreTheOnesOfTheEngine()
+    {
+        var exitMode = Field("queue.exitMode");
+        var fixedExitCount = Field("queue.fixedExitCount");
+        var winnerExitWins = Field("queue.winnerExitWins");
+
+        Assert.Equal(ExitModeKinds, exitMode.Values.Select(value => value.Text));
+        Assert.Equal(SettingsValue.Of(DefaultExitMode), exitMode.DefaultValue);
+        Assert.Equal((MinFixedExitCount, MaxFixedExitCount), ((int)fixedExitCount.Min, (int)fixedExitCount.Max));
+        Assert.Equal(SettingsValue.Of(DefaultFixedExitCount), fixedExitCount.DefaultValue);
+        Assert.Equal((MinWinnerExitWins, MaxWinnerExitWins), ((int)winnerExitWins.Min, (int)winnerExitWins.Max));
+        Assert.Equal(SettingsValue.Of(DefaultWinnerExitWins), winnerExitWins.DefaultValue);
+        Assert.Equal(SettingsValue.Of(false), Field("queue.winnerExitEnabled").DefaultValue);
     }
 
     [Fact]
