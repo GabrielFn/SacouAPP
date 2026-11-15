@@ -87,7 +87,11 @@ function levelLook(look: LevelBadgeModel["look"], colors: Theme): LevelLook {
         border: colors.suggestBorder,
       };
     case "none":
-      return { background: colors.surface, foreground: colors.textMuted, border: colors.borderDashed };
+      return {
+        background: colors.surface,
+        foreground: colors.textMuted,
+        border: colors.borderDashed,
+      };
   }
 }
 
@@ -124,7 +128,9 @@ export function LevelBadge({ model, onPress }: LevelBadgeProps) {
           color: look.foreground,
           fontFamily: model.look === "none" ? fontFamilies.body600 : fontFamilies.display800,
           fontSize:
-            model.look === "none" ? tokens.fontSizes.levelCaption : tokens.fontSizes.displayLevelBadge,
+            model.look === "none"
+              ? tokens.fontSizes.levelCaption
+              : tokens.fontSizes.displayLevelBadge,
         }}
       >
         {model.value}

@@ -59,7 +59,11 @@ export function membersScreenReducer(
     case "sheet-closed":
       return { ...state, sheetMemberId: null };
     case "level-opened":
-      return { sheetMemberId: null, level: { memberId: action.memberId, draft: null }, confirm: null };
+      return {
+        sheetMemberId: null,
+        level: { memberId: action.memberId, draft: null },
+        confirm: null,
+      };
     case "level-drafted":
       return state.level === null
         ? state

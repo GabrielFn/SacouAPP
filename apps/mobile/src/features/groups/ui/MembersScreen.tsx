@@ -190,7 +190,11 @@ function MembersDialogs({ model, onLeft }: MembersDialogsProps) {
       <MemberLevelDialog model={model} />
       <ConfirmSheet
         visible={removed !== null}
-        title={removed === null ? texts.sheet.remove : texts.sheet.removeConfirmTitle(memberName(removed))}
+        title={
+          removed === null
+            ? texts.sheet.remove
+            : texts.sheet.removeConfirmTitle(memberName(removed))
+        }
         body={texts.sheet.removeHelp}
         confirmLabel={texts.sheet.removeConfirm}
         cancelLabel={texts.sheet.cancel}

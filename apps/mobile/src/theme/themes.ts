@@ -112,9 +112,9 @@ function courtTheme(colors: CourtColors): Theme {
     infoFill: palette.infoFill,
     infoText: palette.infoText,
     danger: palette.danger,
-  noticeFill: palette.noticeFill,
-  suggestBorder: palette.suggestBorder,
-  suggestText: palette.suggestText,
+    noticeFill: palette.noticeFill,
+    suggestBorder: palette.suggestBorder,
+    suggestText: palette.suggestText,
   };
 }
 

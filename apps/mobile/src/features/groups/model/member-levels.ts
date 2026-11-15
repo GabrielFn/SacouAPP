@@ -108,12 +108,18 @@ export function reviewTenths(
 }
 
 /** "você ajustou": the admin moved the level away from the suggestion. */
-export function isAdjusted(draft: LevelTenths | undefined, suggestion: LevelTenths | null): boolean {
+export function isAdjusted(
+  draft: LevelTenths | undefined,
+  suggestion: LevelTenths | null,
+): boolean {
   return draft !== undefined && suggestion !== null && draft !== suggestion;
 }
 
 /** A card with no suggestion that nobody touched offers "Não sei" instead of "Confirmar". */
-export function offersUnknown(draft: LevelTenths | undefined, suggestion: LevelTenths | null): boolean {
+export function offersUnknown(
+  draft: LevelTenths | undefined,
+  suggestion: LevelTenths | null,
+): boolean {
   return draft === undefined && suggestion === null;
 }
 
@@ -136,4 +142,38 @@ export function inBatches<T>(items: readonly T[]): readonly (readonly T[])[] {
   return Array.from({ length: Math.ceil(items.length / LEVELS_PER_BATCH) }, (_, index) =>
     items.slice(index * LEVELS_PER_BATCH, (index + 1) * LEVELS_PER_BATCH),
   );
+}
+
+/** One card of screen 19b: a member the admin has not reviewed yet, with or without a suggestion. */
+export interface ReviewCard {
+  readonly member: Member;
+  readonly suggestion: LevelTenths | null;
+}
+
+/** The cards of 19b, in the order of screen 19: who is pending, nothing else (ADR 0047). */
+export function reviewCards(
+  sortedMembers: readonly Member[],
+  levels: readonly MemberLevel[],
+): readonly ReviewCard[] {
+  const byId = levelsById(levels);
+  return pendingReviews(sortedMembers, levels).map((member) => ({
+    member,
+    suggestion: tenthsOf(byId.get(member.memberId)?.suggestedLevel ?? null),
+  }));
+}
+
+/** "Ponteira · sugeriu 4,0 · você ajustou", "Ponteiro · sem conta · não sugeriu". */
+export function reviewDetail(
+  card: ReviewCard,
+  draft: LevelTenths | undefined,
+  mainPosition: string | null,
+): string {
+  const review = texts.review;
+  const parts = [
+    ...(mainPosition === null ? [] : [mainPosition]),
+    ...(card.member.hasAccount ? [] : [review.noAccount]),
+    card.suggestion === null ? review.notSuggested : review.suggested(formatLevel(card.suggestion)),
+    ...(isAdjusted(draft, card.suggestion) ? [review.adjusted] : []),
+  ];
+  return parts.join(strings.members.row.separator);
 }

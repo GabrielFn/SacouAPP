@@ -75,6 +75,8 @@ export const ratingsStrings = {
       failed === 1
         ? "1 nota não entrou. Tente de novo."
         : `${String(failed)} notas não entraram. Tente de novo.`,
+    notAllowedTitle: "Sem acesso às notas",
+    notAllowed: "Só admins e co-admins veem as notas.",
     loading: "Carregando as notas",
     loadError: "Não deu para carregar as notas",
   },

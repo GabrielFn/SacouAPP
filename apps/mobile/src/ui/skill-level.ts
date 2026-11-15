@@ -3,7 +3,12 @@
  * whole tenths (10 to 50, by 5) so no sum ever drifts. The server has the last word: this only draws the
  * steps and never sends a value outside them.
  */
-export const SKILL_LEVEL = { minTenths: 10, maxTenths: 50, stepTenths: 5, defaultTenths: 30 } as const;
+export const SKILL_LEVEL = {
+  minTenths: 10,
+  maxTenths: 50,
+  stepTenths: 5,
+  defaultTenths: 30,
+} as const;
 
 const TENTHS_PER_POINT = 10;
 const DECIMALS = 1;

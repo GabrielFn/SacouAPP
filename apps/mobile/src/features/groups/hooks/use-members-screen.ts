@@ -2,12 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useReducer } from "react";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
-import type {
-  GroupRole,
-  Member,
-  MemberLevel,
-  MemberType,
-} from "../../../services/api/sacou-api";
+import type { GroupRole, Member, MemberLevel, MemberType } from "../../../services/api/sacou-api";
 import { useServices } from "../../../services/services-context";
 import { levelOf as wireLevel, type LevelTenths } from "../../../ui/skill-level";
 import { canManageLevels, memberActions, type MemberSheet } from "../model/member-actions";
