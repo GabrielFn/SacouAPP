@@ -1,3 +1,4 @@
+import { MutationObserver } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { createFakeExternalLink } from "../../../adapters/fake-external-link";
@@ -12,6 +13,7 @@ import { queryKeys } from "../../../services/query/query-keys";
 import { GROUP } from "../model/members.test.fixture";
 import type { StoredInviteLink } from "../ports/invite-link-store";
 import {
+  inviteLinkMutation,
   openInviteLink,
   regenerateInviteLink,
   revokeListedInvite,
@@ -59,6 +61,22 @@ function cacheText(client: ReturnType<typeof createSacouQueryClient>): string {
   );
 }
 
+/** Everything the mutation cache holds, as text: after the screen leaves, the token must be gone. */
+function mutationCacheText(client: ReturnType<typeof createSacouQueryClient>): string {
+  return JSON.stringify(
+    client
+      .getMutationCache()
+      .getAll()
+      .map((mutation) => mutation.state.data),
+  );
+}
+
+/** Lets the timer of `gcTime: 0` run. */
+const nextTick = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+
 describe("opening the invite of screen 19d", () => {
   test("nothing kept: creates one and keeps it", async () => {
     const { fake, store, deps } = setup(null);
@@ -89,6 +107,21 @@ describe("opening the invite of screen 19d", () => {
     const text = cacheText(client);
     expect(text).not.toContain(NEW_TOKEN);
     expect(text).not.toContain(OLD.token);
+  });
+
+  test("the mutation cache drops the token once the screen unmounts", async () => {
+    const { fake, client, deps } = setup(OLD);
+    fake.respond("listInvites", apiOk([listed("other")]));
+    const observer = new MutationObserver(client, inviteLinkMutation(deps, GROUP));
+    const unsubscribe = observer.subscribe(() => undefined);
+    await observer.mutate({ kind: "open" });
+    expect(mutationCacheText(client)).toContain(NEW_TOKEN);
+
+    unsubscribe();
+    await nextTick();
+
+    expect(mutationCacheText(client)).not.toContain(NEW_TOKEN);
+    expect(client.getMutationCache().getAll()).toHaveLength(0);
   });
 
   test("the invite limit refuses with its text and refreshes the list", async () => {

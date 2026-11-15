@@ -10,11 +10,7 @@ import {
   inviteScreenReducer,
   type InviteScreenState,
 } from "../model/invite-screen.reducer";
-import {
-  openInviteLink,
-  regenerateInviteLink,
-  sendInviteOnWhatsApp,
-} from "../queries/invite-link-flow";
+import { inviteLinkMutation, sendInviteOnWhatsApp } from "../queries/invite-link-flow";
 import type { StoredInviteLink } from "../ports/invite-link-store";
 
 /** What the screen draws once the link is ready. Built on each render, never kept (ADR 0049, D7). */
@@ -40,9 +36,6 @@ export interface InviteScreenModel {
   readonly closeRegenerate: () => void;
   readonly regenerate: () => void;
 }
-
-type LinkStep =
-  { readonly kind: "open" } | { readonly kind: "regenerate"; readonly inviteId: string };
 
 interface ViewInput {
   readonly baseUrl: string | null;
@@ -80,11 +73,7 @@ export function useInviteScreen(groupId: string, groupName: string): InviteScree
   const [state, dispatch] = useReducer(inviteScreenReducer, initialInviteScreenState);
   // A failed "gerar outro" shows the error and "Tentar de novo", which reads the link kept again.
   const link = useMutation({
-    gcTime: 0,
-    mutationFn: (step: LinkStep) =>
-      step.kind === "open"
-        ? openInviteLink(deps, groupId)
-        : regenerateInviteLink(deps, groupId, step.inviteId),
+    ...inviteLinkMutation(deps, groupId),
     onSuccess: () => {
       dispatch({ type: "link-changed" });
     },

@@ -20,6 +20,24 @@ export interface InviteFlowDeps {
   readonly client: QueryClient;
 }
 
+export type LinkStep =
+  | { readonly kind: "open" }
+  | { readonly kind: "regenerate"; readonly inviteId: string };
+
+/** The cache drops the result of the link mutation, and so the token, as soon as the screen leaves. */
+const DROP_WHEN_UNUSED = 0;
+
+/** The options of the one mutation of screen 19d that holds the token in memory (ADR 0049, D7). */
+export function inviteLinkMutation(deps: InviteFlowDeps, groupId: string) {
+  return {
+    gcTime: DROP_WHEN_UNUSED,
+    mutationFn: (step: LinkStep) =>
+      step.kind === "open"
+        ? openInviteLink(deps, groupId)
+        : regenerateInviteLink(deps, groupId, step.inviteId),
+  };
+}
+
 /** A failed write of the copy does not lose the link: it is shown now, and another is made next time. */
 async function keep(
   store: InviteLinkStore,
