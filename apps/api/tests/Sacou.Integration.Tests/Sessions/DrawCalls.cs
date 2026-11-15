@@ -26,7 +26,7 @@ internal static class DrawCalls
     /// <summary>The draw on (and balanced, unless told), written through the Groups settings route as the admin.</summary>
     public static async Task EnableAsync(GroupWorld world, bool enabled = true, bool balance = true)
     {
-        var patch = $$"""{"settings":{"schemaVersion":1,"draw":{"enabled":{{Flag(enabled)}},"balanceByLevel":{{Flag(balance)}}}}}""";
+        var patch = $$"""{"settings":{"schemaVersion":1,"draw":{"enabled":{{Flag(enabled)}},"balanceByLevel":{{Flag(balance)}} """ + "}}}";
         using var response = await world.SendAsync(GroupActor.Admin, HttpMethod.Patch, world.GroupPath + "/settings", patch);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
