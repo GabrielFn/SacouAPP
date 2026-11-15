@@ -19,6 +19,11 @@ public sealed class TeamDrawOracleTests
     /// <summary>About 60 ms in Debug on a quiet machine; the margin covers a CI runner busy with the other test projects.</summary>
     private const int TimeLimitMilliseconds = 1000;
     private const int TimedRuns = 5;
+    private const int ThreeTeamsOfFour = 3 * BeachFour;
+    private const int SixTeams = 6;
+    private const int SixTeamsOfSix = SixTeams * Indoor;
+    private const int TwelvePlayers = 12;
+    private const int ThirtyPlayers = 30;
 
     [Fact]
     public void TwoTeams_AlwaysMatchTheOracle()
@@ -40,7 +45,7 @@ public sealed class TeamDrawOracleTests
         var checkedCases = 0;
         while (checkedCases < ThreeTeamCases)
         {
-            checkedCases += MatchesTheOracle(generator, 12, BeachFour) ? 1 : 0;
+            checkedCases += MatchesTheOracle(generator, ThreeTeamsOfFour, BeachFour) ? 1 : 0;
         }
     }
 
@@ -48,13 +53,13 @@ public sealed class TeamDrawOracleTests
     public void ThirtySixPlayers_NoSwapOfTwoPlayersImproves_AndItIsFast()
     {
         var generator = new SeededRandom(GeneratorSeed + 2);
-        var input = Input(RandomPlayers(generator, 36), Indoor);
+        var input = Input(RandomPlayers(generator, SixTeamsOfSix), Indoor);
         var result = TeamDraw.Run(input).Value;
 
         // The fastest of a few runs, so a busy machine running the other test projects does not fail it.
         var fastest = Enumerable.Range(0, TimedRuns).Min(_ => ElapsedMilliseconds(input));
 
-        Assert.Equal(6, result.Teams.Length);
+        Assert.Equal(SixTeams, result.Teams.Length);
         Assert.False(AnySwapImproves(result));
         Assert.True(fastest < TimeLimitMilliseconds, $"took {fastest} ms");
     }
@@ -63,7 +68,7 @@ public sealed class TeamDrawOracleTests
     public void SameInputAndSeed_GiveTheSameDraw_WhateverTheOrderOfThePlayers()
     {
         var generator = new SeededRandom(GeneratorSeed + 3);
-        DrawInput[] inputs = [ScreenSevenInput(), Input(RandomPlayers(generator, 12), BeachFour), Input(RandomPlayers(generator, 30), Indoor)];
+        DrawInput[] inputs = [ScreenSevenInput(), Input(RandomPlayers(generator, TwelvePlayers), BeachFour), Input(RandomPlayers(generator, ThirtyPlayers), Indoor)];
 
         Assert.All(inputs, input =>
         {
@@ -98,13 +103,16 @@ public sealed class TeamDrawOracleTests
             return false;
         }
 
-        var expected = DrawOracle.BestSumGap(playing, locks, layout.TeamCount, layout.TeamSize);
-        int? actual = result.IsSuccess ? SumGap(result.Value) : null;
+        // Both levels of the objective: the gap, then the sum of the squared sums (it decides among 3 teams).
+        var expected = DrawOracle.Best(playing, locks, layout.TeamCount, layout.TeamSize);
+        (int Gap, long SquaredSums)? actual = result.IsSuccess ? (SumGap(result.Value), SquaredSums(result.Value)) : null;
         Assert.True(expected == actual, $"oracle {expected}, draw {actual}: levels [{string.Join(",", players.Select(player => player.LevelTenths))}], "
             + $"locks [{string.Join(", ", locks.Select(item => $"{item.First.Value.ToString()[..8]}-{item.Second.Value.ToString()[..8]} {item.Kind}"))}]"
             + (result.IsSuccess ? $", split {SplitKey(result.Value)}" : string.Empty));
         return true;
     }
+
+    private static long SquaredSums(DrawResult result) => Sums(result).Sum(sum => (long)sum * sum);
 
     private static ImmutableArray<DrawPlayer> RandomPlayers(SeededRandom generator, int count) =>
         Players([.. Enumerable.Range(0, count).Select(_ => 10 + (5 * generator.NextBelow(LevelSteps)))]);
