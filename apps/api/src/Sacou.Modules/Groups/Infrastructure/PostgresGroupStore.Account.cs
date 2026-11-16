@@ -10,6 +10,9 @@ namespace Sacou.Modules.Groups.Infrastructure;
 /// </summary>
 internal sealed partial class PostgresGroupStore
 {
+    /// <summary>Passes of the erasure before giving up on a person who keeps joining groups; each pass is one transaction.</summary>
+    private const int MaxErasureAttempts = 3;
+
     public async Task<IReadOnlyList<AccountMembership>> ListMembershipsOfUserAsync(UserId user, CancellationToken cancellationToken)
     {
         var rows = await WithGroupNamesAsync(
@@ -56,11 +59,38 @@ internal sealed partial class PostgresGroupStore
     {
         ArgumentNullException.ThrowIfNull(isBlocker);
         ArgumentNullException.ThrowIfNull(erase);
+        for (var attempt = 1; ; attempt++)
+        {
+            if (await TryEraseAccountAsync(user, isBlocker, erase, cancellationToken).ConfigureAwait(false) is { } blocking)
+            {
+                return blocking;
+            }
+
+            if (attempt == MaxErasureAttempts)
+            {
+                throw new InvalidOperationException("The person kept joining groups during the account erasure.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// One pass of <see cref="EraseAccountAsync"/>, or null when the person joined a group while this pass waited for
+    /// the person's lock (an acceptance or a creation commits while holding it): that group cannot be locked now,
+    /// after the person, so the pass writes nothing and the next one takes the group in order.
+    /// </summary>
+    private async Task<IReadOnlyList<GroupId>?> TryEraseAccountAsync(
+        UserId user, Func<Group, bool> isBlocker, Func<Group, GroupChange> erase, CancellationToken cancellationToken)
+    {
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
             var groups = await LockGroupsOfAsync(user, cancellationToken).ConfigureAwait(false);
             await LockPersonAsync(user, cancellationToken).ConfigureAwait(false);
+            if (await JoinedMeanwhileAsync(user, groups, cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+
             List<GroupId> blocking = [.. groups.Where(isBlocker).Select(group => group.Id)];
             if (blocking.Count > 0)
             {
@@ -84,10 +114,18 @@ internal sealed partial class PostgresGroupStore
         }
     }
 
+    /// <summary>A member of the person in a group this pass did not lock, committed while the pass waited for the person's lock.</summary>
+    private async Task<bool> JoinedMeanwhileAsync(UserId user, IReadOnlyList<Group> locked, CancellationToken cancellationToken)
+    {
+        Guid[] known = [.. locked.Select(group => group.Id.Value)];
+        return await database.Members.AsNoTracking()
+            .AnyAsync(member => member.UserId == user.Value && !known.Contains(member.GroupId), cancellationToken).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Ascending id order, so two erasures, or an erasure and a write of one group, never wait on each other in a
-    /// cycle. A group the person joins after the first read is left for the sweep (ADR 0056, D7): locking it after the
-    /// person's lock could close a cycle with an acceptance, which takes the group first.
+    /// cycle. A group the person joins after the first read is left for the next pass or the sweep (ADR 0056, D7):
+    /// locking it after the person's lock could close a cycle with an acceptance, which takes the group first.
     /// </summary>
     private async Task<IReadOnlyList<Group>> LockGroupsOfAsync(UserId user, CancellationToken cancellationToken)
     {

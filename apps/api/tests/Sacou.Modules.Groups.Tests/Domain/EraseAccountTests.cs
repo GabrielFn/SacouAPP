@@ -51,7 +51,7 @@ public sealed class EraseAccountTests
 
         var change = world.Group.EraseAccount(world.Founder.UserId!.Value, Later);
 
-        Assert.False(change.Group.ActiveMembers.Any(member => member.IsActiveAdmin));
+        Assert.DoesNotContain(change.Group.ActiveMembers, member => member.IsActiveAdmin);
         Assert.Equal(GroupRole.Admin, Assert.Single(change.ChangedMembers).Role);
     }
 
