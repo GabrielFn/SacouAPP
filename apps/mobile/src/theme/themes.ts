@@ -41,6 +41,21 @@ function nightWithAlpha(alpha: number): string {
   return `rgba(${nightRgb}, ${String(alpha)})`;
 }
 
+/** Colors that do not change with the theme: member rows, notices, the danger text and the dark panel of the round. */
+const memberColors = {
+  avatarSurface: palette.avatarSurface,
+  infoFill: palette.infoFill,
+  infoText: palette.infoText,
+  danger: palette.danger,
+  // The dark panel of the round (Rodada.dc.html, RodadaJogador.dc.html): sand text, yellow counts.
+  panelSurface: palette.night,
+  onPanel: palette.sand,
+  panelAccent: palette.ballYellow,
+  noticeFill: palette.noticeFill,
+  suggestBorder: palette.suggestBorder,
+  suggestText: palette.suggestText,
+} as const;
+
 export const appTheme = {
   background: palette.sand,
   surface: palette.white,
@@ -63,17 +78,7 @@ export const appTheme = {
   badgeSurface: nightWithAlpha(nightAlpha.badge),
   trackOff: nightWithAlpha(nightAlpha.trackOff),
   segmentSurface: nightWithAlpha(nightAlpha.segment),
-  avatarSurface: palette.avatarSurface,
-  infoFill: palette.infoFill,
-  infoText: palette.infoText,
-  danger: palette.danger,
-  // The dark panel of the round (Rodada.dc.html, RodadaJogador.dc.html): sand text, yellow counts.
-  panelSurface: palette.night,
-  onPanel: palette.sand,
-  panelAccent: palette.ballYellow,
-  noticeFill: palette.noticeFill,
-  suggestBorder: palette.suggestBorder,
-  suggestText: palette.suggestText,
+  ...memberColors,
 } as const satisfies Theme;
 
 /**
@@ -115,16 +120,7 @@ function courtTheme(colors: CourtColors): Theme {
     trackOff: colors.muted,
     segmentSurface: colors.background,
     // The court has no member rows: the same colors as the app, for a complete theme.
-    avatarSurface: palette.avatarSurface,
-    infoFill: palette.infoFill,
-    infoText: palette.infoText,
-    danger: palette.danger,
-    panelSurface: palette.night,
-    onPanel: palette.sand,
-    panelAccent: palette.ballYellow,
-    noticeFill: palette.noticeFill,
-    suggestBorder: palette.suggestBorder,
-    suggestText: palette.suggestText,
+    ...memberColors,
   };
 }
 
