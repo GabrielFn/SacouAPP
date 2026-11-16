@@ -34,7 +34,13 @@ export interface QuickProfileFooterProps {
 }
 
 /** "Pular" (flex 1) and "Pronto" (flex 2) on the first access; only "Salvar" in edit mode. */
-export function QuickProfileFooter({ mode, disabled, saving, onSubmit, onSkip }: QuickProfileFooterProps) {
+export function QuickProfileFooter({
+  mode,
+  disabled,
+  saving,
+  onSubmit,
+  onSkip,
+}: QuickProfileFooterProps) {
   const { tokens } = useTheme();
   const { profile } = strings;
   if (mode === "edit")
