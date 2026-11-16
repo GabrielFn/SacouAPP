@@ -14,6 +14,7 @@ import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
 import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
 import { expoClipboard } from "../adapters/expo-clipboard";
+import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
 import { secureStoreInviteLinkStore } from "../adapters/secure-store-invite-link-store";
@@ -64,6 +65,7 @@ const realServices: Services = {
   networkStatus,
   shareSheet: reactNativeShareSheet,
   clipboard: expoClipboard,
+  idGenerator: expoCryptoIdGenerator,
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,

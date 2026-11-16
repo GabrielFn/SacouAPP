@@ -14,6 +14,7 @@ import type { NetworkStatus } from "./api/network-status";
 import type { SacouApi } from "./api/sacou-api";
 import type { Clipboard } from "./clipboard/clipboard";
 import type { FontLoader } from "./font-loader";
+import type { IdGenerator } from "./id/id-generator";
 import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
 import type { ShareSheet } from "./share/share-sheet";
@@ -46,6 +47,8 @@ export interface Services {
   readonly clipboard: Clipboard;
   /** Opens WhatsApp with the invite; on a phone without it, the share sheet takes over. */
   readonly externalLink: ExternalLink;
+  /** The `requestId` of a guest, made once per opening of the sheet 21a (ADR 0053, D5). */
+  readonly idGenerator: IdGenerator;
   readonly qrEncoder: QrEncoder;
   /** The only place of an invite token on the phone (ADR 0049, D7). */
   readonly inviteLinkStore: InviteLinkStore;

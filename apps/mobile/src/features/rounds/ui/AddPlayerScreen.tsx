@@ -13,6 +13,7 @@ import { managesRounds, roundSettingsOf } from "../model/round-detail";
 import { addPlayerView } from "../model/round-screen-view";
 import { roundHref } from "../navigation";
 import { AddableList, AddFeedback } from "./AddableList";
+import { GuestBlock, GuestSheet } from "./GuestSheet";
 import { RoundLoading } from "./RoundHeading";
 
 const { add } = strings.rounds;
@@ -57,6 +58,8 @@ function AddPlayerContent({ groupId, groupName, round, members, model }: AddPlay
       </Text>
       <AddableList view={view} model={model} />
       {view.hint === null ? null : <Text variant="muted">{view.hint.text}</Text>}
+      <GuestBlock model={model} />
+      <GuestSheet model={model} />
     </Screen>
   );
 }

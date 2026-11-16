@@ -7,7 +7,7 @@ import type {
   CourtLogResult,
   StoredCourtLog,
 } from "../ports/court-event-log";
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 import type { SqlDatabase, SqlExecutor, SqlRow } from "../ports/sql-database";
 import { continuesLog, hasContiguousSequences } from "./append-rules";
 import { FIRST_BATCH } from "./migrations.data";

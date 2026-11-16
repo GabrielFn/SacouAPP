@@ -6,7 +6,7 @@ import {
 } from "@sacou/match-engine";
 import { ok, type Err, type Ok, type Result } from "@sacou/volley-rules";
 
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 
 /** An event without an envelope, as the engine drafts it. */
 export interface EventDraft {

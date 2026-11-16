@@ -164,7 +164,7 @@ export const roundsStrings = {
     close: "Fechar",
     position: (position: number) => `${String(position)}º`,
   },
-  /** Screen 21, without the guest block until part 3. */
+  /** Screen 21. */
   add: {
     title: "Adicionar quem confirmou no WhatsApp",
     subtitle: (group: string, count: string) => `${group} · ${count} confirmados`,
@@ -185,6 +185,27 @@ export const roundsStrings = {
     added: (name: string) => `${name} entrou na lista.`,
     waitlisted: (name: string, position: number) =>
       `${name} entrou na espera (${String(position)}º).`,
+  },
+  /** The guest block of screen 21 and the sheet 21a, without the claim of the profile (ADR 0046). */
+  guest: {
+    blockTitle: "Convidado sem conta",
+    name: "Nome",
+    joinsAs: "Entra como",
+    open: "Adicionar convidado",
+    title: "Adicionar convidado",
+    intro: "Para quem ainda não tem o app. Ele entra como avulso nesta rodada.",
+    nameLabel: "Nome ou apelido",
+    position: "Posição",
+    optional: "· opcional",
+    level: "Nota do sorteio",
+    levelUnset: (level: string) => `${level} · definir`,
+    levelLabel: (level: string) => `Nota do sorteio: ${level}. Definir`,
+    privacy: "Só admins veem a nota.",
+    submit: "Adicionar à rodada",
+    submitting: "Adicionando…",
+    close: "Fechar",
+    nameRequired: "Escreva o nome ou apelido do convidado.",
+    nameInvalid: "Use só letras, números e símbolos comuns, em até 20 caracteres.",
   },
   /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */
   copyList: {

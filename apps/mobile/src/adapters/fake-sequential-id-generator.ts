@@ -1,4 +1,4 @@
-import type { IdGenerator } from "../features/court/ports/id-generator";
+import type { IdGenerator } from "../services/id/id-generator";
 
 const ID_DIGITS = 12;
 const ID_PREFIX = "00000000-0000-4000-8000-";

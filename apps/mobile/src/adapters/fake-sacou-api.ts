@@ -53,6 +53,7 @@ function defaults(): Answers {
     updateRound: none,
     respondAttendance: none,
     setMemberAttendance: none,
+    addGuest: none,
   };
 }
 
@@ -103,6 +104,7 @@ export function createFakeSacouApi(): FakeSacouApi {
     respondAttendance: (groupId, roundId, response) =>
       answer("respondAttendance", [groupId, roundId, response]),
     setMemberAttendance: (member, response) => answer("setMemberAttendance", [member, response]),
+    addGuest: (groupId, body) => answer("addGuest", [groupId, body]),
   };
 
   return {
