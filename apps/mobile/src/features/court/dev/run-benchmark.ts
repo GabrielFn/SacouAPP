@@ -1,4 +1,4 @@
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 import { buildBenchmarkScenario, type BenchmarkScenarioId } from "./benchmark-scenarios";
 import { runScenario, type BenchmarkDeps, type BenchmarkResult } from "./replay-benchmark";
 

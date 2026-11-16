@@ -6,12 +6,15 @@ import type {
   AttendanceAnswer,
   AttendanceResponse,
   CreateRoundBody,
+  Round,
   SacouApi,
+  UpdateRoundBody,
 } from "../../../services/api/sacou-api";
 import {
   applyCacheEffects,
   cacheEffectsOf,
   isConflict,
+  settleCacheEffects,
   type CacheEffect,
 } from "../../../services/query/invalidation";
 import { queryKeys } from "../../../services/query/query-keys";
@@ -40,6 +43,45 @@ export function createRoundMutation(api: SacouApi, client: QueryClient, groupId:
   };
 }
 
+const FORBIDDEN_STATUS = 403;
+
+/**
+ * A refused edit reads again what it was refused against: a 403 the group and its role, a 409 (`round-closed`,
+ * `round-date-taken`) the round. The text comes from the error.
+ */
+export function roundEditRefusedEffects(
+  groupId: string,
+  roundId: string,
+  error: unknown,
+): readonly CacheEffect[] {
+  const apiError = apiErrorOf(error);
+  if (apiError?.kind !== "problem") return [];
+  const round: CacheEffect = { action: "invalidate", key: queryKeys.round(groupId, roundId) };
+  if (apiError.status === FORBIDDEN_STATUS) {
+    return [...cacheEffectsOf({ type: "settingsForbidden", groupId }), round];
+  }
+  return isConflict(error) ? [round] : [];
+}
+
+/** "Salvar" of "Editar rodada": the answer is the whole round, which replaces the cached detail. */
+export function updateRoundMutation(
+  api: SacouApi,
+  client: QueryClient,
+  groupId: string,
+  roundId: string,
+) {
+  return {
+    scope: roundScope(roundId),
+    mutationFn: (body: UpdateRoundBody) => unwrap(api.updateRound(groupId, roundId, body)),
+    onSuccess: (round: Round) => {
+      applyCacheEffects(client, cacheEffectsOf({ type: "roundUpdated", groupId, roundId, round }));
+    },
+    onError: (error: unknown) => {
+      applyCacheEffects(client, roundEditRefusedEffects(groupId, roundId, error));
+    },
+  };
+}
+
 const MEMBER_GONE: ReadonlySet<string> = new Set([
   "sessions.member-not-found",
   "groups.member-not-found",
@@ -47,7 +89,9 @@ const MEMBER_GONE: ReadonlySet<string> = new Set([
 
 /**
  * A refused answer shows its text and reads again what it was refused against: a 409 (`round-full`,
- * `drop-in-window-closed`, `round-closed`...) the round, a member that is gone the member list (D3).
+ * `drop-in-window-closed`, `round-closed`...) the round, a member that is gone the member list (D3). A 403
+ * means the role on the phone is stale: the group (and its role) and the round are read again, and the
+ * screens that need `ManageRounds` go back to the round by themselves.
  */
 export function attendanceRefusedEffects(
   groupId: string,
@@ -56,6 +100,12 @@ export function attendanceRefusedEffects(
 ): readonly CacheEffect[] {
   const apiError = apiErrorOf(error);
   if (apiError?.kind !== "problem") return [];
+  if (apiError.status === FORBIDDEN_STATUS) {
+    return [
+      ...cacheEffectsOf({ type: "settingsForbidden", groupId }),
+      ...cacheEffectsOf({ type: "attendanceChanged", groupId, roundId }),
+    ];
+  }
   if (MEMBER_GONE.has(apiError.code)) {
     return [{ action: "invalidate", key: queryKeys.members(groupId) }];
   }
@@ -64,9 +114,9 @@ export function attendanceRefusedEffects(
 
 function attendanceEffects(client: QueryClient, groupId: string, roundId: string) {
   return {
-    onSuccess: () => {
-      applyCacheEffects(client, cacheEffectsOf({ type: "attendanceChanged", groupId, roundId }));
-    },
+    // Returned, so the call stays pending until the round is read again ("Adicionando…" lasts until then).
+    onSuccess: () =>
+      settleCacheEffects(client, cacheEffectsOf({ type: "attendanceChanged", groupId, roundId })),
     onError: (error: unknown) => {
       applyCacheEffects(client, attendanceRefusedEffects(groupId, roundId, error));
     },

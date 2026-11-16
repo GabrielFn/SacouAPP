@@ -1,127 +1,52 @@
 import type { GroupSettings } from "@sacou/match-engine";
 import { Redirect, useRouter } from "expo-router";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
-import { errorTextOf } from "../../../services/api/api-error-text";
+import type { Round } from "../../../services/api/sacou-api";
 import { wallClockNow } from "../../../services/api/wall-clock";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { fontFamilies } from "../../../theme/tokens.data";
-import { BottomSheet } from "../../../ui/BottomSheet";
 import { Button } from "../../../ui/Button";
-import { EmptyState } from "../../../ui/EmptyState";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
-import { FieldFrame } from "../../../ui/FieldFrame";
 import { BackBar } from "../../../ui/BackBar";
-import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
-import { Switch } from "../../../ui/Switch";
 import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
 import { groupsHref } from "../../groups/navigation";
 import { formatTime } from "../../groups/model/schedule-text";
 import { useGroup, useGroupSettings } from "../../groups/queries/use-group-queries";
 import { useCreateRound, type CreateRoundModel } from "../hooks/use-create-round";
+import { useEditRound } from "../hooks/use-edit-round";
 import { firstRoundDate } from "../model/create-round.selectors";
 import { dateLabel } from "../model/round-dates";
 import { roundChips, sourceReader } from "../model/round-chips";
-import { managesRounds } from "../model/round-detail";
+import { managesRounds, roundSettingsOf, type RoundSettingsView } from "../model/round-detail";
 import { hasUpcomingSeries } from "../model/round-series";
 import { roundHref } from "../navigation";
-import { useRounds } from "../queries/use-round-queries";
+import { useRound, useRounds } from "../queries/use-round-queries";
 import { DatePickerSheet } from "./DatePickerSheet";
+import { FormLoading, PickerField, RepeatRow, TimeSheet } from "./RoundFormParts";
 import { PersonalizeSection } from "./PersonalizeSection";
 import { RoundChips } from "./RoundChips";
 
 const { create } = strings.rounds;
 
-export interface PickerFieldProps {
-  readonly label: string;
-  readonly value: string;
-  readonly error: string | null;
-  readonly onPress: () => void;
-}
-
-/** A field that opens a sheet instead of a keyboard (day and time). */
-function PickerField({ label, value, error, onPress }: PickerFieldProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <View style={{ flex: 1 }}>
-      <FieldFrame label={label}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${label}: ${value}`}
-          onPress={onPress}
-          style={{
-            minHeight: tokens.sizes.field,
-            justifyContent: "center",
-            borderRadius: tokens.radii.field,
-            borderWidth: tokens.borderWidths.thin,
-            borderColor: error === null ? colors.borderField : colors.primary,
-            backgroundColor: colors.surface,
-            paddingHorizontal: tokens.spacing.m,
-          }}
-        >
-          <Text style={{ fontFamily: fontFamilies.body600, fontSize: tokens.fontSizes.field }}>
-            {value}
-          </Text>
-        </Pressable>
-        {error === null ? null : (
-          <Text variant="caption" accessibilityRole="alert" style={{ color: colors.text }}>
-            {error}
-          </Text>
-        )}
-      </FieldFrame>
-    </View>
-  );
-}
-
-export interface TimeSheetProps {
-  readonly model: CreateRoundModel;
-}
-
-/** The time in `HH:mm`, edited in place; confirming only closes the sheet. */
-function TimeSheet({ model }: TimeSheetProps) {
-  const { state, errors, dispatch } = model;
-  const close = () => {
-    dispatch({ type: "sheet-closed" });
-  };
-  return (
-    <BottomSheet visible={state.sheet.kind === "time"} title={create.pickTime} onClose={close}>
-      <TextField
-        label={create.time}
-        value={state.localTime}
-        help={create.timeHint}
-        error={errors.time ?? undefined}
-        keyboardType="numbers-and-punctuation"
-        onChangeText={(localTime) => {
-          dispatch({ type: "time-picked", localTime });
-        }}
-      />
-      <Button
-        label={create.confirm}
-        onPress={() => {
-          if (errors.time === null) close();
-        }}
-      />
-    </BottomSheet>
-  );
-}
-
-export interface CreateRoundFormProps {
-  readonly groupId: string;
+export interface RoundFormProps {
   readonly groupName: string;
   readonly settings: GroupSettings;
-  readonly hasSeries: boolean;
+  readonly model: CreateRoundModel;
+  /** "Editar rodada": its own title, "Salvar", and no "Repetir toda semana" (one round only). */
+  readonly editing: boolean;
 }
 
-/** Screen 20 once the group's settings are known: the state starts from them, never copies them again. */
-function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoundFormProps) {
-  const router = useRouter();
+function buttonLabel(editing: boolean, pending: boolean): string {
+  if (editing) return pending ? create.saving : create.save;
+  return pending ? create.publishing : create.publish;
+}
+
+/** The form of screen 20, for a new round and an edited one; the hook that runs it decides the call. */
+function RoundForm({ groupName, settings, model, editing }: RoundFormProps) {
   const { tokens } = useTheme();
-  const model = useCreateRound({ groupId, groupName, settings, hasSeries }, (roundId) => {
-    router.replace(roundHref(groupId, roundId));
-  });
   const { state, errors, dispatch } = model;
   const chips = roundChips(model.resolved.values, sourceReader(model.resolved.sources), {
     withRotation: true,
@@ -132,7 +57,7 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
         <>
           {model.errorText !== null ? <ErrorStrip text={model.errorText} /> : null}
           <Button
-            label={model.pending ? create.publishing : create.publish}
+            label={buttonLabel(editing, model.pending)}
             disabled={model.publishDisabled}
             onPress={model.publish}
           />
@@ -142,9 +67,9 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
       <BackBar title={groupName} fallbackHref={groupsHref} />
       <View style={{ gap: tokens.spacing.xs }}>
         <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
-          {create.title}
+          {editing ? create.editTitle : create.title}
         </Text>
-        <Text variant="muted">{create.subtitle}</Text>
+        <Text variant="muted">{editing ? create.editSubtitle : create.subtitle}</Text>
       </View>
       <View style={{ flexDirection: "row", gap: tokens.spacing.m }}>
         <PickerField
@@ -189,7 +114,7 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
         <RoundChips chips={chips} />
       </View>
       <PersonalizeSection group={settings} model={model} />
-      <RepeatRow model={model} enabled={settings.schedule.enabled} />
+      <RepeatRow model={model} enabled={!editing && settings.schedule.enabled} />
       <DatePickerSheet
         visible={state.sheet.kind === "date"}
         firstDate={firstRoundDate(settings, new Date(wallClockNow()))}
@@ -201,35 +126,43 @@ function CreateRoundForm({ groupId, groupName, settings, hasSeries }: CreateRoun
           dispatch({ type: "sheet-closed" });
         }}
       />
-      <TimeSheet model={model} />
+      {state.sheet.kind === "time" ? <TimeSheet model={model} /> : null}
     </Screen>
   );
 }
 
-export interface RepeatRowProps {
-  readonly model: CreateRoundModel;
-  /** Without a fixed day the group has no weekly rhythm to repeat. */
-  readonly enabled: boolean;
+export interface NewRoundFormProps {
+  readonly groupId: string;
+  readonly groupName: string;
+  readonly settings: GroupSettings;
+  readonly hasSeries: boolean;
 }
 
-function RepeatRow({ model, enabled }: RepeatRowProps) {
-  const { tokens } = useTheme();
-  if (!enabled) return null;
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.m }}>
-      <View style={{ flex: 1, gap: tokens.spacing.xs }}>
-        <Text variant="bodyStrong">{create.repeat}</Text>
-        <Text variant="caption">{model.repeatText}</Text>
-      </View>
-      <Switch
-        checked={model.state.repeatWeekly}
-        accessibilityLabel={create.repeat}
-        onChange={() => {
-          model.dispatch({ type: "repeat-toggled" });
-        }}
-      />
-    </View>
-  );
+/** Screen 20 once the group's settings are known: the state starts from them, never copies them again. */
+function NewRoundForm({ groupId, groupName, settings, hasSeries }: NewRoundFormProps) {
+  const router = useRouter();
+  const model = useCreateRound({ groupId, groupName, settings, hasSeries }, (roundId) => {
+    router.replace(roundHref(groupId, roundId));
+  });
+  return <RoundForm groupName={groupName} settings={settings} model={model} editing={false} />;
+}
+
+export interface EditRoundFormProps {
+  readonly groupId: string;
+  readonly groupName: string;
+  readonly settings: GroupSettings;
+  readonly round: Round;
+  readonly view: RoundSettingsView;
+}
+
+/** "Editar rodada": starts from the round in the cache; saving goes back to where it came from. */
+function EditRoundForm({ groupId, groupName, settings, round, view }: EditRoundFormProps) {
+  const router = useRouter();
+  const model = useEditRound({ groupId, settings, round, view }, () => {
+    if (router.canGoBack()) router.back();
+    else router.replace(roundHref(groupId, round.roundId));
+  });
+  return <RoundForm groupName={groupName} settings={settings} model={model} editing />;
 }
 
 export interface CreateRoundScreenProps {
@@ -245,41 +178,43 @@ export function CreateRoundScreen({ groupId }: CreateRoundScreenProps) {
     return <Redirect href={groupsHref} />;
   }
   if (group.data === undefined || settings.data === undefined || rounds.data === undefined) {
-    const failed = group.error ?? settings.error ?? rounds.error;
-    if (failed === null) {
-      return (
-        <Screen>
-          <LoadingState accessibilityLabel={create.loading} />
-        </Screen>
-      );
-    }
-    return (
-      <Screen>
-        <EmptyState
-          alert
-          title={create.loadError}
-          body={errorTextOf(failed)}
-          actions={[
-            {
-              label: create.retry,
-              variant: "secondary",
-              onPress: () => {
-                void group.refetch();
-                void settings.refetch();
-                void rounds.refetch();
-              },
-            },
-          ]}
-        />
-      </Screen>
-    );
+    return <FormLoading queries={[group, settings, rounds]} />;
   }
   return (
-    <CreateRoundForm
+    <NewRoundForm
       groupId={groupId}
       groupName={group.data.name}
       settings={settings.data.settings}
       hasSeries={hasUpcomingSeries(rounds.data, wallClockNow())}
+    />
+  );
+}
+
+export interface EditRoundScreenProps {
+  readonly groupId: string;
+  readonly roundId: string;
+}
+
+/** Screen 20 with `?roundId=`: only for who manages rounds; the others go back to the round. */
+export function EditRoundScreen({ groupId, roundId }: EditRoundScreenProps) {
+  const group = useGroup(groupId);
+  const settings = useGroupSettings(groupId);
+  const round = useRound(groupId, roundId);
+  if (group.data !== undefined && !managesRounds(group.data.role)) {
+    return <Redirect href={roundHref(groupId, roundId)} />;
+  }
+  if (group.data === undefined || settings.data === undefined || round.data === undefined) {
+    return <FormLoading queries={[group, settings, round]} />;
+  }
+  const view = roundSettingsOf(round.data);
+  if (view === null) return <Redirect href={roundHref(groupId, roundId)} />;
+  return (
+    <EditRoundForm
+      groupId={groupId}
+      groupName={group.data.name}
+      settings={settings.data.settings}
+      round={round.data}
+      view={view}
     />
   );
 }
