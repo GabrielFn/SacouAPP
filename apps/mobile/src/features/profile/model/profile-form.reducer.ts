@@ -1,8 +1,4 @@
-import type {
-  MyProfile,
-  PlayingPosition,
-  PrimaryPosition,
-} from "../../../services/api/sacou-api";
+import type { MyProfile, PlayingPosition, PrimaryPosition } from "../../../services/api/sacou-api";
 import { firstName } from "./first-name";
 
 /**

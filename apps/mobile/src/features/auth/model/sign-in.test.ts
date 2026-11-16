@@ -17,12 +17,7 @@ import {
   showsEmailError,
 } from "./email-sign-in.selectors";
 import { wordsOf } from "./legal-words";
-import {
-  initialSignInState,
-  isBusy,
-  signInReducer,
-  type SignInAction,
-} from "./sign-in.reducer";
+import { initialSignInState, isBusy, signInReducer, type SignInAction } from "./sign-in.reducer";
 
 const { auth } = strings;
 const DOMAIN = "@x.com";
@@ -135,7 +130,11 @@ describe("e-mail sheet reducer and selectors", () => {
     });
     expect(refused).toMatchObject({ email: "ana@x.com", password: "", submitting: false });
     expect(authFailureText(refused.failure)).toBe("E-mail ou senha incorretos.");
-    const offline = emailSignInReducer(sent, { type: "failed", mode: "signIn", failure: "offline" });
+    const offline = emailSignInReducer(sent, {
+      type: "failed",
+      mode: "signIn",
+      failure: "offline",
+    });
     expect(offline.password).toBe("errada");
   });
 
@@ -166,7 +165,11 @@ describe("e-mail sheet reducer and selectors", () => {
     expect(unknown).toEqual(known);
     expect(known.resetSent).toBe(true);
     expect(canSubmit(known)).toBe(false);
-    const offline = emailSignInReducer(asked, { type: "failed", mode: "reset", failure: "offline" });
+    const offline = emailSignInReducer(asked, {
+      type: "failed",
+      mode: "reset",
+      failure: "offline",
+    });
     expect(offline.resetSent).toBe(false);
   });
 
@@ -191,7 +194,13 @@ describe("e-mail sheet reducer and selectors", () => {
   });
 
   test("the terms sentence breaks between words", () => {
-    expect(wordsOf("Ao entrar você aceita os ")).toEqual(["Ao ", "entrar ", "você ", "aceita ", "os "]);
+    expect(wordsOf("Ao entrar você aceita os ")).toEqual([
+      "Ao ",
+      "entrar ",
+      "você ",
+      "aceita ",
+      "os ",
+    ]);
     expect(wordsOf(" e a ")).toEqual([" e ", "a "]);
     expect(wordsOf(".")).toEqual(["."]);
     expect(wordsOf(" ")).toEqual([" "]);

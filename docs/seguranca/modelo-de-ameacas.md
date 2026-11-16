@@ -268,6 +268,7 @@ Telas 19, 19a, 19b e 19c ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-
 |---|---|---|
 | I | Placar ou Jogador vê a nota de alguém no app | A consulta `memberLevelsQuery` tem `enabled: canManageLevels(papel)`: para Placar e Jogador a rota nunca é chamada (teste com o falso), a lista não tem cartão de nota, a faixa "N notas para confirmar", a linha "Só admins veem" nem a linha "Nota do sorteio" da 19c, e a 19b mostra "Sem acesso às notas". A lista de membros não tem campo de nível |
 | I | Nota ou sugestão gravada no aparelho | A chave `["groups", id, "member-levels"]` fica fora da lista de permissão do `sacou-cache.db` (teste de política e teste de persistência que procura `adminLevel` e `suggestedLevel` no arquivo); mutações de nota com `gcTime: 0`; o rascunho fica só nos reducers das telas |
+| I | Sugestão do próprio nível gravada no aparelho (tela 27, E4.3 Parte 2) | `["me", "profile"]` fica fora da lista de permissão (raiz `me`); teste que persiste o cache com o perfil carregado e procura o nível marcador, o apelido e a chave no arquivo; a mutação do perfil com `gcTime: 0`; o perfil some no `clearSession`. A flag "pulou o perfil" é a única linha nova do `sacou-cache.db`, sem dado da pessoa, e também some no `clearSession` |
 | I | Nota em log, rota ou chave de consulta | Nenhum `console`; a rota da 19b leva só o `groupId`; a chave só tem o `groupId` |
 | E | Admin rebaixado continua vendo as notas | Um 403 `groups.forbidden` numa escrita de nota invalida o grupo e as notas: o papel novo esconde a nota na hora |
 

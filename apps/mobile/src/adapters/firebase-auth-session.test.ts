@@ -36,7 +36,9 @@ function userView(
     displayName: "Ana Souza",
     getIdToken: (forceRefresh) => {
       forced.push(forceRefresh);
-      return tokenFailure === null ? Promise.resolve(TOKEN) : Promise.reject(sdkError(tokenFailure));
+      return tokenFailure === null
+        ? Promise.resolve(TOKEN)
+        : Promise.reject(sdkError(tokenFailure));
     },
   };
 }

@@ -13,7 +13,10 @@ export type AccountScreenName = "export" | "delete";
  * Screens of the account that are not built yet: their rows hide until they are (the pattern of E4.6).
  * "Exportar meus dados" (30a) and "Excluir conta" (30b) arrive with E4.3, part 3, over E3.16.
  */
-export const PENDING_ACCOUNT_SCREENS: ReadonlySet<AccountScreenName> = new Set(["export", "delete"]);
+export const PENDING_ACCOUNT_SCREENS: ReadonlySet<AccountScreenName> = new Set([
+  "export",
+  "delete",
+]);
 
 export function isAccountScreenReady(
   screen: AccountScreenName,

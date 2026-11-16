@@ -54,7 +54,11 @@ export function saveProfileMutation(deps: ProfileMutationDeps) {
     onSuccess: (profile: MyProfile) => {
       applyCacheEffects(
         deps.client,
-        cacheEffectsOf({ type: "profileSaved", profile, cachedGroupIds: cachedGroupIds(deps.client) }),
+        cacheEffectsOf({
+          type: "profileSaved",
+          profile,
+          cachedGroupIds: cachedGroupIds(deps.client),
+        }),
       );
     },
   };

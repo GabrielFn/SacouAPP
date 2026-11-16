@@ -34,7 +34,8 @@ export interface QuickProfileFooterProps {
 function QuickProfileFooter({ mode, disabled, onSubmit, onSkip }: QuickProfileFooterProps) {
   const { tokens } = useTheme();
   const { profile } = strings;
-  if (mode === "edit") return <Button label={profile.save} onPress={onSubmit} disabled={disabled} />;
+  if (mode === "edit")
+    return <Button label={profile.save} onPress={onSubmit} disabled={disabled} />;
   return (
     <View style={{ flexDirection: "row", gap: tokens.spacing.s }}>
       <View style={{ flex: 1 }}>
