@@ -11,6 +11,7 @@ export type Member = Schemas["MemberResponse"];
 export type Invite = Schemas["InviteResponse"];
 export type GroupRole = Schemas["GroupRole"];
 export type MemberType = Schemas["MemberType"];
+export type PrimaryPosition = Schemas["PrimaryPosition"];
 export type GroupSettingsDocument = Schemas["GroupSettingsResponse"];
 export type SavedTemplate = Schemas["SavedTemplateResponse"];
 /** The admin's level of a member and its own suggestion: private, admin and co-admin only (ADR 0047). */
@@ -27,7 +28,6 @@ export type TemplateChoice =
 /** The person's own profile; it has the level they suggest for themselves, so it is never persisted. */
 export type MyProfile = Schemas["MyProfileResponse"];
 export type SaveMyProfileBody = Schemas["SaveMyProfileRequest"];
-export type PrimaryPosition = Schemas["PrimaryPosition"];
 export type PlayingPosition = Schemas["PlayingPosition"];
 
 export type Round = Schemas["RoundResponse"];
@@ -36,6 +36,9 @@ export type CreateRoundBody = Schemas["CreateRoundRequest"];
 export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
 export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
 export type AttendanceResponse = Schemas["AttendanceResponse"];
+/** A guest without an account: a name of someone who accepted no terms, and a private level (ADR 0053). */
+export type AddGuestBody = Schemas["AddGuestRequest"];
+export type AddedGuest = Schemas["AddGuestResponse"];
 
 export interface MemberRef {
   readonly groupId: string;
@@ -108,6 +111,8 @@ export interface SacouApi {
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */
   saveMyProfile(body: SaveMyProfileBody): Promise<ApiResult<MyProfile>>;
+  /** The same `requestId` in the same group answers the same `memberId` (ADR 0053, D5). Admin and co-admin. */
+  addGuest(groupId: string, body: AddGuestBody): Promise<ApiResult<AddedGuest>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

@@ -2,7 +2,7 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtEventLog } from "../ports/court-event-log";
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 import { highestSequence } from "../persistence/append-rules";
 import { draftsFor, type CourtCommand } from "./command-drafts";
 import type { CommandError } from "./court-errors";

@@ -183,14 +183,29 @@ export function groupGoneEffects(key: SacouQueryKey, error: unknown): readonly C
     : [];
 }
 
+/**
+ * Applies the effects and resolves when every query they invalidated is back: a mutation that returns it
+ * from `onSuccess` stays pending until the screen shows the server's answer ("Adicionando…").
+ */
+export async function settleCacheEffects(
+  client: QueryClient,
+  effects: readonly CacheEffect[],
+): Promise<void> {
+  await Promise.all(
+    effects.map((effect) => {
+      if (effect.action === "set") client.setQueryData(effect.key, effect.data);
+      else if (effect.action === "remove") client.removeQueries({ queryKey: effect.key });
+      else {
+        return client.invalidateQueries({
+          queryKey: effect.key,
+          exact: effect.action === "invalidateExact",
+        });
+      }
+      return Promise.resolve();
+    }),
+  );
+}
+
 export function applyCacheEffects(client: QueryClient, effects: readonly CacheEffect[]): void {
-  effects.forEach((effect) => {
-    if (effect.action === "set") client.setQueryData(effect.key, effect.data);
-    else if (effect.action === "remove") client.removeQueries({ queryKey: effect.key });
-    else
-      void client.invalidateQueries({
-        queryKey: effect.key,
-        exact: effect.action === "invalidateExact",
-      });
-  });
+  void settleCacheEffects(client, effects);
 }

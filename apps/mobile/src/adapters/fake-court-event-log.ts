@@ -4,7 +4,7 @@ import { err, ok } from "@sacou/volley-rules";
 import { continuesLog, highestSequence } from "../features/court/persistence/append-rules";
 import { FIRST_BATCH } from "../features/court/persistence/migrations.data";
 import type { CourtEventLog, CourtLogResult } from "../features/court/ports/court-event-log";
-import type { IdGenerator } from "../features/court/ports/id-generator";
+import type { IdGenerator } from "../services/id/id-generator";
 
 interface FakeSession {
   readonly status: "open" | "closed";

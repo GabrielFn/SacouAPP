@@ -65,6 +65,13 @@ type Operation = readonly [
 ];
 
 /** Method, path template of the generated `paths` and body of every operation (H1). */
+const GUEST_BODY = {
+  requestId: "00000000-0000-4000-8000-000000000001",
+  name: "Duda",
+  primaryPosition: "outsideHitter",
+  level: null,
+};
+
 const OPERATIONS: readonly Operation[] = [
   ["signIn", (a) => a.signIn(), "POST", "/v1/me", "/v1/me", null],
   ["listMyGroups", (a) => a.listMyGroups(), "GET", "/v1/groups", "/v1/groups", null],
@@ -314,6 +321,14 @@ const OPERATIONS: readonly Operation[] = [
     `/v1/groups/${GROUP}/rounds/${ROUND}/attendance/${MEMBER}`,
     { response: "notGoing" },
   ],
+  [
+    "addGuest",
+    (a) => a.addGuest(GROUP, GUEST_BODY),
+    "POST",
+    "/v1/groups/{groupId}/guests",
+    `/v1/groups/${GROUP}/guests`,
+    GUEST_BODY,
+  ],
 ];
 
 afterEach(() => {
@@ -321,8 +336,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 30 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(30);
+  test("the table covers the 31 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(31);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {

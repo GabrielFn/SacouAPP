@@ -58,7 +58,7 @@ function findNamed(node: ReactNode, name: string): ReactElement<Record<string, u
 }
 
 const model = {
-  state: { sheet: { kind: "none" }, copied: false },
+  state: { sheet: { kind: "none" }, copyNote: "none" },
   dispatch: () => undefined,
   now: 0,
   responding: false,
