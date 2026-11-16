@@ -51,6 +51,25 @@ namespace Sacou.Modules.Identity.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Identity.Infrastructure.DeletedAccountRow", b =>
+                {
+                    b.Property<byte[]>("SubjectHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("subject_hash");
+
+                    b.Property<DateTimeOffset>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.HasKey("SubjectHash")
+                        .HasName("pk_deleted_accounts");
+
+                    b.ToTable("deleted_accounts", "identity", t =>
+                        {
+                            t.HasCheckConstraint("ck_deleted_accounts_subject_hash_length", "octet_length(subject_hash) = 32");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Identity.Infrastructure.PlayerProfileRow", b =>
                 {
                     b.Property<Guid>("UserId")

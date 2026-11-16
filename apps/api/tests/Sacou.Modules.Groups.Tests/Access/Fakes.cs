@@ -86,6 +86,10 @@ internal sealed class FakeGroupStore : IGroupStore
     public Task<IReadOnlyList<Group>> ListGroupsWhereActiveAdminAsync(UserId user, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
+    public Task<IReadOnlyList<GroupId>> EraseAccountAsync(
+        UserId user, Func<Group, bool> isBlocker, Func<Group, GroupChange> erase, CancellationToken cancellationToken) =>
+        throw new NotSupportedException();
+
     public Task<InvitePreview?> FindInvitePreviewAsync(InviteTokenHash tokenHash, UserId person, CancellationToken cancellationToken)
     {
         InviteCalls++;

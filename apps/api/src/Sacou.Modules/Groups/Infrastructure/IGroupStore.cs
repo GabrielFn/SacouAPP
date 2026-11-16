@@ -51,6 +51,16 @@ internal interface IGroupStore
     /// </summary>
     Task<IReadOnlyList<Group>> ListGroupsWhereActiveAdminAsync(UserId user, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The account deletion in this module (E3.16, ADR 0056, D7), in one transaction: every group the person has a
+    /// member in (any status), locked with <c>FOR UPDATE</c> in ascending id order, then the per-person lock (group
+    /// before person, ADR 0040, D7). The groups where <paramref name="isBlocker"/> holds come back and nothing is
+    /// written; otherwise <paramref name="erase"/> runs on each locked aggregate, the rows it changed are written and
+    /// the levels <em>about</em> the person's members are deleted (the ones they gave stay). Empty when it ran.
+    /// </summary>
+    Task<IReadOnlyList<GroupId>> EraseAccountAsync(
+        UserId user, Func<Group, bool> isBlocker, Func<Group, GroupChange> erase, CancellationToken cancellationToken);
+
     /// <summary>The person's active member in that group, or null for a missing group, a non-member, a left or a removed member.</summary>
     Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken);
 
