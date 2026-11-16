@@ -1,6 +1,6 @@
 # ADR 0056 · Conta: exportação dos dados e exclusão
 
-**Status:** aceito em parte (15/11/2026, parte 1: exportação e bloqueios da exclusão, decisões D1, D3, D6, D9 a D12). A parte 2 (exclusão, login recente e marca de exclusão: D2, D4, D5, D7 e D8) completa este ADR. **Tarefa:** E3.16. **Plano:** [`docs/estado/tarefas/E3.16.md`](../../estado/tarefas/E3.16.md).
+**Status:** aceito (15/11/2026, parte 1: exportação e bloqueios, D1, D3, D6, D9 a D12; 16/11/2026, parte 2: exclusão, login recente e marca de exclusão, D2, D4, D5, D7, D8 e D11). **Tarefa:** E3.16. **Plano:** [`docs/estado/tarefas/E3.16.md`](../../estado/tarefas/E3.16.md).
 
 ## Contexto
 
@@ -36,8 +36,25 @@ A documentação XML das portas proíbe devolver dado de outra pessoa, a nota do
 
 **D12 · Rotas fora do filtro de grupo.** As duas rotas não têm `{groupId}`: entram na lista fechada do teste de guarda de rotas (ADR 0040, D4) e no contrato OpenAPI (ADR 0042), com os tipos do app regenerados. Nenhuma exige login recente.
 
+## Decisões da parte 2
+
+**D2 · O que a exclusão apaga e o que muda.** Apagados: `identity.users` e, em cascata, `identity.player_profiles`; as notas **sobre** a pessoa (`groups.member_levels` com o `member_id` dela, em todos os grupos). Mudam: cada `groups.members` da pessoa perde o `user_id`; quem estava `active` vira `left` com `left_at` agora, e `left` e `removed` mantêm status e data; o papel fica, para o histórico; os convites válidos que ela criou são revogados. Ficam: as notas que ela **deu** (`set_by_member_id` aponta para um `MemberId` que já não leva a ninguém), a autoria de configuração e modelos, e as presenças em `sessions.attendances` (a presença numa rodada futura vira `NotGoing` pela reconciliação que já existe para quem saiu, e a vaga vai para o 1º da espera). Se a pessoa era o último membro ativo com conta do grupo, os nomes dos convidados (`groups.guests`) também são apagados; os `MemberId` deles e as presenças ficam (Gabriel, pergunta 64). O agregado decide isso em `Group.EraseAccount(person, now)`, que ignora a regra do último admin porque D3 já foi julgada sob a mesma trava.
+
+**D4 · Login recente para excluir.** `VerifiedLogin` ganhou `AuthenticatedAt` e o principal ganhou a claim `auth_time` (segundos Unix; nota no ADR 0036, D7). `LoginRecency.IsRecent(authTime, now)` aceita `now − authTime ≤ 5 min` (`AccountRules.RecentLoginWindow`, a mesma janela em que o Firebase aceita `user.delete()`); acima, ou sem a claim, **403 `identity.recent-login-required`** (403 e não 401, para o app pedir a reautenticação sem deslogar). Exportar não exige login recente (pergunta 65). A confirmação "digite EXCLUIR" é só do app: um corpo no `DELETE` é **400 `identity.body-not-allowed`** (ADR 0039).
+
+**D5 · Marca de exclusão (tombstone).** `identity.deleted_accounts` com `subject_hash` (`bytea` de 32 bytes, SHA-256 do UID em UTF-8, chave primária, sem sal: o UID tem entropia alta e a busca precisa ser determinística, como no token de convite) e `deleted_at`, nada mais. `POST /v1/me` com UID marcado responde **410 `identity.account-deleted`** sem criar linha: é o sinal para o app chamar `user.delete()` de novo (pergunta 63: o app apaga a conta do Firebase logo depois do 204; a API não usa o FirebaseAdmin). As outras rotas já recusam com 403 `identity.user-not-registered`, porque a linha de `identity.users` sumiu. A marca e o `DELETE` do usuário são uma transação só, sob a trava do UID (`SubjectLock`), a mesma do `POST /v1/me`, para um login concorrente não recriar a conta. Retenção da marca: até a E6.2 decidir.
+
+**D7 · `DELETE /v1/me` em passos idempotentes, sem transação entre módulos.** (1) Login recente; usuário não registrado (já excluído ou nunca entrou) é 204. (2) `IAccountErasure.EraseAsync(userId, Checked)` em cada módulo que guarda vínculos (o Groups, no piloto), numa transação: trava os grupos da pessoa com `FOR UPDATE` em ordem crescente de id e depois a trava da pessoa (grupo antes de pessoa, ADR 0040, D7); se um aceite ou uma criação de grupo entrou enquanto esperava a trava da pessoa, a passada não grava nada e recomeça (até 3 vezes), porque esse grupo não pode ser travado depois da pessoa; julga D3 sobre os agregados travados; bloqueado → **409 `identity.deletion-blocked`** com `groupIds` na extensão do `ProblemDetails`, nada gravado. (3) Identity: marca e `DELETE` do usuário. (4) `EraseAsync(userId, Sweep)`: a mesma passada sem julgar D3, para um vínculo criado entre (2) e (3). (5) **204**. Uma falha no meio é curada pelo próximo `DELETE`: cada passo só acha o que sobrou, e a marca usa `ON CONFLICT DO NOTHING`. `Cache-Control: no-store` na rota.
+
+**D8 · Sem evento.** Ninguém consome um "conta apagada" no piloto e o Outbox ainda não existe. Se vier, leva só ids.
+
+**D11 (parte 2) · Logs.** `Account deleted.` em Information e `Account deletion refused: {Code}, {Groups} groups.` (só o código e quantos grupos), sem `userId`, `sub`, `MemberId`, `groupId` nem nome. Teste L1 da integração com o apelido, os UIDs, os ids e o nome do grupo como textos proibidos.
+
 ## Consequências
 
 - O plano da E4.3 (D9) previa `{ soleAdminGroupIds: uuid[] }` para a prévia; o contrato adotado traz também o nome e o tipo do bloqueio, e o app usa `groupId` como antes.
 - Cada módulo novo que guarda dado pessoal acrescenta a sua `IAccountExportSection` (e, na parte 2, o seu passo de exclusão) sem tocar no Identity além de um nome em `AccountExportSections`.
 - A exportação é cara para quem tem muitos grupos; a E5.3 decide o limite de requisições.
+- `user_id` nulo deixa de significar só "convidado" (ADR 0040, D1): o que distingue o convidado é a linha em `groups.guests`. As rotas de convidado procuram essa linha, então o ex-jogador dá 404 nelas (teste de integração).
+- Risco aceito: um aceite de convite que resolveu o usuário antes do passo (3) e só pega a trava da pessoa depois da varredura (4) deixaria um vínculo com o `user_id` apagado. A janela exige que o aceite fique mais lento que duas transações inteiras da exclusão; o vínculo não expõe dado (o usuário e o perfil já não existem) e a próxima varredura o limpa. Rever se aparecer em produção.
+- Conta órfã no Firebase se o app cair entre o 204 e o `user.delete()`: o 410 do próximo login faz o app tentar de novo; sem novo login, sobra no Firebase um e-mail sem dado nenhum na API (pergunta 63, opção 2 resolve de vez com segredo novo).

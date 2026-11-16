@@ -38,3 +38,5 @@ O app entra pelo Firebase Auth (Google, Apple, e-mail e senha) e manda o ID toke
 - **Formato do endpoint do Google:** mudança derruba o login com 503 (não 401). Coberto por testes.
 - **Log de requisição:** o log de hospedagem do ASP.NET em Information mostra a query string. `appsettings.json` corta `Microsoft.AspNetCore` em Warning; o token nunca vem na query, mas um cliente errado poderia mandá-lo ali.
 - `produto.md:250` fica desatualizado ("FirebaseAdmin valida"); este ADR prevalece.
+
+> **Nota (E3.16, parte 2, [ADR 0056](0056-conta-exportacao-e-exclusao.md), D4 e D5):** o principal deixou de ter "uma claim só": além do `sub`, leva `auth_time` (segundos Unix, já conferido pelas regras do token), lido só pelo `DELETE /v1/me` para exigir login de no máximo 5 minutos (403 `identity.recent-login-required`). O risco "Sem revogação" foi tratado com a marca de exclusão: `identity.deleted_accounts` guarda o SHA-256 do UID, e o `POST /v1/me` com UID marcado responde 410 `identity.account-deleted` sem recriar o usuário; as outras rotas recusam com 403 porque a linha sumiu. Sem `checkRevoked` e sem FirebaseAdmin.
