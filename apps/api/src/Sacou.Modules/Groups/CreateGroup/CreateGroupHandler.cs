@@ -9,8 +9,11 @@ using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.CreateGroup;
 
-/// <summary>Registered user first, then the name, then the template, then the per-person ceiling, checked atomically by the store.</summary>
-internal sealed class CreateGroupHandler(ICurrentUser currentUser, IGroupStore store, TimeProvider time)
+/// <summary>
+/// Registered user first, then the name, then the template, then, atomically in the store under the person's lock,
+/// that the account still exists (ADR 0056, D7) and the per-person ceiling.
+/// </summary>
+internal sealed class CreateGroupHandler(ICurrentUser currentUser, IRegisteredUsers registeredUsers, IGroupStore store, TimeProvider time)
 {
     private const string DefaultTemplateKey = "do-zero";
 
@@ -42,7 +45,13 @@ internal sealed class CreateGroupHandler(ICurrentUser currentUser, IGroupStore s
 
         var creator = new UserId(user.Value.UserId);
         var group = Group.Create(groupName.Value, creator, time.GetUtcNow());
-        var stored = await store.CreateAsync(group, creator, GroupLimits.CanJoinAnotherGroup, settings.Value, cancellationToken).ConfigureAwait(false);
+        var stored = await store.CreateAsync(
+            group,
+            creator,
+            cancellation => registeredUsers.ConfirmAsync(creator.Value, cancellation),
+            GroupLimits.CanJoinAnotherGroup,
+            settings.Value,
+            cancellationToken).ConfigureAwait(false);
         return stored.Match(
             () => Result.Success(new CreateGroupResponse(group.Id.Value, group.Members[0].Id.Value)),
             Result.Failure<CreateGroupResponse>);

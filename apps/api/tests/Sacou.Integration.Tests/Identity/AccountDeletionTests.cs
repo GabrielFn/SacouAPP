@@ -301,6 +301,43 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
         }
     }
 
+    /// <summary>
+    /// C4: the acceptance resolved the person, and the whole deletion runs before its transaction starts. Without the
+    /// check under the person's lock, the member would be written with the deleted user id after the sweep.
+    /// </summary>
+    [Fact]
+    public async Task AcceptanceResolvedBeforeTheDeletion_IsRefused_AndLeavesNoMember()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var deletion = HttpStatusCode.OK;
+        api.AfterCurrentUserResolved = async () => deletion = (await world.DeleteAccountAsync(A.NonMember)).StatusCode;
+
+        using var accepted = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.AcceptPath, GroupWorld.TokenBody(world.Invite.Token));
+
+        Assert.Equal(HttpStatusCode.NoContent, deletion);
+        Assert.Equal(HttpStatusCode.Forbidden, accepted.StatusCode);
+        Assert.Equal("identity.user-not-registered", await RoundCalls.CodeAsync(accepted));
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM groups.members WHERE user_id = @id", world.Users[A.NonMember]));
+    }
+
+    /// <summary>C5: the same window for a group creation: refused, and no group is left with a member of the deleted user.</summary>
+    [Fact]
+    public async Task CreationResolvedBeforeTheDeletion_IsRefused_AndLeavesNoGroup()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var deletion = HttpStatusCode.OK;
+        api.AfterCurrentUserResolved = async () => deletion = (await world.DeleteAccountAsync(A.NonMember)).StatusCode;
+
+        using var created = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Racha órfão"}""");
+
+        Assert.Equal(HttpStatusCode.NoContent, deletion);
+        Assert.Equal(HttpStatusCode.Forbidden, created.StatusCode);
+        Assert.Equal("identity.user-not-registered", await RoundCalls.CodeAsync(created));
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM groups.members WHERE user_id = @id", world.Users[A.NonMember]));
+    }
+
     /// <summary>L1: the deletion logs carry no nickname, subject, user id, member id or group name.</summary>
     [Fact]
     public async Task Logs_CarryNothingPersonal()

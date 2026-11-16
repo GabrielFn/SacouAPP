@@ -38,6 +38,7 @@ public static class IdentityModule
         services.AddScoped<SignInHandler>();
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddScoped<IRegisteredUsers, StoreRegisteredUsers>();
         services.AddScoped<SaveMyProfileHandler>();
         services.AddScoped<IPlayerProfiles, StorePlayerProfiles>();
         services.AddScoped<ExportMyDataHandler>();
