@@ -145,8 +145,9 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2);
         var round = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
+        Assert.Equal(HttpStatusCode.OK, (await RoundCalls.RespondAsync(world, world.Subjects[A.Admin], round, going: true)).Status);
         Assert.Equal(HttpStatusCode.OK, (await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true)).Status);
         var waiting = await RoundCalls.RespondAsync(world, world.Subjects[A.CoAdmin], round, going: true);
         Assert.Equal("waitlisted", waiting.Body!["status"]!.GetValue<string>());
@@ -187,7 +188,9 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var group = await world.CreateGroupAsync(A.NonMember, "Só eu e os convidados");
-        foreach (var name in new[] { "Léo", "Bia" })
+        // Names of this test only: the database is shared by every test class.
+        var names = new[] { "Léo-" + Guid.NewGuid().ToString("N")[..8], "Bia-" + Guid.NewGuid().ToString("N")[..8] };
+        foreach (var name in names)
         {
             using var added = await world.SendAsync(A.NonMember, HttpMethod.Post, $"{GroupWorld.GroupsPath}/{group}/guests", GuestCalls.AddBody(Guid.NewGuid(), name));
             Assert.Equal(HttpStatusCode.Created, added.StatusCode);
@@ -198,7 +201,10 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
         Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
         Assert.Equal(0, await GuestCalls.CountAsync(api.ConnectionString, group));
         Assert.Equal(3, await CountAsync("SELECT count(*) FROM groups.members WHERE group_id = @id", group));
-        Assert.Empty(await GuestCalls.FindTextAsync(api.ConnectionString, "Léo"));
+        foreach (var name in names)
+        {
+            Assert.Empty(await GuestCalls.FindTextAsync(api.ConnectionString, name));
+        }
     }
 
     /// <summary>R3: a former player is no guest, so the guest correction route does not find them.</summary>
@@ -230,8 +236,8 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
     }
 
     /// <summary>
-    /// C1: the only admin deletes while promoting the player. Promotion first: 204 and the player is the admin.
-    /// Deletion first: 409. Never a group whose player with an account is left without an admin.
+    /// C1: the only admin deletes while promoting the player. Promotion first: 204 and the player is the only admin.
+    /// Deletion first: 409, and then the promotion leaves two admins. Never a group without an admin.
     /// </summary>
     [Fact]
     public async Task DeletionWhilePromoting_NeverLeavesTheGroupWithoutAnAdmin()
@@ -246,7 +252,9 @@ public sealed class AccountDeletionTests(IntegrationDatabase database) : IAsyncL
                 async () => (await world.SendAsync(A.Admin, HttpMethod.Put, world.MemberPath(player) + "/role", """{"role":"admin"}""")).StatusCode);
 
             Assert.Contains(statuses[0], new[] { HttpStatusCode.NoContent, HttpStatusCode.Conflict });
-            Assert.Equal(1, await MemberRows.CountActiveAdminsAsync(api.ConnectionString, world.GroupId));
+            Assert.Equal(HttpStatusCode.OK, statuses[1]);
+            var admins = await MemberRows.CountActiveAdminsAsync(api.ConnectionString, world.GroupId);
+            Assert.Equal(statuses[0] == HttpStatusCode.NoContent ? 1 : 2, admins);
             if (statuses[0] == HttpStatusCode.NoContent)
             {
                 Assert.Equal("admin", (await MemberRows.ReadAsync(api.ConnectionString, player)).Role);
