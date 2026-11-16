@@ -52,6 +52,17 @@ public sealed class FirebaseTokenRulesTests : IDisposable
         Assert.Equal(SignInProvider.Password, login.Value.Provider);
     }
 
+    /// <summary>E3.16 (ADR 0056, D4): the auth_time the rules already checked reaches the login, to the second.</summary>
+    [Fact]
+    public void ValidPayload_GivesWhenThePersonSignedIn()
+    {
+        var signedIn = Now.AddMinutes(-3);
+
+        var login = FirebaseTokenRules.Check(Payload(Valid().At(signedIn, "auth_time")), Project, Now);
+
+        Assert.Equal(signedIn, login.Value.AuthenticatedAt);
+    }
+
     [Theory]
     [InlineData("password", "Password")]
     [InlineData("google.com", "Google")]

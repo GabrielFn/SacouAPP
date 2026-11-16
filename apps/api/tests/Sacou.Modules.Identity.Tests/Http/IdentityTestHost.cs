@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Sacou.Http;
 using Sacou.Modules.Identity.Domain.Users;
 using Sacou.Modules.Identity.Infrastructure;
 using Sacou.Tests.TestSupport;
@@ -67,9 +68,11 @@ internal sealed class IdentityTestHost : IAsyncDisposable
             .ConfigurePrimaryHttpMessageHandler(() => stub)
             .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
         builder.Services.Replace(ServiceDescriptor.Singleton<IUserStore>(users));
+        builder.Services.Replace(ServiceDescriptor.Singleton<IDeletedAccountStore>(users));
 
         var app = builder.Build();
         app.UseExceptionHandler();
+        app.UseNoStore();
         app.UseStatusCodePages();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -120,16 +123,41 @@ internal sealed class IdentityTestHost : IAsyncDisposable
 
     public Task<HttpResponseMessage> SignInAsync(string token) => SignInAsync([$"Bearer {token}"]);
 
+    /// <summary>Any route, with one bearer token and an optional JSON body.</summary>
+    public async Task<HttpResponseMessage> SendAsync(string method, string path, string token, string? body = null)
+    {
+        var context = await app.GetTestServer().SendAsync(
+            http =>
+            {
+                http.Request.Method = method;
+                http.Request.Path = path;
+                http.Request.Headers.Authorization = $"Bearer {token}";
+                if (body is not null)
+                {
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(body);
+                    http.Request.ContentType = "application/json";
+                    http.Request.ContentLength = bytes.Length;
+                    http.Request.Body = new MemoryStream(bytes);
+                }
+            },
+            TestContext.Current.CancellationToken);
+        return await ToResponseMessageAsync(context.Response);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await app.DisposeAsync();
     }
 }
 
-/// <summary>The store the HTTP tests use: counts calls, so a refusal can prove it never reached it.</summary>
-internal sealed class InMemoryUserStore : IUserStore
+/// <summary>
+/// The store the HTTP tests use: counts calls, so a refusal can prove it never reached it. Keeps the tombstones too
+/// (by subject, in memory: the hashing is the Postgres store's), so a deleted subject is never created again.
+/// </summary>
+internal sealed class InMemoryUserStore : IUserStore, IDeletedAccountStore
 {
     private readonly ConcurrentDictionary<string, UserId> users = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, DateTimeOffset> deleted = new(StringComparer.Ordinal);
     private int calls;
 
     public int Calls => Volatile.Read(ref calls);
@@ -151,7 +179,19 @@ internal sealed class InMemoryUserStore : IUserStore
     public Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken)
     {
         Interlocked.Increment(ref calls);
-        return Task.FromResult(users.TryAdd(user.Subject.Value, user.Id));
+        return Task.FromResult(!deleted.ContainsKey(user.Subject.Value) && users.TryAdd(user.Subject.Value, user.Id));
+    }
+
+    public IReadOnlyCollection<string> DeletedSubjects => [.. deleted.Keys];
+
+    public Task<bool> IsDeletedAsync(AuthSubject subject, CancellationToken cancellationToken) =>
+        Task.FromResult(deleted.ContainsKey(subject.Value));
+
+    public Task DeleteAsync(UserId user, AuthSubject subject, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        deleted.TryAdd(subject.Value, now);
+        users.TryRemove(subject.Value, out _);
+        return Task.CompletedTask;
     }
 }
 
