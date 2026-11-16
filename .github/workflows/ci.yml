@@ -55,7 +55,8 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    # Steps with `if: ...api == 'true'` are skipped when only apps/mobile/ changed. The app side always runs:
+    # Steps with `if: ...api != 'false'` are skipped only when only apps/mobile/ changed: a missing or
+    # unexpected output runs them (the architecture tests forbid `api ==`). The app side always runs:
     # lint, lint:regression and the tests need the package build, and lint:regression also probes dotnet.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -106,7 +107,7 @@ jobs:
         run: pnpm lint:regression
 
       - name: Lint API
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: pnpm lint:api
 
       - name: Check file size (C#)
@@ -146,23 +147,23 @@ jobs:
         run: pnpm test
 
       - name: Build API
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: dotnet build
 
       - name: Test API
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: dotnet test
 
       # Outside Sacou.slnx, so `dotnet test` above skips it. Needs Docker (the runner has it). Zero tests
       # fail the step on purpose: no exit code is ignored. Decisions: docs/arquitetura/adr/0020-postgres-local-e-testes-de-integracao.md
       - name: Test API integration
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
 
       # The Ryuk digest comes from the Testcontainers package (pinned at [4.16.0]); a different one means
       # the package or the configuration changed it. Raising the package is a deliberate review.
       - name: Check Ryuk image digest
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: |
           docker image ls --digests --no-trunc \
             | grep --fixed-strings 'testcontainers/ryuk' \
@@ -172,7 +173,7 @@ jobs:
       # .env.example is a placeholder. `up --wait` fails when the healthcheck does not pass.
       # Never run `docker compose config` without --quiet: it prints the password.
       - name: Check Postgres compose
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: |
           docker compose --env-file .env.example up -d --wait
           docker compose --env-file .env.example exec -T postgres pg_isready -h 127.0.0.1
@@ -187,7 +188,7 @@ jobs:
         run: pnpm audit --audit-level high
 
       - name: Audit NuGet dependencies
-        if: needs.changes.outputs.api == 'true'
+        if: needs.changes.outputs.api != 'false'
         run: pnpm audit:api
 
   # No `needs` or `if`, so it also runs on docs-only PRs. Decisions: docs/seguranca/varredura-ci.md

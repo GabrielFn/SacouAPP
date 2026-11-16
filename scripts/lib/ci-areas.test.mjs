@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 import { describe, it } from "node:test";
 
 import { ciAreas } from "./ci-areas.mjs";
@@ -44,5 +46,16 @@ describe("ciAreas", () => {
     cases.forEach((file) =>
       assert.deepEqual(ciAreas(["apps/mobile/src/app/index.tsx", file]), EVERYTHING, file),
     );
+  });
+});
+
+describe("scripts/ci-areas.mjs", () => {
+  const SCRIPT = resolve(import.meta.dirname, "..", "ci-areas.mjs");
+  const run = (input) => execFileSync(process.execPath, [SCRIPT], { input, encoding: "utf8" });
+
+  it("prints both keys for $GITHUB_OUTPUT", () => {
+    assert.equal(run("apps/mobile/src/app/index.tsx\n"), "code=true\napi=false\n");
+    assert.equal(run("docs/decisoes.md\n"), "code=false\napi=false\n");
+    assert.equal(run("\n"), "code=true\napi=true\n");
   });
 });
