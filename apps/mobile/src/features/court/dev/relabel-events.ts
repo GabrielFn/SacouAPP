@@ -1,6 +1,6 @@
 import type { EventEnvelope } from "@sacou/match-engine";
 
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 
 const MATCH_ID_PREFIX = "f0000000-0000-4000-8000-";
 const MATCH_ID_DIGITS = 12;

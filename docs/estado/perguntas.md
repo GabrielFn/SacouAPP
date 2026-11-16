@@ -121,3 +121,6 @@ Detalhes em `docs/estado/tarefas/E3.16.md`, seção 9. Nenhuma trava a Parte 1. 
 
 ## 16/11/2026: cobrança do GitHub Actions de novo
 - **Pergunta:** desde 16/11, todo job cai com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra. Prontos esperando a CI: **#100** (E4.6 Parte 3: revisão e testador aprovaram, SHA `31867fe`); **#101** (E3.16 Parte 2: em revisão; o último run com CI, `4b03a43`, só teve 3 testes de integração de preparo errados, corrigidos em `8004762`). Ação do Gabriel: Settings → Billing & plans. Depois, o orquestrador roda de novo (`gh run rerun <id>`).
+
+## 16/11/2026: minutos do GitHub Actions
+A cota do plano Free acabou e o Gabriel não quer pagar. Opções: (1) runner no PC dele, (2) repositório público, (3) gastar menos minutos, (4) bateria local como portão. **Resposta do Gabriel (16/11): repositório público**, com o e-mail de autor dos commits visível, risco aceito. Feito no ADR 0058.

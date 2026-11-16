@@ -13,6 +13,7 @@ export function createRoundOperations(
   | "updateRound"
   | "respondAttendance"
   | "setMemberAttendance"
+  | "addGuest"
 > {
   return {
     listRounds: (groupId) =>
@@ -51,6 +52,10 @@ export function createRoundOperations(
           params: { path: { groupId: ref.groupId, roundId: ref.roundId, memberId: ref.memberId } },
           body: { response },
         }),
+      ),
+    addGuest: (groupId, body) =>
+      execute((init) =>
+        client.POST("/v1/groups/{groupId}/guests", { ...init, ...group(groupId), body }),
       ),
   };
 }

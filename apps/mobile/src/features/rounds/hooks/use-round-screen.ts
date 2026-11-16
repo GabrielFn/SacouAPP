@@ -16,6 +16,9 @@ import { roundListText } from "../model/round-list-text";
 import { respondAttendanceMutation, setMemberAttendanceMutation } from "../queries/round-mutations";
 import { useRound } from "../queries/use-round-queries";
 
+/** How long "Lista copiada." (or its failure) stays under the button. */
+export const COPY_NOTE_MS = 4_000;
+
 export interface RoundListInput {
   readonly groupName: string;
   readonly round: Round;
@@ -74,9 +77,21 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
     errorText: failure === null ? null : errorTextOf(failure),
     copyList: (list) => {
       const text = roundListText(list.groupName, list.round, list.members, list.waitlistEnabled);
-      void clipboard.setText(text).then(() => {
-        dispatch({ type: "list-copied" });
-      });
+      const clearLater = () => {
+        setTimeout(() => {
+          dispatch({ type: "copy-note-cleared" });
+        }, COPY_NOTE_MS);
+      };
+      void clipboard.setText(text).then(
+        () => {
+          dispatch({ type: "list-copied" });
+          clearLater();
+        },
+        () => {
+          dispatch({ type: "copy-failed" });
+          clearLater();
+        },
+      );
     },
   };
 }

@@ -5,7 +5,7 @@ import { fontFamilies, palette } from "../theme/tokens.data";
 
 import { Text } from "./Text";
 
-export type StatusKind = "confirmed" | "waiting" | "pay";
+export type StatusKind = "confirmed" | "waiting" | "pay" | "going";
 
 export interface StatusPillProps {
   readonly label: string;
@@ -19,6 +19,7 @@ export function StatusPill({ label, status }: StatusPillProps) {
     confirmed: { fill: colors.text, border: colors.text, text: colors.background },
     waiting: { fill: colors.waitingFill, border: colors.waitingBorder, text: palette.night },
     pay: { fill: colors.primary, border: colors.primary, text: colors.onPrimary },
+    going: { fill: colors.goingFill, border: colors.goingText, text: colors.goingText },
   }[status];
   return (
     <View

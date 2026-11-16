@@ -9,12 +9,13 @@ import { takeResumeTarget } from "../../features/court/session/resume-target";
 import { useGroupsScreen } from "../../features/groups/hooks/use-groups-screen";
 import { createGroupHref, groupsHref, notificationsHref } from "../../features/groups/navigation";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
+import { roundHref } from "../../features/rounds/navigation";
+import { HomeRoundCards } from "../../features/rounds/ui/HomeRoundCards";
 import { strings } from "../../strings/pt-BR";
 import { useTheme } from "../../theme/theme-context";
 import { AppHeader } from "../../ui/AppHeader";
 import { BellIcon, PlusIcon } from "../../ui/Icons";
 import { Button } from "../../ui/Button";
-import { EmptyState } from "../../ui/EmptyState";
 import { IconButton } from "../../ui/IconButton";
 import { OfflineBanner } from "../../ui/OfflineBanner";
 import { Screen } from "../../ui/Screen";
@@ -74,8 +75,14 @@ export default function HomeScreen() {
         state={state}
         onRetry={retry}
         onCreateGroup={goToCreateGroup}
-        renderList={() => (
-          <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={seeGroups} />
+        renderList={(groups) => (
+          <HomeRoundCards
+            groups={groups}
+            emptyActions={seeGroups}
+            onOpenRound={(groupId, roundId) => {
+              router.push(roundHref(groupId, roundId));
+            }}
+          />
         )}
       />
       {DEV_TOOLS_ENABLED ? (

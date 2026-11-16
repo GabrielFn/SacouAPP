@@ -2,7 +2,7 @@ import type { Result } from "@sacou/volley-rules";
 
 import type { CourtReplayer } from "../session/court-replay";
 import type { CourtEventLog } from "./court-event-log";
-import type { IdGenerator } from "./id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 
 /** What the court needs from the device, already opened: the log, the replay cache and the ids. */
 export interface CourtRuntime {
