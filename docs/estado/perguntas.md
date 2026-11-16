@@ -119,5 +119,8 @@ Detalhes em `docs/estado/tarefas/E3.16.md`, seção 9. Nenhuma trava a Parte 1. 
 ## 15/11/2026: rate limiting na API (pergunta 66)
 66. A API não tem limite de requisições por usuário (achado da revisão do PR #91: o sorteio custa até ~0,4 s de CPU por chamada, e qualquer usuário cria um grupo). Opções: (1) limite por usuário no ASP.NET Core (`AddRateLimiter`, janela fixa por `MemberId`/UID) antes do piloto, como tarefa pequena na E5.3; (2) só no proxy do Railway; (3) aceitar o risco no piloto fechado. **Recomendação: 1.** Até a resposta, o risco fica registrado, não aceito, em `modelo-de-ameacas.md`.
 
+## 16/11/2026: cobrança do GitHub Actions de novo
+- **Pergunta:** desde 16/11, todo job cai com "recent account payments have failed or your spending limit needs to be increased". Sem CI nenhum PR entra. Prontos esperando a CI: **#100** (E4.6 Parte 3: revisão e testador aprovaram, SHA `31867fe`); **#101** (E3.16 Parte 2: em revisão; o último run com CI, `4b03a43`, só teve 3 testes de integração de preparo errados, corrigidos em `8004762`). Ação do Gabriel: Settings → Billing & plans. Depois, o orquestrador roda de novo (`gh run rerun <id>`).
+
 ## 16/11/2026: minutos do GitHub Actions
 A cota do plano Free acabou e o Gabriel não quer pagar. Opções: (1) runner no PC dele, (2) repositório público, (3) gastar menos minutos, (4) bateria local como portão. **Resposta do Gabriel (16/11): repositório público**, com o e-mail de autor dos commits visível, risco aceito. Feito no ADR 0058.
