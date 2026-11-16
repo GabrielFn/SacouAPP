@@ -6,7 +6,6 @@ import type { AuthProvider } from "../../../services/auth/auth-session";
 import { useServices } from "../../../services/services-context";
 import {
   asksForPassword,
-  deleteAccount,
   deletionOutcomeText,
   type DeletionOutcome,
 } from "../model/delete-account-flow";
@@ -16,8 +15,13 @@ import {
   type DeleteAccountState,
 } from "../model/delete-account.reducer";
 import { blockerNotice, canDelete, type BlockerNotice } from "../model/delete-account.selectors";
+import { createPasswordHandoff } from "../model/password-handoff";
 import { createSingleFlight } from "../model/single-flight";
-import { deletionBlockersQuery, refreshDeletionBlockers } from "../queries/account-queries";
+import {
+  deleteAccountMutation,
+  deletionBlockersQuery,
+  refreshDeletionBlockers,
+} from "../queries/account-queries";
 
 export interface DeleteAccountModel {
   readonly state: DeleteAccountState;
@@ -40,24 +44,23 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
   const client = useQueryClient();
   const [state, dispatch] = useReducer(deleteAccountReducer, initialDeleteAccountState);
   const blockers = useQuery(deletionBlockersQuery(sacouApi));
-  // Not state: it only closes the window of a second tap in the same frame (see single-flight.ts).
+  // Not state: they only close the window of a second tap in the same frame (see single-flight.ts) and
+  // carry the password to the request without keeping it (see password-handoff.ts).
   const flight = useRef(createSingleFlight<DeletionOutcome>());
-  const deletion = useMutation({
-    scope: { id: "delete-my-account" },
-    gcTime: 0,
-    mutationFn: (password: string | null) =>
-      flight.current.run(() =>
-        deleteAccount(
-          {
-            api: sacouApi,
-            auth: authSession,
-            ender: sessionEnder,
-            refreshBlockers: () => refreshDeletionBlockers(client),
-          },
-          { provider, password },
-        ),
-      ),
-  });
+  const handoff = useRef(createPasswordHandoff());
+  const deletion = useMutation(
+    deleteAccountMutation({
+      deletion: {
+        api: sacouApi,
+        auth: authSession,
+        ender: sessionEnder,
+        refreshBlockers: () => refreshDeletionBlockers(client),
+      },
+      provider,
+      password: handoff.current,
+      flight: flight.current,
+    }),
+  );
   const asks = asksForPassword(provider, deletion.data);
   const ready = canDelete({
     confirmText: state.confirmText,
@@ -85,9 +88,9 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
     },
     submit: () => {
       if (!ready) return;
-      const password = asks ? state.password : null;
+      handoff.current.give(asks ? state.password : null);
       if (asks) dispatch({ type: "password-sent" });
-      deletion.mutate(password);
+      deletion.mutate();
     },
   };
 }

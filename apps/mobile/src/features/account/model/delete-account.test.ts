@@ -1,3 +1,4 @@
+import { MutationObserver } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { createFakeAuthSession, fakeSessionIdentity } from "../../../adapters/fake-auth-session";
@@ -23,6 +24,9 @@ import {
   canDelete,
   confirmMatches,
 } from "./delete-account.selectors";
+import { createSacouQueryClient } from "../../../services/query/query-client";
+import { deleteAccountMutation } from "../queries/account-queries";
+import { createPasswordHandoff } from "./password-handoff";
 import { createSingleFlight } from "./single-flight";
 
 const texts = strings.account.deleteScreen;
@@ -251,5 +255,36 @@ describe("deleting the account (E4.3, D9; ADR 0056, D4 and D7)", () => {
     ]);
     expect(first).toEqual(second);
     expect(deletes()).toBe(1);
+  });
+});
+
+describe("the password never stays in the mutation (ADR 0057, D12)", () => {
+  const PASSWORD = "errada-Qw7";
+
+  test("after a wrong password, neither the variables nor the cache hold it", async () => {
+    const { auth, deps } = setup();
+    auth.fail("reauthenticate", "invalid-credentials");
+    const client = createSacouQueryClient();
+    const seen: unknown[] = [];
+    client.getMutationCache().subscribe((event) => {
+      seen.push(event.mutation?.state);
+    });
+    const password = createPasswordHandoff();
+    const observer = new MutationObserver(
+      client,
+      deleteAccountMutation({
+        deletion: deps,
+        provider: "password",
+        password,
+        flight: createSingleFlight<DeletionOutcome>(),
+      }),
+    );
+    password.give(PASSWORD);
+    const outcome = await observer.mutate();
+    expect(outcome).toEqual({ kind: "reauth-failed", failure: "invalid-credentials" });
+    expect(auth.calls()).toEqual([{ method: "reauthenticate" }]);
+    expect(observer.getCurrentResult().variables).toBeUndefined();
+    expect(JSON.stringify(seen)).not.toContain(PASSWORD);
+    expect(password.take()).toBeNull();
   });
 });
