@@ -16,6 +16,7 @@ public sealed class IntegrationSetupTests
 
     private static readonly string ValidWorkflow = $"""
         - name: Test API integration
+          {IntegrationSetupRules.ApiStepCondition}
           run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
         - name: Check Ryuk image digest
           run: docker image ls --digests --no-trunc | grep 'testcontainers/ryuk' | grep '{IntegrationSetupRules.RyukDigest}'
@@ -118,6 +119,7 @@ public sealed class IntegrationSetupTests
     [InlineData("down -v", "down")]
     [InlineData("docker image ls --digests", "docker image ls")]
     [InlineData(IntegrationSetupRules.RyukDigest, "sha256:0")]
+    [InlineData(IntegrationSetupRules.ApiStepCondition, "if: always()")]
     public void Ci_WithoutARequiredFragment_IsReported(string required, string replacement)
     {
         var workflow = ValidWorkflow.Replace(required, replacement, StringComparison.Ordinal);
@@ -132,6 +134,7 @@ public sealed class IntegrationSetupTests
     [InlineData("continue-on-error: true")]
     [InlineData("run: dotnet test || true")]
     [InlineData("if: false")]
+    [InlineData("if: needs.changes.outputs.api == 'true'")]
     public void Ci_WithAForbiddenFragment_IsReported(string forbidden)
     {
         Assert.NotEmpty(IntegrationSetupRules.CiViolations($"{ValidWorkflow}{Environment.NewLine}{forbidden}"));
