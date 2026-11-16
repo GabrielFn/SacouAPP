@@ -207,6 +207,20 @@ export const roundsStrings = {
     nameRequired: "Escreva o nome ou apelido do convidado.",
     nameInvalid: "Use só letras, números e símbolos comuns, em até 20 caracteres.",
   },
+  /** The round cards of the home (03) and of the groups list (17). */
+  cards: {
+    oneThisWeek: "1 rodada essa semana.",
+    manyThisWeek: (count: number) => `${String(count)} rodadas essa semana.`,
+    going: "Vou",
+    waiting: (position: number | null) =>
+      position === null ? "Na espera" : `Na espera · ${String(position)}º`,
+    full: "Lista cheia",
+    confirmed: (count: string) => `${count} confirmados`,
+    withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
+    next: (when: string) => `Próxima: ${when}`,
+    editRound: "Editar rodada",
+    stripLabel: (day: string, hour: string) => `${day}, ${hour}`,
+  },
   /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */
   copyList: {
     header: (group: string, when: string) => `${group} · ${when}`,
