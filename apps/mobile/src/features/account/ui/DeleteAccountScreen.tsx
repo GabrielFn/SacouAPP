@@ -14,42 +14,13 @@ import { groupMembersHref } from "../../groups/navigation";
 import { useDeleteAccount } from "../hooks/use-delete-account";
 import { blockerSentence, type BlockerNotice } from "../model/delete-account.selectors";
 import { accountRoutes } from "../navigation";
+import { LinesCard } from "./LinesCard";
 
 export interface DeleteAccountScreenProps {
   readonly provider: AuthProvider;
 }
 
 const texts = strings.account.deleteScreen;
-
-/** What the deletion does, in a white card (ExcluirConta.dc.html). */
-function Consequences() {
-  const { colors, tokens } = useTheme();
-  return (
-    <View
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        borderRadius: tokens.radii.tile,
-        paddingVertical: tokens.spacing.xs,
-      }}
-    >
-      {texts.consequences.map((line, index) => (
-        <View
-          key={line}
-          style={{
-            paddingHorizontal: tokens.spacing.s14,
-            paddingVertical: tokens.spacing.m,
-            borderTopWidth: index === 0 ? 0 : tokens.borderWidths.thin,
-            borderTopColor: colors.borderDivider,
-          }}
-        >
-          <Text variant="body">{line}</Text>
-        </View>
-      ))}
-    </View>
-  );
-}
 
 export interface BlockerNoticeViewProps {
   readonly notice: BlockerNotice;
@@ -110,7 +81,7 @@ export function DeleteAccountScreen({ provider }: DeleteAccountScreenProps) {
         <Text variant="display" displaySize="displayTitleSmall" accessibilityRole="header">
           {texts.title}
         </Text>
-        <Consequences />
+        <LinesCard lines={texts.consequences} />
         {notice === null ? null : (
           <>
             <BlockerNoticeView notice={notice} />
