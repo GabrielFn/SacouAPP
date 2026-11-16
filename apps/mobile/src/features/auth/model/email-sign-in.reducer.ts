@@ -55,16 +55,27 @@ function failed(state: EmailSignInState, failure: AuthFailure): EmailSignInState
   };
 }
 
+/** While a request is out the mode stays, so its answer lands where it was asked. */
+function modeChanged(state: EmailSignInState, mode: EmailMode): EmailSignInState {
+  return state.submitting ? state : { ...initialEmailSignInState, mode, email: state.email };
+}
+
+/** An answer counts only for the mode it was sent in. */
+function answered(
+  state: EmailSignInState,
+  mode: EmailMode,
+  next: (current: EmailSignInState) => EmailSignInState,
+): EmailSignInState {
+  return mode === state.mode ? next(state) : state;
+}
+
 export function emailSignInReducer(
   state: EmailSignInState,
   action: EmailSignInAction,
 ): EmailSignInState {
   switch (action.type) {
     case "mode-changed":
-      // While a request is out the mode stays, so its answer lands where it was asked.
-      return state.submitting
-        ? state
-        : { ...initialEmailSignInState, mode: action.mode, email: state.email };
+      return modeChanged(state, action.mode);
     case "email-changed":
       return { ...state, email: action.text, failure: null, resetSent: false };
     case "password-changed":
@@ -72,9 +83,13 @@ export function emailSignInReducer(
     case "submitted":
       return state.submitting ? state : { ...state, submitting: true, failure: null };
     case "failed":
-      return action.mode === state.mode ? failed(state, action.failure) : state;
+      return answered(state, action.mode, (current) => failed(current, action.failure));
     case "reset-sent":
-      return action.mode === state.mode ? { ...state, submitting: false, resetSent: true } : state;
+      return answered(state, action.mode, (current) => ({
+        ...current,
+        submitting: false,
+        resetSent: true,
+      }));
     case "closed":
       return initialEmailSignInState;
   }
