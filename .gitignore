@@ -31,3 +31,7 @@ credentials.json
 *.keystore
 *.p12
 .npmrc
+
+# Firebase Android config: public inside the APK, but kept out until the API key is restricted to com.sacou.app and the SHA-1 (ADR 0057, ADR 0058, M3-B6).
+apps/mobile/google-services.json
+*.stackdump

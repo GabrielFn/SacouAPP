@@ -58,6 +58,7 @@ Abaixo de High, ficam só no relatório do `pnpm audit`, sem reprovar: `deepmerg
 - **Guardas da E0.6:** casam texto (`ci.yml`, compose, código do teste), sem parser YAML. Detectam remoção acidental; não impedem um PR adversário, cuja barreira é a leitura obrigatória do `ci.yml`.
 - O gitleaks não vê título nem descrição de PR, nem conteúdo binário.
 - **Merge:** o `-m` cobre o valor colocado só na resolução, e cada achado de merge aparece uma vez por pai. `leaks found` conta achados, não valores.
+- **CI por área no push da `main`:** a CI por área também vale no push da `main`: um merge só de `apps/mobile/` não roda `audit:api`. É seguro, porque arquivo desconhecido e `.github/` rodam tudo. Soma ao "sem execução agendada": CVE novo do NuGet só reprova no próximo PR da API (revisão do M3, M3-I1).
 - **Validade:** só é cobrada em execução com código. Sem execução agendada, uma exceção vencida não reprova nada até o próximo PR com código.
 - Sem proteção de branch, um PR pode editar o próprio workflow ou o `.gitleaks.toml`, pois o `pull_request` usa a versão do PR. A barreira é a leitura do revisor.
 - `refs/pull/<n>/head` das sondas continua no GitHub: por isso o valor delas é fictício, gerado na hora e descartado.
