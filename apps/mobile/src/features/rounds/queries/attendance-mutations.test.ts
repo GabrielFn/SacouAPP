@@ -81,6 +81,21 @@ describe("respondAttendance (screen 26)", () => {
     expect(invalidated(client, queryKeys.round(GROUP, ROUND))).toBe(true);
   });
 
+  test("a 403 reads the group (and its role) and the round again", async () => {
+    const fake = createFakeSacouApi();
+    const client = seeded();
+    client.setQueryData(queryKeys.group(GROUP), { groupId: GROUP });
+    fake.respond(
+      "setMemberAttendance",
+      apiErr({ kind: "problem", status: 403, code: "groups.forbidden" }),
+    );
+    await new MutationObserver(client, setMemberAttendanceMutation(fake.api, client, GROUP, ROUND))
+      .mutate({ memberId: "m-ana", response: "going" })
+      .catch(() => undefined);
+    expect(invalidated(client, queryKeys.group(GROUP))).toBe(true);
+    expect(invalidated(client, queryKeys.round(GROUP, ROUND))).toBe(true);
+  });
+
   test("without a network nothing is invalidated", () => {
     expect(attendanceRefusedEffects(GROUP, ROUND, new Error("x"))).toEqual([]);
   });

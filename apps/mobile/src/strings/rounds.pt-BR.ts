@@ -110,6 +110,7 @@ export const roundsStrings = {
     back: "Voltar",
     copyList: "Copiar lista",
     listCopied: "Lista copiada.",
+    copyFailed: "Não deu para copiar a lista. Tente de novo.",
     addFromWhatsApp: "Adicionar quem confirmou no WhatsApp",
     openConfirmed: (count: string) => `Ver a lista de ${count} confirmados`,
   },

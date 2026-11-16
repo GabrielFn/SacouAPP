@@ -3,7 +3,7 @@ import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { addableMembers, type AddableRow } from "./addable-members";
 import { capacityHint, type CapacityHint } from "./capacity-hint";
 import { presenceCard, type PresenceCardView } from "./presence-card";
-import { isCanceled, statsCells, type RoundSettingsView } from "./round-detail";
+import { isCanceled, type RoundSettingsView } from "./round-detail";
 import { rosterOf, waitlistLine, type RosterEntry } from "./roster";
 
 /** The names of a round, derived on each render from the round and the member list (rule 1). */
@@ -72,11 +72,13 @@ export function addPlayerView(
 ): AddPlayerView {
   const waitlistEnabled = settings?.values.attendance.waitlistEnabled ?? false;
   const hint = capacityHint(round, waitlistEnabled);
-  const cells = settings === null ? [] : statsCells(round, settings.values);
   return {
     rows: addableMembers(members, round, search),
     hint,
-    confirmed: cells[0]?.value ?? String(round.goingCount),
+    confirmed:
+      round.capacity === null
+        ? roundsStrings.detail.confirmedCount(round.goingCount)
+        : roundsStrings.detail.confirmedOf(round.goingCount, round.capacity),
     blocked: hint?.canAdd === false,
   };
 }
