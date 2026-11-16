@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useReducer, useRef } from "react";
+import { useReducer, useState } from "react";
 
 import { errorTextOf } from "../../../services/api/api-error-text";
 import type { AuthProvider } from "../../../services/auth/auth-session";
@@ -44,10 +44,11 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
   const client = useQueryClient();
   const [state, dispatch] = useReducer(deleteAccountReducer, initialDeleteAccountState);
   const blockers = useQuery(deletionBlockersQuery(sacouApi));
-  // Not state: they only close the window of a second tap in the same frame (see single-flight.ts) and
-  // carry the password to the request without keeping it (see password-handoff.ts).
-  const flight = useRef(createSingleFlight<DeletionOutcome>());
-  const handoff = useRef(createPasswordHandoff());
+  // Never changed, only kept across renders (a lazy `useState`, since a ref may not be read in render):
+  // the single flight closes the window of a second tap in the same frame (see single-flight.ts), and
+  // the handoff carries the password to the request without keeping it (see password-handoff.ts).
+  const [flight] = useState(() => createSingleFlight<DeletionOutcome>());
+  const [handoff] = useState(createPasswordHandoff);
   const deletion = useMutation(
     deleteAccountMutation({
       deletion: {
@@ -57,8 +58,8 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
         refreshBlockers: () => refreshDeletionBlockers(client),
       },
       provider,
-      password: handoff.current,
-      flight: flight.current,
+      password: handoff,
+      flight,
     }),
   );
   const asks = asksForPassword(provider, deletion.data);
@@ -88,7 +89,7 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
     },
     submit: () => {
       if (!ready) return;
-      handoff.current.give(asks ? state.password : null);
+      handoff.give(asks ? state.password : null);
       if (asks) dispatch({ type: "password-sent" });
       deletion.mutate();
     },
