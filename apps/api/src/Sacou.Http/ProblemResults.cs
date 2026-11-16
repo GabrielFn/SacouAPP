@@ -15,15 +15,24 @@ public static class ProblemResults
 
     private const string SectionBase = "https://tools.ietf.org/html/rfc9110#section-";
 
-    public static ProblemHttpResult From(Error error)
+    public static ProblemHttpResult From(Error error) => From(error, new Dictionary<string, object?>());
+
+    /// <summary>
+    /// The same body with more extensions, for the few refusals whose app screen needs ids the caller already owns
+    /// (the groups that block the account deletion, ADR 0056). Never a received value; <c>code</c> cannot be replaced.
+    /// </summary>
+    public static ProblemHttpResult From(Error error, IReadOnlyDictionary<string, object?> extensions)
     {
         ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(extensions);
+        if (extensions.ContainsKey(CodeExtension))
+        {
+            throw new ArgumentException("The code extension comes from the error.", nameof(extensions));
+        }
+
         var shape = ShapeOf(error.Kind);
-        return TypedResults.Problem(
-            statusCode: shape.Status,
-            title: shape.Title,
-            type: SectionBase + shape.Section,
-            extensions: new Dictionary<string, object?> { [CodeExtension] = error.Code });
+        var all = new Dictionary<string, object?>(extensions) { [CodeExtension] = error.Code };
+        return TypedResults.Problem(statusCode: shape.Status, title: shape.Title, type: SectionBase + shape.Section, extensions: all);
     }
 
     private static ProblemShape ShapeOf(ErrorKind kind) => kind switch
@@ -32,6 +41,7 @@ public static class ProblemResults
         ErrorKind.Forbidden => new(StatusCodes.Status403Forbidden, "Forbidden", "15.5.4"),
         ErrorKind.NotFound => new(StatusCodes.Status404NotFound, "Not found", "15.5.5"),
         ErrorKind.Conflict => new(StatusCodes.Status409Conflict, "Conflict", "15.5.10"),
+        ErrorKind.Gone => new(StatusCodes.Status410Gone, "Gone", "15.5.11"),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Every error kind needs a status."),
     };
 

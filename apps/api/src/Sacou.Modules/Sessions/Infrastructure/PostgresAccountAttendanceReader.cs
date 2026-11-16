@@ -7,7 +7,7 @@ namespace Sacou.Modules.Sessions.Infrastructure;
 /// <summary>One parameterized query with no tracking; the member ids come from the Groups contract (ADR 0056, D6).</summary>
 internal sealed class PostgresAccountAttendanceReader(SessionsDbContext database) : IAccountAttendanceReader
 {
-    public async Task<IReadOnlyList<AttendanceExportEntry>> ListOfMembersAsync(IReadOnlyCollection<Guid> members, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<AccountAttendance>> ListOfMembersAsync(IReadOnlyCollection<Guid> members, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(members);
         if (members.Count == 0)
@@ -34,7 +34,7 @@ internal sealed class PostgresAccountAttendanceReader(SessionsDbContext database
                 pair.attendance.PromotedAt,
             })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return [.. rows.Select(row => new AttendanceExportEntry(
+        return [.. rows.Select(row => new AccountAttendance(
             row.Id,
             row.GroupId,
             row.MemberId,

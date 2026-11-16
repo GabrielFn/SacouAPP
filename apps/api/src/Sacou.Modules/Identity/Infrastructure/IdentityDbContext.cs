@@ -13,10 +13,13 @@ internal sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> opti
 
     public DbSet<PlayerProfileRow> PlayerProfiles => Set<PlayerProfileRow>();
 
+    public DbSet<DeletedAccountRow> DeletedAccounts => Set<DeletedAccountRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new PlayerProfileConfiguration());
+        modelBuilder.ApplyConfiguration(new DeletedAccountConfiguration());
     }
 }

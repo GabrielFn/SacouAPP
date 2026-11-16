@@ -17,7 +17,7 @@ public sealed class SignInHandlerTests
     {
         var store = new ScriptedStore(finds: [null], inserted: true);
 
-        var outcome = await HandleAsync(store);
+        var outcome = (await HandleAsync(store)).Value;
 
         Assert.True(outcome.Created);
         Assert.Equal(store.CreatedUser?.Id, outcome.UserId);
@@ -29,7 +29,7 @@ public sealed class SignInHandlerTests
     {
         var store = new ScriptedStore(finds: [Existing], inserted: true);
 
-        var outcome = await HandleAsync(store);
+        var outcome = (await HandleAsync(store)).Value;
 
         Assert.False(outcome.Created);
         Assert.Equal(Existing, outcome.UserId);
@@ -41,16 +41,45 @@ public sealed class SignInHandlerTests
     {
         var store = new ScriptedStore(finds: [null, Existing], inserted: false);
 
-        var outcome = await HandleAsync(store);
+        var outcome = (await HandleAsync(store)).Value;
 
         Assert.False(outcome.Created);
         Assert.Equal(Existing, outcome.UserId);
         Assert.Equal(2, store.Finds);
     }
 
-    private static Task<SignInOutcome> HandleAsync(IUserStore store) =>
-        new SignInHandler(store, new FixedTimeProvider(FixedTimeProvider.WholeSecondNow()))
+    /// <summary>D5 of E3.16: a deleted login is neither found nor created, and the answer is the tombstone's code.</summary>
+    [Fact]
+    public async Task DeletedSubject_IsGone()
+    {
+        var store = new ScriptedStore(finds: [null, null], inserted: false);
+
+        var outcome = await HandleAsync(store, new ScriptedTombstones(deleted: true));
+
+        Assert.True(outcome.IsFailure);
+        Assert.Equal("identity.account-deleted", outcome.Error.Code);
+        Assert.Null(store.CreatedUser);
+    }
+
+    [Fact]
+    public async Task NeitherFoundNorCreatedNorDeleted_IsAProgrammingError()
+    {
+        var store = new ScriptedStore(finds: [null, null], inserted: false);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => HandleAsync(store, new ScriptedTombstones(deleted: false)));
+    }
+
+    private static Task<Sacou.Shared.Results.Result<SignInOutcome>> HandleAsync(IUserStore store, IDeletedAccountStore? tombstones = null) =>
+        new SignInHandler(store, tombstones ?? new ScriptedTombstones(deleted: false), new FixedTimeProvider(FixedTimeProvider.WholeSecondNow()))
             .HandleAsync(Subject, TestContext.Current.CancellationToken);
+
+    private sealed class ScriptedTombstones(bool deleted) : IDeletedAccountStore
+    {
+        public Task<bool> IsDeletedAsync(AuthSubject subject, CancellationToken cancellationToken) => Task.FromResult(deleted);
+
+        public Task DeleteAsync(UserId user, AuthSubject subject, DateTimeOffset now, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+    }
 
     private sealed class ScriptedStore(UserId?[] finds, bool inserted) : IUserStore
     {

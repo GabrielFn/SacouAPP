@@ -16,6 +16,7 @@ internal static class IdentityDatabase
             options, configuration.GetConnectionString(ConnectionStringName) ?? string.Empty));
         services.AddScoped<IUserStore, PostgresUserStore>();
         services.AddScoped<IPlayerProfileStore, PostgresPlayerProfileStore>();
+        services.AddScoped<IDeletedAccountStore, PostgresDeletedAccountStore>();
         return services;
     }
 

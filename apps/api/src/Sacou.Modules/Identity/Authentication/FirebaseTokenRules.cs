@@ -72,9 +72,14 @@ internal static class FirebaseTokenRules
             return Result.Failure<VerifiedLogin>(IdTokenRejection.InvalidSubject.ToError());
         }
 
-        return ReadProvider(payload) is { } provider
-            ? Result.Success(new VerifiedLogin(subject.Value, provider))
-            : Result.Failure<VerifiedLogin>(IdTokenRejection.DisallowedProvider.ToError());
+        if (ReadProvider(payload) is not { } provider)
+        {
+            return Result.Failure<VerifiedLogin>(IdTokenRejection.DisallowedProvider.ToError());
+        }
+
+        // CheckTimes already refused a token without a readable auth_time.
+        var authenticatedAt = ReadTime(payload, AuthenticatedAt) ?? throw new InvalidOperationException("auth_time was checked first.");
+        return Result.Success(new VerifiedLogin(subject.Value, provider, authenticatedAt));
     }
 
     private static SignInProvider? ReadProvider(JsonElement payload) =>

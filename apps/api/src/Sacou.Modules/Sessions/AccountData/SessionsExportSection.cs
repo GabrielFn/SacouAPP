@@ -1,7 +1,6 @@
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions.Domain.Attendances;
-using Sacou.Modules.Sessions.Infrastructure;
 
 namespace Sacou.Modules.Sessions.AccountData;
 
@@ -19,8 +18,38 @@ internal sealed class SessionsExportSection(IGroupMembership membership, IAccoun
     public async Task<object?> ExportAsync(Guid userId, CancellationToken cancellationToken)
     {
         var members = await membership.ListMemberIdsOfUserAsync(userId, cancellationToken).ConfigureAwait(false);
-        return await attendances.ListOfMembersAsync(members, cancellationToken).ConfigureAwait(false);
+        var found = await attendances.ListOfMembersAsync(members, cancellationToken).ConfigureAwait(false);
+        return found.Select(ToEntry).ToList();
     }
+
+    private static AttendanceExportEntry ToEntry(AccountAttendance attendance) => new(
+        attendance.RoundId,
+        attendance.GroupId,
+        attendance.MemberId,
+        attendance.LocalDate,
+        attendance.LocalTime,
+        attendance.TimeZone,
+        ToExport(attendance.Status),
+        ToExport(attendance.Source),
+        attendance.RespondedAt,
+        attendance.PromotedAt);
+
+    private static ExportedAttendanceStatus ToExport(AttendanceStatus status) => status switch
+    {
+        AttendanceStatus.Going => ExportedAttendanceStatus.Going,
+        AttendanceStatus.NotGoing => ExportedAttendanceStatus.NotGoing,
+        AttendanceStatus.Waitlisted => ExportedAttendanceStatus.Waitlisted,
+        AttendanceStatus.Promoted => ExportedAttendanceStatus.Promoted,
+        _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Every status needs an exported twin."),
+    };
+
+    private static ExportedAttendanceSource ToExport(AttendanceSource source) => source switch
+    {
+        AttendanceSource.Self => ExportedAttendanceSource.Self,
+        AttendanceSource.Admin => ExportedAttendanceSource.Admin,
+        AttendanceSource.Regular => ExportedAttendanceSource.Regular,
+        _ => throw new ArgumentOutOfRangeException(nameof(source), source, "Every source needs an exported twin."),
+    };
 }
 
 /// <summary>One attendance in the export: the round it belongs to, the person's member id there, and the answer.</summary>
@@ -31,7 +60,24 @@ internal sealed record AttendanceExportEntry(
     DateOnly LocalDate,
     TimeOnly LocalTime,
     string TimeZone,
-    AttendanceStatus Status,
-    AttendanceSource Source,
+    ExportedAttendanceStatus Status,
+    ExportedAttendanceSource Source,
     DateTimeOffset RespondedAt,
     DateTimeOffset? PromotedAt);
+
+/// <summary>The attendance status as the export writes it, converted by hand so the domain enum stays free to change.</summary>
+internal enum ExportedAttendanceStatus
+{
+    Going,
+    NotGoing,
+    Waitlisted,
+    Promoted,
+}
+
+/// <summary>Who answered, as the export writes it.</summary>
+internal enum ExportedAttendanceSource
+{
+    Self,
+    Admin,
+    Regular,
+}

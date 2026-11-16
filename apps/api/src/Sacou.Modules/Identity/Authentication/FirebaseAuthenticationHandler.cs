@@ -11,7 +11,8 @@ namespace Sacou.Modules.Identity.Authentication;
 
 /// <summary>
 /// Reads only one <c>Authorization: Bearer</c> header (never the query string or a cookie), asks the
-/// verifier and builds a principal with a single claim, the subject. Every refusal is the same 401;
+/// verifier and builds a principal with two claims: the subject and <c>auth_time</c> (Unix seconds, only for the
+/// account deletion's recent login, ADR 0036 D7 note, ADR 0056 D4). Every refusal is the same 401;
 /// signing keys out of reach give 503 with <c>Retry-After</c>, so the app keeps the person signed in.
 /// </summary>
 internal sealed partial class FirebaseAuthenticationHandler(
@@ -76,7 +77,12 @@ internal sealed partial class FirebaseAuthenticationHandler(
 
     private AuthenticateResult Accept(VerifiedLogin login)
     {
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, login.Subject.Value)], Scheme.Name);
+        var identity = new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.NameIdentifier, login.Subject.Value),
+                new Claim(LoginClaims.AuthenticatedAt, login.AuthenticatedAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
+            ],
+            Scheme.Name);
         return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name));
     }
 

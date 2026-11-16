@@ -21,6 +21,7 @@ internal static class GroupRouteGuard
     {
         "* /health",
         "POST /v1/me",
+        "DELETE /v1/me",
         "GET /v1/me/profile",
         "PUT /v1/me/profile",
         "GET /v1/me/export",

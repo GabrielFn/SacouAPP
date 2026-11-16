@@ -60,6 +60,7 @@ public static class GroupsModule
         // The person's own data, for the Identity routes of E3.16 (ADR 0056, D6): Groups implements the Identity ports.
         services.AddScoped<IAccountExportSection, GroupsExportSection>();
         services.AddScoped<IAccountDeletionBlockers, GroupsDeletionBlockers>();
+        services.AddScoped<IAccountErasure, GroupsAccountErasure>();
         return services;
     }
 
