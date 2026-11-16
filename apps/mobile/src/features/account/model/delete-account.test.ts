@@ -258,6 +258,25 @@ describe("deleting the account (E4.3, D9; ADR 0056, D4 and D7)", () => {
   });
 });
 
+describe("two taps on Excluir in the same frame (ADR 0057)", () => {
+  test("send one deleteMyAccount", async () => {
+    const { fake, deps, deletes } = setup();
+    fake.respond("deleteMyAccount", apiOk(null));
+    const observer = new MutationObserver(
+      createSacouQueryClient(),
+      deleteAccountMutation({
+        deletion: deps,
+        provider: "google",
+        password: createPasswordHandoff(),
+        flight: createSingleFlight<DeletionOutcome>(),
+      }),
+    );
+    const [first, second] = await Promise.all([observer.mutate(), observer.mutate()]);
+    expect(first).toEqual(second);
+    expect(deletes()).toBe(1);
+  });
+});
+
 describe("the password never stays in the mutation (ADR 0057, D12)", () => {
   const PASSWORD = "errada-Qw7";
 

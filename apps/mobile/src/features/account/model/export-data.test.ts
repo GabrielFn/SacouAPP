@@ -1,3 +1,4 @@
+import { MutationObserver } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { createFakeFileShare, createFakeTempFileSdk } from "../../../adapters/fake-file-share";
@@ -5,6 +6,7 @@ import { createFakeSacouApi } from "../../../adapters/fake-sacou-api";
 import { createTempFileShare } from "../../../adapters/temp-file-share";
 import { apiErr, apiOk } from "../../../services/api/api-result";
 import { isPersistedKey } from "../../../services/query/persist-policy";
+import { createSacouQueryClient } from "../../../services/query/query-client";
 import { queryKeys } from "../../../services/query/query-keys";
 import { apiErrorKindTexts } from "../../../strings/api-errors.pt-BR";
 import { strings } from "../../../strings/pt-BR";
@@ -56,6 +58,15 @@ describe("sheet 30a: exporting my data (E4.3, D9)", () => {
     // The result is only ok or a failure kind: the document never reaches the mutation state.
     expect(JSON.stringify(result)).not.toContain("João");
     expect(mutation.gcTime).toBe(0);
+    expect(fileShare.shared()).toHaveLength(1);
+  });
+
+  test("two taps in the same frame open one share sheet", async () => {
+    const { fake, fileShare, deps } = setup();
+    fake.respond("exportMyData", apiOk(DOCUMENT));
+    const observer = new MutationObserver(createSacouQueryClient(), exportDataMutation(deps));
+    await Promise.all([observer.mutate(), observer.mutate()]);
+    expect(fake.calls().map((call) => call.operation)).toEqual(["exportMyData"]);
     expect(fileShare.shared()).toHaveLength(1);
   });
 

@@ -1,3 +1,4 @@
+import type { Result } from "@sacou/volley-rules";
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
 import { unwrap } from "../../../services/api/api-result";
@@ -10,9 +11,9 @@ import {
   type DeletionDeps,
   type DeletionOutcome,
 } from "../model/delete-account-flow";
-import { exportMyData } from "../model/export-data";
+import { exportMyData, type ExportFailure } from "../model/export-data";
 import type { PasswordHandoff } from "../model/password-handoff";
-import type { SingleFlight } from "../model/single-flight";
+import { createSingleFlight, type SingleFlight } from "../model/single-flight";
 
 /**
  * The preview of screen 30b: always read again (a role may have changed on another phone) and gone
@@ -39,13 +40,17 @@ export interface ExportMutationDeps {
 
 /**
  * "Gerar arquivo". The document never reaches the mutation's state: the result is only ok or the kind
- * of the failure, and it is dropped as soon as the sheet closes (`gcTime: 0`).
+ * of the failure, and it is dropped as soon as the sheet closes (`gcTime: 0`). No `scope`: a scope
+ * queues the second tap until the first ends, when the single flight is free again, so it would run
+ * twice. Without it both run at once and share the one flight (one request, one share sheet).
  */
-export function exportDataMutation(deps: ExportMutationDeps) {
+export function exportDataMutation(
+  deps: ExportMutationDeps,
+  flight: SingleFlight<Result<null, ExportFailure>> = createSingleFlight(),
+) {
   return {
-    scope: { id: "export-my-data" },
     gcTime: 0,
-    mutationFn: () => exportMyData(deps),
+    mutationFn: () => flight.run(() => exportMyData(deps)),
   };
 }
 
@@ -58,7 +63,8 @@ export interface DeleteMutationDeps {
 
 /**
  * "Excluir minha conta". No variables: the password comes through the handoff and is taken at once, so
- * the mutation's state never holds it; the outcome holds kinds and codes only (`gcTime: 0`).
+ * the mutation's state never holds it; the outcome holds kinds and codes only (`gcTime: 0`). No
+ * `scope`, for the reason of `exportDataMutation`: a second tap in the same frame joins the flight.
  */
 export function deleteAccountMutation({
   deletion,
@@ -67,7 +73,6 @@ export function deleteAccountMutation({
   flight,
 }: DeleteMutationDeps) {
   return {
-    scope: { id: "delete-my-account" },
     gcTime: 0,
     mutationFn: () => {
       const typed = password.take();
