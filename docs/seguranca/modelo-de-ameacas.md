@@ -240,6 +240,8 @@ Revisado em 01/11/2026 ([parecer](revisoes/M1-2026-11-01.md)). Aqui, "Mitigaçã
 | I: vazamento pelo log da CI | `--redact`, sem artefato | O e-mail do autor aparece no achado |
 | I: valor preso em `refs/pull` | Revogar o segredo; a sonda usa valor fictício | Nenhuma |
 | D: abuso de minutos ou cache | Timeouts, cancelamento em PR e cache isolado por ref | Nenhuma com um único colaborador |
+| T, E: PR de fork roda a CI (repositório público desde 16/11, ADR 0058) | PR de quem não é colaborador só roda com aprovação do Gabriel (`all_external_contributors`); `contents: read`, sem segredos e PR de fork sem acesso a segredos | Aprovar sem ler o diff |
+| I: código, docs e e-mail do autor públicos (ADR 0058) | Nenhum segredo versionado (gitleaks em todo o histórico); `google-services.json` só depois de restringir a chave | E-mail do autor no histórico; risco aceito pelo Gabriel |
 | R: exceção eterna do audit | `test:tooling` cobra a validade | Formas que escapam da política (SEC-M1) e cobrança só em execução com código |
 | T: fonte do app adulterada (E4.1) | TTF versionados no repositório, de repositórios oficiais, com SHA-256 no ADR 0034; sem download em execução | Conferir o hash exige comparar com a fonte oficial |
 
