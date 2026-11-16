@@ -5,6 +5,7 @@ import type { AuthFailure } from "../services/auth/auth-session";
 import { firebaseFailureOf, googleFailureOf, type GoogleStatusCodes } from "./auth-failure-codes";
 import {
   createFirebaseAuthSession,
+  TokenRenewalOffline,
   type FirebaseAuthSdk,
   type FirebaseUserView,
   type GoogleAccountPicker,
@@ -24,14 +25,20 @@ interface FakeSdk extends FirebaseAuthSdk {
   readonly log: string[];
 }
 
-function userView(providerIds: readonly string[], forced: boolean[] = []): FirebaseUserView {
+function userView(
+  providerIds: readonly string[],
+  forced: boolean[] = [],
+  tokenFailure: string | null = null,
+): FirebaseUserView {
   return {
     providerIds,
     email: "ana@example.com",
     displayName: "Ana Souza",
     getIdToken: (forceRefresh) => {
       forced.push(forceRefresh);
-      return Promise.resolve(TOKEN);
+      return tokenFailure === null
+        ? Promise.resolve(TOKEN)
+        : Promise.reject(sdkError(tokenFailure));
     },
   };
 }
@@ -143,6 +150,21 @@ describe("the Firebase session", () => {
     expect(await session.getIdToken({ forceRefresh: true })).toBe(TOKEN);
     expect(await session.getIdToken({ forceRefresh: false })).toBe(TOKEN);
     expect(forced).toEqual([true, false]);
+  });
+
+  test("only no network rejects the token; any other refusal of the SDK ends the session", async () => {
+    const offlineSdk = fakeSdk();
+    const offline = createFirebaseAuthSession({ sdk: offlineSdk, google: null });
+    offlineSdk.change(userView(["password"], [], "auth/network-request-failed"));
+    const rejected = offline.getIdToken({ forceRefresh: true });
+    await expect(rejected).rejects.toBeInstanceOf(TokenRenewalOffline);
+    await expect(rejected).rejects.not.toHaveProperty("message", expect.stringContaining("@"));
+    for (const code of ["auth/user-token-expired", "auth/user-disabled", "auth/odd"]) {
+      const sdk = fakeSdk();
+      const session = createFirebaseAuthSession({ sdk, google: null });
+      sdk.change(userView(["password"], [], code));
+      expect(await session.getIdToken({ forceRefresh: true })).toBeNull();
+    }
   });
 
   test("Google: the picker token becomes a Firebase credential", async () => {

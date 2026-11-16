@@ -1,15 +1,19 @@
+import { accountStrings } from "./account.pt-BR";
 import { authStrings } from "./auth.pt-BR";
 import { courtStrings } from "./court.pt-BR";
 import { createGroupStrings } from "./create-group.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
 import { inviteStrings } from "./invite.pt-BR";
 import { membersStrings } from "./members.pt-BR";
+import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
 import { settingsStrings } from "./settings.pt-BR";
 
 export const strings = {
   auth: authStrings,
+  profile: profileStrings,
+  account: accountStrings,
   court: courtStrings,
   groups: groupsStrings,
   createGroup: createGroupStrings,

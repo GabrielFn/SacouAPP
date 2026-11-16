@@ -3,7 +3,7 @@ import { join, relative } from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-import { SIGNED_IN_ROUTES, SIGNED_OUT_ROUTES } from "./navigation";
+import { ONBOARDING_ROUTES, SIGNED_IN_ROUTES, SIGNED_OUT_ROUTES } from "./navigation";
 
 const APP = join(__dirname, "..", "..", "app");
 const ROUTE_FILE = /\.tsx$/;
@@ -24,13 +24,18 @@ function routeNames(dir: string): string[] {
 describe("the session gate of the root stack", () => {
   test("every route of src/app is behind the gate, in one list only", () => {
     const files = routeNames(APP).map((name) => name.split("\\").join("/"));
-    const listed = [...SIGNED_IN_ROUTES, ...SIGNED_OUT_ROUTES];
+    const listed = [...SIGNED_IN_ROUTES, ...ONBOARDING_ROUTES, ...SIGNED_OUT_ROUTES];
     expect(new Set(listed).size).toBe(listed.length);
     expect([...listed].sort()).toEqual([...files].sort());
   });
 
   test("signed out, only the login is reachable", () => {
     expect(SIGNED_OUT_ROUTES).toEqual(["sign-in"]);
+  });
+
+  test("the quick profile has its own guard; its edit mode is a plain signed-in route", () => {
+    expect(ONBOARDING_ROUTES).toEqual(["onboarding"]);
+    expect(SIGNED_IN_ROUTES).toContain("account/profile");
   });
 });
 

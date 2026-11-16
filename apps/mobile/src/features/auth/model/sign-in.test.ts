@@ -16,7 +16,8 @@ import {
   passwordTooShort,
   showsEmailError,
 } from "./email-sign-in.selectors";
-import { initialSignInState, signInReducer, type SignInAction } from "./sign-in.reducer";
+import { wordsOf } from "./legal-words";
+import { initialSignInState, isBusy, signInReducer, type SignInAction } from "./sign-in.reducer";
 
 const { auth } = strings;
 const DOMAIN = "@x.com";
@@ -122,10 +123,18 @@ describe("e-mail sheet reducer and selectors", () => {
     );
     expect(canSubmit(sent)).toBe(false);
     expect(emailSignInReducer(sent, { type: "submitted" })).toBe(sent);
-    const refused = emailSignInReducer(sent, { type: "failed", failure: "invalid-credentials" });
+    const refused = emailSignInReducer(sent, {
+      type: "failed",
+      mode: "signIn",
+      failure: "invalid-credentials",
+    });
     expect(refused).toMatchObject({ email: "ana@x.com", password: "", submitting: false });
     expect(authFailureText(refused.failure)).toBe("E-mail ou senha incorretos.");
-    const offline = emailSignInReducer(sent, { type: "failed", failure: "offline" });
+    const offline = emailSignInReducer(sent, {
+      type: "failed",
+      mode: "signIn",
+      failure: "offline",
+    });
     expect(offline.password).toBe("errada");
   });
 
@@ -147,13 +156,61 @@ describe("e-mail sheet reducer and selectors", () => {
       { type: "email-changed", text: "ana@x.com" },
       { type: "submitted" },
     );
-    const known = emailSignInReducer(asked, { type: "reset-sent" });
-    const unknown = emailSignInReducer(asked, { type: "failed", failure: "invalid-credentials" });
+    const known = emailSignInReducer(asked, { type: "reset-sent", mode: "reset" });
+    const unknown = emailSignInReducer(asked, {
+      type: "failed",
+      mode: "reset",
+      failure: "invalid-credentials",
+    });
     expect(unknown).toEqual(known);
     expect(known.resetSent).toBe(true);
     expect(canSubmit(known)).toBe(false);
-    const offline = emailSignInReducer(asked, { type: "failed", failure: "offline" });
+    const offline = emailSignInReducer(asked, {
+      type: "failed",
+      mode: "reset",
+      failure: "offline",
+    });
     expect(offline.resetSent).toBe(false);
+  });
+
+  test("while a request is out the mode stays, and an answer for another mode is ignored", () => {
+    const sent = emailState(
+      { type: "email-changed", text: "ana@x.com" },
+      { type: "password-changed", text: "segredo" },
+      { type: "submitted" },
+    );
+    expect(emailSignInReducer(sent, { type: "mode-changed", mode: "reset" })).toBe(sent);
+    const reset = emailState(
+      { type: "mode-changed", mode: "reset" },
+      { type: "email-changed", text: "ana@x.com" },
+    );
+    const late = emailSignInReducer(reset, {
+      type: "failed",
+      mode: "signIn",
+      failure: "invalid-credentials",
+    });
+    expect(late).toBe(reset);
+    expect(emailSignInReducer(reset, { type: "reset-sent", mode: "signIn" })).toBe(reset);
+  });
+
+  test("the terms sentence breaks between words", () => {
+    expect(wordsOf("Ao entrar você aceita os ")).toEqual([
+      "Ao ",
+      "entrar ",
+      "você ",
+      "aceita ",
+      "os ",
+    ]);
+    expect(wordsOf(" e a ")).toEqual([" e ", "a "]);
+    expect(wordsOf(".")).toEqual(["."]);
+    expect(wordsOf(" ")).toEqual([" "]);
+    expect(wordsOf("")).toEqual([]);
+  });
+
+  test("busy: a pending login or the open sheet", () => {
+    expect(isBusy(initialSignInState)).toBe(false);
+    expect(isBusy({ ...initialSignInState, pending: "google" })).toBe(true);
+    expect(isBusy({ ...initialSignInState, emailOpen: true })).toBe(true);
   });
 
   test("texts of the refusals; a cancel says nothing", () => {

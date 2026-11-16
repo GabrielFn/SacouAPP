@@ -133,7 +133,9 @@
     "levelBadgeWidth": 52,
     "levelBadgeHeight": 48,
     "levelStep": 56,
-    "levelShortcut": 48
+    "levelShortcut": 48,
+    "levelOption": 84,
+    "loginBadge": 24
   },
   "radii": {
     "field": 12,
