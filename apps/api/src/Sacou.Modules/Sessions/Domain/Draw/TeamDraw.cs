@@ -38,9 +38,10 @@ internal static class TeamDraw
     private static Result<DrawResult> Split(DrawInput input, TeamLayout layout, DrawUnits units, ImmutableArray<DrawPlayer> reserves)
     {
         var random = new SeededRandom(input.Seed);
-        var teamOfUnit = !input.BalanceByLevel ? QuickSplit(units, layout, random)
+        var budget = PlacementBudget.ForADraw();
+        var teamOfUnit = !input.BalanceByLevel ? QuickSplit(units, layout, random, budget)
             : ExactSplit.Applies(layout) ? ExactSplit.Find(units, layout, random)
-            : LocalSearch.Find(units, layout, random);
+            : LocalSearch.Find(units, layout, random, budget);
         return teamOfUnit is null
             ? Result.Failure<DrawResult>(DrawErrors.LocksUnsatisfiable)
             : Result.Success(ToResult(input.Seed, layout, units, teamOfUnit, reserves));
@@ -65,12 +66,12 @@ internal static class TeamDraw
     }
 
     /// <summary>"Sorteio rápido": one shuffle, the units dealt one team after the other, no balancing.</summary>
-    private static int[]? QuickSplit(DrawUnits units, TeamLayout layout, SeededRandom random)
+    private static int[]? QuickSplit(DrawUnits units, TeamLayout layout, SeededRandom random, PlacementBudget budget)
     {
         var order = random.Shuffle(Enumerable.Range(0, units.Units.Length).ToArray())
             .OrderByDescending(unit => units.Units[unit].Size)
             .ToArray();
-        return TeamPlacement.Place(units, layout, order, PlacementPattern.InTurn);
+        return TeamPlacement.Place(units, layout, order, PlacementPattern.InTurn, budget);
     }
 
     private static DrawResult ToResult(

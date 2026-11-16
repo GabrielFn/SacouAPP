@@ -5,6 +5,9 @@ namespace Sacou.Modules.Sessions.Domain.Draw;
 /// <summary>Stable codes, listed in docs/dominio/sorteio.md. None of them carries a name or a level.</summary>
 internal static class DrawErrors
 {
+    /// <summary>The round's settings have the draw off (<c>draw.enabled</c>).</summary>
+    public static readonly Error DrawDisabled = new("sessions.draw-disabled", ErrorKind.Conflict);
+
     /// <summary>Fewer than <see cref="DrawLimits.MinPlayers"/> confirmed players: not even two teams of two.</summary>
     public static readonly Error NotEnoughPlayers = new("sessions.draw-not-enough-players", ErrorKind.Conflict);
 

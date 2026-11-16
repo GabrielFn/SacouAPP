@@ -33,7 +33,8 @@ internal sealed class StoreGroupSettingsReader(IGroupSettingsStore store) : IGro
             normalized.ChangeCount == 0 ? null : SettingsJsonWriter.Write(SettingsTree.ToNode(Catalog, normalized)),
             SettingsJsonWriter.Write(SettingsTree.ToNode(Catalog, resolved.Values)),
             resolved.Sources.ToImmutableDictionary(source => source.Key, source => source.Value.Code, StringComparer.Ordinal),
-            AttendanceRulesReader.From(resolved.Values)));
+            AttendanceRulesReader.From(resolved.Values),
+            DrawRulesReader.From(resolved.Values)));
     }
 
     /// <summary>Null means refused: malformed JSON and every parser refusal look the same from outside.</summary>

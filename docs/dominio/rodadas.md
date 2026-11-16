@@ -86,5 +86,6 @@ Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do 
 | `PUT /rounds/{roundId}/attendance/me` | `RespondAttendance` | 200 `{ status, position }` |
 | `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |
 | `POST /series/{seriesId}/stop` | `ManageRounds` | 204 (de novo, 204) |
+| `POST /rounds/{roundId}/draw` | `DrawTeams` | 200 com os times e as notas, `Cache-Control: no-store` ([sorteio.md](sorteio.md)) |
 
 Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.
