@@ -1,6 +1,6 @@
 # Sorteio equilibrado (`TeamDraw`)
 
-Regra da E3.6 (ADR 0047, decisões 2 a 5; [ADR 0055](../arquitetura/adr/0055-sorteio-no-servidor.md)). Código em `apps/api/src/Sacou.Modules/Sessions/Domain/Draw/`. Roda **só no servidor**: a nota do admin e a sugestão do jogador são privadas ([perfil-e-nota.md](perfil-e-nota.md)). A rota (`POST .../rounds/{roundId}/draw`, só Admin e Co-admin) é a Parte 2 da E3.6.
+Regra da E3.6 (ADR 0047, decisões 2 a 5; [ADR 0055](../arquitetura/adr/0055-sorteio-no-servidor.md)). Código em `apps/api/src/Sacou.Modules/Sessions/Domain/Draw/`. Roda **só no servidor**: a nota do admin e a sugestão do jogador são privadas ([perfil-e-nota.md](perfil-e-nota.md)). A rota é a seção [Rota](#rota), da Parte 2 da E3.6.
 
 ## Entrada
 
@@ -62,7 +62,31 @@ Os códigos dizem só o motivo, nunca nome nem nota.
 | `sessions.draw-lock-invalid` | Trava com reserva, com quem não confirmou, consigo mesmo, repetida, ou mais de 24 travas |
 | `sessions.draw-lock-too-large` | Bloco `together` maior que o time |
 | `sessions.draw-locks-conflict` | `apart` entre dois jogadores do mesmo bloco `together` |
-| `sessions.draw-locks-unsatisfiable` | Nenhuma divisão respeita todas as travas (3 separados dois a dois em 2 times) |
+| `sessions.draw-locks-unsatisfiable` | Nenhuma divisão respeita todas as travas (3 separados dois a dois em 2 times), ou nenhuma foi achada antes de acabar o orçamento de passos do sorteio |
+| `sessions.draw-disabled` | A configuração da rodada tem o sorteio desligado (`draw.enabled`) |
+
+## Rota
+
+`POST /v1/groups/{groupId}/rounds/{roundId}/draw`, só Admin e Co-admin (`DrawTeams`). Corpo, sempre um objeto (`{}` é um sorteio simples):
+
+```json
+{ "locks": [{ "first": "<memberId>", "second": "<memberId>", "kind": "together" }], "reserves": ["<memberId>"] }
+```
+
+Os dois campos são opcionais; numa trava os três são obrigatórios (`kind` é `together` ou `apart`). Campo a mais, `kind` desconhecido, id que não é GUID ou item nulo em `reserves` dão 400 da leitura estrita; trava nula dá `sessions.draw-lock-invalid`. Resposta `200` com `Cache-Control: no-store`:
+
+```json
+{ "seed": "1234567890123456789", "playersPerTeam": 6,
+  "teams": [{ "number": 1, "members": [{ "memberId": "<id>", "levelTenths": 40 }], "averageTenths": 37 }],
+  "reserves": [{ "memberId": "<id>", "levelTenths": 35 }], "differenceTenths": 1 }
+```
+
+- **Jogadores:** os confirmados da rodada que ainda são membros ativos do grupo (quem saiu não entra, como a próxima leitura da rodada o tiraria).
+- **`seed`** vai como texto: um inteiro de 64 bits não cabe num número de JavaScript. Vem de `RandomNumberGenerator` a cada chamada; não é aceita no corpo.
+- **`number`** começa em 1; os membros vêm em ordem de chegada.
+- Nunca a origem da nota, apelido nem sugestão. Nada é gravado.
+- Recusas: rodada de outro grupo ou inexistente → 404 `sessions.round-not-found`; cancelada → 409 `sessions.round-closed`; `draw.enabled = false` → 409 `sessions.draw-disabled`; os erros do domínio acima.
+- **Orçamento de passos por sorteio** (`DrawLimits.MaxPlacementSteps`, `PlacementBudget`): o posicionamento com travas "separar" põe primeiro os blocos com mais travas, e todas as partidas da busca dividem 100.000 passos. Acabando antes da primeira divisão, `sessions.draw-locks-unsatisfiable`; acabando depois, vale a melhor divisão já achada. O pior sorteio medido gastou 3.155 passos (ADR 0055).
 
 ## Fora do escopo
 

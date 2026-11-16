@@ -433,6 +433,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/draw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["DrawTeams"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -528,6 +544,41 @@ export interface components {
       venue: null | string;
       settings: null | components["schemas"]["JsonElement"];
       repeatWeekly: boolean;
+    };
+    /** @enum {string} */
+    DrawLockKind: "together" | "apart";
+    DrawLockRequest: {
+      /** Format: uuid */
+      first: string;
+      /** Format: uuid */
+      second: string;
+      kind: components["schemas"]["DrawLockKind"];
+    };
+    DrawnPlayerResponse: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: int32 */
+      levelTenths: number;
+    };
+    DrawnTeamResponse: {
+      /** Format: int32 */
+      number: number;
+      members: components["schemas"]["DrawnPlayerResponse"][];
+      /** Format: int32 */
+      averageTenths: number;
+    };
+    DrawTeamsRequest: {
+      locks?: null | components["schemas"]["DrawLockRequest"][];
+      reserves?: null | string[];
+    };
+    DrawTeamsResponse: {
+      seed: string;
+      /** Format: int32 */
+      playersPerTeam: number;
+      teams: components["schemas"]["DrawnTeamResponse"][];
+      reserves: components["schemas"]["DrawnPlayerResponse"][];
+      /** Format: int32 */
+      differenceTenths: number;
     };
     GoingEntry: {
       /** Format: uuid */
@@ -3484,6 +3535,96 @@ export interface operations {
       };
       /** @description Not Found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  DrawTeams: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DrawTeamsRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DrawTeamsResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
         headers: {
           [name: string]: unknown;
         };

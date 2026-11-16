@@ -23,7 +23,7 @@ public sealed class GroupRouteGuardTests
     /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
     /// </summary>
     private const int GroupRoutes = 21;
-    private const int RoundRoutes = 8;
+    private const int RoundRoutes = 9;
 
     private const string Development = "Development";
     private const string Production = "Production";

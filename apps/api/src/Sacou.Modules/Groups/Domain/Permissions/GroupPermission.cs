@@ -21,4 +21,7 @@ internal enum GroupPermission
 
     /// <summary>Adds a guest without an account and corrects its name and position (ADR 0053, D7).</summary>
     ManageGuests,
+
+    /// <summary>Draws the teams of a round with the private levels (ADR 0055): the answer carries them.</summary>
+    DrawTeams,
 }

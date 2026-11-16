@@ -22,7 +22,7 @@ public interface IGroupSettingsReader
 /// <summary>
 /// <see cref="LayerJson"/> is what the round stores (null when it inherits everything); <see cref="ResolvedJson"/>
 /// is the complete document for the screen; <see cref="Sources"/> says, by leaf path, whether it came from the
-/// <c>group</c> or the <c>round</c>.
+/// <c>group</c> or the <c>round</c>. <see cref="Attendance"/> and <see cref="Draw"/> are the typed leaves the Sessions uses.
 /// </summary>
 public sealed record RoundSettings(
-    string? LayerJson, string ResolvedJson, IReadOnlyDictionary<string, string> Sources, AttendanceRules Attendance);
+    string? LayerJson, string ResolvedJson, IReadOnlyDictionary<string, string> Sources, AttendanceRules Attendance, DrawRules Draw);
