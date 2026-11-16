@@ -124,3 +124,8 @@ Detalhes em `docs/estado/tarefas/E3.16.md`, seção 9. Nenhuma trava a Parte 1. 
 
 ## 16/11/2026: minutos do GitHub Actions
 A cota do plano Free acabou e o Gabriel não quer pagar. Opções: (1) runner no PC dele, (2) repositório público, (3) gastar menos minutos, (4) bateria local como portão. **Resposta do Gabriel (16/11): repositório público**, com o e-mail de autor dos commits visível, risco aceito. Feito no ADR 0058.
+
+## 16/11/2026: fechamento do M3 (relatório em `relatorios/M3.md`)
+67. Riscos registrados sem dono, todos pequenos (revisão do M3, M3-B2): o seletor do Google que devolve a mesma conta; `user.delete()` e `signOut` falhando juntos; um 410 antes da primeira resposta do Firebase; duas conexões por aceite de convite ou criação de grupo. **Recomendação: aceitar os três do celular no piloto e resolver o das conexões junto com a pergunta 66.**
+68. Teste da E4.3 no celular: precisa dos passos do console do Firebase e da API em `https:`. Opções: (1) primeiro deploy (E5.1) no começo do M4, com o limite de requisições antes; (2) túnel temporário (conta grátis nova); (3) esperar a E5.1 na ordem normal. **Recomendação: 1** (deploy em produção precisa do ok do Gabriel).
+- A pergunta 66 (limite de requisições) segue aberta e virou condição da E5.1 na revisão do M3.
