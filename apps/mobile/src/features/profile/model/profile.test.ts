@@ -228,6 +228,13 @@ describe("the gate of screen 27 (nobody is held there)", () => {
     ["404 before the flag is read", missing, "unknown", "skip"],
     ["a saved profile", { status: "success", data: SAVED }, "notSkipped", "skip"],
     ["loading or offline", { status: "pending", data: undefined }, "notSkipped", "skip"],
+    [
+      "pending even if a stale null is there",
+      { status: "pending", data: null },
+      "notSkipped",
+      "skip",
+    ],
+    ["error even if a stale null is there", { status: "error", data: null }, "notSkipped", "skip"],
     ["an error (500, unavailable)", { status: "error", data: undefined }, "notSkipped", "skip"],
   ] as const)("%s: %s", (_name, profile, skip, expected) => {
     expect(onboardingGate(profile, skip)).toBe(expected);
