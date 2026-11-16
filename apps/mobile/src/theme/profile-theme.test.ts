@@ -22,6 +22,10 @@ describe("quick profile and account colors reach AA", () => {
     ["chosen chip on night", palette.sand, palette.night],
     ["row key and note on sand", palette.textSecondary, palette.sand],
     ["G of the login row on white", palette.netBlue, palette.white],
+    ["Excluir conta title on its card", palette.dangerTitle, palette.dangerFill],
+    ["note of the danger card", palette.textSecondary, palette.dangerFill],
+    ["Excluir buttons in white on red", palette.white, palette.danger],
+    ["blocker notice text on pale yellow", palette.night, palette.noticeFill],
   ])("%s", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);
   });
@@ -35,6 +39,9 @@ describe("quick profile and account tokens scale and keep the touch floor", () =
     expect(tokens.sizes.settingRowMin).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
     expect(tokens.sizes.iconButton).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
     expect(tokens.sizes.loginBadge).toBeGreaterThan(0);
+    // "Excluir" of the danger card (Conta.dc.html) and the buttons of 30a and 30b.
+    expect(tokens.sizes.minTouchTarget).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+    expect(tokens.sizes.primaryButton).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
   });
 
   it("the level option grows with the window", () => {

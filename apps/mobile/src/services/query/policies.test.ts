@@ -82,10 +82,17 @@ describe("cacheEffectsOf (P5, golden)", () => {
     [{ type: "profileSaved", profile: {}, cachedGroupIds: [] }, ["set me/profile"]],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
-        [{ type, groupId: G, targetIsMe: false }, [`invalidate groups/${G}/members`]],
+        [
+          { type, groupId: G, targetIsMe: false },
+          [`invalidate groups/${G}/members`, "invalidate me/deletion-blockers"],
+        ],
         [
           { type, groupId: G, targetIsMe: true },
-          [`invalidate groups/${G}/members`, "invalidate groups"],
+          [
+            `invalidate groups/${G}/members`,
+            "invalidate groups",
+            "invalidate me/deletion-blockers",
+          ],
         ],
       ],
     ),

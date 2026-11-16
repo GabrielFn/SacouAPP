@@ -226,4 +226,34 @@ describe("the API client and the session", () => {
     const snapshot = harness.auth.snapshot();
     expect(signOutReasonText(snapshot)).toBe(strings.auth.reasons.expired);
   });
+
+  test("410 of the login of a deleted account deletes it in Firebase too (ADR 0056, D5)", async () => {
+    const harness = setup();
+    const { client, http } = api(harness);
+    http.enqueue(
+      jsonAnswer(403, { title: "x", status: 403, code: "identity.user-not-registered" }),
+      jsonAnswer(410, { title: "x", status: 410, code: "identity.account-deleted" }),
+    );
+    const result = await client.listMyGroups();
+    expect(result.ok).toBe(false);
+    await harness.ender.end("deleted");
+    expect(callsOf(harness.auth)).toEqual(["deleteAccount", "forgetProviderAccount"]);
+    expect(signOutReasonText(harness.auth.snapshot())).toBe(strings.auth.reasons.deleted);
+  });
+});
+
+describe("the end of a deleted account (screen 30b)", () => {
+  test("deletes in Firebase instead of signing out, then clears like any exit", async () => {
+    const harness = setup();
+    harness.client.setQueryData(queryKeys.group(GROUP_A), { name: "Racha" });
+    await harness.ender.end("deleted");
+    expect(harness.order).toEqual([
+      "deleteAccount",
+      "cancelQueries",
+      "clearSession",
+      "forgetProviderAccount",
+    ]);
+    expect(harness.client.getQueryData(queryKeys.group(GROUP_A))).toBeUndefined();
+    expect(signOutReasonText(harness.auth.snapshot())).toBe("Sua conta foi excluída.");
+  });
 });
