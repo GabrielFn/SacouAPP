@@ -6,7 +6,9 @@ import type {
   AttendanceAnswer,
   AttendanceResponse,
   CreateRoundBody,
+  Round,
   SacouApi,
+  UpdateRoundBody,
 } from "../../../services/api/sacou-api";
 import {
   applyCacheEffects,
@@ -42,6 +44,43 @@ export function createRoundMutation(api: SacouApi, client: QueryClient, groupId:
 }
 
 const FORBIDDEN_STATUS = 403;
+
+/**
+ * A refused edit reads again what it was refused against: a 403 the group and its role, a 409 (`round-closed`,
+ * `round-date-taken`) the round. The text comes from the error.
+ */
+export function roundEditRefusedEffects(
+  groupId: string,
+  roundId: string,
+  error: unknown,
+): readonly CacheEffect[] {
+  const apiError = apiErrorOf(error);
+  if (apiError?.kind !== "problem") return [];
+  const round: CacheEffect = { action: "invalidate", key: queryKeys.round(groupId, roundId) };
+  if (apiError.status === FORBIDDEN_STATUS) {
+    return [...cacheEffectsOf({ type: "settingsForbidden", groupId }), round];
+  }
+  return isConflict(error) ? [round] : [];
+}
+
+/** "Salvar" of "Editar rodada": the answer is the whole round, which replaces the cached detail. */
+export function updateRoundMutation(
+  api: SacouApi,
+  client: QueryClient,
+  groupId: string,
+  roundId: string,
+) {
+  return {
+    scope: roundScope(roundId),
+    mutationFn: (body: UpdateRoundBody) => unwrap(api.updateRound(groupId, roundId, body)),
+    onSuccess: (round: Round) => {
+      applyCacheEffects(client, cacheEffectsOf({ type: "roundUpdated", groupId, roundId, round }));
+    },
+    onError: (error: unknown) => {
+      applyCacheEffects(client, roundEditRefusedEffects(groupId, roundId, error));
+    },
+  };
+}
 
 const MEMBER_GONE: ReadonlySet<string> = new Set([
   "sessions.member-not-found",
