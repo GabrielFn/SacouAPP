@@ -27,12 +27,14 @@ export interface QuickProfileScreenProps {
 export interface QuickProfileFooterProps {
   readonly mode: QuickProfileMode;
   readonly disabled: boolean;
+  /** A save in flight: "Pular" would queue a PUT that overwrites it with empty positions and level. */
+  readonly saving: boolean;
   readonly onSubmit: () => void;
   readonly onSkip: () => void;
 }
 
 /** "Pular" (flex 1) and "Pronto" (flex 2) on the first access; only "Salvar" in edit mode. */
-function QuickProfileFooter({ mode, disabled, onSubmit, onSkip }: QuickProfileFooterProps) {
+export function QuickProfileFooter({ mode, disabled, saving, onSubmit, onSkip }: QuickProfileFooterProps) {
   const { tokens } = useTheme();
   const { profile } = strings;
   if (mode === "edit")
@@ -40,7 +42,7 @@ function QuickProfileFooter({ mode, disabled, onSubmit, onSkip }: QuickProfileFo
   return (
     <View style={{ flexDirection: "row", gap: tokens.spacing.s }}>
       <View style={{ flex: 1 }}>
-        <Button variant="link" label={profile.skip} onPress={onSkip} />
+        <Button variant="link" label={profile.skip} onPress={onSkip} disabled={saving} />
       </View>
       <View style={{ flex: 2 }}>
         <Button label={profile.done} onPress={onSubmit} disabled={disabled} />
@@ -73,6 +75,7 @@ export function QuickProfileScreen({ mode, initial, onSaved }: QuickProfileScree
           <QuickProfileFooter
             mode={mode}
             disabled={!canSubmit(state) || model.saving}
+            saving={model.saving}
             onSubmit={model.submit}
             onSkip={model.skip}
           />

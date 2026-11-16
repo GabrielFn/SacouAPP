@@ -45,6 +45,7 @@ export function useQuickProfile(initial: ProfileFormState, onSaved: () => void):
       save.mutate(profileRequest(state), { onSuccess: onSaved });
     },
     skip: () => {
+      if (save.isPending) return;
       skipQuickProfile(state, {
         onboardingSkip,
         save: (body) => {
