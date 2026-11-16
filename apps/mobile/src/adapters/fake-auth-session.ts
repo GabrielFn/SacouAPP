@@ -6,6 +6,7 @@ import type {
   AuthProvider,
   AuthResult,
   AuthSession,
+  SessionIdentity,
   SessionSnapshot,
   SignOutReason,
 } from "../services/auth/auth-session";
@@ -41,9 +42,17 @@ export interface FakeAuthSessionOptions {
 export interface FakeAuthSession extends AuthSession {
   /** The next call of `method` gives this failure (once). Without it, the call succeeds. */
   fail(method: FakeAuthMethod, failure: AuthFailure): void;
-  /** Changes the session as the SDK would (a login elsewhere, a session ended by the server). */
-  emit(snapshot: SessionSnapshot): void;
+  /**
+   * Changes the session as the SDK would (a login elsewhere, a session ended by the server). A signed-in
+   * snapshot keeps the account of the session unless `identity` names another (an account switch).
+   */
+  emit(snapshot: SessionSnapshot, identity?: SessionIdentity): void;
   calls(): readonly FakeAuthCall[];
+}
+
+/** A new account for the fake session, to test an account switch. */
+export function fakeSessionIdentity(): SessionIdentity {
+  return Object.freeze({ opaque: Symbol("fake-account") });
 }
 
 export const FAKE_ACCOUNT: AccountView = {
@@ -69,13 +78,15 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
   const calls: { value: readonly FakeAuthCall[] } = { value: [] };
   const supported = new Set(options.supported ?? ["google", "password"]);
   const account = options.account ?? FAKE_ACCOUNT;
+  const identity: { value: SessionIdentity } = { value: fakeSessionIdentity() };
 
   function record(call: FakeAuthCall): void {
     calls.value = [...calls.value, call];
     options.onCall?.(call);
   }
 
-  function emit(next: SessionSnapshot): void {
+  function emit(next: SessionSnapshot, nextIdentity?: SessionIdentity): void {
+    if (nextIdentity !== undefined) identity.value = nextIdentity;
     snapshot.value = next;
     listeners.notify();
   }
@@ -100,6 +111,7 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
     signInWithEmail: () => run("signInWithEmail"),
     createAccountWithEmail: () => run("createAccountWithEmail"),
     sendPasswordReset: () => run("sendPasswordReset"),
+    currentSession: () => (snapshot.value.status === "signedIn" ? identity.value : null),
     getIdToken({ forceRefresh }) {
       record({ method: "getIdToken", forceRefresh });
       return Promise.resolve(snapshot.value.status === "signedIn" ? FAKE_SESSION_TOKEN : null);
@@ -115,7 +127,10 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
     },
     // The password is never recorded: only that a new login was asked.
     reauthenticate: () => run("reauthenticate"),
-    deleteAccount() {
+    deleteAccount(session) {
+      if (snapshot.value.status !== "signedIn" || session !== identity.value) {
+        return Promise.resolve();
+      }
       record({ method: "deleteAccount" });
       emit({ status: "signedOut", reason: "deleted" });
       return Promise.resolve();

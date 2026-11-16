@@ -2,7 +2,11 @@ import { QueryObserver } from "@tanstack/react-query";
 import { persistQueryClientSave } from "@tanstack/react-query-persist-client";
 import { describe, expect, test } from "vitest";
 
-import { createFakeAuthSession, type FakeAuthSession } from "../../adapters/fake-auth-session";
+import {
+  createFakeAuthSession,
+  fakeSessionIdentity,
+  type FakeAuthSession,
+} from "../../adapters/fake-auth-session";
 import { createFakeHttpTransport, jsonAnswer } from "../../adapters/fake-http-transport";
 import { createHttpSacouApi } from "../../adapters/http-sacou-api";
 import { createMemoryInviteLinkStore } from "../../adapters/memory-invite-link-store";
@@ -12,7 +16,7 @@ import {
   ONBOARDING_SKIP_KEY,
 } from "../../adapters/stored-onboarding-skip";
 import { strings } from "../../strings/pt-BR";
-import type { SessionSnapshot } from "../auth/auth-session";
+import type { SessionIdentity, SessionSnapshot } from "../auth/auth-session";
 import { signOutReasonText } from "../../features/auth/model/auth-failure-text";
 import {
   CACHE_STORAGE_KEY,
@@ -34,6 +38,17 @@ const SIGNED_IN = {
   status: "signedIn",
   account: { provider: "google", email: "a@x.com", displayName: "Ana" },
 } as const;
+
+const SIGNED_IN_B = {
+  status: "signedIn",
+  account: { provider: "password", email: "b@x.com", displayName: "Bia" },
+} as const;
+
+function sessionOf(auth: FakeAuthSession): SessionIdentity {
+  const session = auth.currentSession();
+  if (session === null) throw new Error("nobody signed in");
+  return session;
+}
 
 function setup(initial: SessionSnapshot = SIGNED_IN) {
   const order: string[] = [];
@@ -236,9 +251,26 @@ describe("the API client and the session", () => {
     );
     const result = await client.listMyGroups();
     expect(result.ok).toBe(false);
-    await harness.ender.end("deleted");
+    // Waits for the end the 410 started; it would sign out instead if nothing had started.
+    await harness.ender.end("expired");
     expect(callsOf(harness.auth)).toEqual(["deleteAccount", "forgetProviderAccount"]);
     expect(signOutReasonText(harness.auth.snapshot())).toBe(strings.auth.reasons.deleted);
+  });
+
+  test("a late 410 of account A, with B signed in now, neither deletes B nor ends its session", async () => {
+    const harness = setup();
+    const { client, http } = api(harness);
+    http.enqueue(
+      jsonAnswer(403, { title: "x", status: 403, code: "identity.user-not-registered" }),
+      jsonAnswer(410, { title: "x", status: 410, code: "identity.account-deleted" }),
+    );
+    const pending = client.listMyGroups();
+    harness.auth.emit(SIGNED_IN_B, fakeSessionIdentity());
+    expect((await pending).ok).toBe(false);
+    await Promise.resolve();
+    expect(callsOf(harness.auth)).toEqual([]);
+    expect(harness.order).toEqual([]);
+    expect(harness.auth.snapshot()).toEqual(SIGNED_IN_B);
   });
 });
 
@@ -246,7 +278,7 @@ describe("the end of a deleted account (screen 30b)", () => {
   test("deletes in Firebase instead of signing out, then clears like any exit", async () => {
     const harness = setup();
     harness.client.setQueryData(queryKeys.group(GROUP_A), { name: "Racha" });
-    await harness.ender.end("deleted");
+    await harness.ender.endDeleted(sessionOf(harness.auth));
     expect(harness.order).toEqual([
       "deleteAccount",
       "cancelQueries",
@@ -255,5 +287,14 @@ describe("the end of a deleted account (screen 30b)", () => {
     ]);
     expect(harness.client.getQueryData(queryKeys.group(GROUP_A))).toBeUndefined();
     expect(signOutReasonText(harness.auth.snapshot())).toBe("Sua conta foi excluída.");
+  });
+
+  test("the deletion of A after a switch to B does nothing", async () => {
+    const harness = setup();
+    const accountA = sessionOf(harness.auth);
+    harness.auth.emit(SIGNED_IN_B, fakeSessionIdentity());
+    await harness.ender.endDeleted(accountA);
+    expect(harness.order).toEqual([]);
+    expect(harness.auth.snapshot()).toEqual(SIGNED_IN_B);
   });
 });

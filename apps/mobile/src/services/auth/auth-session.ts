@@ -13,6 +13,14 @@ export interface AccountView {
   readonly displayName: string | null;
 }
 
+/**
+ * Which account a session belongs to, without the UID (ADR 0057, D2): the same object for the same
+ * account, compared by reference. It ties a late answer of the API (a 410) to the account that sent it.
+ */
+export interface SessionIdentity {
+  readonly opaque: symbol;
+}
+
 /** Why the session ended, shown once on the login screen. `null`: it was never open on this phone. */
 export type SignOutReason = "signedOut" | "expired" | "deleted";
 
@@ -62,6 +70,8 @@ export interface AuthSession {
   createAccountWithEmail(email: string, password: string): Promise<AuthResult>;
   /** Asks the provider for the reset e-mail. The screen answers the same text either way (D7). */
   sendPasswordReset(email: string): Promise<AuthResult>;
+  /** The account signed in now; `null` when nobody is (or the SDK has not answered yet). */
+  currentSession(): SessionIdentity | null;
   /** `null` when nobody is signed in; `forceRefresh` asks the SDK for a new token. */
   getIdToken(options: { readonly forceRefresh: boolean }): Promise<string | null>;
   /** Ends the session in the SDK: from here on `getIdToken` gives `null`. */
@@ -73,7 +83,8 @@ export interface AuthSession {
   /**
    * After the API deleted the account (204, or 410 on a later login): deletes the user in Firebase, revokes
    * the Google grant and ends the session as `deleted`. If the SDK refuses, it signs out anyway, and the
-   * 410 of the next login tries again (ADR 0056, question 63).
+   * 410 of the next login tries again (ADR 0056, question 63). Only for the account of `session`: if
+   * another account is signed in now (a late 410 after an account switch), it does nothing.
    */
-  deleteAccount(): Promise<void>;
+  deleteAccount(session: SessionIdentity): Promise<void>;
 }

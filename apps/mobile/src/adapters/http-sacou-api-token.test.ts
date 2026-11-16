@@ -94,7 +94,12 @@ describe("the token (P2, P3, H2)", () => {
     const api = createHttpSacouApi({
       baseUrl: BASE,
       transport: http.transport,
-      idTokens: { getIdToken, onSessionExpired, onAccountDeleted: vi.fn() },
+      idTokens: {
+        currentSession: () => null,
+        getIdToken,
+        onSessionExpired,
+        onAccountDeleted: vi.fn(),
+      },
       now: () => NOW,
       timeoutMs: 20,
     });
@@ -116,7 +121,12 @@ describe("the token (P2, P3, H2)", () => {
     const api = createHttpSacouApi({
       baseUrl: BASE,
       transport: http.transport,
-      idTokens: { getIdToken, onSessionExpired, onAccountDeleted: vi.fn() },
+      idTokens: {
+        currentSession: () => null,
+        getIdToken,
+        onSessionExpired,
+        onAccountDeleted: vi.fn(),
+      },
       now: () => NOW,
       timeoutMs: 20,
     });

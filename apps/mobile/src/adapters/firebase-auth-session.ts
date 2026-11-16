@@ -7,6 +7,7 @@ import type {
   AuthResult,
   AuthSession,
   Reauthentication,
+  SessionIdentity,
   SessionSnapshot,
   SignOutReason,
 } from "../services/auth/auth-session";
@@ -21,6 +22,8 @@ export interface FirebaseUserView {
   readonly providerIds: readonly string[];
   readonly email: string | null;
   readonly displayName: string | null;
+  /** The same object for the same account (the SDK wrapper keys it by the UID, which stays there). */
+  readonly identity: SessionIdentity;
   getIdToken(forceRefresh: boolean): Promise<string>;
 }
 
@@ -134,6 +137,7 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
     createAccountWithEmail: (email, password) =>
       attempt(() => sdk.createAccountWithEmail(email, password)),
     sendPasswordReset: (email) => attempt(() => sdk.sendPasswordReset(email)),
+    currentSession: () => currentUser.value?.identity ?? null,
     async getIdToken({ forceRefresh }) {
       await firstState;
       const user = currentUser.value;
@@ -169,7 +173,9 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
       if (result.ok) await currentUser.value?.getIdToken(true).catch(() => null);
       return result;
     },
-    async deleteAccount() {
+    async deleteAccount(session) {
+      // A late 410 of another account: the one signed in now is not touched.
+      if (currentUser.value?.identity !== session) return;
       pendingReason.value = "deleted";
       try {
         await sdk.deleteCurrentUser();

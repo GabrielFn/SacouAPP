@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 
 import type { IdTokenProvider } from "../api/id-token-provider";
-import type { AuthSession, SignOutReason } from "../auth/auth-session";
+import type { AuthSession, SessionIdentity, SignOutReason } from "../auth/auth-session";
 import { clearSession, type SessionStores } from "./clear-session";
 
 export interface SessionEnderDeps {
@@ -13,7 +13,13 @@ export interface SessionEnderDeps {
 /** The one way out of a session: the Sair button, the expired session and a session ended elsewhere. */
 export interface SessionEnder {
   /** Signs out and forgets everything of the account on this phone. Calls at the same time share one. */
-  end(reason: SignOutReason): Promise<void>;
+  end(reason: Exclude<SignOutReason, "deleted">): Promise<void>;
+  /**
+   * The API deleted the account of `session` (204 of screen 30b, or 410 of a later login): deletes it in
+   * Firebase too and forgets it, like `end`. Nothing when another account is signed in now: a late answer
+   * of the old account never deletes nor ends the session of the new one.
+   */
+  endDeleted(session: SessionIdentity): Promise<void>;
   /**
    * The SDK is already signed out (the app opened that way, or the session fell elsewhere): forgets the
    * account on this phone. Once per signed-out period, so the gate can call it on every render.
@@ -56,9 +62,16 @@ export function createSessionEnder({
       if (running.current !== null) return running.current;
       if (authSession.snapshot().status === "signedOut") return Promise.resolve();
       return once(async () => {
+        await authSession.signOut(reason);
+        await forget();
+      });
+    },
+    endDeleted(session) {
+      if (running.current !== null) return running.current;
+      if (authSession.currentSession() !== session) return Promise.resolve();
+      return once(async () => {
         // A deleted account leaves Firebase too; signing out is part of it (ADR 0056, question 63).
-        if (reason === "deleted") await authSession.deleteAccount();
-        else await authSession.signOut(reason);
+        await authSession.deleteAccount(session);
         await forget();
       });
     },
@@ -73,12 +86,13 @@ export function createSessionEnder({
 /** What the API client gets: the token of the session, and the expired session ends through the ender. */
 export function sessionIdTokens(authSession: AuthSession, ender: SessionEnder): IdTokenProvider {
   return {
+    currentSession: () => authSession.currentSession(),
     getIdToken: (options) => authSession.getIdToken(options),
     onSessionExpired: () => {
       void ender.end("expired");
     },
-    onAccountDeleted: () => {
-      void ender.end("deleted");
+    onAccountDeleted: (session) => {
+      void ender.endDeleted(session);
     },
   };
 }

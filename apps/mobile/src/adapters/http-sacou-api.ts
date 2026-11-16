@@ -165,6 +165,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   }
 
   async function run<T>(call: Call<T>, state: AttemptState): Promise<ApiResult<T>> {
+    const session = idTokens.currentSession();
     const tokenResult = await tokenFor(state);
     if (!tokenResult.ok) return tokenResult;
     const token = tokenResult.value;
@@ -177,7 +178,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       case "sign-in": {
         const signed = await attempt(signInCall, token);
         if (signed.ok) return run(call, { ...state, signedIn: true });
-        if (isAccountDeleted(signed.error)) idTokens.onAccountDeleted();
+        if (isAccountDeleted(signed.error) && session !== null) idTokens.onAccountDeleted(session);
         return giveUp(signed.error);
       }
       case "give-up":

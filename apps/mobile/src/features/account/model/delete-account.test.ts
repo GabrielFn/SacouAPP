@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { createFakeAuthSession } from "../../../adapters/fake-auth-session";
+import { createFakeAuthSession, fakeSessionIdentity } from "../../../adapters/fake-auth-session";
 import { createFakeSacouApi } from "../../../adapters/fake-sacou-api";
 import type { ApiError } from "../../../services/api/api-error";
 import { apiErr, apiOk } from "../../../services/api/api-result";
@@ -43,9 +43,9 @@ function setup() {
   });
   const ended: SignOutReason[] = [];
   const refreshed = { count: 0 };
-  const ender: Pick<SessionEnder, "end"> = {
-    end: (reason) => {
-      ended.push(reason);
+  const ender: Pick<SessionEnder, "endDeleted"> = {
+    endDeleted: (session) => {
+      if (session === auth.currentSession()) ended.push("deleted");
       return Promise.resolve();
     },
   };
@@ -153,6 +153,15 @@ describe("deleting the account (E4.3, D9; ADR 0056, D4 and D7)", () => {
     fake.respond("deleteMyAccount", apiOk(null));
     expect(await run(deps, "google")).toEqual({ kind: "deleted" });
     expect(ended).toEqual(["deleted"]);
+  });
+
+  test("204 ends the session of the account that asked, not of one signed in meanwhile", async () => {
+    const { fake, auth, ended, deps } = setup();
+    fake.respond("deleteMyAccount", apiOk(null));
+    const pending = run(deps, "google");
+    auth.emit(auth.snapshot(), fakeSessionIdentity());
+    expect(await pending).toEqual({ kind: "deleted" });
+    expect(ended).toEqual([]);
   });
 
   test("409 of a blocker made meanwhile reads the blockers again", async () => {

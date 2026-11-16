@@ -27,8 +27,8 @@ export type DeletionOutcome =
 
 export interface DeletionDeps {
   readonly api: Pick<SacouApi, "deleteMyAccount">;
-  readonly auth: Pick<AuthSession, "reauthenticate">;
-  readonly ender: Pick<SessionEnder, "end">;
+  readonly auth: Pick<AuthSession, "reauthenticate" | "currentSession">;
+  readonly ender: Pick<SessionEnder, "endDeleted">;
   readonly refreshBlockers: () => Promise<void>;
 }
 
@@ -43,9 +43,11 @@ function isProblem(error: ApiError, code: string): boolean {
 }
 
 async function attemptDeletion(deps: DeletionDeps): Promise<DeletionOutcome> {
+  // Read before the call: only the account that asked for the deletion leaves Firebase.
+  const session = deps.auth.currentSession();
   const result = await deps.api.deleteMyAccount();
   if (result.ok) {
-    await deps.ender.end("deleted");
+    if (session !== null) await deps.ender.endDeleted(session);
     return { kind: "deleted" };
   }
   if (isProblem(result.error, BLOCKED)) {

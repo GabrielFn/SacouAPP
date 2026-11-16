@@ -1,7 +1,7 @@
 import { err, ok, type Result } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
-import type { AuthFailure } from "../services/auth/auth-session";
+import type { AuthFailure, SessionIdentity } from "../services/auth/auth-session";
 import { firebaseFailureOf, googleFailureOf, type GoogleStatusCodes } from "./auth-failure-codes";
 import {
   createFirebaseAuthSession,
@@ -25,13 +25,18 @@ interface FakeSdk extends FirebaseAuthSdk {
   readonly log: string[];
 }
 
+const ACCOUNT_A: SessionIdentity = Object.freeze({ opaque: Symbol("a") });
+const ACCOUNT_B: SessionIdentity = Object.freeze({ opaque: Symbol("b") });
+
 function userView(
   providerIds: readonly string[],
   forced: boolean[] = [],
   tokenFailure: string | null = null,
+  identity: SessionIdentity = ACCOUNT_A,
 ): FirebaseUserView {
   return {
     providerIds,
+    identity,
     email: "ana@example.com",
     displayName: "Ana Souza",
     getIdToken: (forceRefresh) => {
@@ -306,11 +311,24 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
     const google = picker();
     const session = createFirebaseAuthSession({ sdk, google });
     sdk.change(userView(["google.com"]));
-    await session.deleteAccount();
+    await session.deleteAccount(ACCOUNT_A);
     sdk.change(null);
     expect(sdk.log).toEqual(["delete"]);
     expect(google.revoked()).toBe(1);
     expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });
+  });
+
+  test("the session names its account; a deletion for another account touches nothing", async () => {
+    const sdk = fakeSdk();
+    const google = picker();
+    const session = createFirebaseAuthSession({ sdk, google });
+    expect(session.currentSession()).toBeNull();
+    sdk.change(userView(["google.com"], [], null, ACCOUNT_B));
+    expect(session.currentSession()).toBe(ACCOUNT_B);
+    await session.deleteAccount(ACCOUNT_A);
+    expect(sdk.log).toEqual([]);
+    expect(google.revoked()).toBe(0);
+    expect(session.snapshot().status).toBe("signedIn");
   });
 
   test("a refused delete signs out anyway, still as deleted", async () => {
@@ -318,7 +336,7 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
     const session = createFirebaseAuthSession({ sdk, google: picker() });
     sdk.change(userView(["password"]));
     sdk.failNext("auth/requires-recent-login");
-    await session.deleteAccount();
+    await session.deleteAccount(ACCOUNT_A);
     sdk.change(null);
     expect(sdk.log).toEqual(["delete", "signOut"]);
     expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });

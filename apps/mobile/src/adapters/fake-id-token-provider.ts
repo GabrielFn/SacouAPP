@@ -1,4 +1,5 @@
 import type { IdTokenProvider } from "../services/api/id-token-provider";
+import type { SessionIdentity } from "../services/auth/auth-session";
 
 export const FAKE_ID_TOKEN = "fake-id-token-Zx9";
 
@@ -20,7 +21,9 @@ export function createFakeIdTokenProvider(
 ): FakeIdTokenProvider {
   const counts = { value: { total: 0, forced: 0, expired: 0, deleted: 0 } };
   const gate: { current: Promise<void> | null } = { current: null };
+  const session: SessionIdentity = Object.freeze({ opaque: Symbol("fake-session") });
   return {
+    currentSession: () => (token === null ? null : session),
     async getIdToken({ forceRefresh }) {
       const { total, forced } = counts.value;
       counts.value = {
