@@ -1,0 +1,31 @@
+/** Texts of the quick profile (screen 27), on the first access and when edited from the account. */
+export const profileStrings = {
+  title: "Seu perfil de quadra",
+  subtitle: "Leva 20 segundos. Ajuda no sorteio.",
+  nicknameLabel: "Apelido na quadra",
+  nicknameRequired: "Escreva um apelido.",
+  nicknameTooLong: "Use até 20 letras.",
+  nicknameInvalid: "Use letras, números ou emojis, sem símbolos invisíveis.",
+  primaryTitle: "Posição principal",
+  othersTitle: "Também jogo de",
+  othersNote: "pode marcar mais de uma",
+  levelTitle: "Como você se avalia?",
+  levelNote: "é só uma sugestão",
+  levelGroupLabel: "Sugestão de nível de 1 a 5",
+  /** From level 1 to level 5. */
+  levels: [
+    "Tô aprendendo",
+    "Jogo de vez em quando",
+    "Me viro bem",
+    "Sou dos bons da pelada",
+    "Jogo federado",
+  ],
+  levelLabel: (level: number, text: string) => `${String(level)}, ${text}`,
+  privacy: "O admin do grupo confirma ou ajusta a nota, que só ele vê. Ela é usada no sorteio.",
+  skip: "Pular",
+  done: "Pronto",
+  save: "Salvar",
+  loading: "Carregando seu perfil",
+  loadFailed: "Não deu para abrir seu perfil",
+  retry: "Tentar de novo",
+} as const;

@@ -187,6 +187,9 @@ export const sizes = {
   levelBadgeHeight: 48,
   levelStep: 56,
   levelShortcut: 48,
+  // Quick profile (Onboarding.dc.html .nv button) and the account (Conta.dc.html, the circle of the G).
+  levelOption: 84,
+  loginBadge: 24,
 } as const;
 
 /**
@@ -218,6 +221,7 @@ export const interactiveHeights = [
   sizes.levelBadgeHeight,
   sizes.levelStep,
   sizes.levelShortcut,
+  sizes.levelOption,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.

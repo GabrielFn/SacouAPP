@@ -13,6 +13,7 @@ import {
 } from "../services/api/api-policy";
 import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
+import { createProfileOperations } from "./http-profile-operations";
 import { createRoundOperations } from "./http-round-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
 import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
@@ -155,7 +156,8 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
           : await idTokens.getIdToken({ forceRefresh: false }),
       );
     } catch {
-      // The SDK could not renew the token (no network): the session is not over (ADR 0057, D5).
+      // Only no network rejects (the SDK's other refusals give `null`, which ends the session below):
+      // the session is not over (ADR 0057, D5).
       return apiErr({ kind: "offline" });
     }
   }
@@ -287,5 +289,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
+    ...createProfileOperations(client, execute),
   };
 }

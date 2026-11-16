@@ -19,7 +19,7 @@ const VIEW_BOX = "0 0 24 24";
 const PLUS_PATH = "M12 5v14M5 12h14";
 const MINUS_PATH = "M5 12h14";
 const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
-const NAV_STROKE_WIDTH = 2;
+export const NAV_STROKE_WIDTH = 2;
 const HEADER_STROKE_WIDTH = 2.2;
 
 export interface StrokeIconProps extends IconProps {
@@ -28,7 +28,7 @@ export interface StrokeIconProps extends IconProps {
   readonly children: ReactNode;
 }
 
-function StrokeIcon({ color, size, strokeWidth, children }: StrokeIconProps) {
+export function StrokeIcon({ color, size, strokeWidth, children }: StrokeIconProps) {
   const { colors } = useTheme();
   return (
     <Svg

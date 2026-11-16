@@ -24,6 +24,15 @@ export type MutationEvent =
   | { readonly type: "attendanceChanged"; readonly groupId: string; readonly roundId: string }
   /** A change of the settings was refused for lack of permission: the role is stale. */
   | { readonly type: "settingsForbidden"; readonly groupId: string }
+  /**
+   * The person saved the profile (screen 27): the answer replaces the cached one, and the members of the
+   * groups in the cache are read again, because the nickname shows there (E4.3, part 2).
+   */
+  | {
+      readonly type: "profileSaved";
+      readonly profile: unknown;
+      readonly cachedGroupIds: readonly string[];
+    }
   | {
       readonly type: "changeMemberRole" | "changeMemberType" | "removeMember";
       readonly groupId: string;
@@ -130,6 +139,11 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
       return [invalidate(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
     case "leaveGroup":
       return [remove(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
+    case "profileSaved":
+      return [
+        { action: "set", key: queryKeys.myProfile(), data: event.profile },
+        ...event.cachedGroupIds.map((groupId) => invalidate(queryKeys.members(groupId))),
+      ];
   }
 }
 

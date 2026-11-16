@@ -1,0 +1,20 @@
+/** Texts of the account (screen 30). Exporting and deleting arrive with E4.3, part 3. */
+export const accountStrings = {
+  title: "Conta",
+  entry: "Conta",
+  yourData: "Seus dados",
+  nickname: "Apelido",
+  setNickname: "Definir apelido",
+  nicknameLabel: (nickname: string) => `Apelido: ${nickname}. Alterar`,
+  email: "E-mail",
+  login: "Login",
+  providers: { google: "Google", apple: "Apple", password: "E-mail" },
+  googleMark: "G",
+  notificationsTitle: "Notificações",
+  notifications: "Notificações",
+  notificationsNote: "Lista, espera, times",
+  more: "Mais",
+  terms: "Termos de uso",
+  privacy: "Política de privacidade",
+  signOut: "Sair",
+} as const;

@@ -7,6 +7,10 @@ import { createFakeHttpTransport, jsonAnswer } from "../../adapters/fake-http-tr
 import { createHttpSacouApi } from "../../adapters/http-sacou-api";
 import { createMemoryInviteLinkStore } from "../../adapters/memory-invite-link-store";
 import { createMemoryKeyValueStore } from "../../adapters/memory-key-value-store";
+import {
+  createStoredOnboardingSkip,
+  ONBOARDING_SKIP_KEY,
+} from "../../adapters/stored-onboarding-skip";
 import { strings } from "../../strings/pt-BR";
 import type { SessionSnapshot } from "../auth/auth-session";
 import { signOutReasonText } from "../../features/auth/model/auth-failure-text";
@@ -44,6 +48,7 @@ function setup(initial: SessionSnapshot = SIGNED_IN) {
   const persister = createCachePersister(store, 0);
   const cacheSession = createCacheSession(client, persister);
   const inviteLinkStore = createMemoryInviteLinkStore();
+  const onboardingSkip = createStoredOnboardingSkip(store);
   const queries = {
     cancelQueries: async () => {
       order.push("cancelQueries");
@@ -58,9 +63,10 @@ function setup(initial: SessionSnapshot = SIGNED_IN) {
       },
     },
     inviteLinkStore,
+    onboardingSkip,
   };
   const ender = createSessionEnder({ authSession: auth, queries, stores });
-  return { auth, client, store, persister, inviteLinkStore, ender, order };
+  return { auth, client, store, persister, inviteLinkStore, onboardingSkip, ender, order };
 }
 
 function callsOf(auth: FakeAuthSession): string[] {
@@ -100,6 +106,17 @@ describe("endSession", () => {
     expect(await harness.inviteLinkStore.read(GROUP_A)).toBeNull();
     expect(harness.store.entries().has(CACHE_STORAGE_KEY)).toBe(false);
     expect(harness.client.getQueryCache().getAll()).toEqual([]);
+  });
+
+  test("the skip of the quick profile and the profile itself are forgotten", async () => {
+    const harness = setup();
+    await harness.onboardingSkip.markSkipped();
+    harness.client.setQueryData(queryKeys.myProfile(), { nickname: "Ana", suggestedLevel: 4 });
+    expect(harness.store.entries().get(ONBOARDING_SKIP_KEY)).toBe("1");
+    await harness.ender.end("signedOut");
+    expect(harness.store.entries().has(ONBOARDING_SKIP_KEY)).toBe(false);
+    expect(harness.onboardingSkip.snapshot()).toBe("notSkipped");
+    expect(harness.client.getQueryData(queryKeys.myProfile())).toBeUndefined();
   });
 
   test("a query in flight during the exit does not write the cache again", async () => {

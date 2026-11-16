@@ -7,6 +7,7 @@ import { loginColors } from "../../../theme/login-colors";
 import { useTheme } from "../../../theme/theme-context";
 import { Text } from "../../../ui/Text";
 import { useSignInScreen } from "../hooks/use-sign-in-screen";
+import { isBusy } from "../model/sign-in.reducer";
 import { CourtBackdrop } from "./CourtBackdrop";
 import { EmailSignInSheet } from "./EmailSignInSheet";
 import { LegalLine } from "./LegalLine";
@@ -23,7 +24,7 @@ export function SignInScreen() {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const { auth } = strings;
-  const busy = model.state.pending !== null || model.state.emailOpen;
+  const busy = isBusy(model.state);
   return (
     <View style={{ flex: 1, backgroundColor: loginColors.ground }}>
       <CourtBackdrop />

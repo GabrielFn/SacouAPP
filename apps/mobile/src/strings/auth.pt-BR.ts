@@ -53,5 +53,4 @@ export const authStrings = {
     resetSent: "Se houver uma conta com esse e-mail, mandamos um link.",
     backToSignIn: "Voltar para entrar",
   },
-  signOut: "Sair",
 } as const;

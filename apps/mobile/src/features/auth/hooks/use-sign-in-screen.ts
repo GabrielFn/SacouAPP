@@ -28,7 +28,9 @@ export function useSignInScreen(): SignInScreenModel {
   const { authSession, externalLink } = useServices();
   const session = useSession();
   const [state, dispatch] = useReducer(signInReducer, initialSignInState);
-  // Guards the native picker against a second tap before the screen draws the pending state.
+  // An allowed exception to rule 1 of frontend.md: `state.pending` says the same, but a dispatch is seen
+  // only on the next render, and a second tap in the same frame would open a second native picker. The
+  // ref is not shown nor derived from: it only closes that window, and the reducer stays the record.
   const inFlight = useRef(false);
 
   function signIn(provider: SignInProvider): void {
