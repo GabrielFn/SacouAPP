@@ -41,6 +41,12 @@
 | E2.12 | Feita | PRs #71 e #89 (M4, adiantada), ADR 0050, `docs/dominio/fila.md`. Parte 2 (porte para C#) retomada depois da sessão interrompida de 14/11; revisor Opus aprovou com oráculo próprio TS × C# (3000 de 3000), testador Sonnet passou (8 de 8 sabotagens pegas, 4186 testes .NET). Baixos em `pendencias.md`. |
 | E3.6 | Feita | PRs #85 e #91 (M4, adiantada), ADR 0055, `docs/dominio/sorteio.md`. Parte 2: revisão e segurança juntas (Opus) aprovaram com ressalvas; orçamento de passos por sorteio e `no-store` nos erros (middleware `UseNoStore`) corrigidos; verificador único aprovou; testador Sonnet passou (5 de 6 sabotagens pegas, a sobrevivente virou `PlacementBudgetTests`). Rate limiting: pergunta 66. |
 | E4.5 | Feita | PRs #74, #87, #90 e #96, ADR 0049. Parte 2 com correção por desenvolvedor novo e verificador único; Partes 3 e 4 aprovadas no ciclo 1. Testadores: Parte 2 com 4 de 6 sabotagens e 1 lacuna virada teste; Parte 3 com 6 de 6. Baixos em `pendencias.md`. |
+| E3.4 | Feita | PRs #58 e #60, ADR 0043 (rodadas, recorrência, presença e espera; módulo Sessions). Parte 2: ciclo 1 reprovado, correção com desenvolvedor novo. |
+| E3.5 | Feita | PR #82, ADR 0053 (convidado sem conta). |
+| E3.17 | Feita | PRs #73 e #80, ADR 0051 (perfil do jogador; nota do admin só para Admin e Co-admin). |
+| E4.6 | Feita | PRs #84, #94 e #100, ADR 0054 (rodadas no app: telas 20, 06, 26, 21, 21a e cards). |
+| E3.16 | Feita | PRs #93 e #101, ADR 0056 (exportar e excluir a conta, histórico como Ex-jogador). Corrida com o aceite de convite e a criação de grupo corrigida no #107 (D7a), achada pela CI em 16/11. |
+| E4.3 | Em andamento | Partes 1 e 2 feitas: PRs #98 (login) e #102 (perfil rápido e conta), ADR 0057. Parte 3 (telas 30a e 30b) em `task/E4.3-delete-export`. |
 
 ## Em andamento
 
