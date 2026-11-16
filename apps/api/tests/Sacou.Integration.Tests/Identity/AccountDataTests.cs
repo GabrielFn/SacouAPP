@@ -93,7 +93,7 @@ public sealed class AccountDataTests(IntegrationDatabase database) : IAsyncLifet
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         await ScenarioAsync(world);
-        Assert.Equal(AdminNoteValue, (await LevelCalls.ListAsync(world))[world.MemberIds[A.Player]]["level"]!.GetValue<double>());
+        Assert.Equal(AdminNoteValue, (await LevelCalls.ListAsync(world))[world.MemberIds[A.Player]]["adminLevel"]!.GetValue<double>());
 
         var (_, document) = await ExportAsync(world, A.Player);
 
@@ -138,7 +138,7 @@ public sealed class AccountDataTests(IntegrationDatabase database) : IAsyncLifet
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
         Assert.Equal("utf-8", response.Content.Headers.ContentType?.CharSet);
         Assert.Equal("attachment", response.Content.Headers.ContentDisposition?.DispositionType);
-        Assert.Equal($"\"sacou-meus-dados-{day}.json\"", response.Content.Headers.ContentDisposition?.FileName);
+        Assert.Equal($"sacou-meus-dados-{day}.json", response.Content.Headers.ContentDisposition?.FileName);
     }
 
     /// <summary>E6 and the matrix of B1: 401 without a token, 403 before <c>POST /v1/me</c>, never cached either.</summary>
