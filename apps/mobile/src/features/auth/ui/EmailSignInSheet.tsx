@@ -113,6 +113,7 @@ export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
       <Button
         variant="link"
         label={resetting ? emailSheet.backToSignIn : emailSheet.forgot}
+        disabled={state.submitting}
         onPress={() => {
           model.changeMode(resetting ? "signIn" : "reset");
         }}

@@ -24,7 +24,8 @@ export type SignInAction =
 
 export const initialSignInState: SignInState = { pending: null, failure: null, emailOpen: false };
 
-function isBusy(state: SignInState): boolean {
+/** A login is pending or the e-mail sheet is open: every other way in is off. */
+export function isBusy(state: SignInState): boolean {
   return state.pending !== null || state.emailOpen;
 }
 

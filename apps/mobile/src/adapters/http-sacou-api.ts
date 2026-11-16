@@ -155,7 +155,8 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
           : await idTokens.getIdToken({ forceRefresh: false }),
       );
     } catch {
-      // The SDK could not renew the token (no network): the session is not over (ADR 0057, D5).
+      // Only no network rejects (the SDK's other refusals give `null`, which ends the session below):
+      // the session is not over (ADR 0057, D5).
       return apiErr({ kind: "offline" });
     }
   }

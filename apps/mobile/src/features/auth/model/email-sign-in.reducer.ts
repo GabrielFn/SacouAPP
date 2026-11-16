@@ -21,8 +21,9 @@ export type EmailSignInAction =
   | { readonly type: "email-changed"; readonly text: string }
   | { readonly type: "password-changed"; readonly text: string }
   | { readonly type: "submitted" }
-  | { readonly type: "failed"; readonly failure: AuthFailure }
-  | { readonly type: "reset-sent" }
+  /** `mode`: the mode the request was sent in. An answer for another mode is ignored. */
+  | { readonly type: "failed"; readonly mode: EmailMode; readonly failure: AuthFailure }
+  | { readonly type: "reset-sent"; readonly mode: EmailMode }
   | { readonly type: "closed" };
 
 export const initialEmailSignInState: EmailSignInState = {
@@ -60,7 +61,10 @@ export function emailSignInReducer(
 ): EmailSignInState {
   switch (action.type) {
     case "mode-changed":
-      return { ...initialEmailSignInState, mode: action.mode, email: state.email };
+      // While a request is out the mode stays, so its answer lands where it was asked.
+      return state.submitting
+        ? state
+        : { ...initialEmailSignInState, mode: action.mode, email: state.email };
     case "email-changed":
       return { ...state, email: action.text, failure: null, resetSent: false };
     case "password-changed":
@@ -68,9 +72,9 @@ export function emailSignInReducer(
     case "submitted":
       return state.submitting ? state : { ...state, submitting: true, failure: null };
     case "failed":
-      return failed(state, action.failure);
+      return action.mode === state.mode ? failed(state, action.failure) : state;
     case "reset-sent":
-      return { ...state, submitting: false, resetSent: true };
+      return action.mode === state.mode ? { ...state, submitting: false, resetSent: true } : state;
     case "closed":
       return initialEmailSignInState;
   }

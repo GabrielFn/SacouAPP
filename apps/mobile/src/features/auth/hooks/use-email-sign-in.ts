@@ -42,8 +42,8 @@ export function useEmailSignIn(onClose: () => void): EmailSignInModel {
     const { mode } = state;
     dispatch({ type: "submitted" });
     void request().then((result) => {
-      if (!result.ok) dispatch({ type: "failed", failure: result.error });
-      else if (mode === "reset") dispatch({ type: "reset-sent" });
+      if (!result.ok) dispatch({ type: "failed", mode, failure: result.error });
+      else if (mode === "reset") dispatch({ type: "reset-sent", mode });
       // A login that worked swaps the screen through the session gate: nothing to do here.
     });
   }

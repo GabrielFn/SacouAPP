@@ -12,6 +12,9 @@ import type {
 import { firebaseFailureOf } from "./auth-failure-codes";
 import { createListeners } from "./listeners";
 
+/** The token could not be renewed for lack of network; it carries nothing of the SDK's message. */
+export class TokenRenewalOffline extends Error {}
+
 /** The Firebase user as this adapter reads it: no UID, which never leaves the SDK wrapper. */
 export interface FirebaseUserView {
   readonly providerIds: readonly string[];
@@ -115,8 +118,15 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
     async getIdToken({ forceRefresh }) {
       await firstState;
       const user = currentUser.value;
-      // A failed renewal rejects: the API client treats it as no network, not as a session over.
-      return user === null ? null : user.getIdToken(forceRefresh);
+      if (user === null) return null;
+      try {
+        return await user.getIdToken(forceRefresh);
+      } catch (error) {
+        // Only no network rejects, and the API client treats it as `offline`. Any other refusal of the
+        // SDK (token revoked, user disabled or deleted) is a session that is over: `null` ends it.
+        if (firebaseFailureOf(error) === "offline") throw new TokenRenewalOffline();
+        return null;
+      }
     },
     async signOut(reason) {
       pendingReason.value = reason;

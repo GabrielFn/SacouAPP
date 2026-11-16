@@ -4,8 +4,9 @@
  */
 export interface IdTokenProvider {
   /**
-   * `null` when nobody is signed in. `forceRefresh` asks Firebase for a new token (after a 401). It
-   * rejects when the token could not be renewed (no network): the call is then `offline`.
+   * `null` when nobody is signed in or the SDK refused the renewal (token revoked, user disabled): the
+   * session is then over. `forceRefresh` asks Firebase for a new token (after a 401). It rejects only when
+   * the token could not be renewed for lack of network: the call is then `offline`.
    */
   getIdToken(options: { readonly forceRefresh: boolean }): Promise<string | null>;
   /** The API refused even a fresh token: the session is over (the `SessionEnder` signs out and clears). */

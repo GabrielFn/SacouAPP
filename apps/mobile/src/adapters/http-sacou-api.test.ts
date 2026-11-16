@@ -487,6 +487,27 @@ describe("the token (P2, P3, H2)", () => {
     expect(http.requests()).toHaveLength(1);
   });
 
+  test("a renewal the SDK refuses (null, not a rejection) after a 401 ends the session", async () => {
+    const onSessionExpired = vi.fn();
+    const getIdToken = vi.fn((options: { readonly forceRefresh: boolean }) =>
+      Promise.resolve(options.forceRefresh ? null : "token"),
+    );
+    const http = createFakeHttpTransport();
+    const api = createHttpSacouApi({
+      baseUrl: BASE,
+      transport: http.transport,
+      idTokens: { getIdToken, onSessionExpired },
+      now: () => NOW,
+      timeoutMs: 20,
+    });
+    http.enqueue(problem(401));
+
+    expect(await api.listMyGroups()).toEqual({ ok: false, error: { kind: "session-expired" } });
+
+    expect(onSessionExpired).toHaveBeenCalledTimes(1);
+    expect(http.requests()).toHaveLength(1);
+  });
+
   test("a build without an API sends nothing", async () => {
     const { api, http } = setup({ baseUrl: null });
 

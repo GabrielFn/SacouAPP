@@ -5,6 +5,7 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
+import { wordsOf } from "../model/legal-words";
 
 export interface LegalLineProps {
   readonly links: LegalLinks;
@@ -38,11 +39,24 @@ function LegalWord({ label, url, onOpen }: LegalWordProps) {
   );
 }
 
+export interface PlainWordsProps {
+  readonly text: string;
+}
+
+/** A plain part of the sentence, a piece per word, so the line breaks between words. */
+function PlainWords({ text }: PlainWordsProps) {
+  const { tokens } = useTheme();
+  const plain = { fontSize: tokens.fontSizes.legal };
+  return wordsOf(text).map((word, index) => (
+    <Text key={`${String(index)}-${word}`} variant="muted" style={plain}>
+      {word}
+    </Text>
+  ));
+}
+
 /** "Ao entrar você aceita os Termos e a Política de Privacidade.", each document a 44 target. */
 export function LegalLine({ links, onOpen }: LegalLineProps) {
-  const { tokens } = useTheme();
   const { legal } = strings.auth;
-  const plain = { fontSize: tokens.fontSizes.legal };
   return (
     <View
       style={{
@@ -52,17 +66,11 @@ export function LegalLine({ links, onOpen }: LegalLineProps) {
         alignItems: "center",
       }}
     >
-      <Text variant="muted" style={plain}>
-        {legal.before}
-      </Text>
+      <PlainWords text={legal.before} />
       <LegalWord label={legal.terms} url={links.terms} onOpen={onOpen} />
-      <Text variant="muted" style={plain}>
-        {legal.between}
-      </Text>
+      <PlainWords text={legal.between} />
       <LegalWord label={legal.privacy} url={links.privacy} onOpen={onOpen} />
-      <Text variant="muted" style={plain}>
-        {legal.after}
-      </Text>
+      <PlainWords text={legal.after} />
     </View>
   );
 }
