@@ -8,6 +8,7 @@ using Sacou.Modules.Sessions.AccountData;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.CancelRound;
 using Sacou.Modules.Sessions.CreateRound;
+using Sacou.Modules.Sessions.DrawTeams;
 using Sacou.Modules.Sessions.GetRound;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Modules.Sessions.ListRounds;
@@ -40,6 +41,8 @@ public static class SessionsModule
         // The person's own attendances, for the export of the Identity (E3.16, ADR 0056, D6).
         services.AddScoped<IAccountAttendanceReader, PostgresAccountAttendanceReader>();
         services.AddScoped<IAccountExportSection, SessionsExportSection>();
+        services.AddSingleton<IDrawSeeds, RandomDrawSeeds>();
+        services.AddScoped<DrawTeamsHandler>();
         return services;
     }
 
@@ -57,7 +60,8 @@ public static class SessionsModule
             .MapCancelRound()
             .MapRespondAttendance()
             .MapSetMemberAttendance()
-            .MapStopSeries();
+            .MapStopSeries()
+            .MapDrawTeams();
         return endpoints;
     }
 

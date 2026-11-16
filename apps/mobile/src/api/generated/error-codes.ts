@@ -29,6 +29,7 @@ export const apiErrorCodes = [
   "identity.subject-invalid",
   "identity.user-not-registered",
   "sessions.attendance-disabled",
+  "sessions.draw-disabled",
   "sessions.draw-lock-invalid",
   "sessions.draw-lock-too-large",
   "sessions.draw-locks-conflict",

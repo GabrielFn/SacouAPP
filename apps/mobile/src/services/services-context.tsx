@@ -9,9 +9,13 @@ import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
 import type { ScreenOrientation } from "../features/court/ports/screen-orientation";
+import type { InviteLinkStore } from "../features/groups/ports/invite-link-store";
 import type { NetworkStatus } from "./api/network-status";
 import type { SacouApi } from "./api/sacou-api";
+import type { Clipboard } from "./clipboard/clipboard";
 import type { FontLoader } from "./font-loader";
+import type { ExternalLink } from "./links/external-link";
+import type { QrEncoder } from "./qr/qr-encoder";
 import type { ShareSheet } from "./share/share-sheet";
 
 import type { CacheSession } from "./query/cache-persister";
@@ -38,6 +42,15 @@ export interface Services {
   readonly networkStatus: NetworkStatus;
   /** The system share sheet, for the round message (E4.6). */
   readonly shareSheet: ShareSheet;
+  /** Only "Copiar" of the invite writes here (ADR 0049, D7). */
+  readonly clipboard: Clipboard;
+  /** Opens WhatsApp with the invite; on a phone without it, the share sheet takes over. */
+  readonly externalLink: ExternalLink;
+  readonly qrEncoder: QrEncoder;
+  /** The only place of an invite token on the phone (ADR 0049, D7). */
+  readonly inviteLinkStore: InviteLinkStore;
+  /** The origin of the invite links, or `null` until there is a domain: the invite buttons hide. */
+  readonly inviteBaseUrl: string | null;
   /** Sign-out clears the server cache, in memory and in `sacou-cache.db` (E4.3 calls it). */
   readonly cacheSession: CacheSession;
 }

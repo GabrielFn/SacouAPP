@@ -1,0 +1,26 @@
+/** Texts of the invite screen (19d). */
+export const inviteStrings = {
+  title: "Convidar",
+  header: (groupName: string) => `${groupName} · membros`,
+  intro:
+    "Quem abrir o link ou ler o QR entra no grupo como jogador. Você muda o papel depois, em Membros.",
+  qrLabel: (groupName: string) => `QR do convite do ${groupName}`,
+  showOnCourt: "Mostre na quadra para quem chegou.",
+  linkLabel: (shown: string) => `Link do convite: ${shown}`,
+  copy: "Copiar",
+  copyLabel: "Copiar o link do convite",
+  copied: "Link copiado",
+  whatsapp: "Mandar no WhatsApp",
+  message: (groupName: string, link: string) => `Entra no ${groupName} no Sacou: ${link}`,
+  regenerate: "Desativar este link e gerar outro",
+  regenerateConfirmTitle: "Desativar este link?",
+  regenerateConfirmBody: "Quem tiver o link antigo não entra mais por ele. O novo aparece aqui.",
+  regenerateConfirm: "Desativar e gerar outro",
+  cancel: "Cancelar",
+  validity: "O link vale até você desativar.",
+  loading: "Gerando o link do convite",
+  loadError: "Não deu para gerar o link",
+  retry: "Tentar de novo",
+  unavailableTitle: "O link de convite ainda não está disponível.",
+  unavailableBody: "Ele aparece aqui assim que o endereço do Sacou estiver pronto.",
+} as const;

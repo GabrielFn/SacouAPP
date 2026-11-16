@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Sacou.Http;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Shared.Results;
@@ -19,11 +18,10 @@ internal static class GetDeletionBlockersEndpoint
     public const string Route = "/v1/me/deletion-blockers";
     public const string Name = "GetDeletionBlockers";
 
-    private const string NoStore = "no-store";
 
     public static IEndpointRouteBuilder MapGetDeletionBlockers(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireAuthorization()
+        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireAuthorization().WithNoStore()
             .ProducesProblem(StatusCodes.Status403Forbidden);
         return endpoints;
     }
@@ -31,7 +29,6 @@ internal static class GetDeletionBlockersEndpoint
     private static async Task<Results<Ok<DeletionBlockersResponse>, ProblemHttpResult>> HandleAsync(
         HttpContext context, GetDeletionBlockersHandler handler, CancellationToken cancellationToken)
     {
-        context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var found = await handler.HandleAsync(cancellationToken).ConfigureAwait(false);
         return found.ToHttpResult(TypedResults.Ok);
     }

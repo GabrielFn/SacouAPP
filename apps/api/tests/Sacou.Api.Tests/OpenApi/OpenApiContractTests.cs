@@ -49,6 +49,7 @@ public sealed class OpenApiContractTests
         "post /v1/groups/{groupId}/rounds/{roundId}/cancel CancelRound",
         "put /v1/groups/{groupId}/rounds/{roundId}/attendance/me RespondAttendance",
         "put /v1/groups/{groupId}/rounds/{roundId}/attendance/{memberId} SetMemberAttendance",
+        "post /v1/groups/{groupId}/rounds/{roundId}/draw DrawTeams",
         "post /v1/groups/{groupId}/series/{seriesId}/stop StopSeries",
     ];
 

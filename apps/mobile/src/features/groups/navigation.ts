@@ -6,7 +6,7 @@ import { isFromScratch, serializeCustomBlocks, type GroupOrigin } from "./model/
 export type PendingGroupScreen = "createGroup" | "members" | "settings";
 
 /** Screens of the groups area that are not built yet; each owner task removes its own item (E4.4, D1). */
-export const PENDING_GROUP_SCREENS: readonly PendingGroupScreen[] = ["members"];
+export const PENDING_GROUP_SCREENS: readonly PendingGroupScreen[] = [];
 
 export const homeHref: Href = "/";
 export const groupsHref: Href = "/groups";
@@ -28,6 +28,15 @@ export function createGroupDetailsHref(origin: GroupOrigin): Href {
 
 export function groupSettingsHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/settings", params: { groupId } };
+}
+
+export function groupMembersHref(groupId: string): Href {
+  return { pathname: "/groups/[groupId]/members", params: { groupId } };
+}
+
+/** Screen 19d. Only the group travels on the route: never the token (ADR 0049, D7). */
+export function groupInviteHref(groupId: string): Href {
+  return { pathname: "/groups/[groupId]/invite", params: { groupId } };
 }
 
 export function queueRuleHref(groupId: string): Href {

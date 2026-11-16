@@ -57,6 +57,9 @@ internal readonly record struct DrawScore(long GapNumerator, long GapDenominator
 
     public bool IsBetterThan(DrawScore other) => CompareTo(other) < 0;
 
+    /// <summary>The sums come from private levels: never printed.</summary>
+    public override string ToString() => nameof(DrawScore);
+
     private static bool AverageIsBelow(IReadOnlyList<int> sums, IReadOnlyList<int> sizes, int team, int other) =>
         (long)sums[team] * sizes[other] < (long)sums[other] * sizes[team];
 }

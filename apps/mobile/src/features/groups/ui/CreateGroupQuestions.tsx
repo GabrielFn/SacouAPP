@@ -1,3 +1,4 @@
+import { defaultGroupSettings } from "@sacou/match-engine";
 import { View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
@@ -10,9 +11,13 @@ import { QuestionSection } from "./QuestionSection";
 import { ScheduleField } from "./ScheduleField";
 
 const { step2 } = strings.createGroup;
+const DEFAULT_SCHEDULE = defaultGroupSettings().schedule;
 
-/** What the sheet of day and time opens with when nothing was chosen: Tuesday at 20:00, the catalog default. */
-export const SHEET_START = { weekday: 2, time: "20:00" } as const;
+/** What the sheet of day and time opens with when nothing was chosen: the catalog default (Tuesday at 20:00). */
+export const SHEET_START = {
+  weekday: DEFAULT_SCHEDULE.weekday,
+  time: DEFAULT_SCHEDULE.startTime,
+} as const;
 /** The three fields of "Quando e onde?" share the row as in the canvas (1.25 : 1.25 : 0.6). */
 const SCHEDULE_FLEX = 1.25;
 const CAPACITY_FLEX = 0.6;

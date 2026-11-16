@@ -39,6 +39,12 @@ describe("contrast of the groups screens", () => {
     ["admin badge", palette.sand, palette.night],
     ["offline strip", palette.night, palette.waitingFill],
     ["muted text on the card", palette.textSecondary, palette.white],
+    ["Placar badge", palette.infoText, palette.infoFill],
+    ["danger text on the sand", palette.danger, palette.sand],
+    ["danger text on the card", palette.danger, palette.white],
+    ["white on the danger button", palette.white, palette.danger],
+    ["Sem conta badge", palette.night, palette.waitingFill],
+    ["QR modules on white", palette.night, palette.white],
   ])("%s reaches AA", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);
   });
@@ -50,7 +56,13 @@ describe("contrast of the groups screens", () => {
 describe("scale of the groups screens", () => {
   it.each(WIDTHS)("keeps the touch floors at width %s", (windowWidth) => {
     const { sizes, borderWidths } = createScaledTokens({ windowWidth, fontScale: 1 });
-    for (const target of [sizes.tabItem, sizes.cardFooter, sizes.iconButton]) {
+    for (const target of [
+      sizes.tabItem,
+      sizes.cardFooter,
+      sizes.iconButton,
+      sizes.moreButtonWidth,
+      sizes.moreButtonHeight,
+    ]) {
       expect(target).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
     }
     expect(borderWidths.thin).toBeGreaterThanOrEqual(accessibilityFloors.hairline);

@@ -21,13 +21,12 @@ internal static class ExportMyDataEndpoint
     public const string FileNamePrefix = "sacou-meus-dados-";
     public const string FileNameExtension = ".json";
 
-    private const string NoStore = "no-store";
     private const string Attachment = "attachment";
     private const string DayFormat = "yyyy-MM-dd";
 
     public static IEndpointRouteBuilder MapExportMyData(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireAuthorization()
+        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireAuthorization().WithNoStore()
             .ProducesProblem(StatusCodes.Status403Forbidden);
         return endpoints;
     }
@@ -39,7 +38,6 @@ internal static class ExportMyDataEndpoint
     private static async Task<Results<Ok<JsonObject>, ProblemHttpResult>> HandleAsync(
         HttpContext context, ExportMyDataHandler handler, CancellationToken cancellationToken)
     {
-        context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var export = await handler.HandleAsync(cancellationToken).ConfigureAwait(false);
         if (export.IsSuccess)
         {

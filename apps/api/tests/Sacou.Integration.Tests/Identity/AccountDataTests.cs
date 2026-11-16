@@ -156,6 +156,7 @@ public sealed class AccountDataTests(IntegrationDatabase database) : IAsyncLifet
 
         Assert.Equal((HttpStatusCode)status, response.StatusCode);
         Assert.Equal(code, await RoundCalls.CodeAsync(response));
+        Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         Assert.Null(response.Content.Headers.ContentDisposition);
     }
 

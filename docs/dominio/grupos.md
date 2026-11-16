@@ -44,6 +44,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `RespondAttendance` (responder "vou" ou "não vou" por si; E3.4) | sim | sim | sim | sim |
 | `ManageMemberLevels` (ver e dar a nota de cada membro e ver a sugestão dele; E3.17, [perfil-e-nota.md](perfil-e-nota.md)) | sim | sim | não | não |
 | `ManageGuests` (adicionar e corrigir convidado sem conta; E3.5) | sim | sim | não | não |
+| `DrawTeams` (sortear os times da rodada, vendo as notas; E3.6, [sorteio.md](sorteio.md)) | sim | sim | não | não |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
 
