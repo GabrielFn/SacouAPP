@@ -7,6 +7,10 @@ import { AccountScreen } from "./AccountScreen";
 
 const ender = vi.hoisted(() => ({ end: vi.fn(() => Promise.resolve()) }));
 
+vi.mock("react", async (original) => ({
+  ...(await original<typeof import("react")>()),
+  useState: (initial: unknown) => [initial, vi.fn()],
+}));
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("react-native", () => ({ View: "View" }));
 vi.mock("../../../services/services-context", () => ({
@@ -19,7 +23,10 @@ vi.mock("../../../ui/MenuIcons", () => ({
   DocumentIcon: () => null,
   ShieldIcon: () => null,
   SignOutIcon: () => null,
+  DownloadIcon: () => null,
 }));
+vi.mock("./DeleteAccountCard", () => ({ DeleteAccountCard: () => null }));
+vi.mock("./ExportDataSheet", () => ({ ExportDataSheet: () => null }));
 vi.mock("../../../ui/Screen", () => ({ Screen: () => null }));
 vi.mock("../../../ui/Text", () => ({ Text: () => null }));
 vi.mock("./AccountRow", () => ({ AccountCard: () => null, AccountRow: () => null }));

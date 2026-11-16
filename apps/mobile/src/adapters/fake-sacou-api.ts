@@ -55,6 +55,9 @@ function defaults(): Answers {
     setMemberAttendance: none,
     getMyProfile: none,
     saveMyProfile: none,
+    exportMyData: none,
+    getDeletionBlockers: none,
+    deleteMyAccount: none,
     addGuest: none,
   };
 }
@@ -108,6 +111,9 @@ export function createFakeSacouApi(): FakeSacouApi {
     setMemberAttendance: (member, response) => answer("setMemberAttendance", [member, response]),
     getMyProfile: () => answer("getMyProfile", []),
     saveMyProfile: (body) => answer("saveMyProfile", [body]),
+    exportMyData: () => answer("exportMyData", []),
+    getDeletionBlockers: () => answer("getDeletionBlockers", []),
+    deleteMyAccount: () => answer("deleteMyAccount", []),
     addGuest: (groupId, body) => answer("addGuest", [groupId, body]),
   };
 

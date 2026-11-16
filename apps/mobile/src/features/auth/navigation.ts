@@ -9,6 +9,7 @@ export const SIGNED_IN_ROUTES = [
   "notifications",
   "account/index",
   "account/profile",
+  "account/delete",
   "court/[courtSessionId]",
   "dev/catalog",
   "dev/court",

@@ -6,6 +6,8 @@ export const queryKeys = {
   me: () => ["me"] as const,
   /** The person's own profile, with the level they suggest: outside the persisted allow list. */
   myProfile: () => ["me", "profile"] as const,
+  /** What keeps the account from being deleted (screen 30b): outside the persisted allow list. */
+  deletionBlockers: () => ["me", "deletion-blockers"] as const,
   groups: () => ["groups"] as const,
   group: (groupId: string) => ["groups", groupId] as const,
   members: (groupId: string) => ["groups", groupId, "members"] as const,

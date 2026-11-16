@@ -20,6 +20,7 @@ import type { FontLoader } from "./font-loader";
 import type { IdGenerator } from "./id/id-generator";
 import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
+import type { FileShare } from "./share/file-share";
 import type { ShareSheet } from "./share/share-sheet";
 
 import type { CacheSession } from "./query/cache-persister";
@@ -47,6 +48,8 @@ export interface Services {
   readonly networkStatus: NetworkStatus;
   /** The system share sheet, for the round message (E4.6). */
   readonly shareSheet: ShareSheet;
+  /** The export of screen 30a: a temporary file handed to the share sheet, then deleted (E4.3, D9). */
+  readonly fileShare: FileShare;
   /** Only "Copiar" of the invite and "Copiar lista" of the round write here (ADR 0049, D7; ADR 0054). */
   readonly clipboard: Clipboard;
   /** Opens WhatsApp with the invite; on a phone without it, the share sheet takes over. */

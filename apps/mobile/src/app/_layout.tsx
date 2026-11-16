@@ -13,6 +13,7 @@ import { performanceClock } from "../adapters/performance-clock";
 import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
 import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
+import { expoFileShare } from "../adapters/expo-file-share";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
@@ -38,6 +39,7 @@ import {
   SIGNED_IN_ROUTES,
   SIGNED_OUT_ROUTES,
 } from "../features/auth/navigation";
+import { removeExportLeftovers } from "../features/account/model/export-data";
 import { useOnboardingGate } from "../features/profile/hooks/use-profile";
 import { useSession } from "../services/auth/use-session";
 import { createSessionEnder, sessionIdTokens } from "../services/session/end-session";
@@ -69,6 +71,7 @@ const sessionEnder = createSessionEnder({
   stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore, onboardingSkip },
 });
 bindAppStateFocus();
+void removeExportLeftovers(expoFileShare);
 
 const realServices: Services = {
   fontLoader: expoFontLoader,
@@ -90,6 +93,7 @@ const realServices: Services = {
   }),
   networkStatus,
   shareSheet: reactNativeShareSheet,
+  fileShare: expoFileShare,
   clipboard: expoClipboard,
   idGenerator: expoCryptoIdGenerator,
   externalLink: reactNativeExternalLink,

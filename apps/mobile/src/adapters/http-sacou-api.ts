@@ -6,11 +6,13 @@ import { isApiUrl } from "../services/api/api-config";
 import {
   classifyFailure,
   finalError,
+  isAccountDeleted,
   isJson,
   isSuccess,
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createAccountOperations } from "./http-account-operations";
 import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
@@ -163,6 +165,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   }
 
   async function run<T>(call: Call<T>, state: AttemptState): Promise<ApiResult<T>> {
+    const session = idTokens.currentSession();
     const tokenResult = await tokenFor(state);
     if (!tokenResult.ok) return tokenResult;
     const token = tokenResult.value;
@@ -174,7 +177,9 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
         return run(call, { ...state, renewedToken: true });
       case "sign-in": {
         const signed = await attempt(signInCall, token);
-        return signed.ok ? run(call, { ...state, signedIn: true }) : giveUp(signed.error);
+        if (signed.ok) return run(call, { ...state, signedIn: true });
+        if (isAccountDeleted(signed.error) && session !== null) idTokens.onAccountDeleted(session);
+        return giveUp(signed.error);
       }
       case "give-up":
         return giveUp(result.error);
@@ -290,5 +295,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
     ...createProfileOperations(client, execute),
+    ...createAccountOperations(client, execute),
   };
 }

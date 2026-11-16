@@ -25,5 +25,8 @@ export function createGoogleAccountPicker(webClientId: string): GoogleAccountPic
     async forget() {
       await GoogleSignin.signOut();
     },
+    async revoke() {
+      await GoogleSignin.revokeAccess();
+    },
   };
 }

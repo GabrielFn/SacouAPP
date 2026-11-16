@@ -63,7 +63,11 @@ function isMemberEvent(event: MutationEvent): event is MemberEvent {
 
 function memberEffects(event: MemberEvent): readonly CacheEffect[] {
   const members = invalidate(queryKeys.members(event.groupId));
-  return event.targetIsMe ? [members, invalidate(queryKeys.groups())] : [members];
+  // A new admin, or one member less, may free the deletion of screen 30b (it is open under screen 19).
+  const blockers = invalidate(queryKeys.deletionBlockers());
+  return event.targetIsMe
+    ? [members, invalidate(queryKeys.groups()), blockers]
+    : [members, blockers];
 }
 
 type RoundEvent = Extract<

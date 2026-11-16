@@ -1,7 +1,7 @@
 import { err, ok, type Result } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
-import type { AuthFailure } from "../services/auth/auth-session";
+import type { AuthFailure, SessionIdentity } from "../services/auth/auth-session";
 import { firebaseFailureOf, googleFailureOf, type GoogleStatusCodes } from "./auth-failure-codes";
 import {
   createFirebaseAuthSession,
@@ -22,16 +22,23 @@ function sdkError(code: string): Error {
 interface FakeSdk extends FirebaseAuthSdk {
   change(user: FirebaseUserView | null): void;
   failNext(code: string): void;
+  /** The SDK's own current user moves to `identity`, before its listener runs. */
+  moveSilently(identity: SessionIdentity): void;
   readonly log: string[];
 }
+
+const ACCOUNT_A: SessionIdentity = Object.freeze({ opaque: Symbol("a") });
+const ACCOUNT_B: SessionIdentity = Object.freeze({ opaque: Symbol("b") });
 
 function userView(
   providerIds: readonly string[],
   forced: boolean[] = [],
   tokenFailure: string | null = null,
+  identity: SessionIdentity = ACCOUNT_A,
 ): FirebaseUserView {
   return {
     providerIds,
+    identity,
     email: "ana@example.com",
     displayName: "Ana Souza",
     getIdToken: (forceRefresh) => {
@@ -47,6 +54,7 @@ function fakeSdk(): FakeSdk {
   const listeners: ((user: FirebaseUserView | null) => void)[] = [];
   const failure: { current: string | null } = { current: null };
   const log: string[] = [];
+  const sdkUser: { identity: SessionIdentity | null } = { identity: null };
   const run = (name: string) => {
     log.push(name);
     const code = failure.current;
@@ -60,6 +68,7 @@ function fakeSdk(): FakeSdk {
       return () => undefined;
     },
     change(user) {
+      sdkUser.identity = user?.identity ?? null;
       listeners.forEach((listener) => {
         listener(user);
       });
@@ -67,25 +76,41 @@ function fakeSdk(): FakeSdk {
     failNext(code) {
       failure.current = code;
     },
+    moveSilently(identity) {
+      sdkUser.identity = identity;
+    },
     signInWithGoogleIdToken: (idToken) => run(`google:${idToken === GOOGLE_TOKEN ? "ok" : "?"}`),
     signInWithEmail: () => run("email"),
     createAccountWithEmail: () => run("create"),
     sendPasswordReset: () => run("reset"),
     signOut: () => run("signOut"),
+    reauthenticateWithGoogleIdToken: (idToken) =>
+      run(`reauth-google:${idToken === GOOGLE_TOKEN ? "ok" : "?"}`),
+    reauthenticateWithPassword: (password) => run(`reauth-password:${password}`),
+    deleteCurrentUser: (identity) =>
+      sdkUser.identity === identity
+        ? run("delete").then(() => "deleted" as const)
+        : Promise.resolve("other-account" as const),
   };
 }
 
 function picker(result: Result<string, AuthFailure> = ok(GOOGLE_TOKEN)): GoogleAccountPicker & {
   readonly forgotten: () => number;
+  readonly revoked: () => number;
 } {
-  const count = { value: 0 };
+  const count = { value: 0, revoked: 0 };
   return {
     pick: () => Promise.resolve(result),
     forget: () => {
       count.value += 1;
       return Promise.resolve();
     },
+    revoke: () => {
+      count.revoked += 1;
+      return Promise.resolve();
+    },
     forgotten: () => count.value,
+    revoked: () => count.revoked,
   };
 }
 
@@ -255,5 +280,89 @@ describe("translation of the SDK codes", () => {
     ["10", "unexpected"],
   ])("Google %s is %s", (code, failure) => {
     expect(googleFailureOf(sdkError(code), codes)).toBe(failure);
+  });
+});
+
+describe("reauthentication and deletion (E4.3, part 3)", () => {
+  test("Google picks the account again and reauthenticates; a new ID token is asked for", async () => {
+    const sdk = fakeSdk();
+    const forced: boolean[] = [];
+    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    sdk.change(userView(["google.com"], forced));
+    expect(await session.reauthenticate({ provider: "google" })).toEqual(ok(null));
+    expect(sdk.log).toEqual(["reauth-google:ok"]);
+    expect(forced).toEqual([true]);
+  });
+
+  test("a cancelled picker or a wrong password fails without the SDK's message", async () => {
+    const sdk = fakeSdk();
+    const cancelled = createFirebaseAuthSession({ sdk, google: picker(err("cancelled")) });
+    sdk.change(userView(["password"]));
+    expect(await cancelled.reauthenticate({ provider: "google" })).toEqual(err("cancelled"));
+    sdk.failNext("auth/wrong-password");
+    const refused = await cancelled.reauthenticate({ provider: "password", password: "123456" });
+    expect(refused).toEqual(err("invalid-credentials"));
+    expect(JSON.stringify(refused)).not.toContain(PLANTED_EMAIL);
+    expect(sdk.log).toEqual(["reauth-password:123456"]);
+  });
+
+  test("Apple, or Google without a client ID, is unavailable", async () => {
+    const session = createFirebaseAuthSession({ sdk: fakeSdk(), google: null });
+    expect(await session.reauthenticate({ provider: "google" })).toEqual(
+      err("provider-unavailable"),
+    );
+    expect(await session.reauthenticate({ provider: "apple" })).toEqual(
+      err("provider-unavailable"),
+    );
+  });
+
+  test("deleteAccount deletes the user, revokes Google and ends as deleted", async () => {
+    const sdk = fakeSdk();
+    const google = picker();
+    const session = createFirebaseAuthSession({ sdk, google });
+    sdk.change(userView(["google.com"]));
+    await session.deleteAccount(ACCOUNT_A);
+    sdk.change(null);
+    expect(sdk.log).toEqual(["delete"]);
+    expect(google.revoked()).toBe(1);
+    expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });
+  });
+
+  test("the session names its account; a deletion for another account touches nothing", async () => {
+    const sdk = fakeSdk();
+    const google = picker();
+    const session = createFirebaseAuthSession({ sdk, google });
+    expect(session.currentSession()).toBeNull();
+    sdk.change(userView(["google.com"], [], null, ACCOUNT_B));
+    expect(session.currentSession()).toBe(ACCOUNT_B);
+    await session.deleteAccount(ACCOUNT_A);
+    expect(sdk.log).toEqual([]);
+    expect(google.revoked()).toBe(0);
+    expect(session.snapshot().status).toBe("signedIn");
+  });
+
+  test("the SDK already on another account, before its listener: nothing is touched", async () => {
+    const sdk = fakeSdk();
+    const google = picker();
+    const session = createFirebaseAuthSession({ sdk, google });
+    sdk.change(userView(["google.com"]));
+    sdk.moveSilently(ACCOUNT_B);
+    await session.deleteAccount(ACCOUNT_A);
+    sdk.change(userView(["google.com"], [], null, ACCOUNT_B));
+    sdk.change(null);
+    expect(sdk.log).toEqual([]);
+    expect(google.revoked()).toBe(0);
+    expect(session.snapshot()).toEqual({ status: "signedOut", reason: "expired" });
+  });
+
+  test("a refused delete signs out anyway, still as deleted", async () => {
+    const sdk = fakeSdk();
+    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    sdk.change(userView(["password"]));
+    sdk.failNext("auth/requires-recent-login");
+    await session.deleteAccount(ACCOUNT_A);
+    sdk.change(null);
+    expect(sdk.log).toEqual(["delete", "signOut"]);
+    expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });
   });
 });

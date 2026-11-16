@@ -13,6 +13,14 @@ export interface AccountView {
   readonly displayName: string | null;
 }
 
+/**
+ * Which account a session belongs to, without the UID (ADR 0057, D2): the same object for the same
+ * account, compared by reference. It ties a late answer of the API (a 410) to the account that sent it.
+ */
+export interface SessionIdentity {
+  readonly opaque: symbol;
+}
+
 /** Why the session ended, shown once on the login screen. `null`: it was never open on this phone. */
 export type SignOutReason = "signedOut" | "expired" | "deleted";
 
@@ -38,6 +46,14 @@ export type AuthFailure =
 export type AuthResult = Result<null, AuthFailure>;
 
 /**
+ * The login asked again before deleting the account, by the provider of the session (ADR 0056, D4):
+ * Google opens the picker again; an e-mail account gives its password on the screen 30b.
+ */
+export type Reauthentication =
+  | { readonly provider: "google" | "apple" }
+  | { readonly provider: "password"; readonly password: string };
+
+/**
  * The session of the person on this phone. Its state lives only in the SDK, which keeps the tokens in
  * the private area of the app (ADR 0057, D5): the app reads it here and never copies it.
  */
@@ -54,10 +70,21 @@ export interface AuthSession {
   createAccountWithEmail(email: string, password: string): Promise<AuthResult>;
   /** Asks the provider for the reset e-mail. The screen answers the same text either way (D7). */
   sendPasswordReset(email: string): Promise<AuthResult>;
+  /** The account signed in now; `null` when nobody is (or the SDK has not answered yet). */
+  currentSession(): SessionIdentity | null;
   /** `null` when nobody is signed in; `forceRefresh` asks the SDK for a new token. */
   getIdToken(options: { readonly forceRefresh: boolean }): Promise<string | null>;
   /** Ends the session in the SDK: from here on `getIdToken` gives `null`. */
   signOut(reason: SignOutReason): Promise<void>;
   /** Forgets the account chosen in the Google picker, so the next login asks again (account switch). */
   forgetProviderAccount(): Promise<void>;
+  /** A fresh login of the same account, for the API's `identity.recent-login-required`. */
+  reauthenticate(proof: Reauthentication): Promise<AuthResult>;
+  /**
+   * After the API deleted the account (204, or 410 on a later login): deletes the user in Firebase, revokes
+   * the Google grant and ends the session as `deleted`. If the SDK refuses, it signs out anyway, and the
+   * 410 of the next login tries again (ADR 0056, question 63). Only for the account of `session`: if
+   * another account is signed in now (a late 410 after an account switch), it does nothing.
+   */
+  deleteAccount(session: SessionIdentity): Promise<void>;
 }
