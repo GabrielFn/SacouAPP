@@ -111,7 +111,10 @@ export function nextRoundText(round: RoundSummary): string {
 /** A stable index in a palette of `size` colors, from the `groupId`: the same group keeps its color. */
 export function swatchIndexOf(groupId: string, size: number): number {
   if (size === 0) return 0;
-  const sum = [...groupId].reduce((total, char) => total + (char.codePointAt(0) ?? 0), 0);
+  // A UUID is ASCII: its code units are its characters.
+  const sum = Array.from({ length: groupId.length }, (_, index) =>
+    groupId.charCodeAt(index),
+  ).reduce((total, code) => total + code, 0);
   return sum % size;
 }
 

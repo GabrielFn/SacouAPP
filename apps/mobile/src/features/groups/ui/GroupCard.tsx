@@ -30,7 +30,7 @@ function actionLabel(action: GroupCardAction): string {
   }
 }
 
-interface CardMainProps {
+export interface CardMainProps {
   readonly model: GroupCardModel;
   readonly round: RoundCardModel | null;
 }

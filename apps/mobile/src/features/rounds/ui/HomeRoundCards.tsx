@@ -19,7 +19,7 @@ export interface HomeRoundCardsProps {
   readonly onOpenRound: (groupId: string, roundId: string) => void;
 }
 
-interface HomeRoundCardProps {
+export interface HomeRoundCardProps {
   readonly groupName: string;
   readonly round: RoundCardModel;
   readonly onOpenRound: (groupId: string, roundId: string) => void;
