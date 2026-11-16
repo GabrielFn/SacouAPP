@@ -17,7 +17,9 @@ export const SIGNED_IN_ROUTES = [
   "groups/[groupId]/invite",
   "groups/[groupId]/members",
   "groups/[groupId]/queue-rule",
+  "groups/[groupId]/ratings",
   "groups/[groupId]/settings",
   "groups/[groupId]/rounds/new",
   "groups/[groupId]/rounds/[roundId]/index",
+  "groups/[groupId]/rounds/[roundId]/add",
 ] as const;
