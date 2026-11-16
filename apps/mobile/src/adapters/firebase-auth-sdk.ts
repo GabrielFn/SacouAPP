@@ -76,8 +76,12 @@ export function createFirebaseAuthSdk(): FirebaseAuthSdk {
       if (user.email === null) throw NO_USER;
       await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
     },
-    deleteCurrentUser: async () => {
-      await deleteUser(current());
+    async deleteCurrentUser(identity) {
+      const user = current();
+      // Compared again on the SDK's own user: the session's copy changes only when the listener runs.
+      if (identityOf(user.uid) !== identity) return "other-account";
+      await deleteUser(user);
+      return "deleted";
     },
   };
 }

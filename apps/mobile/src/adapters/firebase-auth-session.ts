@@ -27,6 +27,8 @@ export interface FirebaseUserView {
   getIdToken(forceRefresh: boolean): Promise<string>;
 }
 
+export type DeleteCurrentUserOutcome = "deleted" | "other-account";
+
 /** The few calls of `@react-native-firebase/auth` the session needs (firebase-auth-sdk.ts). */
 export interface FirebaseAuthSdk {
   onAuthStateChanged(listener: (user: FirebaseUserView | null) => void): () => void;
@@ -39,8 +41,12 @@ export interface FirebaseAuthSdk {
   reauthenticateWithGoogleIdToken(idToken: string): Promise<void>;
   /** With the e-mail of the current user, which the SDK wrapper reads. */
   reauthenticateWithPassword(password: string): Promise<void>;
-  /** `user.delete()`: needs a recent login, the same 5 minutes of the API (ADR 0056, D4). */
-  deleteCurrentUser(): Promise<void>;
+  /**
+   * `user.delete()`: needs a recent login, the same 5 minutes of the API (ADR 0056, D4). Only when the
+   * SDK's current user is still `identity`: it may have moved to another account before its listener
+   * ran, and then nothing is deleted (`"other-account"`).
+   */
+  deleteCurrentUser(identity: SessionIdentity): Promise<DeleteCurrentUserOutcome>;
 }
 
 /** The native Google account picker (google-sign-in.ts). */
@@ -178,7 +184,11 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
       if (currentUser.value?.identity !== session) return;
       pendingReason.value = "deleted";
       try {
-        await sdk.deleteCurrentUser();
+        if ((await sdk.deleteCurrentUser(session)) === "other-account") {
+          // The SDK had already moved to another account, before its listener: nothing is touched.
+          pendingReason.value = null;
+          return;
+        }
       } catch {
         // Refused (no recent login, no network): the session ends anyway, and the 410 of the next login
         // asks again (ADR 0056, question 63).
