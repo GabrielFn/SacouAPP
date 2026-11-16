@@ -60,6 +60,14 @@
     "suggestText": {
       "hex": "#5C3F00",
       "source": "Membros.dc.html:28"
+    },
+    "goingFill": {
+      "hex": "#E3F3E8",
+      "source": "Inicio.dc.html (pill Vou)"
+    },
+    "goingText": {
+      "hex": "#0C6B35",
+      "source": "Inicio.dc.html (pill Vou)"
     }
   },
   "court": {
