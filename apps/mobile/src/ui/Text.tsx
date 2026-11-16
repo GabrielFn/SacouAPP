@@ -12,7 +12,10 @@ export type DisplaySize =
   | "displayTitleSmall"
   | "displayTitle"
   | "displayTitleLarge"
-  | "displayScore";
+  | "displayScore"
+  | "displayLevel"
+  | "displayLevelCard"
+  | "displayLevelBadge";
 
 export interface TextProps extends NativeTextProps {
   readonly variant?: TextVariant;

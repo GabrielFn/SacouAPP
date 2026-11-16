@@ -17,14 +17,18 @@ import { Screen } from "../../../ui/Screen";
 import { TabSwitch } from "../../../ui/TabSwitch";
 import { Text } from "../../../ui/Text";
 import { useMembersScreen, type MembersScreenModel } from "../hooks/use-members-screen";
+import { optionsLevelText } from "../model/member-levels";
 import {
+  memberName,
   membersHeader,
   membersOfTab,
   membersTabs,
+  shownTabOf,
   tabLabel,
   type MembersTab,
 } from "../model/members.selectors";
-import { groupInviteHref, groupsHref } from "../navigation";
+import { groupInviteHref, groupRatingsHref, groupsHref } from "../navigation";
+import { LevelNotices, MemberLevelDialog } from "./MemberLevelParts";
 import { MemberOptionsSheet } from "./MemberOptionsSheet";
 import { InvitesList, MembersList } from "./MembersLists";
 
@@ -65,6 +69,10 @@ export interface MembersDialogsProps {
 function MembersDialogs({ model, onLeft }: MembersDialogsProps) {
   const { state, dispatch } = model;
   const confirm = state.confirm;
+  const removed =
+    confirm?.kind === "remove"
+      ? (model.members.data?.find((member) => member.memberId === confirm.memberId) ?? null)
+      : null;
   const closeConfirm = () => {
     dispatch({ type: "confirm-closed" });
   };
@@ -81,6 +89,33 @@ function MembersDialogs({ model, onLeft }: MembersDialogsProps) {
         onLeave={() => {
           dispatch({ type: "leave-asked" });
         }}
+        levelText={
+          model.sheet === null || model.levelOf === null
+            ? null
+            : optionsLevelText(model.levelOf(model.sheet.target.memberId))
+        }
+        onLevel={(target) => {
+          dispatch({ type: "level-opened", memberId: target.memberId });
+        }}
+        onRemove={(target) => {
+          dispatch({ type: "remove-asked", memberId: target.memberId });
+        }}
+      />
+      <MemberLevelDialog model={model} />
+      <ConfirmSheet
+        visible={removed !== null}
+        title={
+          removed === null
+            ? texts.sheet.remove
+            : texts.sheet.removeConfirmTitle(memberName(removed))
+        }
+        body={texts.sheet.removeHelp}
+        confirmLabel={texts.sheet.removeConfirm}
+        cancelLabel={texts.sheet.cancel}
+        onConfirm={() => {
+          if (removed !== null) model.removeMember(removed);
+        }}
+        onCancel={closeConfirm}
       />
       <ConfirmSheet
         visible={confirm?.kind === "leave"}
@@ -134,7 +169,10 @@ export interface MembersScreenProps {
   readonly groupId: string;
 }
 
-/** Screen 19, before the names of E3.17: who is in the group, its role and type, and the invites. */
+/**
+ * Screen 19: who is in the group, its role, type and positions, the invites and, for admins and co-admins
+ * only, the level of each one (ADR 0047). Placar and Jogador never ask for the levels.
+ */
 export function MembersScreen({ groupId }: MembersScreenProps) {
   const router = useRouter();
   const { tokens } = useTheme();
@@ -154,8 +192,10 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
     );
   }
   const tabs = membersTabs(group.data.role);
-  const shownTab = tabs.includes(tab) ? tab : "regular";
+  const shownTab = shownTabOf(tabs, tab);
   const showInvite = model.canInvite && inviteBaseUrl !== null;
+  // The sheet 19a shows its own refusal; the screen does not repeat it under the sheet.
+  const screenError = model.levelSheet === null ? model.errorText : null;
   return (
     <Screen
       scroll
@@ -182,7 +222,15 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
         onSelect={setTab}
         accessibilityLabel={texts.tabs.label}
       />
-      {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
+      {model.levelOf === null ? null : (
+        <LevelNotices
+          pendingCount={model.pendingCount}
+          onReview={() => {
+            router.push(groupRatingsHref(groupId));
+          }}
+        />
+      )}
+      {screenError === null ? null : <ErrorStrip text={screenError} />}
       {shownTab === "invites" ? (
         <InvitesList
           invites={model.invites}
@@ -195,6 +243,10 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
         <MembersList
           members={membersOfTab(members.data, shownTab)}
           all={members.data}
+          levelOf={model.levelOf}
+          onLevel={(memberId) => {
+            model.dispatch({ type: "level-opened", memberId });
+          }}
           onOptions={(memberId) => {
             model.dispatch({ type: "sheet-opened", memberId });
           }}

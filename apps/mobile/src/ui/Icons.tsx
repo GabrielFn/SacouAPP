@@ -216,3 +216,29 @@ export function QrIcon({ color }: IconProps) {
     </StrokeIcon>
   );
 }
+
+/** The lock before "Só admins veem." (Membros.dc.html, NotaMembro.dc.html). */
+export function LockIcon({ color }: IconProps) {
+  const { colors, tokens } = useTheme();
+  return (
+    <StrokeIcon
+      color={color ?? colors.textMuted}
+      size={tokens.sizes.checkIcon}
+      strokeWidth={HEADER_STROKE_WIDTH}
+    >
+      <Path d="M7 11h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z" />
+      <Path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </StrokeIcon>
+  );
+}
+
+/** The warning of the "N notas para confirmar" strip (Membros.dc.html). */
+export function WarningIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.chevronIcon} strokeWidth={HEADER_STROKE_WIDTH}>
+      <Path d="M12 9v4M12 17h.01" />
+      <Path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    </StrokeIcon>
+  );
+}

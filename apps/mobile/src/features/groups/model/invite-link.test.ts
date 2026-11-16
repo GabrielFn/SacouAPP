@@ -61,9 +61,9 @@ describe("the reducers of screens 19 and 19d hold no token", () => {
       type: "sheet-opened",
       memberId: "m",
     });
-    expect(opened).toEqual({ sheetMemberId: "m", confirm: null });
+    expect(opened).toEqual({ sheetMemberId: "m", level: null, confirm: null });
     const leaving = membersScreenReducer(opened, { type: "leave-asked" });
-    expect(leaving).toEqual({ sheetMemberId: null, confirm: { kind: "leave" } });
+    expect(leaving).toEqual({ sheetMemberId: null, level: null, confirm: { kind: "leave" } });
     const revoking = membersScreenReducer(leaving, { type: "revoke-asked", inviteId: "i" });
     expect(revoking.confirm).toEqual({ kind: "revoke-invite", inviteId: "i" });
     expect(membersScreenReducer(revoking, { type: "confirm-closed" })).toEqual(

@@ -1,52 +1,50 @@
+import { useRouter } from "expo-router";
 import { View } from "react-native";
 
-import { errorTextOf } from "../../../services/api/api-error-text";
-import type { GroupRole, Member, Round } from "../../../services/api/sacou-api";
+import type { Group, Member, Round } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { BackBar } from "../../../ui/BackBar";
 import { Button } from "../../../ui/Button";
-import { EmptyState } from "../../../ui/EmptyState";
+import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
-import { LoadingState } from "../../../ui/LoadingState";
+import { PlusIcon } from "../../../ui/Icons";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { groupsHref } from "../../groups/navigation";
-import { useGroup, useGroupMembers } from "../../groups/queries/use-group-queries";
+import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { hasRoundLayer, roundChips, sourceReader } from "../model/round-chips";
 import {
   footerActions,
   isCanceled,
-  managesRounds,
   roleHeader,
-  roundSettingsOf,
-  roundSubtitle,
   statsCells,
   type RoundSettingsView,
 } from "../model/round-detail";
-import { rosterOf, waitlistLine } from "../model/roster";
-import { PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
-import { useRound } from "../queries/use-round-queries";
+import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
+import { addPlayerHref, PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
+import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
+import { RoundHeading } from "./RoundHeading";
 import { RoundStatsPanel } from "./RoundStatsPanel";
 
-const { detail } = strings.rounds;
+const { detail, confirmed } = strings.rounds;
 
 export interface RoundBodyProps {
   readonly round: Round;
   readonly settings: RoundSettingsView;
-  readonly members: readonly Member[];
+  readonly waitlist: string;
+  readonly onOpenConfirmed: () => void;
+  readonly onAdd: () => void;
 }
 
-/** Everything under the title of screen 06: pills, panel, waitlist or the canceled strip. */
-function RoundBody({ round, settings, members }: RoundBodyProps) {
+/** Everything under the title of screen 06: pills, panel, waitlist, "Adicionar…" or the canceled strip. */
+function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundBodyProps) {
   const { tokens } = useTheme();
-  const waitlist = settings.values.attendance.waitlistEnabled
-    ? waitlistLine(rosterOf(round.waitlist, members))
-    : "";
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
     withRotation: false,
   });
+  const attendance = settings.values.attendance.enabled;
   return (
     <>
       <RoundChips chips={chips} legend={hasRoundLayer(settings.sources)} />
@@ -54,7 +52,10 @@ function RoundBody({ round, settings, members }: RoundBodyProps) {
         <ErrorStrip text={detail.canceled} />
       ) : (
         <>
-          <RoundStatsPanel cells={statsCells(round, settings.values)} />
+          <RoundStatsPanel
+            cells={statsCells(round, settings.values)}
+            onOpenConfirmed={onOpenConfirmed}
+          />
           {waitlist === "" ? null : (
             <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
               <Text variant="bodyStrong">{detail.waitlistTitle}</Text>
@@ -63,6 +64,14 @@ function RoundBody({ round, settings, members }: RoundBodyProps) {
               </Text>
             </View>
           )}
+          {attendance ? (
+            <Button
+              label={detail.addFromWhatsApp}
+              variant="outline"
+              renderIcon={(color) => <PlusIcon color={color} />}
+              onPress={onAdd}
+            />
+          ) : null}
         </>
       )}
     </>
@@ -89,70 +98,133 @@ function noAction(): void {
   // The destinations (E4.7 and the court) take over these buttons when they exist.
 }
 
-export interface RoundLoadingProps {
-  readonly failure: Error | null;
-  readonly onRetry: () => void;
+export interface AdminRoundScreenProps {
+  readonly groupId: string;
+  readonly group: Group;
+  readonly round: Round;
+  /** `null` when the resolved settings do not parse: nothing is drawn from them. */
+  readonly settings: RoundSettingsView | null;
+  readonly members: readonly Member[];
+  readonly model: RoundScreenModel;
 }
 
-/** The wait for the round, or the reason it could not be read. */
-function RoundLoading({ failure, onRetry }: RoundLoadingProps) {
-  if (failure === null) return <LoadingState accessibilityLabel={detail.loading} />;
+export interface AdminHeaderProps {
+  readonly role: Group["role"];
+  readonly canCopy: boolean;
+  readonly copied: boolean;
+  readonly onCopy: () => void;
+}
+
+/** "Você é admin" with the back button, and "Copiar lista" on the right (Rodada.dc.html). */
+function AdminHeader({ role, canCopy, copied, onCopy }: AdminHeaderProps) {
+  const { tokens } = useTheme();
   return (
-    <EmptyState
-      alert
-      title={detail.loadError}
-      body={errorTextOf(failure)}
-      actions={[{ label: detail.retry, variant: "secondary", onPress: onRetry }]}
-    />
+    <>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
+        <View style={{ flex: 1 }}>
+          <BackBar title={roleHeader(role)} fallbackHref={groupsHref} />
+        </View>
+        {canCopy ? <Button label={detail.copyList} variant="link" onPress={onCopy} /> : null}
+      </View>
+      {copied ? (
+        <Text variant="muted" accessibilityLiveRegion="polite">
+          {detail.listCopied}
+        </Text>
+      ) : null}
+    </>
   );
 }
 
-export interface AdminRoundScreenProps {
-  readonly groupId: string;
-  readonly roundId: string;
+export interface RemoveSheetsProps {
+  readonly round: Round;
+  readonly roster: RosterView;
+  readonly model: RoundScreenModel;
 }
 
-/**
- * Screen 06 for who manages the rounds. A scorekeeper or a player gets the same page without buttons
- * until the player's screen (26) arrives in the next part.
- */
-export function AdminRoundScreen({ groupId, roundId }: AdminRoundScreenProps) {
-  const { tokens } = useTheme();
-  const group = useGroup(groupId);
-  const round = useRound(groupId, roundId);
-  const members = useGroupMembers(groupId);
-  const settings = round.data === undefined ? null : roundSettingsOf(round.data);
-  if (group.data === undefined || round.data === undefined) {
-    return (
-      <Screen>
-        <RoundLoading
-          failure={group.error ?? round.error}
-          onRetry={() => {
-            void group.refetch();
-            void round.refetch();
-          }}
-        />
-      </Screen>
-    );
-  }
-  const role: GroupRole = group.data.role;
-  const actions = managesRounds(role)
-    ? footerActions(PENDING_ROUND_SCREENS, isCanceled(round.data))
-    : [];
+/** The list with "Tirar" and its confirmation, one sheet at a time (question 47). */
+function RemoveSheets({ round, roster, model }: RemoveSheetsProps) {
+  const { state, dispatch } = model;
+  const removing = state.sheet.kind === "remove" ? state.sheet.memberId : null;
+  const close = () => {
+    dispatch({ type: "sheet-closed" });
+  };
+  return (
+    <>
+      <ConfirmedSheet
+        visible={state.sheet.kind === "confirmed"}
+        going={roster.going}
+        waitlistLine={roster.waitlist}
+        meId={round.me.memberId}
+        removing={model.removing}
+        onRemove={
+          isCanceled(round)
+            ? null
+            : (memberId) => {
+                dispatch({ type: "remove-asked", memberId });
+              }
+        }
+        onClose={close}
+      />
+      <ConfirmSheet
+        visible={removing !== null}
+        title={confirmed.removeTitle}
+        body={confirmed.removeBody(removalName(roster.going, removing ?? "", round.me.memberId))}
+        confirmLabel={confirmed.removeConfirm}
+        cancelLabel={confirmed.cancel}
+        onConfirm={() => {
+          if (removing !== null) model.removeMember(removing);
+        }}
+        onCancel={close}
+      />
+    </>
+  );
+}
+
+/** Screen 06, for who manages the rounds: the counts, the list with "Tirar" and "Copiar lista". */
+export function AdminRoundScreen({
+  groupId,
+  group,
+  round,
+  settings,
+  members,
+  model,
+}: AdminRoundScreenProps) {
+  const router = useRouter();
+  const roster = rosterView(round, settings, members);
+  const actions = footerActions(PENDING_ROUND_SCREENS, isCanceled(round));
   return (
     <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
-      <BackBar title={roleHeader(role)} fallbackHref={groupsHref} />
-      <View style={{ gap: tokens.spacing.xs }}>
-        <Text variant="display" displaySize="displayMedium" accessibilityRole="header">
-          {group.data.name}
-        </Text>
-        <Text variant="muted">{roundSubtitle(round.data)}</Text>
-      </View>
+      <AdminHeader
+        role={group.role}
+        canCopy={canCopyList(round, settings)}
+        copied={model.state.copied}
+        onCopy={() => {
+          model.copyList({
+            groupName: group.name,
+            round,
+            members,
+            waitlistEnabled: roster.waitlistEnabled,
+          });
+        }}
+      />
+      <RoundHeading groupName={group.name} round={round} />
       {settings === null ? (
         <ErrorStrip text={detail.loadError} />
       ) : (
-        <RoundBody round={round.data} settings={settings} members={members.data ?? []} />
+        <RoundBody
+          round={round}
+          settings={settings}
+          waitlist={roster.waitlist}
+          onOpenConfirmed={() => {
+            model.dispatch({ type: "confirmed-opened" });
+          }}
+          onAdd={() => {
+            router.push(addPlayerHref(groupId, round.roundId));
+          }}
+        />
       )}
+      {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
+      <RemoveSheets round={round} roster={roster} model={model} />
     </Screen>
   );
 }

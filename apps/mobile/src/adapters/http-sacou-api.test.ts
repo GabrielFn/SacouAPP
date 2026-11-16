@@ -189,6 +189,38 @@ const OPERATIONS: readonly Operation[] = [
     null,
   ],
   [
+    "listMemberLevels",
+    (a) => a.listMemberLevels(GROUP),
+    "GET",
+    "/v1/groups/{groupId}/member-levels",
+    `/v1/groups/${GROUP}/member-levels`,
+    null,
+  ],
+  [
+    "setMemberLevel",
+    (a) => a.setMemberLevel({ groupId: GROUP, memberId: MEMBER }, 3.5),
+    "PUT",
+    "/v1/groups/{groupId}/member-levels/{memberId}",
+    `/v1/groups/${GROUP}/member-levels/${MEMBER}`,
+    { level: 3.5 },
+  ],
+  [
+    "setMemberLevel (Não sei)",
+    (a) => a.setMemberLevel({ groupId: GROUP, memberId: MEMBER }, null),
+    "PUT",
+    "/v1/groups/{groupId}/member-levels/{memberId}",
+    `/v1/groups/${GROUP}/member-levels/${MEMBER}`,
+    { level: null },
+  ],
+  [
+    "setMemberLevels",
+    (a) => a.setMemberLevels(GROUP, [{ memberId: MEMBER, level: 4 }]),
+    "PUT",
+    "/v1/groups/{groupId}/member-levels",
+    `/v1/groups/${GROUP}/member-levels`,
+    { levels: [{ memberId: MEMBER, level: 4 }] },
+  ],
+  [
     "createInvite",
     (a) => a.createInvite(GROUP),
     "POST",
@@ -289,8 +321,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 27 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(27);
+  test("the table covers the 30 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(30);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {

@@ -20,6 +20,11 @@ export const palette = {
   infoFill: "#E3EAFF",
   infoText: "#1340C0",
   danger: "#B42318",
+  // The admin's level (Membros.dc.html .sug, NotaMembro.dc.html, RevisarNotas.dc.html): the pale yellow
+  // of the pending strip and of a suggestion, its dashed brown border and its dark brown text.
+  noticeFill: "#FFF8E1",
+  suggestBorder: "#9A6A00",
+  suggestText: "#5C3F00",
 } as const;
 
 export const nightAlpha = {
@@ -75,6 +80,11 @@ export const fontSizes = {
   displayTitle: 40,
   displayTitleLarge: 44,
   displayScore: 132,
+  // The admin's level: the number of the sheet 19a, of a card of 19b, of the row card and its caption.
+  displayLevel: 72,
+  displayLevelCard: 28,
+  displayLevelBadge: 20,
+  levelCaption: 11,
 } as const;
 
 export const spacing = {
@@ -169,6 +179,11 @@ export const sizes = {
   googleBadge: 30,
   linkButton: 48,
   loginLogo: 34,
+  // The admin's level (Membros.dc.html .nota, NotaMembro.dc.html .step and .chips button).
+  levelBadgeWidth: 52,
+  levelBadgeHeight: 48,
+  levelStep: 56,
+  levelShortcut: 48,
 } as const;
 
 /**
@@ -196,6 +211,10 @@ export const interactiveHeights = [
   sizes.moreButtonWidth,
   sizes.moreButtonHeight,
   sizes.linkButton,
+  sizes.levelBadgeWidth,
+  sizes.levelBadgeHeight,
+  sizes.levelStep,
+  sizes.levelShortcut,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.

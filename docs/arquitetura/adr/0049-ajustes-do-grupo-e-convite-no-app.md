@@ -1,6 +1,6 @@
 # ADR 0049 · Ajustes do grupo e convite no app
 
-**Status:** aceito (10/11/2026), Parte 1; Parte 2 em 14/11/2026. **Tarefa:** E4.5. Plano: [`E4.5.md`](../../estado/tarefas/E4.5.md). A Parte 2 (membros, convite e QR) acrescenta as decisões D7 abaixo.
+**Status:** aceito (10/11/2026), Parte 1; Parte 2 em 14/11/2026; Parte 3 em 15/11/2026. **Tarefa:** E4.5. Plano: [`E4.5.md`](../../estado/tarefas/E4.5.md). A Parte 2 (membros, convite e QR) acrescenta as decisões D7 abaixo.
 
 ## Contexto
 
@@ -53,6 +53,19 @@ A E4.5 liga o app às rotas de configuração do grupo da E3.3 ([ADR 0041](0041-
 - **QR:** porta `QrEncoder` sobre `qrcode-generator` (JS puro, versão exata), nível M, versão automática (link de 63 bytes → versão 5, 37 módulos); `ui/QrCode.tsx` recebe só a matriz e desenha um caminho SVG com margem de 4 módulos, `#0F1B2D` sobre branco, 60% da largura com `aspectRatio: 1`.
 - **Sessão:** `clearSession({ cacheSession, inviteLinkStore })` limpa o cache do servidor e chama `clearAll()`; a E4.3 liga ao logout.
 - **Componentes novos:** `ui/TabSwitch`, `ui/ConfirmSheet`, `ui/QrCode`, variantes `outline`, `danger`, `dangerOutline` e `dangerText` e ícone opcional no `ui/Button`, ícones `MoreIcon`, `LinkIcon` e `QrIcon`; cores `avatarSurface`, `infoFill`/`infoText` (selo Placar) e `danger` (`#B42318`), todas conferidas para AA.
+
+## Decisão (Parte 3): nomes, posições e nota do admin
+
+**D9 · Telas 19, 19a, 19b e 19c com os dados da E3.17.**
+
+- **Porta:** `listMemberLevels`, `setMemberLevel` (`null` é "Não sei") e `setMemberLevels` (lote de 1 a 50, tudo ou nada), pelos tipos gerados. Nenhuma rota nova na API.
+- **Privacidade (ADR 0047):** `memberLevelsQuery` só com `canManageLevels` (Admin e Co-admin); Placar e Jogador nunca chamam a rota e não veem cartão de nota, faixa, linha de privacidade nem "Nota do sorteio". A chave `["groups", id, "member-levels"]` fica fora do cache persistido; um 403 invalida o grupo e as notas.
+- **Escala:** `ui/skill-level.ts`, em décimos inteiros (10 a 50, de 5 em 5, padrão 30), igual ao `SkillLevel` de `perfil-e-nota.md`. Valor fora da escala vindo da API é tratado como ausente, nunca arredondado.
+- **Linha da 19:** apelido, iniciais (duas primeiras letras ou dígitos), "Ponteiro · líbero · mensalista · você"; convidado com "entrou pelo WhatsApp". Sem perfil, continua "Você" ou "Membro desde 12 out" com o avatar neutro. Cartão de nota: confirmada, "sugeriu" tracejado amarelo, ou "– sem nota". As posições usam a forma masculina enquanto a pergunta 41 não é respondida; o título da 19a é "Nota de Bia" (a API não guarda gênero).
+- **19a:** componente controlado `ui/LevelSheet.tsx` (sem estado próprio), reaproveitável na 21a. Na 19, o rascunho fica no reducer da tela (`level: { memberId, draft }`); `draft: null` mostra a nota do servidor, senão a sugestão, senão 3,0. Salvar faz um `PUT` com `scope` por grupo e fecha a folha no sucesso.
+- **19b:** cartões derivados do cache (quem tem `reviewed: false`); o reducer `rating-review.reducer.ts` guarda só o rascunho por `MemberId`. "Confirmar" e "Não sei" usam a rota de um membro; "Confirmar todas (N)" usa a rota em lote, de 50 em 50, contando todos os cartões: o rascunho, senão a sugestão, senão "Não sei" (como no canvas, que conta 3 com o Léo). Lote recusado mantém os cartões e mostra quantas notas não entraram. "Não sei" grava `null` (revisado), para o membro sair da faixa; o sorteio continua usando a sugestão ou 3,0.
+- **Remover (pergunta 30):** "Remover do grupo" na 19c de outra pessoa, com confirmação; Admin remove qualquer um, Co-admin só Placar e Jogador. O sucesso invalida membros e notas.
+- **Componentes novos:** `ui/Avatar`, `ui/LevelSheet`, `StepButton` exportado com tamanho, ícones `LockIcon` e `WarningIcon`; cores `noticeFill`, `suggestBorder` e `suggestText`, conferidas para AA.
 
 ## Alternativas descartadas
 

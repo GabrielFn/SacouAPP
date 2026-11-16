@@ -45,7 +45,7 @@ export interface Services {
   readonly networkStatus: NetworkStatus;
   /** The system share sheet, for the round message (E4.6). */
   readonly shareSheet: ShareSheet;
-  /** Only "Copiar" of the invite writes here (ADR 0049, D7). */
+  /** Only "Copiar" of the invite and "Copiar lista" of the round write here (ADR 0049, D7; ADR 0054). */
   readonly clipboard: Clipboard;
   /** Opens WhatsApp with the invite; on a phone without it, the share sheet takes over. */
   readonly externalLink: ExternalLink;
