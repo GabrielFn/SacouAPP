@@ -107,7 +107,7 @@ export interface LevelNoticesProps {
 export function LevelNotices({ pendingCount, onReview }: LevelNoticesProps) {
   return (
     <>
-      {pendingCount > 0 ? <PendingLevelsStrip count={pendingCount} onReview={onReview} /> : null}
+      {pendingCount === 0 ? null : <PendingLevelsStrip count={pendingCount} onReview={onReview} />}
       <LevelPrivacyLine />
     </>
   );
