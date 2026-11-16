@@ -32,9 +32,13 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "Escolha um nome de até 40 letras para o modelo, sem deixar em branco.",
   "groups.template-not-found": "Esse modelo não existe mais.",
   "groups.use-leave": "Para sair do grupo, use a opção Sair do grupo.",
+  "identity.account-deleted": "Esta conta foi excluída.",
+  "identity.deletion-blocked":
+    "Você é o único admin de um grupo. Passe o papel para alguém antes de excluir.",
   "identity.nickname-invalid": "Escolha um apelido de até 20 letras, sem deixar em branco.",
   "identity.profile-invalid": "Confira as posições e o nível escolhidos e tente de novo.",
   "identity.profile-not-found": "Você ainda não preencheu seu perfil.",
+  "identity.recent-login-required": "Por segurança, entre de novo antes de excluir a conta.",
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
   "sessions.attendance-disabled": "A presença está desligada nesta rodada.",

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Identity.Authentication;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Identity.CurrentUsers;
+using Sacou.Modules.Identity.DeleteMyAccount;
 using Sacou.Modules.Identity.ExportMyData;
 using Sacou.Modules.Identity.GetDeletionBlockers;
 using Sacou.Modules.Identity.GetMyProfile;
@@ -17,7 +18,8 @@ namespace Sacou.Modules.Identity;
 /// <summary>
 /// Login, users and profiles: Firebase ID token check, <c>identity.users</c>, <c>POST /v1/me</c> (ADR 0036, ADR 0037)
 /// the person's profile, <c>/v1/me/profile</c> (ADR 0051), and the person's own data: the export and what blocks the
-/// deletion (E3.16, ADR 0056), whose sections the other modules add through <see cref="IAccountExportSection"/>.
+/// deletion, and the deletion itself (E3.16, ADR 0056), whose sections and erasures the other modules add through
+/// <see cref="IAccountExportSection"/> and <see cref="IAccountErasure"/>.
 /// </summary>
 public static class IdentityModule
 {
@@ -40,13 +42,15 @@ public static class IdentityModule
         services.AddScoped<IPlayerProfiles, StorePlayerProfiles>();
         services.AddScoped<ExportMyDataHandler>();
         services.AddScoped<GetDeletionBlockersHandler>();
+        services.AddScoped<DeleteMyAccountHandler>();
         services.AddScoped<IAccountExportSection, AccountExportSection>();
         services.AddScoped<IAccountExportSection, ProfileExportSection>();
         return services;
     }
 
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints) =>
-        endpoints.MapSignIn().MapGetMyProfile().MapSaveMyProfile().MapExportMyData().MapGetDeletionBlockers();
+        endpoints.MapSignIn().MapGetMyProfile().MapSaveMyProfile().MapExportMyData().MapGetDeletionBlockers()
+            .MapDeleteMyAccount();
 
     /// <summary>Applies the Identity migrations. The API calls it when <c>Database:MigrateOnStartup</c> is true.</summary>
     public static Task MigrateAsync(IServiceProvider services, CancellationToken cancellationToken = default) =>

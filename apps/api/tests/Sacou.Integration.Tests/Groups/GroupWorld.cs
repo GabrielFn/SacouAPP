@@ -202,6 +202,23 @@ internal sealed class GroupWorld
         return id;
     }
 
+    /// <summary>
+    /// <c>DELETE /v1/me</c> as <paramref name="subject"/>, signed in <paramref name="signedInAgo"/> before the API's
+    /// clock (the default token signed in ten minutes ago, too old to delete, ADR 0056, D4).
+    /// </summary>
+    public async Task<HttpResponseMessage> DeleteAccountAsync(string subject, TimeSpan signedInAgo = default)
+    {
+        var now = DateTimeOffset.FromUnixTimeSeconds(api.Clock.GetUtcNow().ToUnixTimeSeconds());
+        using var request = new HttpRequestMessage(HttpMethod.Delete, SignInPath);
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Bearer", TestIdToken.Valid(api.Key, now).With("sub", subject).With("user_id", subject).At(now - signedInAgo, "auth_time").Sign());
+        return await client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Like <see cref="DeleteAccountAsync(string, TimeSpan)"/>, as one of the actors.</summary>
+    public Task<HttpResponseMessage> DeleteAccountAsync(GroupActor actor, TimeSpan signedInAgo = default) =>
+        DeleteAccountAsync(subjects[actor], signedInAgo);
+
     private string TokenFor(string subject) =>
         TestIdToken.Valid(api.Key, DateTimeOffset.FromUnixTimeSeconds(api.Clock.GetUtcNow().ToUnixTimeSeconds())).With("sub", subject).With("user_id", subject).Sign();
 

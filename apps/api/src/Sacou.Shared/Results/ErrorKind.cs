@@ -6,4 +6,7 @@ public enum ErrorKind
     NotFound,
     Conflict,
     Forbidden,
+
+    /// <summary>The resource existed and was deleted for good (410).</summary>
+    Gone,
 }

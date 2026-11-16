@@ -11,6 +11,8 @@ public sealed class ProblemResultsTests
 {
     private const string Code = "sample.code";
 
+    private static readonly Dictionary<string, object?> GroupIds = new() { ["groupIds"] = new[] { "a" } };
+
     /// <summary>Written by hand, never derived from the production switch.</summary>
     public static readonly TheoryData<ErrorKind, int, string, string> ExpectedShapes = new()
     {
@@ -18,6 +20,7 @@ public sealed class ProblemResultsTests
         { ErrorKind.Forbidden, 403, "Forbidden", "https://tools.ietf.org/html/rfc9110#section-15.5.4" },
         { ErrorKind.NotFound, 404, "Not found", "https://tools.ietf.org/html/rfc9110#section-15.5.5" },
         { ErrorKind.Conflict, 409, "Conflict", "https://tools.ietf.org/html/rfc9110#section-15.5.10" },
+        { ErrorKind.Gone, 410, "Gone", "https://tools.ietf.org/html/rfc9110#section-15.5.11" },
     };
 
     [Theory]
@@ -60,6 +63,20 @@ public sealed class ProblemResultsTests
             body.Select(field => field.Key).Order(StringComparer.Ordinal));
     }
 
+    /// <summary>The extensions of a refusal ride along with the code, which they can never replace.</summary>
+    [Fact]
+    public async Task Extensions_GoNextToTheCode()
+    {
+        var (status, body) = await WriteAsync(
+            ProblemResults.From(new Error(Code, ErrorKind.Conflict), GroupIds));
+
+        Assert.Equal(409, status);
+        Assert.Equal(Code, body[ProblemResults.CodeExtension]!.GetValue<string>());
+        Assert.Equal("[\"a\"]", body["groupIds"]!.ToJsonString());
+        Assert.Throws<ArgumentException>(() => ProblemResults.From(
+            new Error(Code, ErrorKind.Conflict), new Dictionary<string, object?> { [ProblemResults.CodeExtension] = "other" }));
+    }
+
     [Fact]
     public void Success_UsesTheSuccessResult()
     {
@@ -79,14 +96,16 @@ public sealed class ProblemResultsTests
         Assert.Equal(StatusCodes.Status409Conflict, problem.StatusCode);
     }
 
-    private static async Task<(int Status, JsonObject Body)> WriteAsync(Error error)
+    private static Task<(int Status, JsonObject Body)> WriteAsync(Error error) => WriteAsync(ProblemResults.From(error));
+
+    private static async Task<(int Status, JsonObject Body)> WriteAsync(Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult problem)
     {
         await using var services = new ServiceCollection().AddLogging().AddProblemDetails().BuildServiceProvider();
         var context = new DefaultHttpContext { RequestServices = services };
         using var stream = new MemoryStream();
         context.Response.Body = stream;
 
-        await ProblemResults.From(error).ExecuteAsync(context);
+        await problem.ExecuteAsync(context);
 
         var body = JsonNode.Parse(stream.ToArray())!.AsObject();
         return (context.Response.StatusCode, body);

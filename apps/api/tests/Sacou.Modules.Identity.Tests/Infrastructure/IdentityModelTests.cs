@@ -85,6 +85,23 @@ public sealed class IdentityModelTests : IDisposable
         Assert.Equal(typeof(User), key.PrincipalEntityType.ClrType);
     }
 
+    /// <summary>U5 of E3.16 (ADR 0056, D5): the tombstone keeps the hash of the login and the date, and nothing else.</summary>
+    [Fact]
+    public void DeletedAccounts_KeepOnlyTheHashAndTheDate()
+    {
+        var deleted = Entity(typeof(DeletedAccountRow));
+
+        Assert.Equal("identity", deleted.GetSchema());
+        Assert.Equal("deleted_accounts", deleted.GetTableName());
+        Assert.Equal(
+            ["deleted_at", "subject_hash"],
+            deleted.GetProperties().Select(property => property.GetColumnName()).Order(StringComparer.Ordinal));
+        Assert.Equal("bytea", deleted.FindProperty(nameof(DeletedAccountRow.SubjectHash))!.GetColumnType());
+        Assert.Equal("pk_deleted_accounts", deleted.FindPrimaryKey()!.GetName());
+        Assert.Equal("octet_length(subject_hash) = 32", Assert.Single(deleted.GetCheckConstraints()).Sql);
+        Assert.Empty(deleted.GetForeignKeys());
+    }
+
     public void Dispose() => context.Dispose();
 
     /// <summary>The design-time model keeps check constraints; the runtime one drops them.</summary>
