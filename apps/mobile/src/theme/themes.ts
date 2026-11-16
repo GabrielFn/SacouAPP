@@ -32,6 +32,8 @@ export const THEME_ROLES = [
   "noticeFill",
   "suggestBorder",
   "suggestText",
+  "goingFill",
+  "goingText",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -54,7 +56,25 @@ const memberColors = {
   noticeFill: palette.noticeFill,
   suggestBorder: palette.suggestBorder,
   suggestText: palette.suggestText,
+  goingFill: palette.goingFill,
+  goingText: palette.goingText,
 } as const;
+
+/** One ground and its text for the day strip of a round card (Grupos.dc.html .day). */
+export interface DayStripSwatch {
+  readonly fill: string;
+  readonly text: string;
+}
+
+/**
+ * The day strips of the canvas, in order: orange, navy and yellow. Each group keeps one, picked from its
+ * `groupId`, so the same group has the same color on the home and on the list (AA checked in the tests).
+ */
+export const dayStripSwatches: readonly DayStripSwatch[] = [
+  { fill: palette.serveOrange, text: palette.night },
+  { fill: palette.night, text: palette.sand },
+  { fill: palette.ballYellow, text: palette.night },
+];
 
 export const appTheme = {
   background: palette.sand,

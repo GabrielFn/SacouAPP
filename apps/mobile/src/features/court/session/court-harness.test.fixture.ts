@@ -18,7 +18,7 @@ import {
   type NodeSqliteDatabase,
 } from "../persistence/node-sqlite-database.test.fixture";
 import type { CourtEventLog } from "../ports/court-event-log";
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 import { createCourtReplayer, runCourtReplay, type CourtReplayer } from "./court-replay";
 import {
   createCourtSessionController,

@@ -1,0 +1,172 @@
+import type { MyGroup, RoundSummary } from "../../../services/api/sacou-api";
+import { roundsStrings } from "../../../strings/rounds.pt-BR";
+import { formatTime } from "../../groups/model/schedule-text";
+import { dateLabel, isoWeekdayOf, parseIsoDate } from "./round-dates";
+
+const { cards } = roundsStrings;
+
+const DAYS_PER_WEEK = 7;
+const MONDAY_ISO = 1;
+
+/** The round a group card shows: the first scheduled one that has not started yet. */
+export function nextRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {
+  const upcoming = rounds
+    .filter((round) => round.status === "scheduled" && Date.parse(round.startsAt) > now)
+    .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt));
+  return upcoming[0] ?? null;
+}
+
+/** The start of the next Monday, local time: "essa semana" runs from now to the end of Sunday. */
+function endOfWeek(now: number): number {
+  const today = new Date(now);
+  const daysToMonday = DAYS_PER_WEEK - isoWeekdayOf(today) + MONDAY_ISO;
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysToMonday).getTime();
+}
+
+/** How many scheduled rounds, of all the groups, start between now and the end of this week. */
+export function roundsThisWeek(roundsByGroup: readonly (readonly RoundSummary[])[], now: number) {
+  const limit = endOfWeek(now);
+  return roundsByGroup.flat().filter((round) => {
+    const start = Date.parse(round.startsAt);
+    return round.status === "scheduled" && start > now && start < limit;
+  }).length;
+}
+
+/** "2 rodadas essa semana.", or `null` with none (the home then speaks with its empty state). */
+export function weekSummaryText(count: number): string | null {
+  if (count === 0) return null;
+  return count === 1 ? cards.oneThisWeek : cards.manyThisWeek(count);
+}
+
+export interface GroupWithNextRound {
+  readonly group: MyGroup;
+  readonly next: RoundSummary | null;
+}
+
+/** Groups by their next round, the soonest first; groups without one keep their order at the end. */
+export function orderByNextRound(
+  entries: readonly GroupWithNextRound[],
+): readonly GroupWithNextRound[] {
+  const startOf = (entry: GroupWithNextRound) =>
+    entry.next === null ? Number.POSITIVE_INFINITY : Date.parse(entry.next.startsAt);
+  return entries
+    .map((entry, index) => ({ entry, index }))
+    .sort((first, second) => {
+      const gap = startOf(first.entry) - startOf(second.entry);
+      return gap === 0 || Number.isNaN(gap) ? first.index - second.index : gap;
+    })
+    .map(({ entry }) => entry);
+}
+
+/** The pill styles of `ui/StatusPill` a card uses. */
+export type CardPillKind = "confirmed" | "waiting" | "going";
+
+export interface CardPill {
+  readonly kind: CardPillKind;
+  readonly label: string;
+}
+
+function isFull(round: RoundSummary): boolean {
+  return round.capacity !== null && round.goingCount >= round.capacity;
+}
+
+/**
+ * "Vou" with you in a place, "Na espera · 2º" in the waitlist, "Lista cheia" when the list is full and
+ * you are not in it, and nothing otherwise (Grupos.dc.html and Inicio.dc.html).
+ */
+export function cardPill(round: RoundSummary): CardPill | null {
+  const { status, position } = round.me;
+  if (status === "going" || status === "promoted") return { kind: "confirmed", label: cards.going };
+  if (status === "waitlisted") return { kind: "waiting", label: cards.waiting(position) };
+  return isFull(round) ? { kind: "going", label: cards.full } : null;
+}
+
+/** "9/12 confirmados", "14/14 · 2 na espera" or "9 confirmados" without a limit. */
+export function cardCountText(round: RoundSummary): string {
+  const going = String(round.goingCount);
+  if (round.capacity === null) return cards.confirmed(going);
+  const count = `${going}/${String(round.capacity)}`;
+  return round.waitlistCount > 0
+    ? cards.withWaitlist(count, round.waitlistCount)
+    : cards.confirmed(count);
+}
+
+/** The day strip: "Ter" and "20h30", in the group's own local date and time. */
+export interface DayStripText {
+  readonly day: string;
+  readonly hour: string;
+}
+
+export function dayStripText(round: RoundSummary): DayStripText {
+  const date = parseIsoDate(round.localDate);
+  const day = date === null ? "" : (roundsStrings.weekdayShort[isoWeekdayOf(date)] ?? "");
+  return { day, hour: formatTime(round.localTime) };
+}
+
+/** "Próxima: ter, 3/11". */
+export function nextRoundText(round: RoundSummary): string {
+  return cards.next(dateLabel(round.localDate).toLowerCase());
+}
+
+/** A stable index in a palette of `size` colors, from the `groupId`: the same group keeps its color. */
+export function swatchIndexOf(groupId: string, size: number): number {
+  if (size === 0) return 0;
+  // A UUID is ASCII: its code units are its characters.
+  const sum = Array.from({ length: groupId.length }, (_, index) =>
+    groupId.charCodeAt(index),
+  ).reduce((total, code) => total + code, 0);
+  return sum % size;
+}
+
+/** What a card shows of its next round; the screens add the group's own parts (name, role). */
+export interface RoundCardModel {
+  readonly groupId: string;
+  readonly roundId: string;
+  readonly strip: DayStripText;
+  readonly venue: string;
+  readonly nextText: string;
+  readonly pill: CardPill | null;
+  readonly countText: string;
+}
+
+export function roundCardModel(groupId: string, round: RoundSummary): RoundCardModel {
+  return {
+    groupId,
+    roundId: round.roundId,
+    strip: dayStripText(round),
+    venue: round.venue,
+    nextText: nextRoundText(round),
+    pill: cardPill(round),
+    countText: cardCountText(round),
+  };
+}
+
+export interface GroupRoundCard {
+  readonly group: MyGroup;
+  readonly round: RoundCardModel | null;
+}
+
+export interface RoundCards {
+  /** Every group, the soonest next round first and the groups without one at the end. */
+  readonly groups: readonly GroupRoundCard[];
+  readonly weekText: string | null;
+}
+
+/** `lists[i]` holds the rounds of `groups[i]` (an empty list while they load). */
+export function roundCardsOf(
+  groups: readonly MyGroup[],
+  lists: readonly (readonly RoundSummary[])[],
+  now: number,
+): RoundCards {
+  const entries = groups.map((group, index) => ({
+    group,
+    next: nextRoundOf(lists[index] ?? [], now),
+  }));
+  return {
+    groups: orderByNextRound(entries).map(({ group, next }) => ({
+      group,
+      round: next === null ? null : roundCardModel(group.groupId, next),
+    })),
+    weekText: weekSummaryText(roundsThisWeek(lists, now)),
+  };
+}

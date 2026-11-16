@@ -18,7 +18,11 @@ export type CreateRoundSheet =
   | { readonly kind: "time" }
   | { readonly kind: "setting"; readonly path: PersonalizePath };
 
-/** What the person typed or touched in screen 20, and nothing that can be derived from it. */
+/**
+ * What the person typed or touched in screen 20, and nothing that can be derived from it. It starts from
+ * the group (a new round) or from the round being edited, by the initializer of `useReducer`: never by an
+ * effect that copies the query (frontend.md, rule 1).
+ */
 export interface CreateRoundState {
   readonly localDate: string;
   readonly localTime: string;
@@ -30,62 +34,80 @@ export interface CreateRoundState {
   readonly sheet: CreateRoundSheet;
 }
 
-export type CreateRoundAction =
-  | { readonly type: "init"; readonly state: CreateRoundState }
+/** What the person types or picks in the fields of the form. */
+type FieldAction =
   | { readonly type: "date-picked"; readonly localDate: string }
   | { readonly type: "time-picked"; readonly localTime: string }
   | { readonly type: "venue-changed"; readonly venue: string }
   | { readonly type: "capacity-changed"; readonly text: string }
+  | { readonly type: "repeat-toggled" };
+
+/** The sheets, the "Personalizar" fold and the leaves of the round's layer. */
+type PanelAction =
   | { readonly type: "sheet-opened"; readonly sheet: CreateRoundSheet }
   | { readonly type: "sheet-closed" }
   | { readonly type: "layer-set"; readonly path: PersonalizePath; readonly value: SettingsValue }
   | { readonly type: "layer-reset"; readonly path: PersonalizePath }
-  | { readonly type: "repeat-toggled" }
   | { readonly type: "personalize-toggled" };
+
+export type CreateRoundAction = FieldAction | PanelAction;
 
 const NOT_A_DIGIT = /\D/g;
 const NO_SHEET: CreateRoundSheet = { kind: "none" };
+const FIELD_ACTIONS: ReadonlySet<CreateRoundAction["type"]> = new Set<FieldAction["type"]>([
+  "date-picked",
+  "time-picked",
+  "venue-changed",
+  "capacity-changed",
+  "repeat-toggled",
+]);
 
 function withoutPath(layer: RoundLayer, path: PersonalizePath): RoundLayer {
   return Object.fromEntries(Object.entries(layer).filter(([key]) => key !== path));
 }
 
-type Handlers = {
-  readonly [T in CreateRoundAction["type"]]: (
-    state: CreateRoundState,
-    action: Extract<CreateRoundAction, { readonly type: T }>,
-  ) => CreateRoundState;
-};
+function isFieldAction(action: CreateRoundAction): action is FieldAction {
+  return FIELD_ACTIONS.has(action.type);
+}
 
-/** One handler per action: a new action without a handler does not compile, the same guarantee as an exhaustive switch. */
-const HANDLERS: Handlers = {
-  init: (_state, action) => action.state,
-  "date-picked": (state, action) => ({ ...state, localDate: action.localDate, sheet: NO_SHEET }),
-  "time-picked": (state, action) => ({ ...state, localTime: action.localTime }),
-  "venue-changed": (state, action) => ({ ...state, venue: action.venue }),
-  "capacity-changed": (state, action) => ({
-    ...state,
-    capacityText: action.text.replace(NOT_A_DIGIT, ""),
-  }),
-  "sheet-opened": (state, action) => ({ ...state, sheet: action.sheet }),
-  "sheet-closed": (state) => ({ ...state, sheet: NO_SHEET }),
-  "layer-set": (state, action) => ({
-    ...state,
-    layer: { ...state.layer, [action.path]: action.value },
-    sheet: NO_SHEET,
-  }),
-  "layer-reset": (state, action) => ({ ...state, layer: withoutPath(state.layer, action.path) }),
-  "repeat-toggled": (state) => ({ ...state, repeatWeekly: !state.repeatWeekly }),
-  "personalize-toggled": (state) => ({ ...state, personalizeOpen: !state.personalizeOpen }),
-};
+function fieldReducer(state: CreateRoundState, action: FieldAction): CreateRoundState {
+  switch (action.type) {
+    case "date-picked":
+      return { ...state, localDate: action.localDate, sheet: NO_SHEET };
+    case "time-picked":
+      // The sheet edits a draft of its own: only a valid time arrives here, and it closes the sheet.
+      return { ...state, localTime: action.localTime, sheet: NO_SHEET };
+    case "venue-changed":
+      return { ...state, venue: action.venue };
+    case "capacity-changed":
+      return { ...state, capacityText: action.text.replace(NOT_A_DIGIT, "") };
+    case "repeat-toggled":
+      return { ...state, repeatWeekly: !state.repeatWeekly };
+  }
+}
 
+function panelReducer(state: CreateRoundState, action: PanelAction): CreateRoundState {
+  switch (action.type) {
+    case "sheet-opened":
+      return { ...state, sheet: action.sheet };
+    case "sheet-closed":
+      return { ...state, sheet: NO_SHEET };
+    case "layer-set":
+      return { ...state, layer: { ...state.layer, [action.path]: action.value }, sheet: NO_SHEET };
+    case "layer-reset":
+      return { ...state, layer: withoutPath(state.layer, action.path) };
+    case "personalize-toggled":
+      return { ...state, personalizeOpen: !state.personalizeOpen };
+  }
+}
+
+/**
+ * Pure, and two small exhaustive `switch`es without `default` (frontend.md, rule 4): a new action without
+ * a case fails `tsc`.
+ */
 export function createRoundReducer(
   state: CreateRoundState,
   action: CreateRoundAction,
 ): CreateRoundState {
-  const handle = HANDLERS[action.type] as (
-    current: CreateRoundState,
-    received: CreateRoundAction,
-  ) => CreateRoundState;
-  return handle(state, action);
+  return isFieldAction(action) ? fieldReducer(state, action) : panelReducer(state, action);
 }

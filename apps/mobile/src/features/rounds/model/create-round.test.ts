@@ -3,6 +3,7 @@ import {
   defaultGroupSettings,
   getSettingsTemplate,
   SETTINGS_CATALOG,
+  SETTINGS_SCHEMA_VERSION,
   type GroupSettings,
   type SettingsPath,
   type SettingsValue,
@@ -31,6 +32,8 @@ import {
   roundLayerOf,
   visiblePersonalizePaths,
 } from "./create-round.selectors";
+import { attendanceRound } from "./attendance.test.fixture";
+import { editRoundState, updateRoundRequest } from "./edit-round";
 import { roundChips, sourceReader } from "./round-chips";
 import { dateLabel, isoDateOf, nextRoundDate, pickableDates, startOf } from "./round-dates";
 
@@ -334,7 +337,17 @@ describe("the reducer", () => {
     expect(
       run(state, { type: "sheet-opened", sheet: { kind: "time" } }, { type: "sheet-closed" }).sheet,
     ).toEqual({ kind: "none" });
-    expect(run(state, { type: "init", state: { ...state, venue: "Outra" } }).venue).toBe("Outra");
+  });
+
+  test("a valid time closes its sheet", () => {
+    const opened = run(initial(), { type: "sheet-opened", sheet: { kind: "time" } });
+    expect(run(opened, { type: "time-picked", localTime: "19:00" }).sheet.kind).toBe("none");
+  });
+
+  test("a new action without a case does not compile", () => {
+    // @ts-expect-error: an action the reducer does not know.
+    const unknown: CreateRoundAction = { type: "round-canceled" };
+    expect(unknown.type).toBe("round-canceled");
   });
 
   test("picking a date closes its sheet; setting a leaf closes its sheet", () => {
@@ -347,5 +360,64 @@ describe("the reducer", () => {
     const set = run(setting, { type: "layer-set", path: "rotation.system", value: "6x2" });
     expect(set.sheet.kind).toBe("none");
     expect(set.layer).toEqual({ "rotation.system": "6x2" });
+  });
+});
+
+describe("Editar rodada (screen 20 with roundId)", () => {
+  const group = rachaDeTerca();
+  const edited = withLeaf(withLeaf(group, "scoring.bestOf", 3), "queue.exitMode", "partial");
+  const view = {
+    values: withLeaf(edited, "attendance.capacity", 16),
+    sources: {
+      "scoring.bestOf": "round",
+      "queue.exitMode": "round",
+      "attendance.capacity": "round",
+      "attendance.capacityLimited": "round",
+      "rotation.system": "group",
+    },
+  };
+  const round = attendanceRound({
+    localDate: TUESDAY_DATE,
+    localTime: "20:30",
+    venue: "Ginásio Sesc",
+    capacity: 16,
+  });
+
+  test("starts from the round: its date, time, venue, capacity and own leaves; no weekly repeat", () => {
+    const state = editRoundState(group, round, view);
+    expect(state).toMatchObject({
+      localDate: TUESDAY_DATE,
+      localTime: "20:30",
+      venue: "Ginásio Sesc",
+      capacityText: "16",
+      layer: { "scoring.bestOf": 3 },
+      repeatWeekly: false,
+      personalizeOpen: true,
+    });
+  });
+
+  test("the PATCH carries the whole layer, the leaves the form does not show included", () => {
+    const body = updateRoundRequest(group, view, editRoundState(group, round, view));
+    expect(body).toEqual({
+      localDate: TUESDAY_DATE,
+      localTime: "20:30",
+      venue: "Ginásio Sesc",
+      settings: {
+        schemaVersion: SETTINGS_SCHEMA_VERSION,
+        queue: { exitMode: "partial" },
+        scoring: { bestOf: 3 },
+        attendance: { capacity: 16, capacityLimited: true },
+      },
+    });
+  });
+
+  test("an emptied layer goes as {}, which clears it", () => {
+    const plain = { values: group, sources: { "scoring.bestOf": "round" } };
+    const state = run(editRoundState(group, round, plain), {
+      type: "layer-reset",
+      path: "scoring.bestOf",
+    });
+    const body = updateRoundRequest(group, plain, { ...state, capacityText: "14" });
+    expect(body.settings).toEqual({});
   });
 });

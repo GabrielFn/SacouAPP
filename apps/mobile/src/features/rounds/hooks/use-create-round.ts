@@ -38,6 +38,8 @@ export interface CreateRoundModel {
   readonly state: CreateRoundState;
   readonly dispatch: (action: CreateRoundAction) => void;
   readonly errors: CreateRoundErrors;
+  /** The error of a time still in the draft of its sheet, before it reaches the state. */
+  readonly timeErrorOf: (localTime: string) => string | null;
   readonly canPublish: boolean;
   readonly publishDisabled: boolean;
   readonly resolved: ReturnType<typeof resolvedPreview>;
@@ -45,9 +47,35 @@ export interface CreateRoundModel {
   /** True while the call is on the way: the button is off, against a double tap. */
   readonly pending: boolean;
   readonly errorText: string | null;
+  /** "Publicar" of a new round, "Salvar" of an edited one. */
   readonly publish: () => void;
   /** A value equal to the group's drops the leaf from the layer: the layer holds only differences. */
   readonly setLeaf: (path: PersonalizePath, value: SettingsValue) => void;
+}
+
+type FormModel = Omit<CreateRoundModel, "publishDisabled" | "pending" | "errorText" | "publish">;
+
+/** The reducer and what derives from it, the same for a new round and an edited one (D4). */
+export function useRoundForm(settings: GroupSettings, initial: () => CreateRoundState): FormModel {
+  const [state, dispatch] = useReducer(createRoundReducer, undefined, initial);
+  const now = new Date(wallClockNow());
+  return {
+    state,
+    dispatch,
+    errors: createRoundErrors(settings, state, now),
+    timeErrorOf: (localTime) => createRoundErrors(settings, { ...state, localTime }, now).time,
+    canPublish: canPublish(settings, state, now),
+    resolved: resolvedPreview(settings, state),
+    repeatText: repeatSummary(settings, state, formatTime),
+    setLeaf: (path, value) => {
+      dispatch(
+        groupValueOf(settings, path) === value
+          ? { type: "layer-reset", path }
+          : { type: "layer-set", path, value },
+      );
+      dispatch({ type: "sheet-closed" });
+    },
+  };
 }
 
 /** Runs the reducer of screen 20 and the call of "Publicar"; the screen only draws (D4). */
@@ -58,26 +86,23 @@ export function useCreateRound(
   const { sacouApi, shareSheet } = useServices();
   const client = useQueryClient();
   const { settings } = input;
-  const [state, dispatch] = useReducer(createRoundReducer, undefined, () =>
+  const form = useRoundForm(settings, () =>
     initialCreateRoundState(settings, new Date(wallClockNow()), input.hasSeries),
   );
   const mutation = useMutation(createRoundMutation(sacouApi, client, input.groupId));
-  const now = new Date(wallClockNow());
-  const errors = createRoundErrors(settings, state, now);
-  const ready = canPublish(settings, state, now);
   return {
-    state,
-    dispatch,
-    errors,
-    canPublish: ready,
-    publishDisabled: isPublishDisabled(settings, state, now, mutation.isPending),
-    resolved: resolvedPreview(settings, state),
-    repeatText: repeatSummary(settings, state, formatTime),
+    ...form,
+    publishDisabled: isPublishDisabled(
+      settings,
+      form.state,
+      new Date(wallClockNow()),
+      mutation.isPending,
+    ),
     pending: mutation.isPending,
     errorText: mutation.isError ? errorTextOf(mutation.error) : null,
     publish: () => {
-      if (!ready || mutation.isPending) return;
-      const body = createRoundRequest(settings, state);
+      if (!form.canPublish || mutation.isPending) return;
+      const body = createRoundRequest(settings, form.state);
       mutation.mutate(body, {
         onSuccess: (round) => {
           onPublished(round.roundId);
@@ -93,14 +118,6 @@ export function useCreateRound(
           );
         },
       });
-    },
-    setLeaf: (path, value) => {
-      dispatch(
-        groupValueOf(settings, path) === value
-          ? { type: "layer-reset", path }
-          : { type: "layer-set", path, value },
-      );
-      dispatch({ type: "sheet-closed" });
     },
   };
 }

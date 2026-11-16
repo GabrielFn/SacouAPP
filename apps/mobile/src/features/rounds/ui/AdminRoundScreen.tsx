@@ -22,6 +22,7 @@ import {
   type RoundSettingsView,
 } from "../model/round-detail";
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
+import type { CopyNote } from "../model/round-screen.reducer";
 import { addPlayerHref, PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
@@ -111,12 +112,12 @@ export interface AdminRoundScreenProps {
 export interface AdminHeaderProps {
   readonly role: Group["role"];
   readonly canCopy: boolean;
-  readonly copied: boolean;
+  readonly copyNote: CopyNote;
   readonly onCopy: () => void;
 }
 
 /** "Você é admin" with the back button, and "Copiar lista" on the right (Rodada.dc.html). */
-function AdminHeader({ role, canCopy, copied, onCopy }: AdminHeaderProps) {
+function AdminHeader({ role, canCopy, copyNote, onCopy }: AdminHeaderProps) {
   const { tokens } = useTheme();
   return (
     <>
@@ -126,11 +127,12 @@ function AdminHeader({ role, canCopy, copied, onCopy }: AdminHeaderProps) {
         </View>
         {canCopy ? <Button label={detail.copyList} variant="link" onPress={onCopy} /> : null}
       </View>
-      {copied ? (
+      {copyNote === "copied" ? (
         <Text variant="muted" accessibilityLiveRegion="polite">
           {detail.listCopied}
         </Text>
       ) : null}
+      {copyNote === "failed" ? <ErrorStrip text={detail.copyFailed} /> : null}
     </>
   );
 }
@@ -197,7 +199,7 @@ export function AdminRoundScreen({
       <AdminHeader
         role={group.role}
         canCopy={canCopyList(round, settings)}
-        copied={model.state.copied}
+        copyNote={model.state.copyNote}
         onCopy={() => {
           model.copyList({
             groupName: group.name,

@@ -25,6 +25,9 @@ export const palette = {
   noticeFill: "#FFF8E1",
   suggestBorder: "#9A6A00",
   suggestText: "#5C3F00",
+  // The "Vou" pill of the round cards (Inicio.dc.html, Grupos.dc.html): pale green, dark green text.
+  goingFill: "#E3F3E8",
+  goingText: "#0C6B35",
 } as const;
 
 export const nightAlpha = {

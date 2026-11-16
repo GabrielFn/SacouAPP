@@ -1,9 +1,16 @@
 import { useLocalSearchParams } from "expo-router";
 
-import { CreateRoundScreen } from "../../../../features/rounds/ui/CreateRoundScreen";
+import {
+  CreateRoundScreen,
+  EditRoundScreen,
+} from "../../../../features/rounds/ui/CreateRoundScreen";
 
-/** Screen 20: "Nova rodada" of one group. */
+/** Screen 20: "Nova rodada" of one group, or "Editar rodada" with `?roundId=` (only IDs in the route). */
 export default function CreateRoundRoute() {
-  const { groupId } = useLocalSearchParams<{ groupId: string }>();
-  return <CreateRoundScreen groupId={groupId} />;
+  const { groupId, roundId } = useLocalSearchParams<{ groupId: string; roundId?: string }>();
+  return roundId === undefined ? (
+    <CreateRoundScreen groupId={groupId} />
+  ) : (
+    <EditRoundScreen groupId={groupId} roundId={roundId} />
+  );
 }

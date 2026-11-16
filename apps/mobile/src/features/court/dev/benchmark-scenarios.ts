@@ -1,7 +1,7 @@
 import type { EventEnvelope, MatchStartedPayload, TeamSide } from "@sacou/match-engine";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
-import type { IdGenerator } from "../ports/id-generator";
+import type { IdGenerator } from "../../../services/id/id-generator";
 import { createCourtReplayer } from "../session/court-replay";
 import { createCourtSessionController } from "../session/court-session-controller";
 import { startCourtMatch } from "../session/start-court-match";

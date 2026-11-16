@@ -55,6 +55,10 @@ export const roundsStrings = {
     regularsConfirmed: "Mensalistas já confirmados.",
     publish: "Publicar e compartilhar no WhatsApp",
     publishing: "Publicando…",
+    editTitle: "Editar rodada",
+    editSubtitle: "Mude só o que precisar. Quem já confirmou continua na lista.",
+    save: "Salvar",
+    saving: "Salvando…",
     pickDay: "Escolher o dia",
     pickTime: "Escolher o horário",
     timeHint: "Use 24 horas, por exemplo 20:30.",
@@ -110,6 +114,7 @@ export const roundsStrings = {
     back: "Voltar",
     copyList: "Copiar lista",
     listCopied: "Lista copiada.",
+    copyFailed: "Não deu para copiar a lista. Tente de novo.",
     addFromWhatsApp: "Adicionar quem confirmou no WhatsApp",
     openConfirmed: (count: string) => `Ver a lista de ${count} confirmados`,
   },
@@ -159,7 +164,7 @@ export const roundsStrings = {
     close: "Fechar",
     position: (position: number) => `${String(position)}º`,
   },
-  /** Screen 21, without the guest block until part 3. */
+  /** Screen 21. */
   add: {
     title: "Adicionar quem confirmou no WhatsApp",
     subtitle: (group: string, count: string) => `${group} · ${count} confirmados`,
@@ -180,6 +185,41 @@ export const roundsStrings = {
     added: (name: string) => `${name} entrou na lista.`,
     waitlisted: (name: string, position: number) =>
       `${name} entrou na espera (${String(position)}º).`,
+  },
+  /** The guest block of screen 21 and the sheet 21a, without the claim of the profile (ADR 0046). */
+  guest: {
+    blockTitle: "Convidado sem conta",
+    name: "Nome",
+    joinsAs: "Entra como",
+    open: "Adicionar convidado",
+    title: "Adicionar convidado",
+    intro: "Para quem ainda não tem o app. Ele entra como avulso nesta rodada.",
+    nameLabel: "Nome ou apelido",
+    position: "Posição",
+    optional: "· opcional",
+    level: "Nota do sorteio",
+    levelUnset: (level: string) => `${level} · definir`,
+    levelLabel: (level: string) => `Nota do sorteio: ${level}. Definir`,
+    privacy: "Só admins veem a nota.",
+    submit: "Adicionar à rodada",
+    submitting: "Adicionando…",
+    close: "Fechar",
+    nameRequired: "Escreva o nome ou apelido do convidado.",
+    nameInvalid: "Use só letras, números e símbolos comuns, em até 20 caracteres.",
+  },
+  /** The round cards of the home (03) and of the groups list (17). */
+  cards: {
+    oneThisWeek: "1 rodada essa semana.",
+    manyThisWeek: (count: number) => `${String(count)} rodadas essa semana.`,
+    going: "Vou",
+    waiting: (position: number | null) =>
+      position === null ? "Na espera" : `Na espera · ${String(position)}º`,
+    full: "Lista cheia",
+    confirmed: (count: string) => `${count} confirmados`,
+    withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
+    next: (when: string) => `Próxima: ${when}`,
+    editRound: "Editar rodada",
+    stripLabel: (day: string, hour: string) => `${day}, ${hour}`,
   },
   /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */
   copyList: {

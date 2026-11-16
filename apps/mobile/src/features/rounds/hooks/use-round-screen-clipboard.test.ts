@@ -53,4 +53,20 @@ describe("the clipboard only gets the list on the tap of Copiar lista", () => {
     await Promise.resolve();
     expect(dispatch).toHaveBeenCalledWith({ type: "list-copied" });
   });
+
+  test("a clipboard that refuses shows the failure, and the note goes away later", async () => {
+    vi.useFakeTimers();
+    setText.mockReset().mockRejectedValue(new Error("denied"));
+    dispatch.mockClear();
+    useRoundScreen("g", "r").copyList({
+      groupName: "Racha",
+      round: attendanceRound(),
+      members: [],
+      waitlistEnabled: false,
+    });
+    await vi.runAllTimersAsync();
+    expect(dispatch).toHaveBeenCalledWith({ type: "copy-failed" });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "copy-note-cleared" });
+    vi.useRealTimers();
+  });
 });

@@ -340,7 +340,18 @@ describe("roundScreenReducer", () => {
     expect(roundScreenReducer(initialRoundScreenState, { type: "leave-asked" }).sheet).toEqual({
       kind: "leave",
     });
-    expect(roundScreenReducer(asked, { type: "list-copied" })).toEqual({ ...asked, copied: true });
+    expect(roundScreenReducer(asked, { type: "list-copied" })).toEqual({
+      ...asked,
+      copyNote: "copied",
+    });
+  });
+
+  test("the copy note shows, fails and goes away", () => {
+    const copied = roundScreenReducer(initialRoundScreenState, { type: "list-copied" });
+    expect(roundScreenReducer(copied, { type: "copy-note-cleared" }).copyNote).toBe("none");
+    const failed = roundScreenReducer(initialRoundScreenState, { type: "copy-failed" });
+    expect(failed.copyNote).toBe("failed");
+    expect(roundScreenReducer(failed, { type: "copy-note-cleared" }).copyNote).toBe("none");
   });
 
   test("a new action without a case does not compile", () => {
