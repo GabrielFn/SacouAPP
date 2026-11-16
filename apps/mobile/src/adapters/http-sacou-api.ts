@@ -6,6 +6,7 @@ import { isApiUrl } from "../services/api/api-config";
 import {
   classifyFailure,
   finalError,
+  isAccountDeleted,
   isJson,
   isSuccess,
   nextStep,
@@ -50,11 +51,6 @@ class NetworkFailure extends Error {}
 class OtherOriginRefused extends Error {}
 
 const NOT_SENT: ApiError = { kind: "unexpected", status: 0 };
-
-/** The 410 of `POST /v1/me` for an account deleted on the server (ADR 0056, D5). */
-function isAccountDeleted(error: ApiError): boolean {
-  return error.kind === "problem" && error.code === "identity.account-deleted";
-}
 const BODYLESS_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "DELETE"]);
 
 async function bodyOf(request: Request): Promise<string | null> {

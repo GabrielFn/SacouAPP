@@ -10,13 +10,12 @@ const JSON_UTI = "public.json";
 /** The only file that touches `expo-file-system` and `expo-sharing` (frontend.md, rule 3). */
 const expoTempFileSdk: TempFileSdk = {
   canShare: () => isAvailableAsync(),
-  write(name, text) {
+  async write(name, text) {
     // The cache directory of the app: private, outside the backup (`allowBackup: false`).
     const file = new File(Paths.cache, name);
-    if (file.exists) file.delete();
-    file.create();
-    file.write(text);
-    return Promise.resolve(file.uri);
+    file.create({ overwrite: true });
+    await file.write(text);
+    return file.uri;
   },
   share: (uri) => shareAsync(uri, { mimeType: JSON_MIME, UTI: JSON_UTI }),
   remove(uri) {

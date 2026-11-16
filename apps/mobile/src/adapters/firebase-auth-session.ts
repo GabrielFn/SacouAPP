@@ -183,5 +183,4 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
       await google?.revoke().catch(() => null);
     },
   };
-
 }

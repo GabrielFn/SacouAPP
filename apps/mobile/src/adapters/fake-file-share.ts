@@ -18,17 +18,17 @@ export interface FakeFileShare extends FileShare {
 /** The `FileShare` of the screens' tests: records the file, opens nothing. */
 export function createFakeFileShare(): FakeFileShare {
   const log = { value: [] as readonly SharedFile[] };
-  const failure: { next: FileShareFailure | null } = { next: null };
+  const failure: { value: FileShareFailure | null } = { value: null };
   return {
     shareJsonFile(name, text) {
       log.value = [...log.value, { name, text }];
-      const next = failure.next;
-      failure.next = null;
+      const next = failure.value;
+      failure.value = null;
       return Promise.resolve(next === null ? ok(null) : err(next));
     },
     shared: () => log.value,
     fail(next) {
-      failure.next = next;
+      failure.value = next;
     },
   };
 }

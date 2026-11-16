@@ -20,16 +20,16 @@ export function createTempFileShare(sdk: TempFileSdk): FileShare {
   return {
     async shareJsonFile(name, text) {
       if (!(await sdk.canShare().catch(() => false))) return err("unavailable");
-      const written: { uri: string | null } = { uri: null };
+      const written: { value: string | null } = { value: null };
       try {
-        written.uri = await sdk.write(name, text);
-        await sdk.share(written.uri);
+        written.value = await sdk.write(name, text);
+        await sdk.share(written.value);
         return ok(null);
       } catch {
         // The reason may carry the path: only the kind goes on.
         return err("failed");
       } finally {
-        if (written.uri !== null) await sdk.remove(written.uri).catch(() => null);
+        if (written.value !== null) await sdk.remove(written.value).catch(() => null);
       }
     },
   };

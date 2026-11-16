@@ -47,7 +47,10 @@ export function DeleteAccountCard({ onDelete }: DeleteAccountCardProps) {
           backgroundColor: colors.danger,
         }}
       >
-        <Text variant="bodyStrong" style={{ color: colors.surface, fontSize: tokens.fontSizes.small }}>
+        <Text
+          variant="bodyStrong"
+          style={{ color: colors.surface, fontSize: tokens.fontSizes.small }}
+        >
           {texts.deleteButton}
         </Text>
       </Pressable>

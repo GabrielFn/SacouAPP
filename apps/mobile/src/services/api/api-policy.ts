@@ -22,6 +22,8 @@ const HTTP = {
   forbidden: 403,
   notFound: 404,
   conflict: 409,
+  // `POST /v1/me` of an account deleted on the server (ADR 0056, D5).
+  gone: 410,
   tooLarge: 413,
   unavailable: 503,
 } as const;
@@ -31,6 +33,7 @@ const RULE_STATUSES: ReadonlySet<number> = new Set([
   HTTP.forbidden,
   HTTP.notFound,
   HTTP.conflict,
+  HTTP.gone,
 ]);
 const JSON_TYPES = /^application\/(?:problem\+)?json(?:;|$)/i;
 const DELTA_SECONDS = /^[0-9]+$/;
@@ -115,4 +118,9 @@ export function finalError(error: ApiError): ApiError {
   return error.kind === "not-registered"
     ? { kind: "problem", status: HTTP.forbidden, code: NOT_REGISTERED }
     : error;
+}
+
+/** The 410 of `POST /v1/me` for an account deleted on the server (ADR 0056, D5). */
+export function isAccountDeleted(error: ApiError): boolean {
+  return error.kind === "problem" && error.code === "identity.account-deleted";
 }

@@ -23,7 +23,11 @@ export function createFakeIdTokenProvider(
   return {
     async getIdToken({ forceRefresh }) {
       const { total, forced } = counts.value;
-      counts.value = { ...counts.value, total: total + 1, forced: forceRefresh ? forced + 1 : forced };
+      counts.value = {
+        ...counts.value,
+        total: total + 1,
+        forced: forceRefresh ? forced + 1 : forced,
+      };
       if (forceRefresh) await gate.current;
       return token;
     },

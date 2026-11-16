@@ -52,7 +52,8 @@ async function attemptDeletion(deps: DeletionDeps): Promise<DeletionOutcome> {
     await deps.refreshBlockers();
     return { kind: "blocked" };
   }
-  if (isProblem(result.error, RECENT_LOGIN)) return { kind: "reauth-required", error: result.error };
+  if (isProblem(result.error, RECENT_LOGIN))
+    return { kind: "reauth-required", error: result.error };
   return { kind: "failed", error: result.error };
 }
 

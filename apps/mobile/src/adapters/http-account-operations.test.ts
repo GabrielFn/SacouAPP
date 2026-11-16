@@ -48,7 +48,10 @@ describe("export and deletion of the account (ADR 0056)", () => {
 
   test("410 of the login of a deleted account tells the token provider once", async () => {
     const { api, http, tokens } = setup();
-    http.enqueue(problem(403, "identity.user-not-registered"), problem(410, "identity.account-deleted"));
+    http.enqueue(
+      problem(403, "identity.user-not-registered"),
+      problem(410, "identity.account-deleted"),
+    );
     const result = await api.listMyGroups();
     expect(result).toEqual({
       ok: false,
@@ -60,7 +63,10 @@ describe("export and deletion of the account (ADR 0056)", () => {
 
   test("another refusal of the login does not", async () => {
     const { api, http, tokens } = setup();
-    http.enqueue(problem(403, "identity.user-not-registered"), problem(400, "identity.subject-invalid"));
+    http.enqueue(
+      problem(403, "identity.user-not-registered"),
+      problem(400, "identity.subject-invalid"),
+    );
     await api.listMyGroups();
     expect(tokens.accountDeletedCount()).toBe(0);
   });
