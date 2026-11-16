@@ -10,12 +10,14 @@ const JSON_UTI = "public.json";
 /** The only file that touches `expo-file-system` and `expo-sharing` (frontend.md, rule 3). */
 const expoTempFileSdk: TempFileSdk = {
   canShare: () => isAvailableAsync(),
-  async write(name, text) {
+  create(name) {
     // The cache directory of the app: private, outside the backup (`allowBackup: false`).
     const file = new File(Paths.cache, name);
     file.create({ overwrite: true });
-    await file.write(text);
-    return file.uri;
+    return Promise.resolve(file.uri);
+  },
+  async write(uri, text) {
+    await new File(uri).write(text);
   },
   share: (uri) => shareAsync(uri, { mimeType: JSON_MIME, UTI: JSON_UTI }),
   remove(uri) {
@@ -23,6 +25,13 @@ const expoTempFileSdk: TempFileSdk = {
     if (file.exists) file.delete();
     return Promise.resolve();
   },
+  list: () =>
+    Promise.resolve(
+      Paths.cache
+        .list()
+        .filter((entry) => entry instanceof File)
+        .map((file) => ({ name: file.name, uri: file.uri })),
+    ),
 };
 
 /** Sheet 30a: the export as a temporary file in the share sheet, deleted when it closes (E4.3, D9). */

@@ -13,4 +13,9 @@ export interface FileShare {
    * sheet closes, shared or not (E4.3, D9).
    */
   shareJsonFile(name: string, text: string): Promise<Result<null, FileShareFailure>>;
+  /**
+   * Deletes the temporary files whose name starts with `prefix`: what a crash or a killed app left while
+   * the sheet was open. Never fails; called when the app opens.
+   */
+  removeLeftovers(prefix: string): Promise<void>;
 }

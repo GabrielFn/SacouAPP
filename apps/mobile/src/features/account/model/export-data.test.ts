@@ -9,7 +9,12 @@ import { queryKeys } from "../../../services/query/query-keys";
 import { apiErrorKindTexts } from "../../../strings/api-errors.pt-BR";
 import { strings } from "../../../strings/pt-BR";
 import { exportDataMutation } from "../queries/account-queries";
-import { exportFailureText, exportFileName, exportMyData } from "./export-data";
+import {
+  exportFailureText,
+  exportFileName,
+  exportMyData,
+  removeExportLeftovers,
+} from "./export-data";
 
 const NOW = new Date(2026, 10, 15, 21, 30);
 const DOCUMENT = {
@@ -92,7 +97,8 @@ describe("the temporary file (createTempFileShare)", () => {
     });
     const uri = "file:///cache/sacou-meus-dados-2026-11-15.json";
     expect(sdk.log()).toEqual([
-      "write:sacou-meus-dados-2026-11-15.json",
+      "create:sacou-meus-dados-2026-11-15.json",
+      `write:${uri}`,
       `share:${uri}`,
       `remove:${uri}`,
     ]);
@@ -105,6 +111,27 @@ describe("the temporary file (createTempFileShare)", () => {
     expect(result).toEqual({ ok: false, error: "failed" });
     expect(JSON.stringify(result)).not.toContain("cache");
     expect(sdk.files().size).toBe(0);
+  });
+
+  test("a write that fails after the file was created deletes it too", async () => {
+    const sdk = createFakeTempFileSdk({ writeFails: true });
+    const result = await createTempFileShare(sdk).shareJsonFile("sacou-meus-dados-x.json", "{}");
+    expect(result).toEqual({ ok: false, error: "failed" });
+    expect(sdk.log()).toContain("remove:file:///cache/sacou-meus-dados-x.json");
+    expect(sdk.files().size).toBe(0);
+  });
+
+  test("when the app opens, the exports left behind go and the other files stay", async () => {
+    const left = "file:///cache/sacou-meus-dados-2026-11-14.json";
+    const other = "file:///cache/sacou-cache.db";
+    const sdk = createFakeTempFileSdk({
+      existing: new Map([
+        [left, "{}"],
+        [other, "x"],
+      ]),
+    });
+    await removeExportLeftovers(createTempFileShare(sdk));
+    expect([...sdk.files().keys()]).toEqual([other]);
   });
 
   test("a phone without sharing writes nothing", async () => {

@@ -19,6 +19,13 @@ export function exportFileName(now: Date): string {
   return `${FILE_PREFIX}${day}${FILE_EXTENSION}`;
 }
 
+/** The exports a crash or a killed app left in the cache directory: deleted when the app opens. */
+export function removeExportLeftovers(
+  fileShare: Pick<FileShare, "removeLeftovers">,
+): Promise<void> {
+  return fileShare.removeLeftovers(FILE_PREFIX);
+}
+
 export type ExportFailure =
   | { readonly kind: "api"; readonly error: ApiError }
   | { readonly kind: "share"; readonly failure: FileShareFailure };

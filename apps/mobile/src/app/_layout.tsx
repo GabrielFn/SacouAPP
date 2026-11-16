@@ -39,6 +39,7 @@ import {
   SIGNED_IN_ROUTES,
   SIGNED_OUT_ROUTES,
 } from "../features/auth/navigation";
+import { removeExportLeftovers } from "../features/account/model/export-data";
 import { useOnboardingGate } from "../features/profile/hooks/use-profile";
 import { useSession } from "../services/auth/use-session";
 import { createSessionEnder, sessionIdTokens } from "../services/session/end-session";
@@ -70,6 +71,7 @@ const sessionEnder = createSessionEnder({
   stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore, onboardingSkip },
 });
 bindAppStateFocus();
+void removeExportLeftovers(expoFileShare);
 
 const realServices: Services = {
   fontLoader: expoFontLoader,

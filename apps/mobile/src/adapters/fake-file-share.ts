@@ -20,6 +20,7 @@ export function createFakeFileShare(): FakeFileShare {
   const log = { value: [] as readonly SharedFile[] };
   const failure: { value: FileShareFailure | null } = { value: null };
   return {
+    removeLeftovers: () => Promise.resolve(),
     shareJsonFile(name, text) {
       log.value = [...log.value, { name, text }];
       const next = failure.value;
@@ -34,7 +35,7 @@ export function createFakeFileShare(): FakeFileShare {
 }
 
 export interface FakeTempFileSdk extends TempFileSdk {
-  /** `write:<name>`, `share:<uri>` and `remove:<uri>`, in order. */
+  /** `create:<name>`, `write:<uri>`, `share:<uri>` and `remove:<uri>`, in order. */
   readonly log: () => readonly string[];
   /** Files written and not removed yet. */
   readonly files: () => ReadonlyMap<string, string>;
@@ -43,22 +44,33 @@ export interface FakeTempFileSdk extends TempFileSdk {
 export interface FakeTempFileSdkOptions {
   readonly canShare?: boolean;
   readonly shareFails?: boolean;
+  readonly writeFails?: boolean;
+  /** Files already in the directory when the app opens (left by a crash, or of other features). */
+  readonly existing?: ReadonlyMap<string, string>;
 }
 
 /** The SDK under `createTempFileShare`, in memory: what was written, shared and removed. */
 export function createFakeTempFileSdk(options: FakeTempFileSdkOptions = {}): FakeTempFileSdk {
   const log = { value: [] as readonly string[] };
-  const files = { value: new Map<string, string>() as ReadonlyMap<string, string> };
+  const files = {
+    value: new Map<string, string>(options.existing ?? []) as ReadonlyMap<string, string>,
+  };
   const note = (line: string) => {
     log.value = [...log.value, line];
   };
   return {
     canShare: () => Promise.resolve(options.canShare ?? true),
-    write(name, text) {
+    create(name) {
       const uri = `file:///cache/${name}`;
-      note(`write:${name}`);
-      files.value = new Map([...files.value, [uri, text]]);
+      note(`create:${name}`);
+      files.value = new Map([...files.value, [uri, ""]]);
       return Promise.resolve(uri);
+    },
+    write(uri, text) {
+      note(`write:${uri}`);
+      if (options.writeFails === true) return Promise.reject(new Error(`no space for ${uri}`));
+      files.value = new Map([...files.value, [uri, text]]);
+      return Promise.resolve();
     },
     share(uri) {
       note(`share:${uri}`);
@@ -71,6 +83,10 @@ export function createFakeTempFileSdk(options: FakeTempFileSdkOptions = {}): Fak
       files.value = new Map([...files.value].filter(([key]) => key !== uri));
       return Promise.resolve();
     },
+    list: () =>
+      Promise.resolve(
+        [...files.value.keys()].map((uri) => ({ name: uri.slice(uri.lastIndexOf("/") + 1), uri })),
+      ),
     log: () => log.value,
     files: () => files.value,
   };
