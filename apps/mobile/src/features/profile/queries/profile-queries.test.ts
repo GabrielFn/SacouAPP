@@ -42,7 +42,7 @@ describe("the profile query", () => {
       apiErr({ kind: "problem", status: 404, code: "identity.profile-not-found" }),
     );
     const client = createSacouQueryClient();
-    expect(await client.fetchQuery(myProfileQuery(fake.api, true))).toBeNull();
+    expect(await client.query(myProfileQuery(fake.api, true))).toBeNull();
   });
 
   test("any other error is a failure", async () => {
@@ -50,7 +50,7 @@ describe("the profile query", () => {
     fake.respond("getMyProfile", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
     const client = createSacouQueryClient();
     await expect(
-      client.fetchQuery({ ...myProfileQuery(fake.api, true), retry: false }),
+      client.query({ ...myProfileQuery(fake.api, true), retry: false }),
     ).rejects.toThrow();
   });
 
@@ -58,7 +58,7 @@ describe("the profile query", () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));
     const client = createSacouQueryClient();
-    await client.fetchQuery(myProfileQuery(fake.api, true));
+    await client.query(myProfileQuery(fake.api, true));
     client.setQueryData(queryKeys.groups(), [{ groupId: G1 }]);
     const store = createMemoryKeyValueStore();
     await persistQueryClientSave({

@@ -4,24 +4,24 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { LockIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
-import { SELF_LEVELS, type SelfLevel } from "../model/self-levels";
+import { SELF_LEVEL_OPTIONS, type SelfLevelOption } from "../model/self-levels";
 import { ProfileSection } from "./ProfileSection";
 
 export interface LevelPickerProps {
   /** In points; a half point saved elsewhere selects nothing and is kept. */
   readonly level: number | null;
-  readonly onPick: (level: SelfLevel) => void;
+  readonly onPick: (level: number) => void;
 }
 
 export interface LevelOptionProps {
-  readonly level: SelfLevel;
+  readonly option: SelfLevelOption;
   readonly selected: boolean;
-  readonly onPick: (level: SelfLevel) => void;
+  readonly onPick: (level: number) => void;
 }
 
-function LevelOption({ level, selected, onPick }: LevelOptionProps) {
+function LevelOption({ option, selected, onPick }: LevelOptionProps) {
   const { colors, tokens } = useTheme();
-  const text = strings.profile.levels[level];
+  const { level, text } = option;
   return (
     <Pressable
       accessibilityRole="radio"
@@ -72,8 +72,13 @@ export function LevelPicker({ level, onPick }: LevelPickerProps) {
         accessibilityLabel={profile.levelGroupLabel}
         style={{ flexDirection: "row", gap: tokens.spacing.s6 }}
       >
-        {SELF_LEVELS.map((option) => (
-          <LevelOption key={option} level={option} selected={level === option} onPick={onPick} />
+        {SELF_LEVEL_OPTIONS.map((option) => (
+          <LevelOption
+            key={option.level}
+            option={option}
+            selected={level === option.level}
+            onPick={onPick}
+          />
         ))}
       </View>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: tokens.spacing.s6 }}>

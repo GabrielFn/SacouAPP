@@ -15,7 +15,10 @@ export function useMyProfile(enabled = true) {
 
 export function useOnboardingSkip(): OnboardingSkipState {
   const { onboardingSkip } = useServices();
-  return useSyncExternalStore(onboardingSkip.subscribe, onboardingSkip.snapshot);
+  return useSyncExternalStore(
+    (listener) => onboardingSkip.subscribe(listener),
+    () => onboardingSkip.snapshot(),
+  );
 }
 
 /** Whether the session gate opens screen 27 (E4.3, D6); signed out it never asks for the profile. */

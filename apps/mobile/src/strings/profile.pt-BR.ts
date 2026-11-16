@@ -12,13 +12,14 @@ export const profileStrings = {
   levelTitle: "Como você se avalia?",
   levelNote: "é só uma sugestão",
   levelGroupLabel: "Sugestão de nível de 1 a 5",
-  levels: {
-    1: "Tô aprendendo",
-    2: "Jogo de vez em quando",
-    3: "Me viro bem",
-    4: "Sou dos bons da pelada",
-    5: "Jogo federado",
-  },
+  /** From level 1 to level 5. */
+  levels: [
+    "Tô aprendendo",
+    "Jogo de vez em quando",
+    "Me viro bem",
+    "Sou dos bons da pelada",
+    "Jogo federado",
+  ],
   levelLabel: (level: number, text: string) => `${String(level)}, ${text}`,
   privacy: "O admin do grupo confirma ou ajusta a nota, que só ele vê. Ela é usada no sorteio.",
   skip: "Pular",

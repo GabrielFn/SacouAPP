@@ -24,6 +24,7 @@ import {
   skipRequest,
   visibleOthers,
 } from "./profile-form.selectors";
+import { SELF_LEVEL_OPTIONS } from "./self-levels";
 import { skipQuickProfile } from "./skip-quick-profile";
 
 const FAMILY = "👨‍👩‍👧‍👦";
@@ -106,6 +107,11 @@ describe("the form reducer of screen 27", () => {
     expect(four.others).toHaveLength(4);
     const three = profileFormReducer(four, { type: "other-toggled", position: "setter" });
     expect(three.others).not.toContain("setter");
+  });
+
+  test("the five options are the whole levels 1 to 5 with the texts of the canvas", () => {
+    expect(SELF_LEVEL_OPTIONS.map((option) => option.level)).toEqual([1, 2, 3, 4, 5]);
+    expect(SELF_LEVEL_OPTIONS[3]?.text).toBe("Sou dos bons da pelada");
   });
 
   test("a level is picked, and the same level again clears it", () => {
