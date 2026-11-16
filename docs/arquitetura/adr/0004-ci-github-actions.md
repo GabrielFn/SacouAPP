@@ -4,7 +4,7 @@
 
 ## Contexto
 
-A definição de pronto exige CI verde. O repositório é privado, com cota limitada de minutos, e sem proteção de branch. As tarefas até aqui só tinham sido validadas no Windows (ADR 0003).
+A definição de pronto exige CI verde. O repositório era privado, com cota limitada de minutos (público desde 16/11/2026, [ADR 0058](0058-repositorio-publico.md), sem limite de minutos), e não tem proteção de branch. As tarefas até aqui só tinham sido validadas no Windows (ADR 0003).
 
 ## Decisão
 
