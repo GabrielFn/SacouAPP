@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import type { GroupRole, Member } from "../../../services/api/sacou-api";
-import { losesInvites, memberActions, type ChipState } from "./member-actions";
+import { canManageLevels, losesInvites, memberActions, type ChipState } from "./member-actions";
 import { member } from "./members.test.fixture";
 
 type Chips = Readonly<Record<GroupRole, ChipState>>;
@@ -61,8 +61,37 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
     expect(sheet?.type).toEqual({ regularBlocked: true });
   });
 
-  test("another person's row never offers Remover until the names (question 30)", () => {
-    expect(memberActions(admin, player, [admin, player])?.canLeave).toBe(false);
+  test("another person's row offers Remover, never Sair (question 30)", () => {
+    const sheet = memberActions(admin, player, [admin, player]);
+    expect(sheet).toMatchObject({ canLeave: false, canRemove: true, showsLevel: true });
+  });
+
+  test("an admin removes anyone; a co-admin only Placar and Jogador (RemoveAdmin)", () => {
+    const all = [admin, otherAdmin, coAdmin, scorekeeper, player, guest];
+    expect(memberActions(admin, otherAdmin, all)?.canRemove).toBe(true);
+    expect(memberActions(admin, coAdmin, all)?.canRemove).toBe(true);
+    const me = member("c2", "coAdmin", { isMe: true });
+    const withMe = [...all, me];
+    expect(memberActions(me, otherAdmin, withMe)?.canRemove).toBe(false);
+    expect(memberActions(me, coAdmin, withMe)?.canRemove).toBe(false);
+    expect(memberActions(me, scorekeeper, withMe)?.canRemove).toBe(true);
+    expect(memberActions(me, guest, withMe)?.canRemove).toBe(true);
+  });
+
+  test("the own row never offers Remover; only admins see the level, their own included", () => {
+    expect(memberActions(admin, admin, [admin, otherAdmin])).toMatchObject({
+      canRemove: false,
+      showsLevel: true,
+    });
+    for (const role of ["scorekeeper", "player"] as const) {
+      const me = member("me", role, { isMe: true });
+      expect(memberActions(me, me, [admin, me])).toMatchObject({
+        canRemove: false,
+        showsLevel: false,
+      });
+      expect(canManageLevels(role)).toBe(false);
+    }
+    expect(canManageLevels("admin") && canManageLevels("coAdmin")).toBe(true);
   });
 
   test("Placar and Jogador have no options on someone else's row", () => {
@@ -79,6 +108,8 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
       roles: null,
       type: null,
       canLeave: true,
+      canRemove: false,
+      showsLevel: false,
       lastAdmin: false,
     });
   });

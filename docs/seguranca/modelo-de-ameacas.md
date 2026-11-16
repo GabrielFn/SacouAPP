@@ -252,6 +252,17 @@ Implementado na E4.2 ([ADR 0042](../arquitetura/adr/0042-contrato-openapi-e-clie
 | I | `code` desconhecido de uma API mais nova mostrado como texto livre | Só `code` do catálogo gerado vira `problem`; o resto vira `unexpected`, com texto genérico (P1) |
 | D | API fora do ar derrubando o app em laço de retentativas | Consultas repetem no máximo 2 vezes, só em `offline`, `unavailable` e 5xx; o 503 respeita `Retry-After`, limitado a 60 s; tempo limite de 15 s por requisição |
 
+### 12.2 Nota do admin no app (E4.5, Parte 3)
+
+Telas 19, 19a, 19b e 19c ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-convite-no-app.md), D9). A regra de quem vê é da API (seção 2, E3.17); o app só reduz a superfície.
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| I | Placar ou Jogador vê a nota de alguém no app | A consulta `memberLevelsQuery` tem `enabled: canManageLevels(papel)`: para Placar e Jogador a rota nunca é chamada (teste com o falso), a lista não tem cartão de nota, a faixa "N notas para confirmar", a linha "Só admins veem" nem a linha "Nota do sorteio" da 19c, e a 19b mostra "Sem acesso às notas". A lista de membros não tem campo de nível |
+| I | Nota ou sugestão gravada no aparelho | A chave `["groups", id, "member-levels"]` fica fora da lista de permissão do `sacou-cache.db` (teste de política e teste de persistência que procura `adminLevel` e `suggestedLevel` no arquivo); mutações de nota com `gcTime: 0`; o rascunho fica só nos reducers das telas |
+| I | Nota em log, rota ou chave de consulta | Nenhum `console`; a rota da 19b leva só o `groupId`; a chave só tem o `groupId` |
+| E | Admin rebaixado continua vendo as notas | Um 403 `groups.forbidden` numa escrita de nota invalida o grupo e as notas: o papel novo esconde a nota na hora |
+
 ### 12.1 Convite no app (E4.5, Parte 2)
 
 Telas 19 e 19d ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-convite-no-app.md), D7). O token do convite sai uma vez, na resposta de `createInvite`, e no aparelho fica em um lugar só: a porta `InviteLinkStore`.

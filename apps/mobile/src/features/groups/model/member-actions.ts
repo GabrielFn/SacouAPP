@@ -21,8 +21,12 @@ export interface MemberSheet {
   /** `null`: the section is not shown (a scorekeeper or a player on its own row). */
   readonly roles: readonly RoleChip[] | null;
   readonly type: TypeChoice | null;
-  /** Own row: "Sair do grupo". Removing someone else waits for the names (question 30). */
+  /** Own row: "Sair do grupo". */
   readonly canLeave: boolean;
+  /** Another row: "Remover do grupo" (question 30, closed with the names of E3.17). */
+  readonly canRemove: boolean;
+  /** "Nota do sorteio": admins and co-admins only, on every row, their own included (ADR 0047). */
+  readonly showsLevel: boolean;
   /** The only admin: leaving and demoting itself are off, with "Promova outro admin antes". */
   readonly lastAdmin: boolean;
 }
@@ -47,7 +51,15 @@ function ownSheet(me: Member, members: readonly Member[]): MemberSheet {
   const admins = members.filter((member) => member.role === "admin").length;
   const lastAdmin = me.role === "admin" && admins <= 1;
   if (!isAdminRole(me.role)) {
-    return { target: me, roles: null, type: null, canLeave: true, lastAdmin };
+    return {
+      target: me,
+      roles: null,
+      type: null,
+      canLeave: true,
+      canRemove: false,
+      showsLevel: false,
+      lastAdmin,
+    };
   }
   // An admin demotes itself only with another admin; a co-admin never does (it leaves).
   const roles = chips(me.role, () => me.role === "admin" && !lastAdmin);
@@ -56,6 +68,8 @@ function ownSheet(me: Member, members: readonly Member[]): MemberSheet {
     roles,
     type: { regularBlocked: !me.hasAccount },
     canLeave: true,
+    canRemove: false,
+    showsLevel: true,
     lastAdmin,
   };
 }
@@ -75,6 +89,9 @@ export function memberActions(
     roles: chips(target.role, (role) => allowed(role) && (target.hasAccount || role === "player")),
     type: { regularBlocked: !target.hasAccount },
     canLeave: false,
+    // A co-admin removes only Placar and Jogador (`RemoveMember`); an admin removes anyone (`RemoveAdmin`).
+    canRemove: me.role === "admin" || !isAdminRole(target.role),
+    showsLevel: true,
     lastAdmin: false,
   };
 }
@@ -82,4 +99,9 @@ export function memberActions(
 /** Who becomes Placar or Jogador loses its invites on the server; the phone forgets its copy. */
 export function losesInvites(role: GroupRole): boolean {
   return !isAdminRole(role);
+}
+
+/** Admins and co-admins see and give the levels (`ManageMemberLevels`); the others never ask (ADR 0047). */
+export function canManageLevels(role: GroupRole): boolean {
+  return isAdminRole(role);
 }

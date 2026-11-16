@@ -39,6 +39,11 @@ export function groupInviteHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/invite", params: { groupId } };
 }
 
+/** Screen 19b. Only the group travels on the route: never a level (ADR 0047). */
+export function groupRatingsHref(groupId: string): Href {
+  return { pathname: "/groups/[groupId]/ratings", params: { groupId } };
+}
+
 export function queueRuleHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/queue-rule", params: { groupId } };
 }

@@ -48,6 +48,18 @@
     "danger": {
       "hex": "#B42318",
       "source": "Convidar.dc.html:36"
+    },
+    "noticeFill": {
+      "hex": "#FFF8E1",
+      "source": "Membros.dc.html:60"
+    },
+    "suggestBorder": {
+      "hex": "#9A6A00",
+      "source": "Membros.dc.html:28"
+    },
+    "suggestText": {
+      "hex": "#5C3F00",
+      "source": "Membros.dc.html:28"
     }
   },
   "court": {
@@ -106,7 +118,11 @@
     "avatar": 40,
     "moreButtonWidth": 44,
     "moreButtonHeight": 48,
-    "memberRowMin": 56
+    "memberRowMin": 56,
+    "levelBadgeWidth": 52,
+    "levelBadgeHeight": 48,
+    "levelStep": 56,
+    "levelShortcut": 48
   },
   "radii": {
     "field": 12,
@@ -135,7 +151,11 @@
     "displayBrand": 24,
     "statusPill": 14,
     "link": 16,
-    "button": 17
+    "button": 17,
+    "displayLevel": 72,
+    "displayLevelCard": 28,
+    "displayLevelBadge": 20,
+    "levelCaption": 11
   },
   "iconStroke": {
     "plus": 2.2

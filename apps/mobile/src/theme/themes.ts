@@ -26,6 +26,9 @@ export const THEME_ROLES = [
   "infoFill",
   "infoText",
   "danger",
+  "noticeFill",
+  "suggestBorder",
+  "suggestText",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -61,6 +64,9 @@ export const appTheme = {
   infoFill: palette.infoFill,
   infoText: palette.infoText,
   danger: palette.danger,
+  noticeFill: palette.noticeFill,
+  suggestBorder: palette.suggestBorder,
+  suggestText: palette.suggestText,
 } as const satisfies Theme;
 
 /**
@@ -106,6 +112,9 @@ function courtTheme(colors: CourtColors): Theme {
     infoFill: palette.infoFill,
     infoText: palette.infoText,
     danger: palette.danger,
+    noticeFill: palette.noticeFill,
+    suggestBorder: palette.suggestBorder,
+    suggestText: palette.suggestText,
   };
 }
 

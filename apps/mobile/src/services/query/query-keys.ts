@@ -8,6 +8,8 @@ export const queryKeys = {
   group: (groupId: string) => ["groups", groupId] as const,
   members: (groupId: string) => ["groups", groupId, "members"] as const,
   invites: (groupId: string) => ["groups", groupId, "invites"] as const,
+  /** The admin's levels and the suggestions: outside the persisted allow list (ADR 0047). */
+  memberLevels: (groupId: string) => ["groups", groupId, "member-levels"] as const,
   settings: (groupId: string) => ["groups", groupId, "settings"] as const,
   templates: (groupId: string) => ["groups", groupId, "templates"] as const,
   rounds: (groupId: string) => ["groups", groupId, "rounds"] as const,
