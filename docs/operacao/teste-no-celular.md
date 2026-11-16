@@ -27,6 +27,32 @@ Veja `docs/estado/tarefas/E4.9.md`, seção 6 (é o mesmo texto). Anote o **mode
 
 O orquestrador registra os números em `docs/arquitetura/adr/0038-log-local-da-quadra.md` e o que falhou no `progresso.md`. A E4.9 só passa a "Feita" depois deste roteiro.
 
+## Teste local pelo cabo (build de desenvolvimento)
+
+Sem API publicada, o login, o perfil, a conta, exportar e excluir são testados com a API e o Postgres rodando no computador, e o celular ligado no USB. O perfil `development` do `eas.json` gera um APK com `expo-dev-client`. Nele `__DEV__` é verdadeiro, então o app aceita `http://localhost`. O `adb reverse` faz o `localhost` do celular apontar para o computador.
+
+**Uma vez:**
+
+1. Celular com depuração USB liberada para este computador (`adb devices` mostra `device`).
+2. `.env` na raiz (cópia de `.env.example`, com senha própria) e `apps/mobile/.env` com `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. O segundo `.env` também pode ter `EXPO_PUBLIC_API_URL=http://localhost:5080`.
+3. `apps/mobile/google-services.json` salvo localmente. Ele fica fora do Git (`.gitignore`), mas o `.easignore` deixa o EAS enviá-lo ao build na nuvem. Mantenha os dois arquivos com as mesmas exclusões.
+4. Build: `cd apps/mobile && npx eas-cli@27.5.0 build --platform android --profile development`. Instale pelo cabo com `adb install <apk>`.
+5. SHA-1 e SHA-256 do certificado desse build (`npx eas-cli@27.5.0 credentials --platform android`, perfil `development`) cadastrados no app Android do Firebase. Sem isso, o Google responde `DEVELOPER_ERROR`.
+
+**A cada teste:**
+
+```sh
+docker compose up -d --wait
+set -a; . ./.env; set +a   # lê o POSTGRES_PASSWORD sem imprimir
+export ConnectionStrings__Sacou="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=$POSTGRES_PASSWORD"
+export Database__MigrateOnStartup=true
+ASPNETCORE_URLS=http://localhost:5080 ASPNETCORE_ENVIRONMENT=Development dotnet run --project apps/api/src/Sacou.Api
+adb reverse tcp:5080 tcp:5080 && adb reverse tcp:8081 tcp:8081
+pnpm --filter @sacou/mobile start
+```
+
+Abra o app no celular: ele carrega o JavaScript do Metro pela porta 8081. A conexão segue [`postgres-local.md`](postgres-local.md).
+
 ## Login e sessão (E4.3, Parte 1)
 
 APK novo: a Parte 1 traz módulos nativos (Firebase, Google Sign-In). O teste real só funciona depois dos passos do console do [ADR 0057](../arquitetura/adr/0057-login-e-sessao-no-app.md), seção "Configuração do build" (pergunta 57). Nenhum valor passa pelo chat.

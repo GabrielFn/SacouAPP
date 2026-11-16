@@ -1,0 +1,37 @@
+# EAS uploads with this file instead of .gitignore. Same exclusions as .gitignore, except
+# apps/mobile/google-services.json: the native build needs it, and it stays out of Git (M3-B6).
+# Keep both files in sync.
+node_modules/
+.claude/worktrees/
+.env
+.env.*
+!.env.example
+bin/
+obj/
+.expo/
+dist/
+.turbo/
+*.log
+.DS_Store
+*.tsbuildinfo
+coverage/
+TestResults/
+.vs/
+apps/mobile/android/
+apps/mobile/ios/
+expo-env.d.ts
+__lint-regression__*
+.nuget-audit.json
+.nuget-audit-integration.json
+.claude/settings.local.json
+service-account*.json
+firebase-adminsdk*.json
+appsettings.Development.json
+secrets.json
+credentials.json
+*.pem
+*.jks
+*.keystore
+*.p12
+.npmrc
+*.stackdump
