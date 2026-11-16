@@ -19,7 +19,8 @@ internal static class SignInEndpoint
 
     public static IEndpointRouteBuilder MapSignIn(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireAuthorization();
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireAuthorization()
+            .ProducesProblem(StatusCodes.Status410Gone);
         return endpoints;
     }
 
