@@ -22,7 +22,7 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | V11 Cryptography | Parcial (E3.2): token de convite de 256 bits de `RandomNumberGenerator`, em Base64url, guardado só como SHA-256 (vetor fixo testado), nunca em log nem em outra resposta (ADR 0040, D10). Pendente: token do placar e pagamentos | E3.8, E3.10 |
 | V12 Secure Communication | Pendente | E5.1 |
 | V13 Configuration | Parcial: CI e dependências conferidas; produção pendente | E0.9, E5.1, E5.3 |
-| V14 Data Protection | Pendente | E3.10, E3.16, E5.3, E6.2 |
+| V14 Data Protection | Parcial (E3.16 parte 1: exportação só da própria pessoa, `no-store`) | E3.10, E3.16, E5.3, E6.2 |
 | V15 Secure Coding and Architecture | Parcial: dependências e análise estática conferidas; domínio C# sem infraestrutura e eventos só com `MemberId`, com testes de arquitetura e de reflexão (E2.10) | E0.9, E6.2 |
 | V16 Security Logging and Error Handling | Pendente | E5.2 |
 | V17 WebRTC | Pendente | Nenhum documento prevê WebRTC; confirmar se não se aplica na E6.2 |
@@ -38,4 +38,4 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | MASVS-PLATFORM | Pendente | E4.9, E4.17 (E4.14 e E4.16 pós-piloto, ADR 0046) |
 | MASVS-CODE | Parcial: dependências conferidas; versão mínima pendente | E0.9, E5.3 (versão mínima), E5.4 |
 | MASVS-RESILIENCE | Pendente | E5.4, E6.2 |
-| MASVS-PRIVACY | Pendente. Motor: eventos e estatísticas só com `MemberId`, sem nome nem nível (M2) | E3.16, E4.13, E5.2, E6.2 |
+| MASVS-PRIVACY | Parcial (E3.16 parte 1: exportação dos dados pessoais).  Motor: eventos e estatísticas só com `MemberId`, sem nome nem nível (M2) | E3.16, E4.13, E5.2, E6.2 |

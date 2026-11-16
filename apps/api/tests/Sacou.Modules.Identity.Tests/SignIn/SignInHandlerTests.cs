@@ -61,6 +61,9 @@ public sealed class SignInHandlerTests
         public Task<UserId?> FindIdAsync(AuthSubject subject, CancellationToken cancellationToken) =>
             Task.FromResult(finds[Finds++]);
 
+        public Task<DateTimeOffset?> FindCreatedAtAsync(UserId user, CancellationToken cancellationToken) =>
+            Task.FromResult<DateTimeOffset?>(null);
+
         public Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken)
         {
             CreatedUser = inserted ? user : null;

@@ -13,6 +13,9 @@ internal sealed record MemberGroup(GroupId GroupId, GroupName Name, GroupMember 
 /// <summary>An active member and, for a guest without an account, the name and position the admin typed (ADR 0053, D10).</summary>
 internal sealed record RosterEntry(GroupMember Member, GuestProfile? Guest);
 
+/// <summary>One membership of the person, in any status, with the group's current name (E3.16: the personal data export).</summary>
+internal sealed record AccountMembership(GroupId GroupId, GroupName GroupName, GroupMember Member);
+
 /// <summary>What the group detail shows besides the caller's membership.</summary>
 internal sealed record GroupOverview(GroupId GroupId, GroupName Name, int ActiveMembers);
 
@@ -38,6 +41,15 @@ internal interface IGroupStore
 
     /// <summary>Active memberships only, in the order the person joined.</summary>
     Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken);
+
+    /// <summary>Every membership of the person, active, left and removed, in the order they joined (E3.16).</summary>
+    Task<IReadOnlyList<AccountMembership>> ListMembershipsOfUserAsync(UserId user, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The groups where the person is an active admin, each with all its members and without a lock, for the
+    /// deletion rule (E3.16, ADR 0056, D3). Only the members are loaded: the invites and the guests stay empty.
+    /// </summary>
+    Task<IReadOnlyList<Group>> ListGroupsWhereActiveAdminAsync(UserId user, CancellationToken cancellationToken);
 
     /// <summary>The person's active member in that group, or null for a missing group, a non-member, a left or a removed member.</summary>
     Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken);

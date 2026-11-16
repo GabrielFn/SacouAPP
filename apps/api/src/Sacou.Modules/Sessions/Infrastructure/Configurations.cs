@@ -97,6 +97,7 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
 {
     public const string Table = "attendances";
     public const string SequenceIndex = "ux_attendances_round_sequence";
+    public const string MemberIndex = "ix_attendances_member";
 
     private const string TimestampType = "timestamp with time zone";
 
@@ -122,5 +123,7 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
             .HasConstraintName("fk_attendances_rounds").OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(attendance => new { attendance.RoundId, attendance.Sequence }).IsUnique().HasDatabaseName(SequenceIndex)
             .HasFilter($"status <> '{ColumnValues.NotGoingStatus}'");
+        // The personal data export reads by member, across rounds (E3.16); the primary key starts with the round.
+        builder.HasIndex(attendance => attendance.MemberId).HasDatabaseName(MemberIndex);
     }
 }

@@ -216,6 +216,126 @@
         }
       }
     },
+    "/v1/me/export": {
+      "get": {
+        "tags": [
+          "ExportMyDataEndpoint"
+        ],
+        "operationId": "ExportMyData",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/deletion-blockers": {
+      "get": {
+        "tags": [
+          "GetDeletionBlockersEndpoint"
+        ],
+        "operationId": "GetDeletionBlockers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionBlockersResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/groups": {
       "post": {
         "tags": [
@@ -4008,6 +4128,48 @@
         },
         "additionalProperties": false
       },
+      "DeletionBlockerKind": {
+        "enum": [
+          "lastAdmin"
+        ],
+        "type": "string"
+      },
+      "DeletionBlockerResponse": {
+        "required": [
+          "groupId",
+          "groupName",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DeletionBlockerKind"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeletionBlockersResponse": {
+        "required": [
+          "blockers"
+        ],
+        "type": "object",
+        "properties": {
+          "blockers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeletionBlockerResponse"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "DrawLockKind": {
         "enum": [
           "together",
@@ -4326,6 +4488,10 @@
       },
       "JsonElement": {},
       "JsonNode": {},
+      "JsonObject": {
+        "type": "object",
+        "additionalProperties": {}
+      },
       "MemberLevelResponse": {
         "required": [
           "memberId",

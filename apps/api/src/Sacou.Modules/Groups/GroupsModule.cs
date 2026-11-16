@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sacou.Modules.Groups.AcceptInvite;
+using Sacou.Modules.Groups.AccountData;
 using Sacou.Modules.Groups.ApplyTemplate;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.ChangeMemberRole;
@@ -31,6 +32,7 @@ using Sacou.Modules.Groups.SaveTemplate;
 using Sacou.Modules.Groups.SetMemberLevel;
 using Sacou.Modules.Groups.SetMemberLevels;
 using Sacou.Modules.Groups.UpdateGroupSettings;
+using Sacou.Modules.Identity.Contracts;
 
 namespace Sacou.Modules.Groups;
 
@@ -55,6 +57,9 @@ public static class GroupsModule
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
         services.AddScoped<IGroupSettingsReader, StoreGroupSettingsReader>();
         services.AddScoped<IMemberLevels, StoreMemberLevels>();
+        // The person's own data, for the Identity routes of E3.16 (ADR 0056, D6): Groups implements the Identity ports.
+        services.AddScoped<IAccountExportSection, GroupsExportSection>();
+        services.AddScoped<IAccountDeletionBlockers, GroupsDeletionBlockers>();
         return services;
     }
 
