@@ -78,7 +78,7 @@ public sealed class InviteHandlerTests
     public async Task UnregisteredCaller_IsRefused_BeforeTheToken()
     {
         var preview = await new PreviewInviteHandler(new FakeCurrentUser(null), store, time).HandleAsync(FixedToken, TestContext.Current.CancellationToken);
-        var accepted = await new AcceptInviteHandler(new FakeCurrentUser(null), store, time, NullLogger<AcceptInviteHandler>.Instance)
+        var accepted = await new AcceptInviteHandler(new FakeCurrentUser(null), new FakeRegisteredUsers(), store, time, NullLogger<AcceptInviteHandler>.Instance)
             .HandleAsync(FixedToken, TestContext.Current.CancellationToken);
 
         Assert.Equal(CurrentUserErrors.NotRegistered, preview.Error);
@@ -86,12 +86,25 @@ public sealed class InviteHandlerTests
         Assert.Equal(0, store.InviteCalls);
     }
 
+    /// <summary>ADR 0056, D7: the account was deleted after the request resolved the person; the store's check refuses it.</summary>
+    [Fact]
+    public async Task Accept_OfAnAccountDeletedMeanwhile_IsNotRegistered_AndJoinsNobody()
+    {
+        var created = await new CreateInviteHandler(store, tokens, time).HandleAsync(FounderAccess(), TestContext.Current.CancellationToken);
+        var members = store.Locked!.Members.Length;
+
+        var accepted = await Accept(Guid.NewGuid(), stillRegistered: false).HandleAsync(created.Value.Token, TestContext.Current.CancellationToken);
+
+        Assert.Equal(CurrentUserErrors.NotRegistered, accepted.Error);
+        Assert.Equal(members, store.Locked!.Members.Length);
+    }
+
     private GroupAccess FounderAccess() => new(world.Group.Id, world.Founder, world.Founder.UserId!.Value);
 
     private PreviewInviteHandler Preview(Guid person) => new(new FakeCurrentUser(person), store, time);
 
-    private AcceptInviteHandler Accept(Guid person) =>
-        new(new FakeCurrentUser(person), store, time, NullLogger<AcceptInviteHandler>.Instance);
+    private AcceptInviteHandler Accept(Guid person, bool stillRegistered = true) =>
+        new(new FakeCurrentUser(person), new FakeRegisteredUsers(stillRegistered), store, time, NullLogger<AcceptInviteHandler>.Instance);
 
     private sealed class FakeTokenGenerator : IInviteTokenGenerator
     {

@@ -19,7 +19,7 @@
 
 Sem proteção de branch, um PR pode alterar a própria barreira, e a CI verde não prova nada sobre isso. O diff que tocar qualquer item abaixo exige leitura explícita do revisor, citada no parecer (`docs/seguranca/varredura-ci.md`):
 
-- **CI:** qualquer arquivo em `.github/workflows/`, inclusive novo.
+- **CI:** qualquer arquivo em `.github/workflows/`, inclusive novo, e `scripts/ci-areas.mjs` com `scripts/lib/ci-areas.mjs` (decidem o que o `verify` pula).
 - **Varredura:** `.gitleaks.toml`, `.gitleaksignore`, `scripts/check-dotnet-audit.mjs`, `scripts/lib/*` e os scripts `audit:api` e `test:tooling` do `package.json`.
 - **Exceções:** `scripts/nuget-audit-exceptions.json`, `scripts/npm-audit-exceptions.json` e `NuGetAuditSuppress`.
 - **Dependências:** `audit.ignore`, `overrides` e `allowBuilds` em `pnpm-workspace.yaml`; `pnpm-lock.yaml` (fonte dos pacotes), `.npmrc`, `nuget.config` e `packages.lock.json`.

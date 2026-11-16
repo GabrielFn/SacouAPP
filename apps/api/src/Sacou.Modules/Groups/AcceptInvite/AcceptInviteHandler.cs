@@ -10,12 +10,12 @@ namespace Sacou.Modules.Groups.AcceptInvite;
 
 /// <summary>
 /// The acceptance (ADR 0040, D10): registered user, the token's format (no query for a malformed one), its
-/// hash, then the store's one transaction, where the invite, the group lock, the person lock and the
-/// aggregate's rule run in that order. The log keeps the outcome and the invite id, never the token, the
+/// hash, then the store's one transaction, where the invite, the group lock, the person lock, the check that
+/// the account still exists (ADR 0056, D7) and the aggregate's rule run in that order. The log keeps the outcome and the invite id, never the token, the
 /// hash, the group's name or the person.
 /// </summary>
 internal sealed partial class AcceptInviteHandler(
-    ICurrentUser currentUser, IGroupStore store, TimeProvider time, ILogger<AcceptInviteHandler> logger)
+    ICurrentUser currentUser, IRegisteredUsers registeredUsers, IGroupStore store, TimeProvider time, ILogger<AcceptInviteHandler> logger)
 {
     private const string Joined = "joined";
     private const string AlreadyMember = "already-member";
@@ -41,7 +41,11 @@ internal sealed partial class AcceptInviteHandler(
         var person = new UserId(user.Value.UserId);
         var now = time.GetUtcNow();
         var attempt = await store.AcceptInviteAsync(
-            hash.Value, person, (group, invite, activeGroups) => group.Accept(invite, person, activeGroups, now), cancellationToken)
+            hash.Value,
+            person,
+            cancellation => registeredUsers.ConfirmAsync(person.Value, cancellation),
+            (group, invite, activeGroups) => group.Accept(invite, person, activeGroups, now),
+            cancellationToken)
             .ConfigureAwait(false);
         var accepted = attempt.Change.Match(change => Result.Success(AcceptedInvite.From(change, person)), Result.Failure<AcceptedInvite>);
         var outcome = Outcome(accepted);

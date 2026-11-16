@@ -10,9 +10,14 @@ namespace Sacou.Modules.Groups.Infrastructure;
 internal sealed partial class PostgresGroupStore
 {
     public async Task<InviteAttempt> AcceptInviteAsync(
-        InviteTokenHash tokenHash, UserId person, Func<Group, InviteId, int, Result<GroupChange>> accept, CancellationToken cancellationToken)
+        InviteTokenHash tokenHash,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, InviteId, int, Result<GroupChange>> accept,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(tokenHash);
+        ArgumentNullException.ThrowIfNull(stillRegistered);
         ArgumentNullException.ThrowIfNull(accept);
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
@@ -29,6 +34,12 @@ internal sealed partial class PostgresGroupStore
                 async locked =>
                 {
                     await LockPersonAsync(person, cancellationToken).ConfigureAwait(false);
+                    var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
+                    if (registered.IsFailure)
+                    {
+                        return Result.Failure<GroupChange>(registered.Error);
+                    }
+
                     var activeGroups = await CountActiveGroupsAsync(person, cancellationToken).ConfigureAwait(false);
                     return accept(locked, invite, activeGroups);
                 },

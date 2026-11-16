@@ -35,9 +35,16 @@ internal interface IGroupStore
     /// Counts the creator's active groups and inserts the group with its founder, in one transaction that
     /// holds a per-person lock, so two concurrent creations cannot both pass <paramref name="admission"/>.
     /// The group's first settings go in the same transaction, so a group never exists without them.
+    /// <paramref name="stillRegistered"/> runs right after the person's lock, so an account deleted since the request
+    /// resolved the creator is refused instead of linked (ADR 0056, D7).
     /// </summary>
     Task<Result> CreateAsync(
-        Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken);
+        Group group,
+        UserId creator,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<int, Result> admission,
+        StoredSettings settings,
+        CancellationToken cancellationToken);
 
     /// <summary>Active memberships only, in the order the person joined.</summary>
     Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken);
@@ -92,9 +99,14 @@ internal interface IGroupStore
     /// The acceptance, in one transaction: the invite by its hash (none: <c>groups.invite-invalid</c>), then
     /// the group lock, then the per-person lock (group before person, ADR 0040, D7), the person's active
     /// groups, and <paramref name="accept"/> on the locked aggregate. The member is written only here.
+    /// <paramref name="stillRegistered"/> runs right after the person's lock, as in <see cref="CreateAsync"/>.
     /// </summary>
     Task<InviteAttempt> AcceptInviteAsync(
-        InviteTokenHash tokenHash, UserId person, Func<Group, InviteId, int, Result<GroupChange>> accept, CancellationToken cancellationToken);
+        InviteTokenHash tokenHash,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, InviteId, int, Result<GroupChange>> accept,
+        CancellationToken cancellationToken);
 
     /// <summary>The invites still valid at <paramref name="now"/>, oldest first.</summary>
     Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken);

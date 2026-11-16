@@ -21,11 +21,15 @@ internal static partial class IntegrationSetupRules
     private const string ProjectPath = "apps/api/tests/Sacou.Integration.Tests/Sacou.Integration.Tests.csproj";
     private const string AuditReport = ".nuget-audit-integration.json";
 
+    /// <summary>A missing or unexpected `api` output must run the API steps, never skip them.</summary>
+    internal const string ApiStepCondition = "if: needs.changes.outputs.api != 'false'";
+
     private static readonly string[] ExactVersionPackages = ["Testcontainers", "Testcontainers.PostgreSql"];
 
     private static readonly string[] RequiredCiFragments =
     [
         "- name: Test API integration",
+        ApiStepCondition,
         "dotnet test --project apps/api/tests/Sacou.Integration.Tests",
         "docker image ls --digests",
         RyukDigest,
@@ -44,6 +48,7 @@ internal static partial class IntegrationSetupRules
         "continue-on-error",
         "|| true",
         "if: false",
+        "outputs.api ==",
     ];
 
     private static readonly string[] ForbiddenPatterns =

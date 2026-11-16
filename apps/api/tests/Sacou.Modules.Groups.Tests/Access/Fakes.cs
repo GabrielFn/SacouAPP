@@ -16,6 +16,18 @@ internal sealed class FakeCurrentUser(Guid? userId) : ICurrentUser
             : Result.Failure<CurrentUser>(CurrentUserErrors.NotRegistered));
 }
 
+/// <summary>Whether the account still exists when the store asks, under the person's lock (ADR 0056, D7).</summary>
+internal sealed class FakeRegisteredUsers(bool registered = true) : IRegisteredUsers
+{
+    public int Calls { get; private set; }
+
+    public Task<Result> ConfirmAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        Calls++;
+        return Task.FromResult(registered ? Result.Success() : Result.Failure(CurrentUserErrors.NotRegistered));
+    }
+}
+
 /// <summary>
 /// The membership lookup the filter needs, and an in-memory aggregate (<see cref="Locked"/>) for the invite
 /// handlers. Counts calls, so a refusal can prove it never asked.
@@ -43,7 +55,12 @@ internal sealed class FakeGroupStore : IGroupStore
     }
 
     public Task<Result> CreateAsync(
-        Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken) =>
+        Group group,
+        UserId creator,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<int, Result> admission,
+        StoredSettings settings,
+        CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
     public Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken) =>
@@ -67,14 +84,25 @@ internal sealed class FakeGroupStore : IGroupStore
         return Task.FromResult(Locked is null || Locked.Id != group ? Result.Failure<GroupChange>(GroupErrors.GroupNotFound) : Apply(change(Locked)));
     }
 
-    public Task<InviteAttempt> AcceptInviteAsync(
-        InviteTokenHash tokenHash, UserId person, Func<Group, InviteId, int, Result<GroupChange>> accept, CancellationToken cancellationToken)
+    public async Task<InviteAttempt> AcceptInviteAsync(
+        InviteTokenHash tokenHash,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, InviteId, int, Result<GroupChange>> accept,
+        CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(stillRegistered);
         InviteCalls++;
         var invite = Locked?.Invites.SingleOrDefault(candidate => candidate.TokenHash == tokenHash);
-        return Task.FromResult(invite is null
-            ? new InviteAttempt(null, Result.Failure<GroupChange>(GroupErrors.InviteInvalid))
-            : new InviteAttempt(invite.Id, Apply(accept(Locked!, invite.Id, ActiveGroupsOfPerson))));
+        if (invite is null)
+        {
+            return new InviteAttempt(null, Result.Failure<GroupChange>(GroupErrors.InviteInvalid));
+        }
+
+        var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
+        return registered.IsFailure
+            ? new InviteAttempt(invite.Id, Result.Failure<GroupChange>(registered.Error))
+            : new InviteAttempt(invite.Id, Apply(accept(Locked!, invite.Id, ActiveGroupsOfPerson)));
     }
 
     public Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken) =>
