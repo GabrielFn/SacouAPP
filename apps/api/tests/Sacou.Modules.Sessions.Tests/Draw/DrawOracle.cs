@@ -4,18 +4,22 @@ namespace Sacou.Modules.Sessions.Tests.Draw;
 
 /// <summary>
 /// Brute force, written apart from the domain: every way to put the players on equal teams, honouring the locks.
-/// Gives the smallest gap between the highest and the lowest team sum, or null when no split exists.
+/// Gives the smallest gap between the highest and the lowest team sum and, among the splits with that gap, the
+/// smallest sum of the squared team sums (the tie-break of the objective); null when no split exists.
 /// </summary>
 internal static class DrawOracle
 {
-    public static int? BestSumGap(IReadOnlyList<DrawPlayer> playing, IReadOnlyList<DrawLock> locks, int teamCount, int teamSize)
+    public static int? BestSumGap(IReadOnlyList<DrawPlayer> playing, IReadOnlyList<DrawLock> locks, int teamCount, int teamSize) =>
+        Best(playing, locks, teamCount, teamSize)?.Gap;
+
+    public static (int Gap, long SquaredSums)? Best(IReadOnlyList<DrawPlayer> playing, IReadOnlyList<DrawLock> locks, int teamCount, int teamSize)
     {
         var position = playing.Select((player, index) => (player.MemberId, index)).ToDictionary();
         var constraints = locks.Select(item => (First: position[item.First], Second: position[item.Second], item.Kind)).ToArray();
         var team = new int[playing.Count];
         var sums = new int[teamCount];
         var loads = new int[teamCount];
-        int? best = null;
+        (int Gap, long SquaredSums)? best = null;
 
         void Visit(int player, int teamsUsed)
         {
@@ -23,8 +27,8 @@ internal static class DrawOracle
             {
                 if (constraints.All(item => (team[item.First] == team[item.Second]) == (item.Kind == DrawLockKind.Together)))
                 {
-                    var gap = sums.Max() - sums.Min();
-                    best = best is { } current && current <= gap ? current : gap;
+                    (int Gap, long SquaredSums) found = (sums.Max() - sums.Min(), sums.Sum(sum => (long)sum * sum));
+                    best = best is { } current && current.CompareTo(found) <= 0 ? current : found;
                 }
 
                 return;

@@ -77,6 +77,24 @@ export function changeTypeMutation(deps: MemberMutationDeps, groupId: string) {
   };
 }
 
+/** "Remover do grupo" (19c): the members and the levels are read again; the removed row leaves both. */
+export function removeMemberMutation(deps: MemberMutationDeps, groupId: string) {
+  return {
+    scope: membersScope(groupId),
+    mutationFn: async (target: Member) => {
+      await unwrap(deps.api.removeMember({ groupId, memberId: target.memberId }));
+      return target;
+    },
+    onSuccess: () => {
+      applyCacheEffects(deps.client, [
+        ...cacheEffectsOf({ type: "removeMember", groupId, targetIsMe: false }),
+        ...cacheEffectsOf({ type: "memberLevelsChanged", groupId }),
+      ]);
+    },
+    onError: refusedBy(deps.client, groupId),
+  };
+}
+
 export function leaveGroupMutation(deps: MemberMutationDeps, groupId: string) {
   return {
     scope: membersScope(groupId),

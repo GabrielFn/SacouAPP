@@ -7,9 +7,10 @@ import { useTheme } from "../../../theme/theme-context";
 import { ErrorStrip } from "../../../ui/ErrorStrip";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Text } from "../../../ui/Text";
-import type { useMembersScreen } from "../hooks/use-members-screen";
+import type { LevelLookup, useMembersScreen } from "../hooks/use-members-screen";
+import { levelBadge } from "../model/member-levels";
 import { memberActions } from "../model/member-actions";
-import { inviteRows, memberRowModel } from "../model/members.selectors";
+import { inviteRows, memberName, memberRowModel } from "../model/members.selectors";
 import { InviteRow } from "./InviteRow";
 import { MemberRow } from "./MemberRow";
 
@@ -39,10 +40,13 @@ function ListCard({ children }: ListCardProps) {
 export interface MembersListProps {
   readonly members: readonly Member[];
   readonly all: readonly Member[];
+  /** `null` for Placar and Jogador: no level, and the route is never called (ADR 0047). */
+  readonly levelOf: LevelLookup;
+  readonly onLevel: (memberId: string) => void;
   readonly onOptions: (memberId: string) => void;
 }
 
-export function MembersList({ members, all, onOptions }: MembersListProps) {
+export function MembersList({ members, all, levelOf, onLevel, onOptions }: MembersListProps) {
   const me = all.find((member) => member.isMe);
   if (members.length === 0) return <Text variant="muted">{texts.empty}</Text>;
   return (
@@ -53,6 +57,13 @@ export function MembersList({ members, all, onOptions }: MembersListProps) {
           <MemberRow
             key={member.memberId}
             model={memberRowModel(member)}
+            own={member.isMe}
+            level={
+              levelOf === null ? null : levelBadge(memberName(member), levelOf(member.memberId))
+            }
+            onLevel={() => {
+              onLevel(member.memberId);
+            }}
             onOptions={
               hasSheet
                 ? () => {

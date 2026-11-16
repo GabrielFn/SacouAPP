@@ -1,7 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useServices } from "../../../services/services-context";
-import { groupInvitesQuery, groupMembersQuery, groupQuery, myGroupsQuery } from "./group-queries";
+import {
+  groupInvitesQuery,
+  groupMembersQuery,
+  groupQuery,
+  memberLevelsQuery,
+  myGroupsQuery,
+} from "./group-queries";
 import { groupSettingsQuery, groupTemplatesQuery } from "./group-settings-queries";
 
 // The data stays only in the query cache (frontend.md, rule 1): these hooks return the query as it is.
@@ -36,4 +42,10 @@ export function useGroupTemplates(groupId: string, enabled: boolean) {
 export function useGroupInvites(groupId: string, enabled: boolean) {
   const { sacouApi } = useServices();
   return useQuery(groupInvitesQuery(sacouApi, groupId, enabled));
+}
+
+/** Off for Placar and Jogador (ADR 0047): the levels are never asked for them. */
+export function useMemberLevels(groupId: string, enabled: boolean) {
+  const { sacouApi } = useServices();
+  return useQuery(memberLevelsQuery(sacouApi, groupId, enabled));
 }

@@ -9,4 +9,7 @@ public enum GroupCapability
     ViewGroup,
     ManageRounds,
     RespondAttendance,
+
+    /// <summary>Draws the teams of a round, seeing the private levels (ADR 0055).</summary>
+    DrawTeams,
 }

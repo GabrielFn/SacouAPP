@@ -81,11 +81,14 @@ public sealed class TeamDrawGoldenTests
     {
         var players = Players(50, 10, 45, 20, 35, 30, 40, 15, 25);
 
+        const int pairs = 4;
+        var lastToArrive = Member(players.Length);
+
         var result = TeamDraw.Run(Input(players, BeachTwo)).Value;
 
-        Assert.Equal(4, result.Teams.Length);
-        Assert.Equal([Member(9)], result.Reserves.Select(player => player.MemberId));
-        Assert.Equal(DrawOracle.BestSumGap(players[..^1], [], 4, BeachTwo), SumGap(result));
+        Assert.Equal(pairs, result.Teams.Length);
+        Assert.Equal([lastToArrive], result.Reserves.Select(player => player.MemberId));
+        Assert.Equal(DrawOracle.BestSumGap(players[..^1], [], pairs, BeachTwo), SumGap(result));
     }
 
     [Fact]
@@ -93,11 +96,13 @@ public sealed class TeamDrawGoldenTests
     {
         var players = Players(50, 45, 45, 40, 35, 35, 30, 30, 25, 20, 15, 10);
 
+        const int teams = 3;
+
         var result = TeamDraw.Run(Input(players, BeachFour)).Value;
 
-        Assert.Equal(3, result.Teams.Length);
+        Assert.Equal(teams, result.Teams.Length);
         Assert.Empty(result.Reserves);
-        Assert.Equal(DrawOracle.BestSumGap(players, [], 3, BeachFour), SumGap(result));
+        Assert.Equal(DrawOracle.BestSumGap(players, [], teams, BeachFour), SumGap(result));
     }
 
     [Theory]

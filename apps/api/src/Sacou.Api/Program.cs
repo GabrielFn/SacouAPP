@@ -32,6 +32,8 @@ builder.Services.AddSacouOpenApi();
 
 var app = builder.Build();
 
+// Cache-Control: no-store on the routes that ask for it, their errors too (ADR 0055).
+app.UseNoStore();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();

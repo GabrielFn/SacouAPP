@@ -58,6 +58,7 @@ describe("cacheEffectsOf (P5, golden)", () => {
     [{ type: "leaveGroup", groupId: G }, [`remove groups/${G}`, "invalidate groups"]],
     [{ type: "createInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
     [{ type: "revokeInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
+    [{ type: "memberLevelsChanged", groupId: G }, [`invalidate groups/${G}/member-levels`]],
     [{ type: "settingsReplaced", groupId: G, view: {} }, [`set groups/${G}/settings`]],
     [{ type: "templatesChanged", groupId: G }, [`invalidate groups/${G}/templates`]],
     [
@@ -147,6 +148,7 @@ describe("the allow list of the persisted cache (P6)", () => {
     [["groups", G, "rounds", 1], false],
     [["groups", G, "rounds", "round-1", "extra"], false],
     [queryKeys.invites(G), false],
+    [queryKeys.memberLevels(G), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [["groups", G, "members", "extra"], false],

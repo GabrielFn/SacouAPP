@@ -8,7 +8,11 @@ namespace Sacou.Modules.Sessions.Domain.Draw;
 /// ADR 0047): private, it never leaves the server but to an Admin or a Co-admin. <see cref="Sequence"/> is the order
 /// of arrival in the round.
 /// </summary>
-internal sealed record DrawPlayer(MemberId MemberId, int LevelTenths, int Sequence);
+internal sealed record DrawPlayer(MemberId MemberId, int LevelTenths, int Sequence)
+{
+    /// <summary>The level is private: never printed, not even in a test failure or a log.</summary>
+    public override string ToString() => nameof(DrawPlayer);
+}
 
 /// <summary>
 /// Everything a draw needs. <see cref="Reserves"/> null means "the last ones to arrive" (docs/dominio/sorteio.md);
@@ -21,4 +25,7 @@ internal sealed record DrawInput(
     ImmutableArray<DrawLock> Locks,
     ImmutableArray<MemberId>? Reserves,
     bool BalanceByLevel,
-    ulong Seed);
+    ulong Seed)
+{
+    public override string ToString() => nameof(DrawInput);
+}

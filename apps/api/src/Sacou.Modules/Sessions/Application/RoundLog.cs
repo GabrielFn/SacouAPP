@@ -24,6 +24,11 @@ internal static partial class RoundLog
     [LoggerMessage(Level = LogLevel.Information, Message = "Group {GroupId}: series {SeriesId} stop: {Result}.")]
     public static partial void SeriesStopped(ILogger logger, Guid groupId, Guid seriesId, string result);
 
+    /// <summary>One line per draw: ids, counts and the time. Never a level, the body or the seed (ADR 0055).</summary>
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Group {GroupId}: draw of round {RoundId}: {Result}, {Players} players, {Teams} teams, {Locks} locks, {ElapsedMs} ms.")]
+    public static partial void Drew(ILogger logger, Guid groupId, Guid roundId, string result, int players, int teams, int locks, long elapsedMs);
+
     /// <summary>One line per write: the result code and the promotions, by member id.</summary>
     public static void LogChange(ILogger logger, RoundId round, string result, RoundChange? change)
     {

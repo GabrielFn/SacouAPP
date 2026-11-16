@@ -29,6 +29,9 @@ export const THEME_ROLES = [
   "panelSurface",
   "onPanel",
   "panelAccent",
+  "noticeFill",
+  "suggestBorder",
+  "suggestText",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -68,6 +71,9 @@ export const appTheme = {
   panelSurface: palette.night,
   onPanel: palette.sand,
   panelAccent: palette.ballYellow,
+  noticeFill: palette.noticeFill,
+  suggestBorder: palette.suggestBorder,
+  suggestText: palette.suggestText,
 } as const satisfies Theme;
 
 /**
@@ -116,6 +122,9 @@ function courtTheme(colors: CourtColors): Theme {
     panelSurface: palette.night,
     onPanel: palette.sand,
     panelAccent: palette.ballYellow,
+    noticeFill: palette.noticeFill,
+    suggestBorder: palette.suggestBorder,
+    suggestText: palette.suggestText,
   };
 }
 

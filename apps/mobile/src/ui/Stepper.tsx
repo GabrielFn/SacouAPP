@@ -23,11 +23,14 @@ export interface StepButtonProps {
   readonly enabled: boolean;
   readonly onPress: () => void;
   readonly children: ReactNode;
+  /** A scaled size from the tokens; the touch floor by default (`.mini`). */
+  readonly size?: number;
 }
 
-function StepButton({ label, enabled, onPress, children }: StepButtonProps) {
+/** The round minus or plus button (`.mini`, `.step`): off, and dimmed, at a limit. */
+export function StepButton({ label, enabled, onPress, children, size: wanted }: StepButtonProps) {
   const { colors, tokens } = useTheme();
-  const size = tokens.sizes.minTouchTarget;
+  const size = wanted ?? tokens.sizes.minTouchTarget;
   return (
     <Pressable
       accessibilityRole="button"

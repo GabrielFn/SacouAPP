@@ -258,6 +258,26 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       executeEmpty((init) =>
         client.POST("/v1/groups/{groupId}/leave", { ...init, ...group(groupId) }),
       ),
+    listMemberLevels: (groupId) =>
+      execute((init) =>
+        client.GET("/v1/groups/{groupId}/member-levels", { ...init, ...group(groupId) }),
+      ),
+    setMemberLevel: (ref, level) =>
+      execute((init) =>
+        client.PUT("/v1/groups/{groupId}/member-levels/{memberId}", {
+          ...init,
+          ...member(ref),
+          body: { level },
+        }),
+      ),
+    setMemberLevels: (groupId, levels) =>
+      execute((init) =>
+        client.PUT("/v1/groups/{groupId}/member-levels", {
+          ...init,
+          ...group(groupId),
+          body: { levels: [...levels] },
+        }),
+      ),
     createInvite: (groupId) =>
       execute((init) =>
         client.POST("/v1/groups/{groupId}/invites", { ...init, ...group(groupId) }),

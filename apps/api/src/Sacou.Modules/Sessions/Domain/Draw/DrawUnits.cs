@@ -10,6 +10,8 @@ internal sealed record DrawUnit(ImmutableArray<DrawPlayer> Players)
     public int Size => Players.Length;
 
     public int SumTenths => Players.Sum(player => player.LevelTenths);
+
+    public override string ToString() => nameof(DrawUnit);
 }
 
 /// <summary>
@@ -31,7 +33,10 @@ internal sealed class DrawUnits
 
     public bool AreApart(int unit, int other) => _apart.Contains(Pair(unit, other));
 
-    public bool HasApartLock(int unit) => _apart.Any(pair => pair.Low == unit || pair.High == unit);
+    public bool HasApartLock(int unit) => ApartCount(unit) > 0;
+
+    /// <summary>How many units <paramref name="unit"/> is kept apart from.</summary>
+    public int ApartCount(int unit) => _apart.Count(pair => pair.Low == unit || pair.High == unit);
 
     /// <summary><paramref name="playing"/> is in order of arrival and holds only the players of the teams.</summary>
     public static Result<DrawUnits> From(IReadOnlyList<DrawPlayer> playing, IReadOnlyList<DrawLock> locks, int teamSize)

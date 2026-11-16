@@ -73,6 +73,20 @@ public sealed class GroupSettingsReaderTests
         Assert.False(Reader().ResolveRound(Snapshot(), null).Value.Attendance.RegularsEnabled);
     }
 
+    [Theory]
+    [InlineData("indoor-6x6", 6)]
+    [InlineData("beach-4x4", 4)]
+    [InlineData("beach-2x2", 2)]
+    public void DrawRules_ComeFromTheResolvedDocument_AndTheModalityGivesTheTeamSize(string modality, int playersPerTeam)
+    {
+        var group = Snapshot(("draw.enabled", true));
+
+        var rules = Reader().ResolveRound(group, $$$"""{"schemaVersion":1,"draw":{"balanceByLevel":true},"format":{"modality":"{{{modality}}}"}}""").Value.Draw;
+
+        Assert.Equal(new DrawRules(true, true, playersPerTeam), rules);
+        Assert.Equal(new DrawRules(false, false, 6), Reader().ResolveRound(Snapshot(), null).Value.Draw);
+    }
+
     [Fact]
     public void G5_TheGroupIsReadAtEveryUse_SoARoundWithoutTheLeafSeesTheNewValue()
     {

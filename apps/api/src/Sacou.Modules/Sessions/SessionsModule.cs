@@ -6,6 +6,7 @@ using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.CancelRound;
 using Sacou.Modules.Sessions.CreateRound;
+using Sacou.Modules.Sessions.DrawTeams;
 using Sacou.Modules.Sessions.GetRound;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Modules.Sessions.ListRounds;
@@ -35,6 +36,8 @@ public static class SessionsModule
         services.AddScoped<RespondAttendanceHandler>();
         services.AddScoped<SetMemberAttendanceHandler>();
         services.AddScoped<StopSeriesHandler>();
+        services.AddSingleton<IDrawSeeds, RandomDrawSeeds>();
+        services.AddScoped<DrawTeamsHandler>();
         return services;
     }
 
@@ -52,7 +55,8 @@ public static class SessionsModule
             .MapCancelRound()
             .MapRespondAttendance()
             .MapSetMemberAttendance()
-            .MapStopSeries();
+            .MapStopSeries()
+            .MapDrawTeams();
         return endpoints;
     }
 
