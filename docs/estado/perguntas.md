@@ -115,3 +115,6 @@ Detalhes em `docs/estado/tarefas/E3.16.md`, seção 9. Nenhuma trava a Parte 1. 
 63. Quem apaga a conta no Firebase: **padrão: o app chama `user.delete()` depois do 204; a API guarda o hash do UID e responde 410 a um login posterior.** A alternativa (FirebaseAdmin na API) pediria o segredo `SACOU_FIREBASE_SERVICE_ACCOUNT` e trava a Parte 2.
 64. O último membro com conta exclui a conta e o grupo tem convidados sem conta: **padrão: os nomes dos convidados são apagados.**
 65. Exportar exige login recente: **padrão: não, só excluir.**
+
+## 15/11/2026: rate limiting na API (pergunta 66)
+66. A API não tem limite de requisições por usuário (achado da revisão do PR #91: o sorteio custa até ~0,4 s de CPU por chamada, e qualquer usuário cria um grupo). Opções: (1) limite por usuário no ASP.NET Core (`AddRateLimiter`, janela fixa por `MemberId`/UID) antes do piloto, como tarefa pequena na E5.3; (2) só no proxy do Railway; (3) aceitar o risco no piloto fechado. **Recomendação: 1.** Até a resposta, o risco fica registrado, não aceito, em `modelo-de-ameacas.md`.
