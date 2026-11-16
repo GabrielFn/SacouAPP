@@ -35,6 +35,10 @@ export const membersStrings = {
     type: "Tipo",
     needsAccount: "Precisa ter conta",
     leave: "Sair do grupo",
+    remove: "Remover do grupo",
+    removeHelp: "Quem é removido não volta pelo link de convite. O histórico nas partidas fica.",
+    removeConfirmTitle: (name: string) => `Remover ${name} do grupo?`,
+    removeConfirm: "Remover",
     leaveConfirmTitle: "Sair do grupo?",
     leaveConfirmBody:
       "Você deixa de ver as rodadas deste grupo. Para voltar, precisa de um link novo.",

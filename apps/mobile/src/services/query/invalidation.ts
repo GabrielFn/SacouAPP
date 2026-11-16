@@ -8,18 +8,20 @@ export type MutationEvent =
   | { readonly type: "createGroup" | "acceptInvite" }
   | { readonly type: "renameGroup" | "leaveGroup"; readonly groupId: string }
   | { readonly type: "createInvite" | "revokeInvite"; readonly groupId: string }
+  /** A level was set: the levels are read again (never persisted, ADR 0047). */
+  | { readonly type: "memberLevelsChanged"; readonly groupId: string }
   /** The server answered with the whole settings document: it replaces the cached one (ADR 0049). */
   | { readonly type: "settingsReplaced"; readonly groupId: string; readonly view: unknown }
   | { readonly type: "templatesChanged"; readonly groupId: string }
   /** The server answered with the whole round: it replaces the cached detail (ADR 0054). */
   | {
-      readonly type: "round-created" | "round-updated";
+      readonly type: "roundCreated" | "roundUpdated";
       readonly groupId: string;
       readonly roundId: string;
       readonly round: unknown;
     }
   /** The place of the others moved: only the server knows how, so the detail is read again. */
-  | { readonly type: "attendance-changed"; readonly groupId: string; readonly roundId: string }
+  | { readonly type: "attendanceChanged"; readonly groupId: string; readonly roundId: string }
   /** A change of the settings was refused for lack of permission: the role is stale. */
   | { readonly type: "settingsForbidden"; readonly groupId: string }
   | {
@@ -29,8 +31,12 @@ export type MutationEvent =
       readonly targetIsMe: boolean;
     };
 
+/**
+ * `invalidateExact` touches only the query of that key, not the ones under it: the list of rounds is read
+ * again without throwing away the detail that was just written (ADR 0054, D3).
+ */
 export type CacheEffect =
-  | { readonly action: "invalidate" | "remove"; readonly key: SacouQueryKey }
+  | { readonly action: "invalidate" | "invalidateExact" | "remove"; readonly key: SacouQueryKey }
   | { readonly action: "set"; readonly key: SacouQueryKey; readonly data: unknown };
 
 const invalidate = (key: SacouQueryKey): CacheEffect => ({ action: "invalidate", key });
@@ -53,21 +59,21 @@ function memberEffects(event: MemberEvent): readonly CacheEffect[] {
 
 type RoundEvent = Extract<
   MutationEvent,
-  { readonly type: "round-created" | "round-updated" | "attendance-changed" }
+  { readonly type: "roundCreated" | "roundUpdated" | "attendanceChanged" }
 >;
 
 function isRoundEvent(event: MutationEvent): event is RoundEvent {
   return (
-    event.type === "round-created" ||
-    event.type === "round-updated" ||
-    event.type === "attendance-changed"
+    event.type === "roundCreated" ||
+    event.type === "roundUpdated" ||
+    event.type === "attendanceChanged"
   );
 }
 
 function roundEffects(event: RoundEvent): readonly CacheEffect[] {
-  const list = invalidate(queryKeys.rounds(event.groupId));
+  const list: CacheEffect = { action: "invalidateExact", key: queryKeys.rounds(event.groupId) };
   const detail = queryKeys.round(event.groupId, event.roundId);
-  return event.type === "attendance-changed"
+  return event.type === "attendanceChanged"
     ? [invalidate(detail), list]
     : [{ action: "set", key: detail, data: event.round }, list];
 }
@@ -94,11 +100,28 @@ function settingsEffects(event: SettingsEvent): readonly CacheEffect[] {
   }
 }
 
+type ChildEvent = Extract<
+  MutationEvent,
+  { readonly type: "createInvite" | "revokeInvite" | "memberLevelsChanged" }
+>;
+
+/** The one list under the group that each of these writes makes stale. */
+const STALE_CHILD: Readonly<Record<ChildEvent["type"], (groupId: string) => SacouQueryKey>> = {
+  createInvite: queryKeys.invites,
+  revokeInvite: queryKeys.invites,
+  memberLevelsChanged: queryKeys.memberLevels,
+};
+
+function isChildEvent(event: MutationEvent): event is ChildEvent {
+  return event.type in STALE_CHILD;
+}
+
 /** What each mutation makes stale, pure and tested as a golden table (P5). */
 export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
   if (isMemberEvent(event)) return memberEffects(event);
   if (isSettingsEvent(event)) return settingsEffects(event);
   if (isRoundEvent(event)) return roundEffects(event);
+  if (isChildEvent(event)) return [invalidate(STALE_CHILD[event.type](event.groupId))];
   switch (event.type) {
     case "createGroup":
     case "acceptInvite":
@@ -107,9 +130,6 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
       return [invalidate(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
     case "leaveGroup":
       return [remove(queryKeys.group(event.groupId)), invalidate(queryKeys.groups())];
-    case "createInvite":
-    case "revokeInvite":
-      return [invalidate(queryKeys.invites(event.groupId))];
   }
 }
 
@@ -153,6 +173,10 @@ export function applyCacheEffects(client: QueryClient, effects: readonly CacheEf
   effects.forEach((effect) => {
     if (effect.action === "set") client.setQueryData(effect.key, effect.data);
     else if (effect.action === "remove") client.removeQueries({ queryKey: effect.key });
-    else void client.invalidateQueries({ queryKey: effect.key });
+    else
+      void client.invalidateQueries({
+        queryKey: effect.key,
+        exact: effect.action === "invalidateExact",
+      });
   });
 }

@@ -3,6 +3,7 @@ import { createGroupStrings } from "./create-group.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
 import { inviteStrings } from "./invite.pt-BR";
 import { membersStrings } from "./members.pt-BR";
+import { ratingsStrings } from "./ratings.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
 import { settingsStrings } from "./settings.pt-BR";
 
@@ -14,6 +15,7 @@ export const strings = {
   rounds: roundsStrings,
   members: membersStrings,
   invite: inviteStrings,
+  ratings: ratingsStrings,
   appName: "Sacou",
   a11y: { createGroup: "Criar grupo", back: "Voltar", logo: "Logo do Sacou" },
   catalog: {

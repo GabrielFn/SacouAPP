@@ -58,21 +58,22 @@ describe("cacheEffectsOf (P5, golden)", () => {
     [{ type: "leaveGroup", groupId: G }, [`remove groups/${G}`, "invalidate groups"]],
     [{ type: "createInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
     [{ type: "revokeInvite", groupId: G }, [`invalidate groups/${G}/invites`]],
+    [{ type: "memberLevelsChanged", groupId: G }, [`invalidate groups/${G}/member-levels`]],
     [{ type: "settingsReplaced", groupId: G, view: {} }, [`set groups/${G}/settings`]],
     [{ type: "templatesChanged", groupId: G }, [`invalidate groups/${G}/templates`]],
     [
       { type: "settingsForbidden", groupId: G },
       [`invalidate groups/${G}`, `invalidate groups/${G}/settings`],
     ],
-    ...(["round-created", "round-updated"] as const).map(
+    ...(["roundCreated", "roundUpdated"] as const).map(
       (type): [MutationEvent, readonly string[]] => [
         { type, groupId: G, roundId: "r1", round: {} },
-        [`set groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+        [`set groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
       ],
     ),
     [
-      { type: "attendance-changed", groupId: G, roundId: "r1" },
-      [`invalidate groups/${G}/rounds/r1`, `invalidate groups/${G}/rounds`],
+      { type: "attendanceChanged", groupId: G, roundId: "r1" },
+      [`invalidate groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
     ],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
@@ -147,6 +148,7 @@ describe("the allow list of the persisted cache (P6)", () => {
     [["groups", G, "rounds", 1], false],
     [["groups", G, "rounds", "round-1", "extra"], false],
     [queryKeys.invites(G), false],
+    [queryKeys.memberLevels(G), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [["groups", G, "members", "extra"], false],

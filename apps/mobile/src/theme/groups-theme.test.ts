@@ -45,8 +45,15 @@ describe("contrast of the groups screens", () => {
     ["white on the danger button", palette.white, palette.danger],
     ["Sem conta badge", palette.night, palette.waitingFill],
     ["QR modules on white", palette.night, palette.white],
+    ["sugeriu text on its yellow", palette.suggestText, palette.noticeFill],
+    ["pending strip text", palette.night, palette.noticeFill],
+    ["Revisar link on the strip", palette.infoText, palette.noticeFill],
+    ["muted text of an untouched card", palette.textSecondary, palette.white],
   ])("%s reaches AA", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+  it("the dashed border of a suggestion stands out from its yellow (3:1, WCAG 1.4.11)", () => {
+    expect(ratio(palette.suggestBorder, palette.noticeFill)).toBeGreaterThanOrEqual(3);
   });
   it("gives the badge ground to every theme", () => {
     expect(appTheme.badgeSurface).toContain("rgba");
@@ -62,6 +69,10 @@ describe("scale of the groups screens", () => {
       sizes.iconButton,
       sizes.moreButtonWidth,
       sizes.moreButtonHeight,
+      sizes.levelBadgeWidth,
+      sizes.levelBadgeHeight,
+      sizes.levelStep,
+      sizes.levelShortcut,
     ]) {
       expect(target).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
     }
