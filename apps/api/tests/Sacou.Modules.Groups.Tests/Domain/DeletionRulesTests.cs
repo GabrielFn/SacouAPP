@@ -34,6 +34,19 @@ public sealed class DeletionRulesTests
         Assert.False(DeletionRules.IsDeletionBlocker(group.Group, group.Founder.Id));
     }
 
+    [Theory]
+    [InlineData(Role.CoAdmin)]
+    [InlineData(Role.Scorekeeper)]
+    [InlineData(Role.Player)]
+    public void ANonAdminPerson_NeverBlocks_EvenWhenNoOtherAdminIsLeft(Role role)
+    {
+        var group = GroupBuilder.WithFounder();
+        var person = group.Add(role.ToDomain());
+        group.Replace(group.Founder with { Role = GroupRole.Player });
+
+        Assert.False(DeletionRules.IsDeletionBlocker(group.Group, person.Id));
+    }
+
     [Fact]
     public void SoleAdmin_Alone_DoesNotBlock()
     {
