@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity;
+using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
@@ -24,6 +25,8 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     private static readonly SemaphoreSlim MigrationGate = new(1, 1);
 
     private readonly IntegrationDatabase database;
+
+    private Func<Task>? afterCurrentUserResolved;
 
     public ApiWithDatabase(IntegrationDatabase database)
     {
@@ -51,6 +54,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// </summary>
     internal Func<int, Task>? BeforeMembershipLookup { get; set; }
 
+    /// <summary>
+    /// Runs once, right after the next <see cref="ICurrentUser.GetAsync"/> resolves the user, and is then cleared.
+    /// Lets a test delete the account between a write's resolution of the person and its transaction.
+    /// </summary>
+    internal Func<Task>? AfterCurrentUserResolved
+    {
+        get => Volatile.Read(ref afterCurrentUserResolved);
+        set => Volatile.Write(ref afterCurrentUserResolved, value);
+    }
+
     /// <summary>Applies the Identity, Groups and then Sessions migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
@@ -76,6 +89,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(HookMembership);
+        builder.ConfigureServices(HookCurrentUser);
         builder.ConfigureServices(services =>
         {
             _ = services.RemoveAll<TimeProvider>();
@@ -95,6 +109,17 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.Remove(original);
         _ = services.AddScoped<IGroupMembership>(provider => new HookedMembership(
             (IGroupMembership)ActivatorUtilities.CreateInstance(provider, implementation), () => BeforeMembershipLookup));
+    }
+
+    /// <summary>Wraps the Identity's current user in a pass-through that runs <see cref="AfterCurrentUserResolved"/> once.</summary>
+    private void HookCurrentUser(IServiceCollection services)
+    {
+        var original = services.Single(descriptor => descriptor.ServiceType == typeof(ICurrentUser));
+        var implementation = original.ImplementationType ?? throw new InvalidOperationException("ICurrentUser is registered by type.");
+        _ = services.Remove(original);
+        _ = services.AddScoped<ICurrentUser>(provider => new HookedCurrentUser(
+            (ICurrentUser)ActivatorUtilities.CreateInstance(provider, implementation),
+            () => Interlocked.Exchange(ref afterCurrentUserResolved, null)));
     }
 
     protected override void Dispose(bool disposing)
