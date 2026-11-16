@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { View } from "react-native";
 
 import type { AccountView } from "../../../services/auth/auth-session";
@@ -7,14 +7,16 @@ import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { BackBar } from "../../../ui/BackBar";
-import { DocumentIcon, ShieldIcon, SignOutIcon } from "../../../ui/MenuIcons";
+import { DocumentIcon, DownloadIcon, ShieldIcon, SignOutIcon } from "../../../ui/MenuIcons";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { meHref } from "../../groups/navigation";
 import { useMyProfile } from "../../profile/hooks/use-profile";
 import { accountScreenView } from "../model/account-view";
-import { accountRoutes } from "../navigation";
+import { accountRoutes, isAccountScreenReady } from "../navigation";
 import { AccountCard, AccountRow } from "./AccountRow";
+import { DeleteAccountCard } from "./DeleteAccountCard";
+import { ExportDataSheet } from "./ExportDataSheet";
 
 export interface AccountScreenProps {
   readonly account: AccountView;
@@ -66,9 +68,11 @@ function LegalRow({ url, label, icon }: LegalRowProps) {
   );
 }
 
-/** Screen 30, "Conta" (Conta.dc.html). Exporting and deleting arrive with part 3 (E3.16). */
+/** Screen 30, "Conta" (Conta.dc.html), with the export sheet (30a) and the way to the deletion (30b). */
 export function AccountScreen({ account }: AccountScreenProps) {
   const router = useRouter();
+  // Simple state of one field (frontend.md, rule 4): the sheet is mounted only while open.
+  const [exporting, setExporting] = useState(false);
   const { legalLinks, sessionEnder } = useServices();
   const profile = useMyProfile();
   const view = accountScreenView({ account, profile: profile.data, legalLinks });
@@ -104,6 +108,15 @@ export function AccountScreen({ account }: AccountScreenProps) {
         />
       </AccountCard>
       <AccountCard title={texts.more}>
+        {isAccountScreenReady("export") ? (
+          <AccountRow
+            icon={<DownloadIcon />}
+            label={texts.exportRow}
+            onPress={() => {
+              setExporting(true);
+            }}
+          />
+        ) : null}
         <LegalRow url={view.termsUrl} label={texts.terms} icon={<DocumentIcon />} />
         <LegalRow url={view.privacyUrl} label={texts.privacy} icon={<ShieldIcon />} />
         <AccountRow
@@ -116,6 +129,20 @@ export function AccountScreen({ account }: AccountScreenProps) {
           last
         />
       </AccountCard>
+      {isAccountScreenReady("delete") ? (
+        <DeleteAccountCard
+          onDelete={() => {
+            router.push(accountRoutes.deleteAccount);
+          }}
+        />
+      ) : null}
+      {exporting ? (
+        <ExportDataSheet
+          onClose={() => {
+            setExporting(false);
+          }}
+        />
+      ) : null}
     </Screen>
   );
 }

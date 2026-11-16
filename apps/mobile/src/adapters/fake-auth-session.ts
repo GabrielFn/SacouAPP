@@ -18,13 +18,15 @@ export type FakeAuthMethod =
   | "signInWithApple"
   | "signInWithEmail"
   | "createAccountWithEmail"
-  | "sendPasswordReset";
+  | "sendPasswordReset"
+  | "reauthenticate";
 
 /** One line per call, in order: what the tests check (the order of the sign-out, the logins). */
 export type FakeAuthCall =
   | { readonly method: FakeAuthMethod }
   | { readonly method: "signOut"; readonly reason: SignOutReason }
   | { readonly method: "forgetProviderAccount" }
+  | { readonly method: "deleteAccount" }
   | { readonly method: "getIdToken"; readonly forceRefresh: boolean };
 
 export interface FakeAuthSessionOptions {
@@ -109,6 +111,13 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
     },
     forgetProviderAccount() {
       record({ method: "forgetProviderAccount" });
+      return Promise.resolve();
+    },
+    // The password is never recorded: only that a new login was asked.
+    reauthenticate: () => run("reauthenticate"),
+    deleteAccount() {
+      record({ method: "deleteAccount" });
+      emit({ status: "signedOut", reason: "deleted" });
       return Promise.resolve();
     },
     fail(method, failure) {

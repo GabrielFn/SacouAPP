@@ -1,9 +1,12 @@
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
   getAuth,
   getIdToken,
   GoogleAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithCredential,
   signInWithEmailAndPassword,
@@ -23,9 +26,17 @@ function viewOf(user: User): FirebaseUserView {
   };
 }
 
+/** A refusal with a code, like the SDK's, for the adapter to read: nobody is signed in. */
+const NO_USER = Object.assign(new Error("no current user"), { code: "auth/no-current-user" });
+
 /** `@react-native-firebase/auth`, which keeps the session in the private area of the app (D5). */
 export function createFirebaseAuthSdk(): FirebaseAuthSdk {
   const auth = getAuth();
+  function current(): User {
+    const user = auth.currentUser;
+    if (user === null) throw NO_USER;
+    return user;
+  }
   return {
     onAuthStateChanged: (listener) =>
       onAuthStateChanged(auth, (user) => {
@@ -42,5 +53,16 @@ export function createFirebaseAuthSdk(): FirebaseAuthSdk {
     },
     sendPasswordReset: (email) => sendPasswordResetEmail(auth, email),
     signOut: () => signOut(auth),
+    async reauthenticateWithGoogleIdToken(idToken) {
+      await reauthenticateWithCredential(current(), GoogleAuthProvider.credential(idToken));
+    },
+    async reauthenticateWithPassword(password) {
+      const user = current();
+      if (user.email === null) throw NO_USER;
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    },
+    deleteCurrentUser: async () => {
+      await deleteUser(current());
+    },
   };
 }

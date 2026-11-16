@@ -11,4 +11,9 @@ export interface IdTokenProvider {
   getIdToken(options: { readonly forceRefresh: boolean }): Promise<string | null>;
   /** The API refused even a fresh token: the session is over (the `SessionEnder` signs out and clears). */
   onSessionExpired(): void;
+  /**
+   * `POST /v1/me` answered 410 `identity.account-deleted`: the server deleted this account and the phone
+   * still has it in Firebase. The `SessionEnder` deletes it there and ends the session (ADR 0056, D5).
+   */
+  onAccountDeleted(): void;
 }

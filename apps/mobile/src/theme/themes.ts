@@ -26,6 +26,8 @@ export const THEME_ROLES = [
   "infoFill",
   "infoText",
   "danger",
+  "dangerFill",
+  "dangerTitle",
   "panelSurface",
   "onPanel",
   "panelAccent",
@@ -49,6 +51,8 @@ const memberColors = {
   infoFill: palette.infoFill,
   infoText: palette.infoText,
   danger: palette.danger,
+  dangerFill: palette.dangerFill,
+  dangerTitle: palette.dangerTitle,
   // The dark panel of the round (Rodada.dc.html, RodadaJogador.dc.html): sand text, yellow counts.
   panelSurface: palette.night,
   onPanel: palette.sand,

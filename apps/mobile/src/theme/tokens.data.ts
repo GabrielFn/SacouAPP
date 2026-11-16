@@ -20,6 +20,9 @@ export const palette = {
   infoFill: "#E3EAFF",
   infoText: "#1340C0",
   danger: "#B42318",
+  // The "Excluir conta" card of the account (Conta.dc.html): pale red ground and its dark red title.
+  dangerFill: "#FDECEA",
+  dangerTitle: "#8C1D18",
   // The admin's level (Membros.dc.html .sug, NotaMembro.dc.html, RevisarNotas.dc.html): the pale yellow
   // of the pending strip and of a suggestion, its dashed brown border and its dark brown text.
   noticeFill: "#FFF8E1",

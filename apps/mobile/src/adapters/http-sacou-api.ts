@@ -11,6 +11,7 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createAccountOperations } from "./http-account-operations";
 import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
@@ -49,6 +50,11 @@ class NetworkFailure extends Error {}
 class OtherOriginRefused extends Error {}
 
 const NOT_SENT: ApiError = { kind: "unexpected", status: 0 };
+
+/** The 410 of `POST /v1/me` for an account deleted on the server (ADR 0056, D5). */
+function isAccountDeleted(error: ApiError): boolean {
+  return error.kind === "problem" && error.code === "identity.account-deleted";
+}
 const BODYLESS_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "DELETE"]);
 
 async function bodyOf(request: Request): Promise<string | null> {
@@ -174,7 +180,9 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
         return run(call, { ...state, renewedToken: true });
       case "sign-in": {
         const signed = await attempt(signInCall, token);
-        return signed.ok ? run(call, { ...state, signedIn: true }) : giveUp(signed.error);
+        if (signed.ok) return run(call, { ...state, signedIn: true });
+        if (isAccountDeleted(signed.error)) idTokens.onAccountDeleted();
+        return giveUp(signed.error);
       }
       case "give-up":
         return giveUp(result.error);
@@ -290,5 +298,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
     ...createProfileOperations(client, execute),
+    ...createAccountOperations(client, execute),
   };
 }

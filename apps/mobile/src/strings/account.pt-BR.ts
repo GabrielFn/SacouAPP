@@ -1,4 +1,4 @@
-/** Texts of the account (screen 30). Exporting and deleting arrive with E4.3, part 3. */
+/** Texts of the account (screen 30), the export sheet (30a) and the deletion (30b). */
 export const accountStrings = {
   title: "Conta",
   entry: "Conta",
@@ -17,4 +17,48 @@ export const accountStrings = {
   terms: "Termos de uso",
   privacy: "Política de privacidade",
   signOut: "Sair",
+  exportRow: "Exportar meus dados",
+  deleteTitle: "Excluir conta",
+  deleteNote: "Apaga seu perfil. Seu histórico nas partidas fica como Ex-jogador.",
+  deleteButton: "Excluir",
+  deleteButtonA11y: "Excluir conta",
+  exportSheet: {
+    title: "Exportar meus dados",
+    intro: "Vamos juntar tudo o que o Sacou guarda sobre você num arquivo:",
+    items: [
+      "Perfil: apelido e posições",
+      "Grupos e papéis",
+      "Presenças nas rodadas",
+      "Partidas e estatísticas",
+    ],
+    where: "O arquivo fica no seu celular. Você escolhe onde guardar.",
+    generate: "Gerar arquivo",
+    generating: "Gerando arquivo…",
+    notNow: "Agora não",
+    shareUnavailable: "Este celular não abriu o compartilhamento. Tente de novo.",
+  },
+  deleteScreen: {
+    back: "Configurações da conta",
+    title: "Excluir minha conta",
+    consequences: [
+      "Seu perfil, login e notas somem.",
+      'Nas partidas que você jogou, seu nome vira "Ex-jogador". Placar e estatísticas dos outros não mudam.',
+      "Não dá para desfazer.",
+    ],
+    blockerStart: "Você é o único admin ",
+    blockerOfNamed: "do ",
+    blockerUnnamed: "de um grupo",
+    blockerMore: (others: number) =>
+      others === 1 ? " e de mais 1 grupo" : ` e de mais ${String(others)} grupos`,
+    blockerEnd: ". Passe o papel para alguém antes de excluir.",
+    chooseAdmin: "Escolher outro admin",
+    confirmLabel: "Para confirmar, digite EXCLUIR",
+    confirmWord: "EXCLUIR",
+    submit: "Excluir minha conta",
+    submitting: "Excluindo…",
+    passwordLabel: "Sua senha",
+    passwordHelp: "Por segurança, digite sua senha para excluir a conta.",
+    passwordSubmit: "Confirmar e excluir",
+    retryBlockers: "Tentar de novo",
+  },
 } as const;

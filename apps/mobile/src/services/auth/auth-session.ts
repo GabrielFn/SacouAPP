@@ -38,6 +38,14 @@ export type AuthFailure =
 export type AuthResult = Result<null, AuthFailure>;
 
 /**
+ * The login asked again before deleting the account, by the provider of the session (ADR 0056, D4):
+ * Google opens the picker again; an e-mail account gives its password on the screen 30b.
+ */
+export type Reauthentication =
+  | { readonly provider: "google" | "apple" }
+  | { readonly provider: "password"; readonly password: string };
+
+/**
  * The session of the person on this phone. Its state lives only in the SDK, which keeps the tokens in
  * the private area of the app (ADR 0057, D5): the app reads it here and never copies it.
  */
@@ -60,4 +68,12 @@ export interface AuthSession {
   signOut(reason: SignOutReason): Promise<void>;
   /** Forgets the account chosen in the Google picker, so the next login asks again (account switch). */
   forgetProviderAccount(): Promise<void>;
+  /** A fresh login of the same account, for the API's `identity.recent-login-required`. */
+  reauthenticate(proof: Reauthentication): Promise<AuthResult>;
+  /**
+   * After the API deleted the account (204, or 410 on a later login): deletes the user in Firebase, revokes
+   * the Google grant and ends the session as `deleted`. If the SDK refuses, it signs out anyway, and the
+   * 410 of the next login tries again (ADR 0056, question 63).
+   */
+  deleteAccount(): Promise<void>;
 }

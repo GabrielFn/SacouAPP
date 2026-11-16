@@ -6,6 +6,7 @@ import type {
   AuthProvider,
   AuthResult,
   AuthSession,
+  Reauthentication,
   SessionSnapshot,
   SignOutReason,
 } from "../services/auth/auth-session";
@@ -31,6 +32,12 @@ export interface FirebaseAuthSdk {
   createAccountWithEmail(email: string, password: string): Promise<void>;
   sendPasswordReset(email: string): Promise<void>;
   signOut(): Promise<void>;
+  /** The same account again: `auth/user-mismatch` for another one. */
+  reauthenticateWithGoogleIdToken(idToken: string): Promise<void>;
+  /** With the e-mail of the current user, which the SDK wrapper reads. */
+  reauthenticateWithPassword(password: string): Promise<void>;
+  /** `user.delete()`: needs a recent login, the same 5 minutes of the API (ADR 0056, D4). */
+  deleteCurrentUser(): Promise<void>;
 }
 
 /** The native Google account picker (google-sign-in.ts). */
@@ -39,6 +46,8 @@ export interface GoogleAccountPicker {
   pick(): Promise<Result<string, AuthFailure>>;
   /** Forgets the chosen account, so the picker shows again. */
   forget(): Promise<void>;
+  /** Revokes the grant of the app to the Google account, after the account is deleted. */
+  revoke(): Promise<void>;
 }
 
 export interface FirebaseAuthSessionDeps {
@@ -99,6 +108,16 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
     listeners.notify();
   });
 
+  async function reauthenticateWith(proof: Reauthentication): Promise<AuthResult> {
+    if (proof.provider === "password") {
+      return attempt(() => sdk.reauthenticateWithPassword(proof.password));
+    }
+    if (proof.provider === "apple" || google === null) return err("provider-unavailable");
+    const picked = await google.pick();
+    if (!picked.ok) return picked;
+    return attempt(() => sdk.reauthenticateWithGoogleIdToken(picked.value));
+  }
+
   return {
     subscribe: (listener) => listeners.add(listener),
     snapshot: () => snapshot.value,
@@ -144,5 +163,25 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
         // The picker had no account: nothing to forget.
       }
     },
+    async reauthenticate(proof) {
+      const result = await reauthenticateWith(proof);
+      // A new ID token now, so the next call to the API carries the new `auth_time`.
+      if (result.ok) await currentUser.value?.getIdToken(true).catch(() => null);
+      return result;
+    },
+    async deleteAccount() {
+      pendingReason.value = "deleted";
+      try {
+        await sdk.deleteCurrentUser();
+      } catch {
+        // Refused (no recent login, no network): the session ends anyway, and the 410 of the next login
+        // asks again (ADR 0056, question 63).
+        await sdk.signOut().catch(() => {
+          pendingReason.value = null;
+        });
+      }
+      await google?.revoke().catch(() => null);
+    },
   };
+
 }

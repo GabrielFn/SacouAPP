@@ -29,6 +29,10 @@ export type TemplateChoice =
 export type MyProfile = Schemas["MyProfileResponse"];
 export type SaveMyProfileBody = Schemas["SaveMyProfileRequest"];
 export type PlayingPosition = Schemas["PlayingPosition"];
+/** Everything the server keeps about the person (ADR 0056, D9): an open object, shared as a file. */
+export type MyDataExport = Schemas["JsonObject"];
+/** A group where the person is the only admin, with someone else in it (ADR 0056, D3 and D10). */
+export type DeletionBlocker = Schemas["DeletionBlockerResponse"];
 
 export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
@@ -111,6 +115,15 @@ export interface SacouApi {
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */
   saveMyProfile(body: SaveMyProfileBody): Promise<ApiResult<MyProfile>>;
+  /** Screen 30a: built on the spot, `no-store`; the answer lives only in the export, never in the cache. */
+  exportMyData(): Promise<ApiResult<MyDataExport>>;
+  /** Screen 30b: a preview only; the `DELETE` judges again under the locks of the groups. */
+  getDeletionBlockers(): Promise<ApiResult<readonly DeletionBlocker[]>>;
+  /**
+   * 204 deletes the account on the server; 409 `identity.deletion-blocked` and 403
+   * `identity.recent-login-required` change nothing (ADR 0056, D4 and D7).
+   */
+  deleteMyAccount(): Promise<ApiResult<null>>;
   /** The same `requestId` in the same group answers the same `memberId` (ADR 0053, D5). Admin and co-admin. */
   addGuest(groupId: string, body: AddGuestBody): Promise<ApiResult<AddedGuest>>;
 }

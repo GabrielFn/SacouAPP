@@ -56,7 +56,9 @@ export function createSessionEnder({
       if (running.current !== null) return running.current;
       if (authSession.snapshot().status === "signedOut") return Promise.resolve();
       return once(async () => {
-        await authSession.signOut(reason);
+        // A deleted account leaves Firebase too; signing out is part of it (ADR 0056, question 63).
+        if (reason === "deleted") await authSession.deleteAccount();
+        else await authSession.signOut(reason);
         await forget();
       });
     },
@@ -74,6 +76,9 @@ export function sessionIdTokens(authSession: AuthSession, ender: SessionEnder): 
     getIdToken: (options) => authSession.getIdToken(options),
     onSessionExpired: () => {
       void ender.end("expired");
+    },
+    onAccountDeleted: () => {
+      void ender.end("deleted");
     },
   };
 }

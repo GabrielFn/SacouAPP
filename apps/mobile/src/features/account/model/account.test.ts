@@ -60,11 +60,11 @@ describe("screen 30 (question 60)", () => {
     ).toBe("");
   });
 
-  test("exporting and deleting wait for part 3", () => {
-    expect(isAccountScreenReady("export")).toBe(false);
-    expect(isAccountScreenReady("delete")).toBe(false);
-    expect([...PENDING_ACCOUNT_SCREENS]).toEqual(["export", "delete"]);
-    expect(isAccountScreenReady("export", new Set())).toBe(true);
+  test("exporting and deleting are ready since part 3; a pending screen still hides", () => {
+    expect(isAccountScreenReady("export")).toBe(true);
+    expect(isAccountScreenReady("delete")).toBe(true);
+    expect([...PENDING_ACCOUNT_SCREENS]).toEqual([]);
+    expect(isAccountScreenReady("export", new Set(["export"]))).toBe(false);
   });
 
   test("the e-mail and the provider come from the phone: the view has no UID", () => {
