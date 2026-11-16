@@ -1,3 +1,4 @@
+import { authStrings } from "./auth.pt-BR";
 import { courtStrings } from "./court.pt-BR";
 import { createGroupStrings } from "./create-group.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
@@ -8,6 +9,7 @@ import { roundsStrings } from "./rounds.pt-BR";
 import { settingsStrings } from "./settings.pt-BR";
 
 export const strings = {
+  auth: authStrings,
   court: courtStrings,
   groups: groupsStrings,
   createGroup: createGroupStrings,

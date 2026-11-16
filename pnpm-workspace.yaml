@@ -4,10 +4,16 @@ packages:
 
 allowBuilds:
   unrs-resolver: false
+  # Postinstall scripts of the JS Firebase SDK that @react-native-firebase pulls in; not needed (E4.3).
+  "@firebase/util": false
+  protobufjs: false
 
 # Advisory fix, see docs/seguranca/varredura-ci.md.
 overrides:
   eslint-plugin-functional>deepmerge-ts: 8.0.2
+  # GHSA-m9gg-hp2v-232j: the JS Firebase SDK under @react-native-firebase pins grpc-js 1.9; the app
+  # never loads Firestore (the native SDK does the work), so the patched line is safe here (E4.3).
+  "@firebase/firestore>@grpc/grpc-js": 1.13.7
 
 # Each entry needs a reason and an expiry in scripts/npm-audit-exceptions.json (test:tooling checks).
 audit:

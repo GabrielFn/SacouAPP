@@ -22,11 +22,19 @@ import { expoFontLoader } from "../adapters/expo-font-loader";
 import { bindAppStateFocus } from "../adapters/app-state-focus";
 import { expoAppVersion } from "../adapters/expo-app-version";
 import { createExpoCacheStore } from "../adapters/expo-cache-store";
-import { createFakeIdTokenProvider, FAKE_ID_TOKEN } from "../adapters/fake-id-token-provider";
+import { createFirebaseAuthSdk } from "../adapters/firebase-auth-sdk";
+import { createFirebaseAuthSession } from "../adapters/firebase-auth-session";
+import { createGoogleAccountPicker } from "../adapters/google-sign-in";
 import { fetchHttpTransport } from "../adapters/fetch-http-transport";
 import { createHttpSacouApi } from "../adapters/http-sacou-api";
 import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
 import { buildApiBaseUrl } from "../config/api-url";
+import { buildGoogleWebClientId } from "../config/google-sign-in";
+import { buildLegalLinks } from "../config/legal-links";
+import { SIGNED_IN_ROUTES, SIGNED_OUT_ROUTES } from "../features/auth/navigation";
+import { useSession } from "../services/auth/use-session";
+import { createSessionEnder, sessionIdTokens } from "../services/session/end-session";
+import { useSessionCleanup } from "../services/session/use-session-cleanup";
 import { createSampleRoster } from "../features/court/dev/sample-roster";
 import { DatabaseGate } from "../services/DatabaseGate";
 import { createCachePersister, createCacheSession } from "../services/query/cache-persister";
@@ -38,9 +46,18 @@ import { ThemeProvider } from "../theme/theme-context";
 const queryClient = createSacouQueryClient();
 const cachePersister = createCachePersister(createExpoCacheStore());
 const networkStatus = createNetInfoNetworkStatus();
-// Until the login (E4.3) brings Firebase, only a development build has a token, and a release build
-// never calls the API.
-const idTokenProvider = createFakeIdTokenProvider(__DEV__ ? FAKE_ID_TOKEN : null);
+const googleWebClientId = buildGoogleWebClientId();
+// The session lives in the native Firebase SDK; the app only reads it (ADR 0057, D2 and D5).
+const authSession = createFirebaseAuthSession({
+  sdk: createFirebaseAuthSdk(),
+  google: googleWebClientId === null ? null : createGoogleAccountPicker(googleWebClientId),
+});
+const cacheSession = createCacheSession(queryClient, cachePersister);
+const sessionEnder = createSessionEnder({
+  authSession,
+  queries: queryClient,
+  stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore },
+});
 bindAppStateFocus();
 
 const realServices: Services = {
@@ -59,7 +76,7 @@ const realServices: Services = {
   sacouApi: createHttpSacouApi({
     baseUrl: buildApiBaseUrl(__DEV__),
     transport: fetchHttpTransport,
-    idTokens: idTokenProvider,
+    idTokens: sessionIdTokens(authSession, sessionEnder),
   }),
   networkStatus,
   shareSheet: reactNativeShareSheet,
@@ -68,15 +85,43 @@ const realServices: Services = {
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,
   inviteBaseUrl: buildInviteBaseUrl(__DEV__),
-  cacheSession: createCacheSession(queryClient, cachePersister),
+  cacheSession,
+  authSession,
+  sessionEnder,
+  legalLinks: buildLegalLinks(),
 };
+
+/**
+ * The gate of ADR 0057 (D3): nothing while the SDK reads the session (the splash stays, the login does
+ * not blink), the login alone when signed out, and every other route when signed in.
+ */
+function SessionStack() {
+  const session = useSession();
+  useSessionCleanup(session);
+  if (session.status === "unknown") return null;
+  const signedIn = session.status === "signedIn";
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={signedIn}>
+        {SIGNED_IN_ROUTES.map((name) => (
+          <Stack.Screen key={name} name={name} />
+        ))}
+      </Stack.Protected>
+      <Stack.Protected guard={!signedIn}>
+        {SIGNED_OUT_ROUTES.map((name) => (
+          <Stack.Screen key={name} name={name} />
+        ))}
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 function FontGate() {
   const { fontLoader } = useServices();
   const loaded = fontLoader.useFontsLoaded();
   return loaded ? (
     <DatabaseGate>
-      <Stack screenOptions={{ headerShown: false }} />
+      <SessionStack />
     </DatabaseGate>
   ) : null;
 }
