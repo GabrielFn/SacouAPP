@@ -23,7 +23,9 @@ export function RoundCardStatus({ round }: RoundCardStatusProps) {
         paddingTop: tokens.spacing.xs,
       }}
     >
-      {round.pill === null ? null : <StatusPill label={round.pill.label} status={round.pill.kind} />}
+      {round.pill === null ? null : (
+        <StatusPill label={round.pill.label} status={round.pill.kind} />
+      )}
       <Text variant="muted" tabular>
         {round.countText}
       </Text>

@@ -86,7 +86,9 @@ export function cardCountText(round: RoundSummary): string {
   const going = String(round.goingCount);
   if (round.capacity === null) return cards.confirmed(going);
   const count = `${going}/${String(round.capacity)}`;
-  return round.waitlistCount > 0 ? cards.withWaitlist(count, round.waitlistCount) : cards.confirmed(count);
+  return round.waitlistCount > 0
+    ? cards.withWaitlist(count, round.waitlistCount)
+    : cards.confirmed(count);
 }
 
 /** The day strip: "Ter" and "20h30", in the group's own local date and time. */

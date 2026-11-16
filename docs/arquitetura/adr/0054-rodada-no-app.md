@@ -1,6 +1,6 @@
 # ADR 0054 · Rodada no app
 
-**Status:** aceito (14/11/2026). **Tarefa:** E4.6, parte 1 (telas 20 e 06 sem a lista). Plano em [`docs/estado/tarefas/E4.6.md`](../../estado/tarefas/E4.6.md). As partes 2 (telas 26 e 21) e 3 (21a, cards, edição) completam este ADR.
+**Status:** aceito (14/11/2026). **Tarefa:** E4.6, parte 1 (telas 20 e 06 sem a lista). Plano em [`docs/estado/tarefas/E4.6.md`](../../estado/tarefas/E4.6.md). As partes 2 (telas 26 e 21, 15/11) e 3 (21a, cards, edição, 16/11) completam este ADR.
 
 ## Contexto
 
@@ -30,6 +30,13 @@ A API de rodadas (E3.4) e o motor de configurações (E3.1) estão prontos; falt
 17. **Textos de tipo de membro** ("Mensalista", "Avulso", "Sem conta") na 21 vêm de `membersStrings`: os textos de rodada nunca dizem "Avulso" (o campo saiu do piloto, item 9, e um teste confere).
 18. **Tokens do painel escuro:** `panelSurface`, `onPanel` e `panelAccent` (noite, areia e amarelo) no tema, no lugar de `colors.text` e `palette.ballYellow` direto; contraste conferido em teste.
 19. **Fica para a Parte 3:** a 21a e o bloco do convidado na 21, os cards de rodada (E4.4) e o "Editar rodada". "Abrir no WhatsApp do grupo" some no piloto (pergunta 49).
+
+## Parte 3 · 21a, cards e "Editar rodada" (16/11/2026)
+
+20. **Convidado sem conta (21a):** `addGuest` (`POST /v1/groups/{groupId}/guests`, ADR 0053) e, com o `memberId` da resposta, `setMemberAttendance(going)` na rodada. O `requestId` nasce ao abrir a folha (porta `IdGenerator`, agora em `services/id`) e só muda ao fechar: tentar de novo depois de erro ou de rede caída reusa o mesmo, e o servidor devolve o mesmo convidado. Nome aparado e em NFC, recusado pela mesma regra do servidor (`checkDisplayText`, até 20). A nota usa o passo de meio ponto de `ui/LevelSheet.tsx` (o da 19a); o rascunho vive só no reducer da folha aberta (`add-player.reducer.ts`), nunca em chave de consulta, rota ou cache, e fechar descarta. Sem nota, o corpo leva `level: null` (o sorteio usa 3,0, ADR 0047).
+21. **"Editar rodada"** é a tela 20 com `?roundId=`: o formulário começa da rodada pelo inicializador do `useReducer` (sem a ação `round-loaded` do plano e sem efeito que copia a consulta, regra 1), esconde "Repetir toda semana" e o botão vira "Salvar". O `PATCH` leva a camada inteira (`{}` limpa). `round-closed` e `round-date-taken` viram texto e relêem a rodada; um 403 relê o grupo e o papel. O link fica no rodapé do card do grupo (Grupos.dc.html), só para `ManageRounds` e só com uma próxima rodada.
+22. **Cards de rodada** no Início (03) e em "Seus grupos" (17): um `listRounds` por grupo com `useQueries` (a mesma chave das telas de rodada), derivado a cada render (`round-cards.ts`). A próxima rodada é a primeira `scheduled` que não começou; os grupos se ordenam por ela, e os sem rodada vão para o fim na ordem da API. "N rodadas essa semana" conta as rodadas de agora até o fim do domingo, no relógio do aparelho. Pílulas do canvas: "Vou" (vaga, `promoted` incluído), "Na espera · 2º" e "Lista cheia" (lista cheia sem você); sem pílula nos outros casos. A faixa do dia usa a data e a hora locais da rodada e uma das três cores do canvas (laranja, noite, amarelo), escolhida pelo `groupId`, com contraste AA em teste; sem rodada, a faixa neutra com traço.
+23. **Reducer da 20 com `switch`:** o mapa de tratadores da Parte 1 virou dois `switch` exaustivos sem `default` (campos e painéis), com o teste `@ts-expect-error`. A `TimeSheet` edita um rascunho próprio, como a `NumberDraftSheet`: só uma hora válida chega ao reducer, e fechar pelo fundo descarta.
 
 ## Consequências
 

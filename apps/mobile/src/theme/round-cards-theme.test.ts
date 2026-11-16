@@ -12,9 +12,12 @@ function ratio(first: string, second: string): number {
 }
 
 describe("the colors of the round cards", () => {
-  test.each(dayStripSwatches)("the day strip $fill keeps AA with its text $text", ({ fill, text }) => {
-    expect(ratio(fill, text)).toBeGreaterThanOrEqual(AA_TEXT);
-  });
+  test.each(dayStripSwatches)(
+    "the day strip $fill keeps AA with its text $text",
+    ({ fill, text }) => {
+      expect(ratio(fill, text)).toBeGreaterThanOrEqual(AA_TEXT);
+    },
+  );
   test("the Lista cheia pill keeps AA", () => {
     expect(ratio(palette.goingFill, palette.goingText)).toBeGreaterThanOrEqual(AA_TEXT);
   });

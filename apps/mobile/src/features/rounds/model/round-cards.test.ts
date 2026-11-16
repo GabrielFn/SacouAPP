@@ -17,7 +17,12 @@ import {
 // Monday 2 November 2026, 10h local.
 const NOW = new Date(2026, 10, 2, 10, 0).getTime();
 
-function summary(id: string, localDate: string, localTime: string, extra: Partial<RoundSummary> = {}) {
+function summary(
+  id: string,
+  localDate: string,
+  localTime: string,
+  extra: Partial<RoundSummary> = {},
+) {
   const [year = 0, month = 1, day = 1] = localDate.split("-").map(Number);
   const [hours = 0, minutes = 0] = localTime.split(":").map(Number);
   const round: RoundSummary = {
@@ -73,7 +78,11 @@ describe("roundCardsOf", () => {
   it("orders the groups by their next round and puts the groups without one at the end", () => {
     const groups = [group("a", "Sem rodada"), group("b", "Sexta"), group("c", "Quarta")];
     const cards = roundCardsOf(groups, [[], [FRIDAY], [WEDNESDAY]], NOW);
-    expect(cards.groups.map((entry) => entry.group.name)).toEqual(["Quarta", "Sexta", "Sem rodada"]);
+    expect(cards.groups.map((entry) => entry.group.name)).toEqual([
+      "Quarta",
+      "Sexta",
+      "Sem rodada",
+    ]);
     expect(cards.groups[2]?.round).toBeNull();
     expect(cards.weekText).toBe("2 rodadas essa semana.");
   });
@@ -86,15 +95,18 @@ describe("roundCardsOf", () => {
 
 describe("cardPill", () => {
   it("says Vou with you in a place, promoted included", () => {
-    expect(cardPill(summary("r", "2026-11-04", "19:00", { me: { status: "going", position: 3 } })))
-      .toEqual({ kind: "confirmed", label: "Vou" });
+    expect(
+      cardPill(summary("r", "2026-11-04", "19:00", { me: { status: "going", position: 3 } })),
+    ).toEqual({ kind: "confirmed", label: "Vou" });
     expect(
       cardPill(summary("r", "2026-11-04", "19:00", { me: { status: "promoted", position: 12 } }))
         ?.label,
     ).toBe("Vou");
   });
   it("says Na espera · 2º in the waitlist", () => {
-    const round = summary("r", "2026-11-04", "19:00", { me: { status: "waitlisted", position: 2 } });
+    const round = summary("r", "2026-11-04", "19:00", {
+      me: { status: "waitlisted", position: 2 },
+    });
     expect(cardPill(round)).toEqual({ kind: "waiting", label: "Na espera · 2º" });
   });
   it("says Lista cheia when you are out of a full list, and nothing otherwise", () => {

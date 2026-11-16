@@ -66,7 +66,9 @@ export function HomeRoundCards({ groups, emptyActions, onOpenRound }: HomeRoundC
     round === null ? [] : [{ name: group.name, round }],
   );
   if (withRound.length === 0) {
-    return <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={emptyActions} />;
+    return (
+      <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={emptyActions} />
+    );
   }
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
