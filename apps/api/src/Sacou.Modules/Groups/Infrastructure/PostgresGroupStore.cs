@@ -17,15 +17,28 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
     /// <summary>First key of the two-key advisory lock: "memberships of one person", so it never collides with another lock family.</summary>
     private const int MembershipLockFamily = 3_202;
 
-    public async Task<Result> CreateAsync(Group group, UserId creator, Func<int, Result> admission, StoredSettings settings, CancellationToken cancellationToken)
+    public async Task<Result> CreateAsync(
+        Group group,
+        UserId creator,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<int, Result> admission,
+        StoredSettings settings,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(stillRegistered);
         ArgumentNullException.ThrowIfNull(admission);
         ArgumentNullException.ThrowIfNull(settings);
         var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
             await LockPersonAsync(creator, cancellationToken).ConfigureAwait(false);
+            var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
+            if (registered.IsFailure)
+            {
+                return registered;
+            }
+
             var admitted = admission(await CountActiveGroupsAsync(creator, cancellationToken).ConfigureAwait(false));
             if (admitted.IsFailure)
             {
