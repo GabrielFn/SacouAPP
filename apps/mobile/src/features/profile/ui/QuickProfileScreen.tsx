@@ -9,6 +9,7 @@ import { ErrorStrip } from "../../../ui/ErrorStrip";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
+import { accountRoutes } from "../../account/navigation";
 import { useQuickProfile, type QuickProfileMode } from "../hooks/use-quick-profile";
 import { NICKNAME_FIELD_LIMIT } from "../model/nickname";
 import type { ProfileFormState } from "../model/profile-form.reducer";
@@ -48,6 +49,16 @@ function QuickProfileFooter({ mode, disabled, onSubmit, onSkip }: QuickProfileFo
   );
 }
 
+export interface QuickProfileHeaderProps {
+  readonly mode: QuickProfileMode;
+}
+
+/** The brand on the first access; the way back to the account in edit mode. */
+function QuickProfileHeader({ mode }: QuickProfileHeaderProps) {
+  if (mode === "onboarding") return <AppHeader />;
+  return <BackBar title={strings.profile.title} fallbackHref={accountRoutes.account} />;
+}
+
 /** Screen 27, "Seu perfil de quadra" (Onboarding.dc.html). */
 export function QuickProfileScreen({ mode, initial, onSaved }: QuickProfileScreenProps) {
   const model = useQuickProfile(initial, onSaved);
@@ -68,7 +79,7 @@ export function QuickProfileScreen({ mode, initial, onSaved }: QuickProfileScree
         </>
       }
     >
-      {mode === "edit" ? <BackBar title={profile.title} fallbackHref="/account" /> : <AppHeader />}
+      <QuickProfileHeader mode={mode} />
       <View style={{ gap: tokens.spacing.xs }}>
         <Text variant="display" displaySize="displayTitleSmall" accessibilityRole="header">
           {profile.title}
