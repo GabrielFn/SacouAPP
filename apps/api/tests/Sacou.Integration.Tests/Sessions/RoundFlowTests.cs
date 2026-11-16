@@ -229,6 +229,7 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Contains("ux_rounds_series_date", indexes, StringComparison.Ordinal);
         Assert.Contains("ux_attendances_round_sequence", indexes, StringComparison.Ordinal);
         Assert.Contains("pk_attendances", indexes, StringComparison.Ordinal);
+        Assert.Contains("ix_attendances_member", indexes, StringComparison.Ordinal);
         Assert.Equal("1", await ScalarAsync(connection, "SELECT count(*)::text FROM sessions.\"__ef_migrations_history\" WHERE \"MigrationId\" LIKE '%CreateRounds'"));
 
         await Assert.ThrowsAsync<PostgresException>(() => ExecuteAsync(connection,

@@ -58,6 +58,9 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                     b.HasKey("RoundId", "MemberId")
                         .HasName("pk_attendances");
 
+                    b.HasIndex("MemberId")
+                        .HasDatabaseName("ix_attendances_member");
+
                     b.HasIndex("RoundId", "Sequence")
                         .IsUnique()
                         .HasDatabaseName("ux_attendances_round_sequence")

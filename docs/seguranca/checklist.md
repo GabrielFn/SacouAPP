@@ -13,16 +13,16 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | V3 Web Frontend Security | Pendente | E3.12 |
 | V4 API and Web Service | Parcial (E3.1, E3.2): política de fallback exige login em todo endpoint, `AllowAnonymous` só em `Program.cs` (guarda de texto); 401, 503 e 500 em `ProblemDetails` sem detalhe; erro de regra em `ProblemDetails` com `code` e sem eco do valor (`Sacou.Http`, ADR 0039); corpo com campo desconhecido ou enum numérico recusado em toda a API; corpo das rotas de grupo limitado a 4 KB, com o 413 testado no Kestrel; papel e tipo obrigatórios no corpo (`JsonRequired`); token de convite só no corpo, nunca na URL, e a resposta que o mostra com `Cache-Control: no-store`; sem CORS (app nativo). Pendente: SignalR, webhooks e limite de requisições | E3.7 (SignalR), E3.15, E5.3 |
 | V5 File Handling | Pendente | E3.14 |
-| V6 Authentication | Parcial (E3.1): senha e tentativas com o Firebase (bloqueio e proteção contra enumeração), só `password`, `google.com` e `apple.com`, sem anônimo nem telefone. Pendente: sessão da página web e login no app | E3.12, E4.3 |
-| V7 Session Management | Parcial (E3.1): sessão é o ID token do Firebase (1 h), sem sessão própria na API; sem revogação, risco aceito até a E3.16. Pendente: guarda do token no app, sessão web, token de placar | E3.8, E3.12, E3.16, E4.3 |
+| V6 Authentication | Parcial (E3.1): senha e tentativas com o Firebase (bloqueio e proteção contra enumeração), só `password`, `google.com` e `apple.com`, sem anônimo nem telefone. Login no app (E4.3, ADR 0057): Google nativo e e-mail pelo SDK, mensagens sem oráculo de conta. Pendente: sessão da página web | E3.12 |
+| V7 Session Management | Parcial (E3.1): sessão é o ID token do Firebase (1 h), sem sessão própria na API; sem revogação, risco aceito até a E3.16. Guarda do token no app pelo SDK nativo, saída que limpa a sessão local (E4.3, ADR 0057). Pendente: sessão web, token de placar | E3.8, E3.12, E3.16 |
 | V8 Authorization | Parcial (E3.2): autorização por recurso no Groups, com filtro por grupo segura por padrão (membro ativo lido do banco a cada requisição, uma permissão por rota, teste de guarda sobre todas as rotas da API), 404 idêntico para não membro, tabela de permissões testada nas 40 combinações e matriz ator × rota sobre o Postgres real (M1, as 14 rotas; E3.3: mais 6 rotas de configuração e modelos, 60 linhas, e IDOR de modelo salvo). Regras de alvo no agregado (D4, M7), papel de quem age conferido de novo sob a trava por grupo, IDOR de membro (M6), último admin sob corrida (C1 a C3), IDOR de convite (M10), convites revogados de quem perde o poder, aceite sob a trava (C4 a C6). Sessions (E3.4): filtro próprio com as mesmas respostas do Groups, uma capacidade por rota, rodada e série por `(group_id, id)`, IDOR de membro alvo, capacidade conferida de novo sob a trava da rodada e matriz de 10 atores por 8 rotas. Pendente: placar, pagamentos e planos | E3.8, E3.10, E3.15 |
 | V4 e V8, convidado sem conta (E3.5, ADR 0053) | Atendido: controle de acesso por permissão `ManageGuests` (admin e co-admin), nota só com `ManageMemberLevels` (regra no agregado, `Group.Guests.cs`, sem teste próprio: hoje os dois papéis coincidem), convidado de outro grupo igual a inexistente; corpo limitado a 4 KB; nome do convidado fora de log e apagado na remoção. Testes: matriz e IDOR em `GuestsAuthorizationTests.cs`, `GuestsRequestSizeTests.cs`, L1 e L3 de `GuestsBehaviourTests.cs` | E3.5 |
 | V9 Self-contained Tokens | Parcial (E3.1): só RS256, `kid` obrigatório e só a chave dele, chaves só da URL fixa do Google, `aud` string única, `iss` exato, `exp`/`iat`/`auth_time` obrigatórios com 60 s, `nbf`, sem tenant, até 8 KB, JWE recusado; matriz R1 a R24 com controle positivo. Pendente: token de placar | E3.8 |
-| V10 OAuth and OIDC | Parcial (E3.1): a API é só resource server do Firebase e confere emissor, audiência e provedor. Pendente: o fluxo no app (Google e Apple pelo SDK) | E4.3 |
+| V10 OAuth and OIDC | Parcial (E3.1): a API é só resource server do Firebase e confere emissor, audiência e provedor. Google pelo SDK nativo no app (E4.3); Apple depois do piloto (pergunta 58) | E4.3 |
 | V11 Cryptography | Parcial (E3.2): token de convite de 256 bits de `RandomNumberGenerator`, em Base64url, guardado só como SHA-256 (vetor fixo testado), nunca em log nem em outra resposta (ADR 0040, D10). Pendente: token do placar e pagamentos | E3.8, E3.10 |
 | V12 Secure Communication | Pendente | E5.1 |
 | V13 Configuration | Parcial: CI e dependências conferidas; produção pendente | E0.9, E5.1, E5.3 |
-| V14 Data Protection | Pendente | E3.10, E3.16, E5.3, E6.2 |
+| V14 Data Protection | Parcial (E3.16 parte 1: exportação só da própria pessoa, `no-store`) | E3.10, E3.16, E5.3, E6.2 |
 | V15 Secure Coding and Architecture | Parcial: dependências e análise estática conferidas; domínio C# sem infraestrutura e eventos só com `MemberId`, com testes de arquitetura e de reflexão (E2.10) | E0.9, E6.2 |
 | V16 Security Logging and Error Handling | Pendente | E5.2 |
 | V17 WebRTC | Pendente | Nenhum documento prevê WebRTC; confirmar se não se aplica na E6.2 |
@@ -31,11 +31,11 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 
 | Grupo | Status | Tarefas que cobrem |
 |---|---|---|
-| MASVS-STORAGE | Pendente | E4.3, E4.9 |
+| MASVS-STORAGE | Parcial (E4.3): credencial só no SDK nativo, `allowBackup: false`, sem token em log ou cache; senha só em memória. Pendente: `sacou.db` da quadra no logout | E4.9, E4.11 |
 | MASVS-CRYPTO | Pendente | E4.3, E4.9 |
-| MASVS-AUTH | Pendente | E3.8, E4.3 |
+| MASVS-AUTH | Parcial (E4.3): login pelo Firebase, saída que invalida a sessão local, sessão expirada termina uma vez. Pendente: reautenticação para excluir (E3.16), placar | E3.8, E3.16 |
 | MASVS-NETWORK | Pendente | E4.2, E4.11 |
 | MASVS-PLATFORM | Pendente | E4.9, E4.17 (E4.14 e E4.16 pós-piloto, ADR 0046) |
 | MASVS-CODE | Parcial: dependências conferidas; versão mínima pendente | E0.9, E5.3 (versão mínima), E5.4 |
 | MASVS-RESILIENCE | Pendente | E5.4, E6.2 |
-| MASVS-PRIVACY | Pendente. Motor: eventos e estatísticas só com `MemberId`, sem nome nem nível (M2) | E3.16, E4.13, E5.2, E6.2 |
+| MASVS-PRIVACY | Parcial (E3.16 parte 1: exportação dos dados pessoais).  Motor: eventos e estatísticas só com `MemberId`, sem nome nem nível (M2) | E3.16, E4.13, E5.2, E6.2 |

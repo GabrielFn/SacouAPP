@@ -72,6 +72,22 @@ export function courtLintCases(prefix) {
     [`${adapters}fetch.ts`, 'export const call = fetch("/");\n', CLEAN],
     [`${adapters}openapi.ts`, 'import "openapi-fetch";\n', CLEAN],
     [`${adapters}netinfo.ts`, 'import "@react-native-community/netinfo";\n', CLEAN],
+    // Firebase and the Google picker are service SDKs: adapters only (E4.3).
+    [`${groups}firebase.ts`, 'import "@react-native-firebase/auth";\n', NO_RESTRICTED_IMPORTS],
+    [
+      `${screen}google.tsx`,
+      'import "@react-native-google-signin/google-signin";\n',
+      NO_RESTRICTED_IMPORTS,
+    ],
+    [
+      `${groups}firebase-lazy.ts`,
+      'export const f = import("@react-native-firebase/auth");\n',
+      NO_RESTRICTED_SYNTAX,
+    ],
+    [`${adapters}firebase.ts`, 'import "@react-native-firebase/auth";\n', CLEAN],
+    // No fake adapter in a route, the root layout above all (ADR 0057, D10).
+    [`${screen}fake.tsx`, 'import "../adapters/fake-auth-session";\n', NO_RESTRICTED_IMPORTS],
+    [`${screen}real.tsx`, 'import "../adapters/firebase-auth-session";\n', CLEAN],
     // Node.js is for tests only, everywhere in the app.
     [`${ui}node.ts`, 'import "node:fs";\n', NO_RESTRICTED_IMPORTS],
     [`${ui}node-bare.ts`, 'import "path";\n', NO_RESTRICTED_IMPORTS],

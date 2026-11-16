@@ -71,11 +71,18 @@ const NO_DEFAULT_IN_REDUCER = {
 const FREE_EXPO = "(router|status-bar)";
 const FREE_REACT_NATIVE = "(svg|safe-area-context|reanimated|gesture-handler|screens)";
 const SDK_IMPORTS = {
-  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/|openapi-fetch$)`,
+  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/|@react-native-firebase/|@react-native-google-signin/|openapi-fetch$)`,
   message: "Device and service SDKs are used only in src/adapters/, behind an interface.",
 };
 
 // react-native itself is free, but its device APIs are not: they have an adapter and an interface.
+// The routes run the real services only: a fake adapter in src/app/ would ship in the APK (ADR 0057).
+const MOBILE_ROUTE_FILES = [`apps/mobile/src/app/**/*.${TS_EXTENSIONS}`];
+const FAKE_IMPORTS = {
+  regex: "(^|/)adapters/fake-",
+  message: "Routes use the real adapters; fakes are for tests (ADR 0057, D10).",
+};
+
 const DEVICE_API_NAMES = ["BackHandler", "Vibration", "AccessibilityInfo"];
 const DEVICE_API_PATHS = [
   {
@@ -205,6 +212,16 @@ export function mobileFrontendBlocks({ testFiles, dataRestrictions }) {
         "@typescript-eslint/no-restricted-imports": [
           "error",
           { patterns: [SDK_IMPORTS, NODE_IMPORTS], paths: DEVICE_API_PATHS },
+        ],
+      },
+    },
+    {
+      files: MOBILE_ROUTE_FILES,
+      ignores: [...testFiles, ...FIXTURE_FILES],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          { patterns: [SDK_IMPORTS, NODE_IMPORTS, FAKE_IMPORTS], paths: DEVICE_API_PATHS },
         ],
       },
     },

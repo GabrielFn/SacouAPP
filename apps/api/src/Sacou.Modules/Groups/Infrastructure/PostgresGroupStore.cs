@@ -43,13 +43,8 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
 
     public async Task<IReadOnlyList<MemberGroup>> ListActiveGroupsAsync(UserId user, CancellationToken cancellationToken)
     {
-        var rows = await ActiveMembers()
-            .Where(member => member.UserId == user.Value)
-            .Join(database.Groups.AsNoTracking(), member => member.GroupId, group => group.Id, (member, group) => new { member, group.Name })
-            .OrderBy(pair => pair.member.JoinedAt).ThenBy(pair => pair.member.Id)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return [.. rows.Select(pair => new MemberGroup(
-            new GroupId(pair.member.GroupId), RowMapping.ToName(pair.Name), RowMapping.ToMember(pair.member)))];
+        var rows = await WithGroupNamesAsync(ActiveMembers().Where(member => member.UserId == user.Value), cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(row => new MemberGroup(row.GroupId, row.Name, row.Member))];
     }
 
     public async Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken)

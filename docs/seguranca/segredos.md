@@ -6,6 +6,8 @@ Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes s
 
 **Não são segredos** (E3.1, [ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)): `Firebase:ProjectId` (`sacou-79493`) é configuração pública, vai dentro do app e fica versionado em `apps/api/src/Sacou.Api/appsettings.json`; a variável `Firebase__ProjectId` só se um ambiente precisar trocar. `Database:MigrateOnStartup` também não.
 
+**Também não são segredos** (E4.3, [ADR 0057](../arquitetura/adr/0057-login-e-sessao-no-app.md)): `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (client ID web do Firebase, vai dentro do APK; fica no `.env` local e nas variáveis do EAS), `EXPO_PUBLIC_TERMS_URL` e `EXPO_PUBLIC_PRIVACY_URL`. O `google-services.json` também é público (vai dentro do APK) e **vai ser versionado** em `apps/mobile/google-services.json` (decisão de 15/11, que substitui a pergunta 8), só depois de restringir a chave de API ao pacote `com.sacou.app` e ao SHA-1 e com exceção do gitleaks só para esse arquivo.
+
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
 | `POSTGRES_PASSWORD` | Postgres local do `docker-compose.yml`, só desenvolvimento; sem segredo no GitHub Actions (a CI usa o marcador de `.env.example`) | `.env` | E0.6 |

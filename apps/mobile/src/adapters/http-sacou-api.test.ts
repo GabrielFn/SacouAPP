@@ -463,6 +463,30 @@ describe("the token (P2, P3, H2)", () => {
     expect(tokens.sessionExpiredCount()).toBe(1);
   });
 
+  test("a renewal that rejects after a 401 is offline and does not end the session", async () => {
+    const onSessionExpired = vi.fn();
+    const getIdToken = vi.fn((options: { readonly forceRefresh: boolean }) =>
+      options.forceRefresh
+        ? Promise.reject(new Error("network-request-failed"))
+        : Promise.resolve("token"),
+    );
+    const http = createFakeHttpTransport();
+    const api = createHttpSacouApi({
+      baseUrl: BASE,
+      transport: http.transport,
+      idTokens: { getIdToken, onSessionExpired },
+      now: () => NOW,
+      timeoutMs: 20,
+    });
+    http.enqueue(problem(401));
+
+    expect(await api.listMyGroups()).toEqual({ ok: false, error: { kind: "offline" } });
+
+    expect(getIdToken).toHaveBeenLastCalledWith({ forceRefresh: true });
+    expect(onSessionExpired).not.toHaveBeenCalled();
+    expect(http.requests()).toHaveLength(1);
+  });
+
   test("a build without an API sends nothing", async () => {
     const { api, http } = setup({ baseUrl: null });
 

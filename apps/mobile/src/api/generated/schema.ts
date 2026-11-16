@@ -33,6 +33,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/me/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ExportMyData"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me/deletion-blockers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetDeletionBlockers"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups": {
     parameters: {
       query?: never;
@@ -546,6 +578,17 @@ export interface components {
       repeatWeekly: boolean;
     };
     /** @enum {string} */
+    DeletionBlockerKind: "lastAdmin";
+    DeletionBlockerResponse: {
+      /** Format: uuid */
+      groupId: string;
+      groupName: string;
+      kind: components["schemas"]["DeletionBlockerKind"];
+    };
+    DeletionBlockersResponse: {
+      blockers: components["schemas"]["DeletionBlockerResponse"][];
+    };
+    /** @enum {string} */
     DrawLockKind: "together" | "apart";
     DrawLockRequest: {
       /** Format: uuid */
@@ -635,6 +678,9 @@ export interface components {
     };
     JsonElement: unknown;
     JsonNode: unknown;
+    JsonObject: {
+      [key: string]: unknown;
+    };
     MemberLevelResponse: {
       /** Format: uuid */
       memberId: string;
@@ -1003,6 +1049,104 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  ExportMyData: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JsonObject"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetDeletionBlockers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeletionBlockersResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {

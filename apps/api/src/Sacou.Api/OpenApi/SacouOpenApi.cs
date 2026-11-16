@@ -14,6 +14,7 @@ internal static class SacouOpenApi
         services.AddOpenApi(DocumentName, options => options
             .AddSchemaTransformer<EnumAsTextSchemaTransformer>()
             .AddSchemaTransformer<NumberAsNumberSchemaTransformer>()
+            .AddSchemaTransformer<OpenObjectSchemaTransformer>()
             .AddOperationTransformer<RouteParameterOperationTransformer>()
             .AddOperationTransformer<RuleProblemOperationTransformer>()
             .AddOperationTransformer<CommonResponsesOperationTransformer>()
