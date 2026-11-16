@@ -1,15 +1,5 @@
-import type createClient from "openapi-fetch";
-
-import type { paths } from "../api/generated/schema";
-import type { ApiResult } from "../services/api/api-result";
 import type { SacouApi } from "../services/api/sacou-api";
-import type { Call } from "./http-sacou-api";
-
-type Client = ReturnType<typeof createClient<paths>>;
-type Execute = <T>(call: Call<T>) => Promise<ApiResult<T>>;
-
-const group = (groupId: string) => ({ params: { path: { groupId } } });
-const round = (groupId: string, roundId: string) => ({ params: { path: { groupId, roundId } } });
+import { group, round, type Client, type Execute } from "./http-path-params";
 
 /** The operations of the rounds and the presence, apart from the rest to keep the adapter small (E4.6). */
 export function createRoundOperations(

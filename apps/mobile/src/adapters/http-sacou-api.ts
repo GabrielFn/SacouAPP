@@ -11,11 +11,13 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createLevelOperations } from "./http-level-operations";
+import { group, member } from "./http-path-params";
 import { createRoundOperations } from "./http-round-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
 import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
 import type { IdTokenProvider } from "../services/api/id-token-provider";
-import type { MemberRef, SacouApi } from "../services/api/sacou-api";
+import type { SacouApi } from "../services/api/sacou-api";
 
 /** A request that takes longer is treated as no network (E4.2, D5). */
 export const REQUEST_TIMEOUT_MS = 15_000;
@@ -104,11 +106,6 @@ function readOutcome<T>(baseUrl: string, outcome: FetchOutcome<T>, nowMs: number
 function authInit(token: string): AuthInit {
   return { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } };
 }
-
-const group = (groupId: string) => ({ params: { path: { groupId } } });
-const member = (ref: MemberRef) => ({
-  params: { path: { groupId: ref.groupId, memberId: ref.memberId } },
-});
 
 /**
  * The real `SacouApi` over `openapi-fetch`, typed by the generated `paths` (E4.2, D4 and D7). It builds the
@@ -271,26 +268,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       executeEmpty((init) =>
         client.POST("/v1/groups/{groupId}/leave", { ...init, ...group(groupId) }),
       ),
-    listMemberLevels: (groupId) =>
-      execute((init) =>
-        client.GET("/v1/groups/{groupId}/member-levels", { ...init, ...group(groupId) }),
-      ),
-    setMemberLevel: (ref, level) =>
-      execute((init) =>
-        client.PUT("/v1/groups/{groupId}/member-levels/{memberId}", {
-          ...init,
-          ...member(ref),
-          body: { level },
-        }),
-      ),
-    setMemberLevels: (groupId, levels) =>
-      execute((init) =>
-        client.PUT("/v1/groups/{groupId}/member-levels", {
-          ...init,
-          ...group(groupId),
-          body: { levels: [...levels] },
-        }),
-      ),
     createInvite: (groupId) =>
       execute((init) =>
         client.POST("/v1/groups/{groupId}/invites", { ...init, ...group(groupId) }),
@@ -308,6 +285,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/preview", { ...init, body: { token } })),
     acceptInvite: (token) =>
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
+    ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
   };
 }
