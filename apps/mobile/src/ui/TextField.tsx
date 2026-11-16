@@ -9,7 +9,18 @@ import { Text } from "./Text";
 
 export interface TextFieldProps extends Pick<
   TextInputProps,
-  "value" | "onChangeText" | "placeholder" | "autoCapitalize" | "keyboardType" | "maxLength"
+  | "value"
+  | "onChangeText"
+  | "placeholder"
+  | "autoCapitalize"
+  | "keyboardType"
+  | "maxLength"
+  | "autoComplete"
+  | "autoCorrect"
+  | "textContentType"
+  | "secureTextEntry"
+  | "returnKeyType"
+  | "onSubmitEditing"
 > {
   readonly label: string;
   readonly help?: string;

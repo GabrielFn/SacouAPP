@@ -142,6 +142,12 @@ internal sealed class InMemoryUserStore : IUserStore
         return Task.FromResult<UserId?>(users.TryGetValue(subject.Value, out var id) ? id : null);
     }
 
+    public Task<DateTimeOffset?> FindCreatedAtAsync(UserId user, CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref calls);
+        return Task.FromResult<DateTimeOffset?>(null);
+    }
+
     public Task<bool> TryCreateAsync(User user, CancellationToken cancellationToken)
     {
         Interlocked.Increment(ref calls);

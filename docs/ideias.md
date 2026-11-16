@@ -12,3 +12,5 @@
 - **Pontos recusados ao assumir a quadra** (ADR 0046): guardar os eventos do celular antigo que chegaram depois da troca para o admin revisar e aplicar, em vez de só avisar.
 
 - **Trocar os lados a cada set** ("Inverter lados" automático, como a troca de quadra do vôlei): decidido em 13/11/2026 que o "Inverter lados" vale só enquanto a quadra está aberta e é manual (E4.17); a troca sozinha a cada set fica aqui.
+
+- **Bloqueio do app por biometria ou PIN** (E4.3, ADR 0057, D5): o piloto confia no bloqueio do próprio celular; pedir a digital antes de abrir o app ou de ações sensíveis fica para depois.

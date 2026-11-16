@@ -127,6 +127,9 @@
     "moreButtonWidth": 44,
     "moreButtonHeight": 48,
     "memberRowMin": 56,
+    "googleBadge": 30,
+    "linkButton": 48,
+    "loginLogo": 34,
     "levelBadgeWidth": 52,
     "levelBadgeHeight": 48,
     "levelStep": 56,
@@ -139,7 +142,8 @@
     "pill": 22,
     "statusPill": 15,
     "tabPill": 15,
-    "roleBadge": 13
+    "roleBadge": 13,
+    "sheet": 24
   },
   "borderWidths": {
     "thin": 1.5,
@@ -160,6 +164,9 @@
     "statusPill": 14,
     "link": 16,
     "button": 17,
+    "legal": 12,
+    "sheetTitle": 20,
+    "loginBrand": 28,
     "displayLevel": 72,
     "displayLevelCard": 28,
     "displayLevelBadge": 20,
@@ -174,7 +181,8 @@
     "fontSizes": "Inicio.dc.html:24,41,47; Onboarding.dc.html:91",
     "iconStroke": "Inicio.dc.html:26",
     "courtTokens": "QuadraSol.dc.html:17-37,44-130; QuadraNoite.dc.html:16-17,72",
-    "groupsScreens": "Grupos.dc.html:17-30,121-135; Inicio.dc.html:35; Notificacoes.dc.html:30"
+    "groupsScreens": "Grupos.dc.html:17-30,121-135; Inicio.dc.html:35; Notificacoes.dc.html:30",
+    "login": "Login.dc.html:24,25,34,39,43,46,47 (logo, brand, sheet title and radius, G badge, e-mail link, legal line)"
   },
   "courtTokens": {
     "sizes": {

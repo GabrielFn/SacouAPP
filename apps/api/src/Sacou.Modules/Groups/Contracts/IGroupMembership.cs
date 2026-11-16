@@ -13,6 +13,12 @@ public interface IGroupMembership
     /// <summary>Every active member of the group, in the order they joined; empty for a group that does not exist.</summary>
     Task<IReadOnlyList<GroupMembership>> ListActiveAsync(Guid groupId, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Every member id the person has or had, in any group and any status (active, left, removed), oldest first:
+    /// the personal data export reads the attendances of all of them (E3.16, ADR 0056, D6).
+    /// </summary>
+    Task<IReadOnlyList<Guid>> ListMemberIdsOfUserAsync(Guid userId, CancellationToken cancellationToken);
+
     /// <summary>Whether the role may do it, read from the single permission table of the Groups domain.</summary>
     bool Allows(GroupRole role, GroupCapability capability);
 }
