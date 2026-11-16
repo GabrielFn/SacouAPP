@@ -24,6 +24,12 @@ export type TemplateChoice =
   | { readonly kind: "ready"; readonly key: SettingsTemplateKey }
   | { readonly kind: "saved"; readonly templateId: string };
 
+/** The person's own profile; it has the level they suggest for themselves, so it is never persisted. */
+export type MyProfile = Schemas["MyProfileResponse"];
+export type SaveMyProfileBody = Schemas["SaveMyProfileRequest"];
+export type PrimaryPosition = Schemas["PrimaryPosition"];
+export type PlayingPosition = Schemas["PlayingPosition"];
+
 export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
@@ -98,6 +104,10 @@ export interface SacouApi {
     member: MemberRef & { readonly roundId: string },
     response: AttendanceResponse,
   ): Promise<ApiResult<AttendanceAnswer>>;
+  /** 404 `identity.profile-not-found` before the quick profile (screen 27) is ever saved. */
+  getMyProfile(): Promise<ApiResult<MyProfile>>;
+  /** Replaces the whole profile: what is `null` in the body is cleared. */
+  saveMyProfile(body: SaveMyProfileBody): Promise<ApiResult<MyProfile>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

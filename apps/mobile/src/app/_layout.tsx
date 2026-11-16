@@ -28,10 +28,16 @@ import { createGoogleAccountPicker } from "../adapters/google-sign-in";
 import { fetchHttpTransport } from "../adapters/fetch-http-transport";
 import { createHttpSacouApi } from "../adapters/http-sacou-api";
 import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
+import { createStoredOnboardingSkip } from "../adapters/stored-onboarding-skip";
 import { buildApiBaseUrl } from "../config/api-url";
 import { buildGoogleWebClientId } from "../config/google-sign-in";
 import { buildLegalLinks } from "../config/legal-links";
-import { SIGNED_IN_ROUTES, SIGNED_OUT_ROUTES } from "../features/auth/navigation";
+import {
+  ONBOARDING_ROUTES,
+  SIGNED_IN_ROUTES,
+  SIGNED_OUT_ROUTES,
+} from "../features/auth/navigation";
+import { useOnboardingGate } from "../features/profile/hooks/use-profile";
 import { useSession } from "../services/auth/use-session";
 import { createSessionEnder, sessionIdTokens } from "../services/session/end-session";
 import { useSessionCleanup } from "../services/session/use-session-cleanup";
@@ -44,7 +50,10 @@ import { ServicesProvider, useServices, type Services } from "../services/servic
 import { ThemeProvider } from "../theme/theme-context";
 
 const queryClient = createSacouQueryClient();
-const cachePersister = createCachePersister(createExpoCacheStore());
+const cacheStore = createExpoCacheStore();
+const cachePersister = createCachePersister(cacheStore);
+// A row of its own in sacou-cache.db, apart from the persisted cache: a flag, never the profile.
+const onboardingSkip = createStoredOnboardingSkip(cacheStore);
 const networkStatus = createNetInfoNetworkStatus();
 const googleWebClientId = buildGoogleWebClientId();
 // The session lives in the native Firebase SDK; the app only reads it (ADR 0057, D2 and D5).
@@ -56,7 +65,7 @@ const cacheSession = createCacheSession(queryClient, cachePersister);
 const sessionEnder = createSessionEnder({
   authSession,
   queries: queryClient,
-  stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore },
+  stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore, onboardingSkip },
 });
 bindAppStateFocus();
 
@@ -89,21 +98,29 @@ const realServices: Services = {
   authSession,
   sessionEnder,
   legalLinks: buildLegalLinks(),
+  onboardingSkip,
 };
 
 /**
  * The gate of ADR 0057 (D3): nothing while the SDK reads the session (the splash stays, the login does
- * not blink), the login alone when signed out, and every other route when signed in.
+ * not blink), the login alone when signed out, and every other route when signed in. While the profile
+ * is missing and was not skipped, screen 27 alone (D6); loading or offline, the app (nobody held there).
  */
 function SessionStack() {
   const session = useSession();
   useSessionCleanup(session);
-  if (session.status === "unknown") return null;
   const signedIn = session.status === "signedIn";
+  const onboarding = useOnboardingGate(signedIn) === "show";
+  if (session.status === "unknown") return null;
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={signedIn}>
+      <Stack.Protected guard={signedIn && !onboarding}>
         {SIGNED_IN_ROUTES.map((name) => (
+          <Stack.Screen key={name} name={name} />
+        ))}
+      </Stack.Protected>
+      <Stack.Protected guard={onboarding}>
+        {ONBOARDING_ROUTES.map((name) => (
           <Stack.Screen key={name} name={name} />
         ))}
       </Stack.Protected>

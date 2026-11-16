@@ -11,6 +11,7 @@ import type { ScreenAwake } from "../features/court/ports/screen-awake";
 import type { ScreenOrientation } from "../features/court/ports/screen-orientation";
 import type { InviteLinkStore } from "../features/groups/ports/invite-link-store";
 import type { LegalLinks } from "../config/legal-links";
+import type { OnboardingSkip } from "../features/profile/ports/onboarding-skip";
 import type { NetworkStatus } from "./api/network-status";
 import type { AuthSession } from "./auth/auth-session";
 import type { SacouApi } from "./api/sacou-api";
@@ -62,6 +63,8 @@ export interface Services {
   readonly sessionEnder: SessionEnder;
   /** Terms and privacy policy, or `null` each until E6.1 publishes them (question 62). */
   readonly legalLinks: LegalLinks;
+  /** "Pular" of screen 27 with nothing to save; forgotten when the session ends (E4.3, D6). */
+  readonly onboardingSkip: OnboardingSkip;
 }
 
 const ServicesContext = createContext<Services | null>(null);

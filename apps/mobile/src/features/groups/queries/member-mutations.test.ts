@@ -121,7 +121,8 @@ describe("clearSession", () => {
   test("forgets the server cache and every invite link", async () => {
     const store = createMemoryInviteLinkStore({ [GROUP]: LINK, other: LINK });
     const cacheSession = createFakeCacheSession();
-    await clearSession({ cacheSession, inviteLinkStore: store });
+    const onboardingSkip = { clear: () => Promise.resolve() };
+    await clearSession({ cacheSession, inviteLinkStore: store, onboardingSkip });
     expect(store.snapshot()).toEqual({});
     expect(store.calls()).toEqual(["clearAll"]);
     expect(cacheSession.cleared()).toBe(1);

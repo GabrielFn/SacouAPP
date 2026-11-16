@@ -75,6 +75,11 @@ describe("cacheEffectsOf (P5, golden)", () => {
       { type: "attendanceChanged", groupId: G, roundId: "r1" },
       [`invalidate groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
     ],
+    [
+      { type: "profileSaved", profile: {}, cachedGroupIds: [G, "g2"] },
+      ["set me/profile", `invalidate groups/${G}/members`, "invalidate groups/g2/members"],
+    ],
+    [{ type: "profileSaved", profile: {}, cachedGroupIds: [] }, ["set me/profile"]],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
         [{ type, groupId: G, targetIsMe: false }, [`invalidate groups/${G}/members`]],
@@ -151,6 +156,7 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.memberLevels(G), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
+    [queryKeys.myProfile(), false],
     [["groups", G, "members", "extra"], false],
     [["groups", 1], false],
     [["unknown"], false],
