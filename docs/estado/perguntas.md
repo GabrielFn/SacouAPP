@@ -146,3 +146,6 @@ Detalhes em `docs/estado/tarefas/E3.7.md` (69 e 70) e `docs/estado/tarefas/E4.7.
 72. E4.7: rodada de grupo com o sorteio desligado (padrão do "Do zero"): **recomendação: "Montar times" à mão**; até a resposta, só um aviso, e esses grupos não chegam à quadra.
 73. E4.7: líbero no início da partida: **recomendação e padrão: fica para a tela 22 (E4.8).**
 - **Respostas do Gabriel (17/11):** 69, 70, 71 e 73: valem as recomendações (não recusar, com o risco aceito; uma quadra por rodada; texto no compartilhar; líbero na tela 22). 72: **opção 1, "Montar times" à mão** quando o sorteio do grupo está desligado; vira a Parte 3 da E4.7.
+
+## 17/11/2026: alerta alto no `picomatch` (GHSA-fc5q-39xc-vjpf)
+- **Pergunta:** ReDoS no `picomatch` <=4.0.7, sem versão corrigida, só pelas ferramentas de build e teste (Metro, Jest, mapa de arquivos do Expo; não entra no app). O portão `pnpm audit --audit-level high` reprovava todos os PRs. **Resposta do Gabriel (17/11):** exceção até 31/12/2026, como a do `zod` (ADR 0007), em `scripts/npm-audit-exceptions.json`; sai assim que houver versão corrigida.
