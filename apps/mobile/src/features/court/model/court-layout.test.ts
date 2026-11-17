@@ -153,7 +153,7 @@ describe("the court sits high enough for the names of its bottom row", () => {
   ] as const;
 
   test.each(SCREENS)(
-    "below the square there is room for a chip and a name, above it less, at $width x $height",
+    "below the square there is room for half a chip, never less than above it, at $width x $height",
     (screen) => {
       const layout = computeCourtLayout(input(screen.width, screen.height));
       const tokens = createScaledTokens({
@@ -163,7 +163,7 @@ describe("the court sits high enough for the names of its bottom row", () => {
       for (const end of ["left", "right"] as const) {
         const origin = squareOrigin(layout, end);
         const below = layout.zoneHeight - origin.y - layout.halfCourtSide;
-        expect(origin.y).toBeLessThan(below);
+        expect(origin.y).toBeLessThanOrEqual(below + TOLERANCE);
         expect(origin.y).toBeGreaterThanOrEqual(0);
         expect(below).toBeGreaterThanOrEqual(tokens.court.sizes.chip / 2);
       }

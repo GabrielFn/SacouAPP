@@ -87,8 +87,8 @@ export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 280 / 382;
  */
 export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 256 / 294;
 
-/** Of the free height of the zone, the square leaves this share above it and the rest below, for the names. */
-export const LANDSCAPE_SQUARE_TOP_SHARE = 0.3;
+/** Of the free height of the zone, the square leaves this share above it and the rest below, for the names (0.4 or less crosses names at 640 x 360). */
+export const LANDSCAPE_SQUARE_TOP_SHARE = 0.5;
 
 /**
  * The score is 38% of the zone height in landscape (112 of the 294), a little less than the 45% of
