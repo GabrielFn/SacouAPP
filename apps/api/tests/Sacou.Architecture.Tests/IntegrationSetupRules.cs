@@ -49,6 +49,7 @@ internal static partial class IntegrationSetupRules
         "|| true",
         "if: false",
         "outputs.api ==",
+        "outputs.app ==",
     ];
 
     private static readonly string[] ForbiddenPatterns =
