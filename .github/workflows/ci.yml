@@ -20,6 +20,7 @@ jobs:
     outputs:
       code: ${{ steps.filter.outputs.code }}
       api: ${{ steps.filter.outputs.api }}
+      app: ${{ steps.filter.outputs.app }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -27,7 +28,8 @@ jobs:
           persist-credentials: false
 
       # The rule is scripts/lib/ci-areas.mjs (tested in test:tooling). code=false only when every changed
-      # file is in docs/ and outside docs/dominio/; api=false only when every code file is in apps/mobile/.
+      # file is in docs/ and outside docs/dominio/; api=false only when every code file is in apps/mobile/;
+      # app=false only when every code file is in apps/api/ (outside apps/api/openapi/).
       # An empty or failed diff (zeroed SHA on a new ref, for example) runs the full job.
       # --no-renames lists both sides, so moving code into docs/ still counts as code.
       - name: Detect code changes
@@ -50,14 +52,138 @@ jobs:
       - name: Check line endings
         run: node scripts/check-eol.mjs
 
-  verify:
+  # Checks that do not depend on a side: they run whenever there is code.
+  common:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Check duplication
+        run: pnpm check:duplication
+
+      - name: Test tooling
+        run: pnpm test:tooling
+
+      # Registry failures fail this step on purpose: no --ignore-registry-errors.
+      - name: Audit npm dependencies
+        run: pnpm audit --audit-level high
+
+  # Runs unless only apps/mobile/ changed: a missing or unexpected output runs it (the architecture tests
+  # forbid `api ==`). The output is false whenever there is no code, so docs-only PRs skip it too.
+  verify-api:
+    needs: changes
+    if: needs.changes.outputs.api != 'false'
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
-    # Steps with `if: ...api != 'false'` are skipped only when only apps/mobile/ changed: a missing or
-    # unexpected output runs them (the architecture tests forbid `api ==`). The app side always runs:
-    # lint, lint:regression and the tests need the package build, and lint:regression also probes dotnet.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', 'global.json', '**/*.csproj') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint API
+        run: pnpm lint:api
+
+      - name: Check file size (C#)
+        run: pnpm check:size
+
+      # Only the tip of main: check:api-compat reads apps/api/openapi/v1.json from origin/main. The token goes in
+      # a header of this one command (the checkout keeps no credentials). The encoded header is masked in the log
+      # and goes through the environment, so it never shows in the process arguments.
+      - name: Fetch main
+        env:
+          FETCH_TOKEN: ${{ github.token }}
+        run: |
+          basic=$(printf "x-access-token:%s" "$FETCH_TOKEN" | base64 -w0)
+          echo "::add-mask::$basic"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $basic" \
+            git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+
+      # /v1 stays compatible with main; BREAKING-V1 in the PR body (read from the event) is the exception.
+      - name: Check API compatibility
+        run: pnpm check:api-compat
+
+      - name: Build API
+        run: dotnet build
+
+      - name: Test API
+        run: dotnet test
+
+      # Outside Sacou.slnx, so `dotnet test` above skips it. Needs Docker (the runner has it). Zero tests
+      # fail the step on purpose: no exit code is ignored. Decisions: docs/arquitetura/adr/0020-postgres-local-e-testes-de-integracao.md
+      - name: Test API integration
+        run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
+
+      # The Ryuk digest comes from the Testcontainers package (pinned at [4.16.0]); a different one means
+      # the package or the configuration changed it. Raising the package is a deliberate review.
+      - name: Check Ryuk image digest
+        run: |
+          docker image ls --digests --no-trunc \
+            | grep --fixed-strings 'testcontainers/ryuk' \
+            | grep --fixed-strings 'sha256:7c1a8a9a47c780ed0f983770a662f80deb115d95cce3e2daa3d12115b8cd28f0'
+
+      # --env-file on each command: ${POSTGRES_PASSWORD:?} is evaluated by all of them. The value in
+      # .env.example is a placeholder. `up --wait` fails when the healthcheck does not pass.
+      # Never run `docker compose config` without --quiet: it prints the password.
+      - name: Check Postgres compose
+        run: |
+          docker compose --env-file .env.example up -d --wait
+          docker compose --env-file .env.example exec -T postgres pg_isready -h 127.0.0.1
+          docker compose --env-file .env.example port postgres 5432 | grep --fixed-strings --line-regexp '127.0.0.1:5432'
+          docker compose --env-file .env.example down -v
+
+      - name: Audit NuGet dependencies
+        run: pnpm audit:api
+
+  # Runs unless only apps/api/ changed (the contract in apps/api/openapi/ counts for the app). Lint,
+  # lint:regression and the tests need the package build; lint:regression also probes dotnet (CA1502).
+  verify-app:
+    needs: changes
+    if: needs.changes.outputs.app != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -94,102 +220,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check line endings
-        run: pnpm check:eol
-
-      - name: Check formatting
-        run: pnpm format:check
-
       - name: Lint
         run: pnpm lint
 
       - name: Lint regression
         run: pnpm lint:regression
 
-      - name: Lint API
-        if: needs.changes.outputs.api != 'false'
-        run: pnpm lint:api
-
-      - name: Check file size (C#)
-        run: pnpm check:size
-
-      - name: Check duplication
-        run: pnpm check:duplication
-
       - name: Build
         run: pnpm build
 
-      # The app's types are what apps/api/openapi/v1.json gives; the Test API step proves the file is what
-      # the API serves (ADR 0042, D3).
+      # The app's types are what apps/api/openapi/v1.json gives; the Test API step of verify-api proves the
+      # file is what the API serves (ADR 0042, D3).
       - name: Check API types
         run: pnpm check:api-types
-
-      # Only the tip of main: check:api-compat reads apps/api/openapi/v1.json from origin/main. The token goes in
-      # a header of this one command (the checkout keeps no credentials). The encoded header is masked in the log
-      # and goes through the environment, so it never shows in the process arguments.
-      - name: Fetch main
-        env:
-          FETCH_TOKEN: ${{ github.token }}
-        run: |
-          basic=$(printf "x-access-token:%s" "$FETCH_TOKEN" | base64 -w0)
-          echo "::add-mask::$basic"
-          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $basic" \
-            git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
-
-      # /v1 stays compatible with main; BREAKING-V1 in the PR body (read from the event) is the exception.
-      - name: Check API compatibility
-        run: pnpm check:api-compat
 
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Test
         run: pnpm test
-
-      - name: Build API
-        if: needs.changes.outputs.api != 'false'
-        run: dotnet build
-
-      - name: Test API
-        if: needs.changes.outputs.api != 'false'
-        run: dotnet test
-
-      # Outside Sacou.slnx, so `dotnet test` above skips it. Needs Docker (the runner has it). Zero tests
-      # fail the step on purpose: no exit code is ignored. Decisions: docs/arquitetura/adr/0020-postgres-local-e-testes-de-integracao.md
-      - name: Test API integration
-        if: needs.changes.outputs.api != 'false'
-        run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
-
-      # The Ryuk digest comes from the Testcontainers package (pinned at [4.16.0]); a different one means
-      # the package or the configuration changed it. Raising the package is a deliberate review.
-      - name: Check Ryuk image digest
-        if: needs.changes.outputs.api != 'false'
-        run: |
-          docker image ls --digests --no-trunc \
-            | grep --fixed-strings 'testcontainers/ryuk' \
-            | grep --fixed-strings 'sha256:7c1a8a9a47c780ed0f983770a662f80deb115d95cce3e2daa3d12115b8cd28f0'
-
-      # --env-file on each command: ${POSTGRES_PASSWORD:?} is evaluated by all of them. The value in
-      # .env.example is a placeholder. `up --wait` fails when the healthcheck does not pass.
-      # Never run `docker compose config` without --quiet: it prints the password.
-      - name: Check Postgres compose
-        if: needs.changes.outputs.api != 'false'
-        run: |
-          docker compose --env-file .env.example up -d --wait
-          docker compose --env-file .env.example exec -T postgres pg_isready -h 127.0.0.1
-          docker compose --env-file .env.example port postgres 5432 | grep --fixed-strings --line-regexp '127.0.0.1:5432'
-          docker compose --env-file .env.example down -v
-
-      - name: Test tooling
-        run: pnpm test:tooling
-
-      # Registry failures fail this step on purpose: no --ignore-registry-errors.
-      - name: Audit npm dependencies
-        run: pnpm audit --audit-level high
-
-      - name: Audit NuGet dependencies
-        if: needs.changes.outputs.api != 'false'
-        run: pnpm audit:api
 
   # No `needs` or `if`, so it also runs on docs-only PRs. Decisions: docs/seguranca/varredura-ci.md
   secrets:
@@ -223,7 +272,7 @@ jobs:
 
   # The only check the merge routine reads (docs/padroes/commits-e-prs.md).
   ci-ok:
-    needs: [changes, secrets, verify]
+    needs: [changes, secrets, common, verify-api, verify-app]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -232,15 +281,27 @@ jobs:
         env:
           CHANGES_RESULT: ${{ needs.changes.result }}
           SECRETS_RESULT: ${{ needs.secrets.result }}
-          VERIFY_RESULT: ${{ needs.verify.result }}
+          COMMON_RESULT: ${{ needs.common.result }}
+          API_RESULT: ${{ needs.verify-api.result }}
+          APP_RESULT: ${{ needs.verify-app.result }}
           CODE: ${{ needs.changes.outputs.code }}
           API: ${{ needs.changes.outputs.api }}
+          APP: ${{ needs.changes.outputs.app }}
         run: |
-          echo "changes=$CHANGES_RESULT secrets=$SECRETS_RESULT verify=$VERIFY_RESULT code=$CODE api=$API"
+          echo "changes=$CHANGES_RESULT secrets=$SECRETS_RESULT common=$COMMON_RESULT api=$API_RESULT app=$APP_RESULT code=$CODE api-area=$API app-area=$APP"
           if [ "$CHANGES_RESULT" != "success" ] || [ "$SECRETS_RESULT" != "success" ]; then
             exit 1
           fi
-          case "$VERIFY_RESULT:$CODE" in
+          # A job may be skipped only when its area is off; any other result, cancelled included, fails.
+          case "$COMMON_RESULT:$CODE" in
+            success:true | skipped:false) ;;
+            *) exit 1 ;;
+          esac
+          case "$API_RESULT:$API" in
+            success:true | skipped:false) ;;
+            *) exit 1 ;;
+          esac
+          case "$APP_RESULT:$APP" in
             success:true | skipped:false) ;;
             *) exit 1 ;;
           esac
