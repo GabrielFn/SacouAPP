@@ -51,6 +51,7 @@
 
 ## Em andamento
 
+- 16/11/2026, fim: **parada pedida pelo Gabriel.** Teste no celular da E4.3 completo, menos o 302. #117 (primeira leva de defeitos) em verificação; segunda leva em `pendencias.md`. Próximo passo no [diário de 15/11](sessoes/2026-11-15.md), seção "Próximo passo exato (depois de 16/11)".
 - 16/11/2026, noite: primeiro teste no celular com login (ver a linha da E4.3). O Android com login não compilava (RN Firebase 27 exige Kotlin 2.4.0), corrigido no #114. Seis defeitos de interface achados no teste em correção na branch `fix/phone-test-findings` (desenvolvedor Sonnet).
 - 16/11/2026, noite: **M3 fechado no código.** Mergeados #105 (CI por área), #107 (corrida da exclusão), #108 e #109 (docs) e #110 (E4.3 Parte 3). Revisão geral de segurança do M3 feita. Relatório e perguntas para o Gabriel em [`relatorios/M3.md`](relatorios/M3.md).
 - 16/11/2026, tarde: repositório público (ADR 0058), CI de volta. **Mergeados** #100 (E4.6 Parte 3), #101 (E3.16 Parte 2), #102 (E4.3 Parte 2) e #103 e #104 (docs). Em andamento: #105 (CI pula a API em PR só do app; revisão aprovada), correção da corrida entre excluir a conta e aceitar convite (branch `fix/deletion-invite-race`, Opus) e E4.3 Parte 3 (branch `task/E4.3-delete-export`, Opus). Próximo passo no [diário de 15/11](sessoes/2026-11-15.md).
