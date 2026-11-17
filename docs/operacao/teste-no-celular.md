@@ -48,10 +48,11 @@ export ConnectionStrings__Sacou="Host=localhost;Port=5432;Database=postgres;User
 export Database__MigrateOnStartup=true
 ASPNETCORE_URLS=http://localhost:5080 ASPNETCORE_ENVIRONMENT=Development dotnet run --project apps/api/src/Sacou.Api
 adb reverse tcp:5080 tcp:5080 && adb reverse tcp:8081 tcp:8081
+pnpm --filter @sacou/volley-rules --filter @sacou/match-engine run build   # o app lê o dist/ dos pacotes
 pnpm --filter @sacou/mobile start
 ```
 
-Abra o app no celular: ele carrega o JavaScript do Metro pela porta 8081. A conexão segue [`postgres-local.md`](postgres-local.md).
+Abra o app no celular: ele carrega o JavaScript do Metro pela porta 8081. Com o `dist/` dos pacotes desatualizado, o app abre com `Cannot read property ... of undefined`: compile os pacotes e reinicie o Metro com `--clear`. A conexão segue [`postgres-local.md`](postgres-local.md).
 
 ## Login e sessão (E4.3, Parte 1)
 
