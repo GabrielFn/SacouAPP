@@ -1,16 +1,14 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-import { apiErrorOf } from "../../../services/api/api-error";
 import { unwrap } from "../../../services/api/api-result";
 import type { DrawTeamsAnswer, DrawTeamsBody, SacouApi } from "../../../services/api/sacou-api";
-import {
-  applyCacheEffects,
-  cacheEffectsOf,
-  type CacheEffect,
-} from "../../../services/query/invalidation";
-import { queryKeys } from "../../../services/query/query-keys";
+import { applyCacheEffects, type CacheEffect } from "../../../services/query/invalidation";
+import { roundRefusedEffects } from "../../rounds/queries/round-mutations";
 
-const FORBIDDEN_STATUS = 403;
+/** Every refusal of a draw reads the round again. */
+function always(): boolean {
+  return true;
+}
 
 /** One draw at a time per round: a second tap waits for the first (D10). */
 export function drawScope(roundId: string): { readonly id: string } {
@@ -35,12 +33,7 @@ export function drawRefusedEffects(
   roundId: string,
   error: unknown,
 ): readonly CacheEffect[] {
-  const apiError = apiErrorOf(error);
-  if (apiError?.kind !== "problem") return [];
-  const round: CacheEffect = { action: "invalidate", key: queryKeys.round(groupId, roundId) };
-  return apiError.status === FORBIDDEN_STATUS
-    ? [...cacheEffectsOf({ type: "settingsForbidden", groupId }), round]
-    : [round];
+  return roundRefusedEffects(groupId, roundId, error, always);
 }
 
 export function drawMutation(api: SacouApi, client: QueryClient, groupId: string, roundId: string) {
