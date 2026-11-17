@@ -18,6 +18,7 @@ export interface LogoProps {
 const VIEW_BOX = "0 0 24 24";
 const PLUS_PATH = "M12 5v14M5 12h14";
 const MINUS_PATH = "M5 12h14";
+const CLOSE_PATH = "M6 6l12 12M18 6L6 18";
 const CHECK_PATH = "M5 12.5l4.5 4.5L19 7.5";
 export const NAV_STROKE_WIDTH = 2;
 const HEADER_STROKE_WIDTH = 2.2;
@@ -122,6 +123,11 @@ export function PlusIcon({ color }: IconProps) {
 
 export function MinusIcon({ color }: IconProps) {
   return <CrossIcon color={color} path={MINUS_PATH} />;
+}
+
+/** The cross of "Fechar" on a sheet (PreJogo.dc.html). */
+export function CloseIcon({ color }: IconProps) {
+  return <CrossIcon color={color} path={CLOSE_PATH} />;
 }
 
 export function CheckIcon({ color }: IconProps) {

@@ -3,7 +3,7 @@ import type { Href } from "expo-router";
 export type PendingRoundScreen = "draw" | "court";
 
 /** Screens a round leads to that are not built yet; each owner task removes its own item (E4.6, D1). */
-export const PENDING_ROUND_SCREENS: readonly PendingRoundScreen[] = ["court"];
+export const PENDING_ROUND_SCREENS: readonly PendingRoundScreen[] = [];
 
 export function createRoundHref(groupId: string): Href {
   return { pathname: "/groups/[groupId]/rounds/new", params: { groupId } };

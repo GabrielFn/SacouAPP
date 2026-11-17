@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { strings } from "../strings/pt-BR";
 import { useTheme } from "../theme/theme-context";
+import { CloseIcon } from "./Icons";
 import { Text } from "./Text";
 
 export interface BottomSheetProps {
@@ -12,6 +13,42 @@ export interface BottomSheetProps {
   /** Back button, tap outside and the dismiss of the screen reader. */
   readonly onClose: () => void;
   readonly children: ReactNode;
+  /** A cross beside the title that closes the sheet, with this label ("Fechar" of PreJogo.dc.html). */
+  readonly closeLabel?: string;
+}
+
+export interface SheetTitleProps {
+  readonly title: string;
+  readonly closeLabel: string | undefined;
+  readonly onClose: () => void;
+}
+
+function SheetTitle({ title, closeLabel, onClose }: SheetTitleProps) {
+  const { tokens } = useTheme();
+  const heading = (
+    <Text variant="display" displaySize="displayBlock" accessibilityRole="header">
+      {title}
+    </Text>
+  );
+  if (closeLabel === undefined) return heading;
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
+      <View style={{ flex: 1 }}>{heading}</View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={closeLabel}
+        onPress={onClose}
+        style={{
+          minWidth: tokens.sizes.iconButton,
+          minHeight: tokens.sizes.iconButton,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CloseIcon />
+      </Pressable>
+    </View>
+  );
 }
 
 const SHEET_MAX_HEIGHT = "85%";
@@ -19,7 +56,7 @@ const SHEET_MAX_HEIGHT = "85%";
 const KEYBOARD_BEHAVIOR = "padding";
 
 /** A sheet over the screen, on the `Modal` of React Native. It holds no state of its own. */
-export function BottomSheet({ visible, title, onClose, children }: BottomSheetProps) {
+export function BottomSheet({ visible, title, onClose, children, closeLabel }: BottomSheetProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -54,9 +91,7 @@ export function BottomSheet({ visible, title, onClose, children }: BottomSheetPr
               gap: tokens.spacing.l,
             }}
           >
-            <Text variant="display" displaySize="displayBlock" accessibilityRole="header">
-              {title}
-            </Text>
+            <SheetTitle title={title} closeLabel={closeLabel} onClose={onClose} />
             {children}
           </ScrollView>
         </View>

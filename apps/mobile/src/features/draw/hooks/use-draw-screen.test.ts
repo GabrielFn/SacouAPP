@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { DrawFlowState } from "../model/draw-flow.reducer";
-import { drawnG1, g1Members, g1Round, G1_ANSWER } from "../model/draw.test.fixture";
+import { withLeaf } from "../../groups/model/settings-patch";
+import { drawnG1, drawSettings, g1Members, g1Round, G1_ANSWER } from "../model/draw.test.fixture";
 import type { DrawVariables } from "../queries/draw-mutation";
 import { useDrawScreen } from "./use-draw-screen";
 
@@ -16,6 +17,7 @@ const world = vi.hoisted(() => ({
   state: new Map<"state", unknown>(),
   role: new Map<"role", string>(),
   online: true,
+  scoring: true,
   mutate: vi.fn<(variables: DrawVariables, options?: RunOptions) => void>(),
   dispatch: vi.fn(),
   share: vi.fn<(text: string) => Promise<void>>(),
@@ -50,7 +52,16 @@ vi.mock("../../groups/queries/use-group-queries", () => ({
   useGroupMembers: () => ({ data: g1Members(), error: null }),
 }));
 vi.mock("../../rounds/queries/use-round-queries", () => ({
-  useRound: () => ({ data: g1Round() }),
+  useRound: () => ({
+    data: g1Round(undefined, {
+      settings: {
+        schemaVersion: 1,
+        layer: null,
+        resolved: withLeaf(drawSettings(), "scoring.enabled", world.scoring),
+        sources: {},
+      },
+    }),
+  }),
 }));
 
 /** The hook as a plain function: the mocks above stand in for React. */
@@ -67,6 +78,7 @@ beforeEach(() => {
   world.refs = [];
   world.role.set("role", "admin");
   world.online = true;
+  world.scoring = true;
   world.mutate.mockReset();
   world.dispatch.mockReset();
   world.share.mockReset().mockResolvedValue(undefined);
@@ -169,6 +181,25 @@ describe("Confirmar e compartilhar (D11)", () => {
     await Promise.resolve();
     render(drawnG1()).share();
     expect(world.share).toHaveBeenCalledTimes(2);
+  });
+
+  test("after the share sheet, shared or not, sheet 08 opens (D11)", async () => {
+    render(drawnG1()).share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
+    world.dispatch.mockReset();
+    world.share.mockRejectedValue(new Error("no share sheet"));
+    render(drawnG1()).share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
+  });
+
+  test("with the score off in the round there is no court: the 08 does not open (D6)", async () => {
+    world.scoring = false;
+    render(drawnG1()).share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.share).toHaveBeenCalledTimes(1);
+    expect(world.dispatch).not.toHaveBeenCalledWith({ type: "pre-game-opened" });
   });
 
   test("nothing is shared before the draw, nor while rendering", () => {
