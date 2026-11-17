@@ -137,3 +137,11 @@ A cota do plano Free acabou e o Gabriel não quer pagar. Opções: (1) runner no
 - 7 ("Encerrar partida" antes do fim): **opção 1**, vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai.
 - **M4 liberado.** O primeiro deploy em produção (E5.1) ainda pede o ok explícito do Gabriel na hora.
 - Pendente com o Gabriel antes da loja: conferir os termos do Gemini para uso comercial do ícone (ADR 0059).
+
+## 17/11/2026: M4, perguntas 69 a 73 (padrões adotados; nenhuma trava a Parte 1)
+Detalhes em `docs/estado/tarefas/E3.7.md` (69 e 70) e `docs/estado/tarefas/E4.7.md` (71 a 73).
+69. E3.7: conferências que dependem de dado que muda durante a rodada (presença, plano da fila, plano Pro; lista 3.1, item 5): (1) não recusar, risco aceito; (2) recusar, com risco de travar a sincronização de um celular honesto. **Recomendação e padrão: 1.** Precisa da resposta antes do merge da E3.7 Parte 2.
+70. E3.7: quantas quadras por rodada no piloto: (1) uma, um segundo celular recebe recusa e o app oferece assumir; (2) várias. **Recomendação e padrão: 1.**
+71. E4.7: "Confirmar e compartilhar" da tela 07, imagem ou texto: **recomendação e padrão: texto agora, imagem depois.**
+72. E4.7: rodada de grupo com o sorteio desligado (padrão do "Do zero"): **recomendação: "Montar times" à mão**; até a resposta, só um aviso, e esses grupos não chegam à quadra.
+73. E4.7: líbero no início da partida: **recomendação e padrão: fica para a tela 22 (E4.8).**
