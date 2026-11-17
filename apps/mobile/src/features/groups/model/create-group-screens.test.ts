@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 
 import { strings } from "../../../strings/pt-BR";
 import { sizes } from "../../../theme/tokens.data";
-import { createGroupCustomHref, createGroupDetailsHref } from "../navigation";
+import { createGroupCustomHref, createGroupDetailsHref, leaveWizardForNewRound } from "../navigation";
 import { createInitialState } from "./create-group.reducer";
 import { createGroupPatch, hasPatch } from "./create-group.selectors";
 import {
@@ -139,5 +139,21 @@ describe("screen 18", () => {
 
   test("the draw is balanced by the grade of the admin", () => {
     expect(fields["draw.balanceByLevel"]).toBe("Equilibrar pela nota do admin");
+  });
+});
+
+describe("leaving the wizard", () => {
+  test("clears the wizard from the stack before opening 'Nova rodada'", () => {
+    const calls: string[] = [];
+    leaveWizardForNewRound(
+      {
+        dismissAll: () => calls.push("dismissAll"),
+        push: (href) => calls.push(JSON.stringify(href)),
+      },
+      "g1",
+    );
+    expect(calls[0]).toBe("dismissAll");
+    expect(calls[1]).toContain("/groups/[groupId]/rounds/new");
+    expect(calls[1]).toContain("g1");
   });
 });

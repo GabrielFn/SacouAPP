@@ -48,6 +48,8 @@ function lookOf(variant: ButtonVariant, colors: Theme): ButtonLook {
 function labelStyleOf(isLink: boolean, foreground: string, tokens: ScaledTokens) {
   return {
     color: foreground,
+    flexShrink: 1,
+    textAlign: "center" as const,
     fontFamily: isLink ? fontFamilies.body600 : fontFamilies.body700,
     fontSize: isLink ? tokens.fontSizes.link : tokens.fontSizes.button,
     textDecorationLine: isLink ? ("underline" as const) : ("none" as const),
@@ -72,7 +74,7 @@ function containerStyleOf(
     borderColor: look.border ?? look.background,
     minHeight: tokens.sizes.primaryButton,
     borderRadius: tokens.radii.button,
-    paddingHorizontal: tokens.spacing.xl,
+    paddingHorizontal: tokens.spacing.m,
   };
 }
 

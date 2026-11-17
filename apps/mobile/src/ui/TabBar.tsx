@@ -61,6 +61,8 @@ export function TabBarItem({ label, renderIcon, isFocused = false, onPress }: Ta
       }}
     >
       <View
+        // Not collapsable: a flattened view that gets its color later on Android loses its rounded corners.
+        collapsable={false}
         style={{
           width: tokens.sizes.tabPillWidth,
           height: tokens.sizes.tabPillHeight,

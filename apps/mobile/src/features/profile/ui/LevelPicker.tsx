@@ -40,7 +40,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         alignItems: "center",
         paddingTop: tokens.spacing.s,
         paddingBottom: tokens.spacing.s6,
-        paddingHorizontal: tokens.spacing.xs,
+        paddingHorizontal: tokens.spacing.xxs,
         gap: tokens.spacing.xs,
       }}
     >
@@ -50,7 +50,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
       <Text
         variant={selected ? "bodyStrong" : "muted"}
         style={{
-          fontSize: tokens.fontSizes.caption,
+          fontSize: tokens.fontSizes.levelOptionText,
           textAlign: "center",
           color: selected ? colors.onPrimary : colors.textMuted,
         }}

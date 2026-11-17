@@ -20,6 +20,7 @@ import {
   hasPatch,
   isRetryDisabled,
   isSubmitDisabled,
+  visibleCreateGroupErrors,
   normalizeText,
 } from "./create-group.selectors";
 
@@ -277,5 +278,23 @@ describe("screen 05 reached from screen 04a", () => {
     const none = scratchOrigin([]);
     expect(createGroupDraft(createInitialState(none), none).attendance.enabled).toBe(false);
     expect(createGroupDraft(createInitialState(scratch), scratch).attendance.enabled).toBe(true);
+  });
+});
+
+describe("visibleCreateGroupErrors", () => {
+  test("the empty name is quiet when the screen opens", () => {
+    const fresh = createInitialState(RACHA);
+    expect(visibleCreateGroupErrors(fresh, RACHA).name).toBeUndefined();
+    expect(canSubmit(fresh, RACHA)).toBe(false);
+  });
+
+  test("the empty name shows after the person leaves the field", () => {
+    const left = typed(RACHA, { type: "name-left" });
+    expect(visibleCreateGroupErrors(left, RACHA).name).toBeTypeOf("string");
+  });
+
+  test("an invalid name already typed shows without leaving the field", () => {
+    const long = typed(RACHA, { type: "name-changed", name: "x".repeat(61) });
+    expect(visibleCreateGroupErrors(long, RACHA).name).toBeTypeOf("string");
   });
 });

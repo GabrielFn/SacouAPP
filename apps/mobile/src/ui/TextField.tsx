@@ -21,6 +21,7 @@ export interface TextFieldProps extends Pick<
   | "secureTextEntry"
   | "returnKeyType"
   | "onSubmitEditing"
+  | "onBlur"
 > {
   readonly label: string;
   readonly help?: string;

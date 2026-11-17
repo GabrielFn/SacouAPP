@@ -16,6 +16,7 @@ import {
   isRetryDisabled,
   isSubmitDisabled,
   createGroupErrors,
+  visibleCreateGroupErrors,
   createGroupPatch,
   hasPatch,
   normalizeText,
@@ -79,7 +80,7 @@ export function useCreateGroup(
   return {
     state,
     dispatch,
-    errors: createGroupErrors(state, origin),
+    errors: visibleCreateGroupErrors(state, origin),
     canSubmit: canSubmit(state, origin),
     submitDisabled: isSubmitDisabled(state, origin, pending),
     retryDisabled: isRetryDisabled(state, pending),
