@@ -22,6 +22,11 @@ const rotationSystems: Readonly<Record<string, string>> = {
   "6x2": "6x2",
 };
 
+/** "confirmado" for one, "confirmados" otherwise. */
+function confirmedNoun(amount: number): string {
+  return amount === 1 ? "confirmado" : "confirmados";
+}
+
 export const roundsStrings = {
   weekdayShort,
   chips: {
@@ -98,7 +103,7 @@ export const roundsStrings = {
       venue === "" ? `${date} · ${time}` : `${date} · ${time} · ${venue}`,
     confirmedOf: (going: number, capacity: number) => `${String(going)}/${String(capacity)}`,
     confirmedCount: (going: number) => String(going),
-    confirmedLabel: "confirmados",
+    confirmedLabel: confirmedNoun,
     waitlistCount: (count: number) => String(count),
     waitlistLabel: "na espera",
     waitlistTitle: "Espera",
@@ -116,7 +121,8 @@ export const roundsStrings = {
     listCopied: "Lista copiada.",
     copyFailed: "Não deu para copiar a lista. Tente de novo.",
     addFromWhatsApp: "Adicionar quem confirmou no WhatsApp",
-    openConfirmed: (count: string) => `Ver a lista de ${count} confirmados`,
+    openConfirmed: (count: string, amount: number) =>
+      `Ver a lista de ${count} ${confirmedNoun(amount)}`,
   },
   /** The "Sua presença" card of screen 26 (D7, question 46). Ordinals in the masculine, as question 41. */
   presence: {
@@ -153,7 +159,7 @@ export const roundsStrings = {
     nobody: "Ninguém confirmou ainda",
     noInitial: "?",
     waitlist: (line: string) => `Espera: ${line}`,
-    sheetTitle: (count: number) => `${String(count)} confirmados`,
+    sheetTitle: (count: number) => `${String(count)} ${confirmedNoun(count)}`,
     waitlistTitle: "Espera",
     remove: "Tirar",
     removeLabel: (name: string) => `Tirar ${name} da lista`,
@@ -167,7 +173,8 @@ export const roundsStrings = {
   /** Screen 21. */
   add: {
     title: "Adicionar quem confirmou no WhatsApp",
-    subtitle: (group: string, count: string) => `${group} · ${count} confirmados`,
+    subtitle: (group: string, count: string, amount: number) =>
+      `${group} · ${count} ${confirmedNoun(amount)}`,
     search: "Buscar membro do grupo",
     notYet: "Ainda não confirmaram",
     nobodyLeft: "Todo mundo do grupo já está na lista.",
@@ -215,7 +222,7 @@ export const roundsStrings = {
     waiting: (position: number | null) =>
       position === null ? "Na espera" : `Na espera · ${String(position)}º`,
     full: "Lista cheia",
-    confirmed: (count: string) => `${count} confirmados`,
+    confirmed: (count: string, amount: number) => `${count} ${confirmedNoun(amount)}`,
     withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
     next: (when: string) => `Próxima: ${when}`,
     editRound: "Editar rodada",

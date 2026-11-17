@@ -1,3 +1,6 @@
+import { useRef, type RefObject } from "react";
+import type { TextInput } from "react-native";
+
 import { strings } from "../../../strings/pt-BR";
 import { BottomSheet } from "../../../ui/BottomSheet";
 import { Button } from "../../../ui/Button";
@@ -7,7 +10,12 @@ import { TextField } from "../../../ui/TextField";
 import { useEmailSignIn, type EmailSignInModel } from "../hooks/use-email-sign-in";
 import { authFailureText } from "../model/auth-failure-text";
 import type { EmailMode } from "../model/email-sign-in.reducer";
-import { canSubmit, MAX_EMAIL_LENGTH, showsEmailError } from "../model/email-sign-in.selectors";
+import {
+  canSubmit,
+  MAX_EMAIL_LENGTH,
+  showsEmailError,
+  showsModeLink,
+} from "../model/email-sign-in.selectors";
 
 export interface EmailSignInSheetProps {
   readonly onClose: () => void;
@@ -42,10 +50,11 @@ function SheetAlert({ text }: SheetAlertProps) {
 
 export interface PasswordFieldProps {
   readonly model: EmailSignInModel;
+  readonly inputRef: RefObject<TextInput | null>;
 }
 
 /** The password, filled by the password manager; a new one when creating the account. */
-function PasswordField({ model }: PasswordFieldProps) {
+function PasswordField({ model, inputRef }: PasswordFieldProps) {
   const creating = model.state.mode === "signUp";
   return (
     <TextField
@@ -57,6 +66,7 @@ function PasswordField({ model }: PasswordFieldProps) {
       autoCorrect={false}
       autoComplete={creating ? "new-password" : "password"}
       textContentType={creating ? "newPassword" : "password"}
+      inputRef={inputRef}
       returnKeyType="go"
       onSubmitEditing={model.submit}
       help={creating ? emailSheet.passwordRule : undefined}
@@ -71,6 +81,7 @@ function PasswordField({ model }: PasswordFieldProps) {
 export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
   const model = useEmailSignIn(onClose);
   const { state } = model;
+  const passwordRef = useRef<TextInput>(null);
   const resetting = state.mode === "reset";
   const failure = authFailureText(state.failure);
   return (
@@ -100,9 +111,12 @@ export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
         autoComplete="email"
         textContentType="emailAddress"
         maxLength={MAX_EMAIL_LENGTH}
+        returnKeyType={resetting ? "go" : "next"}
+        submitBehavior={resetting ? "blurAndSubmit" : "submit"}
+        onSubmitEditing={resetting ? model.submit : () => passwordRef.current?.focus()}
         error={showsEmailError(state) ? emailSheet.emailInvalid : undefined}
       />
-      {resetting ? null : <PasswordField model={model} />}
+      {resetting ? null : <PasswordField model={model} inputRef={passwordRef} />}
       <SheetAlert text={failure} />
       <SheetAlert text={state.resetSent ? emailSheet.resetSent : null} />
       <Button
@@ -110,14 +124,16 @@ export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
         onPress={model.submit}
         disabled={!canSubmit(state)}
       />
-      <Button
-        variant="link"
-        label={resetting ? emailSheet.backToSignIn : emailSheet.forgot}
-        disabled={state.submitting}
-        onPress={() => {
-          model.changeMode(resetting ? "signIn" : "reset");
-        }}
-      />
+      {showsModeLink(state) ? (
+        <Button
+          variant="link"
+          label={resetting ? emailSheet.backToSignIn : emailSheet.forgot}
+          disabled={state.submitting}
+          onPress={() => {
+            model.changeMode(resetting ? "signIn" : "reset");
+          }}
+        />
+      ) : null}
     </BottomSheet>
   );
 }

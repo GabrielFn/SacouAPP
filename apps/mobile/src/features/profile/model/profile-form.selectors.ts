@@ -15,7 +15,9 @@ const PROBLEM_TEXT: Readonly<Record<NicknameProblem, string>> = {
 /** The text under the nickname field, or `null` when the API would take it. */
 export function nicknameError(state: ProfileFormState): string | null {
   const problem = nicknameProblem(state.nickname);
-  return problem === null ? null : PROBLEM_TEXT[problem];
+  // An empty field is a refusal only after the person typed or left it (as in screen 04).
+  if (problem === null || (problem === "required" && !state.nicknameTouched)) return null;
+  return PROBLEM_TEXT[problem];
 }
 
 export function canSubmit(state: ProfileFormState): boolean {

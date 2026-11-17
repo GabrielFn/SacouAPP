@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, type Ref } from "react";
 import { TextInput, type TextInputProps } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
@@ -22,20 +22,24 @@ export interface TextFieldProps extends Pick<
   | "returnKeyType"
   | "onSubmitEditing"
   | "onBlur"
+  | "submitBehavior"
 > {
   readonly label: string;
   readonly help?: string;
   /** The text of a refusal: shown under the field and announced as an alert. */
   readonly error?: string;
+  /** To move the focus here from another field (the "next" key). */
+  readonly inputRef?: Ref<TextInput>;
 }
 
-export function TextField({ label, help, error, ...inputProps }: TextFieldProps) {
+export function TextField({ label, help, error, inputRef, ...inputProps }: TextFieldProps) {
   const { colors, tokens } = useTheme();
   const helpId = useId();
   return (
     <FieldFrame label={label}>
       <TextInput
         {...inputProps}
+        ref={inputRef}
         accessibilityLabel={label}
         aria-describedby={help ? helpId : undefined}
         placeholderTextColor={colors.textMuted}

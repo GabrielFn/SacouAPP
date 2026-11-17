@@ -3,7 +3,7 @@ import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { addableMembers, type AddableRow } from "./addable-members";
 import { capacityHint, type CapacityHint } from "./capacity-hint";
 import { presenceCard, type PresenceCardView } from "./presence-card";
-import { isCanceled, type RoundSettingsView } from "./round-detail";
+import { confirmedAmount, isCanceled, type RoundSettingsView } from "./round-detail";
 import { rosterOf, waitlistLine, type RosterEntry } from "./roster";
 
 /** The names of a round, derived on each render from the round and the member list (rule 1). */
@@ -60,6 +60,8 @@ export interface AddPlayerView {
   readonly hint: CapacityHint | null;
   /** "12/14", for "Racha de terça · 12/14 confirmados". */
   readonly confirmed: string;
+  /** What "confirmados" agrees with in the subtitle. */
+  readonly confirmedAmount: number;
   /** A full list without waitlist: "Adicionar" is off. */
   readonly blocked: boolean;
 }
@@ -79,6 +81,7 @@ export function addPlayerView(
       round.capacity === null
         ? roundsStrings.detail.confirmedCount(round.goingCount)
         : roundsStrings.detail.confirmedOf(round.goingCount, round.capacity),
+    confirmedAmount: confirmedAmount(round),
     blocked: hint?.canAdd === false,
   };
 }

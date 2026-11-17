@@ -51,9 +51,16 @@ export function roundSubtitle(round: Round): string {
   return detail.subtitle(dateSubtitle(round.localDate), formatTime(round.localTime), round.venue);
 }
 
+/** The number the noun "confirmado" agrees with: the capacity when counted as "x/y", else the count. */
+export function confirmedAmount(round: Pick<Round, "capacity" | "goingCount">): number {
+  return round.capacity ?? round.goingCount;
+}
+
 export interface StatsCell {
   readonly value: string;
   readonly label: string;
+  /** What the label agrees with, for the accessible name of the cell. */
+  readonly amount: number;
 }
 
 /** The two cells of the dark panel; none with the attendance off, and no money cell (ADR 0046). */
@@ -64,10 +71,11 @@ export function statsCells(round: Round, values: GroupSettings): readonly StatsC
       round.capacity === null
         ? detail.confirmedCount(round.goingCount)
         : detail.confirmedOf(round.goingCount, round.capacity),
-    label: detail.confirmedLabel,
+    label: detail.confirmedLabel(confirmedAmount(round)),
+    amount: confirmedAmount(round),
   };
   return values.attendance.waitlistEnabled
-    ? [confirmed, { value: detail.waitlistCount(round.waitlistCount), label: detail.waitlistLabel }]
+    ? [confirmed, { value: detail.waitlistCount(round.waitlistCount), label: detail.waitlistLabel, amount: round.waitlistCount }]
     : [confirmed];
 }
 
