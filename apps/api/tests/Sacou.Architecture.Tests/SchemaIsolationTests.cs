@@ -2,7 +2,7 @@ using Xunit;
 
 namespace Sacou.Architecture.Tests;
 
-/// <summary>A2 of E3.4: the Sessions never reads the <c>groups</c> schema.</summary>
+/// <summary>A2 of E3.4: the Sessions never reads the <c>groups</c> schema. G4 of E3.7: the Matches reads none but its own.</summary>
 public sealed class SchemaIsolationTests
 {
     [Fact]
@@ -12,6 +12,24 @@ public sealed class SchemaIsolationTests
 
         Assert.True(Directory.Exists(directory), "The Sessions module directory must exist for the rule to mean anything.");
         ViolationAssert.None(SchemaIsolationRules.ModuleViolations(directory));
+    }
+
+    [Fact]
+    public void MatchesSource_NeverNamesAnotherModulesSchema()
+    {
+        var directory = Path.Combine(RepositoryFiles.ModulesDirectory, "Matches");
+
+        Assert.True(Directory.Exists(directory), "The Matches module directory must exist for the rule to mean anything.");
+        ViolationAssert.None(SchemaIsolationRules.ModuleViolations(directory, ["groups", "sessions", "identity"]));
+    }
+
+    [Theory]
+    [InlineData("SELECT status FROM sessions.rounds WHERE id = 1")]
+    [InlineData("SELECT 1 FROM matches.court_sessions c JOIN identity.users u ON u.id = c.id")]
+    public void PlantedReadsOfTheSessionsOrIdentitySchema_AreFound(string source)
+    {
+        Assert.NotEmpty(SchemaIsolationRules.Violations("Planted.cs", source, "sessions")
+            .Concat(SchemaIsolationRules.Violations("Planted.cs", source, "identity")));
     }
 
     /// <summary>An empty rule proves nothing: each way of reaching the schema is planted here and must be found.</summary>
