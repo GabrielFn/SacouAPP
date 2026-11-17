@@ -43,6 +43,10 @@ export type AttendanceResponse = Schemas["AttendanceResponse"];
 /** A guest without an account: a name of someone who accepted no terms, and a private level (ADR 0053). */
 export type AddGuestBody = Schemas["AddGuestRequest"];
 export type AddedGuest = Schemas["AddGuestResponse"];
+/** The draw of screen 07: `together` locks and the queue of reserves the admin set (ADR 0055). */
+export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
+/** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
+export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
 
 export interface MemberRef {
   readonly groupId: string;
@@ -126,6 +130,12 @@ export interface SacouApi {
   deleteMyAccount(): Promise<ApiResult<null>>;
   /** The same `requestId` in the same group answers the same `memberId` (ADR 0053, D5). Admin and co-admin. */
   addGuest(groupId: string, body: AddGuestBody): Promise<ApiResult<AddedGuest>>;
+  /** Admin and co-admin only (`DrawTeams`). Stores nothing on the server: each call is a new draw. */
+  drawTeams(
+    groupId: string,
+    roundId: string,
+    body: DrawTeamsBody,
+  ): Promise<ApiResult<DrawTeamsAnswer>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

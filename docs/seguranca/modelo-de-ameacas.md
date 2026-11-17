@@ -282,6 +282,19 @@ Telas 19, 19a, 19b e 19c ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-
 | I | Nota em log, rota ou chave de consulta | Nenhum `console`; a rota da 19b leva só o `groupId`; a chave só tem o `groupId` |
 | E | Admin rebaixado continua vendo as notas | Um 403 `groups.forbidden` numa escrita de nota invalida o grupo e as notas: o papel novo esconde a nota na hora |
 
+### 12.3 Sorteio no app (E4.7, Parte 1)
+
+Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem sorteia e vê as notas é da API (`DrawTeams`, E3.6); o app só reduz a superfície.
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| I | Placar ou Jogador vê a nota de todos pelo sorteio | "Sortear times" só aparece para Admin e Co-admin (`canDraw`); a rota aberta por outro papel mostra "Só admins sorteiam os times." e nunca chama a API (teste do hook com o papel); um 403 dá o mesmo texto e relê o grupo |
+| I | Nota de todos os confirmados guardada no aparelho | A resposta vai direto ao reducer da tela (`deliver`) e a mutação devolve `null`, com `gcTime: 0`: nem o `QueryCache`, nem o `MutationCache`, nem o `sacou-cache.db` têm `levelTenths` (teste que varre os dois caches e a lista persistida). Some ao sair da 07 |
+| I | Nota em log, rota, chave de consulta ou texto compartilhado | Nenhum `console`; a rota da 07 leva só `groupId` e `roundId`; o texto de "Confirmar e compartilhar" tem só apelidos (golden `drawShareText` e teste que procura nota, UUID e posição) e só sai do aparelho no toque |
+| D | Toque repetido em "Sortear de novo" custando CPU no servidor | Um sorteio por vez (`scope` por rodada, guarda contra o toque duplo no mesmo quadro, botões desligados durante o pedido); a mutação não repete sozinha |
+| T | Trava ou reserva forjada no corpo | O app só manda IDs do arranjo e confere o teto de 24 travas e que nenhuma trava toca reserva; o servidor confere tudo de novo (E3.6) |
+| E | Admin rebaixado com a 07 aberta | Se o rebaixamento ocorre sem o app receber 403, as notas continuam na memória do reducer até a pessoa sair da 07; a tela as esconde quando o papel muda no cache (`canDraw`). Risco aceito: a janela é a de uma sessão aberta de quem era admin |
+
 ### 12.1 Convite no app (E4.5, Parte 2)
 
 Telas 19 e 19d ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-convite-no-app.md), D7). O token do convite sai uma vez, na resposta de `createInvite`, e no aparelho fica em um lugar só: a porta `InviteLinkStore`.

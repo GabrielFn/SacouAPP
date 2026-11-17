@@ -16,6 +16,7 @@ import type { Member, Round, RoundSummary } from "../../../services/api/sacou-ap
 import { queryKeys } from "../../../services/query/query-keys";
 import { afterCreateGroupHref } from "../../groups/navigation";
 import { withLeaf } from "../../groups/model/settings-patch";
+import { canDraw } from "../../draw/model/can-draw";
 import { createRoundHref, PENDING_ROUND_SCREENS, roundHref } from "../navigation";
 import { createRoundMutation, roundScope } from "../queries/round-mutations";
 import { hasRoundLayer, roundChips, sourceReader } from "./round-chips";
@@ -197,6 +198,14 @@ describe("one route for every role", () => {
     expect(managesRounds("player")).toBe(false);
   });
 
+  test.each(["admin", "coAdmin", "scorekeeper", "player"] as const)(
+    "'Sortear times' (only on the manager's screen) follows who draws: %s",
+    (role) => {
+      // Screen 26 has no footer, so a role that does not manage never sees the button (E4.7, D1).
+      expect(managesRounds(role)).toBe(canDraw(role));
+    },
+  );
+
   test("the header names the role", () => {
     expect(roleHeader("admin")).toBe("Você é admin");
     expect(roleHeader("coAdmin")).toBe("Você é co-admin");
@@ -204,9 +213,9 @@ describe("one route for every role", () => {
     expect(roleHeader("scorekeeper")).toBe("Você é placar");
   });
 
-  test("with the draw and the court pending there is no footer", () => {
-    expect(PENDING_ROUND_SCREENS).toEqual(["draw", "court"]);
-    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual([]);
+  test("with the draw built (E4.7) only the court is pending: the footer has 'Sortear times'", () => {
+    expect(PENDING_ROUND_SCREENS).toEqual(["court"]);
+    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual(["draw"]);
   });
 
   test("taking 'draw' out of the pending list shows 'Sortear times'", () => {

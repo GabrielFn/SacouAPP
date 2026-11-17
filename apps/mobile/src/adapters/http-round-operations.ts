@@ -1,4 +1,5 @@
 import type { SacouApi } from "../services/api/sacou-api";
+import { createDrawOperations } from "./http-draw-operations";
 import { group, round, type Client, type Execute } from "./http-path-params";
 
 /** The operations of the rounds and the presence, apart from the rest to keep the adapter small (E4.6). */
@@ -14,8 +15,10 @@ export function createRoundOperations(
   | "respondAttendance"
   | "setMemberAttendance"
   | "addGuest"
+  | "drawTeams"
 > {
   return {
+    ...createDrawOperations(client, execute),
     listRounds: (groupId) =>
       execute((init) => client.GET("/v1/groups/{groupId}/rounds", { ...init, ...group(groupId) })),
     getRound: (groupId, roundId) =>

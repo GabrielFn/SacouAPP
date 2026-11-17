@@ -23,7 +23,13 @@ import {
 } from "../model/round-detail";
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
 import type { CopyNote } from "../model/round-screen.reducer";
-import { addPlayerHref, PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
+import { canDraw } from "../../draw/model/can-draw";
+import {
+  addPlayerHref,
+  drawHref,
+  PENDING_ROUND_SCREENS,
+  type PendingRoundScreen,
+} from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
@@ -82,21 +88,22 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
 /** "Sortear times" and "Abrir quadra" appear when their screens exist (D1). */
 export interface RoundFooterProps {
   readonly actions: readonly PendingRoundScreen[];
+  readonly onDraw: () => void;
 }
 
-function RoundFooter({ actions }: RoundFooterProps) {
+function RoundFooter({ actions, onDraw }: RoundFooterProps) {
   return (
     <>
       {actions.includes("court") ? <Button label={detail.openCourt} onPress={noAction} /> : null}
       {actions.includes("draw") ? (
-        <Button label={detail.drawTimes} variant="secondary" onPress={noAction} />
+        <Button label={detail.drawTimes} variant="secondary" onPress={onDraw} />
       ) : null}
     </>
   );
 }
 
 function noAction(): void {
-  // The destinations (E4.7 and the court) take over these buttons when they exist.
+  // The court takes over this button when the pre-game exists (E4.7, part 2).
 }
 
 export interface AdminRoundScreenProps {
@@ -193,9 +200,19 @@ export function AdminRoundScreen({
 }: AdminRoundScreenProps) {
   const router = useRouter();
   const roster = rosterView(round, settings, members);
-  const actions = footerActions(PENDING_ROUND_SCREENS, isCanceled(round));
+  const actions = canDraw(group.role)
+    ? footerActions(PENDING_ROUND_SCREENS, isCanceled(round))
+    : [];
+  const footer = (
+    <RoundFooter
+      actions={actions}
+      onDraw={() => {
+        router.push(drawHref(groupId, round.roundId));
+      }}
+    />
+  );
   return (
-    <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
+    <Screen footer={actions.length === 0 ? undefined : footer}>
       <AdminHeader
         role={group.role}
         canCopy={canCopyList(round, settings)}
