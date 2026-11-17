@@ -63,6 +63,17 @@ A média de cada time é a soma ÷ o tamanho, arredondada para o décimo, **meio
 - **Lista que mudou:** se alguém do sorteio saiu da rodada, a tela avisa e desliga "Confirmar"; se alguém confirmou depois, só avisa.
 - **Compartilhar:** o texto leva só os apelidos de cada time e da fila ("Reservas: 1 Davi, 2 Sofia"), nunca nota, posição nem ID.
 
+## Montar times (sorteio desligado, resposta 72)
+
+Com `draw.enabled` desligado (o padrão do catálogo e do "Do zero"), a tela 07 não sorteia: monta os times **por ordem de chegada**, sem chamar o servidor e sem rede.
+
+- **Divisão:** a mesma da seção [Times e reservas](#times-e-reservas-perguntas-52-e-53-recomendação-seguida). Os primeiros a chegar enchem o time 1, os seguintes o time 2, e assim por diante; os últimos ficam na fila. 14 em 6x6: 1 a 6 no Laranja, 7 a 12 no Azul, 13 e 14 reservas. Golden compartilhado `packages/volley-rules/golden/draw-split.json` (`splitByArrival` no TS; o `TeamDraw` do C# confere tamanhos e reservas).
+- **Sem nota e sem medidor:** nenhum nível é lido.
+- **Trocar:** igual ao do sorteio. Não há "Travar dupla" (trava só vale para o sorteio). "Montar de novo" volta à ordem de chegada.
+- **Lista que mudou:** até a primeira troca, quem confirma depois entra na fila. Depois dela, a tela avisa ("Monte de novo") e, se alguém saiu, desliga "Confirmar".
+- **Confirmar e compartilhar:** igual ao do sorteio, e segue para a folha 08.
+- Menos de 4 confirmados: "Precisa de pelo menos 4 confirmados para montar os times."
+
 
 Os códigos dizem só o motivo, nunca nome nem nota.
 

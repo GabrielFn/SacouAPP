@@ -39,6 +39,13 @@ export interface DrawFlowState {
 
 export type DrawFlowAction =
   | { readonly type: "drawn"; readonly answer: DrawTeamsAnswer }
+  /**
+   * "Montar times" (draw off): the teams by arrival, kept from the first edit on. Until then the screen
+   * derives them from the round, so a late confirmation still joins them.
+   */
+  | { readonly type: "teams-built"; readonly arrangement: DrawArrangement }
+  /** "Montar de novo": back to the teams by arrival, derived from the round again. */
+  | { readonly type: "teams-reset" }
   | { readonly type: "player-tapped"; readonly memberId: MemberId }
   | { readonly type: "swap-mode-chosen" }
   | { readonly type: "lock-mode-chosen" }
@@ -110,6 +117,12 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
   switch (action.type) {
     case "drawn":
       return drawn(state, action.answer);
+    case "teams-built":
+      return state.arrangement === null
+        ? { ...state, arrangement: action.arrangement, locks: [], selection: null, notice: null }
+        : state;
+    case "teams-reset":
+      return { ...state, arrangement: null, locks: [], selection: null, notice: null };
     case "player-tapped":
       return playerTapped(state, action.memberId);
     case "swap-mode-chosen":

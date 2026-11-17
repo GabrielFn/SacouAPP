@@ -58,6 +58,8 @@ function FooterButton({ label, onPress, disabled, selected, renderIcon }: Footer
 export interface DrawFooterProps {
   readonly hint: string;
   readonly mode: DrawMode;
+  /** "Montar times": no lock (only the server draws with locks), and "Montar de novo" needs no network. */
+  readonly manual: boolean;
   readonly lockAction: "lock" | "unlock";
   /** Everything off while a draw is on its way. */
   readonly busy: boolean;
@@ -71,10 +73,20 @@ export interface DrawFooterProps {
   readonly onConfirm: () => void;
 }
 
+/** The label and the state of the third button: "Sortear de novo", or "Montar de novo" by hand. */
+function redrawButton(props: DrawFooterProps): { readonly label: string; readonly off: boolean } {
+  if (props.manual) return { label: draw.manual.rebuild, off: props.busy };
+  return {
+    label: props.online ? draw.redraw : draw.offlineRedraw,
+    off: props.busy || !props.online,
+  };
+}
+
 /** The hint, "Trocar", "Travar dupla", "Sortear de novo" and "Confirmar e compartilhar". */
 export function DrawFooter(props: DrawFooterProps) {
   const { tokens } = useTheme();
   const { busy, mode } = props;
+  const again = redrawButton(props);
   const unlock = props.lockAction === "unlock";
   return (
     <>
@@ -89,18 +101,16 @@ export function DrawFooter(props: DrawFooterProps) {
           onPress={props.onSwap}
           renderIcon={(color) => <SwapIcon color={color} />}
         />
-        <FooterButton
-          label={unlock ? draw.unlock : draw.lock}
-          selected={unlock ? undefined : mode === "lock"}
-          disabled={busy}
-          onPress={unlock ? props.onUnlock : props.onLock}
-          renderIcon={(color) => <LockButtonIcon color={color} />}
-        />
-        <FooterButton
-          label={props.online ? draw.redraw : draw.offlineRedraw}
-          disabled={busy || !props.online}
-          onPress={props.onRedraw}
-        />
+        {props.manual ? null : (
+          <FooterButton
+            label={unlock ? draw.unlock : draw.lock}
+            selected={unlock ? undefined : mode === "lock"}
+            disabled={busy}
+            onPress={unlock ? props.onUnlock : props.onLock}
+            renderIcon={(color) => <LockButtonIcon color={color} />}
+          />
+        )}
+        <FooterButton label={again.label} disabled={again.off} onPress={props.onRedraw} />
       </View>
       <Button label={draw.confirm} disabled={busy || !props.canConfirm} onPress={props.onConfirm} />
     </>

@@ -1,6 +1,6 @@
 # ADR 0061 · Sorteio e pré-jogo no app
 
-**Status:** aceito (17/11/2026): a Parte 1 da E4.7 (tela 07) e a Parte 2 (folha 08, `MatchStarted`, origem da quadra no SQLite). **Decidido por:** plano da E4.7 (`docs/estado/tarefas/E4.7.md`), dentro da arquitetura aprovada. O plano chamava este ADR de 0059; o 0059 foi para o ícone do app e o 0060 para a sincronização do stream (E3.7).
+**Status:** aceito (17/11/2026): a Parte 1 da E4.7 (tela 07), a Parte 2 (folha 08, `MatchStarted`, origem da quadra no SQLite) e a Parte 3 ("Montar times" com o sorteio desligado, resposta 72). **Decidido por:** plano da E4.7 (`docs/estado/tarefas/E4.7.md`), dentro da arquitetura aprovada. O plano chamava este ADR de 0059; o 0059 foi para o ícone do app e o 0060 para a sincronização do stream (E3.7).
 
 ## Contexto
 
@@ -29,6 +29,14 @@ A tela 07 mostra os times sorteados pelo servidor (`POST .../rounds/{roundId}/dr
 14. **"Abrir quadra" na 06 (D1).** Saiu `"court"` de `PENDING_ROUND_SCREENS`: o botão aparece só quando o aparelho tem sessão aberta desta rodada e leva à quadra. "Sortear times" continua só para quem sorteia. O link "Escalação" da 08 espera a tela 22 (`PENDING_PRE_GAME_SCREENS = ["lineup"]`).
 15. **O que sai do canvas na 08 (D9):** o botão "6x0" (fica um "Livre", `decisoes.md:12`), os selos "Pro" (ADR 0046), "começa na posição 2" (o padrão é a zona 1; a tela é ilustrativa, pendência da E2.3), o link "Escalação" (E4.8) e a alça decorativa da folha (a `BottomSheet` não tem). O "Fechar" é uma cruz ao lado do título, que a `BottomSheet` ganhou como opção.
 
+### Parte 3 · "Montar times" com o sorteio desligado (resposta 72, opção 1)
+
+16. **A divisão é golden compartilhado.** `packages/volley-rules/golden/draw-split.json` descreve times e reservas por ordem de chegada (jogadores numerados de 1 a n): `k = n ÷ s` times completos, com menos de dois, dois times de `n ÷ 2`; as reservas são os últimos (respostas 52 e 53); menos de 4 é `not-enough-players`. O TS (`drawLayout` e `splitByArrival` de `@sacou/volley-rules`) confere os times e as reservas; o C# (`DrawSplitGoldenTests`, lista literal, registrado em `SharedJsonFiles`) roda o `TeamDraw` rápido e confere o número de times, o tamanho e as reservas, porque o servidor embaralha quem joga onde.
+17. **Sem chamada, sem nota, sem medidor.** Com `draw.enabled = false` na configuração resolvida da rodada, a 07 não pede sorteio: o estado `drawn` ganha `manual: true` e o arranjo é `arrivalArrangement(round, modality)`, com `levels` vazio. Nota e medidor somem porque não há nível no arranjo (o chip e o cartão mostram só o nome; `meterView` devolve `null`), sem flag paralela. Funciona sem rede. O aviso "O sorteio está desligado nesta rodada." e o "Ligar em Ajustes" saem desse caminho; o texto fica só para o 409 `draw-disabled`, que relê a rodada e cai no "Montar times".
+18. **Registro único.** Até a primeira edição, os times são derivados da rodada (quem confirma depois entra na fila). No primeiro toque, ou no "Confirmar", o hook despacha `teams-built` com o arranjo mostrado, e daí em diante o reducer o guarda. "Montar de novo" (`teams-reset`) volta à ordem de chegada. Nada de efeito copiando a consulta para o estado.
+19. **Rodapé.** "Trocar" como no sorteio; "Travar dupla" some (as travas só valem para o sorteio do servidor); "Sortear de novo" vira "Montar de novo", que não pede rede. A linha "Sorteio desligado: os times seguem a ordem de chegada." fica sob o título, e a de privacidade perde "Só admins veem as notas.". Com alguém que saiu, o aviso diz "Monte de novo" e o "Confirmar" desliga, como no sorteio. "Confirmar e compartilhar" segue para a folha 08 igual.
+20. **Tamanho do time por modalidade** (`playersPerTeamOf`: 6, 4 e 2), o mesmo do `DrawRulesReader` do servidor. A imagem dos times (view-shot) não entra: a resposta 71 fixou o texto, e a imagem foi para `docs/ideias.md`.
+
 ## Consequências
 
 - A nota de todos os confirmados fica na memória do app enquanto a 07 está aberta, e em nenhum outro lugar: nem no cache do Query (persistido ou não), nem no estado da mutação, nem em log ou rota. Captura de tela pelo admin é aceita (ele já vê as notas na 19a).
@@ -38,4 +46,4 @@ A tela 07 mostra os times sorteados pelo servidor (`POST .../rounds/{roundId}/dr
 - A origem da quadra (só IDs de grupo e rodada) passa a ficar no `sacou.db`; nada de nome, nota ou posição.
 - O `MatchStarted` nasce no aparelho sem conferência dos confirmados no servidor até a E3.7 (aceito no piloto), e o `courtSessionId` é gerado no aparelho.
 - Uma quadra por aparelho: abrir a de outra rodada fecha a anterior quando ela não tem partida em curso; eventos não sincronizados continuam no arquivo (E4.11).
-- Parte seguinte: imagem e "Montar times" só se o Gabriel pedir (perguntas 71 e 72).
+- "Montar times" não guarda nada no servidor, como o sorteio: voltar à 07 monta de novo pela ordem de chegada.

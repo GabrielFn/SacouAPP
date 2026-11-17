@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import type { DrawFlowState } from "../model/draw-flow.reducer";
+import {
+  drawFlowReducer,
+  initialDrawFlowState,
+  type DrawFlowState,
+} from "../model/draw-flow.reducer";
 import { withLeaf } from "../../groups/model/settings-patch";
 import { drawnG1, drawSettings, g1Members, g1Round, G1_ANSWER } from "../model/draw.test.fixture";
 import type { DrawVariables } from "../queries/draw-mutation";
@@ -18,6 +22,7 @@ const world = vi.hoisted(() => ({
   role: new Map<"role", string>(),
   online: true,
   scoring: true,
+  drawOn: true,
   mutate: vi.fn<(variables: DrawVariables, options?: RunOptions) => void>(),
   dispatch: vi.fn(),
   share: vi.fn<(text: string) => Promise<void>>(),
@@ -57,7 +62,7 @@ vi.mock("../../rounds/queries/use-round-queries", () => ({
       settings: {
         schemaVersion: 1,
         layer: null,
-        resolved: withLeaf(drawSettings(), "scoring.enabled", world.scoring),
+        resolved: withLeaf(drawSettings(world.drawOn), "scoring.enabled", world.scoring),
         sources: {},
       },
     }),
@@ -79,6 +84,7 @@ beforeEach(() => {
   world.role.set("role", "admin");
   world.online = true;
   world.scoring = true;
+  world.drawOn = true;
   world.mutate.mockReset();
   world.dispatch.mockReset();
   world.share.mockReset().mockResolvedValue(undefined);
@@ -206,5 +212,59 @@ describe("Confirmar e compartilhar (D11)", () => {
     render();
     render(drawnG1());
     expect(world.share).not.toHaveBeenCalled();
+  });
+});
+
+describe("Montar times, with the draw off (question 72)", () => {
+  const BY_ARRIVAL = {
+    teams: [
+      ["ana", "joao", "pedro", "lia", "marcos", "bia"],
+      ["rafa", "duda", "caio", "nina", "leo", "gabi"],
+    ],
+    reserves: ["davi", "sofia"],
+    levels: new Map(),
+  };
+
+  beforeEach(() => {
+    world.drawOn = false;
+  });
+
+  test("opens with the teams by arrival and never asks the API, online or not", () => {
+    expect(render().screen).toEqual({ kind: "drawn", arrangement: BY_ARRIVAL, manual: true });
+    world.online = false;
+    expect(render().screen.kind).toBe("drawn");
+    expect(world.mutate).not.toHaveBeenCalled();
+  });
+
+  test("the first tap keeps the teams by arrival, then selects", () => {
+    render().tap("duda");
+    expect(world.dispatch.mock.calls).toEqual([
+      [{ type: "teams-built", arrangement: BY_ARRIVAL }],
+      [{ type: "player-tapped", memberId: "duda" }],
+    ]);
+    expect(world.mutate).not.toHaveBeenCalled();
+  });
+
+  test("a later tap on the kept teams only taps", () => {
+    const kept = drawFlowReducer(initialDrawFlowState, {
+      type: "teams-built",
+      arrangement: BY_ARRIVAL,
+    });
+    render(kept).tap("pedro");
+    expect(world.dispatch.mock.calls).toEqual([[{ type: "player-tapped", memberId: "pedro" }]]);
+  });
+
+  test("Montar de novo goes back to the order of arrival, with no call", () => {
+    render().redraw();
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "teams-reset" });
+    expect(world.mutate).not.toHaveBeenCalled();
+  });
+
+  test("Confirmar shares the teams by arrival and opens the 08 over them", async () => {
+    render().share();
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "teams-built", arrangement: BY_ARRIVAL });
+    expect(world.share.mock.calls[0]?.[0]).toContain("Laranja: Ana, João, Pedro, Lia, Marcos, Bia");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
   });
 });
