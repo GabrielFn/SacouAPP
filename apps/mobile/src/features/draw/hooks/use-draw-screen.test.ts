@@ -11,10 +11,10 @@ interface RunOptions {
 }
 
 const world = vi.hoisted(() => ({
-  refs: [] as { current: unknown }[],
+  refs: new Array<{ current: unknown }>(),
   refIndex: 0,
-  state: null as unknown,
-  role: "admin" as string,
+  state: new Map<"state", unknown>(),
+  role: new Map<"role", string>(),
   online: true,
   mutate: vi.fn<(variables: DrawVariables, options?: RunOptions) => void>(),
   dispatch: vi.fn(),
@@ -23,7 +23,7 @@ const world = vi.hoisted(() => ({
 
 vi.mock("react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react")>()),
-  useReducer: (_reducer: unknown, initial: unknown) => [world.state ?? initial, world.dispatch],
+  useReducer: (_reducer: unknown, initial: unknown) => [world.state.get("state") ?? initial, world.dispatch],
   useRef: (initial: unknown) => {
     const index = world.refIndex;
     world.refIndex += 1;
@@ -43,7 +43,7 @@ vi.mock("../../../services/services-context", () => ({
 }));
 vi.mock("../../../services/api/use-online", () => ({ useOnline: () => world.online }));
 vi.mock("../../groups/queries/use-group-queries", () => ({
-  useGroup: () => ({ data: { name: "Racha de terça", role: world.role } }),
+  useGroup: () => ({ data: { name: "Racha de terça", role: world.role.get("role") } }),
   useGroupMembers: () => ({ data: g1Members(), error: null }),
 }));
 vi.mock("../../rounds/queries/use-round-queries", () => ({
@@ -51,15 +51,15 @@ vi.mock("../../rounds/queries/use-round-queries", () => ({
 }));
 
 /** One render of the hook, with the refs of the renders before it (as React keeps them). */
-function render(state: DrawFlowState | null = null) {
+function useRender(state: DrawFlowState | null = null) {
   world.refIndex = 0;
-  world.state = state;
+  world.state.set("state", state);
   return useDrawScreen("g1", "r1");
 }
 
 beforeEach(() => {
   world.refs = [];
-  world.role = "admin";
+  world.role.set("role", "admin");
   world.online = true;
   world.mutate.mockReset();
   world.dispatch.mockReset();
@@ -82,7 +82,7 @@ describe("the first draw goes once per opening (D4)", () => {
   });
 
   test.each(["player", "scorekeeper"])("a %s opening the route never asks the API", (role) => {
-    world.role = role;
+    world.role.set("role", role);
     expect(render().screen).toEqual({ kind: "blocked", blocker: "forbidden" });
     expect(world.mutate).not.toHaveBeenCalled();
   });
