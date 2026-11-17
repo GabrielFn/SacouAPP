@@ -29,15 +29,15 @@ public sealed class CourtStreamLimitsTests
         yield return (ScoreEventTypes.MatchEnded, InMatch(MatchEnded("manual", "null")));
     }
 
-    private static CourtWriteError? ErrorOf(StoredStream stored, ImmutableArray<StreamEvent> events)
+    private static CourtWriteError? ErrorOf(StoredStream stored, ImmutableArray<StreamEvent> events, CourtWriteContext? context = null)
     {
-        var result = Decide(stored, events);
+        var result = Decide(stored, events, context);
         return result.IsSuccess ? null : result.Error;
     }
 
     /// <summary>The log stored but its last event, which comes in its own request, as the app sends at each point.</summary>
-    private static CourtWriteError? ErrorOfLast(ImmutableArray<StreamEvent> events) =>
-        ErrorOf(events.Length == 1 ? StoredStream.New : Stored(events[..^1]), [events[^1]]);
+    private static CourtWriteError? ErrorOfLast(ImmutableArray<StreamEvent> events, CourtWriteContext? context = null) =>
+        ErrorOf(events.Length == 1 ? StoredStream.New : Stored(events[..^1]), [events[^1]], context);
 
     private static void AssertLimit(string limit, long eventSequence, CourtWriteError? error)
     {
@@ -91,6 +91,17 @@ public sealed class CourtStreamLimitsTests
 
         Assert.Null(ErrorOfLast(events[..^1]));
         AssertLimit(StreamLimitNames.MatchServingChanges, events.Length, ErrorOfLast(events));
+    }
+
+    [Fact]
+    public void LineupChangesOfAMatch()
+    {
+        var changes = Enumerable.Range(0, CourtStreamLimits.MaxMatchLineupChanges + 1)
+            .Select(index => (ScoreEventTypes.LineupChanged, LineupChangedOfA(index % 2 == 0 ? 7 : 1)));
+        var events = Events(1, [(ScoreEventTypes.MatchStarted, MatchStartedWithRotation(withLibero: false)), .. changes]);
+
+        Assert.Null(ErrorOfLast(events[..^1], RotationContext));
+        AssertLimit(StreamLimitNames.MatchLineupChanges, events.Length, ErrorOfLast(events, RotationContext));
     }
 
     [Fact]

@@ -1,4 +1,7 @@
 using System.Collections.Immutable;
+using System.Text;
+using Sacou.Modules.Matches.CourtSessionJson;
+using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 using Sacou.Modules.Matches.Domain.CourtSessions.Score;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 using Xunit;
@@ -124,6 +127,17 @@ public sealed class CourtWriteRulesTests
         var error = Refused(Decide(Stored(SixEvents, new CourtWriter(2, Device, Caller)), events));
 
         Assert.Equal(CourtWriteErrorCode.BatchMismatch, error.Code);
+    }
+
+    /// <summary>Batch 0 never reaches the write rules: the envelope parser only takes a positive batch.</summary>
+    [Fact]
+    public void BatchZero_IsRefusedByTheEnvelopeParser()
+    {
+        var bytes = Encoding.UTF8.GetBytes(Envelope(7, ScoreEventTypes.PointScored, Point("a"), batch: 0));
+
+        var envelope = EnvelopeParser.Parse(RawValueReader.Parse(bytes));
+
+        Assert.True(envelope.IsFailure);
     }
 
     [Fact]

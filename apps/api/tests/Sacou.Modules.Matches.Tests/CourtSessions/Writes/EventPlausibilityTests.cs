@@ -18,9 +18,13 @@ public sealed class EventPlausibilityTests
     private static readonly (string Type, string Payload)[] SetOneToA =
         [Start, (Pt, Point("a")), (Pt, Point("a")), (Pt, Point("a"))];
 
-    private static string? ReasonOf(params (string Type, string Payload)[] events)
+    private static string? ReasonOf(params (string Type, string Payload)[] events) => ReasonIn(Context, events);
+
+    private static string? ReasonWithRotation(params (string Type, string Payload)[] events) => ReasonIn(RotationContext, events);
+
+    private static string? ReasonIn(CourtWriteContext context, (string Type, string Payload)[] events)
     {
-        var result = Decide(StoredStream.New, Events(1, events));
+        var result = Decide(StoredStream.New, Events(1, events), context);
         if (result.IsSuccess)
         {
             return null;
@@ -187,6 +191,55 @@ public sealed class EventPlausibilityTests
     public void PointAttributed_IsOfAPointOfTheMatch_ByAPlausibleAuthor(long target, string kind, string author, string? reason)
     {
         Assert.Equal(reason, ReasonOf(Start, (Pt, Point("b")), (ScoreEventTypes.PointAttributed, Attributed(target, kind, Quoted(author)))));
+    }
+
+    /// <summary>The libero is on court in slot 2 and may attack, but never blocks nor serves (ADR 0031, P1).</summary>
+    [Theory]
+    [InlineData("block", ImplausibleReasons.InvalidPointAuthor)]
+    [InlineData("attack", null)]
+    public void PointAttributed_ToTheLibero_IsNeverABlock(string kind, string? reason)
+    {
+        Assert.Equal(reason, ReasonWithRotation(
+            (ScoreEventTypes.MatchStarted, MatchStartedWithRotation(withLibero: true)),
+            (Pt, Point("a")),
+            (ScoreEventTypes.PointAttributed, Attributed(2, kind, Quoted(TeamMember('a', 7))))));
+    }
+
+    /// <summary>a7 came in after the point, so it was not on court in the rally; a1, now on the bench, was.</summary>
+    [Theory]
+    [InlineData(7, ImplausibleReasons.InvalidPointAuthor)]
+    [InlineData(1, null)]
+    public void PointAttributed_IsOfWhoWasOnCourtInTheRally(int author, string? reason)
+    {
+        Assert.Equal(reason, ReasonWithRotation(
+            (ScoreEventTypes.MatchStarted, MatchStartedWithRotation(withLibero: false)),
+            (Pt, Point("a")),
+            (ScoreEventTypes.LineupChanged, LineupChangedOfA(7)),
+            (ScoreEventTypes.PointAttributed, Attributed(2, "attack", Quoted(TeamMember('a', author))))));
+    }
+
+    [Fact]
+    public void PointAttributed_ToAPointOfAnotherMatch_IsImplausible()
+    {
+        const string NextMatch = "f0000000-0000-4000-8000-000000000002";
+        string InNextMatch(string payload) => payload.Replace(Match, NextMatch, StringComparison.Ordinal);
+
+        Assert.Equal(ImplausibleReasons.InvalidAttributionTarget, ReasonOf(
+            Start, (Pt, Point("a")),
+            (ScoreEventTypes.MatchEnded, MatchEnded("manual", "null")),
+            (ScoreEventTypes.MatchStarted, InNextMatch(Start.Payload)),
+            (ScoreEventTypes.PointAttributed, InNextMatch(Attributed(2, "attack", Quoted(MemberA))))));
+    }
+
+    [Fact]
+    public void PointAttributed_ToASetEnded_IsImplausible()
+    {
+        Assert.Equal(ImplausibleReasons.InvalidAttributionTarget, ReasonOf(
+        [
+            .. SetOneToA,
+            (Ended, SetEnded(1, "a", NextSet("b", 3))),
+            (ScoreEventTypes.PointAttributed, Attributed(5, "attack", Quoted(MemberA))),
+        ]));
     }
 
     /// <summary>The payload parser already refuses an author on an error of the opponent, so the replay does.</summary>

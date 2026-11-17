@@ -4,7 +4,11 @@ using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 namespace Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
 /// <summary>A parsed envelope and the number of bytes it was received or stored with.</summary>
-internal sealed record StreamEvent(EventEnvelope Envelope, long ByteCount);
+internal sealed record StreamEvent(EventEnvelope Envelope, long ByteCount)
+{
+    /// <summary>Never the envelope: its device id and payload are received content (ADR 0060, D15).</summary>
+    public override string ToString() => nameof(StreamEvent);
+}
 
 /// <summary>Who writes a batch of the stream: a device of one installation and the member who holds it (ADR 0060, D4).</summary>
 internal sealed record CourtWriter(long Batch, string DeviceId, string MemberId)

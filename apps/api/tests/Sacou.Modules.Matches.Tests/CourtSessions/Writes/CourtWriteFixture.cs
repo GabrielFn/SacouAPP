@@ -60,6 +60,40 @@ internal static class CourtWriteFixture
 
     public static string Quoted(string text) => $"\"{text}\"";
 
+    /// <summary>The member <paramref name="number"/> of a team of 7 (a) or 6 (b), on the scheme of <see cref="MemberA"/> and <see cref="MemberB"/>.</summary>
+    public static string TeamMember(char team, int number) =>
+        $"{team}0000000-0000-4000-8000-{number.ToString("D12", CultureInfo.InvariantCulture)}";
+
+    /// <summary>The group of <see cref="Group"/> plus every member of the teams with rotation.</summary>
+    public static readonly CourtWriteContext RotationContext = Context with
+    {
+        GroupMemberIds = Group.Union(Enumerable.Range(1, 7).Select(number => TeamMember('a', number)))
+            .Union(Enumerable.Range(1, 6).Select(number => TeamMember('b', number))),
+    };
+
+    private static string QuotedList(IEnumerable<string> memberIds) => string.Join(",", memberIds.Select(Quoted));
+
+    private static string TeamOf(char team, int count) => QuotedList(Enumerable.Range(1, count).Select(number => TeamMember(team, number)));
+
+    /// <summary>
+    /// A 5x1 match to 25 with the rotation on: a has a1 to a6 on court and a7 on the bench, or as the
+    /// libero of slots 2 and 5; b has b1 to b6.
+    /// </summary>
+    public static string MatchStartedWithRotation(bool withLibero)
+    {
+        var libero = withLibero ? $$"""{"memberId":"{{TeamMember('a', 7)}}","replacedIndexes":[2,5]}""" : "null";
+        var bench = withLibero ? string.Empty : Quoted(TeamMember('a', 7));
+        return $$$"""{"matchId":"{{{Match}}}","rulesVersion":1,"formationsVersion":1,"scoring":{"bestOf":3,"pointsPerSet":25,"tieBreakPoints":15,"winMargin":2},"teams":{"a":{"memberIds":[{{{TeamOf('a', 7)}}}]},"b":{"memberIds":[{{{TeamOf('b', 6)}}}]}},"firstServer":"a","rotations":{"a":{"bench":[{{{bench}}}],"libero":{{{libero}}},"lineup":[{{{TeamOf('a', 6)}}}],"setterZone":1,"system":"5x1"},"b":{"bench":[],"libero":null,"lineup":[{{{TeamOf('b', 6)}}}],"setterZone":1,"system":"5x1"}},"queue":{"players":[],"teams":[]}}""";
+    }
+
+    /// <summary>Team a of <see cref="MatchStartedWithRotation"/> without libero, with <paramref name="onCourt"/> in the place of a1 and the other on the bench.</summary>
+    public static string LineupChangedOfA(int onCourt)
+    {
+        var lineup = new[] { TeamMember('a', onCourt) }.Concat(Enumerable.Range(2, 5).Select(number => TeamMember('a', number)));
+        var bench = Quoted(TeamMember('a', onCourt == 1 ? 7 : 1));
+        return $$"""{"matchId":"{{Match}}","team":"a","lineup":[{{QuotedList(lineup)}}],"setterZone":1,"bench":[{{bench}}],"libero":null}""";
+    }
+
     public static StreamEvent Parse(string json)
     {
         var bytes = Encoding.UTF8.GetBytes(json);

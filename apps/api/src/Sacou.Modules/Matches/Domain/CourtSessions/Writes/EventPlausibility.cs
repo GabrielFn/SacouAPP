@@ -108,7 +108,11 @@ internal static class EventPlausibility
     /// <summary>Port of <c>confirmSetEnd</c>: the winner of the score, and a next set only while nobody won the match.</summary>
     private static string? CheckSetEnded(SetEndedPayload ended, MatchScore match)
     {
-        var set = match.CurrentSet!;
+        if (match.CurrentSet is not { } set)
+        {
+            return ImplausibleReasons.SetNotDecided;
+        }
+
         var winner = ScoreRules.GetSetWinner(set.Score, set.TargetPoints, match.Scoring.WinMargin);
         if (winner is null)
         {
@@ -159,7 +163,11 @@ internal static class EventPlausibility
             return ImplausibleReasons.SetDecided;
         }
 
-        var set = match.CurrentSet!;
+        if (match.CurrentSet is not { } set)
+        {
+            return ImplausibleReasons.SetDecided;
+        }
+
         var servingTeam = set.ServingTeam.Opponent();
         var hasNoPoints = set.Score.A == NoPoints && set.Score.B == NoPoints;
         return changed.ServingTeam != servingTeam ? ImplausibleReasons.WrongServingTeam
