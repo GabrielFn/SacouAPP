@@ -7,7 +7,7 @@
 4. Provedor de IA do resumo: nenhum documento nomeia. Envolve conta e gasto. **Não bloqueia até depois do piloto:** o texto da IA saiu do piloto (ADR 0046).
 5. Editor de formação do Pro: como a sobreposição é só aviso (ADR 0010), o editor deixa salvar uma formação inválida? Opções: (1) deixa salvar, mostrando o aviso; (2) não deixa. **Recomendação: opção 1**, coerente com "aviso, nunca bloqueio". Não bloqueia até a tarefa do editor.
 6. Sets "livre": `produto.md:75` lista "livre, único, md3, md5", mas as telas 08 e 20 só oferecem 1 set, Melhor de 3 e Melhor de 5, e nenhum documento diz o que é "livre". Opções: (1) fora do MVP, como nas telas; (2) partida sem número de sets, que só termina em "Encerrar partida". **Recomendação: opção 1**; entrar depois só acrescenta um valor a `bestOf`. Não bloqueia agora: a E2.2 aceita 1, 3 ou 5.
-7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4.
+7. "Encerrar partida" antes do fim (tela 23): nenhum documento diz quem vence com partida incompleta, o que define quem sai na fila. Opções: (1) vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai; (2) o admin escolhe sempre; (3) a partida é anulada, sem vencedor. **Recomendação: opção 1.** Não bloqueia agora: o `MatchEnded` da E2.2 aceita as três, e a resposta decide só a chamada, nas E2.6 e E4. **Respondida em 17/11/2026: opção 1 (ver o fim do arquivo).**
 9. Tema Sol/Noite (E4.1, 07/11/2026): só no modo quadra, como no canvas, ou modo escuro no app todo? **Recomendação e padrão adotado até a resposta: só na quadra.** Fácil de mudar: os temas usam os mesmos papéis.
 10. Fundo do Noite (E4.1, 07/11/2026): `#000000` (canvas, tela 10) ou `#0F1B2D` (`produto.md:151`)? **Recomendação e padrão adotado: seguir o canvas.** Muda só um token.
 28. Saudação do Início (E4.4, 10/11/2026): "Fala!" sem o nome até existir o perfil (E3.17). **Recomendação e padrão adotado.**
@@ -129,3 +129,11 @@ A cota do plano Free acabou e o Gabriel não quer pagar. Opções: (1) runner no
 67. Riscos registrados sem dono, todos pequenos (revisão do M3, M3-B2): o seletor do Google que devolve a mesma conta; `user.delete()` e `signOut` falhando juntos; um 410 antes da primeira resposta do Firebase; duas conexões por aceite de convite ou criação de grupo. **Recomendação: aceitar os três do celular no piloto e resolver o das conexões junto com a pergunta 66.**
 68. Teste da E4.3 no celular: precisa dos passos do console do Firebase e da API em `https:`. Opções: (1) primeiro deploy (E5.1) no começo do M4, com o limite de requisições antes; (2) túnel temporário (conta grátis nova); (3) esperar a E5.1 na ordem normal. **Recomendação: 1** (deploy em produção precisa do ok do Gabriel).
 - A pergunta 66 (limite de requisições) segue aberta e virou condição da E5.1 na revisão do M3.
+
+## 17/11/2026: respostas do Gabriel ("pode seguir com a recomendação das perguntas")
+- 66 (limite de requisições): **opção 1**, limite por usuário no ASP.NET Core (`AddRateLimiter`, janela fixa por UID ou `MemberId`) nas rotas da condição 1 da revisão do M3, como tarefa pequena antes da E5.1. Junto, resolver as duas conexões por aceite de convite (pool).
+- 67 (riscos sem dono): os três do celular **aceitos no piloto**; o das duas conexões vai com a 66.
+- 68 (teste da E4.3 no celular): resolvida pelo teste local pelo cabo (#112 a #114); falta só o 302.
+- 7 ("Encerrar partida" antes do fim): **opção 1**, vence quem lidera em sets e, se empatar, em pontos; empate total fica sem vencedor e ninguém sai.
+- **M4 liberado.** O primeiro deploy em produção (E5.1) ainda pede o ok explícito do Gabriel na hora.
+- Pendente com o Gabriel antes da loja: conferir os termos do Gemini para uso comercial do ícone (ADR 0059).
