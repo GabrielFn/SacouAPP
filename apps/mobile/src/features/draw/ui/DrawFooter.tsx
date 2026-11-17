@@ -20,11 +20,11 @@ export interface FooterButtonProps {
   readonly renderIcon?: (color: string) => ReactNode;
 }
 
-/** A button of the row of three (Sorteio.dc.html): outlined, filled navy when it is the chosen mode. */
+/** A button of the row of three (Sorteio.dc.html): outlined, the chosen mode shows in a thicker outline. */
 function FooterButton({ label, onPress, disabled, selected, renderIcon }: FooterButtonProps) {
   const { colors, tokens } = useTheme();
   const chosen = selected === true;
-  const foreground = chosen ? colors.background : colors.text;
+  const foreground = colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -36,9 +36,9 @@ function FooterButton({ label, onPress, disabled, selected, renderIcon }: Footer
         flex: 1,
         minHeight: tokens.sizes.field,
         borderRadius: tokens.radii.field,
-        borderWidth: tokens.borderWidths.thin,
+        borderWidth: chosen ? tokens.borderWidths.thick : tokens.borderWidths.thin,
         borderColor: colors.text,
-        backgroundColor: chosen ? colors.text : colors.surface,
+        backgroundColor: colors.surface,
         opacity: disabled ? DISABLED_OPACITY : 1,
         paddingHorizontal: tokens.spacing.xs,
         flexDirection: "row",

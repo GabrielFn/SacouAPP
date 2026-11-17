@@ -37,7 +37,9 @@ export type DrawFlowAction =
   | { readonly type: "unlock-chosen" }
   | { readonly type: "selection-cleared" }
   /** A lock across teams asked for a new draw that the server refused: the lock goes back out. */
-  | { readonly type: "lock-undone"; readonly lock: DrawLock };
+  | { readonly type: "lock-undone"; readonly lock: DrawLock }
+  /** A new draw was asked offline: it is refused here, with a local notice. */
+  | { readonly type: "offline-refused" };
 
 export const initialDrawFlowState: DrawFlowState = {
   arrangement: null,
@@ -105,6 +107,8 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
       return unlockChosen(state);
     case "selection-cleared":
       return { ...state, selection: null, notice: null };
+    case "offline-refused":
+      return { ...state, notice: { kind: "offline" } };
     case "lock-undone":
       return { ...state, locks: state.locks.filter((lock) => !sameLock(lock, action.lock)) };
   }

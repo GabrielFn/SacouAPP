@@ -26,7 +26,6 @@ describe("the colors of the draw (screen 07) reach AA", () => {
     ["the level of a selected name", appTheme.textMuted, appTheme.selectFill],
     ["the letter A on orange", TEAM_PALETTES.orange.onFill, TEAM_PALETTES.orange.fill],
     ["the letter B on blue", TEAM_PALETTES.blue.onFill, TEAM_PALETTES.blue.fill],
-    ["a chosen mode button", appTheme.background, appTheme.text],
     ["Confirmar e compartilhar", appTheme.onPrimary, appTheme.primary],
   ])("%s (text)", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);
@@ -37,7 +36,7 @@ describe("the colors of the draw (screen 07) reach AA", () => {
     ["the green check of the meter", appTheme.goingText, appTheme.surface],
     ["the green band of the meter", appTheme.meterBand, appTheme.surface],
     ["the warning of an unbalanced draw", appTheme.danger, appTheme.surface],
-    ["the strip of Laranja on the card", palette.serveOrange, palette.night],
+    ["the strip of Laranja on the card", palette.serveOrange, appTheme.surface],
   ])("%s (graphic, 3:1)", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_GRAPHIC);
   });

@@ -25,6 +25,7 @@ A tela 07 mostra os times sorteados pelo servidor (`POST .../rounds/{roundId}/dr
 ## Consequências
 
 - A nota de todos os confirmados fica na memória do app enquanto a 07 está aberta, e em nenhum outro lugar: nem no cache do Query (persistido ou não), nem no estado da mutação, nem em log ou rota. Captura de tela pelo admin é aceita (ele já vê as notas na 19a).
+- Os botões de nome usam o papel `button` com estado `selected`, e não `radio` como pedia o plano: o toque troca ou trava, não escolhe uma opção de um grupo. O modo escolhido no rodapé também é `button` com `selected`, e aparece só num contorno mais grosso, como no canvas.
 - O `display-names.ts` subiu de `features/court/model/` para `src/ui/`, porque a 07 usa o mesmo encurtamento de nomes da quadra.
 - `EmptyState` ganhou `body` opcional, para as páginas cujo título já diz tudo.
 - Partes seguintes: tela 08 como folha da 07 no mesmo reducer, escalação padrão, `MatchStarted` e origem da quadra no SQLite (Parte 2); imagem e "Montar times" só se o Gabriel pedir (perguntas 71 e 72).

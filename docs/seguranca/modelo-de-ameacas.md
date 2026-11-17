@@ -293,6 +293,7 @@ Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem
 | I | Nota em log, rota, chave de consulta ou texto compartilhado | Nenhum `console`; a rota da 07 leva só `groupId` e `roundId`; o texto de "Confirmar e compartilhar" tem só apelidos (golden `drawShareText` e teste que procura nota, UUID e posição) e só sai do aparelho no toque |
 | D | Toque repetido em "Sortear de novo" custando CPU no servidor | Um sorteio por vez (`scope` por rodada, guarda contra o toque duplo no mesmo quadro, botões desligados durante o pedido); a mutação não repete sozinha |
 | T | Trava ou reserva forjada no corpo | O app só manda IDs do arranjo e confere o teto de 24 travas e que nenhuma trava toca reserva; o servidor confere tudo de novo (E3.6) |
+| E | Admin rebaixado com a 07 aberta | Se o rebaixamento ocorre sem o app receber 403, as notas continuam na memória do reducer até a pessoa sair da 07; a tela as esconde quando o papel muda no cache (`canDraw`). Risco aceito: a janela é a de uma sessão aberta de quem era admin |
 
 ### 12.1 Convite no app (E4.5, Parte 2)
 

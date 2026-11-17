@@ -1,6 +1,7 @@
 import type { MemberId } from "@sacou/match-engine";
 import { teamAverageTenths } from "@sacou/volley-rules";
 
+import { MAX_DRAW_LOCKS } from "./draw-limits";
 import { drawStrings } from "../../../strings/draw.pt-BR";
 import { formatLevel } from "../../../ui/skill-level";
 import { isLocked, type DrawArrangement } from "./draw-arrangement";
@@ -101,7 +102,9 @@ export function noticeText(notice: DrawNotice | null, nameOf: DrawNameOf): strin
     case "reserve-cannot-lock":
       return drawStrings.notice.reserveCannotLock;
     case "too-many-locks":
-      return drawStrings.notice.tooManyLocks;
+      return drawStrings.notice.tooManyLocks(MAX_DRAW_LOCKS);
+    case "offline":
+      return drawStrings.notice.offline;
   }
 }
 

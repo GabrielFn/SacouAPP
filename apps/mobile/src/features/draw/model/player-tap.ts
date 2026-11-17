@@ -15,7 +15,9 @@ import { swapPlayers } from "./swap-players";
 export type DrawNotice =
   | { readonly kind: "lock-broken"; readonly lock: DrawLock }
   | { readonly kind: "reserve-cannot-lock" }
-  | { readonly kind: "too-many-locks" };
+  | { readonly kind: "too-many-locks" }
+  /** A new draw was asked with no connection (D4): nothing went out. */
+  | { readonly kind: "offline" };
 
 /** What a second name changes: the arrangement, the locks and the notice. The selection always clears. */
 export interface TapOutcome {

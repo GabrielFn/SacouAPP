@@ -26,6 +26,7 @@ export interface DrawActionDeps {
   readonly round: Pick<Round, "going">;
   readonly dispatch: (action: DrawFlowAction) => void;
   readonly mutate: (variables: DrawVariables, options: DrawRunOptions) => void;
+  readonly online: boolean;
   readonly claim: () => boolean;
   readonly release: () => void;
 }
@@ -36,6 +37,10 @@ export function runDraw(
   state: DrawFlowState,
   lockToUndo: DrawLock | null = null,
 ): boolean {
+  if (!deps.online) {
+    deps.dispatch({ type: "offline-refused" });
+    return false;
+  }
   const body = drawRequest(state, deps.round);
   if (!body.ok || !deps.claim()) return false;
   deps.mutate(

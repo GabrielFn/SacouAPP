@@ -133,6 +133,14 @@ describe("Sortear de novo", () => {
     });
   });
 
+  test("offline it refuses before calling, with a local notice (D4)", () => {
+    world.online = false;
+    render(drawnG1()).redraw();
+    expect(world.mutate).not.toHaveBeenCalled();
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "offline-refused" });
+    expect(world.dispatch).not.toHaveBeenCalledWith({ type: "selection-cleared" });
+  });
+
   test("a lock in the same team asks nothing", () => {
     const locking = { ...drawnG1(), mode: "lock" as const, selection: "duda" };
     render(locking).tap("rafa");
@@ -147,6 +155,20 @@ describe("Confirmar e compartilhar (D11)", () => {
     const text = world.share.mock.calls[0]?.[0] ?? "";
     expect(text).toContain("Laranja: Ana, João");
     expect(text).not.toMatch(/\d,\d/);
+  });
+
+  test("a double tap before the sheet closes shares once", async () => {
+    let close: () => void = () => undefined;
+    world.share.mockReturnValue(new Promise<void>((resolve) => (close = resolve)));
+    const model = render(drawnG1());
+    model.share();
+    model.share();
+    expect(world.share).toHaveBeenCalledTimes(1);
+    close();
+    await Promise.resolve();
+    await Promise.resolve();
+    render(drawnG1()).share();
+    expect(world.share).toHaveBeenCalledTimes(2);
   });
 
   test("nothing is shared before the draw, nor while rendering", () => {

@@ -84,6 +84,7 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
     round: round.data ?? { going: [] },
     dispatch,
     mutate,
+    online,
     claim: () => {
       if (inFlight.current) return false;
       inFlight.current = true;
@@ -138,7 +139,10 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
       const arrangement = state.arrangement;
       const groupName = group.data?.name;
       if (arrangement === null || groupName === undefined || round.data === undefined) return;
-      void shareSheet.share(drawShareText(groupName, round.data, arrangement, nameOf));
+      if (!deps.claim()) return;
+      void shareSheet
+        .share(drawShareText(groupName, round.data, arrangement, nameOf))
+        .finally(deps.release);
     },
   };
 }

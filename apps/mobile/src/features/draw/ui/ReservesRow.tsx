@@ -20,7 +20,6 @@ export function ReservesRow({ reserves, disabled, onTap }: ReservesRowProps) {
     <View
       style={{
         padding: tokens.spacing.s10,
-        gap: tokens.spacing.s6,
         backgroundColor: colors.surface,
         borderRadius: tokens.radii.reservesRow,
         borderWidth: tokens.borderWidths.thin,
@@ -28,15 +27,22 @@ export function ReservesRow({ reserves, disabled, onTap }: ReservesRowProps) {
         borderColor: colors.borderDashed,
       }}
     >
-      <Text variant="bodyStrong" accessibilityRole="header">
-        {strings.draw.reservesTitle}
-      </Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.spacing.s6 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: tokens.spacing.s6,
+        }}
+      >
         {reserves.map((chip) => (
-          <View key={chip.memberId} style={{ flexGrow: 1, flexBasis: "45%" }}>
+          <View key={chip.memberId} style={{ flexGrow: 1, flexBasis: "30%" }}>
             <PlayerChip chip={chip} disabled={disabled} onPress={onTap} />
           </View>
         ))}
+        <Text variant="bodyStrong" accessibilityRole="header">
+          {strings.draw.reservesTitle}
+        </Text>
       </View>
     </View>
   );

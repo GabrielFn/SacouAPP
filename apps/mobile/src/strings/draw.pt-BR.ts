@@ -41,7 +41,6 @@ export const drawStrings = {
     /** What the screen reader says of a name: "Duda, nota 3,3". */
     accessibility: (name: string, level: string) => `${name}, nota ${level}`,
     lockedSuffix: ", travado",
-    locked: "Travado",
   },
   /** Question 71: the share is text until there is an image. */
   privacy: "Só admins veem as notas. O que você compartilha mostra só os times.",
@@ -54,8 +53,8 @@ export const drawStrings = {
   notice: {
     lockBroken: (first: string, second: string) => `A trava de ${first} e ${second} saiu.`,
     reserveCannotLock: "Reserva não trava: troque antes.",
-    // "24" is DrawLimits.MaxLocks in apps/api/src/Sacou.Modules/Sessions/Domain/Draw/DrawLimits.cs.
-    tooManyLocks: "Dá para travar até 24 duplas.",
+    tooManyLocks: (maxLocks: number) => `Dá para travar até ${String(maxLocks)} duplas.`,
+    offline: "Sem conexão. O sorteio precisa de internet.",
   },
   swap: "Trocar",
   lock: "Travar dupla",
@@ -75,11 +74,10 @@ export const drawStrings = {
   blocked: {
     forbidden: "Só admins sorteiam os times.",
     canceled: "Rodada cancelada.",
-    // "4" is DrawLimits.MinPlayers in apps/api/src/Sacou.Modules/Sessions/Domain/Draw/DrawLimits.cs.
-    notEnough: "Precisa de pelo menos 4 confirmados para sortear.",
+    notEnough: (minPlayers: number) =>
+      `Precisa de pelo menos ${String(minPlayers)} confirmados para sortear.`,
     disabled: "O sorteio está desligado nesta rodada.",
     offline: "Sem conexão. O sorteio precisa de internet.",
-    failed: "Não deu para sortear os times.",
     title: "Sorteio dos times",
   },
   back: "Voltar",
