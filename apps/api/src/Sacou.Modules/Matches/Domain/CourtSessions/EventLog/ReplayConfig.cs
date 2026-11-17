@@ -40,3 +40,11 @@ internal sealed record TimelineEntry<TState>(EventEnvelope Event, TState State)
 /// <summary>The active events in canonical order, each with its state. Never lists a <c>RevertedTo</c>.</summary>
 internal sealed record ReplayedTimeline<TState>(ImmutableArray<TimelineEntry<TState>> Entries)
     where TState : notnull;
+
+/// <summary>A tracked event and the active timeline right before it.</summary>
+internal sealed record ReplayStep<TState>(EventEnvelope Event, Timeline<TState> Before)
+    where TState : notnull;
+
+/// <summary>The last active timeline and the tracked steps, in canonical order.</summary>
+internal sealed record ReplayedSteps<TState>(Timeline<TState> Head, ImmutableArray<ReplayStep<TState>> Steps)
+    where TState : notnull;
