@@ -122,9 +122,8 @@ export const radii = {
   statusPill: 15,
   tabPill: 15,
   roleBadge: 13,
-  // The top of the light sheet of the login (Login.dc.html:39).
+  // The top of the light sheet of the login (Login.dc.html:39); then the draw (Sorteio.dc.html .p, reserves).
   sheet: 24,
-  // The draw (Sorteio.dc.html .p and the reserves row).
   playerChip: 10,
   reservesRow: 14,
 } as const;
