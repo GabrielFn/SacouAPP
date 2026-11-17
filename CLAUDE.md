@@ -45,6 +45,7 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 4. `revisor-seguranca` — só para tarefas sensíveis (login, tokens, pagamentos, upload de foto, assumir a quadra, nota do admin, votação do MVP, dados pessoais).
 5. `testador` — agente **novo**. Roda build, lint e testes; escreve testes extras para os critérios de aceite; tenta quebrar.
 6. Se revisão e testes passam → merge na `main` (merge automático autorizado pelo Gabriel). Se falham → volta ao desenvolvedor com os achados. **3 ciclos falhando = parar e perguntar ao Gabriel.**
+7. **Depois do merge, apagar a worktree da tarefa** (pedido do Gabriel, 17/11/2026), inclusive as de agentes em `.claude/worktrees/`: conferir que ela não tem alteração pendente nem commit fora do remoto (`git status`, `git log @{u}..`), então `git worktree remove <pasta>` e `git worktree prune`. A branch fica no Git. Worktrees velhas cheias de `node_modules` dentro do repositório derrubam o observador do Metro e pesam no disco.
 
 **Modelo de cada agente** (pedido do Gabriel). Passe sempre o `model` na chamada e cite-o no diário. O `model:` em `.claude/agents/` é só o padrão:
 
