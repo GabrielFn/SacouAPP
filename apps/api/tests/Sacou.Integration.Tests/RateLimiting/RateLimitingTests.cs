@@ -21,6 +21,8 @@ public sealed class RateLimitingTests(IntegrationDatabase database)
     private const string RateLimited = "api.rate-limited";
     private const string GroupBody = """{"name":"Racha do limite"}""";
 
+    private static readonly TimeSpan TimerMargin = TimeSpan.FromMilliseconds(500);
+
     /// <summary>Case 7: the third sign-in of one person in the window is a 429; another person at the same time is not.</summary>
     [Fact]
     public async Task SignIn_PastTheLimit_Is429_ForThatPersonOnly()
@@ -104,7 +106,8 @@ public sealed class RateLimitingTests(IntegrationDatabase database)
         using var refused = await SendAsync(api, client, waitingSubject, HttpMethod.Post, SignInPath);
         await AssertRateLimitedAsync(refused);
         var wait = int.Parse(refused.Headers.GetValues("Retry-After").Single(), CultureInfo.InvariantCulture);
-        await Task.Delay(TimeSpan.FromSeconds(wait), TestContext.Current.CancellationToken);
+        // The window turns on the limiter's timer, which may tick a little after the second: a margin, not a retry.
+        await Task.Delay(TimeSpan.FromSeconds(wait) + TimerMargin, TestContext.Current.CancellationToken);
         using var passed = await SendAsync(api, client, waitingSubject, HttpMethod.Post, SignInPath);
 
         Assert.Equal(1, wait);
