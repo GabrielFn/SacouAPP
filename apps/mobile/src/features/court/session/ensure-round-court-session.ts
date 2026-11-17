@@ -28,10 +28,11 @@ export async function ensureRoundCourtSession(
   if (!active.ok) return err({ code: "load-failed", cause: active.error.code });
   if (active.value !== null) {
     const state = await sessionState(runtime, active.value);
-    if (state.ok && state.value.currentMatch !== null) {
-      return err({ code: "other-round-match-open" });
-    }
-    await log.closeSession(active.value);
+    // A session that cannot be read may have a match on: it stays open.
+    if (!state.ok) return err({ code: "load-failed", cause: state.error });
+    if (state.value.currentMatch !== null) return err({ code: "other-round-match-open" });
+    const closed = await log.closeSession(active.value);
+    if (!closed.ok) return err({ code: "load-failed", cause: closed.error.code });
   }
   const courtSessionId = ids.newId();
   const opened = await log.openSession(courtSessionId, origin);

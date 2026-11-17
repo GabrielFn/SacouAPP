@@ -74,6 +74,42 @@ describe("ensureRoundCourtSession (D7, D8)", () => {
     expect(ensured.ok && ensured.value !== OTHER_SESSION).toBe(true);
     expect(await court.log.findOpenSessionOfRound("r2")).toEqual({ ok: true, value: null });
   });
+
+  test("another round whose log cannot be read stays open and the call fails", async () => {
+    const court = runtime();
+    await sessionWithMatch(court, false);
+    const unreadable: CourtRuntime = {
+      ...court,
+      log: {
+        ...court.log,
+        load: () => Promise.resolve({ ok: false, error: { code: "corrupted-log" } }),
+      },
+    };
+
+    expect(await ensureRoundCourtSession(unreadable, ROUND)).toEqual({
+      ok: false,
+      error: { code: "load-failed", cause: "corrupted-log" },
+    });
+    expect(await court.log.findActiveSession()).toEqual({ ok: true, value: OTHER_SESSION });
+  });
+
+  test("another round that cannot be closed fails and no session opens", async () => {
+    const court = runtime();
+    await sessionWithMatch(court, true);
+    const unclosable: CourtRuntime = {
+      ...court,
+      log: {
+        ...court.log,
+        closeSession: () => Promise.resolve({ ok: false, error: { code: "storage-failed" } }),
+      },
+    };
+
+    expect(await ensureRoundCourtSession(unclosable, ROUND)).toEqual({
+      ok: false,
+      error: { code: "load-failed", cause: "storage-failed" },
+    });
+    expect(await court.log.findOpenSessionOfRound("r1")).toEqual({ ok: true, value: null });
+  });
 });
 
 describe("readRoundCourt: what screens 06 and 08 know of the court (D1, D6)", () => {

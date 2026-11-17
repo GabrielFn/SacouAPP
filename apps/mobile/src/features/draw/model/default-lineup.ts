@@ -1,5 +1,5 @@
 import type { MemberId } from "@sacou/match-engine";
-import type { FormationSystem } from "@sacou/volley-rules";
+import { err, ok, ROTATION_SLOTS, type FormationSystem, type Result } from "@sacou/volley-rules";
 
 import type { Member } from "../../../services/api/sacou-api";
 
@@ -87,27 +87,37 @@ function withStandInSetter(
 }
 
 /** The empty slots take the others in order of arrival: `any`, `libero`, no profile and the extras. */
-function withTheRest(team: readonly MemberId[], seats: Seats): readonly MemberId[] {
+function withTheRest(team: readonly MemberId[], seats: Seats): Seats {
   const rest = team.filter((memberId) => !seats.includes(memberId));
-  return seats.reduce<{ readonly lineup: readonly MemberId[]; readonly next: number }>(
+  return seats.reduce<{ readonly lineup: Seats; readonly next: number }>(
     ({ lineup, next }, seat) =>
       seat === null
-        ? { lineup: [...lineup, rest[next] ?? ""], next: next + 1 }
+        ? { lineup: [...lineup, rest[next] ?? null], next: next + 1 }
         : { lineup: [...lineup, seat], next },
     { lineup: [], next: 0 },
   ).lineup;
 }
 
+export type DefaultLineupError = "wrong-team-size";
+
+function allSeated(seats: Seats): readonly MemberId[] | null {
+  const seated = seats.filter((seat): seat is MemberId => seat !== null);
+  return seated.length === seats.length ? seated : null;
+}
+
 /**
  * The lineup a drawn team starts with (D6), from the positions of the profiles: the starting point that
- * screen 22 changes (E4.8). The team has exactly six; the free system keeps the order of arrival.
+ * screen 22 changes (E4.8). Only a team of six has one (ADR 0024); the free system keeps the order of
+ * arrival. A team that cannot fill the six seats is an error, never an empty `MemberId`.
  */
 export function defaultLineup(
   team: readonly MemberId[],
   system: FormationSystem,
   positionOf: PositionOf,
-): readonly MemberId[] {
-  if (system === "livre") return team;
+): Result<readonly MemberId[], DefaultLineupError> {
+  if (team.length !== ROTATION_SLOTS.length) return err("wrong-team-size");
+  if (system === "livre") return ok(team);
   const seats = byPosition(team, SLOTS_OF[system], positionOf);
-  return withTheRest(team, withStandInSetter(team, system, seats, positionOf));
+  const lineup = allSeated(withTheRest(team, withStandInSetter(team, system, seats, positionOf)));
+  return lineup === null ? err("wrong-team-size") : ok(lineup);
 }

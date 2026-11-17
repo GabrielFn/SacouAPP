@@ -121,10 +121,23 @@ describe("defaultLineup: each slot takes who plays its position, in order of arr
   ])("$name", ({ system, profiles, lineup }) => {
     const { team, positionOf } = teamOf(profiles);
 
-    const result = defaultLineup(team, system, positionOf);
+    const built = defaultLineup(team, system, positionOf);
+    const result = built.ok ? built.value : [];
 
     expect(result).toEqual(lineup);
     expect(new Set(result).size).toBe(team.length);
     expect([...result].sort()).toEqual([...team].sort());
+  });
+});
+
+describe("defaultLineup: a team that cannot fill six seats is an error", () => {
+  const positionOf = () => null;
+
+  test("five or seven members", () => {
+    expect(defaultLineup(["a", "b", "c", "d", "e"], "5x1", positionOf)).toEqual({
+      ok: false,
+      error: "wrong-team-size",
+    });
+    expect(defaultLineup(["a", "b", "c", "d", "e", "f", "g"], "livre", positionOf).ok).toBe(false);
   });
 });

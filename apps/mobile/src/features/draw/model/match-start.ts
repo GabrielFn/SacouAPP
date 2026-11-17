@@ -59,9 +59,12 @@ export function teamRotation(input: MatchStartInput, side: TeamSide): TeamState 
   const team = teamOfSide(input.arrangement, side);
   if (!rotates(input.settings, team)) return null;
   const system = systemOf(input.preGame, input.settings, side);
+  const lineup = defaultLineup(team, system, input.positionOf);
+  // A team that cannot fill the six seats plays with the rotation off, as any other size (ADR 0024).
+  if (!lineup.ok) return null;
   return {
     system,
-    lineup: defaultLineup(team, system, input.positionOf),
+    lineup: lineup.value,
     setterZone: STARTING_SETTER_ZONE,
     bench: [],
     // The libero is chosen on screen 22 (question 73): the match starts without one.
@@ -74,10 +77,11 @@ export function scoringOf({
   settings,
 }: Pick<MatchStartInput, "preGame" | "settings">): ScoringRules {
   const { scoring } = settings;
+  const bestOf = chosenOr(preGame.bestOf, scoring.bestOf);
   return {
-    bestOf: chosenOr(preGame.bestOf, scoring.bestOf),
+    bestOf,
     pointsPerSet: chosenOr(preGame.pointsPerSet, scoring.pointsPerSet),
-    tieBreakPoints: scoring.tieBreakEnabled ? scoring.tieBreakPoints : null,
+    tieBreakPoints: bestOf > 1 && scoring.tieBreakEnabled ? scoring.tieBreakPoints : null,
     winMargin: scoring.winMargin,
   };
 }
