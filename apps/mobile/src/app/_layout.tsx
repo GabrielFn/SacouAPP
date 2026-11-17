@@ -16,6 +16,9 @@ import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
 import { expoFileShare } from "../adapters/expo-file-share";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
+import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
+import { createCachedCourtRoster } from "../adapters/cached-court-roster";
+import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
 import { secureStoreInviteLinkStore } from "../adapters/secure-store-invite-link-store";
@@ -76,8 +79,9 @@ void removeExportLeftovers(expoFileShare);
 const realServices: Services = {
   fontLoader: expoFontLoader,
   courtRuntimeOpener: expoCourtRuntimeOpener,
-  // The sample names until the pre-game brings the real roster, which works offline (E4.2, E4.7).
-  courtRoster: createSampleRoster(),
+  // The names of the members cache, persisted, so the court has them offline (E4.2, E4.7). The sample
+  // names stay behind them only for the development screen.
+  courtRoster: createCachedCourtRoster(queryClient, DEV_TOOLS_ENABLED ? createSampleRoster() : null),
   screenAwake: expoKeepAwakeScreen,
   screenOrientation: expoScreenOrientation,
   batteryMonitor: expoBatteryMonitor,
@@ -96,6 +100,7 @@ const realServices: Services = {
   fileShare: expoFileShare,
   clipboard: expoClipboard,
   idGenerator: expoCryptoIdGenerator,
+  coinFlip: expoCryptoCoinFlip,
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,

@@ -20,6 +20,7 @@ import type { FontLoader } from "./font-loader";
 import type { IdGenerator } from "./id/id-generator";
 import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
+import type { CoinFlip } from "./random/coin-flip";
 import type { FileShare } from "./share/file-share";
 import type { ShareSheet } from "./share/share-sheet";
 
@@ -29,7 +30,7 @@ import type { SessionEnder } from "./session/end-session";
 export interface Services {
   readonly fontLoader: FontLoader;
   readonly courtRuntimeOpener: CourtRuntimeOpener;
-  /** Names and team colors of the court; the sample one until the pre-game exists (E4.7). */
+  /** Names and team colors of the court, from the members cache, so they show offline (E4.7, D7). */
   readonly courtRoster: CourtRoster;
   /** What the phone does for the court: stay awake, buzz, block the back button, keep time. */
   readonly screenAwake: ScreenAwake;
@@ -56,6 +57,8 @@ export interface Services {
   readonly externalLink: ExternalLink;
   /** The `requestId` of a guest, made once per opening of the sheet 21a (ADR 0053, D5). */
   readonly idGenerator: IdGenerator;
+  /** "Sortear" of who serves first on sheet 08 (E4.7, D10). */
+  readonly coinFlip: CoinFlip;
   readonly qrEncoder: QrEncoder;
   /** The only place of an invite token on the phone (ADR 0049, D7). */
   readonly inviteLinkStore: InviteLinkStore;

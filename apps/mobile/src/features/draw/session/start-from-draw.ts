@@ -11,7 +11,7 @@ export type StartFromDrawError = "other-round-match-open" | "match-open" | "fail
 
 /**
  * "Começar partida" (D7): the session of the round on this device, then the `MatchStarted` of the draw
- * through the one public door of the court. The route of the court comes back for `router.replace`.
+ * through the one public door of the court. The session comes back, for `router.replace` to the court.
  */
 export async function startFromDraw(
   runtime: CourtRuntime,
@@ -28,7 +28,7 @@ export async function startFromDraw(
     { ...runtime, courtSessionId: session.value },
     payload.value,
   );
-  if (started.ok) return ok(started.value.route);
+  if (started.ok) return ok(session.value);
   const refusedAsOpen =
     started.error.code === "refused" && started.error.reason === "match-already-open";
   return err(refusedAsOpen ? "match-open" : "failed");

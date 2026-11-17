@@ -138,7 +138,7 @@ describe("startFromDraw: from the 08 to the court (D7, fakes)", () => {
     const session = await court.log.findOpenSessionOfRound("r1");
     expect(session.ok && session.value !== null).toBe(true);
     const id = session.ok ? (session.value ?? "") : "";
-    expect(started).toEqual({ ok: true, value: `/court/${id}` });
+    expect(started).toEqual({ ok: true, value: id });
     const stored = await court.log.load(id);
     expect(stored.ok ? stored.value.events.map((event) => event.type) : []).toEqual([
       "MatchStarted",

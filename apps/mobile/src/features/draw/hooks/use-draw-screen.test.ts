@@ -171,6 +171,17 @@ describe("Confirmar e compartilhar (D11)", () => {
     expect(world.share).toHaveBeenCalledTimes(2);
   });
 
+  test("after the share sheet, shared or not, sheet 08 opens (D11)", async () => {
+    render(drawnG1()).share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
+    world.dispatch.mockReset();
+    world.share.mockRejectedValue(new Error("no share sheet"));
+    render(drawnG1()).share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
+  });
+
   test("nothing is shared before the draw, nor while rendering", () => {
     render();
     render(drawnG1());
