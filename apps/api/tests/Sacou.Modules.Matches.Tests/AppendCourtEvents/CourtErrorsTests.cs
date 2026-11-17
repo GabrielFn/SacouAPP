@@ -56,12 +56,12 @@ public sealed class CourtErrorsTests
     }
 
     [Theory]
-    [InlineData(CourtStreamRefusal.CourtSessionNotFound, "matches.court-session-not-found", ErrorKind.NotFound)]
-    [InlineData(CourtStreamRefusal.RoundHasCourtSession, "matches.round-has-court-session", ErrorKind.Conflict)]
-    [InlineData(CourtStreamRefusal.RoundCanceled, "matches.round-canceled", ErrorKind.Conflict)]
-    public void EachStreamRefusal_HasItsAnswer(CourtStreamRefusal refusal, string code, ErrorKind kind)
+    [InlineData(nameof(CourtStreamRefusal.CourtSessionNotFound), "matches.court-session-not-found", ErrorKind.NotFound)]
+    [InlineData(nameof(CourtStreamRefusal.RoundHasCourtSession), "matches.round-has-court-session", ErrorKind.Conflict)]
+    [InlineData(nameof(CourtStreamRefusal.RoundCanceled), "matches.round-canceled", ErrorKind.Conflict)]
+    public void EachStreamRefusal_HasItsAnswer(string refusal, string code, ErrorKind kind)
     {
-        Assert.Equal(new Error(code, kind), CourtErrors.Of(refusal));
+        Assert.Equal(new Error(code, kind), CourtErrors.Of(Enum.Parse<CourtStreamRefusal>(refusal)));
     }
 
     /// <summary>Only the details the error carries, by the keys of D15; never a member id.</summary>

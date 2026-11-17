@@ -3833,6 +3833,148 @@
           }
         }
       }
+    },
+    "/v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events": {
+      "post": {
+        "tags": [
+          "AppendCourtEventsEndpoint"
+        ],
+        "operationId": "AppendCourtEvents",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "courtSessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendCourtEventsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppendCourtEventsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3941,6 +4083,39 @@
             "type": "string"
           }
         }
+      },
+      "AppendCourtEventsRequest": {
+        "required": [
+          "events"
+        ],
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonObject"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "AppendCourtEventsResponse": {
+        "required": [
+          "lastSequence",
+          "stored"
+        ],
+        "type": "object",
+        "properties": {
+          "lastSequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stored": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "ApplyTemplateRequest": {
         "required": [
@@ -5432,6 +5607,24 @@
     "identity.recent-login-required",
     "identity.subject-invalid",
     "identity.user-not-registered",
+    "matches.batch-invalid",
+    "matches.batch-mismatch",
+    "matches.court-session-not-found",
+    "matches.event-id-conflict",
+    "matches.event-implausible",
+    "matches.event-rejected",
+    "matches.event-too-large",
+    "matches.invalid-envelope",
+    "matches.limit-reached",
+    "matches.member-not-in-group",
+    "matches.not-the-writer",
+    "matches.round-canceled",
+    "matches.round-has-court-session",
+    "matches.sequence-conflict",
+    "matches.sequence-gap",
+    "matches.stream-mismatch",
+    "matches.unknown-event-type",
+    "matches.unsupported-schema-version",
     "sessions.attendance-disabled",
     "sessions.draw-disabled",
     "sessions.draw-lock-invalid",
