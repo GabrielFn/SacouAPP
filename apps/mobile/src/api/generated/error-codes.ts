@@ -2,6 +2,7 @@
 // run `pnpm api:contract` after changing the API (ADR 0042).
 
 export const apiErrorCodes = [
+  "api.rate-limited",
   "groups.forbidden",
   "groups.group-not-found",
   "groups.guest-invalid",

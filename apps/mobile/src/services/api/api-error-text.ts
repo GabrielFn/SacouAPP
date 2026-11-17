@@ -12,6 +12,8 @@ export function apiErrorText(error: ApiError): string {
       return apiErrorKindTexts.notRegistered;
     case "too-large":
       return apiErrorKindTexts.tooLarge;
+    case "rate-limited":
+      return apiErrorKindTexts.rateLimited;
     case "unavailable":
       return apiErrorKindTexts.unavailable;
     case "offline":

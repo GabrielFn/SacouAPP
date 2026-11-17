@@ -131,7 +131,8 @@ public sealed partial class OpenApiSchemaTests
             .Where(type => type.Name.EndsWith(ErrorsSuffix, StringComparison.Ordinal))
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
             .Where(field => field.FieldType == typeof(Error) && field.IsInitOnly)
-            .Select(field => ((Error)field.GetValue(null)!).Code);
+            .Select(field => ((Error)field.GetValue(null)!).Code)
+            .Append("api.rate-limited");
 
         Assert.Equal(declared.Distinct().Order(StringComparer.Ordinal), catalog);
         Assert.Equal(catalog.Distinct().Order(StringComparer.Ordinal), catalog);

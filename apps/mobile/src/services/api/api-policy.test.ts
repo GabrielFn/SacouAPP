@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import {
   classifyFailure,
+  DEFAULT_RETRY_AFTER_MS,
+  MAX_RETRY_AFTER_MS,
   finalError,
   nextStep,
   parseRetryAfter,
@@ -54,6 +56,33 @@ describe("classifyFailure (P1)", () => {
       kind: "unavailable",
       retryAfterMs: 5_000,
     });
+  });
+});
+
+describe("classifyFailure of a 429 (E5.3a, case 16)", () => {
+  test("waits what Retry-After says", () => {
+    expect(classifyFailure(answer(429, null, { retryAfter: "7" }), NOW)).toEqual({
+      kind: "rate-limited",
+      retryAfterMs: 7_000,
+    });
+  });
+
+  test("without Retry-After, the default wait; above 60 s, the ceiling", () => {
+    expect(classifyFailure(answer(429), NOW)).toEqual({
+      kind: "rate-limited",
+      retryAfterMs: DEFAULT_RETRY_AFTER_MS,
+    });
+    expect(classifyFailure(answer(429, null, { retryAfter: "3600" }), NOW)).toEqual({
+      kind: "rate-limited",
+      retryAfterMs: MAX_RETRY_AFTER_MS,
+    });
+  });
+
+  test("by its status, whatever the body says", () => {
+    const unknownCode = answer(429, { code: "api.some-new-limit" }, { retryAfter: "2" });
+    expect(classifyFailure(unknownCode, NOW)).toEqual({ kind: "rate-limited", retryAfterMs: 2_000 });
+    const notJson = answer(429, "slow down", { contentType: "text/plain", retryAfter: "2" });
+    expect(classifyFailure(notJson, NOW)).toEqual({ kind: "rate-limited", retryAfterMs: 2_000 });
   });
 });
 

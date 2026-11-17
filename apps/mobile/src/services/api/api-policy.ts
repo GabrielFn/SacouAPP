@@ -10,7 +10,7 @@ export interface RawAnswer {
 }
 
 const MS_PER_SECOND = 1_000;
-/** A 503 without a usable `Retry-After`, and the ceiling of any wait (D5). */
+/** A 503 or a 429 without a usable `Retry-After`, and the ceiling of any wait (D5). */
 export const DEFAULT_RETRY_AFTER_MS = 30_000;
 export const MAX_RETRY_AFTER_MS = 60_000;
 
@@ -25,6 +25,8 @@ const HTTP = {
   // `POST /v1/me` of an account deleted on the server (ADR 0056, D5).
   gone: 410,
   tooLarge: 413,
+  // The per-user rate limit, whatever the code of its body (ADR 0062, D7).
+  tooManyRequests: 429,
   unavailable: 503,
 } as const;
 
@@ -86,6 +88,8 @@ export function classifyFailure(answer: RawAnswer, nowMs: number): ApiError {
       return { kind: "session-expired" };
     case HTTP.tooLarge:
       return { kind: "too-large" };
+    case HTTP.tooManyRequests:
+      return { kind: "rate-limited", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
     case HTTP.unavailable:
       return { kind: "unavailable", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
     default:

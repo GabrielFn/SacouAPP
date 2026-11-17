@@ -33,12 +33,12 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
   );
 }
 
-/** Failures that say nothing about access: the last answer is still the person's to see. */
-const NETWORK_FAILURES: ReadonlySet<ApiErrorKind> = new Set(["offline", "unavailable"]);
+/** Failures that say nothing about access (a 429 neither, ADR 0062): the last answer is still the person's to see. */
+const TRANSIENT_FAILURES: ReadonlySet<ApiErrorKind> = new Set(["offline", "unavailable", "rate-limited"]);
 
-function isNetworkFailure(error: unknown): boolean {
+function isTransientFailure(error: unknown): boolean {
   const apiError = apiErrorOf(error);
-  return apiError !== null && NETWORK_FAILURES.has(apiError.kind);
+  return apiError !== null && TRANSIENT_FAILURES.has(apiError.kind);
 }
 
 /**
@@ -50,8 +50,8 @@ function isNetworkFailure(error: unknown): boolean {
  */
 export function shouldPersistQuery(query: Pick<Query, "queryKey" | "state">): boolean {
   const { status, data, error } = query.state;
-  const keptOnNetworkFailure = status === "error" && data !== undefined && isNetworkFailure(error);
-  return (status === "success" || keptOnNetworkFailure) && isPersistedKey(query.queryKey);
+  const keptOnTransientFailure = status === "error" && data !== undefined && isTransientFailure(error);
+  return (status === "success" || keptOnTransientFailure) && isPersistedKey(query.queryKey);
 }
 
 /** A cache written by another version of the app, or against another contract, is dropped (D6). */
