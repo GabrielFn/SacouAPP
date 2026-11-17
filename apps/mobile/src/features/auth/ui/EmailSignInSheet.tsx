@@ -73,6 +73,27 @@ function PasswordField({ model, inputRef }: PasswordFieldProps) {
   );
 }
 
+export interface ModeLinkProps {
+  readonly model: EmailSignInModel;
+}
+
+/** "Esqueci a senha" while signing in, "voltar" while resetting, nothing while creating. */
+function ModeLink({ model }: ModeLinkProps) {
+  const { state } = model;
+  if (!showsModeLink(state)) return null;
+  const resetting = state.mode === "reset";
+  return (
+    <Button
+      variant="link"
+      label={resetting ? emailSheet.backToSignIn : emailSheet.forgot}
+      disabled={state.submitting}
+      onPress={() => {
+        model.changeMode(resetting ? "signIn" : "reset");
+      }}
+    />
+  );
+}
+
 /**
  * The e-mail sheet (question 61, in the style of screen 30a). It is mounted only while open, so the
  * password never outlives it (ADR 0057, D5).
@@ -123,16 +144,7 @@ export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
         onPress={model.submit}
         disabled={!canSubmit(state)}
       />
-      {showsModeLink(state) ? (
-        <Button
-          variant="link"
-          label={resetting ? emailSheet.backToSignIn : emailSheet.forgot}
-          disabled={state.submitting}
-          onPress={() => {
-            model.changeMode(resetting ? "signIn" : "reset");
-          }}
-        />
-      ) : null}
+      <ModeLink model={model} />
     </BottomSheet>
   );
 }

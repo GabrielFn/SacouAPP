@@ -10,7 +10,7 @@ describe("key column of the account card", () => {
   });
 
   test("grows with the font up to the cap of the tokens", () => {
-    expect(keyColumnBasis(1.15)).toBe(`${20 * 1.15}%`);
+    expect(keyColumnBasis(1.15)).toBe(`${String(20 * 1.15)}%`);
     expect(keyColumnBasis(3)).toBe(keyColumnBasis(fontScaleCap));
   });
 });

@@ -54,6 +54,15 @@ function toggled(
     : [...others, position];
 }
 
+/** The primary leaves the others; "Qualquer uma" has no others at all. */
+function primaryPicked(state: ProfileFormState, position: PrimaryPosition): ProfileFormState {
+  return {
+    ...state,
+    primary: position,
+    others: position === "any" ? [] : state.others.filter((other) => other !== position),
+  };
+}
+
 export function profileFormReducer(
   state: ProfileFormState,
   action: ProfileFormAction,
@@ -64,15 +73,7 @@ export function profileFormReducer(
     case "nickname-blurred":
       return { ...state, nicknameTouched: true };
     case "primary-picked":
-      // The primary leaves the others; "Qualquer uma" has no others at all.
-      return {
-        ...state,
-        primary: action.position,
-        others:
-          action.position === "any"
-            ? []
-            : state.others.filter((other) => other !== action.position),
-      };
+      return primaryPicked(state, action.position);
     case "other-toggled":
       if (state.primary === null || state.primary === "any" || state.primary === action.position) {
         return state;
