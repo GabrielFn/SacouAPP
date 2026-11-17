@@ -27,7 +27,12 @@
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
-      ]
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF5A1F"
+      }
     },
     "experiments": {
       "typedRoutes": true
@@ -37,6 +42,7 @@
         "projectId": "6ebec243-d104-4750-a5a2-8f0ab0e548db"
       }
     },
-    "owner": "gabrielfn"
+    "owner": "gabrielfn",
+    "icon": "./assets/icon.png"
   }
 }

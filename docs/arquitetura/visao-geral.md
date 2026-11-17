@@ -130,6 +130,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0051](adr/0051-perfil-do-jogador-e-nota-do-admin.md) | Perfil do jogador e nota do membro definida pelo admin |
 | [0055](adr/0055-sorteio-no-servidor.md) | Sorteio equilibrado no servidor, com semente própria |
 | [0058](adr/0058-repositorio-publico.md) | Repositório público, para a CI não ter limite de minutos |
+| [0059](adr/0059-icone-do-app.md) | Ícone do app: silhueta sacando, azul-marinho sobre laranja |
 
 ## Matriz: `decisoes.md` → ADR
 
