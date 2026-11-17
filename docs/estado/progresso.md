@@ -47,10 +47,11 @@
 | E3.17 | Feita | PRs #73 e #80, ADR 0051 (perfil do jogador; nota do admin só para Admin e Co-admin). |
 | E4.6 | Feita | PRs #84, #94 e #100, ADR 0054 (rodadas no app: telas 20, 06, 26, 21, 21a e cards). |
 | E3.16 | Feita | PRs #93 e #101, ADR 0056 (exportar e excluir a conta, histórico como Ex-jogador). Corrida com o aceite de convite e a criação de grupo corrigida no #107 (D7a), achada pela CI em 16/11. |
-| E4.3 | Feita, falta o teste no celular | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b; ciclos 1 e 2 reprovados: 410 que apagava a conta errada, senha no estado e toque duplo), ADR 0057. O teste no celular precisa da API em `https:` ([relatório do M3](relatorios/M3.md), pergunta 3). |
+| E4.3 | Feita | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b), ADR 0057. Testada no celular em 16/11 (Galaxy, Android 17, build de desenvolvimento contra a API local pelo USB, PRs #112 a #114): login com Google, 27, criar grupo, 30, exportar (arquivo temporário apagado) e excluir (banco conferido: usuário apagado, marca gravada, vínculo `left`). Segunda rodada no mesmo dia: troca de conta, e-mail e senha, modo avião e fonte grande; falta só o 302. Defeitos em `pendencias.md`. |
 
 ## Em andamento
 
+- 16/11/2026, noite: primeiro teste no celular com login (ver a linha da E4.3). O Android com login não compilava (RN Firebase 27 exige Kotlin 2.4.0), corrigido no #114. Seis defeitos de interface achados no teste em correção na branch `fix/phone-test-findings` (desenvolvedor Sonnet).
 - 16/11/2026, noite: **M3 fechado no código.** Mergeados #105 (CI por área), #107 (corrida da exclusão), #108 e #109 (docs) e #110 (E4.3 Parte 3). Revisão geral de segurança do M3 feita. Relatório e perguntas para o Gabriel em [`relatorios/M3.md`](relatorios/M3.md).
 - 16/11/2026, tarde: repositório público (ADR 0058), CI de volta. **Mergeados** #100 (E4.6 Parte 3), #101 (E3.16 Parte 2), #102 (E4.3 Parte 2) e #103 e #104 (docs). Em andamento: #105 (CI pula a API em PR só do app; revisão aprovada), correção da corrida entre excluir a conta e aceitar convite (branch `fix/deletion-invite-race`, Opus) e E4.3 Parte 3 (branch `task/E4.3-delete-export`, Opus). Próximo passo no [diário de 15/11](sessoes/2026-11-15.md).
 - 16/11/2026, fim: **parada pedida pelo Gabriel**; CI parada por cobrança do GitHub. Aprovados esperando a CI: #100 (E4.6 P3), #101 (E3.16 P2); #102 (E4.3 P2) com o testador por refazer. Falta a E4.3 P3, a revisão de segurança e o relatório do M3. Próximo passo no [diário de 15/11](sessoes/2026-11-15.md).
