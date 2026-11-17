@@ -40,7 +40,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         alignItems: "center",
         paddingTop: tokens.spacing.s,
         paddingBottom: tokens.spacing.s6,
-        paddingHorizontal: tokens.spacing.xxs,
+        paddingHorizontal: 0,
         gap: tokens.spacing.xs,
       }}
     >

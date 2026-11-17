@@ -3,7 +3,11 @@ import { describe, expect, test } from "vitest";
 
 import { strings } from "../../../strings/pt-BR";
 import { sizes } from "../../../theme/tokens.data";
-import { createGroupCustomHref, createGroupDetailsHref, leaveWizardForNewRound } from "../navigation";
+import {
+  createGroupCustomHref,
+  createGroupDetailsHref,
+  leaveWizardForNewRound,
+} from "../navigation";
 import { createInitialState } from "./create-group.reducer";
 import { createGroupPatch, hasPatch } from "./create-group.selectors";
 import {
