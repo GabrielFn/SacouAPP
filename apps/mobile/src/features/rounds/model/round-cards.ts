@@ -84,11 +84,12 @@ export function cardPill(round: RoundSummary): CardPill | null {
 /** "9/12 confirmados", "14/14 · 2 na espera" or "9 confirmados" without a limit. */
 export function cardCountText(round: RoundSummary): string {
   const going = String(round.goingCount);
-  if (round.capacity === null) return cards.confirmed(going);
+  const amount = round.capacity ?? round.goingCount;
+  if (round.capacity === null) return cards.confirmed(going, amount);
   const count = `${going}/${String(round.capacity)}`;
   return round.waitlistCount > 0
     ? cards.withWaitlist(count, round.waitlistCount)
-    : cards.confirmed(count);
+    : cards.confirmed(count, amount);
 }
 
 /** The day strip: "Ter" and "20h30", in the group's own local date and time. */

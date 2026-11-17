@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
 
+import { keyColumnBasis } from "../model/key-column";
 import { useTheme } from "../../../theme/theme-context";
 import { ChevronRightIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
-
-/** The key column of "Seus dados": 72 of the 358 of the card in the canvas (Conta.dc.html `.k`). */
-const KEY_BASIS = "20%";
 
 export interface AccountCardProps {
   readonly title: string;
@@ -67,20 +65,25 @@ export function AccountRow({
   last = false,
 }: AccountRowProps) {
   const { colors, tokens } = useTheme();
+  const { fontScale } = useWindowDimensions();
   const content = (
     <>
       {icon}
       {keyLabel === undefined ? null : (
-        <Text variant="muted" style={{ flexBasis: KEY_BASIS, flexShrink: 0 }}>
+        <Text variant="muted" style={{ flexBasis: keyColumnBasis(fontScale), flexShrink: 0 }}>
           {keyLabel}
         </Text>
       )}
       {valueIcon}
-      <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
+      <Text
+        variant="bodyStrong"
+        numberOfLines={keyLabel === undefined ? undefined : 1}
+        style={{ flex: 1 }}
+      >
         {label}
       </Text>
       {note === undefined ? null : (
-        <Text variant="muted" style={{ fontSize: tokens.fontSizes.small }}>
+        <Text variant="muted" style={{ fontSize: tokens.fontSizes.small, flexShrink: 1 }}>
           {note}
         </Text>
       )}

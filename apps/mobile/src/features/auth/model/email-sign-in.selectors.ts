@@ -36,3 +36,8 @@ export function canSubmit(state: EmailSignInState): boolean {
   if (state.mode === "reset") return !state.resetSent;
   return passwordLength(state) > 0 && !passwordTooShort(state);
 }
+
+/** The link under the button: "forgot" when signing in, "back" when resetting, none when creating. */
+export function showsModeLink(state: EmailSignInState): boolean {
+  return state.mode !== "signUp";
+}

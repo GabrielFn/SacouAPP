@@ -104,6 +104,9 @@ export function QuickProfileScreen({ mode, initial, onSaved }: QuickProfileScree
         autoCapitalize="words"
         autoComplete="nickname"
         maxLength={NICKNAME_FIELD_LIMIT}
+        onBlur={() => {
+          dispatch({ type: "nickname-blurred" });
+        }}
         error={nicknameError(state) ?? undefined}
       />
       <PositionChips

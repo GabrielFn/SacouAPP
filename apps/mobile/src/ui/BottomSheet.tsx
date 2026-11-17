@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { strings } from "../strings/pt-BR";
@@ -15,6 +15,8 @@ export interface BottomSheetProps {
 }
 
 const SHEET_MAX_HEIGHT = "85%";
+/** Bottom padding lifts the sheet above the keyboard (the Android dialog is not resized edge-to-edge). */
+const KEYBOARD_BEHAVIOR = "padding";
 
 /** A sheet over the screen, on the `Modal` of React Native. It holds no state of its own. */
 export function BottomSheet({ visible, title, onClose, children }: BottomSheetProps) {
@@ -22,7 +24,10 @@ export function BottomSheet({ visible, title, onClose, children }: BottomSheetPr
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={{ flex: 1, justifyContent: "flex-end" }}>
+      <KeyboardAvoidingView
+        behavior={KEYBOARD_BEHAVIOR}
+        style={{ flex: 1, justifyContent: "flex-end" }}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={strings.settings.sheets.dismiss}
@@ -33,6 +38,7 @@ export function BottomSheet({ visible, title, onClose, children }: BottomSheetPr
           accessibilityViewIsModal
           style={{
             maxHeight: SHEET_MAX_HEIGHT,
+            flexShrink: 1,
             backgroundColor: colors.background,
             borderTopLeftRadius: tokens.radii.card,
             borderTopRightRadius: tokens.radii.card,
@@ -54,7 +60,7 @@ export function BottomSheet({ visible, title, onClose, children }: BottomSheetPr
             {children}
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -122,6 +122,9 @@ describe("card texts", () => {
   it("counts with and without a limit and with a waitlist", () => {
     expect(cardCountText(WEDNESDAY)).toBe("9/12 confirmados");
     expect(cardCountText({ ...WEDNESDAY, capacity: null })).toBe("9 confirmados");
+    expect(cardCountText({ ...WEDNESDAY, goingCount: 1, capacity: null })).toBe("1 confirmado");
+    expect(cardCountText({ ...WEDNESDAY, goingCount: 0, capacity: null })).toBe("0 confirmados");
+    expect(cardCountText({ ...WEDNESDAY, goingCount: 1 })).toBe("1/12 confirmados");
     expect(cardCountText({ ...WEDNESDAY, goingCount: 14, capacity: 14, waitlistCount: 2 })).toBe(
       "14/14 · 2 na espera",
     );

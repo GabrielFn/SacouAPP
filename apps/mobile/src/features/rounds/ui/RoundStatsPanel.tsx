@@ -53,7 +53,7 @@ export function RoundStatsPanel({ cells, onOpenConfirmed }: RoundStatsPanelProps
           <Pressable
             key={cell.label}
             accessibilityRole="button"
-            accessibilityLabel={strings.rounds.detail.openConfirmed(cell.value)}
+            accessibilityLabel={strings.rounds.detail.openConfirmed(cell.value, cell.amount)}
             onPress={onOpenConfirmed}
             style={cellStyle}
           >

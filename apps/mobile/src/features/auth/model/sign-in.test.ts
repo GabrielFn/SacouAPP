@@ -15,6 +15,7 @@ import {
   normalizedEmail,
   passwordTooShort,
   showsEmailError,
+  showsModeLink,
 } from "./email-sign-in.selectors";
 import { wordsOf } from "./legal-words";
 import { initialSignInState, isBusy, signInReducer, type SignInAction } from "./sign-in.reducer";
@@ -66,6 +67,12 @@ describe("screen 02 reducer", () => {
 });
 
 describe("e-mail sheet reducer and selectors", () => {
+  test("the forgot-password link shows when signing in, not when creating the account", () => {
+    expect(showsModeLink(emailState())).toBe(true);
+    expect(showsModeLink(emailState({ type: "mode-changed", mode: "signUp" }))).toBe(false);
+    expect(showsModeLink(emailState({ type: "mode-changed", mode: "reset" }))).toBe(true);
+  });
+
   test("the e-mail is trimmed, the password never is", () => {
     const state = emailState(
       { type: "email-changed", text: " ana@x.com " },

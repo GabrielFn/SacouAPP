@@ -130,11 +130,16 @@ describe("the pills of 'Como vai ser'", () => {
 describe("the dark panel", () => {
   const group = resolved();
 
+  test("one confirmed without a limit reads in the singular", () => {
+    const [cell] = statsCells(roundOf({ capacity: null, goingCount: 1 }), group);
+    expect(cell).toMatchObject({ value: "1", label: "confirmado" });
+  });
+
   test("14 of 14 and 2 waiting: only two cells, none about money", () => {
     const cells = statsCells(roundOf(), group);
     expect(cells).toEqual([
-      { value: "14/14", label: "confirmados" },
-      { value: "2", label: "na espera" },
+      { value: "14/14", label: "confirmados", amount: 14 },
+      { value: "2", label: "na espera", amount: 2 },
     ]);
   });
 

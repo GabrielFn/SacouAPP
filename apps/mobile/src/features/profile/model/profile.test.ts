@@ -61,6 +61,7 @@ describe("the form reducer of screen 27", () => {
   test("starts with the first name and nothing chosen", () => {
     expect(initFromAccount("João Ferreira")).toEqual({
       nickname: "João",
+      nicknameTouched: false,
       primary: null,
       others: [],
       level: null,
@@ -124,6 +125,7 @@ describe("the form reducer of screen 27", () => {
   test("the edit mode starts from the saved profile", () => {
     expect(initFromProfile(SAVED)).toEqual({
       nickname: "Jota",
+      nicknameTouched: false,
       primary: "middleBlocker",
       others: ["setter"],
       level: 3,
@@ -171,6 +173,15 @@ describe("the request of 'Pronto'", () => {
     const state = form({ type: "nickname-changed", text });
     expect(canSubmit(state)).toBe(false);
     expect(nicknameError(state)).toBe(error);
+  });
+
+  test("an empty nickname is no refusal until the person types or leaves the field", () => {
+    const untouched = initFromAccount(null);
+    expect(nicknameError(untouched)).toBeNull();
+    expect(canSubmit(untouched)).toBe(false);
+    expect(nicknameError(profileFormReducer(untouched, { type: "nickname-blurred" }))).toBe(
+      texts.nicknameRequired,
+    );
   });
 
   test("twenty characters with emojis are accepted, and the field never cuts them", () => {

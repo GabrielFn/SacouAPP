@@ -25,8 +25,10 @@ export function Screen({
 }: ScreenProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
+  // A scrolling body leaves the status bar to a fixed strip, so the text never rolls under it.
+  const topStrip = <View style={{ height: insets.top, backgroundColor: colors.background }} />;
   const content = {
-    paddingTop: insets.top + tokens.spacing.xl,
+    paddingTop: tokens.spacing.xl,
     paddingBottom: (aboveTabBar || footer ? 0 : insets.bottom) + tokens.spacing.xl,
     paddingLeft: insets.left + tokens.spacing.xl,
     paddingRight: insets.right + tokens.spacing.xl,
@@ -44,6 +46,7 @@ export function Screen({
   if (footer) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
+        {topStrip}
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ ...content, alignItems: centered }}
@@ -67,15 +70,18 @@ export function Screen({
   }
   if (scroll) {
     return (
-      <ScrollView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        contentContainerStyle={{
-          ...content,
-          alignItems: centered,
-        }}
-      >
-        {body}
-      </ScrollView>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        {topStrip}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            ...content,
+            alignItems: centered,
+          }}
+        >
+          {body}
+        </ScrollView>
+      </View>
     );
   }
   return (
@@ -85,6 +91,7 @@ export function Screen({
         backgroundColor: colors.background,
         alignItems: centered,
         ...content,
+        paddingTop: insets.top + tokens.spacing.xl,
       }}
     >
       {body}

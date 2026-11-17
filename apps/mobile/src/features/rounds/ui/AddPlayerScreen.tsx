@@ -41,7 +41,9 @@ function AddPlayerContent({ groupId, groupName, round, members, model }: AddPlay
           <Text variant="title" accessibilityRole="header">
             {add.title}
           </Text>
-          <Text variant="muted">{add.subtitle(groupName, view.confirmed)}</Text>
+          <Text variant="muted">
+            {add.subtitle(groupName, view.confirmed, view.confirmedAmount)}
+          </Text>
         </View>
         <Button label={add.close} variant="link" onPress={close} />
       </View>
