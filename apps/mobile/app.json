@@ -23,6 +23,12 @@
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6ebec243-d104-4750-a5a2-8f0ab0e548db"
+      }
+    },
+    "owner": "gabrielfn"
   }
 }
