@@ -79,9 +79,6 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref afterCurrentUserResolved, value);
     }
 
-    /// <summary>One more change to the API's services, applied last (the control of the pool test drops a start check).</summary>
-    internal Action<IServiceCollection>? MoreServices { get; init; }
-
     /// <summary>Applies the Identity, Groups and then Sessions migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
@@ -122,10 +119,6 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => Keys)
             .SetHandlerLifetime(Timeout.InfiniteTimeSpan));
-        if (MoreServices is { } more)
-        {
-            builder.ConfigureServices(more);
-        }
     }
 
     /// <summary>Wraps the Groups' own membership (whatever type it is) in a pass-through that runs <see cref="BeforeMembershipLookup"/>.</summary>

@@ -1,7 +1,5 @@
 using System.Net;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Sacou.Http.RateLimiting;
 using Sacou.Integration.Tests.Groups;
 using Xunit;
 
@@ -37,28 +35,40 @@ public sealed class DualConnectionPoolTests(IntegrationDatabase database)
     }
 
     /// <summary>
-    /// The control: the same race with the concurrency limit out of the way (and the start check that forbids it
-    /// dropped) runs out of the pool, and some request fails. This is the failure the limit prevents.
+    /// The control: the configuration that would let the race run out of the pool (the initial concurrency of 8 on a
+    /// pool of 6) never starts. A race without the limit is not run here: whether it exhausts the pool depends on the
+    /// machine's timing, so it would be a flaky test.
     /// </summary>
     [Fact]
-    public async Task WithoutTheLimit_TheSameRaceRunsOutOfThePool()
+    public async Task ConcurrencyThatDoesNotFitThePool_StopsTheStart()
     {
-        await using var api = await StartAsync(
-            new Dictionary<string, string?>(StringComparer.Ordinal) { ["RateLimiting:DualConnectionConcurrency"] = "1000" },
-            dropStartChecks: true);
+        await using var api = new ApiWithDatabase(database, new Dictionary<string, string?>(StringComparer.Ordinal)
+        {
+            ["ConnectionStrings:Sacou"] = $"{database.ConnectionString};Maximum Pool Size={SmallPool}",
+        });
 
-        var statuses = await RaceAsync(api);
+        var failure = Record.Exception(() => api.Services);
 
-        Assert.Contains(statuses, status => (int)status >= (int)HttpStatusCode.InternalServerError);
+        var refusal = Assert.IsType<OptionsValidationException>(Innermost(failure), exactMatch: false);
+        Assert.Contains("Maximum Pool Size", refusal.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain(database.ConnectionString, refusal.Message, StringComparison.Ordinal);
     }
 
-    private async Task<ApiWithDatabase> StartAsync(Dictionary<string, string?> settings, bool dropStartChecks = false)
+    private static Exception? Innermost(Exception? failure)
+    {
+        var current = failure;
+        while (current is not null and not OptionsValidationException && current.InnerException is not null)
+        {
+            current = current.InnerException;
+        }
+
+        return current;
+    }
+
+    private async Task<ApiWithDatabase> StartAsync(Dictionary<string, string?> settings)
     {
         settings["ConnectionStrings:Sacou"] = $"{database.ConnectionString};Maximum Pool Size={SmallPool};Timeout={PoolWaitSeconds}";
-        var api = new ApiWithDatabase(database, settings)
-        {
-            MoreServices = dropStartChecks ? services => services.RemoveAll<IValidateOptions<RateLimitingOptions>>() : null,
-        };
+        var api = new ApiWithDatabase(database, settings);
         await api.MigrateAsync();
         return api;
     }
