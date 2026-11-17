@@ -37,15 +37,19 @@ export interface DrawFlowState {
   readonly preGame: PreGameChoices;
 }
 
-export type DrawFlowAction =
-  | { readonly type: "drawn"; readonly answer: DrawTeamsAnswer }
+/** "Montar times" (draw off, question 72). */
+export type ManualTeamsAction =
   /**
    * "Montar times" (draw off): the teams by arrival, kept from the first edit on. Until then the screen
    * derives them from the round, so a late confirmation still joins them.
    */
   | { readonly type: "teams-built"; readonly arrangement: DrawArrangement }
   /** "Montar de novo": back to the teams by arrival, derived from the round again. */
-  | { readonly type: "teams-reset" }
+  | { readonly type: "teams-reset" };
+
+export type DrawFlowAction =
+  | { readonly type: "drawn"; readonly answer: DrawTeamsAnswer }
+  | ManualTeamsAction
   | { readonly type: "player-tapped"; readonly memberId: MemberId }
   | { readonly type: "swap-mode-chosen" }
   | { readonly type: "lock-mode-chosen" }
@@ -113,10 +117,11 @@ function unlockChosen(state: DrawFlowState): DrawFlowState {
 }
 
 /** "Montar times": keep the teams by arrival once, or go back to them (question 72). */
-function manualTeams(
-  state: DrawFlowState,
-  action: Extract<DrawFlowAction, { readonly type: "teams-built" | "teams-reset" }>,
-): DrawFlowState {
+function isManualTeamsAction(action: DrawFlowAction): action is ManualTeamsAction {
+  return action.type === "teams-built" || action.type === "teams-reset";
+}
+
+function manualTeams(state: DrawFlowState, action: ManualTeamsAction): DrawFlowState {
   const cleared = { ...state, locks: [], selection: null, notice: null };
   if (action.type === "teams-reset") return { ...cleared, arrangement: null };
   return state.arrangement === null ? { ...cleared, arrangement: action.arrangement } : state;
@@ -124,12 +129,10 @@ function manualTeams(
 
 export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
   if (isPreGameAction(action)) return preGameReducer(state, action);
+  if (isManualTeamsAction(action)) return manualTeams(state, action);
   switch (action.type) {
     case "drawn":
       return drawn(state, action.answer);
-    case "teams-built":
-    case "teams-reset":
-      return manualTeams(state, action);
     case "player-tapped":
       return playerTapped(state, action.memberId);
     case "swap-mode-chosen":
