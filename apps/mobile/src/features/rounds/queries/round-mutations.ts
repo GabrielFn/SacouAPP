@@ -46,6 +46,25 @@ export function createRoundMutation(api: SacouApi, client: QueryClient, groupId:
 const FORBIDDEN_STATUS = 403;
 
 /**
+ * What a command on a round refused by the server reads again: a 403 the group and its role, and the round;
+ * any other refusal the round only when `readsRound` says so. No answer at all (offline) reads nothing.
+ */
+export function roundRefusedEffects(
+  groupId: string,
+  roundId: string,
+  error: unknown,
+  readsRound: (error: unknown) => boolean,
+): readonly CacheEffect[] {
+  const apiError = apiErrorOf(error);
+  if (apiError?.kind !== "problem") return [];
+  const round: CacheEffect = { action: "invalidate", key: queryKeys.round(groupId, roundId) };
+  if (apiError.status === FORBIDDEN_STATUS) {
+    return [...cacheEffectsOf({ type: "settingsForbidden", groupId }), round];
+  }
+  return readsRound(error) ? [round] : [];
+}
+
+/**
  * A refused edit reads again what it was refused against: a 403 the group and its role, a 409 (`round-closed`,
  * `round-date-taken`) the round. The text comes from the error.
  */
@@ -54,13 +73,7 @@ export function roundEditRefusedEffects(
   roundId: string,
   error: unknown,
 ): readonly CacheEffect[] {
-  const apiError = apiErrorOf(error);
-  if (apiError?.kind !== "problem") return [];
-  const round: CacheEffect = { action: "invalidate", key: queryKeys.round(groupId, roundId) };
-  if (apiError.status === FORBIDDEN_STATUS) {
-    return [...cacheEffectsOf({ type: "settingsForbidden", groupId }), round];
-  }
-  return isConflict(error) ? [round] : [];
+  return roundRefusedEffects(groupId, roundId, error, isConflict);
 }
 
 /** "Salvar" of "Editar rodada": the answer is the whole round, which replaces the cached detail. */

@@ -131,6 +131,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0055](adr/0055-sorteio-no-servidor.md) | Sorteio equilibrado no servidor, com semente própria |
 | [0058](adr/0058-repositorio-publico.md) | Repositório público, para a CI não ter limite de minutos |
 | [0059](adr/0059-icone-do-app.md) | Ícone do app: silhueta sacando, azul-marinho sobre laranja |
+| [0061](adr/0061-sorteio-no-app.md) | Sorteio no app: resultado só no reducer, medidor no TS com o golden do C#, trocas e travas |
 
 ## Matriz: `decisoes.md` → ADR
 

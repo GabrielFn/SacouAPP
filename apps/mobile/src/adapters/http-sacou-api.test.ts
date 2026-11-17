@@ -37,6 +37,11 @@ const GUEST_BODY = {
   level: null,
 };
 
+const DRAW_BODY = {
+  locks: [{ first: MEMBER, second: INVITE, kind: "together" as const }],
+  reserves: [TEMPLATE],
+};
+
 const OPERATIONS: readonly Operation[] = [
   ["signIn", (a) => a.signIn(), "POST", "/v1/me", "/v1/me", null],
   ["listMyGroups", (a) => a.listMyGroups(), "GET", "/v1/groups", "/v1/groups", null],
@@ -294,6 +299,14 @@ const OPERATIONS: readonly Operation[] = [
     `/v1/groups/${GROUP}/guests`,
     GUEST_BODY,
   ],
+  [
+    "drawTeams",
+    (a) => a.drawTeams(GROUP, ROUND, DRAW_BODY),
+    "POST",
+    "/v1/groups/{groupId}/rounds/{roundId}/draw",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/draw`,
+    DRAW_BODY,
+  ],
 ];
 
 afterEach(() => {
@@ -301,8 +314,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 31 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(31);
+  test("the table covers the 32 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(32);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {
