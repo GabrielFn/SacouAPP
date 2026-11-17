@@ -10,7 +10,7 @@ import { teamSwatch } from "./team-swatch";
 const HALF = 2;
 
 function percent(value: number): `${number}%` {
-  return `${value}%`;
+  return `${String(value)}%`;
 }
 
 export interface BalanceMeterProps {

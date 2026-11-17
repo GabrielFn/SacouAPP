@@ -50,11 +50,14 @@ vi.mock("../../rounds/queries/use-round-queries", () => ({
   useRound: () => ({ data: g1Round() }),
 }));
 
+/** The hook as a plain function: the mocks above stand in for React. */
+const runDrawScreen = useDrawScreen;
+
 /** One render of the hook, with the refs of the renders before it (as React keeps them). */
-function useRender(state: DrawFlowState | null = null) {
+function render(state: DrawFlowState | null = null) {
   world.refIndex = 0;
   world.state.set("state", state);
-  return useDrawScreen("g1", "r1");
+  return runDrawScreen("g1", "r1");
 }
 
 beforeEach(() => {

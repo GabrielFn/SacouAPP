@@ -72,11 +72,15 @@ export function drawAnswer(
   };
 }
 
+/** The averages the server gives for G1: 225 and 220 over six, 3,8 and 3,7. */
+const G1_AVERAGE_A_TENTHS = 38;
+const G1_AVERAGE_B_TENTHS = 37;
+
 export const G1_ANSWER: DrawTeamsAnswer = {
   ...drawAnswer(),
   teams: drawAnswer().teams.map((team, index) => ({
     ...team,
-    averageTenths: index === 0 ? 38 : 37,
+    averageTenths: index === 0 ? G1_AVERAGE_A_TENTHS : G1_AVERAGE_B_TENTHS,
   })),
   differenceTenths: 1,
 };
