@@ -77,3 +77,20 @@ FinishedMatch: MatchScore + endReason (depois de currentSet) + winner (no fim)
 ```
 
 Decisões técnicas e reversíveis, para o relatório do M2: limites de 1 a 99 pontos e de 24 membros por time, `winMargin` 1 ou 2 com o mesmo valor no tie-break, sem teto de pontos, 200 partidas terminadas por stream.
+
+## Conferências do servidor
+
+O evento prova o formato, não a verdade. Ao receber eventos do celular (E3.7, [ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)), o servidor roda o replay de todo o stream e recusa, com `event-implausible` e um `reason` da lista fechada, o que um celular honesto nunca grava, porque os comandos do motor recusam. Cada conferência lê só o próprio stream, pelo estado logo antes do evento, e catálogos imutáveis.
+
+| Evento | Regra | `reason` |
+|---|---|---|
+| Qualquer um, entre um `SetEnded` que decide a partida e o `MatchEnded` | Só entram `MatchEnded`, `PointAttributed` e `RevertedTo` (o "desfazer" e o "De quem foi?" seguem valendo) | `match-pending` |
+| `PointScored` | O set aberto ainda não tem vencedor (`getSetWinner` nulo): 25–23 com vantagem já decidiu; 24–24, não | `set-decided` |
+| `SetEnded` | O set tem vencedor e é o do evento; `nextSet` nulo só quando o set decide a partida; `targetPoints` do próximo set por `targetPointsForSet`; `setterZones` iguais aos atuais; `firstServer` alternado, salvo quando o próximo set é o decisivo (sorteio de quem escreve) | `set-not-decided`, `wrong-set-winner`, `wrong-next-set`, `wrong-target-points`, `wrong-setter-zones`, `wrong-first-server` |
+| `MatchEnded` | `sets-won`: o vencedor é o de `getMatchWinner`. `manual`: aceito, com o vencedor escolhido | `wrong-match-winner` |
+| `ServingTeamChanged` | Set aberto e sem vencedor; saca o adversário de quem sacava; em 0–0 ele também passa a ter sacado primeiro, depois de 0–0 quem sacou primeiro fica | `set-decided`, `wrong-serving-team`, `wrong-first-server` |
+| `PointAttributed` | O alvo é `PointScored` ativo da partida aberta; o autor segue `isValidAuthor` e `isPlausibleAuthor` (na quadra do rali, Ace só do sacador, líbero sem Ace nem Bloqueio, `opponent-error` sem autor). O resolvedor ignoraria em silêncio; o servidor recusa | `invalid-attribution-target`, `invalid-point-author` |
+| `QueueChanged` | A fila muda (igual à atual é recusada) | `queue-unchanged` |
+| `MatchStarted` | `rulesVersion` e `formationsVersion` nas listas de versões suportadas (listas, para um app antigo offline) | `unsupported-rules-version`, `unsupported-formations-version` |
+
+**Não recusado** (pergunta 69, padrão adotado): o que depende de dado que muda durante a rodada, como times e fila contra a presença, a fila recalculada pelo modo do grupo e o plano Pro. Recusar travaria para sempre a sincronização de um celular honesto; o risco fica com quem tem papel, registrado pelo lote. Os casos estão no golden `packages/match-engine/golden/server-checks.json`, lido pelo TS (os recusados passam no replay do motor; os aceitos saem dos comandos) e pelo C#.

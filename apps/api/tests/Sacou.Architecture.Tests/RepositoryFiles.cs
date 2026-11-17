@@ -55,6 +55,7 @@ internal static partial class RepositoryFiles
         "packages/match-engine/golden/corrections-events.json",
         "packages/match-engine/golden/attributions-events.json",
         "packages/match-engine/golden/stats-events.json",
+        "packages/match-engine/golden/server-checks.json",
         "packages/match-engine/golden/settings-resolver.json",
     ];
 
