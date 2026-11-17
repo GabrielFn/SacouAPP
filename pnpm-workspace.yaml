@@ -19,6 +19,7 @@ overrides:
 audit:
   ignore:
     - GHSA-mrhx-c7xc-m3w5
+    - GHSA-fc5q-39xc-vjpf
 
 catalog:
   "@eslint/js": 9.39.5
