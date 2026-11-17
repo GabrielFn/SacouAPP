@@ -57,13 +57,13 @@ export function createCachedCourtRoster(
   client: QueryClient,
   fallback: CourtRoster | null = null,
 ): CourtRoster {
-  const memo: { names: ReadonlyMap<MemberId, string> | null } = { names: null };
+  const memo: { current: ReadonlyMap<MemberId, string> | null } = { current: null };
   client.getQueryCache().subscribe(() => {
-    memo.names = null;
+    memo.current = null;
   });
   const names = () => {
-    memo.names ??= nicknamesOf(client);
-    return memo.names;
+    memo.current ??= nicknamesOf(client);
+    return memo.current;
   };
   return {
     nameOf: (memberId) =>

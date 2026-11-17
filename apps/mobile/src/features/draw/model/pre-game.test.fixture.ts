@@ -1,4 +1,4 @@
-import type { GroupSettings, MemberId } from "@sacou/match-engine";
+import type { GroupSettings, MemberId, SettingsPath, SettingsValue } from "@sacou/match-engine";
 
 import { withLeaf } from "../../groups/model/settings-patch";
 import { arrangementOf, type DrawArrangement } from "./draw-arrangement";
@@ -74,23 +74,32 @@ export function g1UuidArrangement(
   );
 }
 
+const GOLDEN_BEST_OF = 3;
+const GOLDEN_POINTS = 25;
+const GOLDEN_TIE_BREAK = 15;
+const ADVANTAGE = 2;
+
 /** Best of 3 to 25, tie-break to 15, advantage, 5x1 for both: the round of the golden case. */
-export function preGameSettings(patch: (settings: GroupSettings) => GroupSettings = (s) => s) {
-  const scored = withLeaf(
-    withLeaf(
-      withLeaf(withLeaf(drawSettings(), "scoring.enabled", true), "scoring.bestOf", 3),
-      "scoring.pointsPerSet",
-      25,
+const GOLDEN_LEAVES: readonly (readonly [SettingsPath, SettingsValue])[] = [
+  ["scoring.enabled", true],
+  ["scoring.bestOf", GOLDEN_BEST_OF],
+  ["scoring.pointsPerSet", GOLDEN_POINTS],
+  ["scoring.tieBreakEnabled", true],
+  ["scoring.tieBreakPoints", GOLDEN_TIE_BREAK],
+  ["scoring.winMargin", ADVANTAGE],
+  ["rotation.enabled", true],
+  ["rotation.system", "5x1"],
+];
+
+export function preGameSettings(
+  patch: (settings: GroupSettings) => GroupSettings = (settings) => settings,
+): GroupSettings {
+  return patch(
+    GOLDEN_LEAVES.reduce(
+      (settings, [path, value]) => withLeaf(settings, path, value),
+      drawSettings(),
     ),
-    "scoring.tieBreakEnabled",
-    true,
   );
-  const rotating = withLeaf(
-    withLeaf(withLeaf(scored, "scoring.tieBreakPoints", 15), "rotation.enabled", true),
-    "rotation.system",
-    "5x1",
-  );
-  return patch(withLeaf(rotating, "scoring.winMargin", 2));
 }
 
 export function g1Input(

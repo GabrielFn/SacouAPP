@@ -1,5 +1,4 @@
-import type { BestOf, MemberId, TeamSide } from "@sacou/match-engine";
-import type { FormationSystem } from "@sacou/volley-rules";
+import type { MemberId } from "@sacou/match-engine";
 
 import type { DrawTeamsAnswer } from "../../../services/api/sacou-api";
 import {
@@ -11,13 +10,16 @@ import {
   type DrawLock,
 } from "./draw-arrangement";
 import { lockOutcome, swapOutcome, unlockMember, type DrawNotice } from "./player-tap";
-import { initialPreGameChoices, overrideOf, steppedPoints, type PreGameChoices } from "./pre-game";
+import { initialPreGameChoices, type PreGameChoices } from "./pre-game";
+import {
+  isPreGameAction,
+  preGameReducer,
+  type DrawSheet,
+  type PreGameAction,
+} from "./pre-game.reducer";
 
 /** What a second name does: swap the two (the default) or lock them together. */
 export type DrawMode = "swap" | "lock";
-
-/** Sheet 08 lies over screen 07, in this same flow, so the draw never leaves the screen (D1). */
-export type DrawSheet = "none" | "pre-game";
 
 /**
  * The flow of screen 07 (frontend.md, rule 4; ADR 0061). The draw is the one answer of a command that stores
@@ -47,20 +49,7 @@ export type DrawFlowAction =
   | { readonly type: "lock-undone"; readonly lock: DrawLock }
   /** A new draw was asked offline: it is refused here, with a local notice. */
   | { readonly type: "offline-refused" }
-  | { readonly type: "pre-game-opened" }
-  | { readonly type: "pre-game-closed" }
-  /** "−" or "+" of "Pontos por set"; `base` is the resolved setting of the round, never stored. */
-  | { readonly type: "points-stepped"; readonly delta: number; readonly base: number }
-  | { readonly type: "best-of-chosen"; readonly bestOf: BestOf; readonly base: BestOf }
-  /** A tap on "A" or "B", or the side the coin gave for "Sortear" (D10). */
-  | { readonly type: "first-server-chosen"; readonly side: TeamSide }
-  | { readonly type: "rotation-tab-chosen"; readonly side: TeamSide }
-  | {
-      readonly type: "system-chosen";
-      readonly side: TeamSide;
-      readonly system: FormationSystem;
-      readonly base: FormationSystem;
-    };
+  | PreGameAction;
 
 export const initialDrawFlowState: DrawFlowState = {
   arrangement: null,
@@ -116,34 +105,8 @@ function unlockChosen(state: DrawFlowState): DrawFlowState {
   };
 }
 
-function withPreGame(state: DrawFlowState, patch: Partial<PreGameChoices>): DrawFlowState {
-  return { ...state, preGame: { ...state.preGame, ...patch } };
-}
-
-function pointsStepped(state: DrawFlowState, delta: number, base: number): DrawFlowState {
-  const shown = state.preGame.pointsPerSet ?? base;
-  return withPreGame(state, { pointsPerSet: overrideOf(steppedPoints(shown, delta), base) });
-}
-
-function systemChosen(
-  state: DrawFlowState,
-  side: TeamSide,
-  system: FormationSystem,
-  base: FormationSystem,
-): DrawFlowState {
-  return withPreGame(state, {
-    systems: { ...state.preGame.systems, [side]: overrideOf(system, base) },
-  });
-}
-
-/** The sheet opens only over a draw: without teams there is no match to start. */
-function preGameOpened(state: DrawFlowState): DrawFlowState {
-  return state.arrangement === null
-    ? state
-    : { ...state, sheet: "pre-game", selection: null, notice: null };
-}
-
 export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
+  if (isPreGameAction(action)) return preGameReducer(state, action);
   switch (action.type) {
     case "drawn":
       return drawn(state, action.answer);
@@ -161,20 +124,6 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
       return { ...state, notice: { kind: "offline" } };
     case "lock-undone":
       return { ...state, locks: state.locks.filter((lock) => !sameLock(lock, action.lock)) };
-    case "pre-game-opened":
-      return preGameOpened(state);
-    case "pre-game-closed":
-      return { ...state, sheet: "none" };
-    case "points-stepped":
-      return pointsStepped(state, action.delta, action.base);
-    case "best-of-chosen":
-      return withPreGame(state, { bestOf: overrideOf(action.bestOf, action.base) });
-    case "first-server-chosen":
-      return withPreGame(state, { firstServer: action.side });
-    case "rotation-tab-chosen":
-      return withPreGame(state, { rotationTab: action.side });
-    case "system-chosen":
-      return systemChosen(state, action.side, action.system, action.base);
   }
 }
 

@@ -4,11 +4,11 @@ import type { CoinFlip } from "../services/random/coin-flip";
 
 /** A coin for tests: the sides in the given order, over and over. */
 export function createFakeCoinFlip(sides: readonly TeamSide[]): CoinFlip {
-  const next = { index: 0 };
+  const next = { value: 0 };
   return {
     flip() {
-      const side = sides[next.index % sides.length] ?? "a";
-      next.index += 1;
+      const side = sides[next.value % sides.length] ?? "a";
+      next.value += 1;
       return side;
     },
   };
