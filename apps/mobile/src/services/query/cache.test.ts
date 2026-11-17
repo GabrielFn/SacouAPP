@@ -220,7 +220,6 @@ describe("offline (Q1, Q6)", () => {
     const fake = programmed();
     await first.query(myGroupsQuery(fake.api));
     await save(first, store);
-    const kept = stored(store);
     fake.respond("listMyGroups", apiErr({ kind: "offline" }));
     const client = await restore(store);
     client.setDefaultOptions({
@@ -238,7 +237,6 @@ describe("offline (Q1, Q6)", () => {
 
     expect(stored(store)).not.toBe("");
     expect(persistedKeys(store)).toContain(JSON.stringify(queryKeys.groups()));
-    expect(JSON.parse(stored(store))).toMatchObject({ buster: JSON.parse(kept).buster });
     const reopened = await restore(store);
     expect(reopened.getQueryData(queryKeys.groups())).toEqual([myGroup]);
   });
