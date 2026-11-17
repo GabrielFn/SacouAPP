@@ -214,6 +214,33 @@ describe("offline (Q1, Q6)", () => {
     client.unmount();
   });
 
+  test("opened with no network the app still thinks it is online: the failed refetch keeps the kept list on disk", async () => {
+    const store = createMemoryKeyValueStore();
+    const first = createSacouQueryClient();
+    const fake = programmed();
+    await first.query(myGroupsQuery(fake.api));
+    await save(first, store);
+    fake.respond("listMyGroups", apiErr({ kind: "offline" }));
+    const client = await restore(store);
+    client.setDefaultOptions({
+      queries: { ...client.getDefaultOptions().queries, retry: false },
+    });
+
+    const observer = new QueryObserver(client, { ...myGroupsQuery(fake.api), staleTime: 0 });
+    const stop = observer.subscribe(() => undefined);
+    await vi.waitFor(() => {
+      expect(observer.getCurrentResult().status).toBe("error");
+    });
+    expect(observer.getCurrentResult().data).toEqual([myGroup]);
+    await save(client, store);
+    stop();
+
+    expect(stored(store)).not.toBe("");
+    expect(persistedKeys(store)).toContain(JSON.stringify(queryKeys.groups()));
+    const reopened = await restore(store);
+    expect(reopened.getQueryData(queryKeys.groups())).toEqual([myGroup]);
+  });
+
   test("a mutation offline fails at once instead of waiting for the network", async () => {
     onlineManager.setOnline(false);
     const client = createSacouQueryClient();

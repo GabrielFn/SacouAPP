@@ -181,6 +181,39 @@ describe("the allow list of the persisted cache (P6)", () => {
     },
   );
 
+  test("an error that kept its last answer is written only for an allowed key", () => {
+    const client = new QueryClient();
+    const allowed = client.getQueryCache().build(client, { queryKey: queryKeys.groups() });
+    allowed.setState({ status: "error", data: [], error: failure({ kind: "offline" }) });
+    expect(shouldPersistQuery(allowed)).toBe(true);
+    const denied = client.getQueryCache().build(client, { queryKey: queryKeys.me() });
+    denied.setState({ status: "error", data: {}, error: failure({ kind: "offline" }) });
+    expect(shouldPersistQuery(denied)).toBe(false);
+  });
+
+  test.each<[string, ApiError, boolean]>([
+    ["no network", { kind: "offline" }, true],
+    ["the server down", { kind: "unavailable", retryAfterMs: 0 }, true],
+    [
+      "removed from the group (403)",
+      { kind: "problem", status: 403, code: "groups.forbidden" },
+      false,
+    ],
+    [
+      "the group gone (404)",
+      { kind: "problem", status: 404, code: "groups.group-not-found" },
+      false,
+    ],
+    ["an expired session", { kind: "session-expired" }, false],
+    ["a user not registered", { kind: "not-registered" }, false],
+    ["an unexpected answer", { kind: "unexpected", status: 500 }, false],
+  ])("the last answer is kept on disk after %s: %s", (_name, error, kept) => {
+    const client = new QueryClient();
+    const query = client.getQueryCache().build(client, { queryKey: queryKeys.groups() });
+    query.setState({ status: "error", data: [], error: failure(error) });
+    expect(shouldPersistQuery(query)).toBe(kept);
+  });
+
   test("the buster joins the app version and the contract", () => {
     expect(cacheBuster("1.2.3")).toMatch(/^1\.2\.3\+[0-9a-f]{16}$/);
   });
