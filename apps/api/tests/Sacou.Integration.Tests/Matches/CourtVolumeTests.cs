@@ -101,7 +101,14 @@ public sealed class CourtVolumeTests(IntegrationDatabase database) : IAsyncLifet
                 await copy.WriteAsync(Guid.Parse(json["deviceId"]!.GetValue<string>()), NpgsqlDbType.Uuid, TestContext.Current.CancellationToken);
                 await copy.WriteAsync(json["schemaVersion"]!.GetValue<long>(), NpgsqlDbType.Bigint, TestContext.Current.CancellationToken);
                 await copy.WriteAsync(json["type"]!.GetValue<string>(), NpgsqlDbType.Text, TestContext.Current.CancellationToken);
-                await copy.WriteAsync(matchId is null ? DBNull.Value : Guid.Parse(matchId), NpgsqlDbType.Uuid, TestContext.Current.CancellationToken);
+                if (matchId is null)
+                {
+                    await copy.WriteNullAsync(TestContext.Current.CancellationToken);
+                }
+                else
+                {
+                    await copy.WriteAsync(Guid.Parse(matchId), NpgsqlDbType.Uuid, TestContext.Current.CancellationToken);
+                }
                 await copy.WriteAsync(envelopes[index], NpgsqlDbType.Text, TestContext.Current.CancellationToken);
                 await copy.WriteAsync(now, NpgsqlDbType.TimestampTz, TestContext.Current.CancellationToken);
             }

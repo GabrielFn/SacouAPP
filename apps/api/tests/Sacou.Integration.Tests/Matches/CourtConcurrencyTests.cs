@@ -60,7 +60,7 @@ public sealed class CourtConcurrencyTests(IntegrationDatabase database) : IAsync
             CourtCalls.SendAsync(world, A.CoAdmin, twoStreams, right, [right.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player])]));
 
         Assert.Equal(1, same.Sum(result => result.Stored));
-        Assert.Equal([HttpStatusCode.Conflict, HttpStatusCode.OK], racing.Select(response => response.StatusCode).Order());
+        Assert.Equal([HttpStatusCode.OK, HttpStatusCode.Conflict], racing.Select(response => response.StatusCode).Order());
         var refused = racing.Single(response => response.StatusCode == HttpStatusCode.Conflict);
         Assert.Equal("matches.round-has-court-session", await RoundCalls.CodeAsync(refused));
         foreach (var response in racing)

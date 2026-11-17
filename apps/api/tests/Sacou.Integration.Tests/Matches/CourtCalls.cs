@@ -33,8 +33,8 @@ internal sealed class CourtPhone(Guid courtSessionId, Guid deviceId, long batch 
     public string MatchStarted(Guid teamA, Guid teamB)
     {
         MatchId = Guid.NewGuid();
-        return Envelope("MatchStarted", $$"""
-            {"firstServer":"a","formationsVersion":1,"matchId":"{{MatchId}}","queue":{"players":[],"teams":[]},"rotations":{"a":null,"b":null},"rulesVersion":1,"scoring":{"bestOf":3,"pointsPerSet":{{PointsPerSet}},"tieBreakPoints":15,"winMargin":2},"teams":{"a":{"memberIds":["{{teamA}}"]},"b":{"memberIds":["{{teamB}}"]}}}
+        return Envelope("MatchStarted", $$$"""
+            {"firstServer":"a","formationsVersion":1,"matchId":"{{{MatchId}}}","queue":{"players":[],"teams":[]},"rotations":{"a":null,"b":null},"scoring":{"bestOf":3,"pointsPerSet":{{{PointsPerSet}}},"tieBreakPoints":15,"winMargin":2},"teams":{"a":{"memberIds":["{{{teamA}}}"]},"b":{"memberIds":["{{{teamB}}}"]}},"rulesVersion":1}
             """);
     }
 
@@ -48,7 +48,7 @@ internal sealed class CourtPhone(Guid courtSessionId, Guid deviceId, long batch 
     public string Envelope(string type, string payload) => Envelope(Guid.NewGuid(), type, payload.Trim());
 
     public string Envelope(Guid eventId, string type, string payload) =>
-        $$"""{"eventId":"{{eventId}}","courtSessionId":"{{CourtSessionId}}","deviceId":"{{DeviceId}}","batch":{{batch}},"sequence":{{nextSequence++}},"schemaVersion":1,"type":"{{type}}","payload":{{payload}}}""";
+        $$$"""{"eventId":"{{{eventId}}}","courtSessionId":"{{{CourtSessionId}}}","deviceId":"{{{DeviceId}}}","batch":{{{batch}}},"sequence":{{{nextSequence++}}},"payload":{{{payload}}},"schemaVersion":1,"type":"{{{type}}}"}""";
 
     public static string Body(IEnumerable<string> envelopes) => $$"""{"events":[{{string.Join(',', envelopes)}}]}""";
 }

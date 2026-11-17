@@ -254,9 +254,10 @@ public sealed class CourtStreamTests(IntegrationDatabase database) : IAsyncLifet
         using var notAnEnvelope = await world.SendAsync(A.Scorekeeper, HttpMethod.Post, CourtCalls.EventsPath(world, round, phone.CourtSessionId), """{"events":["not-an-envelope"]}""");
         phone.ResumeAt(2);
         using var outsider = await CourtCalls.SendAsync(world, A.Scorekeeper, round, phone, [phone.Point("a"), phone.Envelope("QueueChanged",
-            $$"""{"matchId":"{{phone.MatchId}}","queue":{"players":["{{world.MemberIds[A.OutsiderMember]}}"],"teams":[]}}""")]);
+            $$$"""{"matchId":"{{{phone.MatchId}}}","queue":{"players":["{{{world.MemberIds[A.OutsiderMember]}}}"],"teams":[]}}""")]);
 
-        Assert.Equal(HttpStatusCode.BadRequest, unknown.StatusCode);
+        // An unknown key inside the payload is the payload parser's, in the replay: 422, not the 400 of the envelope.
+        Assert.Equal((HttpStatusCode)StatusCodes.UnprocessableContent, unknown.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, notAnEnvelope.StatusCode);
         Assert.Equal((HttpStatusCode)StatusCodes.UnprocessableContent, outsider.StatusCode);
         string[] forbidden =
