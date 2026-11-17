@@ -1,6 +1,7 @@
 import type { Query } from "@tanstack/react-query";
 
 import { apiContractHash } from "../../api/generated/contract-hash";
+import { apiErrorOf, type ApiErrorKind } from "../api/api-error";
 import type { SacouQueryKey } from "./query-keys";
 
 const MS_PER_DAY = 86_400_000;
@@ -32,16 +33,25 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
   );
 }
 
+/** Failures that say nothing about access: the last answer is still the person's to see. */
+const NETWORK_FAILURES: ReadonlySet<ApiErrorKind> = new Set(["offline", "unavailable"]);
+
+function isNetworkFailure(error: unknown): boolean {
+  const apiError = apiErrorOf(error);
+  return apiError !== null && NETWORK_FAILURES.has(apiError.kind);
+}
+
 /**
- * Only answers that arrived: an error, or a query still loading, is never written. A refetch that fails
+ * Only answers that arrived: a query still loading is never written. A refetch that fails on the network
  * (the app opened with no network still takes itself as online until NetInfo speaks) keeps the last
  * answer in `data` with `status: "error"`: that answer stays on disk, or the failed refetch would write
- * the cache empty and the next offline opening would find nothing.
+ * the cache empty and the next offline opening would find nothing. Any other failure (403, 404, 410, an
+ * expired session) drops it: someone removed from a group must not keep its members and rounds.
  */
 export function shouldPersistQuery(query: Pick<Query, "queryKey" | "state">): boolean {
-  const { status, data } = query.state;
-  const answered = status === "success" || (status === "error" && data !== undefined);
-  return answered && isPersistedKey(query.queryKey);
+  const { status, data, error } = query.state;
+  const keptOnNetworkFailure = status === "error" && data !== undefined && isNetworkFailure(error);
+  return (status === "success" || keptOnNetworkFailure) && isPersistedKey(query.queryKey);
 }
 
 /** A cache written by another version of the app, or against another contract, is dropped (D6). */
