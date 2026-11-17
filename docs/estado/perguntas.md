@@ -149,3 +149,8 @@ Detalhes em `docs/estado/tarefas/E3.7.md` (69 e 70) e `docs/estado/tarefas/E4.7.
 
 ## 17/11/2026: alerta alto no `picomatch` (GHSA-fc5q-39xc-vjpf)
 - **Pergunta:** ReDoS no `picomatch` <=4.0.7, sem versão corrigida, só pelas ferramentas de build e teste (Metro, Jest, mapa de arquivos do Expo; não entra no app). O portão `pnpm audit --audit-level high` reprovava todos os PRs. **Resposta do Gabriel (17/11):** exceção até 31/12/2026, como a do `zod` (ADR 0007), em `scripts/npm-audit-exceptions.json`; sai assim que houver versão corrigida.
+
+## 17/11/2026: E3.8 (Placar assume a quadra), perguntas 74 e 75 (padrões adotados)
+Detalhes em `docs/estado/tarefas/E3.8.md`. Nenhuma trava a Parte 1. Os ADRs ficam assim: 0062 para a E5.3a (limite de requisições) e 0063 para a E3.8.
+74. Quem desfaz pontos marcados antes da troca (lista 3.1, item 6): (1) o Placar que assumiu só desfaz o que entrou depois, e Admin e Co-admin desfazem tudo; (2) só o Admin; (3) sem restrição. **Recomendação e padrão: 1** (um pouco mais aberta que "só o Admin", da revisão do M2). Precisa da resposta antes do merge da E3.8 Parte 2.
+75. "Só olhar" da tela 09a sem placar ao vivo no piloto (vale para a E4.11): (1) mostra o último placar que o servidor recebeu, atualizado ao abrir; (2) só fecha a confirmação. **Recomendação e padrão: 1.**
