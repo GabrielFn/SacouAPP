@@ -1,4 +1,4 @@
-import { displayNamesOf, type DisplayNames, type NamedMember } from "./display-names";
+import { displayNamesOf, type DisplayNames, type NamedMember } from "../../../ui/display-names";
 import type { CourtScreenModel, QueueModel, TeamPanelModel } from "./court-screen.types";
 
 type Teams = CourtScreenModel["teams"];

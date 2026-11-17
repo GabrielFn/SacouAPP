@@ -31,6 +31,9 @@ export const palette = {
   // The "Vou" pill of the round cards (Inicio.dc.html, Grupos.dc.html): pale green, dark green text.
   goingFill: "#E3F3E8",
   goingText: "#0C6B35",
+  // The draw (Sorteio.dc.html): the pale blue of a selected name and the green band of the meter.
+  selectFill: "#E8EEFF",
+  meterBand: "#12A150",
 } as const;
 
 export const nightAlpha = {
@@ -91,6 +94,9 @@ export const fontSizes = {
   displayLevelCard: 28,
   displayLevelBadge: 20,
   levelCaption: 11,
+  // The draw (Sorteio.dc.html): the title, the name of a team card.
+  drawTitle: 29,
+  teamTitle: 22,
 } as const;
 
 export const spacing = {
@@ -118,6 +124,9 @@ export const radii = {
   roleBadge: 13,
   // The top of the light sheet of the login (Login.dc.html:39).
   sheet: 24,
+  // The draw (Sorteio.dc.html .p and the reserves row).
+  playerChip: 10,
+  reservesRow: 14,
 } as const;
 
 export const borderWidths = { thin: 1.5, thick: 2 } as const;
@@ -193,6 +202,14 @@ export const sizes = {
   // Quick profile (Onboarding.dc.html .nv button) and the account (Conta.dc.html, the circle of the G).
   levelOption: 84,
   loginBadge: 24,
+  // The draw (Sorteio.dc.html): the color strip and letter of a team card, the meter and the lock.
+  teamStrip: 8,
+  teamBadge: 26,
+  meterArea: 34,
+  meterTrack: 8,
+  meterMarker: 22,
+  lockIcon: 13,
+  swapIcon: 18,
 } as const;
 
 /**

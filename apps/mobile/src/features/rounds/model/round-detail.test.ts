@@ -204,9 +204,9 @@ describe("one route for every role", () => {
     expect(roleHeader("scorekeeper")).toBe("Você é placar");
   });
 
-  test("with the draw and the court pending there is no footer", () => {
-    expect(PENDING_ROUND_SCREENS).toEqual(["draw", "court"]);
-    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual([]);
+  test("with the draw built (E4.7) only the court is pending: the footer has 'Sortear times'", () => {
+    expect(PENDING_ROUND_SCREENS).toEqual(["court"]);
+    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual(["draw"]);
   });
 
   test("taking 'draw' out of the pending list shows 'Sortear times'", () => {

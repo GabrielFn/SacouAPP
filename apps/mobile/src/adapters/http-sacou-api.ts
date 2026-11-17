@@ -13,6 +13,7 @@ import {
   type AttemptState,
 } from "../services/api/api-policy";
 import { createAccountOperations } from "./http-account-operations";
+import { createDrawOperations } from "./http-draw-operations";
 import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
@@ -294,6 +295,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
+    ...createDrawOperations(client, execute),
     ...createProfileOperations(client, execute),
     ...createAccountOperations(client, execute),
   };

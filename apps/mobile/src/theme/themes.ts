@@ -36,6 +36,9 @@ export const THEME_ROLES = [
   "suggestText",
   "goingFill",
   "goingText",
+  "selectFill",
+  "selectOutline",
+  "meterBand",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -62,6 +65,10 @@ const memberColors = {
   suggestText: palette.suggestText,
   goingFill: palette.goingFill,
   goingText: palette.goingText,
+  // The draw (Sorteio.dc.html): a selected name and the band of the meter.
+  selectFill: palette.selectFill,
+  selectOutline: palette.netBlue,
+  meterBand: palette.meterBand,
 } as const;
 
 /** One ground and its text for the day strip of a round card (Grupos.dc.html .day). */
