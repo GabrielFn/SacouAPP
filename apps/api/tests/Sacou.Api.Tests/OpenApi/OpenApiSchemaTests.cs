@@ -86,7 +86,7 @@ public sealed partial class OpenApiSchemaTests
     }
 
     [Fact]
-    public async Task Signed_in_operations_answer_401_and_503_with_retry_after()
+    public async Task Signed_in_operations_answer_401_and_429_and_503_with_retry_after()
     {
         var document = await ContractDocument.ParsedAsync();
 
@@ -97,7 +97,11 @@ public sealed partial class OpenApiSchemaTests
             var unavailable = OpenApiNodes.Response(operation.Node, "503");
             Assert.Equal(OpenApiNodes.ProblemDetails, OpenApiNodes.ProblemReference(unavailable));
             Assert.NotNull(unavailable["headers"]?["Retry-After"]);
+            var tooMany = OpenApiNodes.Response(operation.Node, "429");
+            Assert.Equal(OpenApiNodes.ProblemDetails, OpenApiNodes.ProblemReference(tooMany));
+            Assert.NotNull(tooMany["headers"]?["Retry-After"]);
         });
+        Assert.Contains("api.rate-limited", document["x-sacou-error-codes"]!.AsArray().Select(code => (string)code!));
     }
 
     [Fact]
