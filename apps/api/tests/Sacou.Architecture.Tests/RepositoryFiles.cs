@@ -37,6 +37,7 @@ internal static partial class RepositoryFiles
         "packages/volley-rules/golden/overlap.json",
         "packages/volley-rules/golden/player-card-level.json",
         "packages/volley-rules/golden/draw-balance.json",
+        "packages/volley-rules/golden/draw-split.json",
         "packages/volley-rules/golden/pix.json",
         "packages/volley-rules/golden/pix-crc.json",
         "packages/match-engine/golden/event-log.json",
