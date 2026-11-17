@@ -181,6 +181,16 @@ describe("the allow list of the persisted cache (P6)", () => {
     },
   );
 
+  test("an error that kept its last answer is written only for an allowed key", () => {
+    const client = new QueryClient();
+    const allowed = client.getQueryCache().build(client, { queryKey: queryKeys.groups() });
+    allowed.setState({ status: "error", data: [] });
+    expect(shouldPersistQuery(allowed)).toBe(true);
+    const denied = client.getQueryCache().build(client, { queryKey: queryKeys.me() });
+    denied.setState({ status: "error", data: {} });
+    expect(shouldPersistQuery(denied)).toBe(false);
+  });
+
   test("the buster joins the app version and the contract", () => {
     expect(cacheBuster("1.2.3")).toMatch(/^1\.2\.3\+[0-9a-f]{16}$/);
   });
