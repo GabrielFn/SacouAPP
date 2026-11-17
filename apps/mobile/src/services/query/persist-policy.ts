@@ -32,9 +32,16 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
   );
 }
 
-/** Only answers that arrived: an error, or a query still loading, is never written. */
+/**
+ * Only answers that arrived: an error, or a query still loading, is never written. A refetch that fails
+ * (the app opened with no network still takes itself as online until NetInfo speaks) keeps the last
+ * answer in `data` with `status: "error"`: that answer stays on disk, or the failed refetch would write
+ * the cache empty and the next offline opening would find nothing.
+ */
 export function shouldPersistQuery(query: Pick<Query, "queryKey" | "state">): boolean {
-  return query.state.status === "success" && isPersistedKey(query.queryKey);
+  const { status, data } = query.state;
+  const answered = status === "success" || (status === "error" && data !== undefined);
+  return answered && isPersistedKey(query.queryKey);
 }
 
 /** A cache written by another version of the app, or against another contract, is dropped (D6). */
