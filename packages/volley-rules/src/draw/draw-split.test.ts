@@ -15,9 +15,7 @@ interface DrawSplitGoldenCase {
 
 // The same file the C# `DrawSplitGoldenTests` reads: "Montar times" splits as the server draws.
 const GOLDEN_URL = new URL("../../golden/draw-split.json", import.meta.url);
-const GOLDEN_CASES = JSON.parse(
-  readFileSync(GOLDEN_URL, "utf8"),
-) as readonly DrawSplitGoldenCase[];
+const GOLDEN_CASES = JSON.parse(readFileSync(GOLDEN_URL, "utf8")) as readonly DrawSplitGoldenCase[];
 
 /** Arrival positions 1..n, as the golden names the players. */
 function arrivals(count: number): readonly number[] {
@@ -36,7 +34,13 @@ describe("splitByArrival", () => {
 
   test("keeps the players as given, in order", () => {
     expect(splitByArrival(["Ana", "João", "Pedro", "Lia", "Bia"], 2)).toEqual(
-      ok({ teams: [["Ana", "João"], ["Pedro", "Lia"]], reserves: ["Bia"] }),
+      ok({
+        teams: [
+          ["Ana", "João"],
+          ["Pedro", "Lia"],
+        ],
+        reserves: ["Bia"],
+      }),
     );
   });
 

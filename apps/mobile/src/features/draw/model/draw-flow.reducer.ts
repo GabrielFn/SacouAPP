@@ -127,12 +127,35 @@ function manualTeams(state: DrawFlowState, action: ManualTeamsAction): DrawFlowS
   return state.arrangement === null ? { ...cleared, arrangement: action.arrangement } : state;
 }
 
-export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
-  if (isPreGameAction(action)) return preGameReducer(state, action);
-  if (isManualTeamsAction(action)) return manualTeams(state, action);
+type TapAction = Extract<
+  DrawFlowAction,
+  {
+    type:
+      | "player-tapped"
+      | "swap-mode-chosen"
+      | "lock-mode-chosen"
+      | "unlock-chosen"
+      | "selection-cleared"
+      | "lock-undone";
+  }
+>;
+
+const TAP_ACTION_TYPES: readonly DrawFlowAction["type"][] = [
+  "player-tapped",
+  "swap-mode-chosen",
+  "lock-mode-chosen",
+  "unlock-chosen",
+  "selection-cleared",
+  "lock-undone",
+];
+
+/** The swaps and locks: the taps on names and the mode buttons. */
+function isTapAction(action: DrawFlowAction): action is TapAction {
+  return TAP_ACTION_TYPES.includes(action.type);
+}
+
+function tapReducer(state: DrawFlowState, action: TapAction): DrawFlowState {
   switch (action.type) {
-    case "drawn":
-      return drawn(state, action.answer);
     case "player-tapped":
       return playerTapped(state, action.memberId);
     case "swap-mode-chosen":
@@ -143,10 +166,20 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
       return unlockChosen(state);
     case "selection-cleared":
       return { ...state, selection: null, notice: null };
-    case "offline-refused":
-      return { ...state, notice: { kind: "offline" } };
     case "lock-undone":
       return { ...state, locks: state.locks.filter((lock) => !sameLock(lock, action.lock)) };
+  }
+}
+
+export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
+  if (isPreGameAction(action)) return preGameReducer(state, action);
+  if (isManualTeamsAction(action)) return manualTeams(state, action);
+  if (isTapAction(action)) return tapReducer(state, action);
+  switch (action.type) {
+    case "drawn":
+      return drawn(state, action.answer);
+    case "offline-refused":
+      return { ...state, notice: { kind: "offline" } };
   }
 }
 

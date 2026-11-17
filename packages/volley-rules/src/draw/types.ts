@@ -22,5 +22,4 @@ export interface DrawSplit<T> {
 
 /** Fewer than 4 players, or a team size that is not a positive whole number. */
 export type DrawSplitError =
-  | { readonly code: "not-enough-players" }
-  | { readonly code: "invalid-size" };
+  { readonly code: "not-enough-players" } | { readonly code: "invalid-size" };
