@@ -24,13 +24,6 @@ export interface DrawScreenProps {
   readonly roundId: string;
 }
 
-const BLOCKER_TEXTS: Readonly<Record<DrawBlocker, string>> = {
-  forbidden: draw.blocked.forbidden,
-  canceled: draw.blocked.canceled,
-  disabled: draw.blocked.disabled,
-  "not-enough": draw.blocked.notEnough,
-};
-
 interface StateTexts {
   readonly body: string;
   readonly actions: readonly ScreenAction[];
@@ -43,15 +36,18 @@ interface StateActions {
 }
 
 function blockedTexts(blocker: DrawBlocker, actions: StateActions): StateTexts {
-  const body = BLOCKER_TEXTS[blocker];
   switch (blocker) {
     case "canceled":
-      return { body, actions: [] };
+      return { body: draw.blocked.canceled, actions: [] };
     case "disabled":
-      return { body, actions: actions.settings === null ? [actions.back] : [actions.settings] };
+      return {
+        body: draw.blocked.disabled,
+        actions: actions.settings === null ? [actions.back] : [actions.settings],
+      };
     case "forbidden":
+      return { body: draw.blocked.forbidden, actions: [{ ...actions.back, label: draw.back }] };
     case "not-enough":
-      return { body, actions: [actions.back] };
+      return { body: draw.blocked.notEnough, actions: [actions.back] };
   }
 }
 
@@ -90,7 +86,12 @@ function useStateActions(groupId: string, roundId: string, role: GroupRole): Sta
     },
     retry: { label: draw.retry, variant: "secondary", onPress: () => undefined },
     settings: canManageSettings(role)
-      ? { label: draw.openSettings, onPress: () => { go(groupSettingsHref(groupId)); } }
+      ? {
+          label: draw.openSettings,
+          onPress: () => {
+            go(groupSettingsHref(groupId));
+          },
+        }
       : null,
   };
 }
@@ -116,7 +117,10 @@ export function DrawScreen({ groupId, roundId }: DrawScreenProps) {
       />
     );
   }
-  const texts = stateTexts(screen, { ...actions, retry: { ...actions.retry, onPress: model.retry } });
+  const texts = stateTexts(screen, {
+    ...actions,
+    retry: { ...actions.retry, onPress: model.retry },
+  });
   return (
     <Screen>
       <DrawHeader header={header} title={draw.blocked.title} backHref={backHref} />

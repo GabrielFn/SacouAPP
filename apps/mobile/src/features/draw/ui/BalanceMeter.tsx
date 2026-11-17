@@ -5,7 +5,7 @@ import { useTheme } from "../../../theme/theme-context";
 import { CheckIcon, WarningIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import type { MeterView } from "../model/draw-meter";
-import { teamSwatch } from "./DrawTeamCard";
+import { teamSwatch } from "./team-swatch";
 
 const HALF = 2;
 

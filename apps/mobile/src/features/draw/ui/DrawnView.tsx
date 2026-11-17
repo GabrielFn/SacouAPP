@@ -38,14 +38,18 @@ export interface DrawnViewProps {
   readonly backHref: Href;
 }
 
+export interface DrawStripsProps {
+  readonly model: DrawScreenModel;
+  readonly arrangement: DrawArrangement;
+  readonly round: Round;
+}
+
 /** The strips over the teams: who left or arrived since the draw, the refused draw, the local notice. */
-function DrawStrips({ model, arrangement, round }: Omit<DrawnViewProps, "header" | "backHref">) {
+function DrawStrips({ model, arrangement, round }: DrawStripsProps) {
   const stale = staleDraw(arrangement, round);
   const [firstLeft] = stale.left;
   const refusal =
-    model.error !== null && blockerOfError(model.error) === null
-      ? errorTextOf(model.error)
-      : null;
+    model.error !== null && blockerOfError(model.error) === null ? errorTextOf(model.error) : null;
   const notice = noticeText(model.state.notice, model.nameOf);
   return (
     <>

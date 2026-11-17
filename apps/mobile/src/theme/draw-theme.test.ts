@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { contrastRatio } from "./contrast";
-import { createScaledTokens } from "./scale";
+import { createScaledTokens, scaleFactor } from "./scale";
 import { TEAM_PALETTES } from "./team-colors";
 import { appTheme } from "./themes";
 import { accessibilityFloors, canvasWidth, palette } from "./tokens.data";
@@ -42,17 +42,21 @@ describe("the colors of the draw (screen 07) reach AA", () => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_GRAPHIC);
   });
 
-  it.each(WIDTHS)("keeps the touch floor of the names and the footer at width %s", (windowWidth) => {
-    const { sizes } = createScaledTokens({ windowWidth, fontScale: 2 });
-    expect(sizes.minTouchTarget).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
-    expect(sizes.field).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
-    expect(sizes.primaryButton).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
-  });
+  it.each(WIDTHS)(
+    "keeps the touch floor of the names and the footer at width %s",
+    (windowWidth) => {
+      const { sizes } = createScaledTokens({ windowWidth, fontScale: 2 });
+      expect(sizes.minTouchTarget).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+      expect(sizes.field).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+      expect(sizes.primaryButton).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+    },
+  );
 
   it.each(WIDTHS)("scales the draw tokens with the window at width %s", (windowWidth) => {
     const { sizes, fontSizes } = createScaledTokens({ windowWidth, fontScale: 1 });
-    const factor = windowWidth / canvasWidth;
-    expect(sizes.teamBadge).toBeGreaterThan(0);
-    expect(fontSizes.drawTitle).toBeGreaterThanOrEqual(Math.floor(29 * Math.max(factor, 0.85)) - 1);
+    const factor = scaleFactor(windowWidth);
+    expect(sizes.teamBadge).toBe(Math.round(26 * factor));
+    expect(sizes.meterMarker).toBe(Math.round(22 * factor));
+    expect(fontSizes.drawTitle).toBe(Math.round(29 * factor));
   });
 });

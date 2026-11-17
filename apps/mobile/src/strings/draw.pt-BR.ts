@@ -78,7 +78,6 @@ export const drawStrings = {
     // "4" is DrawLimits.MinPlayers in apps/api/src/Sacou.Modules/Sessions/Domain/Draw/DrawLimits.cs.
     notEnough: "Precisa de pelo menos 4 confirmados para sortear.",
     disabled: "O sorteio está desligado nesta rodada.",
-    disabledBody: "Ligue o sorteio nos ajustes do grupo para montar os times.",
     offline: "Sem conexão. O sorteio precisa de internet.",
     failed: "Não deu para sortear os times.",
     title: "Sorteio dos times",

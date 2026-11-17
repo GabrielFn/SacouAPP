@@ -111,10 +111,7 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
 }
 
 /** The lock the last tap added across two teams: it needs a new draw with the locks (D3, D5). */
-export function lockAcrossTeams(
-  before: DrawFlowState,
-  after: DrawFlowState,
-): DrawLock | null {
+export function lockAcrossTeams(before: DrawFlowState, after: DrawFlowState): DrawLock | null {
   if (after.arrangement === null || after.locks.length <= before.locks.length) return null;
   const added = after.locks.find((lock) => !before.locks.includes(lock));
   return added === undefined || sameTeam(after.arrangement, added) ? null : added;

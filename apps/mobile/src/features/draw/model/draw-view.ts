@@ -35,10 +35,13 @@ export interface TeamCardView {
 interface ChipInput {
   readonly state: DrawFlowState;
   readonly arrangement: DrawArrangement;
-  readonly nameOf: DrawNameOf;
 }
 
-function chipOf({ state, arrangement, nameOf }: ChipInput, memberId: MemberId, label: string) {
+function chipOf(
+  { state, arrangement }: ChipInput,
+  memberId: MemberId,
+  label: string,
+): PlayerChipView {
   const level = formatLevel(arrangement.levels.get(memberId) ?? 0);
   const locked = isLocked(state.locks, memberId);
   const lockedSuffix = locked ? drawStrings.player.lockedSuffix : "";
@@ -62,7 +65,7 @@ export function teamCards(
   arrangement: DrawArrangement,
   nameOf: DrawNameOf,
 ): readonly TeamCardView[] {
-  const input = { state, arrangement, nameOf };
+  const input = { state, arrangement };
   return arrangement.teams.map((members, index) => ({
     team: teamIdentity(index),
     level: teamLevel(arrangement, members),
@@ -76,7 +79,7 @@ export function reserveChips(
   arrangement: DrawArrangement,
   nameOf: DrawNameOf,
 ): readonly PlayerChipView[] {
-  const input = { state, arrangement, nameOf };
+  const input = { state, arrangement };
   return arrangement.reserves.map((memberId, index) =>
     chipOf(input, memberId, drawStrings.reserve(index + 1, nameOf(memberId))),
   );

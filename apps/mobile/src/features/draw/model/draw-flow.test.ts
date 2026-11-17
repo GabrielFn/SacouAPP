@@ -163,7 +163,10 @@ describe("player-tapped in lock mode", () => {
     const after = lockPair(full, "duda", "rafa");
     expect(after.locks).toHaveLength(MAX_DRAW_LOCKS);
     expect(noticeText(after.notice, nameOf)).toBe("Dá para travar até 24 duplas.");
-    expect(drawRequest({ ...full, locks: [...locks, locks[0] ?? { first: "", second: "" }] }, g1Round()).ok).toBe(false);
+    expect(
+      drawRequest({ ...full, locks: [...locks, locks[0] ?? { first: "", second: "" }] }, g1Round())
+        .ok,
+    ).toBe(false);
   });
 
   test("selecting a locked member turns the button into Destravar, which takes all its locks", () => {

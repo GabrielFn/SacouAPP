@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import type { ApiErrorCode } from "../../../api/generated/error-codes";
 import { ApiFailure } from "../../../services/api/api-error";
 import type { GroupRole } from "../../../services/api/sacou-api";
 import { canDraw } from "./can-draw";
@@ -7,11 +8,7 @@ import { arrangementOf, type DrawArrangement } from "./draw-arrangement";
 import { meterAxis, meterLabel, meterView } from "./draw-meter";
 import { drawNamesOf } from "./draw-names";
 import { staleDraw } from "./draw-request";
-import {
-  drawScreenState,
-  shouldDrawFirst,
-  type DrawScreenInput,
-} from "./draw-screen-state";
+import { drawScreenState, shouldDrawFirst, type DrawScreenInput } from "./draw-screen-state";
 import { drawShareText } from "./draw-share-text";
 import { drawTitle, reserveChips, teamCards } from "./draw-view";
 import {
@@ -24,12 +21,13 @@ import {
   G1_ORDER,
   tap,
 } from "./draw.test.fixture";
+import { memberOf } from "../../rounds/model/attendance.test.fixture";
 
 const nameOf = drawNamesOf(g1Members());
 const g1 = arrangementOf(G1_ANSWER);
 
-function problem(status: number, code: string): ApiFailure {
-  return new ApiFailure({ kind: "problem", status, code } as never);
+function problem(status: number, code: ApiErrorCode): ApiFailure {
+  return new ApiFailure({ kind: "problem", status, code });
 }
 
 function input(patch: Partial<DrawScreenInput> = {}, role: GroupRole = "admin"): DrawScreenInput {
@@ -75,7 +73,14 @@ describe("the label and the axis of the meter (question 55, D5)", () => {
 
   test("with three teams the markers are only the highest and the lowest", () => {
     const three = arrangementOf(
-      drawAnswer([["lia", "bia"], ["ana", "joao"], ["marcos", "leo"]], []),
+      drawAnswer(
+        [
+          ["lia", "bia"],
+          ["ana", "joao"],
+          ["marcos", "leo"],
+        ],
+        [],
+      ),
     );
     const meter = meterView(three);
     expect(meter?.markers.map((marker) => marker.team.letter)).toEqual(["B", "C"]);
@@ -105,10 +110,7 @@ describe("the cards (D4)", () => {
 
   test("12 in 4x4 make three cards, the third neutral, no reserves", () => {
     const twelve = arrangementOf(
-      drawAnswer(
-        [G1_ORDER.slice(0, 4), G1_ORDER.slice(4, 8), G1_ORDER.slice(8, 12)],
-        [],
-      ),
+      drawAnswer([G1_ORDER.slice(0, 4), G1_ORDER.slice(4, 8), G1_ORDER.slice(8, 12)], []),
     );
     const cards = teamCards(drawnG1(), twelve, nameOf);
     expect(cards.map((card) => card.team.name)).toEqual(["Laranja", "Azul", "Time 3"]);
@@ -129,8 +131,8 @@ describe("the cards (D4)", () => {
   test("two who share a first name are told apart; no nickname is Sem apelido", () => {
     const names = drawNamesOf([
       ...g1Members(),
-      { ...g1Members()[0], memberId: "ana-c", nickname: "Ana Clara" } as never,
-      { ...g1Members()[0], memberId: "nobody", nickname: null } as never,
+      memberOf("ana-c", "Ana Clara"),
+      memberOf("nobody", null),
     ]);
     expect(names("ana-c")).toBe("Ana C.");
     expect(names("nobody")).toBe("Sem apelido");
@@ -175,7 +177,11 @@ describe("the states of screen 07, one per row of D4", () => {
 
   test("a canceled round has no actions to give", () => {
     const canceled = input({
-      loaded: { role: "admin", round: g1Round(G1_ORDER, { status: "canceled" }), settings: drawSettings() },
+      loaded: {
+        role: "admin",
+        round: g1Round(G1_ORDER, { status: "canceled" }),
+        settings: drawSettings(),
+      },
     });
     expect(drawScreenState(canceled)).toEqual({ kind: "blocked", blocker: "canceled" });
   });
@@ -201,7 +207,10 @@ describe("the states of screen 07, one per row of D4", () => {
   });
 
   test("a redraw refused for a lock keeps the teams", () => {
-    const refused = input({ arrangement: g1, error: problem(400, "sessions.draw-locks-unsatisfiable") });
+    const refused = input({
+      arrangement: g1,
+      error: problem(400, "sessions.draw-locks-unsatisfiable"),
+    });
     expect(drawScreenState(refused)).toEqual({ kind: "drawn", arrangement: g1 });
   });
 

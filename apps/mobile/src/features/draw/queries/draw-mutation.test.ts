@@ -22,8 +22,14 @@ function setup() {
 }
 
 function everythingIn(client: QueryClient): string {
-  const queries = client.getQueryCache().getAll().map((query) => [query.queryKey, query.state]);
-  const mutations = client.getMutationCache().getAll().map((mutation) => mutation.state);
+  const queries = client
+    .getQueryCache()
+    .getAll()
+    .map((query) => [query.queryKey, query.state]);
+  const mutations = client
+    .getMutationCache()
+    .getAll()
+    .map((mutation) => mutation.state);
   return JSON.stringify({ queries, mutations });
 }
 

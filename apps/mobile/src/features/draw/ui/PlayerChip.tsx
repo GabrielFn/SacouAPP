@@ -1,9 +1,43 @@
 import { Pressable, View } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
+import type { Theme } from "../../../theme/themes";
 import { Text } from "../../../ui/Text";
 import type { PlayerChipView } from "../model/draw-view";
 import { ChipLockIcon } from "./DrawIcons";
+
+interface ChipLook {
+  readonly ground: string;
+  readonly foreground: string;
+  readonly muted: string;
+  readonly lock: string;
+}
+
+/** Selected wins over locked: the pale blue with navy text; locked alone is navy with sand text. */
+function chipLook(chip: PlayerChipView, colors: Theme): ChipLook {
+  if (chip.selected) {
+    return {
+      ground: colors.selectFill,
+      foreground: colors.text,
+      muted: colors.textMuted,
+      lock: colors.text,
+    };
+  }
+  if (chip.locked) {
+    return {
+      ground: colors.panelSurface,
+      foreground: colors.onPanel,
+      muted: colors.onPanel,
+      lock: colors.panelAccent,
+    };
+  }
+  return {
+    ground: colors.background,
+    foreground: colors.text,
+    muted: colors.textMuted,
+    lock: colors.text,
+  };
+}
 
 export interface PlayerChipProps {
   readonly chip: PlayerChipView;
@@ -17,13 +51,7 @@ export interface PlayerChipProps {
  */
 export function PlayerChip({ chip, disabled, onPress }: PlayerChipProps) {
   const { colors, tokens } = useTheme();
-  const ground = chip.selected
-    ? colors.selectFill
-    : chip.locked
-      ? colors.panelSurface
-      : colors.background;
-  const foreground = chip.locked && !chip.selected ? colors.onPanel : colors.text;
-  const muted = chip.locked && !chip.selected ? colors.onPanel : colors.textMuted;
+  const look = chipLook(chip, colors);
   return (
     <Pressable
       accessibilityRole="button"
@@ -37,7 +65,7 @@ export function PlayerChip({ chip, disabled, onPress }: PlayerChipProps) {
         flex: 1,
         minHeight: tokens.sizes.minTouchTarget,
         borderRadius: tokens.radii.playerChip,
-        backgroundColor: ground,
+        backgroundColor: look.ground,
         borderWidth: chip.selected ? tokens.borderWidths.thick : undefined,
         borderColor: colors.selectOutline,
         paddingHorizontal: tokens.spacing.s,
@@ -47,15 +75,20 @@ export function PlayerChip({ chip, disabled, onPress }: PlayerChipProps) {
         gap: tokens.spacing.xs,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.xs, flexShrink: 1 }}>
-        {chip.locked ? (
-          <ChipLockIcon color={chip.selected ? colors.text : colors.panelAccent} />
-        ) : null}
-        <Text variant="bodyStrong" style={{ color: foreground, flexShrink: 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: tokens.spacing.xs,
+          flexShrink: 1,
+        }}
+      >
+        {chip.locked ? <ChipLockIcon color={look.lock} /> : null}
+        <Text variant="bodyStrong" style={{ color: look.foreground, flexShrink: 1 }}>
           {chip.label}
         </Text>
       </View>
-      <Text variant="caption" tabular style={{ color: muted }}>
+      <Text variant="caption" tabular style={{ color: look.muted }}>
         {chip.level}
       </Text>
     </Pressable>

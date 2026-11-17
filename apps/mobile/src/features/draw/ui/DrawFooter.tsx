@@ -102,11 +102,7 @@ export function DrawFooter(props: DrawFooterProps) {
           onPress={props.onRedraw}
         />
       </View>
-      <Button
-        label={draw.confirm}
-        disabled={busy || !props.canConfirm}
-        onPress={props.onConfirm}
-      />
+      <Button label={draw.confirm} disabled={busy || !props.canConfirm} onPress={props.onConfirm} />
     </>
   );
 }
