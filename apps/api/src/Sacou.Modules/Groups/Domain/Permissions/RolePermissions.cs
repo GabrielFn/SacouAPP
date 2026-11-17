@@ -25,7 +25,11 @@ internal static class RolePermissions
         GroupPermission.ManageMemberLevels,
         GroupPermission.ManageGuests,
         GroupPermission.DrawTeams,
+        GroupPermission.WriteCourt,
     ]);
+
+    /// <summary>The scorekeeper marks the court on the phone (ADR 0046, decision 2) and nothing else of the day to day.</summary>
+    private static readonly ImmutableHashSet<GroupPermission> Scorekeeping = EveryMember.Add(GroupPermission.WriteCourt);
 
     private static readonly ImmutableHashSet<GroupPermission> Everything = DayToDay.Union(
         [GroupPermission.AssignAdminRole, GroupPermission.RemoveAdmin]);
@@ -34,7 +38,7 @@ internal static class RolePermissions
         ImmutableDictionary<GroupRole, ImmutableHashSet<GroupPermission>>.Empty
             .Add(GroupRole.Admin, Everything)
             .Add(GroupRole.CoAdmin, DayToDay)
-            .Add(GroupRole.Scorekeeper, EveryMember)
+            .Add(GroupRole.Scorekeeper, Scorekeeping)
             .Add(GroupRole.Player, EveryMember);
 
     public static bool Allows(GroupRole role, GroupPermission permission) =>

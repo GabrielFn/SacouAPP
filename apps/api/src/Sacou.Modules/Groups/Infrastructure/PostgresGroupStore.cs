@@ -68,6 +68,23 @@ internal sealed partial class PostgresGroupStore(GroupsDbContext database) : IGr
         return row is null ? null : RowMapping.ToMember(row);
     }
 
+    public async Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(
+        GroupId group, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(memberIds);
+        if (memberIds.Count == 0)
+        {
+            return new HashSet<Guid>();
+        }
+
+        // EF sends the ids as one array parameter: id = ANY (@ids).
+        var found = await database.Members.AsNoTracking()
+            .Where(member => member.GroupId == group.Value && memberIds.Contains(member.Id))
+            .Select(member => member.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return found.ToHashSet();
+    }
+
     public async Task<GroupOverview?> FindOverviewAsync(GroupId group, CancellationToken cancellationToken)
     {
         var active = ColumnValues.ActiveStatus;

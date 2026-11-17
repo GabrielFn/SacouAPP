@@ -69,6 +69,10 @@ internal sealed class FakeGroupStore : IGroupStore
     public Task<GroupOverview?> FindOverviewAsync(GroupId group, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 
+    public Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(
+        GroupId group, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken) =>
+        throw new NotSupportedException();
+
     public Task<IReadOnlyList<GroupMember>> ListActiveMembersAsync(GroupId group, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 

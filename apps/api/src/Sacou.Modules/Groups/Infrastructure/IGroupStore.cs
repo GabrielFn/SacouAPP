@@ -71,6 +71,9 @@ internal interface IGroupStore
     /// <summary>The person's active member in that group, or null for a missing group, a non-member, a left or a removed member.</summary>
     Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken);
 
+    /// <summary>The ids among <paramref name="memberIds"/> with a member row in the group, any status, in one query.</summary>
+    Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(GroupId group, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken);
+
     Task<GroupOverview?> FindOverviewAsync(GroupId group, CancellationToken cancellationToken);
 
     /// <summary>Active members only, in the order they joined.</summary>

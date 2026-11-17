@@ -45,8 +45,9 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `ManageMemberLevels` (ver e dar a nota de cada membro e ver a sugestão dele; E3.17, [perfil-e-nota.md](perfil-e-nota.md)) | sim | sim | não | não |
 | `ManageGuests` (adicionar e corrigir convidado sem conta; E3.5) | sim | sim | não | não |
 | `DrawTeams` (sortear os times da rodada, vendo as notas; E3.6, [sorteio.md](sorteio.md)) | sim | sim | não | não |
+| `WriteCourt` (escrever o stream da quadra da rodada, todos os tipos de evento, inclusive o fim manual; E3.7, [ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)) | sim | sim | sim | não |
 
-\* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o que ele faz na quadra é da E3.7 e da E3.8.
+\* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o único a mais é escrever a quadra (`WriteCourt`, E3.7); assumir a quadra é da E3.8.
 
 **Quem não é membro** (nunca entrou, saiu ou foi removido) recebe sempre o mesmo 404 de um grupo que não existe, em toda rota do grupo. Membro sem a permissão recebe 403.
 
