@@ -19,6 +19,10 @@ export interface LevelOptionProps {
   readonly onPick: (level: number) => void;
 }
 
+/** The cards of screen 27 are narrow: a long word ("aprendendo") shrinks to fit instead of breaking in the middle. */
+const LEVEL_TEXT_MIN_SCALE = 0.6;
+const LEVEL_TEXT_MAX_LINES = 3;
+
 function LevelOption({ option, selected, onPick }: LevelOptionProps) {
   const { colors, tokens } = useTheme();
   const { level, text } = option;
@@ -40,6 +44,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         alignItems: "center",
         paddingTop: tokens.spacing.s,
         paddingBottom: tokens.spacing.s6,
+        paddingHorizontal: tokens.spacing.xs,
         gap: tokens.spacing.xs,
       }}
     >
@@ -47,9 +52,12 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         {String(level)}
       </Text>
       <Text
+        adjustsFontSizeToFit
+        minimumFontScale={LEVEL_TEXT_MIN_SCALE}
+        numberOfLines={LEVEL_TEXT_MAX_LINES}
         variant={selected ? "bodyStrong" : "muted"}
         style={{
-          fontSize: tokens.fontSizes.levelOptionText,
+          fontSize: tokens.fontSizes.caption,
           textAlign: "center",
           color: selected ? colors.onPrimary : colors.textMuted,
         }}

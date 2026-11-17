@@ -91,8 +91,6 @@ export const fontSizes = {
   displayLevelCard: 28,
   displayLevelBadge: 20,
   levelCaption: 11,
-  // The five level cards of screen 27 are ~55 wide on a 360 screen: "aprendendo" must fit in one piece.
-  levelOptionText: 10,
 } as const;
 
 export const spacing = {

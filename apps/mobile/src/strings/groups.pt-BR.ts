@@ -33,7 +33,7 @@ export const groupsStrings = {
   },
   home: {
     greeting: "Fala!",
-    greetingNamed: (nickname: string) => `Fala, ${nickname}!`,
+    greetingNamed: (nickname: string) => `Fala, ${nickname}.`,
     noRoundsTitle: "Nenhuma rodada marcada.",
     noRoundsBody: "Quando o organizador abrir a lista, ela aparece aqui.",
     seeGroups: "Ver seus grupos",

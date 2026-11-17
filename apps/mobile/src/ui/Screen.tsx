@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,8 +25,6 @@ export function Screen({
 }: ScreenProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
-  // The measured height of the fixed footer: the last of the content can always scroll clear of it.
-  const [footerHeight, setFooterHeight] = useState(0);
   const content = {
     paddingTop: insets.top + tokens.spacing.xl,
     paddingBottom: (aboveTabBar || footer ? 0 : insets.bottom) + tokens.spacing.xl,
@@ -48,19 +46,12 @@ export function Screen({
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{
-            ...content,
-            paddingBottom: content.paddingBottom + footerHeight,
-            alignItems: centered,
-          }}
+          contentContainerStyle={{ ...content, alignItems: centered }}
           keyboardShouldPersistTaps="handled"
         >
           {body}
         </ScrollView>
         <View
-          onLayout={(event) => {
-            setFooterHeight(event.nativeEvent.layout.height);
-          }}
           style={{
             paddingLeft: insets.left + tokens.spacing.xl,
             paddingRight: insets.right + tokens.spacing.xl,
