@@ -98,7 +98,7 @@ function withTheRest(team: readonly MemberId[], seats: Seats): Seats {
   ).lineup;
 }
 
-export type DefaultLineupError = "wrong-team-size";
+export type DefaultLineupError = "wrong-team-size" | "duplicate-member";
 
 function allSeated(seats: Seats): readonly MemberId[] | null {
   const seated = seats.filter((seat): seat is MemberId => seat !== null);
@@ -116,6 +116,8 @@ export function defaultLineup(
   positionOf: PositionOf,
 ): Result<readonly MemberId[], DefaultLineupError> {
   if (team.length !== ROTATION_SLOTS.length) return err("wrong-team-size");
+  // A drawn team has each member once: a repeat would put one person in two seats.
+  if (new Set(team).size !== team.length) return err("duplicate-member");
   if (system === "livre") return ok(team);
   const seats = byPosition(team, SLOTS_OF[system], positionOf);
   const lineup = allSeated(withTheRest(team, withStandInSetter(team, system, seats, positionOf)));
