@@ -91,4 +91,41 @@ export const drawStrings = {
     reserves: (names: readonly string[]) =>
       `Reservas: ${names.map((name, index) => `${String(index + 1)} ${name}`).join(", ")}`,
   },
+  /** Sheet 08, the pre-game (PreJogo.dc.html). "6x0" and the "Pro" badges are out (D9). */
+  preGame: {
+    sheetLabel: "Configurar partida",
+    title: (number: number) => `Partida ${String(number)}`,
+    close: "Fechar",
+    versus: "x",
+    points: "Pontos por set",
+    lessPoints: "Menos pontos",
+    morePoints: "Mais pontos",
+    sets: "Sets",
+    bestOf: { one: "1 set", three: "Melhor de 3", five: "Melhor de 5" },
+    tieBreak: (points: number) => `Tie-break: ${String(points)} pontos`,
+    firstServer: "Saca primeiro",
+    /** "A · João": who stands in zone 1, or the team name without rotation. */
+    serverOption: (letter: string, name: string) => `${letter} · ${name}`,
+    flip: "Sortear",
+    rotation: "Rotação de cada time",
+    /** "Laranja · 5x1". */
+    rotationTab: (team: string, system: string) => `${team} · ${system}`,
+    rotationGroup: (team: string) => `Sistema de rotação do ${team}`,
+    systems: { livre: "Livre", "4x2": "4x2", "5x1": "5x1", "6x2": "6x2" },
+    oneSetter: (team: string, name: string, zone: number) =>
+      `Levantador do ${team}: ${name}, começa na posição ${String(zone)}`,
+    twoSetters: (first: string, second: string) => `Levantadores: ${first} e ${second}`,
+    noSetter: (name: string, zone: number) =>
+      `Sem levantador fixo. ${name} começa na posição ${String(zone)}.`,
+    fullTeam: (team: string, size: number) => `${team} tem ${String(size)}, sem banco.`,
+    noRotation: (team: string, size: number) => `${team} tem ${String(size)}: sem rotação.`,
+    start: "Começar partida",
+    starting: "Abrindo a quadra…",
+    blocked: {
+      stale: "A lista mudou depois do sorteio. Sorteie de novo.",
+      openMatch: "Termine a partida aberta antes.",
+      otherRound: "Há uma partida aberta em outra rodada. Encerre-a antes.",
+      failed: "Não deu para começar a partida. Tente de novo.",
+    },
+  },
 } as const;

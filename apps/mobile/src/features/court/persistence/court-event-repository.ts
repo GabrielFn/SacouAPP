@@ -22,6 +22,7 @@ import {
   SELECT_EVENTS,
   SELECT_MAX_POSITION,
   SELECT_MAX_SEQUENCE,
+  SELECT_OPEN_SESSION_OF_ROUND,
   SELECT_SESSION,
   UPDATE_SESSION_STATUS,
 } from "./court-queries.data";
@@ -147,14 +148,25 @@ async function setStatus(
 export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerator): CourtEventLog {
   return {
     getDeviceId: () => guarded(() => database.transaction((tx) => readOrCreateDeviceId(tx, ids))),
-    openSession: (courtSessionId) =>
+    openSession: (courtSessionId, origin) =>
       guarded(async () => {
-        await database.run(INSERT_SESSION, [courtSessionId, OPEN_STATUS, FIRST_BATCH]);
+        await database.run(INSERT_SESSION, [
+          courtSessionId,
+          OPEN_STATUS,
+          FIRST_BATCH,
+          origin?.groupId ?? null,
+          origin?.roundId ?? null,
+        ]);
         return ok(undefined);
       }),
     findActiveSession: () =>
       guarded(async () => {
         const [row] = await database.getAll(SELECT_ACTIVE_SESSION, [OPEN_STATUS]);
+        return ok(readTextColumn(row, "court_session_id"));
+      }),
+    findOpenSessionOfRound: (roundId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_OPEN_SESSION_OF_ROUND, [OPEN_STATUS, roundId]);
         return ok(readTextColumn(row, "court_session_id"));
       }),
     closeSession: (courtSessionId) =>
