@@ -15,7 +15,6 @@ import {
   canSubmit,
   isRetryDisabled,
   isSubmitDisabled,
-  createGroupErrors,
   visibleCreateGroupErrors,
   createGroupPatch,
   hasPatch,
