@@ -34,7 +34,11 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
 }
 
 /** Failures that say nothing about access (a 429 neither, ADR 0062): the last answer is still the person's to see. */
-const TRANSIENT_FAILURES: ReadonlySet<ApiErrorKind> = new Set(["offline", "unavailable", "rate-limited"]);
+const TRANSIENT_FAILURES: ReadonlySet<ApiErrorKind> = new Set([
+  "offline",
+  "unavailable",
+  "rate-limited",
+]);
 
 function isTransientFailure(error: unknown): boolean {
   const apiError = apiErrorOf(error);
@@ -50,7 +54,8 @@ function isTransientFailure(error: unknown): boolean {
  */
 export function shouldPersistQuery(query: Pick<Query, "queryKey" | "state">): boolean {
   const { status, data, error } = query.state;
-  const keptOnTransientFailure = status === "error" && data !== undefined && isTransientFailure(error);
+  const keptOnTransientFailure =
+    status === "error" && data !== undefined && isTransientFailure(error);
   return (status === "success" || keptOnTransientFailure) && isPersistedKey(query.queryKey);
 }
 

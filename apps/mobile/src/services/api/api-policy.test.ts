@@ -80,7 +80,10 @@ describe("classifyFailure of a 429 (E5.3a, case 16)", () => {
 
   test("by its status, whatever the body says", () => {
     const unknownCode = answer(429, { code: "api.some-new-limit" }, { retryAfter: "2" });
-    expect(classifyFailure(unknownCode, NOW)).toEqual({ kind: "rate-limited", retryAfterMs: 2_000 });
+    expect(classifyFailure(unknownCode, NOW)).toEqual({
+      kind: "rate-limited",
+      retryAfterMs: 2_000,
+    });
     const notJson = answer(429, "slow down", { contentType: "text/plain", retryAfter: "2" });
     expect(classifyFailure(notJson, NOW)).toEqual({ kind: "rate-limited", retryAfterMs: 2_000 });
   });

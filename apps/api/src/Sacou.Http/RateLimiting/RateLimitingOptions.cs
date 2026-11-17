@@ -19,6 +19,8 @@ public sealed class RateLimitingOptions
 {
     public const string SectionName = "RateLimiting";
 
+    private const int ConnectionsPerDualRequest = 2;
+
     public WindowLimitOptions? Global { get; init; }
 
     public WindowLimitOptions? SignIn { get; init; }
@@ -65,6 +67,4 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.AccountDelete] = AccountDelete,
         [RateLimitPolicies.CourtSync] = CourtSync,
     };
-
-    private const int ConnectionsPerDualRequest = 2;
 }
