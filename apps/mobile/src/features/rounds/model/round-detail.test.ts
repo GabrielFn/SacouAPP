@@ -22,6 +22,7 @@ import { createRoundMutation, roundScope } from "../queries/round-mutations";
 import { hasRoundLayer, roundChips, sourceReader } from "./round-chips";
 import {
   footerActions,
+  roundFooterActions,
   managesRounds,
   roleHeader,
   roundSettingsOf,
@@ -213,9 +214,17 @@ describe("one route for every role", () => {
     expect(roleHeader("scorekeeper")).toBe("Você é placar");
   });
 
-  test("with the draw built (E4.7) only the court is pending: the footer has 'Sortear times'", () => {
-    expect(PENDING_ROUND_SCREENS).toEqual(["court"]);
-    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual(["draw"]);
+  test("with the pre-game built (E4.7 part 2) nothing is pending: court and draw", () => {
+    expect(PENDING_ROUND_SCREENS).toEqual([]);
+    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual(["court", "draw"]);
+  });
+
+  test("'Abrir quadra' only with a court of the round; 'Sortear times' only for who draws (D1)", () => {
+    const all = footerActions(PENDING_ROUND_SCREENS, false);
+    expect(roundFooterActions(all, true, false)).toEqual(["draw"]);
+    expect(roundFooterActions(all, true, true)).toEqual(["court", "draw"]);
+    expect(roundFooterActions(all, false, true)).toEqual(["court"]);
+    expect(roundFooterActions(all, false, false)).toEqual([]);
   });
 
   test("taking 'draw' out of the pending list shows 'Sortear times'", () => {
