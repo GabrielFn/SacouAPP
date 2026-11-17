@@ -20,9 +20,11 @@ vi.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ isPending: false, data: undefined, error: null, mutate: vi.fn() }),
 }));
 
+const FLIPS = 40;
+
 describe("usePreGame: 'Sortear' asks the injected coin (D10)", () => {
   test("flip dispatches the side of the service, in order, never a random one", () => {
-    coin.current = createFakeCoinFlip(["b", "a", "b"]);
+    coin.current = createFakeCoinFlip(["b"]);
     const dispatch = vi.fn();
     const model = usePreGame({
       groupId: "g1",
@@ -33,13 +35,9 @@ describe("usePreGame: 'Sortear' asks the injected coin (D10)", () => {
       settings: drawSettings(),
       members: [],
     });
-    model.flip();
-    model.flip();
-    model.flip();
-    expect(dispatch.mock.calls.map(([action]) => (action as { side: string }).side)).toEqual([
-      "b",
-      "a",
-      "b",
-    ]);
+    for (let times = 0; times < FLIPS; times += 1) model.flip();
+    expect(dispatch.mock.calls.map(([action]) => (action as { side: string }).side)).toEqual(
+      new Array<string>(FLIPS).fill("b"),
+    );
   });
 });
