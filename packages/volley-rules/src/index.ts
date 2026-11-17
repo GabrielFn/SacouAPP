@@ -1,3 +1,4 @@
+export * from "./draw/index.js";
 export * from "./formations/index.js";
 export * from "./overlap/index.js";
 export * from "./pix/index.js";
