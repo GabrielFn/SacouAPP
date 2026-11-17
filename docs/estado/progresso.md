@@ -51,6 +51,7 @@
 
 ## Em andamento
 
+- 17/11/2026: E3.7 Parte 1 (domínio e golden, Opus, `task/E3.7-court-stream`) e E4.7 Parte 1 (tela 07, Opus, `task/E4.7-draw`) em andamento. Perguntas 69 a 73 respondidas; a 72 cria a Parte 3 da E4.7 ("Montar times" à mão).
 - 17/11/2026: **M4 iniciado** com o ok do Gabriel (perguntas 66, 67 e 7 respondidas). Começando pelos planos da E3.7 (sincronização da quadra) e da E4.7 (sorteio e pré-jogo no app). Nova tarefa antes da E5.1: limite de requisições na API (pergunta 66).
 - 17/11/2026: segunda leva do teste no celular mergeada (#119, telas; #120, cache sem rede). Os dois ciclos tiveram revisor Opus e testador Sonnet; o #120 foi reprovado no ciclo 1 (guardava dados depois de 403/404) e corrigido pelo orquestrador. Falta conferir no celular (lista em `pendencias.md`) e a escolha do logo.
 - 16/11/2026, fim: **parada pedida pelo Gabriel.** Teste no celular da E4.3 completo, menos o 302. #117 (primeira leva de defeitos) em verificação; segunda leva em `pendencias.md`. Próximo passo no [diário de 15/11](sessoes/2026-11-15.md), seção "Próximo passo exato (depois de 16/11)".
