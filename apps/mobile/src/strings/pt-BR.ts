@@ -2,6 +2,7 @@ import { accountStrings } from "./account.pt-BR";
 import { authStrings } from "./auth.pt-BR";
 import { courtStrings } from "./court.pt-BR";
 import { createGroupStrings } from "./create-group.pt-BR";
+import { drawStrings } from "./draw.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
 import { inviteStrings } from "./invite.pt-BR";
 import { membersStrings } from "./members.pt-BR";
@@ -19,6 +20,7 @@ export const strings = {
   createGroup: createGroupStrings,
   settings: settingsStrings,
   rounds: roundsStrings,
+  draw: drawStrings,
   members: membersStrings,
   invite: inviteStrings,
   ratings: ratingsStrings,

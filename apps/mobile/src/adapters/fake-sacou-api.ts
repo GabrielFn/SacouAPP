@@ -59,6 +59,7 @@ function defaults(): Answers {
     getDeletionBlockers: none,
     deleteMyAccount: none,
     addGuest: none,
+    drawTeams: none,
   };
 }
 
@@ -115,6 +116,7 @@ export function createFakeSacouApi(): FakeSacouApi {
     getDeletionBlockers: () => answer("getDeletionBlockers", []),
     deleteMyAccount: () => answer("deleteMyAccount", []),
     addGuest: (groupId, body) => answer("addGuest", [groupId, body]),
+    drawTeams: (groupId, roundId, body) => answer("drawTeams", [groupId, roundId, body]),
   };
 
   return {
