@@ -47,7 +47,7 @@
 | E3.17 | Feita | PRs #73 e #80, ADR 0051 (perfil do jogador; nota do admin só para Admin e Co-admin). |
 | E4.6 | Feita | PRs #84, #94 e #100, ADR 0054 (rodadas no app: telas 20, 06, 26, 21, 21a e cards). |
 | E3.16 | Feita | PRs #93 e #101, ADR 0056 (exportar e excluir a conta, histórico como Ex-jogador). Corrida com o aceite de convite e a criação de grupo corrigida no #107 (D7a), achada pela CI em 16/11. |
-| E4.3 | Feita | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b), ADR 0057. Testada no celular em 16/11 (Galaxy, Android 17, build de desenvolvimento contra a API local pelo USB, PRs #112 a #114): login com Google, 27, criar grupo, 30, exportar (arquivo temporário apagado) e excluir (banco conferido: usuário apagado, marca gravada, vínculo `left`). Faltam no aparelho: troca de conta, e-mail e senha, modo avião, fonte grande e o 302 (lista em `pendencias.md`). |
+| E4.3 | Feita | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b), ADR 0057. Testada no celular em 16/11 (Galaxy, Android 17, build de desenvolvimento contra a API local pelo USB, PRs #112 a #114): login com Google, 27, criar grupo, 30, exportar (arquivo temporário apagado) e excluir (banco conferido: usuário apagado, marca gravada, vínculo `left`). Segunda rodada no mesmo dia: troca de conta, e-mail e senha, modo avião e fonte grande; falta só o 302. Defeitos em `pendencias.md`. |
 
 ## Em andamento
 
