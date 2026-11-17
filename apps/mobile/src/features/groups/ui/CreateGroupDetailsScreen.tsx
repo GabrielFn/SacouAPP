@@ -13,7 +13,7 @@ import { Text } from "../../../ui/Text";
 import { TextField } from "../../../ui/TextField";
 import { useCreateGroup, type CreateGroupModel } from "../hooks/use-create-group";
 import { isFromScratch, type GroupOrigin } from "../model/custom-blocks";
-import { afterCreateGroupHref, createGroupCustomHref, createGroupHref } from "../navigation";
+import { createGroupCustomHref, createGroupHref, leaveWizardForNewRound } from "../navigation";
 import { CourtOption } from "./CourtOption";
 import { SHEET_START, WhenAndWhereQuestion, YES_NO } from "./CreateGroupQuestions";
 import { QuestionSection } from "./QuestionSection";
@@ -65,7 +65,7 @@ export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenPro
   const router = useRouter();
   const { tokens } = useTheme();
   const model = useCreateGroup(origin, (groupId) => {
-    router.replace(afterCreateGroupHref(groupId));
+    leaveWizardForNewRound(router, groupId);
   });
   const { state, dispatch, errors } = model;
   const sheet = state.scheduleSheet;
@@ -75,7 +75,7 @@ export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenPro
         <CreateGroupFooter
           model={model}
           onKeep={(groupId) => {
-            router.replace(afterCreateGroupHref(groupId));
+            leaveWizardForNewRound(router, groupId);
           }}
         />
       }
@@ -100,6 +100,9 @@ export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenPro
           dispatch({ type: "name-changed", name });
         }}
         error={errors.name}
+        onBlur={() => {
+          dispatch({ type: "name-left" });
+        }}
       />
       <WhenAndWhereQuestion model={model} />
       <QuestionSection number={1} title={step2.whereYouPlay}>

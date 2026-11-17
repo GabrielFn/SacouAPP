@@ -15,6 +15,8 @@ export type SubmitState =
 /** What the person typed or touched in screen 05, and nothing that can be derived from it. */
 export interface CreateGroupState {
   readonly name: string;
+  /** True once the person left the name field: only then an empty name is shown as an error. */
+  readonly nameTouched: boolean;
   readonly scheduleWeekday: number | null;
   readonly scheduleTime: string | null;
   /** The open sheet of day and time, with its own draft; `null` when closed. */
@@ -34,6 +36,7 @@ export type ScheduleAction =
 
 export type AnswerAction =
   | { readonly type: "name-changed"; readonly name: string }
+  | { readonly type: "name-left" }
   | { readonly type: "venue-changed"; readonly venue: string }
   | { readonly type: "capacity-changed"; readonly text: string }
   | { readonly type: "modality-selected"; readonly modality: SettingsModality }
@@ -53,6 +56,7 @@ export function createInitialState(origin: GroupOrigin): CreateGroupState {
   const base = originBase(origin);
   return {
     name: "",
+    nameTouched: false,
     scheduleWeekday: null,
     scheduleTime: null,
     scheduleSheet: null,
@@ -95,6 +99,8 @@ function scheduleReducer(state: CreateGroupState, action: ScheduleAction): Creat
 
 function answerReducer(state: CreateGroupState, action: AnswerAction): CreateGroupState {
   switch (action.type) {
+    case "name-left":
+      return { ...state, nameTouched: true };
     case "name-changed":
       return { ...state, name: action.name };
     case "venue-changed":

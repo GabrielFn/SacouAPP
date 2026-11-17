@@ -128,3 +128,16 @@ export function isRetryDisabled(state: CreateGroupState, pending: boolean): bool
 export function isScheduleChosen(state: CreateGroupState): boolean {
   return state.scheduleWeekday !== null && state.scheduleTime !== null;
 }
+
+/**
+ * The errors the screen draws. The rules above decide if the form can be sent; here an empty name stays
+ * quiet until the person leaves the field, so the screen does not open already in red.
+ */
+export function visibleCreateGroupErrors(
+  state: CreateGroupState,
+  origin: GroupOrigin,
+): CreateGroupErrors {
+  const { name, ...others } = createGroupErrors(state, origin);
+  const showsName = state.nameTouched || normalizeText(state.name) !== "";
+  return { ...others, ...(showsName && name !== undefined ? { name } : {}) };
+}

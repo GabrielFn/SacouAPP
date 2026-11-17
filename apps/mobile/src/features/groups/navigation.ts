@@ -52,3 +52,18 @@ export function queueRuleHref(groupId: string): Href {
 export function afterCreateGroupHref(groupId: string): Href {
   return createRoundHref(groupId);
 }
+
+/** The part of the router the wizard needs to leave; a fake in the tests. */
+export interface WizardExitRouter {
+  readonly dismissAll: () => void;
+  readonly push: (href: Href) => void;
+}
+
+/**
+ * Leaves the wizard (screens 04, 04a and 05) for "Nova rodada" without keeping it in the stack, so going
+ * back from the round lands on the screen the wizard was opened from, never on a second, duplicate group.
+ */
+export function leaveWizardForNewRound(router: WizardExitRouter, groupId: string): void {
+  router.dismissAll();
+  router.push(afterCreateGroupHref(groupId));
+}
