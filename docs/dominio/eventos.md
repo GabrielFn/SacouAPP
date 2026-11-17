@@ -18,8 +18,8 @@ Não entram no envelope: `rulesVersion` e a cópia congelada de configurações 
 
 | Tema | Definição |
 |---|---|
-| `batch` | Número do lote de escrita no stream: um novo a cada troca ou retomada de quem escreve. Carimbado ao gravar e imutável: reenvio não muda (a E3.7 fixa quem emite). Não é a tentativa de envio |
-| `sequence` | Cresce por celular no stream. Lacuna não é erro aqui (a E3.7 detecta o que falta) |
+| `batch` | Número do lote de escrita no stream: um novo a cada troca ou retomada de quem escreve. **Emitido pelo servidor; o celular carimba o lote que o servidor lhe deu** antes de gravar no SQLite. Imutável: reenvio não muda, e o servidor nunca reescreve um envelope. O primeiro escritor recebe o lote 1, que já é o valor do log local; a E3.8 emite o seguinte na troca ([ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)). Não é a tentativa de envio |
+| `sequence` | Cresce por celular no stream. Lacuna não é erro no replay. **No servidor** (ADR 0060), o primeiro evento novo de uma requisição tem `sequence` igual à maior do mesmo `deviceId` no stream mais 1: maior é `sequence-gap` com `expectedSequence` (o app reenvia dali); menor ou igual, com `eventId` desconhecido, é `sequence-conflict` (dois celulares com o mesmo `deviceId`) |
 | Ordem canônica | `batch`, `sequence`, `deviceId`, `eventId`: números por valor, textos por unidade UTF-16 (`<` no TS; `string.CompareOrdinal` no C#), nunca `localeCompare` |
 | Duplicata | Mesmo `eventId` e conteúdo igual, sem depender da ordem das chaves: ignora. Conteúdo diferente: `event-id-conflict` |
 | Falha | Fechada: erro devolve `err`, sem estado parcial. Leva só `code` e `eventId` ou `field`, nunca o valor recebido |
@@ -111,8 +111,8 @@ O C# lê o mesmo log com as mesmas regras e produz o mesmo estado nos 14 golden 
 
 ## O que fica para depois
 
-- **E3.7:** simular o replay **antes** de persistir e rejeitar ali, porque com falha fechada um evento inválido gravado impede recalcular o stream (o mesmo vale para o log local na E4.9). `courtSessionId` e permissão vêm do token, não do envelope. Tamanho do payload limitado no servidor. Quem numera o lote e a regra de um celular por vez.
+- **E3.7 (parte 1, feita, [ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)):** as regras de escrita do servidor são uma função pura (`CourtWriteRules.Decide`): o replay roda sobre todo o stream com os novos **antes** de gravar, com tetos de tamanho e de contagem, conferências de plausibilidade ([placar.md](placar.md#conferencias-do-servidor)) e membros do grupo; o lote é tudo ou nada. Quem numera o lote é o servidor, e só o escritor do lote atual grava. **Parte 2:** rota, persistência e permissão (`courtSessionId` e papel vêm da rota e do token, não do envelope).
 - **E4.9 (parte 1, feita, [ADR 0038](../arquitetura/adr/0038-log-local-da-quadra.md)):** o `deviceId` é um UUID aleatório por instalação, gerado na primeira abertura e gravado no SQLite; o log local simula o replay antes de gravar; `batch` é 1 enquanto só este celular escreve, e quem o numera depois é a E3.7/E4.11. **Parte 3:** medir o custo do replay no Hermes (há um cache por array de eventos, para o toque não rodar dois replays).
 - **E4.11:** o que mostrar quando um evento atrasado reordena o passado. O estado no celular pode mudar ao sincronizar; é esperado pelo modelo.
 - **E2.7 (feito, ADR 0030):** "3 pontos serão apagados" (`Corrigir`) é texto para o usuário, montado pela E4.10 a partir de `previewRevert`; no log nada se apaga, e o `RevertedTo` só acrescenta.
-- **Dois escritores offline no mesmo lote:** a ordem é determinística, por `deviceId`, mas pode intercalar pontos. Não é erro no motor, para não travar o jogo. Se a retomada do admin offline gerar placar estranho, é pergunta ao Gabriel na E3.7.
+- **Dois escritores offline no mesmo lote:** não acontece no servidor (ADR 0060): o lote guarda o escritor (`deviceId` e `MemberId`), e o segundo celular recebe `not-the-writer`. A troca de escritor, que abre um lote novo, é da E3.8.

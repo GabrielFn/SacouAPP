@@ -47,6 +47,7 @@ public sealed class RealAssemblyTests
     [InlineData("Sacou.Modules.Stats.Domain.")]
     [InlineData(CourtSessionsNamespace + ".")]
     [InlineData(CourtSessionJsonNamespace + ".")]
+    [InlineData(CourtSessionsNamespace + ".Writes.")]
     public void RealDomain_IsInspected(string domainNamespace)
     {
         Assert.Contains(

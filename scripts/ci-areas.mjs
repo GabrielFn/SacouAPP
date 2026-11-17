@@ -1,5 +1,5 @@
 // Reads the changed files (one per line) from stdin and prints the CI areas as `key=value` lines
-// for $GITHUB_OUTPUT. Rule and reasons: scripts/lib/ci-areas.mjs and ADR 0004.
+// for $GITHUB_OUTPUT. Rule and reasons: scripts/lib/ci-areas.mjs and ADRs 0004 and 0064.
 import { readFileSync } from "node:fs";
 
 import { ciAreas } from "./lib/ci-areas.mjs";

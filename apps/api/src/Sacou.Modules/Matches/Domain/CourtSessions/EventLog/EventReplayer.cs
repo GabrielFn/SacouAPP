@@ -46,9 +46,7 @@ internal static class EventReplayer
         var head = Timeline<TState>.Empty;
         foreach (var envelope in normalized.Value)
         {
-            var next = string.Equals(envelope.Type, EventLogSchema.RevertedToEventType, StringComparison.Ordinal)
-                ? Revert(head, envelope)
-                : Apply(head, envelope, config);
+            var next = Step(head, envelope, config);
             if (next.IsFailure)
             {
                 return next.Forward<ReplayedTimeline<TState>>();
@@ -59,6 +57,53 @@ internal static class EventReplayer
 
         return Result<ReplayedTimeline<TState>, ReplayError>.Success(new ReplayedTimeline<TState>(head.ToEntries()));
     }
+
+    /// <summary>
+    /// Replays a stream like <see cref="ReplayTimeline{TState}"/>, also keeping the timeline right
+    /// before each event <paramref name="isTracked"/> picks, in canonical order. A tracked event that
+    /// a later <c>RevertedTo</c> undoes keeps its step: what it met is what a check needs.
+    /// </summary>
+    public static Result<ReplayedSteps<TState>, ReplayError> ReplaySteps<TState>(
+        ReplayConfig<TState> config,
+        IEnumerable<EventEnvelope> events,
+        Func<EventEnvelope, bool> isTracked)
+        where TState : notnull
+    {
+        var normalized = EventLogNormalizer.Normalize(events, config.CourtSessionId);
+        if (normalized.IsFailure)
+        {
+            return normalized.Forward<ReplayedSteps<TState>>();
+        }
+
+        var head = Timeline<TState>.Empty;
+        var steps = ImmutableArray.CreateBuilder<ReplayStep<TState>>();
+        foreach (var envelope in normalized.Value)
+        {
+            if (isTracked(envelope))
+            {
+                steps.Add(new ReplayStep<TState>(envelope, head));
+            }
+
+            var next = Step(head, envelope, config);
+            if (next.IsFailure)
+            {
+                return next.Forward<ReplayedSteps<TState>>();
+            }
+
+            head = next.Value;
+        }
+
+        return Result<ReplayedSteps<TState>, ReplayError>.Success(new ReplayedSteps<TState>(head, steps.ToImmutable()));
+    }
+
+    private static Result<Timeline<TState>, ReplayError> Step<TState>(
+        Timeline<TState> head,
+        EventEnvelope envelope,
+        ReplayConfig<TState> config)
+        where TState : notnull
+        => string.Equals(envelope.Type, EventLogSchema.RevertedToEventType, StringComparison.Ordinal)
+            ? Revert(head, envelope)
+            : Apply(head, envelope, config);
 
     /// <summary>
     /// Only active events are on the timeline, and only earlier ones so far. A target that is missing,

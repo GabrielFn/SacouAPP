@@ -20,6 +20,12 @@ internal sealed class Timeline<TState>
 
     public TState StateOr(TState initialState) => _head is null ? initialState : _head.State;
 
+    /// <summary>The last active event, or null on an empty timeline.</summary>
+    public EventEnvelope? LastEvent => _head?.Envelope;
+
+    /// <summary>The timeline right before its last event; empty stays empty.</summary>
+    public Timeline<TState> WithoutLast() => _head is null ? this : new Timeline<TState>(_head.Previous);
+
     /// <summary>The timeline as it was right after that active event, or null when it is not active.</summary>
     public Timeline<TState>? Find(string eventId)
     {
