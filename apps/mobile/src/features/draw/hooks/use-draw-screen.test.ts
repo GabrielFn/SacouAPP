@@ -23,7 +23,10 @@ const world = vi.hoisted(() => ({
 
 vi.mock("react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react")>()),
-  useReducer: (_reducer: unknown, initial: unknown) => [world.state.get("state") ?? initial, world.dispatch],
+  useReducer: (_reducer: unknown, initial: unknown) => [
+    world.state.get("state") ?? initial,
+    world.dispatch,
+  ],
   useRef: (initial: unknown) => {
     const index = world.refIndex;
     world.refIndex += 1;
