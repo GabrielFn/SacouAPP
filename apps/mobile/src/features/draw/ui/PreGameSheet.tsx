@@ -23,9 +23,8 @@ import {
   sideIdentity,
   startBlocker,
   tieBreakLine,
-  type StartBlocker,
 } from "../model/pre-game-selectors";
-import type { StartFromDrawError } from "../session/start-from-draw";
+import { startBlockerText, startErrorText } from "../model/pre-game-texts";
 import { PointsStepper } from "./PointsStepper";
 import { RotationPicker } from "./RotationPicker";
 import { teamSwatch } from "./team-swatch";
@@ -45,17 +44,6 @@ export interface PreGameSheetProps {
 function courtOf(read: RoundCourtRead): RoundCourt | null {
   return read.status === "read" ? read.court : null;
 }
-
-const BLOCKER_TEXT: Readonly<Record<StartBlocker, string>> = {
-  stale: texts.blocked.stale,
-  "open-match": texts.blocked.openMatch,
-};
-
-const START_ERROR_TEXT: Readonly<Record<StartFromDrawError, string>> = {
-  "other-round-match-open": texts.blocked.otherRound,
-  "match-open": texts.blocked.openMatch,
-  failed: texts.blocked.failed,
-};
 
 export interface TeamTagProps {
   readonly side: TeamSide;
@@ -214,8 +202,8 @@ function StartButton({ pre, leftSinceDraw }: StartButtonProps) {
   const reading = pre.court.status === "reading";
   return (
     <>
-      {blocker === null ? null : <ErrorStrip text={BLOCKER_TEXT[blocker]} />}
-      {pre.startError === null ? null : <ErrorStrip text={START_ERROR_TEXT[pre.startError]} />}
+      {blocker === null ? null : <ErrorStrip text={startBlockerText(blocker)} />}
+      {pre.startError === null ? null : <ErrorStrip text={startErrorText(pre.startError)} />}
       <Button
         label={pre.starting ? texts.starting : texts.start}
         disabled={blocker !== null || reading || pre.starting}

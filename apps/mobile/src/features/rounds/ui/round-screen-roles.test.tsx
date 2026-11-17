@@ -22,6 +22,9 @@ vi.mock("../hooks/use-round-screen", () => ({
     members: { data: [] },
   }),
 }));
+vi.mock("../../court/hooks/use-round-court", () => ({
+  useRoundCourt: () => ({ status: "reading" }),
+}));
 vi.mock("../../../ui/BackBar", () => ({ BackBar: () => null }));
 vi.mock("../../../ui/Button", () => ({ Button: () => null }));
 vi.mock("../../../ui/ConfirmSheet", () => ({ ConfirmSheet: () => null }));
