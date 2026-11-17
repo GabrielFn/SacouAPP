@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 
 namespace Sacou.Modules.Identity.ExportMyData;
 
@@ -26,7 +27,7 @@ internal static class ExportMyDataEndpoint
 
     public static IEndpointRouteBuilder MapExportMyData(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireAuthorization().WithNoStore()
+        endpoints.MapGet(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.AccountExport).RequireAuthorization().WithNoStore()
             .ProducesProblem(StatusCodes.Status403Forbidden);
         return endpoints;
     }
