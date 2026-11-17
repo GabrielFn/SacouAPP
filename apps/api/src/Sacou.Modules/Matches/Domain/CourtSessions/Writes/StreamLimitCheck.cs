@@ -82,21 +82,21 @@ internal static class StreamLimitCheck
             : ReadText(envelope.Payload, PayloadFields.MatchId);
         var byType = envelope.Type switch
         {
-            ScoreEventTypes.QueueChanged => Counter(StreamLimitNames.StreamQueueChanges, WholeStream, CourtStreamLimits.MaxStreamQueueChanges),
-            ScoreEventTypes.LineupChanged => Counter(StreamLimitNames.MatchLineupChanges, matchId, CourtStreamLimits.MaxMatchLineupChanges),
-            ScoreEventTypes.ServingTeamChanged => Counter(StreamLimitNames.MatchServingChanges, matchId, CourtStreamLimits.MaxMatchServingChanges),
-            EventLogSchema.RevertedToEventType => Counter(StreamLimitNames.MatchReverts, matchId, CourtStreamLimits.MaxMatchReverts),
-            ScoreEventTypes.PointAttributed => Counter(
+            ScoreEventTypes.QueueChanged => CounterOf(StreamLimitNames.StreamQueueChanges, WholeStream, CourtStreamLimits.MaxStreamQueueChanges),
+            ScoreEventTypes.LineupChanged => CounterOf(StreamLimitNames.MatchLineupChanges, matchId, CourtStreamLimits.MaxMatchLineupChanges),
+            ScoreEventTypes.ServingTeamChanged => CounterOf(StreamLimitNames.MatchServingChanges, matchId, CourtStreamLimits.MaxMatchServingChanges),
+            EventLogSchema.RevertedToEventType => CounterOf(StreamLimitNames.MatchReverts, matchId, CourtStreamLimits.MaxMatchReverts),
+            ScoreEventTypes.PointAttributed => CounterOf(
                 StreamLimitNames.PointAttributions,
                 ReadText(envelope.Payload, PayloadFields.PointEventId),
                 CourtStreamLimits.MaxPointAttributions),
             _ => null,
         };
-        return [.. new[] { Counter(StreamLimitNames.MatchEvents, matchId, CourtStreamLimits.MaxMatchEvents), byType }.OfType<Counter>()];
+        return [.. new[] { CounterOf(StreamLimitNames.MatchEvents, matchId, CourtStreamLimits.MaxMatchEvents), byType }.OfType<Counter>()];
     }
 
     /// <summary>No counter without a key: an event the parser would refuse is the replay's to refuse.</summary>
-    private static Counter? Counter(string limit, string? key, int max) => key is null ? null : new Counter(new CounterKey(limit, key), max);
+    private static Counter? CounterOf(string limit, string? key, int max) => key is null ? null : new Counter(new CounterKey(limit, key), max);
 
     private static string? ReadText(RawObject payload, string field) =>
         payload.TryGetMember(field, out var value) && value is RawString text ? text.Value : null;

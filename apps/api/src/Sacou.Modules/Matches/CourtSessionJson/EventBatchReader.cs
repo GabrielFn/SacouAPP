@@ -108,10 +108,23 @@ internal static class EventBatchReader
             return Invalid(EventBatchError.BodyField);
         }
 
-        ImmutableArray<ReadOnlyMemory<byte>>? elements = null;
+        var elements = ReadMembers(ref reader, body);
+        if (elements.IsFailure)
+        {
+            return elements;
+        }
+
+        // Anything after the root object throws, as the reader holds a single value.
+        return reader.Read() ? Invalid(EventBatchError.BodyField) : elements;
+    }
+
+    /// <summary>The members of the root object: exactly one, <c>events</c>, by bytes and case.</summary>
+    private static Result<ImmutableArray<ReadOnlyMemory<byte>>, EventBatchError> ReadMembers(ref Utf8JsonReader reader, ReadOnlyMemory<byte> body)
+    {
+        Result<ImmutableArray<ReadOnlyMemory<byte>>, EventBatchError>? elements = null;
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
-            // By bytes and case: "Events" or an escaped spelling of the key is another key.
+            // "Events" or an escaped spelling of the key is another key.
             if (!reader.ValueTextEquals(EventBatchError.EventsField) || reader.ValueIsEscaped)
             {
                 return Invalid(EventLogSchema.UnknownEnvelopeField);
@@ -122,22 +135,14 @@ internal static class EventBatchReader
                 return Invalid(EventBatchError.EventsField);
             }
 
-            var read = ReadEvents(ref reader, body);
-            if (read.IsFailure)
+            elements = ReadEvents(ref reader, body);
+            if (elements.IsFailure)
             {
-                return read;
+                return elements;
             }
-
-            elements = read.Value;
         }
 
-        if (reader.TokenType != JsonTokenType.EndObject || elements is null)
-        {
-            return Invalid(EventBatchError.EventsField);
-        }
-
-        // Anything after the root object throws, as the reader holds a single value.
-        return reader.Read() ? Invalid(EventBatchError.BodyField) : Result<ImmutableArray<ReadOnlyMemory<byte>>, EventBatchError>.Success(elements.Value);
+        return reader.TokenType == JsonTokenType.EndObject && elements is not null ? elements : Invalid(EventBatchError.EventsField);
     }
 
     private static Result<ImmutableArray<ReadOnlyMemory<byte>>, EventBatchError> ReadEvents(ref Utf8JsonReader reader, ReadOnlyMemory<byte> body)

@@ -21,7 +21,7 @@ internal static class CourtEventMembers
 
     /// <summary>The distinct member ids of many events, in order of appearance, for one query to the group.</summary>
     public static ImmutableArray<string> Collect(IEnumerable<EventEnvelope> envelopes) =>
-        [.. envelopes.SelectMany(Collect).Distinct(StringComparer.Ordinal)];
+        [.. envelopes.SelectMany(envelope => Collect(envelope)).Distinct(StringComparer.Ordinal)];
 
     private static IEnumerable<string> Of(ScorePayload payload) => payload switch
     {

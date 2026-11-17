@@ -40,7 +40,11 @@ export type GoldenCommand =
   | { readonly command: "switchServingTeam" }
   | { readonly command: "endMatchManually"; readonly winner: TeamSide | null }
   | { readonly command: "changeQueue"; readonly queue: TeamQueue }
-  | { readonly command: "shiftRotation"; readonly team: TeamSide; readonly direction: RotationDirection }
+  | {
+      readonly command: "shiftRotation";
+      readonly team: TeamSide;
+      readonly direction: RotationDirection;
+    }
   | {
       readonly command: "attributePoint";
       readonly pointEventId: string;
