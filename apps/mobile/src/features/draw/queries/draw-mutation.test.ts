@@ -33,7 +33,7 @@ function everythingIn(client: QueryClient): string {
   return JSON.stringify({ queries, mutations });
 }
 
-describe("the draw mutation keeps the levels out of every cache (ADR 0060)", () => {
+describe("the draw mutation keeps the levels out of every cache (ADR 0061)", () => {
   test("the answer goes only to deliver; the mutation keeps null", async () => {
     const { fake, client, observer } = setup();
     fake.respond("drawTeams", apiOk(G1_ANSWER));

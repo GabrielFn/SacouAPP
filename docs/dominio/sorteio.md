@@ -53,7 +53,7 @@ A média de cada time é a soma ÷ o tamanho, arredondada para o décimo, **meio
 
 ## No app (tela 07, E4.7)
 
-[ADR 0060](../arquitetura/adr/0060-sorteio-no-app.md). O resultado fica só na memória da tela; cada abertura sorteia de novo.
+[ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md). O resultado fica só na memória da tela; cada abertura sorteia de novo.
 
 - **Rótulo do medidor** (pergunta 55): diferença até 2 décimos é "ótimo", até 5 é "bom", acima é "desequilibrado". O app recalcula médias e diferença a partir do arranjo, com o golden compartilhado.
 - **Eixo da barra:** de `floor(menor)` até um ponto inteiro acima; se a maior média passar, até `ceil(maior)`. Médias 3,7 e 3,8 → de 3,0 a 4,0; 3,9 e 4,1 → de 3,0 a 5,0. Com mais de dois times, só a maior e a menor ganham marcador.

@@ -284,7 +284,7 @@ Telas 19, 19a, 19b e 19c ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-
 
 ### 12.3 Sorteio no app (E4.7, Parte 1)
 
-Tela 07 ([ADR 0060](../arquitetura/adr/0060-sorteio-no-app.md)). A regra de quem sorteia e vê as notas é da API (`DrawTeams`, E3.6); o app só reduz a superfície.
+Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem sorteia e vê as notas é da API (`DrawTeams`, E3.6); o app só reduz a superfície.
 
 | | Ameaça | Mitigação |
 |---|---|---|

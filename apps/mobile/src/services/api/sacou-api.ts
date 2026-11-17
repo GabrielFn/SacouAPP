@@ -45,7 +45,7 @@ export type AddGuestBody = Schemas["AddGuestRequest"];
 export type AddedGuest = Schemas["AddGuestResponse"];
 /** The draw of screen 07: `together` locks and the queue of reserves the admin set (ADR 0055). */
 export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
-/** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0060). */
+/** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
 export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
 
 export interface MemberRef {

@@ -15,7 +15,7 @@ import { lockOutcome, swapOutcome, unlockMember, type DrawNotice } from "./playe
 export type DrawMode = "swap" | "lock";
 
 /**
- * The flow of screen 07 (frontend.md, rule 4; ADR 0060). The draw is the one answer of a command that stores
+ * The flow of screen 07 (frontend.md, rule 4; ADR 0061). The draw is the one answer of a command that stores
  * nothing on the server and is edited by the swaps, so it lives only here: never in the query cache. The
  * request status stays in the TanStack mutation; titles, the meter and the hints are derived.
  */

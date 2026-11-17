@@ -5,7 +5,7 @@ import type { DrawTeamsAnswer } from "../../../services/api/sacou-api";
 /**
  * The draw after the admin's swaps: the teams in order (1 is Laranja, 2 is Azul), each in order of arrival,
  * and the reserves in the order of the queue. The levels are the admin's, in whole tenths, kept only in
- * memory while screen 07 is open (ADR 0060): never cached, persisted, logged nor shared.
+ * memory while screen 07 is open (ADR 0061): never cached, persisted, logged nor shared.
  */
 export interface DrawArrangement {
   readonly teams: readonly (readonly MemberId[])[];

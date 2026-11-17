@@ -1,6 +1,6 @@
-# ADR 0060 · Sorteio e pré-jogo no app
+# ADR 0061 · Sorteio e pré-jogo no app
 
-**Status:** aceito em parte (17/11/2026): a Parte 1 da E4.7 (tela 07). A Parte 2 (tela 08, `MatchStarted`, origem da quadra no SQLite) completa este ADR. **Decidido por:** plano da E4.7 (`docs/estado/tarefas/E4.7.md`), dentro da arquitetura aprovada. O plano chamava este ADR de 0059; o número foi para o ícone do app.
+**Status:** aceito em parte (17/11/2026): a Parte 1 da E4.7 (tela 07). A Parte 2 (tela 08, `MatchStarted`, origem da quadra no SQLite) completa este ADR. **Decidido por:** plano da E4.7 (`docs/estado/tarefas/E4.7.md`), dentro da arquitetura aprovada. O plano chamava este ADR de 0059; o 0059 foi para o ícone do app e o 0060 para a sincronização do stream (E3.7).
 
 ## Contexto
 
