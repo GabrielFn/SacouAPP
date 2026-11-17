@@ -6,7 +6,6 @@ import { useTheme } from "../../../theme/theme-context";
 import { ChevronRightIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 
-
 export interface AccountCardProps {
   readonly title: string;
   readonly children: ReactNode;

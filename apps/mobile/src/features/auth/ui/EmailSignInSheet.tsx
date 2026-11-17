@@ -1,12 +1,11 @@
 import { useRef, type RefObject } from "react";
-import type { TextInput } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { BottomSheet } from "../../../ui/BottomSheet";
 import { Button } from "../../../ui/Button";
 import { SegmentedControl, type SegmentOption } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
-import { TextField } from "../../../ui/TextField";
+import { TextField, type TextInputHandle } from "../../../ui/TextField";
 import { useEmailSignIn, type EmailSignInModel } from "../hooks/use-email-sign-in";
 import { authFailureText } from "../model/auth-failure-text";
 import type { EmailMode } from "../model/email-sign-in.reducer";
@@ -50,7 +49,7 @@ function SheetAlert({ text }: SheetAlertProps) {
 
 export interface PasswordFieldProps {
   readonly model: EmailSignInModel;
-  readonly inputRef: RefObject<TextInput | null>;
+  readonly inputRef: RefObject<TextInputHandle | null>;
 }
 
 /** The password, filled by the password manager; a new one when creating the account. */
@@ -81,7 +80,7 @@ function PasswordField({ model, inputRef }: PasswordFieldProps) {
 export function EmailSignInSheet({ onClose }: EmailSignInSheetProps) {
   const model = useEmailSignIn(onClose);
   const { state } = model;
-  const passwordRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInputHandle>(null);
   const resetting = state.mode === "reset";
   const failure = authFailureText(state.failure);
   return (

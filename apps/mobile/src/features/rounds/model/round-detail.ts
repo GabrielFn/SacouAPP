@@ -75,7 +75,14 @@ export function statsCells(round: Round, values: GroupSettings): readonly StatsC
     amount: confirmedAmount(round),
   };
   return values.attendance.waitlistEnabled
-    ? [confirmed, { value: detail.waitlistCount(round.waitlistCount), label: detail.waitlistLabel, amount: round.waitlistCount }]
+    ? [
+        confirmed,
+        {
+          value: detail.waitlistCount(round.waitlistCount),
+          label: detail.waitlistLabel,
+          amount: round.waitlistCount,
+        },
+      ]
     : [confirmed];
 }
 

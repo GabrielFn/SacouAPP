@@ -1,4 +1,4 @@
-import { useId, type Ref } from "react";
+import { useId, type ComponentRef, type Ref } from "react";
 import { TextInput, type TextInputProps } from "react-native";
 
 import { useTheme } from "../theme/theme-context";
@@ -6,6 +6,9 @@ import { fontFamilies } from "../theme/tokens.data";
 
 import { FieldFrame } from "./FieldFrame";
 import { Text } from "./Text";
+
+/** What a ref to the field holds (`focus()` and the like). */
+export type TextInputHandle = ComponentRef<typeof TextInput>;
 
 export interface TextFieldProps extends Pick<
   TextInputProps,
@@ -29,7 +32,7 @@ export interface TextFieldProps extends Pick<
   /** The text of a refusal: shown under the field and announced as an alert. */
   readonly error?: string;
   /** To move the focus here from another field (the "next" key). */
-  readonly inputRef?: Ref<TextInput>;
+  readonly inputRef?: Ref<TextInputHandle>;
 }
 
 export function TextField({ label, help, error, inputRef, ...inputProps }: TextFieldProps) {

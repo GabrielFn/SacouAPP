@@ -125,6 +125,7 @@ describe("the form reducer of screen 27", () => {
   test("the edit mode starts from the saved profile", () => {
     expect(initFromProfile(SAVED)).toEqual({
       nickname: "Jota",
+      nicknameTouched: false,
       primary: "middleBlocker",
       others: ["setter"],
       level: 3,
