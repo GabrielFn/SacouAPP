@@ -132,6 +132,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0058](adr/0058-repositorio-publico.md) | Repositório público, para a CI não ter limite de minutos |
 | [0059](adr/0059-icone-do-app.md) | Ícone do app: silhueta sacando, azul-marinho sobre laranja |
 | [0061](adr/0061-sorteio-no-app.md) | Sorteio no app: resultado só no reducer, medidor no TS com o golden do C#, trocas e travas |
+| [0062](adr/0062-limite-de-requisicoes.md) | Limite de requisições por usuário (janela fixa, chave com hash do UID) e concorrência das rotas de duas conexões |
 
 ## Matriz: `decisoes.md` → ADR
 
