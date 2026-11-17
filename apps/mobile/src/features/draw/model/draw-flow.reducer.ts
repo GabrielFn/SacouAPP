@@ -112,17 +112,24 @@ function unlockChosen(state: DrawFlowState): DrawFlowState {
   };
 }
 
+/** "Montar times": keep the teams by arrival once, or go back to them (question 72). */
+function manualTeams(
+  state: DrawFlowState,
+  action: Extract<DrawFlowAction, { readonly type: "teams-built" | "teams-reset" }>,
+): DrawFlowState {
+  const cleared = { ...state, locks: [], selection: null, notice: null };
+  if (action.type === "teams-reset") return { ...cleared, arrangement: null };
+  return state.arrangement === null ? { ...cleared, arrangement: action.arrangement } : state;
+}
+
 export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
   if (isPreGameAction(action)) return preGameReducer(state, action);
   switch (action.type) {
     case "drawn":
       return drawn(state, action.answer);
     case "teams-built":
-      return state.arrangement === null
-        ? { ...state, arrangement: action.arrangement, locks: [], selection: null, notice: null }
-        : state;
     case "teams-reset":
-      return { ...state, arrangement: null, locks: [], selection: null, notice: null };
+      return manualTeams(state, action);
     case "player-tapped":
       return playerTapped(state, action.memberId);
     case "swap-mode-chosen":
