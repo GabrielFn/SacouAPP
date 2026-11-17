@@ -135,6 +135,7 @@ public sealed class IntegrationSetupTests
     [InlineData("run: dotnet test || true")]
     [InlineData("if: false")]
     [InlineData("if: needs.changes.outputs.api == 'true'")]
+    [InlineData("if: needs.changes.outputs.app == 'true'")]
     public void Ci_WithAForbiddenFragment_IsReported(string forbidden)
     {
         Assert.NotEmpty(IntegrationSetupRules.CiViolations($"{ValidWorkflow}{Environment.NewLine}{forbidden}"));

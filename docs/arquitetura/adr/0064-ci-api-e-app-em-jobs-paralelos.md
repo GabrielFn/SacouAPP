@@ -18,8 +18,8 @@ O `verify` rodava a API e o app em sequência (8 a 10 minutos), pulando só os p
 Jobs, todos dependendo só de `changes`:
 
 - `common` (`code=true`): `format:check`, `check:duplication`, `test:tooling`, auditoria npm.
-- `verify-api` (`api != 'false'`): .NET e Node (os scripts de contrato e de auditoria são `.mjs`). `lint:api`, `check:size`, `check:api-compat`, build, testes, integração, Ryuk, Postgres e auditoria NuGet.
-- `verify-app` (`app != 'false'`): lint, `lint:regression` (que também sonda o `dotnet`, por isso o .NET está instalado), build, `check:api-types`, typecheck e testes.
+- `verify-api` (`api != 'false'`): .NET e Node (os scripts de contrato e de auditoria são `.mjs`). `lint:api`, `lint:regression:api` (a sonda do CA1502, que prova as regras do .NET mesmo em PR só da API), `check:size`, `check:api-compat`, build, testes, integração, Ryuk, Postgres e auditoria NuGet.
+- `verify-app` (`app != 'false'`): lint, `lint:regression` (que repete a sonda do `dotnet`, por isso o .NET está instalado), build, `check:api-types`, typecheck e testes.
 - `changes` segue com `check:eol`; `secrets` (gitleaks) segue sempre, sem `needs`.
 - `ci-ok` exige `changes` e `secrets` em `success`; `common`, `verify-api` e `verify-app` em `success`, ou `skipped` só quando a saída da sua área é `false`. Qualquer outro resultado, cancelado inclusive, reprova. Continua sendo o único check obrigatório.
 

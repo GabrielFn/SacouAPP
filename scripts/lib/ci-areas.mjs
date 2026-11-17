@@ -11,6 +11,11 @@ const API_ONLY = "apps/api/";
 // The committed contract is read by the app (generated types), so it also needs the app checks.
 const SHARED_CONTRACT = "apps/api/openapi/";
 
+// Build and analyzer configuration inside apps/api/ changes the rules of the whole API and is proved by
+// the probes of both sides, so it counts as shared.
+const API_CONFIGURATION =
+  /(^|\/)(Directory\.[^/]+\.(props|targets)|\.editorconfig|\.globalconfig|CodeMetricsConfig\.txt)$/;
+
 const EVERYTHING = Object.freeze({ code: true, api: true, app: true });
 const NOTHING = Object.freeze({ code: false, api: false, app: false });
 
@@ -23,7 +28,9 @@ function needsApi(file) {
 }
 
 function needsApp(file) {
-  return !file.startsWith(API_ONLY) || file.startsWith(SHARED_CONTRACT);
+  return (
+    !file.startsWith(API_ONLY) || file.startsWith(SHARED_CONTRACT) || API_CONFIGURATION.test(file)
+  );
 }
 
 /**

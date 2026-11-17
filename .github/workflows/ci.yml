@@ -126,6 +126,11 @@ jobs:
       - name: Lint API
         run: pnpm lint:api
 
+      # The dotnet probe of lint:regression: this job also runs on PRs that only touch apps/api/, where
+      # verify-app is skipped, so it proves the CA1502 rule still holds there.
+      - name: Lint regression (API)
+        run: pnpm lint:regression:api
+
       - name: Check file size (C#)
         run: pnpm check:size
 
