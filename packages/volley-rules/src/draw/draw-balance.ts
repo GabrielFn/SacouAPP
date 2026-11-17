@@ -21,12 +21,9 @@ export function drawBalance(
   teamsLevelsTenths: readonly (readonly number[])[],
 ): Result<DrawBalance, DrawBalanceError> {
   if (teamsLevelsTenths.length === 0) return err({ code: "no-teams" });
-  const averages: number[] = [];
-  for (const team of teamsLevelsTenths) {
-    const average = teamAverageTenths(team);
-    if (!average.ok) return average;
-    averages.push(average.value);
-  }
+  const results = teamsLevelsTenths.map((team) => teamAverageTenths(team));
+  const averages = results.flatMap((result) => (result.ok ? [result.value] : []));
+  if (averages.length < results.length) return err({ code: "empty-team" });
   return ok({
     averagesTenths: averages,
     differenceTenths: Math.max(...averages) - Math.min(...averages),
