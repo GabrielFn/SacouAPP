@@ -3,5 +3,10 @@
     "advisory": "GHSA-mrhx-c7xc-m3w5",
     "reason": "Approved by the product owner on 2026-11-01. No fixed zod the tree allows: @expo/cli requires ^3.25.76. See ADR 0007.",
     "expires": "2027-01-31"
+  },
+  {
+    "advisory": "GHSA-fc5q-39xc-vjpf",
+    "reason": "Approved by the product owner on 2026-11-17. ReDoS in picomatch <=4.0.7 with no patched version yet; it only comes from build and test tooling (Metro, Jest, the Expo file map) and never ships in the app bundle. Remove as soon as a fixed picomatch is published. See ADR 0007.",
+    "expires": "2026-12-31"
   }
 ]
