@@ -25,12 +25,14 @@ import { BalanceMeter } from "./BalanceMeter";
 import { DrawFooter } from "./DrawFooter";
 import { DrawHeader } from "./DrawHeader";
 import { DrawTeamCard } from "./DrawTeamCard";
+import { PreGameSheet } from "./PreGameSheet";
 import { ReservesRow } from "./ReservesRow";
 
 const { draw } = strings;
 const FADED = 0.5;
 
 export interface DrawnViewProps {
+  readonly groupId: string;
   readonly model: DrawScreenModel;
   readonly arrangement: DrawArrangement;
   readonly round: Round;
@@ -69,7 +71,14 @@ function DrawStrips({ model, arrangement, round }: DrawStripsProps) {
 }
 
 /** Screen 07 with the teams (Sorteio.dc.html): meter, cards, reserves and the footer. */
-export function DrawnView({ model, arrangement, round, header, backHref }: DrawnViewProps) {
+export function DrawnView({
+  groupId,
+  model,
+  arrangement,
+  round,
+  header,
+  backHref,
+}: DrawnViewProps) {
   const { tokens } = useTheme();
   const { state, nameOf, pending } = model;
   const meter = meterView(arrangement);
@@ -108,6 +117,16 @@ export function DrawnView({ model, arrangement, round, header, backHref }: Drawn
         <ReservesRow reserves={reserves} disabled={pending} onTap={model.tap} />
       </View>
       <Text variant="caption">{draw.privacy}</Text>
+      {model.settings === null ? null : (
+        <PreGameSheet
+          groupId={groupId}
+          roundId={round.roundId}
+          model={model}
+          arrangement={arrangement}
+          settings={model.settings}
+          leftSinceDraw={stale.left.length}
+        />
+      )}
     </Screen>
   );
 }

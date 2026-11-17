@@ -6,8 +6,7 @@ import { useCourtRuntime } from "./court-runtime-context";
 
 /** What the device knows of the court of a round: still reading the log, or what it found there. */
 export type RoundCourtRead =
-  | { readonly status: "reading" }
-  | { readonly status: "read"; readonly court: RoundCourt | null };
+  { readonly status: "reading" } | { readonly status: "read"; readonly court: RoundCourt | null };
 
 interface ReadOfRound {
   readonly roundId: string;

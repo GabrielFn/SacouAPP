@@ -35,6 +35,15 @@ export function footerActions(
   return canceled ? [] : FOOTER_ACTIONS.filter((action) => !pending.includes(action));
 }
 
+/** The court only with a session of this round on the device; the draw only for who draws (D1). */
+export function roundFooterActions(
+  available: readonly PendingRoundScreen[],
+  drawAllowed: boolean,
+  hasCourt: boolean,
+): readonly PendingRoundScreen[] {
+  return available.filter((action) => (action === "court" ? hasCourt : drawAllowed));
+}
+
 export interface RoundSettingsView {
   readonly values: GroupSettings;
   readonly sources: Readonly<Record<string, string>>;

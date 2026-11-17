@@ -65,7 +65,8 @@ export function usePreGame(deps: PreGameDeps): PreGameModel {
     gcTime: 0,
     scope: { id: `court-start:${deps.roundId}` },
     onSuccess: (result) => {
-      if (result.ok) router.replace(courtHref("court", { courtSessionId: result.value, theme: "sun" }));
+      if (result.ok)
+        router.replace(courtHref("court", { courtSessionId: result.value, theme: "sun" }));
     },
   });
   const answer = start.data;

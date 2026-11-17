@@ -282,7 +282,7 @@ Telas 19, 19a, 19b e 19c ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-
 | I | Nota em log, rota ou chave de consulta | Nenhum `console`; a rota da 19b leva só o `groupId`; a chave só tem o `groupId` |
 | E | Admin rebaixado continua vendo as notas | Um 403 `groups.forbidden` numa escrita de nota invalida o grupo e as notas: o papel novo esconde a nota na hora |
 
-### 12.3 Sorteio no app (E4.7, Parte 1)
+### 12.3 Sorteio e pré-jogo no app (E4.7, Partes 1 e 2)
 
 Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem sorteia e vê as notas é da API (`DrawTeams`, E3.6); o app só reduz a superfície.
 
@@ -294,6 +294,11 @@ Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem
 | D | Toque repetido em "Sortear de novo" custando CPU no servidor | Um sorteio por vez (`scope` por rodada, guarda contra o toque duplo no mesmo quadro, botões desligados durante o pedido); a mutação não repete sozinha |
 | T | Trava ou reserva forjada no corpo | O app só manda IDs do arranjo e confere o teto de 24 travas e que nenhuma trava toca reserva; o servidor confere tudo de novo (E3.6) |
 | E | Admin rebaixado com a 07 aberta | Se o rebaixamento ocorre sem o app receber 403, as notas continuam na memória do reducer até a pessoa sair da 07; a tela as esconde quando o papel muda no cache (`canDraw`). Risco aceito: a janela é a de uma sessão aberta de quem era admin |
+| I | Nota, nome ou posição no `MatchStarted` da folha 08 (Parte 2) | `buildMatchStart` lê só os IDs do arranjo e as posições, que servem para ordenar o `lineup`; o payload tem só `MemberId`, regras e versões (fixture `match-start.g1.json` e teste que varre chaves e valores atrás de nota, apelido e posição). A posição decide a ordem e não é gravada |
+| I | Origem da quadra no `sacou.db` (Parte 2) | Passo 2 da migração: `court_sessions.group_id` e `round_id`, só IDs, como o resto do arquivo (`dados-pessoais.md`); nulos nas sessões da amostra. O teste do esquema confere que nenhuma coluna guarda nome |
+| T | Partida começada com a lista desatualizada ou forjada | "Começar partida" fica desligado quando alguém do sorteio saiu da rodada (`staleDraw`) e quando a sessão da rodada tem partida aberta. O servidor ainda não confere `teams` contra os confirmados nem o `courtSessionId` gerado no aparelho: fica para a E3.7 (linha T do stream) |
+| D | Abrir a quadra de uma rodada derruba a partida em curso de outra | `ensureRoundCourtSession` recusa ("Há uma partida aberta em outra rodada. Encerre-a antes.") e não fecha nada quando a sessão aberta tem partida em curso; fechar uma sessão sem partida não apaga eventos (a E4.11 sincroniza) |
+| I | Nomes da quadra fora do cache de membros | O `CourtRoster` real só lê o cache do TanStack, que já é persistido (E4.2); nada do roster vai para o log da quadra nem para evento |
 
 ### 12.1 Convite no app (E4.5, Parte 2)
 

@@ -81,7 +81,10 @@ const realServices: Services = {
   courtRuntimeOpener: expoCourtRuntimeOpener,
   // The names of the members cache, persisted, so the court has them offline (E4.2, E4.7). The sample
   // names stay behind them only for the development screen.
-  courtRoster: createCachedCourtRoster(queryClient, DEV_TOOLS_ENABLED ? createSampleRoster() : null),
+  courtRoster: createCachedCourtRoster(
+    queryClient,
+    DEV_TOOLS_ENABLED ? createSampleRoster() : null,
+  ),
   screenAwake: expoKeepAwakeScreen,
   screenOrientation: expoScreenOrientation,
   batteryMonitor: expoBatteryMonitor,

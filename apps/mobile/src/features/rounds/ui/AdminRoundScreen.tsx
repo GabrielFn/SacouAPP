@@ -16,6 +16,7 @@ import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { hasRoundLayer, roundChips, sourceReader } from "../model/round-chips";
 import {
   footerActions,
+  roundFooterActions,
   isCanceled,
   roleHeader,
   statsCells,
@@ -24,6 +25,8 @@ import {
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
 import type { CopyNote } from "../model/round-screen.reducer";
 import { canDraw } from "../../draw/model/can-draw";
+import { useRoundCourt } from "../../court/hooks/use-round-court";
+import { courtHref } from "../../court/navigation";
 import {
   addPlayerHref,
   drawHref,
@@ -85,25 +88,22 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
   );
 }
 
-/** "Sortear times" and "Abrir quadra" appear when their screens exist (D1). */
+/** "Abrir quadra" only with a court of this round on the device, "Sortear times" for who draws (D1). */
 export interface RoundFooterProps {
   readonly actions: readonly PendingRoundScreen[];
   readonly onDraw: () => void;
+  readonly onCourt: () => void;
 }
 
-function RoundFooter({ actions, onDraw }: RoundFooterProps) {
+function RoundFooter({ actions, onDraw, onCourt }: RoundFooterProps) {
   return (
     <>
-      {actions.includes("court") ? <Button label={detail.openCourt} onPress={noAction} /> : null}
+      {actions.includes("court") ? <Button label={detail.openCourt} onPress={onCourt} /> : null}
       {actions.includes("draw") ? (
         <Button label={detail.drawTimes} variant="secondary" onPress={onDraw} />
       ) : null}
     </>
   );
-}
-
-function noAction(): void {
-  // The court takes over this button when the pre-game exists (E4.7, part 2).
 }
 
 export interface AdminRoundScreenProps {
@@ -200,14 +200,23 @@ export function AdminRoundScreen({
 }: AdminRoundScreenProps) {
   const router = useRouter();
   const roster = rosterView(round, settings, members);
-  const actions = canDraw(group.role)
-    ? footerActions(PENDING_ROUND_SCREENS, isCanceled(round))
-    : [];
+  const read = useRoundCourt(round.roundId);
+  const court = read.status === "read" ? read.court : null;
+  const actions = roundFooterActions(
+    footerActions(PENDING_ROUND_SCREENS, isCanceled(round)),
+    canDraw(group.role),
+    court !== null,
+  );
   const footer = (
     <RoundFooter
       actions={actions}
       onDraw={() => {
         router.push(drawHref(groupId, round.roundId));
+      }}
+      onCourt={() => {
+        if (court !== null) {
+          router.push(courtHref("court", { courtSessionId: court.courtSessionId, theme: "sun" }));
+        }
       }}
     />
   );

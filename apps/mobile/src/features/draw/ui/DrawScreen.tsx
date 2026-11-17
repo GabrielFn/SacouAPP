@@ -115,6 +115,7 @@ export function DrawScreen({ groupId, roundId }: DrawScreenProps) {
   if (screen.kind === "drawn") {
     return (
       <DrawnView
+        groupId={groupId}
         model={model}
         arrangement={screen.arrangement}
         round={round.data}
