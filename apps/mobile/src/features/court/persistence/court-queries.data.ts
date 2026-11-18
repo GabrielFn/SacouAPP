@@ -1,5 +1,3 @@
-import { HALTS_LIFTED_ON_OPEN } from "../ports/court-event-log";
-
 /** Every statement of the court log. Values always travel as parameters, never inside the text. */
 export const SELECT_DEVICE_ID = "SELECT device_id FROM device WHERE singleton = 1";
 export const INSERT_DEVICE_ID = "INSERT INTO device (singleton, device_id) VALUES (1, ?)";
@@ -41,8 +39,9 @@ export const RAISE_ACKED_SEQUENCE =
   "UPDATE court_sessions SET acked_sequence = MAX(acked_sequence, ?) WHERE court_session_id = ?";
 export const SET_ACKED_SEQUENCE =
   "UPDATE court_sessions SET acked_sequence = ? WHERE court_session_id = ?";
-export const LIFT_HALTS_ON_OPEN = `UPDATE court_sessions SET sync_halt = NULL
-  WHERE sync_halt IN (${HALTS_LIFTED_ON_OPEN.map(() => "?").join(", ")})`;
+/** One placeholder per code of `HALTS_LIFTED_ON_OPEN`. */
+export const LIFT_HALTS_ON_OPEN =
+  "UPDATE court_sessions SET sync_halt = NULL WHERE sync_halt IN (?, ?)";
 export const SET_SYNC_HALT = "UPDATE court_sessions SET sync_halt = ? WHERE court_session_id = ?";
 export const SET_TAKEN_OVER =
   "UPDATE court_sessions SET taken_over_batch = ?, acked_sequence = ? WHERE court_session_id = ?";

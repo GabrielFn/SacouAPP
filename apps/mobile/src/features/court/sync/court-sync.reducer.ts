@@ -71,6 +71,11 @@ function failed(
     : { status: "waiting", untilMs: nowMs + retryAfterMs, attempt, reason: "retry-after" };
 }
 
+function passDone(state: CourtSyncState, more: boolean): CourtSyncState {
+  if (state.status !== "sending") return state;
+  return more || state.again ? sending(0) : INITIAL_COURT_SYNC_STATE;
+}
+
 export function courtSyncReducer(state: CourtSyncState, action: CourtSyncAction): CourtSyncState {
   switch (action.type) {
     case "started":
@@ -78,8 +83,7 @@ export function courtSyncReducer(state: CourtSyncState, action: CourtSyncAction)
     case "poked":
       return poked(state);
     case "pass-done":
-      if (state.status !== "sending") return state;
-      return action.more || state.again ? sending(0) : INITIAL_COURT_SYNC_STATE;
+      return passDone(state, action.more);
     case "pass-failed":
       return failed(state, action);
     case "wait-elapsed":
