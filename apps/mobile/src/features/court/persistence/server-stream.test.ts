@@ -2,7 +2,11 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import { parseEventEnvelope } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
+import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import type { CourtEventLog, ServerStreamImport } from "../ports/court-event-log";
+import type { SqlDatabase, SqlExecutor } from "../ports/sql-database";
+import { createCourtEventRepository } from "./court-event-repository";
+import { SELECT_SESSION } from "./court-queries.data";
 import {
   DEVICE,
   makeEnvelope,
@@ -44,6 +48,28 @@ function imported(overrides: Partial<ServerStreamImport> = {}): ServerStreamImpo
     batch: TAKEN_BATCH,
     lastSequence: 0,
     ...overrides,
+  };
+}
+
+const SESSION_C = "c0000000-0000-4000-8000-00000000000c";
+
+/** The real database, but the row of `brokenSession` reads without its cursor inside a transaction. */
+function withBrokenCursor(database: SqlDatabase, brokenSession: string): SqlDatabase {
+  const breaking = (executor: SqlExecutor): SqlExecutor => ({
+    ...executor,
+    exec: (sql) => executor.exec(sql),
+    run: (sql, params) => executor.run(sql, params),
+    async getAll(sql, params) {
+      const rows = await executor.getAll(sql, params);
+      const broken = sql === SELECT_SESSION && params?.[0] === brokenSession;
+      return broken ? rows.map((row) => ({ ...row, acked_sequence: null })) : rows;
+    },
+  });
+  return {
+    exec: (sql) => database.exec(sql),
+    run: (sql, params) => database.run(sql, params),
+    getAll: (sql, params) => database.getAll(sql, params),
+    transaction: (work) => database.transaction((transaction) => work(breaking(transaction))),
   };
 }
 
@@ -117,6 +143,39 @@ describe("replaceWithServerStream (E4.11, D5)", () => {
     expect(await log.findOpenSessionOfRound(ROUND.roundId)).toEqual({ ok: true, value: SESSION_A });
     const sync = await log.findSessionsToSync(DEVICE);
     expect(sync.ok && sync.value).toEqual([]);
+  });
+
+  test("a failure on the second other session rolls back the first one too", async () => {
+    const sqlite = await openMigratedDatabase();
+    const log = repositoryOn(sqlite);
+    const pending = [SESSION_B, SESSION_C].map((courtSessionId, index) =>
+      makeEnvelope({ courtSessionId, sequence: 1, eventNumber: 50 + index }),
+    );
+    for (const envelope of pending) {
+      await log.openSession(envelope.courtSessionId, OWNER);
+      await log.append(envelope.courtSessionId, [envelope]);
+    }
+    const broken = createCourtEventRepository(
+      withBrokenCursor(sqlite.database, SESSION_C),
+      createSequentialIdGenerator(),
+    );
+
+    expect(await broken.replaceWithServerStream(imported())).toEqual({
+      ok: false,
+      error: { code: "corrupted-log" },
+    });
+
+    for (const envelope of pending) {
+      const stored = await loadOk(log, envelope.courtSessionId);
+      expect(stored.events).toEqual([envelope]);
+      expect(stored).toMatchObject({ refused: [], takenOverBatch: null });
+    }
+    expect((await log.load(SESSION_A)).ok).toBe(false);
+    const sync = await log.findSessionsToSync(DEVICE);
+    expect(sync.ok && sync.value.map((session) => session.courtSessionId)).toEqual([
+      SESSION_B,
+      SESSION_C,
+    ]);
   });
 
   test.each([
