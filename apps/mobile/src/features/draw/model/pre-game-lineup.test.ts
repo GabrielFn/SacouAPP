@@ -7,7 +7,7 @@ import {
   type TeamSide,
   type TeamState,
 } from "@sacou/match-engine";
-import { ROTATION_SLOTS, type SetterZone } from "@sacou/volley-rules";
+import { ROTATION_SLOTS } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
@@ -19,14 +19,13 @@ import { initialLineupEditorState } from "../../lineup/model/lineup-editor.reduc
 import { lineupView } from "../../lineup/model/lineup-selectors";
 import { PENDING_PRE_GAME_SCREENS } from "../navigation";
 import { drawFlowReducer, type DrawFlowAction, type DrawFlowState } from "./draw-flow.reducer";
-import { drawnG1 } from "./draw.test.fixture";
+import { drawnG1, RESERVES, TEAM_A, TEAM_B } from "./draw.test.fixture";
 import { buildMatchStart, teamRotation } from "./match-start";
 import type { PreGameChoices, SavedLineup } from "./pre-game";
 import { toSavedLineup } from "./pre-game-lineup";
 import { preGameLineupSource } from "./pre-game-lineup-source";
 import { rotationView } from "./pre-game-selectors";
 import { g1Input, g1UuidArrangement, g1UuidNames, uuidOf } from "./pre-game.test.fixture";
-import { RESERVES, TEAM_A, TEAM_B } from "./draw.test.fixture";
 
 const nameOf = g1UuidNames();
 const ORIGIN = { groupId: "g1", roundId: "r1" };
@@ -92,7 +91,7 @@ describe("the libero of the start, a reserve chosen on screen 22 (D5, question 7
       (["receiving", "serving"] as const).map((phase) => [zone, phase] as const),
     ),
   )("zone %i, %s: the replay puts Sofia where the table says", async (zone, phase) => {
-    const lineups = { a: saved(defaultOf("a"), { libero: SOFIA, setterZone: zone as SetterZone }) };
+    const lineups = { a: saved(defaultOf("a"), { libero: SOFIA, setterZone: zone }) };
     const court = runtime();
     const input = g1Input({ lineups, firstServer: phase === "serving" ? "a" : "b" });
     const id = await startFromDraw(court, ORIGIN, input);

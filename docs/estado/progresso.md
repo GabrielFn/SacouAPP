@@ -51,6 +51,7 @@
 | E4.3 | Feita | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b), ADR 0057. Testada no celular em 16/11 (Galaxy, Android 17, build de desenvolvimento contra a API local pelo USB, PRs #112 a #114): login com Google, 27, criar grupo, 30, exportar (arquivo temporário apagado) e excluir (banco conferido: usuário apagado, marca gravada, vínculo `left`). Segunda rodada no mesmo dia: troca de conta, e-mail e senha, modo avião e fonte grande. O 302 passou no teste de 17/11 (o app não segue redirecionamento para outra origem). Defeitos em `pendencias.md`. |
 | E4.7 | Feita | PRs #127, #135 e #140, ADR 0061 (sorteio no app, tela 07, folha 08, início da partida, "Montar times" à mão com o golden `draw-split.json` TS × C#). |
 | E5.3a | Feita | PR #136, ADR 0062 (limite por usuário, janela por rota, vagas das rotas de duas conexões com limite por conta). Riscos aceitos: achados baixos 2 e 3 da segurança, revistos na E5.3 com os 429 do piloto. |
+| E4.8 | Em andamento | Parte 1 (modelo da 22, `LineupScreen` em retrato e paisagem, folha no pré-jogo, líbero do início no `MatchStarted`) na branch `task/E4.8-lineup-p1`, ADR 0065. Parte 2 (a 22 na partida) depois. |
 
 ## Em andamento
 

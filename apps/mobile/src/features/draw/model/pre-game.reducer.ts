@@ -97,8 +97,36 @@ function lineupSaved<S extends PreGameSlice>(state: S, lineups: SavedLineups): S
   return { ...saved, sheet: "pre-game" };
 }
 
+type LineupSheetAction = Extract<
+  PreGameAction,
+  { type: "lineup-opened" | "lineup-closed" | "lineup-saved" }
+>;
+
+const LINEUP_SHEET_ACTION_TYPES: readonly PreGameAction["type"][] = [
+  "lineup-opened",
+  "lineup-closed",
+  "lineup-saved",
+];
+
+function isLineupSheetAction(action: PreGameAction): action is LineupSheetAction {
+  return LINEUP_SHEET_ACTION_TYPES.includes(action.type);
+}
+
+/** Screen 22 over the 08 (E4.8, D1). */
+function lineupSheetReducer<S extends PreGameSlice>(state: S, action: LineupSheetAction): S {
+  switch (action.type) {
+    case "lineup-opened":
+      return lineupOpened(state);
+    case "lineup-closed":
+      return state.sheet === "lineup" ? { ...state, sheet: "pre-game" } : state;
+    case "lineup-saved":
+      return lineupSaved(state, action.lineups);
+  }
+}
+
 /** The sheet keeps only what differs from the round: back to the base, the choice goes (D3, D6). */
 export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGameAction): S {
+  if (isLineupSheetAction(action)) return lineupSheetReducer(state, action);
   switch (action.type) {
     case "pre-game-opened":
       return opened(state);
@@ -114,11 +142,5 @@ export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGame
       return withChoices(state, { rotationTab: action.side });
     case "system-chosen":
       return systemChosen(state, action.side, action.system, action.base);
-    case "lineup-opened":
-      return lineupOpened(state);
-    case "lineup-closed":
-      return state.sheet === "lineup" ? { ...state, sheet: "pre-game" } : state;
-    case "lineup-saved":
-      return lineupSaved(state, action.lineups);
   }
 }

@@ -4,6 +4,7 @@ import { ROTATION_SLOTS, type FormationSystem, type RotationSlot } from "@sacou/
 import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { misplacedMembers } from "./fix-roles";
+import { DIAGRAM_ORDER } from "./lineup.data";
 import { courtChips, serverOf, type LineupChip } from "./lineup-court";
 import {
   draftsToSave,
@@ -14,8 +15,6 @@ import {
 import type { LineupDraft } from "./lineup-moves";
 import { basesOf, LINEUP_SIDES, type LineupSource, type LineupTeamSource } from "./lineup-source";
 
-/** The order of the court diagram, front row then back row (4, 3, 2, 5, 6, 1): the warning reads so. */
-const DIAGRAM_ORDER: readonly RotationSlot[] = [4, 3, 2, 5, 6, 1];
 const TWO = 2;
 
 export interface LineupTab {

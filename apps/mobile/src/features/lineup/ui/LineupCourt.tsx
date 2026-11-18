@@ -27,7 +27,7 @@ export interface LineupCourtProps {
 }
 
 function percent(value: number): `${number}%` {
-  return `${Math.round(value * ROUNDING) / ROUNDING}%`;
+  return `${String(Math.round(value * ROUNDING) / ROUNDING)}%` as `${number}%`;
 }
 
 export interface ChipSpotProps {

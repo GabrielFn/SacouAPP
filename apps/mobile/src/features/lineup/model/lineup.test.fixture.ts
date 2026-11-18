@@ -38,7 +38,14 @@ export function teamState(
 }
 
 /** The team of the canvas: 5x1, Pedro sets from zone 2 (Escalacao.dc.html). */
-export const CANVAS_TEAM = teamState(["pedro", "ana", "lia", "marcos", "bia", "joao"], 2);
+const CANVAS_SETTER_ZONE = 2;
+const FULL_TEAM = 6;
+const SHORT_TEAM = 5;
+
+export const CANVAS_TEAM = teamState(
+  ["pedro", "ana", "lia", "marcos", "bia", "joao"],
+  CANVAS_SETTER_ZONE,
+);
 
 export function baseOf(state: TeamState, side: TeamSide = "a", key = "k1"): LineupBase {
   return { side, state, key, liberoExit: "out" };
@@ -53,7 +60,7 @@ export function teamSource(
     side,
     name: side === "a" ? "Laranja" : "Azul",
     color: side === "a" ? "orange" : "blue",
-    size: base === null ? 5 : 6,
+    size: base === null ? SHORT_TEAM : FULL_TEAM,
     base,
     phase: side === "a" ? "serving" : "receiving",
     liberoPool: ["sofia", "rafa"],
