@@ -30,7 +30,7 @@ public sealed class CourtWriteRulesTests
         var decision = Accepted(Decide(StoredStream.New, SixEvents));
 
         Assert.True(decision.CreatesStream);
-        Assert.Equal(new CourtWriter(1, Device, Caller), decision.Writer);
+        Assert.Equal(new CourtWriter(1, Device, Caller, EventsBefore: 0), decision.Writer);
         Assert.Equal(6, decision.NewEvents.Length);
         Assert.Equal(6, decision.LastSequence);
         Assert.Equal(0, decision.Duplicates);
@@ -124,7 +124,7 @@ public sealed class CourtWriteRulesTests
     {
         var events = ImmutableArray.Create(Parse(Envelope(7, ScoreEventTypes.PointScored, Point("a"), batch: batch)));
 
-        var error = Refused(Decide(Stored(SixEvents, new CourtWriter(2, Device, Caller)), events));
+        var error = Refused(Decide(Stored(SixEvents, new CourtWriter(2, Device, Caller, EventsBefore: 0)), events));
 
         Assert.Equal(CourtWriteErrorCode.BatchMismatch, error.Code);
     }

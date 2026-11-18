@@ -99,11 +99,12 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
 
     private async Task<StoredStream> LoadStoredAsync(CourtSessionRow session, CancellationToken cancellationToken)
     {
-        var writer = await database.CourtWriters.AsNoTracking()
-            .SingleAsync(row => row.CourtSessionId == session.Id && row.Batch == session.CurrentBatch, cancellationToken)
-            .ConfigureAwait(false);
+        var writers = await database.CourtWriters.AsNoTracking()
+            .Where(row => row.CourtSessionId == session.Id)
+            .OrderBy(row => row.Batch)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
         var events = await LoadAsync(session.Id, cancellationToken).ConfigureAwait(false);
-        return StoredStream.Of(events, new CourtWriter(writer.Batch, Text(writer.DeviceId), Text(writer.MemberId)));
+        return StoredStream.Of(events, [.. writers.Select(row => new CourtWriter(row.Batch, Text(row.DeviceId), Text(row.MemberId), row.EventsBefore))]);
     }
 
     public async Task<ImmutableArray<StreamEvent>> LoadAsync(Guid courtSessionId, CancellationToken cancellationToken)
@@ -144,7 +145,7 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
                 Batch = decision.Writer.Batch,
                 DeviceId = Guid.Parse(decision.Writer.DeviceId),
                 MemberId = Guid.Parse(decision.Writer.MemberId),
-                EventsBefore = session.EventCount,
+                EventsBefore = decision.Writer.EventsBefore,
                 StartedAt = append.Now,
             });
         }

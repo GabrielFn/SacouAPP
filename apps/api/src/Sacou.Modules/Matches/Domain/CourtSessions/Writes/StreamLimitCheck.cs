@@ -5,7 +5,7 @@ using Sacou.Modules.Matches.Domain.CourtSessions.Score.PayloadParsers;
 
 namespace Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
-/// <summary>The ceiling a write reached, by closed list (ADR 0060, D9).</summary>
+/// <summary>The ceiling a write or a takeover reached, by closed list (ADR 0060, D9; ADR 0063, D10).</summary>
 internal static class StreamLimitNames
 {
     public const string StreamEvents = "stream-events";
@@ -16,6 +16,7 @@ internal static class StreamLimitNames
     public const string MatchServingChanges = "match-serving-changes";
     public const string MatchReverts = "match-reverts";
     public const string PointAttributions = "point-attributions";
+    public const string WritersPerStream = "writers-per-stream";
 
     public static readonly ImmutableArray<string> All =
     [
@@ -27,6 +28,7 @@ internal static class StreamLimitNames
         MatchServingChanges,
         MatchReverts,
         PointAttributions,
+        WritersPerStream,
     ];
 }
 

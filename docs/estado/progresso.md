@@ -53,6 +53,7 @@
 | E3.7 | Feita | PRs #128 e #138, ADR 0060 (stream da quadra: regras de escrita, golden, rota idempotente com `court-sync`). Parte 2: revisão e segurança juntas (Opus) aprovaram com condições (docs e a tarefa nova **E5.3b**, custo do replay, que bloqueia o piloto); testador Sonnet: 5 de 5 sabotagens. |
 | E4.7 | Feita | PRs #127, #135 e #140, ADR 0061 (sorteio no app, tela 07, folha 08, início da partida, "Montar times" à mão com o golden `draw-split.json` TS × C#). |
 | E5.3a | Feita | PR #136, ADR 0062 (limite por usuário, janela por rota, vagas das rotas de duas conexões com limite por conta). Riscos aceitos: achados baixos 2 e 3 da segurança, revistos na E5.3 com os 429 do piloto. |
+| E4.8 | Em andamento | Parte 1 (modelo da 22, `LineupScreen` em retrato e paisagem, folha no pré-jogo, líbero do início no `MatchStarted`) na branch `task/E4.8-lineup-p1`, ADR 0065. Parte 2 (a 22 na partida) depois. |
 
 ## Em andamento
 

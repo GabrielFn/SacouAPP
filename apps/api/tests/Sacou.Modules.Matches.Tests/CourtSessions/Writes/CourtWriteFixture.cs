@@ -107,7 +107,7 @@ internal static class CourtWriteFixture
         [.. events.Select((item, index) => Parse(Envelope(firstSequence + index, item.Type, item.Payload)))];
 
     public static StoredStream Stored(ImmutableArray<StreamEvent> events, CourtWriter? writer = null) =>
-        StoredStream.Of(events, writer ?? new CourtWriter(1, Device, Caller));
+        StoredStream.Of(events, [writer ?? new CourtWriter(1, Device, Caller, EventsBefore: 0)]);
 
     public static Result<CourtWriteDecision, CourtWriteError> Decide(
         StoredStream stored,
