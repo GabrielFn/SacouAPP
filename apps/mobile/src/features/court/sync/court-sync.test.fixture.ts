@@ -25,6 +25,9 @@ import {
   type FakeCourtStreamServer,
 } from "./fake-court-stream-server.test.fixture";
 
+/** The middle of the variation, so the backoff waits are the round numbers of the plan. */
+const MIDDLE_JITTER = 0.5;
+
 export const ROUND = {
   groupId: "g0000000-0000-4000-8000-000000000001",
   roundId: "r0000000-0000-4000-8000-000000000001",
@@ -94,7 +97,7 @@ export async function createSyncHarness(options: SyncHarnessOptions = {}): Promi
       foreground,
       clock,
       scheduler,
-      random: { next: () => 0.5 },
+      random: { next: () => MIDDLE_JITTER },
     });
   const current = { value: make() };
   current.value.start();

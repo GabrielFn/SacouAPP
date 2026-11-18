@@ -4,9 +4,10 @@ import type { SacouApi } from "../../../services/api/sacou-api";
 import { highestSequence } from "../persistence/append-rules";
 import type { CourtLogResult, CourtEventLog, SessionToSync } from "../ports/court-event-log";
 import type { CourtAccountRef } from "../ports/court-account";
-import { chunkForUpload, MAX_EVENTS_PER_REQUEST } from "./chunk-for-upload";
+import { chunkForUpload } from "./chunk-for-upload";
 import { pendingEvents } from "./pending-events";
 import { decideSync, type SentRequest, type SyncDecision } from "./sync-policy";
+import { MAX_EVENTS_PER_REQUEST, SHRINK_FACTOR } from "./sync.data";
 
 /** How one request (or its follow-ups) ended, for the loop. */
 export type UploadOutcome =
@@ -46,7 +47,6 @@ interface Pending {
 const PROGRESS: UploadOutcome = { type: "progress" };
 const NOTHING: UploadOutcome = { type: "nothing" };
 const BACKOFF: UploadOutcome = { type: "retry", afterMs: null };
-const HALVE = 2;
 
 function written(result: CourtLogResult<void>): UploadOutcome {
   return result.ok ? PROGRESS : BACKOFF;
@@ -131,7 +131,7 @@ async function sendFirstChunk(
   if (chunk.length === 1) {
     return apply(context, { type: "halt", code: "event-too-large" }, sent);
   }
-  return sendFirstChunk(context, pending, Math.ceil(chunk.length / HALVE));
+  return sendFirstChunk(context, pending, Math.ceil(chunk.length / SHRINK_FACTOR));
 }
 
 /** Sends the next request of one session and writes what the answer means in its log. */

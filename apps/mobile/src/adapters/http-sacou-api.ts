@@ -132,17 +132,24 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     return account !== null && idTokens.currentSession() !== account;
   }
 
+  async function tokenOf(
+    state: AttemptState,
+    account: SessionIdentity | null,
+  ): Promise<ApiResult<string | null>> {
+    if (switchedFrom(account)) return apiErr(ACCOUNT_CHANGED);
+    const token = await tokenFor(state);
+    // The token was read while waiting: the account may have changed meanwhile.
+    return token.ok && switchedFrom(account) ? apiErr(ACCOUNT_CHANGED) : token;
+  }
+
   async function run<T>(
     call: Call<T>,
     state: AttemptState,
     account: SessionIdentity | null,
   ): Promise<ApiResult<T>> {
     const session = idTokens.currentSession();
-    if (switchedFrom(account)) return apiErr(ACCOUNT_CHANGED);
-    const tokenResult = await tokenFor(state);
+    const tokenResult = await tokenOf(state, account);
     if (!tokenResult.ok) return tokenResult;
-    // The token was read while waiting: the account may have changed meanwhile.
-    if (switchedFrom(account)) return apiErr(ACCOUNT_CHANGED);
     const token = tokenResult.value;
     if (token === null) return giveUp({ kind: "session-expired" });
     const result = await attempt(call, token);

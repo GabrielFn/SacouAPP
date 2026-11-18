@@ -16,7 +16,8 @@ export interface FakeScheduler extends Scheduler {
 }
 
 export function createFakeScheduler(clock: FakeClock): FakeScheduler {
-  const tasks = { value: [] as readonly Pending[], made: 0 };
+  const tasks = { value: [] as readonly Pending[] };
+  const made = { value: 0 };
 
   function runDue(): void {
     const due = tasks.value
@@ -30,8 +31,8 @@ export function createFakeScheduler(clock: FakeClock): FakeScheduler {
 
   return {
     after(delayMs, task) {
-      tasks.made += 1;
-      const pending: Pending = { dueMs: clock.now() + delayMs, task, id: tasks.made };
+      made.value += 1;
+      const pending: Pending = { dueMs: clock.now() + delayMs, task, id: made.value };
       tasks.value = [...tasks.value, pending];
       return () => {
         tasks.value = tasks.value.filter((other) => other.id !== pending.id);

@@ -55,7 +55,7 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
     otherAccountSessions: NO_SESSIONS,
   });
   const inFlight = { value: false };
-  const timer = { cancel: null as (() => void) | null };
+  const timer = { current: null as (() => void) | null };
   const unsubscribes = { value: [] as readonly (() => void)[] };
   const sessionListeners = { value: [] as readonly SessionListener[] };
 
@@ -118,12 +118,12 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
   }
 
   function schedule(): void {
-    timer.cancel?.();
-    timer.cancel = null;
+    timer.current?.();
+    timer.current = null;
     const { loop } = store.getSnapshot();
     if (loop.status !== "waiting") return;
-    timer.cancel = deps.scheduler.after(Math.max(0, loop.untilMs - deps.clock.now()), () => {
-      timer.cancel = null;
+    timer.current = deps.scheduler.after(Math.max(0, loop.untilMs - deps.clock.now()), () => {
+      timer.current = null;
       dispatch({ type: "wait-elapsed" });
     });
   }

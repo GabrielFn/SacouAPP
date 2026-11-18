@@ -141,7 +141,7 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       faults.value = [...faults.value, ...next];
     },
     holdNext() {
-      const release = { value: () => undefined as void };
+      const release: { value: () => void } = { value: () => undefined };
       gate.value = new Promise<void>((resolve) => {
         release.value = resolve;
       });

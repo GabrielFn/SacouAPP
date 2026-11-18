@@ -60,7 +60,7 @@ describe("the court answers of the API (E4.11, P5)", () => {
 
   test.each<[string, unknown]>([
     ["negative", -1],
-    ["too large to be exact", 1e400],
+    ["infinite", Number.POSITIVE_INFINITY],
     ["not whole", 2.5],
     ["a text", "10"],
     ["unsafe", Number.MAX_SAFE_INTEGER + 2],

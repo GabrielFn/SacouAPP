@@ -50,15 +50,14 @@ export interface FakeAuthSession extends AuthSession {
   calls(): readonly FakeAuthCall[];
 }
 
-const accountKeys = { byIdentity: new WeakMap<SessionIdentity, string>(), made: 0 };
+const accountKeys = { value: new Map<SessionIdentity, string>() };
 
 /** The key of a fake account, the same for the same identity (the real one hashes the UID). */
 export function fakeAccountKeyOf(identity: SessionIdentity): string {
-  const known = accountKeys.byIdentity.get(identity);
+  const known = accountKeys.value.get(identity);
   if (known !== undefined) return known;
-  accountKeys.made += 1;
-  const key = `fake-account-key-${String(accountKeys.made)}`;
-  accountKeys.byIdentity.set(identity, key);
+  const key = `fake-account-key-${String(accountKeys.value.size + 1)}`;
+  accountKeys.value = new Map([...accountKeys.value, [identity, key]]);
   return key;
 }
 

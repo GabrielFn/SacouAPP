@@ -102,24 +102,24 @@ function problem(
   return conflict === undefined ? DIVERGED : conflict(details, sent);
 }
 
+type PlainKind = Exclude<ApiError["kind"], "problem" | "rate-limited" | "unavailable">;
+
+/** The answers without content to read. Nothing is lost by waiting: the events stay in the log. */
+const PLAIN_DECISIONS: Readonly<Record<PlainKind, SyncDecision>> = {
+  "too-large": { type: "shrink" },
+  "account-changed": { type: "account-changed" },
+  "session-expired": BACKOFF,
+  "not-registered": BACKOFF,
+  offline: BACKOFF,
+  unexpected: BACKOFF,
+};
+
 function failure(error: ApiError, sent: SentRequest): SyncDecision {
-  switch (error.kind) {
-    case "problem":
-      return problem(error.status, error.code, error.details ?? {}, sent);
-    case "too-large":
-      return { type: "shrink" };
-    case "rate-limited":
-    case "unavailable":
-      return { type: "retry", afterMs: error.retryAfterMs };
-    case "account-changed":
-      return { type: "account-changed" };
-    case "session-expired":
-    case "not-registered":
-    case "offline":
-    case "unexpected":
-      // Nothing is lost by waiting: the events stay in the log.
-      return BACKOFF;
+  if (error.kind === "problem") return problem(error.status, error.code, error.details ?? {}, sent);
+  if (error.kind === "rate-limited" || error.kind === "unavailable") {
+    return { type: "retry", afterMs: error.retryAfterMs };
   }
+  return PLAIN_DECISIONS[error.kind];
 }
 
 /** The one table of what each answer means for the upload (D4). Pure: the runner does the effects. */

@@ -1,28 +1,18 @@
 import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
-/** The server takes 1 to 200 events per request (ADR 0060, D5). */
-export const MAX_EVENTS_PER_REQUEST = 200;
-const KIB = 1_024;
-/** Below the 256 KiB of the server, so 200 envelopes of the worst size never make a 413 (D3). */
-export const MAX_REQUEST_BYTES = 192 * KIB;
-/** The ceiling of one envelope on the server: one above it is never sent. */
-export const MAX_ENVELOPE_BYTES = 16 * KIB;
+import { MAX_ENVELOPE_BYTES, MAX_EVENTS_PER_REQUEST, MAX_REQUEST_BYTES } from "./sync.data";
+
+export { MAX_ENVELOPE_BYTES, MAX_EVENTS_PER_REQUEST, MAX_REQUEST_BYTES } from "./sync.data";
 
 // `{"events":[` and `]}` around the envelopes, and one comma between two of them.
 const BODY_FRAME_BYTES = '{"events":[]}'.length;
 const SEPARATOR_BYTES = 1;
-
-const UTF8_LIMITS = [0x80, 0x800, 0x10000] as const;
-
-function codePointBytes(codePoint: number): number {
-  const index = UTF8_LIMITS.findIndex((limit) => codePoint < limit);
-  return index === -1 ? UTF8_LIMITS.length + 1 : index + 1;
-}
+const UTF8 = new TextEncoder();
 
 /** The size in UTF-8 of a text, as the server counts the body. */
 export function utf8Length(text: string): number {
-  return [...text].reduce((total, char) => total + codePointBytes(char.codePointAt(0) ?? 0), 0);
+  return UTF8.encode(text).length;
 }
 
 export function envelopeBytes(envelope: EventEnvelope): number {

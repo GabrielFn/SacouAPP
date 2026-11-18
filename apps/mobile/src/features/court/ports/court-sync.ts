@@ -26,8 +26,8 @@ export interface CourtSync extends CourtSyncHooks {
   start(): void;
   stop(): void;
   /** For `useSyncExternalStore`. */
-  subscribe(listener: () => void): () => void;
-  getSnapshot(): CourtSyncSnapshot;
+  readonly subscribe: (listener: () => void) => () => void;
+  readonly getSnapshot: () => CourtSyncSnapshot;
   /** Told when the loop wrote a halt or a take-over in a session, so its court reads the file again. */
   onSessionChanged(listener: (courtSessionId: string) => void): () => void;
   countUnsent(): Promise<UnsentSummary>;
