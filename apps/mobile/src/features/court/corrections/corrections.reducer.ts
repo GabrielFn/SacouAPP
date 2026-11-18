@@ -8,6 +8,8 @@ export interface CorrectionsState {
   readonly selected: string | null;
   readonly sheet: "none" | "shift";
   readonly shiftTeam: TeamSide;
+  /** Why the last command did nothing; any new pick or sheet clears it. */
+  readonly refusal: string | null;
 }
 
 export type CorrectionsAction =
@@ -15,12 +17,15 @@ export type CorrectionsAction =
   | { readonly type: "selection-cleared" }
   | { readonly type: "shift-opened" }
   | { readonly type: "shift-team-chosen"; readonly team: TeamSide }
-  | { readonly type: "shift-closed" };
+  | { readonly type: "shift-closed" }
+  | { readonly type: "command-refused"; readonly text: string }
+  | { readonly type: "command-accepted" };
 
 export const INITIAL_CORRECTIONS: CorrectionsState = {
   selected: null,
   sheet: "none",
   shiftTeam: "a",
+  refusal: null,
 };
 
 export function correctionsReducer(
@@ -34,14 +39,19 @@ export function correctionsReducer(
         ...state,
         selected: state.selected === action.eventId ? null : action.eventId,
         sheet: "none",
+        refusal: null,
       };
     case "selection-cleared":
       return { ...state, selected: null };
     case "shift-opened":
-      return { ...state, selected: null, sheet: "shift" };
+      return { ...state, selected: null, sheet: "shift", refusal: null };
     case "shift-team-chosen":
       return { ...state, shiftTeam: action.team };
     case "shift-closed":
       return { ...state, sheet: "none" };
+    case "command-refused":
+      return { ...state, refusal: action.text };
+    case "command-accepted":
+      return { ...state, refusal: null };
   }
 }

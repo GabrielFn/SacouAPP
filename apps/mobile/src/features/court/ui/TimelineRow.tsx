@@ -5,7 +5,6 @@ import { useTheme } from "../../../theme/theme-context";
 import { TEAM_PALETTES } from "../../../theme/team-colors";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import { DISABLED_OPACITY } from "../court.data";
 import type { TimelineRowModel } from "../corrections/corrections-selectors";
 
 export interface TimelineRowProps {
@@ -18,6 +17,8 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
   const { colors, tokens } = useTheme();
   const { sizes } = tokens.court;
   const palette = TEAM_PALETTES[row.color];
+  // Lines that will be erased are muted by colour, never by opacity, which would break contrast AA.
+  const mutedColor = row.willUndo ? { color: colors.textMuted } : null;
   return (
     <Pressable
       accessibilityRole="button"
@@ -37,7 +38,6 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
         backgroundColor: row.selected ? colors.surface : "transparent",
         borderWidth: row.selected ? tokens.court.borderWidths.outline : undefined,
         borderColor: colors.text,
-        opacity: row.willUndo ? DISABLED_OPACITY : 1,
       }}
     >
       <Text
@@ -48,6 +48,7 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
           fontFamily: fontFamilies.display800,
           fontSize: tokens.fontSizes.displayBrand,
           textDecorationLine: row.willUndo ? "line-through" : "none",
+          ...mutedColor,
         }}
       >
         {row.scoreText}
@@ -72,10 +73,10 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
           {strings.court.zone.teamLetter[row.team]}
         </Text>
       </View>
-      <Text variant="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
+      <Text variant="muted" numberOfLines={1} style={{ flexShrink: 1, ...mutedColor }}>
         {row.serveText}
         {row.serveName === null ? null : (
-          <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small }}>
+          <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small, ...mutedColor }}>
             {` ${row.serveName}`}
           </Text>
         )}

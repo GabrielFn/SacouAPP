@@ -16,6 +16,8 @@ export interface MatchMenuSheetProps {
   readonly inverted: boolean;
   readonly theme: CourtThemeChoice;
   readonly endSummary: EndMatchSummary | null;
+  /** Why "Encerrar partida" did nothing, in words. */
+  readonly refusal?: string | null;
   readonly onClose: () => void;
   readonly onCorrections: () => void;
   readonly onFlipSides: () => void;
@@ -94,6 +96,7 @@ export function MatchMenuSheet({
   inverted,
   theme,
   endSummary,
+  refusal = null,
   onClose,
   onCorrections,
   onFlipSides,
@@ -102,7 +105,7 @@ export function MatchMenuSheet({
   onEndMatch,
 }: MatchMenuSheetProps) {
   const { menu } = strings.court;
-  const { tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
   const askToEnd = () => {
     if (endSummary?.kind === "confirm-set") {
@@ -155,6 +158,11 @@ export function MatchMenuSheet({
           </View>
           <MenuRow label={menu.leave} onPress={onLeave} />
         </Group>
+        {refusal === null ? null : (
+          <Text accessibilityLiveRegion="polite" style={{ color: colors.danger }}>
+            {refusal}
+          </Text>
+        )}
         {endSummary === null ? null : (
           <Group>
             <MenuRow label={menu.endMatch} chevron onPress={askToEnd} />

@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtTheme } from "../../../features/court/hooks/use-court-theme";
 import { endMatchSummary, menuSubtitle } from "../../../features/court/model/menu-selectors";
+import { refusalText } from "../../../features/court/model/refusal-text";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { MatchMenuSheet } from "../../../features/court/ui/MatchMenuSheet";
 import { useServices } from "../../../services/services-context";
@@ -20,6 +21,7 @@ export default function MenuRoute() {
   const { inverted, toggle } = useCourtSides();
   const theme = useCourtTheme();
   const { view, dispatch, retry } = useCourtSession();
+  const [refusal, setRefusal] = useState<string | null>(null);
   const timeline = view.status === "ready" ? view.timeline : null;
   const subtitle = useMemo(
     () => (timeline === null ? null : menuSubtitle(timeline, courtRoster)),
@@ -43,6 +45,8 @@ export default function MenuRoute() {
     void dispatch({ type: "end-match-manually" }).then((result) => {
       if (result.ok) {
         route.replace("matchEnd");
+      } else {
+        setRefusal(refusalText(result.error));
       }
     });
   };
@@ -52,6 +56,7 @@ export default function MenuRoute() {
       inverted={inverted}
       theme={theme.choice}
       endSummary={summary}
+      refusal={refusal}
       onClose={route.back}
       onCorrections={() => {
         route.push("corrections");

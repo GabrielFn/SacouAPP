@@ -14,7 +14,7 @@ import {
   selectCourtScreen,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
-import { describeUndo, undoNoticeText } from "../../../features/court/model/undo-notice";
+import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
@@ -81,20 +81,15 @@ export default function CourtRoute() {
       }}
       notice={undoNotice.text}
       onUndo={() => {
-        // The line is worked out before the command, from the action about to be taken back. DESFAZER
-        // never buzzes, not even when the engine turns it down (answer of the Gabriel, ADR 0030).
-        const undone = timeline === null ? null : describeUndo(timeline);
-        const matchId =
-          timeline === null ? undefined : stateOfTimeline(timeline).currentMatch?.matchId;
-        void dispatch({ type: "undo" }).then((result) => {
-          if (result.ok) {
+        void undoCourtAction(timeline, {
+          dispatch,
+          teamLabel: (matchId, side) => courtRoster.teamAppearance(matchId, side).label,
+          onUndone: (text) => {
             guard.acceptUndo();
-            if (undone !== null && matchId !== undefined) {
-              undoNotice.show(
-                undoNoticeText(undone, (side) => courtRoster.teamAppearance(matchId, side).label),
-              );
+            if (text !== null) {
+              undoNotice.show(text);
             }
-          }
+          },
         });
       }}
       onCorrect={() => {

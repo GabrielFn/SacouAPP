@@ -65,7 +65,7 @@ function spokenLabel(
   const { corrections } = strings.court;
   const sideOut = point.sideOut ? corrections.rowSideOutLabel(teamLabel, point.setterZone) : null;
   const base = corrections.rowLabel(point.score.a, point.score.b, teamLabel, serve, sideOut);
-  return [base, ...marks].filter((part) => part !== null).join(". ");
+  return corrections.spokenParts([base, ...marks].filter((part) => part !== null));
 }
 
 function rowOf(
@@ -82,7 +82,7 @@ function rowOf(
   const serveText = serveName === null ? corrections.servesTeam(serverTeam) : corrections.serves;
   const selected = index === selectedIndex;
   const willUndo = selectedIndex > FIRST_ROW && index < selectedIndex;
-  const serve = serveName === null ? serveText : `${serveText} ${serveName}`;
+  const serve = serveName === null ? serveText : corrections.serveWithName(serveText, serveName);
   return {
     eventId: point.eventId,
     team: point.team,

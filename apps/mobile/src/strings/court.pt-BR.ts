@@ -143,6 +143,8 @@ export const courtStrings = {
     selected: "Selecionado",
     rowLabel: (a: number, b: number, team: string, serve: string, sideOut: string | null) =>
       `${String(a)} a ${String(b)}, ponto do ${team}, ${serve}${sideOut === null ? "" : `. ${sideOut}`}`,
+    spokenParts: (parts: readonly string[]) => parts.join(". "),
+    serveWithName: (serve: string, name: string) => `${serve} ${name}`,
     rowSideOutLabel: (team: string, zone: number | null) =>
       zone === null ? "Side-out" : `Side-out, ${team} gira para rotação ${String(zone)}`,
     revertTitle: (a: number, b: number) => `Voltar o jogo para ${String(a)}x${String(b)}?`,

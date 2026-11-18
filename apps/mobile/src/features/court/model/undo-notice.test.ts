@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { describeUndo, undoNoticeText } from "./undo-notice";
+import { describeUndo, undoNoticeText, type UndoNotice } from "./undo-notice";
 import {
   ROSTER,
   confirmSet,
@@ -44,5 +44,30 @@ describe("the line that says what DESFAZER took back", () => {
   test("nothing to say right after the start of the match", async () => {
     const scenario = await startScenario();
     expect(describeUndo(scenario.timeline())).toBeNull();
+  });
+});
+
+describe("the text of every kind of notice", () => {
+  const NOTICES: Record<UndoNotice["kind"], UndoNotice> = {
+    point: { kind: "point", team: "a", score: { a: 1, b: 0 } },
+    "serving-change": { kind: "serving-change" },
+    rotation: { kind: "rotation", team: "b" },
+    queue: { kind: "queue" },
+    "set-end": { kind: "set-end" },
+    attribution: { kind: "attribution" },
+  };
+
+  test("the queue and the attribution have their own lines", () => {
+    expect(undoNoticeText(NOTICES.queue, label)).toBe("Desfeito: mudança na fila");
+    expect(undoNoticeText(NOTICES.attribution, label)).toBe("Desfeito: autor do ponto");
+  });
+
+  test("the switch is exhaustive: every kind has a line, and an unknown kind does not compile", () => {
+    for (const notice of Object.values(NOTICES)) {
+      expect(undoNoticeText(notice, label)).toMatch(/^Desfeito: /);
+    }
+    // @ts-expect-error a kind outside the union is not an UndoNotice
+    const unknown: UndoNotice = { kind: "something-else" };
+    expect(unknown.kind).toBe("something-else");
   });
 });

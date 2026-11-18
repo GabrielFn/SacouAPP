@@ -1,4 +1,4 @@
-import { useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer } from "react";
 
 import {
   correctionsReducer,
@@ -32,7 +32,6 @@ export default function CorrectionsRoute() {
   const { courtRoster } = useServices();
   const { view, dispatch, retry } = useCourtSession();
   const [state, send] = useReducer(correctionsReducer, INITIAL_CORRECTIONS);
-  const [refusal, setRefusal] = useState<string | null>(null);
   const timeline = view.status === "ready" ? view.timeline : null;
   const selected = useMemo(
     () => (timeline === null ? null : effectiveSelection(timeline, state.selected)),
@@ -63,7 +62,11 @@ export default function CorrectionsRoute() {
   // A refusal says why nothing happened; a command that goes through clears the last one.
   const run = (command: PlayCommand, onDone?: () => void) => {
     void dispatch(command).then((result) => {
-      setRefusal(result.ok ? null : refusalText(result.error));
+      send(
+        result.ok
+          ? { type: "command-accepted" }
+          : { type: "command-refused", text: refusalText(result.error) },
+      );
       if (result.ok) {
         onDone?.();
       }
@@ -74,7 +77,7 @@ export default function CorrectionsRoute() {
     <CorrectionsScreen
       {...model}
       state={sheetState}
-      refusal={refusal}
+      refusal={state.refusal}
       onClose={route.backOrCourt}
       onPointTapped={(eventId) => {
         send({ type: "point-tapped", eventId });

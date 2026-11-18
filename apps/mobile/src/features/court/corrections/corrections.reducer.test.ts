@@ -32,15 +32,35 @@ describe("the state of screen 24", () => {
     expect(correctionsReducer(team, { type: "shift-closed" })).toMatchObject({
       sheet: "none",
       shiftTeam: "b",
+      refusal: null,
     });
   });
 
   test("clearing the selection keeps the rest", () => {
-    const state: CorrectionsState = { selected: "e1", sheet: "none", shiftTeam: "b" };
+    const state: CorrectionsState = {
+      selected: "e1",
+      sheet: "none",
+      shiftTeam: "b",
+      refusal: null,
+    };
     expect(correctionsReducer(state, { type: "selection-cleared" })).toEqual({
       selected: null,
       sheet: "none",
       shiftTeam: "b",
+      refusal: null,
     });
+  });
+});
+
+describe("the refusal of screen 24", () => {
+  test("a refusal stays until a point is picked or the sheet of Girar opens", () => {
+    const refused = correctionsReducer(INITIAL_CORRECTIONS, {
+      type: "command-refused",
+      text: "Nada mudou.",
+    });
+    expect(refused.refusal).toBe("Nada mudou.");
+    expect(correctionsReducer(refused, { type: "point-tapped", eventId: "e1" }).refusal).toBeNull();
+    expect(correctionsReducer(refused, { type: "shift-opened" }).refusal).toBeNull();
+    expect(correctionsReducer(refused, { type: "command-accepted" }).refusal).toBeNull();
   });
 });
