@@ -29,6 +29,15 @@ export const SYNC_HALT_CODES = [
 
 export type SyncHaltCode = (typeof SYNC_HALT_CODES)[number];
 
+/**
+ * The halts that opening the app again lifts (D4): the admin may give the permission back, and a
+ * round the server did not know may show up. The others are a stream that will not change.
+ */
+export const HALTS_LIFTED_ON_OPEN = [
+  "no-permission",
+  "not-found",
+] as const satisfies readonly SyncHaltCode[];
+
 export interface StoredCourtLog {
   /** The write batch of this device in the stream (`eventos.md`). */
   readonly batch: number;

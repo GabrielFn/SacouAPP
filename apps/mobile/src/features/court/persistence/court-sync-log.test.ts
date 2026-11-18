@@ -12,9 +12,11 @@ import {
   SESSION_A,
   SESSION_B,
 } from "./log-envelopes.test.fixture";
+import { INSERT_EVENT } from "./court-queries.data";
 import { migrateDatabase } from "./migrations";
 import { MIGRATION_STEPS } from "./migrations.data";
 import { openNodeSqliteDatabase } from "./node-sqlite-database.test.fixture";
+import { toEventParams } from "./row-mapping";
 
 const ROUND = { groupId: "g0000000-0000-4000-8000-000000000001", roundId: "r1", ownerKey: "key-a" };
 const VERSION_TWO = 2;
@@ -164,12 +166,24 @@ describe("migration 3: the upload of the court sessions", () => {
     sqlite.raw.exec(
       `INSERT INTO court_sessions (court_session_id, status, batch, group_id, round_id) VALUES ('${SESSION_A}', 'open', 1, 'g', 'r')`,
     );
+    // Events written by the app of version 2, before the migration (R1).
+    const before = [1, 2].map((sequence) => makeEnvelope({ sequence, eventNumber: sequence }));
+    before.forEach((envelope, index) => {
+      sqlite.raw.prepare(INSERT_EVENT).run(...toEventParams(index + 1, envelope));
+    });
     const legacy = repositoryOn(sqlite);
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
-    await legacy.append(SESSION_A, [makeEnvelope({ sequence: 1 })]);
 
     expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(3);
-    expect(await loaded(legacy)).toMatchObject({ ackedSequence: 0, takenOverBatch: null });
+    expect(await loaded(legacy)).toMatchObject({
+      events: before,
+      ackedSequence: 0,
+      takenOverBatch: null,
+      syncHalt: null,
+    });
+    expect(
+      (await legacy.append(SESSION_A, [makeEnvelope({ sequence: 3, eventNumber: 3 })])).ok,
+    ).toBe(true);
     // Without an owner (a session from before this version), nothing ever leaves for any account.
     expect(await legacy.findSessionsToSync(DEVICE)).toEqual({
       ok: true,
