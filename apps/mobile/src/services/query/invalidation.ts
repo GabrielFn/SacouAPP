@@ -31,6 +31,7 @@ export type MutationEvent =
   | {
       readonly type: "profileSaved";
       readonly profile: unknown;
+      readonly nickname: string;
       readonly cachedGroupIds: readonly string[];
     }
   | {
@@ -146,7 +147,7 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "profileSaved":
       return [
         { action: "set", key: queryKeys.myProfile(), data: event.profile },
-        { action: "set", key: queryKeys.myNickname(), data: event.profile.nickname },
+        { action: "set", key: queryKeys.myNickname(), data: event.nickname },
         ...event.cachedGroupIds.map((groupId) => invalidate(queryKeys.members(groupId))),
       ];
   }

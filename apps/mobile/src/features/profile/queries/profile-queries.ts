@@ -73,6 +73,7 @@ export function saveProfileMutation(deps: ProfileMutationDeps) {
         cacheEffectsOf({
           type: "profileSaved",
           profile,
+          nickname: profile.nickname,
           cachedGroupIds: cachedGroupIds(deps.client),
         }),
       );

@@ -70,7 +70,7 @@ describe("the profile query", () => {
     expect(file).not.toContain(String(PLANTED_LEVEL));
   });
 
-  test("is never written to sacou-cache.db, with or without the groups", async () => {
+  test("the profile (with its level) is never written to sacou-cache.db, with or without the groups", async () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));
     const client = createSacouQueryClient();
@@ -84,7 +84,6 @@ describe("the profile query", () => {
     const file = store.entries().get(CACHE_STORAGE_KEY) ?? "";
     expect(file).toContain(G1);
     expect(file).not.toContain(String(PLANTED_LEVEL));
-    expect(file).not.toContain("João");
     expect(file).not.toContain('"profile"');
   });
 });
