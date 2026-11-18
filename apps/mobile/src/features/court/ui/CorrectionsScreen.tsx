@@ -54,7 +54,7 @@ function ActionsColumn(props: CorrectionsScreenProps) {
         <Text accessibilityLiveRegion="polite">{props.servingNotice}</Text>
       )}
       {props.refusal === null ? null : (
-        <Text accessibilityLiveRegion="polite" style={{ color: colors.danger }}>
+        <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
           {props.refusal}
         </Text>
       )}

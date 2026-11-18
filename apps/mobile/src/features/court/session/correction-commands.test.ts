@@ -147,6 +147,7 @@ describe("end-match-manually without a winner", () => {
     const scenario = await startScenario();
     await score(scenario, "ab");
     await scenario.controller.dispatch({ type: "end-match-manually" });
+    expect(stateOf(scenario).finishedMatches.at(-1)?.winner).toBeNull();
     const plan = planNextMatch(stateOf(scenario), {
       exitMode: { kind: "automatic" },
       playersPerTeam: SAMPLE_MATCH_BEST_OF_THREE.teams.a.memberIds.length,
@@ -173,13 +174,13 @@ describe("switch-serving-team at 0-0", () => {
 });
 
 describe("DESFAZER through the route", () => {
-  async function undoThroughRoute(scenario: Scenario) {
+  async function undoThroughRoute(scenario: Scenario, onUndone = vi.fn()) {
     const feedback = createFakeCourtFeedback();
     const before = stateOf(scenario);
     await undoCourtAction(scenario.timeline(), {
       dispatch: scenario.controller.dispatch,
       teamLabel: () => "Laranja",
-      onUndone: () => undefined,
+      onUndone,
     });
     playChangeFeedback(feedback, before, stateOf(scenario));
     return feedback;
@@ -187,7 +188,10 @@ describe("DESFAZER through the route", () => {
 
   test("an accepted undo buzzes nothing", async () => {
     const scenario = await screen09();
-    expect((await undoThroughRoute(scenario)).played()).toEqual([]);
+    const onUndone = vi.fn();
+    expect((await undoThroughRoute(scenario, onUndone)).played()).toEqual([]);
+    expect(onUndone).toHaveBeenCalledTimes(1);
+    expect(onUndone).toHaveBeenCalledWith(expect.stringMatching(/^Desfeito: /));
   });
 
   test("a refused undo buzzes nothing and says nothing", async () => {

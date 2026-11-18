@@ -159,7 +159,7 @@ export function MatchMenuSheet({
           <MenuRow label={menu.leave} onPress={onLeave} />
         </Group>
         {refusal === null ? null : (
-          <Text accessibilityLiveRegion="polite" style={{ color: colors.danger }}>
+          <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
             {refusal}
           </Text>
         )}
