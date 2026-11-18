@@ -34,7 +34,7 @@ export function AccountCard({ title, children }: AccountCardProps) {
   );
 }
 
-interface RowNoteProps {
+export interface RowNoteProps {
   readonly note: string | undefined;
 }
 
