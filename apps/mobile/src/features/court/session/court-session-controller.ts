@@ -20,7 +20,12 @@ export type CourtSnapshot =
     }
   | { readonly status: "failed"; readonly code: LoadFailureCode };
 
-export type CommandResult = Result<void, CommandError>;
+/** The events a command wrote, in order: the screen reads their IDs (the point screen 31 asks about). */
+export interface CommandOutcome {
+  readonly written: readonly EventEnvelope[];
+}
+
+export type CommandResult = Result<CommandOutcome, CommandError>;
 
 export interface CourtSessionController {
   /** For `useSyncExternalStore`. */
@@ -85,7 +90,7 @@ export function createCourtSessionController(
       return outcome;
     }
     store.set({ ...snapshot, events: outcome.value });
-    return ok(undefined);
+    return ok({ written: outcome.value.slice(snapshot.events.length) });
   }
 
   void enqueue(load);
