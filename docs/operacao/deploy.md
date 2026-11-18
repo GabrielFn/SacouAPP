@@ -18,9 +18,11 @@ Variáveis (só nomes): `SACOU_DATABASE_URL` (do Secret Manager, por referência
 1. PR com CI verde → merge squash na `main`.
 2. O `CI` roda na `main`. Só com ele verde o workflow **Deploy API** (`.github/workflows/deploy-api.yml`) começa. CI vermelha: nada sobe; corrigir com um PR novo.
 3. Job `changes`: se o commit só mexe em `docs/` (fora de `docs/dominio/`) ou só em `apps/mobile/`, o deploy é pulado (`api=false` de `scripts/ci-areas.mjs`). Qualquer outra coisa, ou um diff que falhe, faz o deploy.
-4. Job `build`: monta a imagem e envia para o Artifact Registry; a saída é a imagem **por digest**.
-5. Job `deploy-test`: aplica o `service.yaml` no `sacou-api-test` e chama `/health`.
-6. Job `deploy-production`: espera a **aprovação do Gabriel** (Actions → o run → "Review deployments" → Approve). Sobe a mesma imagem, pelo digest, no `sacou-api` e chama `/health`. Sem aprovação, só o teste muda.
+4. Job `build` (conta `sacou-builder`, sem ambiente): monta a imagem e envia para o Artifact Registry; a saída é a imagem **por digest**.
+5. Job `deploy-test` (ambiente `test`, conta `sacou-deployer-test`): aplica o `service.yaml` no `sacou-api-test` e chama `/health`.
+6. Job `deploy-production` (ambiente `production`, conta `sacou-deployer-prod`): espera a **aprovação do Gabriel** (Actions → o run → "Review deployments" → Approve). Sobe a mesma imagem, pelo digest, no `sacou-api` e chama `/health`. Sem aprovação, só o teste muda.
+
+Cada deploy tem o seu grupo de `concurrency` (`deploy-api-test` e `deploy-api-production`), sem cancelar o que já roda: um run parado à espera da aprovação da produção não segura o deploy do teste do run seguinte. Por grupo, o GitHub mantém no máximo um job rodando e um pendente: um pendente novo cancela o pendente mais velho antes de ele começar, então a produção sobe sempre o run mais novo que chegou lá.
 
 As migrações rodam na partida de cada revisão, antes de a porta abrir. Se falharem, a revisão nova não recebe tráfego e a anterior continua no ar; o job falha.
 
@@ -28,7 +30,7 @@ As migrações rodam na partida de cada revisão, antes de a porta abrir. Se fal
 
 ## Primeiro deploy de cada serviço
 
-O workflow cria o serviço, mas ele nasce **privado**. O `/health` falha com 403 até o Gabriel marcar, uma vez, Cloud Run → serviço → Segurança → "Permitir acesso público". Depois, "Re-run failed jobs" no run.
+Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".
 
 ## Voltar para a revisão anterior
 
