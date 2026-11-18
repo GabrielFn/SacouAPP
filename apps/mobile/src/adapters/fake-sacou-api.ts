@@ -60,6 +60,7 @@ function defaults(): Answers {
     deleteMyAccount: none,
     addGuest: none,
     drawTeams: none,
+    appendCourtEvents: none,
   };
 }
 
@@ -117,6 +118,8 @@ export function createFakeSacouApi(): FakeSacouApi {
     deleteMyAccount: () => answer("deleteMyAccount", []),
     addGuest: (groupId, body) => answer("addGuest", [groupId, body]),
     drawTeams: (groupId, roundId, body) => answer("drawTeams", [groupId, roundId, body]),
+    appendCourtEvents: (ref, envelopes, account) =>
+      answer("appendCourtEvents", [ref, envelopes, account]),
   };
 
   return {

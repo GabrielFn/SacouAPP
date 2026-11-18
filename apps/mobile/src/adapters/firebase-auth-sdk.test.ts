@@ -17,6 +17,11 @@ const firebase = vi.hoisted(() => ({
   deleted: [] as FakeUser[],
 }));
 
+vi.mock("expo-crypto", () => ({
+  CryptoDigestAlgorithm: { SHA256: "SHA-256" },
+  digestStringAsync: (_algorithm: string, data: string) => Promise.resolve(`hash(${data})`),
+}));
+
 vi.mock("@react-native-firebase/auth", () => ({
   getAuth: () => firebase.auth,
   onAuthStateChanged: (_auth: unknown, listener: (user: FakeUser | null) => void) => {

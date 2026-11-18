@@ -1,5 +1,5 @@
 import { useIsFocused } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import { useCourtBatteryWarning } from "../../../features/court/hooks/battery-warning-context";
 import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
@@ -7,16 +7,13 @@ import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
 import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { useCourtScreenModel } from "../../../features/court/hooks/use-court-screen-model";
 import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
-import {
-  selectCourtPhase,
-  selectCourtScreen,
-  stateOfTimeline,
-} from "../../../features/court/model/court-screen.selectors";
 import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
+import { CourtBlockedView } from "../../../features/court/ui/CourtBlockedView";
 import { useServices } from "../../../services/services-context";
 
 /** Screens 09 and 10. When the set is decided or the match ends, the court hands over to its route. */
@@ -28,15 +25,7 @@ export default function CourtRoute() {
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
   const undoNotice = useUndoNotice();
-  const timeline = view.status === "ready" ? view.timeline : null;
-  const phase = useMemo(
-    () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
-    [timeline],
-  );
-  const model = useMemo(
-    () => (timeline === null ? null : selectCourtScreen(timeline, courtRoster)),
-    [timeline, courtRoster],
-  );
+  const { block, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
 
   // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
   // changes, so coming back from the end of the set (same step) does not open it again.
@@ -54,6 +43,9 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
+  if (block !== null) {
+    return <CourtBlockedView block={block} onLeave={route.leave} />;
+  }
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
   }

@@ -3,11 +3,17 @@ import { ok } from "@sacou/volley-rules";
 import type { CourtRuntime, CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import { createCourtReplayer } from "../features/court/session/court-replay";
 import { createFakeCourtEventLog } from "./fake-court-event-log";
+import { inertCourtSyncHooks } from "./fake-court-sync";
 import { createSequentialIdGenerator } from "./fake-sequential-id-generator";
 
 export function createFakeCourtRuntime(): CourtRuntime {
   const ids = createSequentialIdGenerator();
-  return { log: createFakeCourtEventLog(ids), replayer: createCourtReplayer(), ids };
+  return {
+    log: createFakeCourtEventLog(ids),
+    replayer: createCourtReplayer(),
+    ids,
+    sync: inertCourtSyncHooks,
+  };
 }
 
 /** The same runtime on every call, as the real file is one. */
