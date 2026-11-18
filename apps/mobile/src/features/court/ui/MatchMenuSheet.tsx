@@ -16,10 +16,13 @@ export interface MatchMenuSheetProps {
   readonly inverted: boolean;
   readonly theme: CourtThemeChoice;
   readonly endSummary: EndMatchSummary | null;
+  /** Someone waits on a bench: "Trocar jogador" works; otherwise it is off, "sem banco" (question 79). */
+  readonly canSubstitute: boolean;
   /** Why "Encerrar partida" did nothing, in words. */
   readonly refusal?: string | null;
   readonly onClose: () => void;
   readonly onCorrections: () => void;
+  readonly onSubstitution: () => void;
   readonly onFlipSides: () => void;
   readonly onChooseTheme: (choice: CourtThemeChoice) => void;
   readonly onLeave: () => void;
@@ -32,14 +35,24 @@ export interface MenuRowProps {
   readonly hint?: string;
   readonly accessibilityLabel?: string;
   readonly chevron?: boolean;
+  readonly disabled?: boolean;
   readonly onPress: () => void;
 }
 
-function MenuRow({ label, hint, accessibilityLabel, chevron = false, onPress }: MenuRowProps) {
+function MenuRow({
+  label,
+  hint,
+  accessibilityLabel,
+  chevron = false,
+  disabled = false,
+  onPress,
+}: MenuRowProps) {
   const { colors, tokens } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       accessibilityLabel={
         accessibilityLabel ??
         (hint === undefined ? label : strings.court.menu.hintLabel(label, hint))
@@ -53,7 +66,10 @@ function MenuRow({ label, hint, accessibilityLabel, chevron = false, onPress }: 
         paddingHorizontal: tokens.spacing.xs,
       }}
     >
-      <Text variant="title" style={{ flexShrink: 1 }}>
+      <Text
+        variant="title"
+        style={{ flexShrink: 1, ...(disabled ? { color: colors.textMuted } : null) }}
+      >
         {label}
         {hint === undefined ? null : (
           <Text variant="muted">{strings.court.menu.hintAfter(hint)}</Text>
@@ -96,15 +112,18 @@ export function MatchMenuSheet({
   inverted,
   theme,
   endSummary,
+  canSubstitute,
   refusal = null,
   onClose,
   onCorrections,
+  onSubstitution,
   onFlipSides,
   onChooseTheme,
   onLeave,
   onEndMatch,
 }: MatchMenuSheetProps) {
   const { menu } = strings.court;
+  const { courtPlayers } = strings;
   const { colors, tokens } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
   const askToEnd = () => {
@@ -120,6 +139,15 @@ export function MatchMenuSheet({
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >
         <Group>
+          {isMenuScreenReady("substitution") ? (
+            <MenuRow
+              label={courtPlayers.substitution.menuItem}
+              {...(canSubstitute ? {} : { hint: courtPlayers.substitution.noBench })}
+              chevron={canSubstitute}
+              disabled={!canSubstitute}
+              onPress={onSubstitution}
+            />
+          ) : null}
           {isMenuScreenReady("corrections") ? (
             <MenuRow
               label={menu.corrections}

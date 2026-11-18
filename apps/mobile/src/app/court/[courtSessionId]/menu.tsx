@@ -6,6 +6,7 @@ import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtTheme } from "../../../features/court/hooks/use-court-theme";
 import { endMatchSummary, menuSubtitle } from "../../../features/court/model/menu-selectors";
 import { refusalText } from "../../../features/court/model/refusal-text";
+import { canSubstitute } from "../../../features/court/substitution/substitution-selectors";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { MatchMenuSheet } from "../../../features/court/ui/MatchMenuSheet";
 import { useServices } from "../../../services/services-context";
@@ -31,6 +32,7 @@ export default function MenuRoute() {
     () => (timeline === null ? null : endMatchSummary(timeline, courtRoster)),
     [timeline, courtRoster],
   );
+  const substitutable = useMemo(() => timeline !== null && canSubstitute(timeline), [timeline]);
   if (view.status === "failed") {
     return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
   }
@@ -56,10 +58,14 @@ export default function MenuRoute() {
       inverted={inverted}
       theme={theme.choice}
       endSummary={summary}
+      canSubstitute={substitutable}
       refusal={refusal}
       onClose={route.back}
       onCorrections={() => {
         route.push("corrections");
+      }}
+      onSubstitution={() => {
+        route.push("substitution");
       }}
       onFlipSides={() => {
         toggle();
