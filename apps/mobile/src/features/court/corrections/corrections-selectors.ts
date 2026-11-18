@@ -16,6 +16,7 @@ import { strings } from "../../../strings/pt-BR";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import type { CourtRoster } from "../ports/court-roster";
+import { authorTextOf, sideOutTextOf } from "./row-text";
 
 const FIRST_ROW = 0;
 const NONE = 0;
@@ -34,16 +35,8 @@ export interface TimelineRowModel {
   /** Newer than the picked point: the revert would erase it. */
   readonly willUndo: boolean;
   readonly accessibilityLabel: string;
-}
-
-function sideOutTextOf(point: RecentPoint): string | null {
-  if (!point.sideOut) {
-    return null;
-  }
-  const { corrections } = strings.court;
-  return point.setterZone === null
-    ? corrections.sideOut
-    : corrections.sideOutRotation(point.setterZone);
+  /** "Ataque · Pedro", "Erro do Azul", "sem autor"; `null` with "Ponto individual" off (D10). */
+  readonly authorText: string | null;
 }
 
 /**
@@ -82,12 +75,17 @@ function spokenLabel(
   return corrections.spokenParts([base, ...marks].filter((part) => part !== null));
 }
 
+interface RowContext {
+  readonly selectedIndex: number;
+  readonly matchId: string;
+  readonly roster: CourtRoster;
+  readonly showAuthors: boolean;
+}
+
 function rowOf(
   point: RecentPoint,
   index: number,
-  selectedIndex: number,
-  matchId: string,
-  roster: CourtRoster,
+  { selectedIndex, matchId, roster, showAuthors }: RowContext,
 ): TimelineRowModel {
   const { corrections } = strings.court;
   const appearance = roster.teamAppearance(matchId, point.team);
@@ -97,6 +95,7 @@ function rowOf(
   const selected = index === selectedIndex;
   const willUndo = selectedIndex > FIRST_ROW && index < selectedIndex;
   const serve = serveName === null ? serveText : corrections.serveWithName(serveText, serveName);
+  const authorText = showAuthors ? authorTextOf(point, matchId, roster) : null;
   return {
     eventId: point.eventId,
     team: point.team,
@@ -109,25 +108,33 @@ function rowOf(
     selected,
     willUndo,
     accessibilityLabel: spokenLabel(point, appearance.label, serve, [
+      authorText,
       index === FIRST_ROW ? corrections.currentRow : null,
       selected ? corrections.selected : null,
       willUndo ? corrections.willUndo : null,
     ]),
+    authorText,
   };
 }
 
-/** The lines of screen 24, newest first. The picked point and the lines it would erase are marked. */
+/**
+ * The lines of screen 24, newest first. The picked point and the lines it would erase are marked; with
+ * "Ponto individual" on, each line says who scored it (D10).
+ */
 export function timelineRows(
   timeline: CourtSessionTimeline,
   roster: CourtRoster,
   selected: string | null,
+  showAuthors = false,
 ): readonly TimelineRowModel[] {
   const matchId = stateOfTimeline(timeline).currentMatch?.matchId;
   const points = getRecentPoints(timeline);
   const selectedIndex = points.findIndex(({ eventId }) => eventId === selected);
   return matchId === undefined
     ? []
-    : points.map((point, index) => rowOf(point, index, selectedIndex, matchId, roster));
+    : points.map((point, index) =>
+        rowOf(point, index, { selectedIndex, matchId, roster, showAuthors }),
+      );
 }
 
 /** "2º set · Laranja 18–15 Azul · últimos 10 pontos"; `null` without a set in play. */

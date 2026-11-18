@@ -1,4 +1,5 @@
 import {
+  attributePoint,
   changeLineup,
   confirmSetEnd,
   endMatchManually,
@@ -7,6 +8,7 @@ import {
   scorePoint,
   shiftRotation,
   startMatch,
+  substitutePlayer,
   switchServingTeam,
   undoLastAction,
   type ConfirmSetEndOptions,
@@ -14,6 +16,8 @@ import {
   type CourtSessionTimeline,
   type LineupAllocation,
   type MatchStartedPayload,
+  type MemberId,
+  type PointAuthorship,
   type RotationDirection,
   type TeamSide,
 } from "@sacou/match-engine";
@@ -43,6 +47,19 @@ export type CourtCommand =
   | { readonly type: "start-next-match"; readonly input: MatchStartedPayload }
   /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */
   | { readonly type: "end-match-manually" }
+  /** "Trocar" of screen 23a: someone of the bench takes the position of someone on the court. */
+  | {
+      readonly type: "substitute-player";
+      readonly team: TeamSide;
+      readonly outgoing: MemberId;
+      readonly incoming: MemberId;
+    }
+  /** "De quem foi?" of screen 31, at once or later from screens 24 and 25 (ADR 0031). */
+  | {
+      readonly type: "attribute-point";
+      readonly pointEventId: string;
+      readonly authorship: PointAuthorship;
+    }
   /** "Salvar escalação" of screen 22 in a match: the whole allocation, never the `system` (E4.8, D7). */
   | {
       readonly type: "change-lineup";
@@ -82,7 +99,9 @@ type CorrectionCommand = Extract<
       | "shift-rotation"
       | "revert-to"
       | "end-match-manually"
-      | "change-lineup";
+      | "change-lineup"
+      | "substitute-player"
+      | "attribute-point";
   }
 >;
 
@@ -102,6 +121,10 @@ function correctionDraftsFor(
       return refused(endMatchManually(state, manualWinnerOf(state)));
     case "change-lineup":
       return refused(changeLineup(state, command.team, command.allocation));
+    case "substitute-player":
+      return refused(substitutePlayer(state, command.team, command.outgoing, command.incoming));
+    case "attribute-point":
+      return refused(attributePoint(timeline, command.pointEventId, command.authorship));
   }
 }
 

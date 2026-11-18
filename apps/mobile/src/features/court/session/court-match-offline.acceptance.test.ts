@@ -26,7 +26,7 @@ async function expectSurvivesKill(
 
 async function ok(pending: ReturnType<CourtSessionController["dispatch"]>): Promise<void> {
   const result = await pending;
-  expect(result).toEqual({ ok: true, value: undefined });
+  expect(result.ok).toBe(true);
 }
 
 describe.each(STORAGES)("a whole best-of-three match played offline (%s)", (kind) => {

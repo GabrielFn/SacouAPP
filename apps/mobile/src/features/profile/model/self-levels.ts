@@ -1,4 +1,5 @@
 import { strings } from "../../../strings/pt-BR";
+import { STACK_FROM_FONT_SCALE } from "../../../theme/font-scale-limits";
 import { SKILL_LEVEL } from "../../../ui/skill-level";
 
 const TENTHS_PER_POINT = 10;
@@ -14,3 +15,8 @@ export interface SelfLevelOption {
 export const SELF_LEVEL_OPTIONS: readonly SelfLevelOption[] = strings.profile.levels.map(
   (text, index) => ({ level: LOWEST_LEVEL + index, text }),
 );
+
+/** A large system font stacks the cards, so each keeps its words whole and all share one text size. */
+export function levelCardsStacked(fontScale: number): boolean {
+  return fontScale > STACK_FROM_FONT_SCALE;
+}

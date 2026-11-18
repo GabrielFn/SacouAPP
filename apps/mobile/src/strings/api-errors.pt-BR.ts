@@ -109,7 +109,7 @@ export const apiErrorKindTexts = {
 /** The strip over data kept from the last time, without a network (question 20, option 1). */
 export const offlineTexts = {
   banner: (updated: string) => `Sem conexão · atualizado ${updated}`,
-  justNow: "agora há pouco",
+  bannerNow: "Sem conexão",
   minutesAgo: (minutes: number) => `há ${String(minutes)} min`,
   hoursAgo: (hours: number) => `há ${String(hours)} h`,
   daysAgo: (days: number) => (days === 1 ? "há 1 dia" : `há ${String(days)} dias`),

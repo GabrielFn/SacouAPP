@@ -1,5 +1,6 @@
 import type { TeamSide } from "@sacou/match-engine";
 import { useEffect, useMemo, useState } from "react";
+import { View } from "react-native";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
@@ -17,6 +18,7 @@ import {
 } from "../../../features/court/model/set-end-view";
 import { confirmSetEnd } from "../../../features/court/session/confirm-set-end";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
+import { SetEndAttribution } from "../../../features/court/ui/SetEndAttribution";
 import { SetEndSheet } from "../../../features/court/ui/SetEndSheet";
 import { useServices } from "../../../services/services-context";
 
@@ -57,34 +59,37 @@ export default function SetEndRoute() {
   const matchId = stateOfTimeline(timeline).currentMatch?.matchId ?? "";
   const colorOf = (side: TeamSide) => courtRoster.teamAppearance(matchId, side).color;
   return (
-    <SetEndSheet
-      model={model}
-      view={setEndView(model)}
-      colors={{ a: colorOf("a"), b: colorOf("b") }}
-      toss={toss}
-      canConfirm={canConfirmSetEnd(model, toss) && !confirming}
-      refusal={refusal}
-      onChooseToss={setToss}
-      onDrawToss={() => {
-        setToss(coinFlip.flip());
-      }}
-      onUndo={() => {
-        void dispatch({ type: "undo" }).then((result) => {
-          setRefusal(result.ok ? null : refusalText(result.error));
-        });
-      }}
-      onConfirm={() => {
-        if (confirming) return;
-        setConfirming(true);
-        const sent = confirmSetEnd(
-          { dispatch, feedback: courtFeedback },
-          firstServerToSend(model, toss),
-        );
-        void sent.then((result) => {
-          setRefusal(result.ok ? null : refusalText(result.error));
-          setConfirming(false);
-        });
-      }}
-    />
+    <View style={{ flex: 1 }}>
+      <SetEndSheet
+        model={model}
+        view={setEndView(model)}
+        colors={{ a: colorOf("a"), b: colorOf("b") }}
+        toss={toss}
+        canConfirm={canConfirmSetEnd(model, toss) && !confirming}
+        refusal={refusal}
+        onChooseToss={setToss}
+        onDrawToss={() => {
+          setToss(coinFlip.flip());
+        }}
+        onUndo={() => {
+          void dispatch({ type: "undo" }).then((result) => {
+            setRefusal(result.ok ? null : refusalText(result.error));
+          });
+        }}
+        onConfirm={() => {
+          if (confirming) return;
+          setConfirming(true);
+          const sent = confirmSetEnd(
+            { dispatch, feedback: courtFeedback },
+            firstServerToSend(model, toss),
+          );
+          void sent.then((result) => {
+            setRefusal(result.ok ? null : refusalText(result.error));
+            setConfirming(false);
+          });
+        }}
+      />
+      <SetEndAttribution timeline={timeline} dispatch={dispatch} />
+    </View>
   );
 }

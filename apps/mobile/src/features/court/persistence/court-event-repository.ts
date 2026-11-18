@@ -182,12 +182,6 @@ async function appendEnvelopes(
   return ok(undefined);
 }
 
-/** Both ids or none: a sample session was opened without an origin. */
-function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
-  const groupId = readTextColumn(row, "group_id");
-  const roundId = readTextColumn(row, "round_id");
-  return groupId === null || roundId === null ? null : { groupId, roundId };
-}
 async function setStatus(
   transaction: SqlExecutor,
   courtSessionId: string,
@@ -198,6 +192,13 @@ async function setStatus(
   }
   await transaction.run(UPDATE_SESSION_STATUS, [status, courtSessionId]);
   return ok(undefined);
+}
+
+/** Both IDs or none: a sample session has neither. */
+function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
+  const groupId = readTextColumn(row, "group_id");
+  const roundId = readTextColumn(row, "round_id");
+  return groupId === null || roundId === null ? null : { groupId, roundId };
 }
 
 /** The court log on SQLite. Every method is atomic: it commits whole or leaves the file as it was. */

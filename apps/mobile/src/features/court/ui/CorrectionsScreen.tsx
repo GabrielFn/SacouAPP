@@ -34,6 +34,8 @@ export interface CorrectionsScreenProps {
   readonly refusal: string | null;
   readonly onClose: () => void;
   readonly onPointTapped: (eventId: string) => void;
+  /** "Autor" of a line, with "Ponto individual" on (D10). */
+  readonly onAuthor?: (eventId: string) => void;
   readonly onSwitchServer: () => void;
   readonly onOpenShift: () => void;
   readonly onChooseShiftTeam: (team: TeamSide) => void;
@@ -131,7 +133,12 @@ export function CorrectionsScreen(props: CorrectionsScreenProps) {
           >
             {rows.length === 0 ? <Text variant="muted">{corrections.empty}</Text> : null}
             {rows.map((row) => (
-              <TimelineRow key={row.eventId} row={row} onPress={props.onPointTapped} />
+              <TimelineRow
+                key={row.eventId}
+                row={row}
+                onPress={props.onPointTapped}
+                {...(props.onAuthor === undefined ? {} : { onAuthor: props.onAuthor })}
+              />
             ))}
           </ScrollView>
         </View>

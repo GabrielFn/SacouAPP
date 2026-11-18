@@ -16,3 +16,5 @@
 - **Bloqueio do app por biometria ou PIN** (E4.3, ADR 0057, D5): o piloto confia no bloqueio do próprio celular; pedir a digital antes de abrir o app ou de ações sensíveis fica para depois.
 
 - **Imagem dos times no "Confirmar e compartilhar"** (E4.7, pergunta 71): uma imagem com os times e as cores, gerada por `react-native-view-shot` (biblioteca nativa nova e APK novo). O piloto compartilha texto ("Laranja: Ana, João…").
+
+- **Trocar jogador com quem está na fila** (E4.10, pergunta 79): no piloto a tela 23a troca só com o banco, como o motor (`substitutePlayer`; os times ficam congelados no `MatchStarted`, ADR 0029). "Entrar da fila" pede um evento novo que tire o jogador da fila e o ponha no time no meio da partida.

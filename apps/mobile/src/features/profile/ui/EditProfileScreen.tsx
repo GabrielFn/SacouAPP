@@ -8,6 +8,7 @@ import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { accountRoutes } from "../../account/navigation";
 import { useMyProfile } from "../hooks/use-profile";
+import { editProfileView, isProfileStub } from "../model/profile-stub";
 import { initFromAccount, initFromProfile } from "../model/profile-form.reducer";
 import { QuickProfileScreen } from "./QuickProfileScreen";
 
@@ -27,14 +28,15 @@ export function EditProfileScreen({ account }: EditProfileScreenProps) {
     if (router.canGoBack()) router.back();
     else router.replace(accountRoutes.account);
   };
-  if (profile.status === "pending") {
+  const view = editProfileView(profile);
+  if (view === "loading") {
     return (
       <Screen>
         <LoadingState accessibilityLabel={texts.loading} />
       </Screen>
     );
   }
-  if (profile.status === "error") {
+  if (view === "error" || profile.data === undefined) {
     return (
       <ErrorScreen
         title={texts.loadFailed}
@@ -51,6 +53,8 @@ export function EditProfileScreen({ account }: EditProfileScreenProps) {
     );
   }
   const initial =
-    profile.data === null ? initFromAccount(account.displayName) : initFromProfile(profile.data);
+    profile.data === null || isProfileStub(profile.data)
+      ? initFromAccount(account.displayName)
+      : initFromProfile(profile.data);
   return <QuickProfileScreen mode="edit" initial={initial} onSaved={goBack} />;
 }

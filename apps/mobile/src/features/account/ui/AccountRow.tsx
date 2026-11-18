@@ -34,6 +34,21 @@ export function AccountCard({ title, children }: AccountCardProps) {
   );
 }
 
+export interface RowNoteProps {
+  readonly note: string | undefined;
+}
+
+/** The grey note takes the rest of the row, so the label beside it keeps its words whole at a large font. */
+function RowNote({ note }: RowNoteProps) {
+  const { tokens } = useTheme();
+  if (note === undefined) return null;
+  return (
+    <Text variant="muted" style={{ fontSize: tokens.fontSizes.small, flex: 1, textAlign: "right" }}>
+      {note}
+    </Text>
+  );
+}
+
 export interface AccountRowProps {
   /** The grey key of "Seus dados" ("E-mail"), before the value. */
   readonly keyLabel?: string;
@@ -78,15 +93,12 @@ export function AccountRow({
       <Text
         variant="bodyStrong"
         numberOfLines={keyLabel === undefined ? undefined : 1}
-        style={{ flex: 1 }}
+        style={note === undefined ? { flex: 1 } : { flexShrink: 0 }}
       >
         {label}
       </Text>
-      {note === undefined ? null : (
-        <Text variant="muted" style={{ fontSize: tokens.fontSizes.small, flexShrink: 1 }}>
-          {note}
-        </Text>
-      )}
+      <RowNote note={note} />
+
       {chevron ? <ChevronRightIcon /> : null}
     </>
   );
