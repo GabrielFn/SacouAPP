@@ -322,6 +322,7 @@ Implementado na E4.11 ([ADR 0067](../arquitetura/adr/0067-sincronizacao-da-quadr
 | D | Quadra que para de marcar porque o servidor recusou | Parar o envio nunca trava a marcação nem apaga eventos (resposta 85): a faixa do meio avisa; só a quadra assumida por outro celular deixa de aceitar gestos (09b) |
 | I | ID, payload ou resposta do servidor em log | O laço e o adaptador não registram nada; os erros carregam só código e números |
 | I | Chave da conta no aparelho | Linha nova em [dados-pessoais.md](dados-pessoais.md): hash do UID com prefixo próprio, no sandbox do app, `allowBackup: false`, nunca enviado |
+| T/D | Sessão `unowned` já existente (aberta sem conta) ainda aceita pontos que nunca saem; aviso de "outra conta" que pisca antes de a conta carregar (achados do testador) | Sem perda de dado nem vazamento: nada dela é enviado (fecha em falha, D8). Pendência da Parte 2: recusar o comando em `unowned` ou adotar a sessão vazia para a conta logada, e só mostrar o aviso depois de a conta carregar |
 
 A importação do stream do servidor ao assumir a quadra (entrada não confiável, tetos, replay antes de gravar) é da Parte 2.
 
