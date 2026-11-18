@@ -61,10 +61,12 @@ export function fixRoles(draft: LineupDraft, positionOf: PositionOf): LineupDraf
   const [setter, ...others] = draft.lineup;
   if (slots === null || setter === undefined) return draft;
   const standIn = standInIndexOf(draft.system);
+  // `others` leaves out the setter at index 0, so each index is one less than in `lineup`.
+  const standInIndexAmongOthers = SECOND_SETTER_INDEX - 1;
   const seated = seatByPosition(
     others,
     slots.slice(1),
-    standIn === null ? null : SECOND_SETTER_INDEX - 1,
+    standIn === null ? null : standInIndexAmongOthers,
     positionOf,
   );
   return seated === null ? draft : { ...draft, lineup: [setter, ...seated] };

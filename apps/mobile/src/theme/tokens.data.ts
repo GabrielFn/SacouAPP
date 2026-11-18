@@ -143,7 +143,8 @@ export const sizes = {
   logo: 26,
   plusIcon: 22,
   checkIcon: 16,
-  // Navigation tabs (Grupos.dc.html, bottom bar): the pill behind the active icon, and the touch target of each tab, taller than the floor because the label sits under the icon.
+  // Navigation tabs (Grupos.dc.html, bottom bar): the pill behind the active icon, and the touch
+  // target of each tab, taller than the floor because the label sits under the icon.
   tabPillWidth: 56,
   tabPillHeight: 30,
   tabItem: 56,
@@ -200,7 +201,8 @@ export const sizes = {
   // Quick profile (Onboarding.dc.html .nv button) and the account (Conta.dc.html, the circle of the G).
   levelOption: 84,
   loginBadge: 24,
-  // The draw (Sorteio.dc.html): the color strip and letter of a team card, the meter and the lock; the lineup (Escalacao.dc.html .oc, .st): a cell of the official order and the badge of a chip.
+  // The draw (Sorteio.dc.html): the color strip and letter of a team card, the meter and the lock;
+  // the lineup (Escalacao.dc.html .oc, .st): a cell of the official order and the badge of a chip.
   teamStrip: 8,
   teamBadge: 26,
   meterArea: 34,
@@ -257,7 +259,8 @@ export const scaleLimits = { min: 0.85, max: 1.4 } as const;
 export const fontScaleCap = 1.3;
 export const accessibilityFloors = { touchTarget: 44, hairline: 1 } as const;
 
-// Measures of the court screens (QuadraSol.dc.html, QuadraNoite.dc.html), in canvas pixels. They are scaled by the window like the other tokens; the touch targets keep the floor of 44.
+// Measures of the court screens (QuadraSol.dc.html, QuadraNoite.dc.html), in canvas pixels. They are
+// scaled by the window like the other tokens; the touch targets keep the floor of 44.
 export const courtSizes = {
   chip: 30,
   setDot: 12,

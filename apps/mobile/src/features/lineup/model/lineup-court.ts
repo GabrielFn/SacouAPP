@@ -14,7 +14,6 @@ import type { LineupDraft } from "./lineup-moves";
 const { chip: texts } = lineupStrings;
 
 const LIBERO_ROLE = "L";
-const SERVING_SLOT: RotationSlot = 1;
 /** The canvas draws the net below the team, as the admin looks from the net (Escalacao.dc.html). */
 const NET_BELOW = "top";
 
@@ -61,7 +60,7 @@ function chipOf(context: ChipContext, alignment: ServeAlignment, slot: RotationS
   const { draft, phase, misplaced, selection, nameOf } = context;
   const { memberId, role, point } = alignment.slots[slot];
   const isLibero = role === LIBERO_ROLE;
-  const isServer = !isLibero && phase === "serving" && slot === SERVING_SLOT;
+  const isServer = !isLibero && memberId === serverOf(draft, phase);
   const isSetter = !isLibero && isSetterOf(draft, memberId);
   const isMisplaced = !isLibero && misplaced.includes(memberId);
   const name = nameOf(memberId);

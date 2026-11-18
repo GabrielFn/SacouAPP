@@ -19,7 +19,7 @@ import { initialLineupEditorState } from "../../lineup/model/lineup-editor.reduc
 import { lineupView } from "../../lineup/model/lineup-selectors";
 import { PENDING_PRE_GAME_SCREENS } from "../navigation";
 import { drawFlowReducer, type DrawFlowAction, type DrawFlowState } from "./draw-flow.reducer";
-import { drawnG1, RESERVES, TEAM_A, TEAM_B } from "./draw.test.fixture";
+import { drawnG1, G1_ORDER, RESERVES, TEAM_A, TEAM_B } from "./draw.test.fixture";
 import { buildMatchStart, teamRotation } from "./match-start";
 import type { PreGameChoices, SavedLineup } from "./pre-game";
 import { toSavedLineup } from "./pre-game-lineup";
@@ -51,6 +51,24 @@ function started(preGame: Partial<PreGameChoices>, arrangement = g1UuidArrangeme
   const payload = buildMatchStart(g1Input(preGame, undefined, arrangement), MATCH_ID);
   if (!payload.ok) throw new Error("not built");
   return payload.value;
+}
+
+const POSITION_WORDS = ["setter", "outsidehitter", "middleblocker", "opposite", "libero", "any"];
+const FIXTURE_NAMES = G1_ORDER.map((key) => nameOf(uuidOf(key)).toLowerCase());
+
+/** The texts of a value, with no keys: a position as a value is a profile that leaked. */
+function values(value: unknown): readonly string[] {
+  return leaves(value).filter((word) => !Object.keys(flatKeys(value)).includes(word));
+}
+
+function flatKeys(value: unknown): Record<string, true> {
+  if (Array.isArray(value)) return Object.assign({}, ...value.map(flatKeys));
+  if (value instanceof Map) return flatKeys([...value.entries()]);
+  if (value === null || typeof value !== "object") return {};
+  return Object.assign(
+    {},
+    ...Object.entries(value).map(([key, inner]) => ({ [key]: true as const, ...flatKeys(inner) })),
+  );
 }
 
 /** Every key and text of a value, to find a level anywhere. */
@@ -128,9 +146,13 @@ describe("the libero of the start, a reserve chosen on screen 22 (D5, question 7
     expect(view?.benchLine).toBe("Laranja tem 6 e líbero Sofia.");
   });
 
-  test("no level in the MatchStarted with a libero", () => {
-    const words = leaves(started(withSofia())).map((word) => word.toLowerCase());
+  test("no level, name or position in the MatchStarted with a libero (events carry only IDs)", () => {
+    const payload = started(withSofia());
+    const words = leaves(payload).map((word) => word.toLowerCase());
     expect(words.filter((word) => word.includes("level"))).toEqual([]);
+    expect(words.filter((word) => FIXTURE_NAMES.some((name) => word.includes(name)))).toEqual([]);
+    const texts = values(payload).map((word) => word.toLowerCase());
+    expect(texts.filter((word) => POSITION_WORDS.includes(word))).toEqual([]);
   });
 });
 
@@ -177,8 +199,11 @@ describe("the flow: 08 → 22 → 08 (D1)", () => {
     const input = g1Input();
     const source = preGameLineupSource(input, nameOf, 1);
     const view = lineupView(initialLineupEditorState("a"), source);
-    const words = [...leaves(source), ...leaves(view)].map((word) => word.toLowerCase());
+    expect(source.teams.a.base).not.toBeNull();
+    const words = leaves(view).map((word) => word.toLowerCase());
     expect(words.filter((word) => word.includes("level"))).toEqual([]);
+    const texts = values(view).map((word) => word.toLowerCase());
+    expect(texts.filter((word) => POSITION_WORDS.includes(word))).toEqual([]);
     expect(view.subtitle).toBe("Partida 1 · antes de começar");
     expect(view.team?.phaseLabel).toBe("Laranja sacando");
   });

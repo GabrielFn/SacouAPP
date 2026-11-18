@@ -74,6 +74,30 @@
       }
     },
     {
+      "name": "4x2 with an opposite in S2: no warning, two setters",
+      "system": "4x2",
+      "lineup": ["s1", "oh1", "mb1", "opp", "oh2", "mb2"],
+      "setterZone": 3,
+      "phase": "serving",
+      "positions": {
+        "s1": "setter",
+        "oh1": "outsideHitter",
+        "mb1": "middleBlocker",
+        "opp": "opposite",
+        "oh2": "outsideHitter",
+        "mb2": "middleBlocker"
+      },
+      "expected": {
+        "officialOrder": ["oh2", "mb2", "s1", "oh1", "mb1", "opp"],
+        "server": "oh2",
+        "setters": ["s1", "opp"],
+        "misplaced": [],
+        "warning": null,
+        "checkedRotation": 3,
+        "fixedLineup": ["s1", "oh1", "mb1", "opp", "oh2", "mb2"]
+      }
+    },
+    {
       "name": "free system: no setter, no rotation number, no warning",
       "system": "livre",
       "lineup": ["a1", "a2", "a3", "a4", "a5", "a6"],
