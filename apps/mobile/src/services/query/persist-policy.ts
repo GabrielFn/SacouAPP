@@ -18,11 +18,12 @@ const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings",
 
 /**
  * The allow list of the persisted cache (D6): the groups, a group, its members, its settings, its rounds and one round (the screen opens without a network on the court, ADR 0054). The
- * default is not to persist: `["me"]` (the internal user ID), the invites and the saved templates (admin
+ * default is not to persist: `["me"]` (the internal user ID; of its children only the nickname is kept, never the profile with its level), the invites and the saved templates (admin
  * only) and anything unknown stay out.
  */
 export function isPersistedKey(key: SacouQueryKey): boolean {
   const [root, groupId, child] = key;
+  if (root === "me") return key.length === GROUP_KEY_LENGTH && groupId === "nickname";
   if (root !== "groups") return false;
   if (key.length === 1) return true;
   if (typeof groupId !== "string") return false;

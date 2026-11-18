@@ -165,6 +165,8 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [queryKeys.myProfile(), false],
+    [queryKeys.myNickname(), true],
+    [["me", "nickname", "x"], false],
     [["groups", G, "members", "extra"], false],
     [["groups", 1], false],
     [["unknown"], false],

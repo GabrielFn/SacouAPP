@@ -6,6 +6,8 @@ export const queryKeys = {
   me: () => ["me"] as const,
   /** The person's own profile, with the level they suggest: outside the persisted allow list. */
   myProfile: () => ["me", "profile"] as const,
+  /** Only the nickname, kept on disk for the greeting without a network: the profile itself stays out. */
+  myNickname: () => ["me", "nickname"] as const,
   /** What keeps the account from being deleted (screen 30b): outside the persisted allow list. */
   deletionBlockers: () => ["me", "deletion-blockers"] as const,
   groups: () => ["groups"] as const,

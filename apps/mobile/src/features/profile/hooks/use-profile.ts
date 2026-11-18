@@ -1,16 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 
 import { useServices } from "../../../services/services-context";
 import { onboardingGate, type OnboardingGate } from "../model/onboarding-gate";
 import type { OnboardingSkipState } from "../ports/onboarding-skip";
-import { myProfileQuery } from "../queries/profile-queries";
+import { myNicknameQuery, myProfileQuery } from "../queries/profile-queries";
 
 // The profile stays only in the query cache and the flag only in its store (frontend.md, rule 1).
 
 export function useMyProfile(enabled = true) {
   const { sacouApi } = useServices();
-  return useQuery(myProfileQuery(sacouApi, enabled));
+  const client = useQueryClient();
+  return useQuery(myProfileQuery(sacouApi, enabled, client));
+}
+
+/** The nickname for the greeting: the live profile when there is one, else the copy kept on disk. */
+export function useGreetingNickname(): string | null {
+  const profile = useMyProfile();
+  const kept = useQuery(myNicknameQuery());
+  return profile.data?.nickname ?? kept.data ?? null;
 }
 
 export function useOnboardingSkip(): OnboardingSkipState {

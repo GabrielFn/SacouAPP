@@ -78,12 +78,12 @@ export function AccountRow({
       <Text
         variant="bodyStrong"
         numberOfLines={keyLabel === undefined ? undefined : 1}
-        style={{ flex: 1 }}
+        style={note === undefined ? { flex: 1 } : { flexShrink: 0 }}
       >
         {label}
       </Text>
       {note === undefined ? null : (
-        <Text variant="muted" style={{ fontSize: tokens.fontSizes.small, flexShrink: 1 }}>
+        <Text variant="muted" style={{ fontSize: tokens.fontSizes.small, flex: 1, textAlign: "right" }}>
           {note}
         </Text>
       )}
