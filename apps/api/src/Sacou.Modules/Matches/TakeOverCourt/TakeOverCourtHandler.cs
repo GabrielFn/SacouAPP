@@ -61,15 +61,7 @@ internal sealed class TakeOverCourtHandler(
         var callerMemberId = access.MemberId.ToString("D");
         var outcome = await store.TakeOverAsync(call, stored => CourtTakeover.Decide(stored, request.Value, callerMemberId), cancellationToken)
             .ConfigureAwait(false);
-        if (outcome.Refusal is { } refusal)
-        {
-            return Refuse(CourtProblem.Of(CourtErrors.Of(refusal)));
-        }
-
-        var decided = outcome.Decided!;
-        return decided.IsSuccess
-            ? Result<CourtTakeoverDecision, CourtProblem>.Success(decided.Value)
-            : Refuse(CourtProblems.From(decided.Error));
+        return CourtProblems.From(outcome);
     }
 
     /// <summary>The same member, still active, with a role that still writes the court.</summary>

@@ -124,8 +124,7 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
         return CourtStreamOutcome<CourtTakeoverDecision>.From(decided);
     }
 
-    private static bool BelongsTo(CourtSessionRow session, Guid groupId, Guid roundId) =>
-        session.GroupId == groupId && session.RoundId == roundId;
+    private static bool BelongsTo(CourtSessionRow session, Guid groupId, Guid roundId) => session.GroupId == groupId && session.RoundId == roundId;
 
     /// <summary>The writer of the next batch and the new current batch, in the transaction of the lock (ADR 0063, D1).</summary>
     private async Task OpenBatchAsync(CourtTakeoverCall call, CourtSessionRow session, CourtWriter writer, CancellationToken cancellationToken)

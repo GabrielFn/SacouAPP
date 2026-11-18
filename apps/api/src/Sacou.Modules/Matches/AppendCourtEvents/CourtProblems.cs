@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Matches.CourtSessionJson;
+using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
+using Sacou.Modules.Matches.Infrastructure;
 
 namespace Sacou.Modules.Matches.AppendCourtEvents;
 
@@ -32,6 +34,22 @@ internal static class CourtProblems
         AddIfPresent(extensions, CourtProblem.LastSequenceExtension, error.LastSequence);
         AddIfPresent(extensions, CourtProblem.FieldExtension, error.Field);
         return new CourtProblem(CourtErrors.Of(error.Code), extensions.ToImmutable());
+    }
+
+    /// <summary>What the store answered under the lock: its own refusal, the refusal of the rules, or the decision.</summary>
+    public static Result<TDecision, CourtProblem> From<TDecision>(CourtStreamOutcome<TDecision> outcome)
+        where TDecision : class
+    {
+        ArgumentNullException.ThrowIfNull(outcome);
+        if (outcome.Refusal is { } refusal)
+        {
+            return Result<TDecision, CourtProblem>.Failure(CourtProblem.Of(CourtErrors.Of(refusal)));
+        }
+
+        var decided = outcome.Decided!;
+        return decided.IsSuccess
+            ? Result<TDecision, CourtProblem>.Success(decided.Value)
+            : Result<TDecision, CourtProblem>.Failure(From(decided.Error));
     }
 
     private static void AddIfPresent(ImmutableDictionary<string, object?>.Builder extensions, string key, object? value)
