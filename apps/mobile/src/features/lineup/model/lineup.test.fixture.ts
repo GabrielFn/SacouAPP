@@ -10,11 +10,11 @@ export function nameOf(memberId: MemberId): string {
   return `${memberId.charAt(0).toUpperCase()}${memberId.slice(1)}`;
 }
 
-export function positionsOf(positions: Readonly<Record<string, string>>): PositionOf {
+export function positionsOf(positions: Readonly<Record<string, string | undefined>>): PositionOf {
   return (memberId) => (positions[memberId] ?? null) as PrimaryPosition;
 }
 
-export const CANVAS_POSITIONS: Readonly<Record<string, string>> = {
+export const CANVAS_POSITIONS: Readonly<Record<string, string | undefined>> = {
   pedro: "setter",
   ana: "middleBlocker",
   lia: "outsideHitter",

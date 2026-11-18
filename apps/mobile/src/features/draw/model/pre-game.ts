@@ -1,5 +1,19 @@
-import { SETTINGS_CATALOG, type BestOf, type TeamSide } from "@sacou/match-engine";
-import type { FormationSystem } from "@sacou/volley-rules";
+import { SETTINGS_CATALOG, type BestOf, type MemberId, type TeamSide } from "@sacou/match-engine";
+import type { FormationSystem, SetterZone } from "@sacou/volley-rules";
+
+/**
+ * A lineup saved on screen 22 (E4.8, D3): it holds only while the team and the system are the ones
+ * it was saved for, and the libero only while still a reserve; otherwise the default comes back.
+ */
+export interface SavedLineup {
+  readonly system: FormationSystem;
+  readonly lineup: readonly MemberId[];
+  readonly setterZone: SetterZone;
+  /** A reserve of the queue who plays as the libero (question 76). */
+  readonly libero: MemberId | null;
+}
+
+export type SavedLineups = Readonly<Partial<Record<TeamSide, SavedLineup>>>;
 
 /**
  * The choices of sheet 08 that differ from the round (D3, D6): `null` keeps the resolved setting, which
@@ -12,6 +26,8 @@ export interface PreGameChoices {
   readonly systems: Readonly<Record<TeamSide, FormationSystem | null>>;
   /** Which team the rotation picker shows. */
   readonly rotationTab: TeamSide;
+  /** What screen 22 saved, per team (E4.8). */
+  readonly lineups: SavedLineups;
 }
 
 /** Team A serves first unless the admin picks or flips (a small decision of D6). */
@@ -21,6 +37,7 @@ export const initialPreGameChoices: PreGameChoices = {
   firstServer: "a",
   systems: { a: null, b: null },
   rotationTab: "a",
+  lineups: {},
 };
 
 /** The value the admin picked, or `null` when it is the base again. */

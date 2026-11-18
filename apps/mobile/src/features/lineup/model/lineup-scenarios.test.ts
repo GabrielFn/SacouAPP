@@ -22,7 +22,7 @@ interface Scenario {
   readonly lineup: readonly string[];
   readonly setterZone: number;
   readonly phase: string;
-  readonly positions: Readonly<Record<string, string>>;
+  readonly positions: Readonly<Record<string, string | undefined>>;
 }
 
 function stateOf(scenario: Scenario): TeamState {
