@@ -3,7 +3,8 @@ import type { MemberId, TeamSide } from "@sacou/match-engine";
 import type { TeamColorName } from "../../../theme/team-colors";
 
 /** The position a member said they play; `null` without a profile. */
-export type RosterPosition = string | null;
+export type RosterPosition =
+  "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero" | "any" | null;
 
 export interface TeamAppearance {
   readonly label: string;
