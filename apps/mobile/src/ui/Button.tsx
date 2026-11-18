@@ -19,6 +19,8 @@ export interface ButtonProps {
   readonly accessibilityLabel?: string;
   /** Looks off, tells the screen reader and never calls `onPress`. */
   readonly disabled?: boolean;
+  /** Working on it ("Carregando o placar..."): off like `disabled`, and the screen reader says busy. */
+  readonly busy?: boolean;
   /** An icon before the label, drawn in the color of the label. */
   readonly renderIcon?: (color: string) => ReactNode;
 }
@@ -85,19 +87,21 @@ export function Button({
   fill = false,
   accessibilityLabel,
   disabled = false,
+  busy = false,
   renderIcon,
 }: ButtonProps) {
   const { colors, tokens } = useTheme();
   const isLink = variant === "link";
   const look = lookOf(variant, colors);
+  const off = disabled || busy;
   return (
     <Pressable
       accessibilityRole={isLink ? "link" : "button"}
       accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={disabled ? undefined : onPress}
-      style={containerStyleOf(look, disabled, fill, tokens)}
+      accessibilityState={{ disabled: off, busy }}
+      disabled={off}
+      onPress={off ? undefined : onPress}
+      style={containerStyleOf(look, off, fill, tokens)}
     >
       {renderIcon === undefined ? null : renderIcon(look.foreground)}
       <Text style={labelStyleOf(isLink, look.foreground, tokens)}>{label}</Text>

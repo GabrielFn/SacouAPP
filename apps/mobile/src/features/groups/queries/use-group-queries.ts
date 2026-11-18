@@ -22,9 +22,10 @@ export function useGroup(groupId: string) {
   return useQuery(groupQuery(sacouApi, groupId));
 }
 
-export function useGroupMembers(groupId: string) {
+/** Off with `enabled` false: the court reads the names only while it shows who took it over. */
+export function useGroupMembers(groupId: string, enabled = true) {
   const { sacouApi } = useServices();
-  return useQuery(groupMembersQuery(sacouApi, groupId));
+  return useQuery({ ...groupMembersQuery(sacouApi, groupId), enabled });
 }
 
 export function useGroupSettings(groupId: string) {

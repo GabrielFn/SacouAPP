@@ -23,7 +23,7 @@ import { undoCourtAction } from "../../../features/court/session/undo-court-acti
 import { AttributionSheet } from "../../../features/court/ui/AttributionSheet";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
-import { CourtBlockedView } from "../../../features/court/ui/CourtBlockedView";
+import { BlockedCourtScreen } from "../../../features/court/ui/BlockedCourtScreen";
 import { useServices } from "../../../services/services-context";
 
 /** The sides as the log leaves them (the tie-break swaps once), or the manual choice with no log. */
@@ -43,9 +43,9 @@ export default function CourtRoute() {
   const guard = useCourtGuard();
   const sides = useCourtSides();
   const warning = useCourtBatteryWarning();
-  const { view, dispatch, retry } = useCourtSession();
+  const { courtSessionId, view, dispatch, retry, markRefusedSeen, reload } = useCourtSession();
   const undoNotice = useUndoNotice();
-  const { block, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
+  const { block, blockedScore, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
   const individualPoints = useIndividualPoints();
   const attribution = useAttributionSheet(timeline, dispatch);
 
@@ -70,9 +70,22 @@ export default function CourtRoute() {
       replace("matchEnd");
     }
   }, [step, push, replace]);
+  // Back from the 09a, the file may hold the stream it imported: a blocked court reads it again.
+  const blocked = block !== null;
+  useEffect(() => {
+    if (focused && blocked) reload();
+  }, [focused, blocked, reload]);
 
   if (block !== null) {
-    return <CourtBlockedView block={block} onLeave={route.leave} />;
+    return (
+      <BlockedCourtScreen
+        block={block}
+        courtSessionId={courtSessionId}
+        localScore={blockedScore}
+        onLeave={route.leave}
+        onRefusedSeen={markRefusedSeen}
+      />
+    );
   }
   if (view.status === "loading" || (view.status === "ready" && isAwayFromCourt(phase))) {
     return null;

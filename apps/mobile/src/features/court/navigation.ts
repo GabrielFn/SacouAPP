@@ -1,5 +1,7 @@
 import type { Href } from "expo-router";
 
+import type { CourtSessionOrigin } from "./ports/court-event-log";
+
 export const COURT_PATHS = {
   court: "/court/[courtSessionId]",
   setEnd: "/court/[courtSessionId]/set-end",
@@ -19,4 +21,9 @@ export interface CourtRouteParams {
 
 export function courtHref(path: CourtPathKey, { courtSessionId }: CourtRouteParams): Href {
   return { pathname: COURT_PATHS[path], params: { courtSessionId } };
+}
+
+/** Screen 09a of the court of a round (E4.11, D5): from the 06, the 08 and "Assumir de volta". */
+export function takeOverHref({ groupId, roundId }: CourtSessionOrigin): Href {
+  return { pathname: "/groups/[groupId]/rounds/[roundId]/take-over", params: { groupId, roundId } };
 }

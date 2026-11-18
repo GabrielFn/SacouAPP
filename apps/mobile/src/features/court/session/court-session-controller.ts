@@ -29,6 +29,8 @@ export type CourtSnapshot =
       readonly courtSessionId: string;
       readonly events: readonly EventEnvelope[];
       readonly sync: CourtSyncStanding;
+      /** This device and its batch: what tells its own pending and refused events apart. */
+      readonly writer: WriteContext;
     }
   | { readonly status: "failed"; readonly code: LoadFailureCode };
 
@@ -54,6 +56,8 @@ export interface CourtSessionController {
   readonly retry: () => Promise<void>;
   /** Reads the file again without showing the loading state: the upload changed the session. */
   readonly reload: () => Promise<void>;
+  /** "Entendi" of screen 09c (D6): the refused points stay, the sheet does not show again. */
+  readonly markRefusedSeen: () => Promise<void>;
 }
 
 export interface CourtSessionControllerDeps extends CommandRunnerDeps {
@@ -98,16 +102,18 @@ export function createCourtSessionController(
       courtSessionId: deps.courtSessionId,
       events: loaded.value.events,
       sync: { ...loaded.value.sync, ownership: await ownershipOf(loaded.value.owner) },
+      writer: loaded.value.context,
     });
   }
 
   async function run(command: CourtCommand): Promise<CommandResult> {
     const snapshot = store.getSnapshot();
-    // The session of another account takes no command: its points would leave with that account.
+    // Only the account that owns the session marks it: the points of another one (or of none) would
+    // leave with that account, or never (tester of part 1, finding 1).
     if (
       snapshot.status !== "ready" ||
       context.current === null ||
-      snapshot.sync.ownership === "other-account"
+      snapshot.sync.ownership !== "own"
     ) {
       return NOT_READY;
     }
@@ -131,6 +137,12 @@ export function createCourtSessionController(
     dispatch: (command) => enqueue(() => run(command)),
     whenIdle: () => queue.current,
     reload: () => enqueue(load),
+    markRefusedSeen: () =>
+      enqueue(async () => {
+        // A write that failed leaves the sheet up: it shows again until "Entendi" is kept.
+        await deps.log.markRefusedSeen(deps.courtSessionId);
+        await load();
+      }),
     retry: () =>
       enqueue(() => {
         store.set({ status: "loading" });
