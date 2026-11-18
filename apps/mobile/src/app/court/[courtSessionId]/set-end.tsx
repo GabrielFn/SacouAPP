@@ -1,5 +1,6 @@
 import type { TeamSide } from "@sacou/match-engine";
 import { useEffect, useMemo } from "react";
+import { View } from "react-native";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
@@ -12,6 +13,7 @@ import {
 import { buildSetEndActions } from "../../../features/court/model/set-end-actions";
 import { confirmSetEnd } from "../../../features/court/session/confirm-set-end";
 import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
+import { SetEndAttribution } from "../../../features/court/ui/SetEndAttribution";
 import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
 
@@ -39,7 +41,7 @@ export default function SetEndRoute() {
     }
   }, [step, backOrCourt, replace]);
 
-  if (model === null) {
+  if (model === null || timeline === null) {
     return null;
   }
   const { setEnd } = strings.court;
@@ -48,22 +50,25 @@ export default function SetEndRoute() {
   };
   const confirmActions = buildSetEndActions(model, setEnd, confirm);
   return (
-    <CourtPlaceholder
-      title={setEnd.title(model.setNumber)}
-      lines={[
-        setEnd.winner(model.winnerLabel),
-        setEnd.scoreLine(
-          model.scores.a.label,
-          model.scores.a.score,
-          model.scores.b.label,
-          model.scores.b.score,
-        ),
-        ...(model.needsFirstServer ? [setEnd.whoServes] : []),
-      ]}
-      actions={[
-        ...confirmActions,
-        { label: setEnd.back, variant: "secondary", onPress: backOrCourt },
-      ]}
-    />
+    <View style={{ flex: 1 }}>
+      <CourtPlaceholder
+        title={setEnd.title(model.setNumber)}
+        lines={[
+          setEnd.winner(model.winnerLabel),
+          setEnd.scoreLine(
+            model.scores.a.label,
+            model.scores.a.score,
+            model.scores.b.label,
+            model.scores.b.score,
+          ),
+          ...(model.needsFirstServer ? [setEnd.whoServes] : []),
+        ]}
+        actions={[
+          ...confirmActions,
+          { label: setEnd.back, variant: "secondary", onPress: backOrCourt },
+        ]}
+      />
+      <SetEndAttribution timeline={timeline} dispatch={dispatch} />
+    </View>
   );
 }

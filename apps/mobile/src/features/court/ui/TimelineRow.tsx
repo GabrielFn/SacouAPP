@@ -10,10 +10,61 @@ import type { TimelineRowModel } from "../corrections/corrections-selectors";
 export interface TimelineRowProps {
   readonly row: TimelineRowModel;
   readonly onPress: (eventId: string) => void;
+  /** "Autor": answers or changes who scored it on screen 31 (D10). */
+  readonly onAuthor?: (eventId: string) => void;
 }
 
-/** One point of screen 24: the score after it, the team, who served and the side-out. */
-export function TimelineRow({ row, onPress }: TimelineRowProps) {
+export interface AuthorLineProps {
+  readonly row: TimelineRowModel;
+  readonly authorText: string;
+  readonly onAuthor: (eventId: string) => void;
+}
+
+/** Who scored the line and the button that opens screen 31 for it; outside the row, not nested. */
+function AuthorLine({ row, authorText, onAuthor }: AuthorLineProps) {
+  const { colors, tokens } = useTheme();
+  const { attribution } = strings.courtPlayers;
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: tokens.spacing.s,
+        paddingHorizontal: tokens.spacing.s10,
+      }}
+    >
+      <Text variant="muted" numberOfLines={1} style={{ flex: 1 }}>
+        {authorText}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={attribution.authorButtonLabel(row.scoreText)}
+        onPress={() => {
+          onAuthor(row.eventId);
+        }}
+        style={{
+          minHeight: tokens.sizes.minTouchTarget,
+          minWidth: tokens.sizes.minTouchTarget,
+          paddingHorizontal: tokens.spacing.s10,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: tokens.radii.field,
+          borderWidth: tokens.borderWidths.thin,
+          borderColor: colors.text,
+        }}
+      >
+        <Text variant="bodyStrong">{attribution.authorButton}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+export interface PointLineProps {
+  readonly row: TimelineRowModel;
+  readonly onPress: (eventId: string) => void;
+}
+
+function PointLine({ row, onPress }: PointLineProps) {
   const { colors, tokens } = useTheme();
   const { sizes } = tokens.court;
   const palette = TEAM_PALETTES[row.color];
@@ -103,5 +154,18 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
         </View>
       )}
     </Pressable>
+  );
+}
+
+/** One point of screen 24: the score after it, the team, who served and the side-out. */
+export function TimelineRow({ row, onPress, onAuthor }: TimelineRowProps) {
+  const { authorText } = row;
+  return (
+    <View>
+      <PointLine row={row} onPress={onPress} />
+      {authorText === null || onAuthor === undefined ? null : (
+        <AuthorLine row={row} authorText={authorText} onAuthor={onAuthor} />
+      )}
+    </View>
   );
 }
