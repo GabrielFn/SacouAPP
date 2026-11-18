@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Identity.Domain.Accounts;
 using Sacou.Shared.Results;
 
@@ -25,7 +26,7 @@ internal static class DeleteMyAccountEndpoint
 
     public static IEndpointRouteBuilder MapDeleteMyAccount(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapDelete(Route, HandleAsync).WithName(Name).RequireAuthorization().WithNoStore()
+        endpoints.MapDelete(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.AccountDelete).RequireAuthorization().WithNoStore()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status409Conflict);

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Sacou.Api.OpenApi;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Matches;
@@ -28,6 +29,8 @@ builder.Services
     .AddPaymentsModule()
     .AddSummariesModule()
     .AddStatsModule();
+// Per-user limits, and the concurrency of the two-connection routes (ADR 0062).
+builder.Services.AddSacouRateLimiting(builder.Configuration);
 builder.Services.AddSacouOpenApi();
 
 var app = builder.Build();
@@ -38,6 +41,8 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
+// After the authentication: a refused token is a 401 and never spends the quota (ADR 0062, D2).
+app.UseSacouRateLimiting();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 app.MapIdentityEndpoints();

@@ -35,6 +35,7 @@ describe("shouldRetryQuery (P4)", () => {
     ["too large", { kind: "too-large" }],
     ["a 4xx without code", { kind: "unexpected", status: 400 }],
     ["a request never sent", { kind: "unexpected", status: 0 }],
+    ["a 429, which would only spend the quota", { kind: "rate-limited", retryAfterMs: 1_000 }],
   ])("%s is never tried again", (_name, error) => {
     expect(shouldRetryQuery(0, failure(error))).toBe(false);
   });
@@ -194,6 +195,7 @@ describe("the allow list of the persisted cache (P6)", () => {
   test.each<[string, ApiError, boolean]>([
     ["no network", { kind: "offline" }, true],
     ["the server down", { kind: "unavailable", retryAfterMs: 0 }, true],
+    ["too many requests (429)", { kind: "rate-limited", retryAfterMs: 0 }, true],
     [
       "removed from the group (403)",
       { kind: "problem", status: 403, code: "groups.forbidden" },

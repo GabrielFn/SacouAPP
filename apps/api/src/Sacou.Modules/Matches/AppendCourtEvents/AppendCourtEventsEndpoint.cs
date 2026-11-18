@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Access;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
@@ -13,6 +14,7 @@ namespace Sacou.Modules.Matches.AppendCourtEvents;
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events</c> <c>{ events }</c>
 /// (<c>AppendCourtEvents</c>): the phone that holds the court sends its events, idempotent by event id (ADR 0060). The
 /// first write creates the stream with batch 1, written by that device and member. Admin, co-admin and scorekeeper.
+/// Each call replays the whole stream under its lock, so it is limited per user by <c>court-sync</c> (ADR 0062).
 /// </summary>
 internal static class AppendCourtEventsEndpoint
 {
@@ -21,7 +23,7 @@ internal static class AppendCourtEventsEndpoint
 
     public static RouteGroupBuilder MapAppendCourtEvents(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name)
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.CourtSync)
             .RequireCapability(GroupCapability.WriteCourt)
             .Accepts<AppendCourtEventsRequest>("application/json")
             .ProducesProblem(StatusCodes.Status400BadRequest)
