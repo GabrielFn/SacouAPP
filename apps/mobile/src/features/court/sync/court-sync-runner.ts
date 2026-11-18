@@ -112,6 +112,7 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
       target,
       account,
       deviceId: device.value,
+      isAccountCurrent: async () => (await deps.account.current())?.session === account.session,
     });
     return actionOf(outcome);
   }

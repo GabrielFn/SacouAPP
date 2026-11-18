@@ -27,7 +27,14 @@ interface UploadContext extends UploadDeps {
   readonly target: SessionToSync;
   readonly account: CourtAccountRef;
   readonly deviceId: string;
+  /** True while `account` is still the one signed in, read right before each request (D8). */
+  readonly isAccountCurrent: () => Promise<boolean>;
 }
+
+const ACCOUNT_CHANGED: Awaited<ReturnType<SacouApi["appendCourtEvents"]>> = {
+  ok: false,
+  error: { kind: "account-changed" },
+};
 
 interface Pending {
   readonly events: readonly EventEnvelope[];
@@ -59,6 +66,7 @@ async function send(
   chunk: readonly EventEnvelope[],
 ): Promise<Awaited<ReturnType<SacouApi["appendCourtEvents"]>>> {
   const { groupId, roundId, courtSessionId } = context.target;
+  if (!(await context.isAccountCurrent())) return ACCOUNT_CHANGED;
   return context.api.appendCourtEvents(
     { groupId, roundId, courtSessionId },
     chunk,

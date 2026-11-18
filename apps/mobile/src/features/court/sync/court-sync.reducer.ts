@@ -57,6 +57,8 @@ function failed(
 ): CourtSyncState {
   if (state.status !== "sending") return state;
   const attempt = state.attempt + 1;
+  // Something came while the failed pass was out (the network back, a point): one more try now.
+  if (state.again && retryAfterMs === null) return sending(attempt);
   return retryAfterMs === null
     ? {
         status: "waiting",

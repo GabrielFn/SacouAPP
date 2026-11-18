@@ -51,6 +51,20 @@ describe("courtSyncReducer (P4)", () => {
     expect(again).toMatchObject({ untilMs: NOW + 4_000, attempt: 2 });
   });
 
+  test("a poke while the failed pass was out tries once more right away, but not over a 429", () => {
+    const poked: CourtSyncState = { status: "sending", again: true, attempt: 0 };
+    const failure = { type: "pass-failed", nowMs: NOW, jitter: MIDDLE } as const;
+    expect(courtSyncReducer(poked, { ...failure, retryAfterMs: null })).toEqual({
+      status: "sending",
+      again: false,
+      attempt: 1,
+    });
+    expect(courtSyncReducer(poked, { ...failure, retryAfterMs: 5_000 })).toMatchObject({
+      status: "waiting",
+      reason: "retry-after",
+    });
+  });
+
   test("the network coming back during a backoff sends right away", () => {
     const waiting: CourtSyncState = {
       status: "waiting",
