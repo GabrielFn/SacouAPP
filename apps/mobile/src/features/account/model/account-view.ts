@@ -1,5 +1,5 @@
 import type { LegalLinks } from "../../../config/legal-links";
-import type { MyProfile } from "../../../services/api/sacou-api";
+import type { StoredProfile } from "../../profile/model/profile-stub";
 import type { AccountView } from "../../../services/auth/auth-session";
 import { strings } from "../../../strings/pt-BR";
 
@@ -7,7 +7,7 @@ export interface AccountViewInput {
   /** From the phone (the SDK), never from the API, which keeps no e-mail (ADR 0036, D3). */
   readonly account: AccountView;
   /** `undefined` while it loads; `null` when it was never saved. */
-  readonly profile: MyProfile | null | undefined;
+  readonly profile: StoredProfile | null | undefined;
   readonly legalLinks: LegalLinks;
 }
 
@@ -26,7 +26,7 @@ export interface AccountScreenView {
 
 const { account: texts } = strings;
 
-function nicknameOf(profile: MyProfile | null | undefined): string {
+function nicknameOf(profile: StoredProfile | null | undefined): string {
   if (profile === undefined) return "";
   return profile === null ? texts.setNickname : profile.nickname;
 }

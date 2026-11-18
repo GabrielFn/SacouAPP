@@ -1,10 +1,10 @@
-import type { MyProfile } from "../../../services/api/sacou-api";
+import type { StoredProfile } from "./profile-stub";
 import type { OnboardingSkipState } from "../ports/onboarding-skip";
 
 /** What the gate reads of the profile query: its status, and the profile (`null`: never saved). */
 export interface ProfileQueryView {
   readonly status: "pending" | "error" | "success";
-  readonly data: MyProfile | null | undefined;
+  readonly data: StoredProfile | null | undefined;
 }
 
 export type OnboardingGate = "show" | "skip";

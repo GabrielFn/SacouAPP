@@ -27,10 +27,14 @@ function isMyProfile(queryKey: SacouQueryKey): boolean {
 
 /** The profile goes to disk as its nickname alone: the level and the positions stay in memory (ADR 0047, 0057 D9). */
 function withNicknameOnly(client: PersistedClient): PersistedClient {
-  const queries = client.clientState.queries.map((query) => {
+  const queries = client.clientState.queries.flatMap((query) => {
+    if (!isMyProfile(query.queryKey)) return [query];
     const { data } = query.state;
-    if (!isMyProfile(query.queryKey) || !hasNickname(data)) return query;
-    return { ...query, state: { ...query.state, data: { nickname: data.nickname } } };
+    // "Never saved" (null) is not kept: offline, the gate must not open screen 27 from the disk (D9).
+    if (!hasNickname(data)) return [];
+    // `dataUpdatedAt: 0` makes the stub stale, so the screen that needs the whole profile always fetches.
+    const state = { ...query.state, data: { nickname: data.nickname }, dataUpdatedAt: 0 };
+    return [{ ...query, state }];
   });
   return { ...client, clientState: { ...client.clientState, queries } };
 }

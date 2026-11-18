@@ -72,6 +72,24 @@ describe("the profile query", () => {
     expect(client.getQueryData(queryKeys.myProfile())).toEqual(PROFILE);
   });
 
+  test("the stub on disk is already stale and a never-saved profile (null) is not kept", async () => {
+    const client = createSacouQueryClient();
+    client.setQueryData(queryKeys.myProfile(), PROFILE);
+    const store = createMemoryKeyValueStore();
+    const options = {
+      queryClient: client,
+      ...persistOptions(createCachePersister(store, 0), "1.0.0"),
+    };
+    await persistQueryClientSave(options);
+    const saved = JSON.parse(store.entries().get(CACHE_STORAGE_KEY) ?? "{}") as {
+      clientState: { queries: { state: { dataUpdatedAt: number } }[] };
+    };
+    expect(saved.clientState.queries[0]?.state.dataUpdatedAt).toBe(0);
+    client.setQueryData(queryKeys.myProfile(), null);
+    await persistQueryClientSave(options);
+    expect(store.entries().get(CACHE_STORAGE_KEY) ?? "").not.toContain("profile");
+  });
+
   test("the profile (with its level) is never written to sacou-cache.db, with or without the groups", async () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));

@@ -1,5 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
+import type { StoredProfile } from "../model/profile-stub";
 import { ApiFailure } from "../../../services/api/api-error";
 import { unwrap } from "../../../services/api/api-result";
 import type { MyProfile, SacouApi, SaveMyProfileBody } from "../../../services/api/sacou-api";
@@ -26,7 +27,7 @@ export async function fetchMyProfile(api: SacouApi): Promise<MyProfile | null> {
 export function myProfileQuery(api: SacouApi, enabled: boolean) {
   return queryOptions({
     queryKey: queryKeys.myProfile(),
-    queryFn: () => fetchMyProfile(api),
+    queryFn: (): Promise<StoredProfile | null> => fetchMyProfile(api),
     staleTime: MY_PROFILE_STALE_MS,
     enabled,
   });
