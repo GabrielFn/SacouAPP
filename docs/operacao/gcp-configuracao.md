@@ -30,7 +30,7 @@ Variáveis do repositório (Settings → Secrets and variables → Actions → *
 ## Passos manuais no console
 
 - **Segredos:** em Security → Secret Manager, em cada segredo, "Nova versão" com a URL **direta** do Neon (sem "Connection pooling"). Nunca pelo chat.
-- **Custo:** teto de gasto do Cloud Run no projeto e alerta de orçamento na conta de faturamento, US$ 1 (resposta 94).
+- **Custo:** teto de gasto do Cloud Run no projeto e alerta de orçamento na conta de faturamento, US$ 1 (R$ 5, a conta é em reais; resposta 94).
 - **Acesso público, uma vez por serviço, depois do primeiro deploy dele:** Cloud Run → serviço → Segurança → "Permitir acesso público". A `sacou-deployer` não tem `run.admin`, então o workflow não liga isso sozinho.
 
 ## Se precisar refazer

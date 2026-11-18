@@ -9,7 +9,7 @@ Decisões: [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md). Configu
 | Teste | `sacou-api-test` | `Staging` | projeto `sacou-test`, banco `sacou` | `sacou-database-url-test` | `sacou-api-test-run` |
 | Produção | `sacou-api` | `Production` | projeto `sacou-prod`, banco `sacou` | `sacou-database-url-prod` | `sacou-api-run` |
 
-Os dois na `us-east4`, projeto `sacou-api`, com a configuração de `deploy/cloud-run/service.yaml`: 1 vCPU, 512 MiB, de 0 a 1 instância, cobrança por requisição, tempo limite de 60 s, sonda de partida em `/health`. As URLs são as `*.run.app` mostradas no run do GitHub (ambiente `test` e `production`) e no console; não há domínio próprio até a E5.4 (resposta 89).
+Os dois na `us-east4`, projeto `sacou-api`, com a configuração de `deploy/cloud-run/service.yaml`: 1 vCPU, 512 MiB, de 0 a 1 instância, cobrança por requisição, tempo limite de 60 s, sonda de partida em `/health`. As URLs são as `*.run.app` mostradas no run do GitHub (ambiente `test` e `production`) e no console; não há domínio próprio agora (resposta 89: a E5.4 usa EAS Update para poder trocar o endereço pelo ar, e o domínio entra quando a E3.12 for aos jogadores).
 
 Variáveis (só nomes): `SACOU_DATABASE_URL` (do Secret Manager, por referência), `ASPNETCORE_ENVIRONMENT`, `Database__MigrateOnStartup=true`. Lista completa em [`segredos.md`](../seguranca/segredos.md).
 
