@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Sacou.Modules.Matches.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCourtTakeover : Migration
+    internal partial class AddCourtTakeover : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

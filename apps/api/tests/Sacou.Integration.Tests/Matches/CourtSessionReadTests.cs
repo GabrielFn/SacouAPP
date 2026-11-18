@@ -75,7 +75,7 @@ public sealed class CourtSessionReadTests(IntegrationDatabase database) : IAsync
         var past = await PageAsync(world, round, phone, "?after=9999");
 
         Assert.Equal($$"""{"events":[{{string.Join(',', sent.Take(PageEvents))}}],"lastPosition":500,"eventCount":601}""", first);
-        Assert.Equal($$"""{"events":[{{string.Join(',', sent.Skip(PageEvents))}}],"lastPosition":601,"eventCount":601}""", middle);
+        Assert.Equal($$"""{"events":[{{string.Join(',', sent.GetRange(PageEvents, sent.Count - PageEvents))}}],"lastPosition":601,"eventCount":601}""", middle);
         Assert.Equal("""{"events":[],"lastPosition":601,"eventCount":601}""", end);
         Assert.Equal(end, past);
     }

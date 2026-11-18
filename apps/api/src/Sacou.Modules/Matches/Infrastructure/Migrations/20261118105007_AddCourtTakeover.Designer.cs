@@ -13,7 +13,7 @@ namespace Sacou.Modules.Matches.Infrastructure.Migrations
 {
     [DbContext(typeof(MatchesDbContext))]
     [Migration("20261118105007_AddCourtTakeover")]
-    partial class AddCourtTakeover
+    internal partial class AddCourtTakeover
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
