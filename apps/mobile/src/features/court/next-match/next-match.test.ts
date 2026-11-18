@@ -53,6 +53,7 @@ const NAMES: Readonly<Record<string, string>> = {
 
 const ROSTER: CourtRoster = {
   nameOf: (memberId) => NAMES[memberId] ?? "Jogador",
+  positionOf: () => null,
   teamAppearance: (_matchId, side: TeamSide) =>
     side === "a" ? { label: "Laranja", color: "orange" } : { label: "Azul", color: "blue" },
 };
