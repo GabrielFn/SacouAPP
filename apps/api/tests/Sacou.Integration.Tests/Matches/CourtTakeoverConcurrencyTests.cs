@@ -74,7 +74,7 @@ public sealed class CourtTakeoverConcurrencyTests(IntegrationDatabase database) 
         using var one = await first;
         using var other = await second;
 
-        Assert.Equal([HttpStatusCode.Conflict, HttpStatusCode.OK], new[] { one.StatusCode, other.StatusCode }.Order());
+        Assert.Equal([HttpStatusCode.OK, HttpStatusCode.Conflict], new[] { one.StatusCode, other.StatusCode }.Order());
         var loser = one.StatusCode == HttpStatusCode.OK ? other : one;
         Assert.Equal("matches.stream-changed", await RoundCalls.CodeAsync(loser));
         Assert.Equal(2, await WritersAsync(phone.CourtSessionId));
