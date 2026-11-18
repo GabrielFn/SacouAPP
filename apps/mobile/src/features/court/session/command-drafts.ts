@@ -74,6 +74,37 @@ function manualWinnerOf(state: CourtSessionState): TeamSide | null {
   return state.currentMatch === null ? null : manualEndWinner(state.currentMatch);
 }
 
+type CorrectionCommand = Extract<
+  CourtCommand,
+  {
+    readonly type:
+      | "switch-serving-team"
+      | "shift-rotation"
+      | "revert-to"
+      | "end-match-manually"
+      | "change-lineup";
+  }
+>;
+
+function correctionDraftsFor(
+  command: CorrectionCommand,
+  timeline: CourtSessionTimeline,
+  state: CourtSessionState,
+): DraftsResult {
+  switch (command.type) {
+    case "switch-serving-team":
+      return refused(switchServingTeam(state));
+    case "shift-rotation":
+      return refused(shiftRotation(state, command.team, command.direction));
+    case "revert-to":
+      return refused(revertToEvent(timeline, command.eventId));
+    case "end-match-manually":
+      return refused(endMatchManually(state, manualWinnerOf(state)));
+    case "change-lineup":
+      return refused(changeLineup(state, command.team, command.allocation));
+  }
+}
+
 /** Runs the command of the engine on the state at the moment of execution, never on a stale one. */
 export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline): DraftsResult {
   const state = currentState(timeline);
@@ -87,15 +118,7 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
       return refused(confirmSetEnd(state, confirmOptions(command.firstServer)));
     case "undo":
       return refused(undoLastAction(timeline));
-    case "switch-serving-team":
-      return refused(switchServingTeam(state));
-    case "shift-rotation":
-      return refused(shiftRotation(state, command.team, command.direction));
-    case "revert-to":
-      return refused(revertToEvent(timeline, command.eventId));
-    case "end-match-manually":
-      return refused(endMatchManually(state, manualWinnerOf(state)));
-    case "change-lineup":
-      return refused(changeLineup(state, command.team, command.allocation));
+    default:
+      return correctionDraftsFor(command, timeline, state);
   }
 }
