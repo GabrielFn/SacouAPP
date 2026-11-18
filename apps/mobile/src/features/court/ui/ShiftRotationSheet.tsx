@@ -6,6 +6,7 @@ import { useTheme } from "../../../theme/theme-context";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
 import { Text } from "../../../ui/Text";
+import { SheetPanel } from "./SheetPanel";
 import type { ShiftOption } from "../corrections/corrections-selectors";
 
 export interface ShiftRotationSheetProps {
@@ -25,21 +26,11 @@ export function ShiftRotationSheet({
   onClose,
 }: ShiftRotationSheetProps) {
   const { corrections } = strings.court;
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
   const chosen = options.find(({ side }) => side === team);
   const rotating = chosen?.zone !== null && chosen !== undefined;
   return (
-    <View
-      accessibilityViewIsModal
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        borderRadius: tokens.radii.tile,
-        padding: tokens.spacing.l,
-        gap: tokens.spacing.s,
-      }}
-    >
+    <SheetPanel>
       <Text variant="display" displaySize="displayBlock" accessibilityRole="header">
         {corrections.shiftTitle}
       </Text>
@@ -89,6 +80,6 @@ export function ShiftRotationSheet({
         </>
       ) : null}
       <Button label={corrections.shiftClose} variant="link" onPress={onClose} />
-    </View>
+    </SheetPanel>
   );
 }

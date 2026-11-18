@@ -5,6 +5,7 @@ import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Button } from "../../../ui/Button";
 import { Text } from "../../../ui/Text";
+import { SheetPanel } from "./SheetPanel";
 import type { RevertSheetModel } from "../corrections/corrections-selectors";
 
 export interface RevertSheetProps {
@@ -33,19 +34,8 @@ function Fact({ label, children }: FactProps) {
 /** What "Voltar o jogo para 16x14?" changes, before it is done. Nothing is erased from the log. */
 export function RevertSheet({ model, onConfirm, onCancel }: RevertSheetProps) {
   const { corrections } = strings.court;
-  const { colors, tokens } = useTheme();
   return (
-    <View
-      accessibilityViewIsModal
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        borderRadius: tokens.radii.tile,
-        padding: tokens.spacing.l,
-        gap: tokens.spacing.s,
-      }}
-    >
+    <SheetPanel>
       <Text variant="display" displaySize="displayBlock" accessibilityRole="header">
         {model.title}
       </Text>
@@ -64,6 +54,6 @@ export function RevertSheet({ model, onConfirm, onCancel }: RevertSheetProps) {
       {model.removedAlsoText === null ? null : <Text variant="muted">{model.removedAlsoText}</Text>}
       <Button label={corrections.revertConfirm} onPress={onConfirm} />
       <Button label={corrections.revertCancel} variant="outline" onPress={onCancel} />
-    </View>
+    </SheetPanel>
   );
 }
