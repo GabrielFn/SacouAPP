@@ -16,7 +16,7 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 | App | Expo + TypeScript strict, com log de eventos em expo-sqlite; tipos da API gerados do contrato OpenAPI versionado (`apps/api/openapi/v1.json`), que a API só serve em `Development` ([ADR 0042](adr/0042-contrato-openapi-e-cliente.md)) |
 | Regras compartilhadas | `packages/match-engine`, `packages/volley-rules` |
 | Serviços | Cloudflare R2 (backups no piloto; fotos depois), Sentry, Resend, Expo Push; RevenueCat e PostHog depois do piloto ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)) |
-| Hospedagem | Railway Hobby |
+| Hospedagem | Google Cloud Run (`us-east4`, escala a zero) e Neon Free (`us-east-1`), deploy pelo GitHub Actions com federação de identidade ([ADR 0068](adr/0068-deploy-cloud-run-neon.md), [`deploy.md`](../operacao/deploy.md)) |
 
 ## Módulos da API
 

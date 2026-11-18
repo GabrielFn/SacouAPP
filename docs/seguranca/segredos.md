@@ -1,29 +1,31 @@
 # Segredos
 
-**Só nomes.** Nunca pedir nem aceitar valor pelo chat, nem colocar em código, log ou commit. O Gabriel cadastra os valores nos segredos do GitHub Actions, no Railway e no `.env` local, que está no `.gitignore`.
+**Só nomes.** Nunca pedir nem aceitar valor pelo chat, nem colocar em código, log ou commit. O Gabriel cadastra os valores nos segredos do GitHub Actions, no Secret Manager do Google Cloud (projeto `sacou-api`) e no `.env` local, que está no `.gitignore`.
 
-Nenhum segredo existe ainda: a CI atual não usa nenhum (ADR 0004). **Os nomes são propostos** até a tarefa que integra cada serviço, que confirma o nome e atualiza esta lista.
+A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md)): o deploy entra no Google Cloud por federação de identidade, sem chave. Os únicos segredos com valor hoje são as duas URLs do banco no Secret Manager (E5.1). **Os nomes são propostos** até a tarefa que integra cada serviço, que confirma o nome e atualiza esta lista.
 
 **Não são segredos** (E3.1, [ADR 0036](../arquitetura/adr/0036-verificacao-do-token-e-usuario.md)): `Firebase:ProjectId` (`sacou-79493`) é configuração pública, vai dentro do app e fica versionado em `apps/api/src/Sacou.Api/appsettings.json`; a variável `Firebase__ProjectId` só se um ambiente precisar trocar. `Database:MigrateOnStartup` também não.
+
+**Também não são segredos** (E5.1, [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md)): as variáveis do repositório `vars.GCP_PROJECT_ID` (`sacou-api`), `vars.GCP_WIF_PROVIDER` (nome completo do provedor `sacouapp` do pool `github`) e `vars.GCP_DEPLOYER_SA` (e-mail da conta `sacou-deployer`). Ficam em Settings → Secrets and variables → Actions → **Variables**. Sem a federação, que só aceita este repositório e a `main`, esses nomes não dão acesso a nada. `ASPNETCORE_ENVIRONMENT` e `Database__MigrateOnStartup` vão no `deploy/cloud-run/service.yaml`.
 
 **Também não são segredos** (E4.3, [ADR 0057](../arquitetura/adr/0057-login-e-sessao-no-app.md)): `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (client ID web do Firebase, vai dentro do APK; fica no `.env` local e nas variáveis do EAS), `EXPO_PUBLIC_TERMS_URL` e `EXPO_PUBLIC_PRIVACY_URL`. O `google-services.json` também é público (vai dentro do APK) e **vai ser versionado** em `apps/mobile/google-services.json` (decisão de 15/11, que substitui a pergunta 8), só depois de restringir a chave de API ao pacote `com.sacou.app` e ao SHA-1 e com exceção do gitleaks só para esse arquivo.
 
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
 | `POSTGRES_PASSWORD` | Postgres local do `docker-compose.yml`, só desenvolvimento; sem segredo no GitHub Actions (a CI usa o marcador de `.env.example`) | `.env` | E0.6 |
-| `ConnectionStrings__Sacou` | Conexão da API com o Postgres. Local: exportada no shell a partir do `POSTGRES_PASSWORD` do `.env` ([`postgres-local.md`](../operacao/postgres-local.md)); produção: a E5.1 mapeia o `SACOU_DATABASE_URL` | Shell local; Railway (E5.1) | E3.1 |
-| `SACOU_DATABASE_URL` | Postgres (Neon) | Railway; `.env` | E5.1 |
-| `SACOU_FIREBASE_SERVICE_ACCOUNT` | Firebase (FirebaseAdmin), só para administrar contas. **Não é usada na E3.1** (a verificação do token não precisa dela). Formato: o JSON baixado do console, em **Base64 padrão numa linha só, sem aspas**. Se a opção 2 da pergunta 63 for adotada, a API decodifica (a E3.16 saiu sem FirebaseAdmin: quem apaga a conta no Firebase é o app), confere `type = service_account` e `project_id` igual a `Firebase:ProjectId`, e nunca registra o valor nem o erro de parse. **Não cadastrar no GitHub Actions** | Railway; `.env` | Pós-piloto, só se a opção 2 da pergunta 63 for adotada |
-| `SACOU_R2_ACCESS_KEY_ID` | Cloudflare R2 (backups no piloto; fotos depois) | Railway; `.env` | E5.3 (E3.14 pós-piloto) |
-| `SACOU_R2_SECRET_ACCESS_KEY` | Cloudflare R2 (backups no piloto; fotos depois) | Railway; `.env` | E5.3 (E3.14 pós-piloto) |
-| `SACOU_REVENUECAT_API_KEY` | RevenueCat | Railway; `.env` | E3.15 (pós-piloto) |
-| `SACOU_REVENUECAT_WEBHOOK_AUTH` | RevenueCat; só se a E3.15 usar webhook | Railway; `.env` | E3.15 (pós-piloto) |
-| `SACOU_SENTRY_DSN` | Sentry | Railway; `.env` | E5.2 |
+| `ConnectionStrings__Sacou` | Conexão da API com o Postgres. Local: exportada no shell a partir do `POSTGRES_PASSWORD` do `.env` ([`postgres-local.md`](../operacao/postgres-local.md)); produção: a E5.1 mapeia o `SACOU_DATABASE_URL` | Shell local. No Cloud Run não é usada: a API monta a conexão a partir do `SACOU_DATABASE_URL` | E3.1 |
+| `SACOU_DATABASE_URL` | Postgres (Neon). Formato: a URL de conexão **direta** do painel do Neon (sem o pooler), `postgresql://<usuário>:<senha>@<host>/sacou?sslmode=require&channel_binding=require`. A API converte em connection string com `SSL Mode=VerifyFull` e pool de 30, e recusa outro parâmetro (ADR 0068, D5). Entra no contêiner por `secretKeyRef`, nunca como valor | Secret Manager: `sacou-database-url-test` (lido só por `sacou-api-test-run`) e `sacou-database-url-prod` (lido só por `sacou-api-run`); `.env` opcional | E5.1 |
+| `SACOU_FIREBASE_SERVICE_ACCOUNT` | Firebase (FirebaseAdmin), só para administrar contas. **Não é usada na E3.1** (a verificação do token não precisa dela). Formato: o JSON baixado do console, em **Base64 padrão numa linha só, sem aspas**. Se a opção 2 da pergunta 63 for adotada, a API decodifica (a E3.16 saiu sem FirebaseAdmin: quem apaga a conta no Firebase é o app), confere `type = service_account` e `project_id` igual a `Firebase:ProjectId`, e nunca registra o valor nem o erro de parse. **Não cadastrar no GitHub Actions** | Secret Manager; `.env` | Pós-piloto, só se a opção 2 da pergunta 63 for adotada |
+| `SACOU_R2_ACCESS_KEY_ID` | Cloudflare R2 (backups no piloto; fotos depois) | Secret Manager; `.env` | E5.3 (E3.14 pós-piloto) |
+| `SACOU_R2_SECRET_ACCESS_KEY` | Cloudflare R2 (backups no piloto; fotos depois) | Secret Manager; `.env` | E5.3 (E3.14 pós-piloto) |
+| `SACOU_REVENUECAT_API_KEY` | RevenueCat | Secret Manager; `.env` | E3.15 (pós-piloto) |
+| `SACOU_REVENUECAT_WEBHOOK_AUTH` | RevenueCat; só se a E3.15 usar webhook | Secret Manager; `.env` | E3.15 (pós-piloto) |
+| `SACOU_SENTRY_DSN` | Sentry | Secret Manager; `.env` | E5.2 |
 | `SENTRY_AUTH_TOKEN` | Sentry (envio de símbolos no build) | GitHub Actions | E5.2 |
-| `SACOU_POSTHOG_API_KEY` | PostHog | Railway; `.env` | Pós-piloto (ADR 0046) |
-| `SACOU_RESEND_API_KEY` | Resend | Railway; `.env` | E3.11 |
+| `SACOU_POSTHOG_API_KEY` | PostHog | Secret Manager; `.env` | Pós-piloto (ADR 0046) |
+| `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | E3.11 |
 | `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |
-| `SACOU_PIX_ENCRYPTION_KEY` | Chave de criptografia do Pix | Railway; `.env` | E3.10 (pós-piloto) |
+| `SACOU_PIX_ENCRYPTION_KEY` | Chave de criptografia do Pix | Secret Manager; `.env` | E3.10 (pós-piloto) |
 
 **Testes de integração:** não leem `.env` nem variável de ambiente. As chaves RSA e os certificados que assinam os ID tokens de teste são gerados em memória a cada execução (`apps/api/tests/TestSupport/TestSigningKeys.cs`); nenhuma chave fica no repositório. O Testcontainers gera uma senha aleatória a cada execução, só em memória, e nunca a registra (ADR 0020).
 

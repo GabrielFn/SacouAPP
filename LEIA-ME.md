@@ -56,7 +56,7 @@ Nas próximas vezes, abra a pasta, rode `claude` e cole o prompt de **sessões s
 ## Durante o trabalho
 
 - O Claude Code pede autorização antes de rodar comandos. Você pode aprovar comandos recorrentes (pnpm, dotnet, git) para ele não perguntar de novo.
-- Segredos (chaves do Firebase, Railway etc.) nunca vão pelo chat: crie um arquivo `.env` local (já ignorado pelo git) e os segredos do GitHub Actions; o Claude só usa os nomes.
+- Segredos (chaves do Firebase, URL do banco etc.) nunca vão pelo chat: crie um arquivo `.env` local (já ignorado pelo git), os segredos do GitHub Actions e os do Secret Manager do Google Cloud; o Claude só usa os nomes.
 - O estado do projeto fica em `docs/estado/` — se fechar no meio, a próxima sessão retoma de lá.
 
 ## O que tem no kit

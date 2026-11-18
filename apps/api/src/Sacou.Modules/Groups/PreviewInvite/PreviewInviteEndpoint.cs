@@ -10,7 +10,7 @@ namespace Sacou.Modules.Groups.PreviewInvite;
 
 /// <summary>
 /// <c>POST /v1/invites/preview</c> <c>{ token }</c>. A POST, so the token travels in the body: hosting and
-/// Railway logs keep the path and the query, never the body. Outside the group filter, on the closed list.
+/// Cloud Run request logs keep the path and the query, never the body. Outside the group filter, on the closed list.
 /// </summary>
 internal static class PreviewInviteEndpoint
 {
