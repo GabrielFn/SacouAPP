@@ -10,6 +10,13 @@ import {
   type DrawLock,
 } from "./draw-arrangement";
 import { lockOutcome, swapOutcome, unlockMember, type DrawNotice } from "./player-tap";
+import { initialPreGameChoices, type PreGameChoices } from "./pre-game";
+import {
+  isPreGameAction,
+  preGameReducer,
+  type DrawSheet,
+  type PreGameAction,
+} from "./pre-game.reducer";
 
 /** What a second name does: swap the two (the default) or lock them together. */
 export type DrawMode = "swap" | "lock";
@@ -26,6 +33,8 @@ export interface DrawFlowState {
   readonly selection: MemberId | null;
   readonly mode: DrawMode;
   readonly notice: DrawNotice | null;
+  readonly sheet: DrawSheet;
+  readonly preGame: PreGameChoices;
 }
 
 export type DrawFlowAction =
@@ -39,7 +48,8 @@ export type DrawFlowAction =
   /** A lock across teams asked for a new draw that the server refused: the lock goes back out. */
   | { readonly type: "lock-undone"; readonly lock: DrawLock }
   /** A new draw was asked offline: it is refused here, with a local notice. */
-  | { readonly type: "offline-refused" };
+  | { readonly type: "offline-refused" }
+  | PreGameAction;
 
 export const initialDrawFlowState: DrawFlowState = {
   arrangement: null,
@@ -47,6 +57,8 @@ export const initialDrawFlowState: DrawFlowState = {
   selection: null,
   mode: "swap",
   notice: null,
+  sheet: "none",
+  preGame: initialPreGameChoices,
 };
 
 /** The server honours the `together` locks: any that came apart (someone left) is dropped. */
@@ -94,6 +106,7 @@ function unlockChosen(state: DrawFlowState): DrawFlowState {
 }
 
 export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
+  if (isPreGameAction(action)) return preGameReducer(state, action);
   switch (action.type) {
     case "drawn":
       return drawn(state, action.answer);

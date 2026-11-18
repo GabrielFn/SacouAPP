@@ -1,7 +1,8 @@
-import type { MemberId } from "@sacou/match-engine";
+import type { GroupSettings, MemberId } from "@sacou/match-engine";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useReducer, useRef } from "react";
 
+import type { Member } from "../../../services/api/sacou-api";
 import { useOnline } from "../../../services/api/use-online";
 import { useServices } from "../../../services/services-context";
 import { useGroup, useGroupMembers } from "../../groups/queries/use-group-queries";
@@ -30,6 +31,10 @@ export interface DrawScreenModel {
   readonly state: DrawFlowState;
   readonly screen: DrawScreenState;
   readonly nameOf: DrawNameOf;
+  /** The members of the group, for the positions of the default lineup (D6). */
+  readonly members: readonly Member[];
+  /** The resolved settings of the round: the base of sheet 08, `null` until they parse. */
+  readonly settings: GroupSettings | null;
   readonly online: boolean;
   /** A draw is on its way (the first one or "Sortear de novo"). */
   readonly pending: boolean;
@@ -40,7 +45,10 @@ export interface DrawScreenModel {
   readonly redraw: () => void;
   /** "Tentar de novo" of the first draw. */
   readonly retry: () => void;
-  /** "Confirmar e compartilhar": the text of the teams to the share sheet (D11). */
+  /**
+   * "Confirmar e compartilhar": the text of the teams to the share sheet, then sheet 08 (D11), shared
+   * or not; with the score off in the round there is no court, so the 08 does not open (D6).
+   */
   readonly share: () => void;
 }
 
@@ -116,12 +124,15 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
   }, [drawFirst, mutate]);
 
   const nameOf = drawNamesOf(members.data ?? []);
+  const settings = input.loaded?.settings ?? null;
   return {
     group,
     round,
     state,
     screen: drawScreenState(input),
     nameOf,
+    members: members.data ?? [],
+    settings,
     online,
     pending: draw.isPending,
     error: draw.error,
@@ -142,7 +153,11 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
       if (!deps.claim()) return;
       void shareSheet
         .share(drawShareText(groupName, round.data, arrangement, nameOf))
-        .finally(deps.release);
+        .catch(() => undefined)
+        .finally(() => {
+          deps.release();
+          if (settings?.scoring.enabled === true) dispatch({ type: "pre-game-opened" });
+        });
     },
   };
 }

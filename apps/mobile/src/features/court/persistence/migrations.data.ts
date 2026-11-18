@@ -25,6 +25,9 @@ export const MIGRATION_STEPS: readonly string[] = [
      PRIMARY KEY (court_session_id, position),
      UNIQUE (court_session_id, batch, sequence, device_id)
    ) STRICT;`,
+  // The origin of a court session (E4.7, D8): only IDs, null in the sample sessions.
+  `ALTER TABLE court_sessions ADD COLUMN group_id TEXT;
+   ALTER TABLE court_sessions ADD COLUMN round_id TEXT;`,
 ];
 
 export const USER_VERSION_PRAGMA = "user_version";

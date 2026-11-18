@@ -9,7 +9,7 @@ import {
 
 const EXPECTED_COLUMNS = {
   device: ["singleton", "device_id"],
-  court_sessions: ["court_session_id", "status", "batch"],
+  court_sessions: ["court_session_id", "status", "batch", "group_id", "round_id"],
   court_events: [
     "court_session_id",
     "position",
