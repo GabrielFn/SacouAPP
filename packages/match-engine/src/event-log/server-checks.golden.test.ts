@@ -123,13 +123,18 @@ describe("server checks golden", () => {
     );
   });
 
-  test.each(takeovers)("$id reverts to an event of batch 1 from batch 2", ({ events, takeoverAt }) => {
-    const parsed = parseEnvelopes(events);
-    const firstBatchIds = new Set(parsed.slice(0, takeoverAt).map(({ eventId }) => eventId));
-    const reverts = parsed.slice(takeoverAt).filter(({ type }) => type === "RevertedTo");
+  test.each(takeovers)(
+    "$id reverts to an event of batch 1 from batch 2",
+    ({ events, takeoverAt }) => {
+      const parsed = parseEnvelopes(events);
+      const firstBatchIds = new Set(parsed.slice(0, takeoverAt).map(({ eventId }) => eventId));
+      const reverts = parsed.slice(takeoverAt).filter(({ type }) => type === "RevertedTo");
 
-    expect(reverts.length).toBeGreaterThan(0);
-    expect(reverts.every(({ batch }) => batch === 2)).toBe(true);
-    expect(reverts.some(({ payload }) => firstBatchIds.has(String(payload["targetEventId"])))).toBe(true);
-  });
+      expect(reverts.length).toBeGreaterThan(0);
+      expect(reverts.every(({ batch }) => batch === 2)).toBe(true);
+      expect(
+        reverts.some(({ payload }) => firstBatchIds.has(String(payload["targetEventId"]))),
+      ).toBe(true);
+    },
+  );
 });

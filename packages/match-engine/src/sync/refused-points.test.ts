@@ -112,7 +112,9 @@ describe("refusedPoints", () => {
       deviceId: OTHER_DEVICE,
     }));
 
-    expect(refusedPoints(timelineOf(imported), { deviceId: OWN_DEVICE, lastStoredSequence: 0 })).toStrictEqual([]);
+    expect(
+      refusedPoints(timelineOf(imported), { deviceId: OWN_DEVICE, lastStoredSequence: 0 }),
+    ).toStrictEqual([]);
   });
 
   test("ignores the imported stream of the new writer and counts only the own points", () => {
