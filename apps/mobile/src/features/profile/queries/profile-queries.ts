@@ -1,5 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
+import type { StoredProfile } from "../model/profile-stub";
 import { ApiFailure } from "../../../services/api/api-error";
 import { unwrap } from "../../../services/api/api-result";
 import type { MyProfile, SacouApi, SaveMyProfileBody } from "../../../services/api/sacou-api";
@@ -19,13 +20,14 @@ export async function fetchMyProfile(api: SacouApi): Promise<MyProfile | null> {
 }
 
 /**
- * The profile has the level the person suggests for themselves: `["me", "profile"]` is outside the
- * persisted allow list (ADR 0047), so it lives only in memory and goes with `clearSession`.
+ * The profile has the level the person suggests for themselves, and is the one record of the nickname.
+ * On disk only the nickname is written (the persister strips the rest, ADR 0057 D9 and ADR 0047), so a
+ * restored copy is a stub (`isProfileStub`); `clearSession` removes both.
  */
 export function myProfileQuery(api: SacouApi, enabled: boolean) {
   return queryOptions({
     queryKey: queryKeys.myProfile(),
-    queryFn: () => fetchMyProfile(api),
+    queryFn: (): Promise<StoredProfile | null> => fetchMyProfile(api),
     staleTime: MY_PROFILE_STALE_MS,
     enabled,
   });
@@ -57,6 +59,7 @@ export function saveProfileMutation(deps: ProfileMutationDeps) {
         cacheEffectsOf({
           type: "profileSaved",
           profile,
+          nickname: profile.nickname,
           cachedGroupIds: cachedGroupIds(deps.client),
         }),
       );

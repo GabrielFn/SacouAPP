@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 
 import { useServices } from "../../../services/services-context";
+import { greetingNicknameOf } from "../model/profile-stub";
 import { onboardingGate, type OnboardingGate } from "../model/onboarding-gate";
 import type { OnboardingSkipState } from "../ports/onboarding-skip";
 import { myProfileQuery } from "../queries/profile-queries";
@@ -11,6 +12,11 @@ import { myProfileQuery } from "../queries/profile-queries";
 export function useMyProfile(enabled = true) {
   const { sacouApi } = useServices();
   return useQuery(myProfileQuery(sacouApi, enabled));
+}
+
+/** The nickname for the greeting: the profile record, live or restored from disk (a stub keeps the nickname). */
+export function useGreetingNickname(): string | null {
+  return greetingNicknameOf(useMyProfile().data);
 }
 
 export function useOnboardingSkip(): OnboardingSkipState {

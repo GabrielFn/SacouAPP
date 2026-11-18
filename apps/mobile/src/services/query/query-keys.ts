@@ -4,7 +4,7 @@
  */
 export const queryKeys = {
   me: () => ["me"] as const,
-  /** The person's own profile, with the level they suggest: outside the persisted allow list. */
+  /** The person's own profile, the one record of the nickname; on disk only the nickname goes (ADR 0057, D9). */
   myProfile: () => ["me", "profile"] as const,
   /** What keeps the account from being deleted (screen 30b): outside the persisted allow list. */
   deletionBlockers: () => ["me", "deletion-blockers"] as const,

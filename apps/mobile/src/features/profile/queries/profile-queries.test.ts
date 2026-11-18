@@ -54,7 +54,43 @@ describe("the profile query", () => {
     ).rejects.toThrow();
   });
 
-  test("is never written to sacou-cache.db, with or without the groups", async () => {
+  test("keeps only the nickname on disk, for the greeting without a network", async () => {
+    const fake = createFakeSacouApi();
+    fake.respond("getMyProfile", apiOk(PROFILE));
+    const client = createSacouQueryClient();
+    await client.query(myProfileQuery(fake.api, true));
+    const store = createMemoryKeyValueStore();
+    await persistQueryClientSave({
+      queryClient: client,
+      ...persistOptions(createCachePersister(store, 0), "1.0.0"),
+    });
+    const file = store.entries().get(CACHE_STORAGE_KEY) ?? "";
+    expect(file).toContain(PROFILE.nickname);
+    expect(file).not.toContain(String(PLANTED_LEVEL));
+    expect(file).not.toContain("otherPositions");
+    expect(file).not.toContain("outsideHitter");
+    expect(client.getQueryData(queryKeys.myProfile())).toEqual(PROFILE);
+  });
+
+  test("the stub on disk is already stale and a never-saved profile (null) is not kept", async () => {
+    const client = createSacouQueryClient();
+    client.setQueryData(queryKeys.myProfile(), PROFILE);
+    const store = createMemoryKeyValueStore();
+    const options = {
+      queryClient: client,
+      ...persistOptions(createCachePersister(store, 0), "1.0.0"),
+    };
+    await persistQueryClientSave(options);
+    const saved = JSON.parse(store.entries().get(CACHE_STORAGE_KEY) ?? "{}") as {
+      clientState: { queries: { state: { dataUpdatedAt: number } }[] };
+    };
+    expect(saved.clientState.queries[0]?.state.dataUpdatedAt).toBe(0);
+    client.setQueryData(queryKeys.myProfile(), null);
+    await persistQueryClientSave(options);
+    expect(store.entries().get(CACHE_STORAGE_KEY) ?? "").not.toContain("profile");
+  });
+
+  test("the profile (with its level) is never written to sacou-cache.db, with or without the groups", async () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));
     const client = createSacouQueryClient();
@@ -68,8 +104,7 @@ describe("the profile query", () => {
     const file = store.entries().get(CACHE_STORAGE_KEY) ?? "";
     expect(file).toContain(G1);
     expect(file).not.toContain(String(PLANTED_LEVEL));
-    expect(file).not.toContain("João");
-    expect(file).not.toContain('"profile"');
+    expect(file).not.toContain("suggestedLevel");
   });
 });
 
