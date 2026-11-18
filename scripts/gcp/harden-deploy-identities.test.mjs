@@ -76,4 +76,12 @@ describe("deploy identities", () => {
       /gcloud run services add-iam-policy-binding "\$service" --region="\$REGION" \\\n\s+--member="serviceAccount:\$\(sa_email "\$deployer"\)" --role=roles\/run\.developer/,
     );
   });
+
+  it("lets each deployer read the images of the sacou repository, never write them", () => {
+    assert.match(
+      script,
+      /gcloud artifacts repositories add-iam-policy-binding "\$ARTIFACT_REPO" --location="\$REGION" \\\n\s+--member="serviceAccount:\$\(sa_email "\$deployer"\)" --role=roles\/artifactregistry\.reader/,
+    );
+    assert.doesNotMatch(script, /sa_email "\$deployer"\)" --role=roles\/artifactregistry\.writer/);
+  });
 });
