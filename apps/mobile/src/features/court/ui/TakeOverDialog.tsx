@@ -126,21 +126,14 @@ export function TakeOverDialog({
               <ScoreCard card={card} />
             </>
           )}
-          {leftOut === null ? null : (
-            <Text style={{ color: colors.refusal }}>{leftOut}</Text>
-          )}
+          {leftOut === null ? null : <Text style={{ color: colors.refusal }}>{leftOut}</Text>}
           {notice === null ? null : (
             <Text accessibilityRole="alert" style={{ color: colors.refusal }}>
               {notice}
             </Text>
           )}
           <ActionButton action={action} onConfirm={onConfirm} onRetry={onRetry} />
-          <Button
-            label={takeover.back}
-            variant="outline"
-            disabled={!canGoBack}
-            onPress={onBack}
-          />
+          <Button label={takeover.back} variant="outline" disabled={!canGoBack} onPress={onBack} />
         </View>
       </View>
     </ScoreBackdrop>
