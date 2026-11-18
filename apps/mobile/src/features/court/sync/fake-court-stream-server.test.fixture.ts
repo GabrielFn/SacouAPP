@@ -25,6 +25,7 @@ export interface ReceivedRequest {
 interface Writer {
   readonly deviceId: string;
   readonly account: SessionIdentity;
+  readonly batch: number;
 }
 
 /** What the next request gets instead of the rules: an error, or "stored but the answer was lost". */
@@ -78,7 +79,7 @@ function isWholeRequest(envelopes: readonly EventEnvelope[]): boolean {
 
 export function createFakeCourtStreamServer(): FakeCourtStreamServer {
   const stream = { value: [] as readonly EventEnvelope[] };
-  const writer = { value: null as Writer | null };
+  const writers = { value: [] as readonly Writer[] };
   const log = { value: [] as readonly ReceivedRequest[] };
   const faults = { value: [] as readonly Fault[] };
   const gate = { value: null as Promise<void> | null };
@@ -89,6 +90,18 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       .reduce((top, event) => Math.max(top, event.sequence), 0);
   }
 
+  /** `lastSequence` only for a pair that wrote an earlier batch (ADR 0063, D8). */
+  function notTheWriter(currentBatch: number, deviceId: string, account: SessionIdentity): ApiError {
+    const wrote = writers.value.some(
+      (other) => other.deviceId === deviceId && other.account === account,
+    );
+    return problem(
+      HTTP_CONFLICT,
+      "matches.not-the-writer",
+      wrote ? { currentBatch, lastSequence: highest(deviceId) } : { currentBatch },
+    );
+  }
+
   function apply(
     envelopes: readonly EventEnvelope[],
     account: SessionIdentity,
@@ -97,9 +110,9 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       return apiErr(problem(HTTP_BAD_REQUEST, "matches.batch-invalid"));
     const [first] = envelopes;
     if (first === undefined) return apiErr(problem(HTTP_BAD_REQUEST, "matches.batch-invalid"));
-    const current = writer.value;
+    const current = writers.value.at(-1) ?? null;
     if (current !== null && (current.deviceId !== first.deviceId || current.account !== account)) {
-      return apiErr(problem(HTTP_CONFLICT, "matches.not-the-writer"));
+      return apiErr(notTheWriter(current.batch, first.deviceId, account));
     }
     const known = new Set(stream.value.map((event) => event.eventId));
     const fresh = envelopes.filter((envelope) => !known.has(envelope.eventId));
@@ -111,7 +124,7 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     if (firstNew !== undefined && firstNew.sequence < expected) {
       return apiErr(problem(HTTP_CONFLICT, "matches.sequence-conflict"));
     }
-    writer.value ??= { deviceId: first.deviceId, account };
+    if (current === null) writers.value = [{ deviceId: first.deviceId, account, batch: 1 }];
     stream.value = [...stream.value, ...fresh];
     return apiOk({ lastSequence: highest(first.deviceId), stored: fresh.length });
   }
@@ -153,10 +166,14 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       stream.value = stream.value.slice(0, Math.max(0, stream.value.length - count));
     },
     giveToAnotherWriter() {
-      writer.value = {
-        deviceId: "another-device",
-        account: Object.freeze({ opaque: Symbol("b") }),
-      };
+      writers.value = [
+        ...writers.value,
+        {
+          deviceId: "another-device",
+          account: Object.freeze({ opaque: Symbol("b") }),
+          batch: writers.value.length + 1,
+        },
+      ];
     },
   };
 }

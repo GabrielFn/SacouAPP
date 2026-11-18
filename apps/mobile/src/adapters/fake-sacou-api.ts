@@ -61,6 +61,9 @@ function defaults(): Answers {
     addGuest: none,
     drawTeams: none,
     appendCourtEvents: none,
+    getCourtSession: none,
+    takeOverCourt: none,
+    listCourtEvents: none,
   };
 }
 
@@ -120,6 +123,9 @@ export function createFakeSacouApi(): FakeSacouApi {
     drawTeams: (groupId, roundId, body) => answer("drawTeams", [groupId, roundId, body]),
     appendCourtEvents: (ref, envelopes, account) =>
       answer("appendCourtEvents", [ref, envelopes, account]),
+    getCourtSession: (groupId, roundId) => answer("getCourtSession", [groupId, roundId]),
+    takeOverCourt: (ref, body, account) => answer("takeOverCourt", [ref, body, account]),
+    listCourtEvents: (ref, after) => answer("listCourtEvents", [ref, after]),
   };
 
   return {
