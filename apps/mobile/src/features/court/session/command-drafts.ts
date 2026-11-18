@@ -30,7 +30,11 @@ export type CourtCommand =
   /** "Trocar sacador" of screen 24. */
   | { readonly type: "switch-serving-team" }
   /** "Girar / desgirar" of screen 24. */
-  | { readonly type: "shift-rotation"; readonly team: TeamSide; readonly direction: RotationDirection }
+  | {
+      readonly type: "shift-rotation";
+      readonly team: TeamSide;
+      readonly direction: RotationDirection;
+    }
   /** "Voltar para este ponto" of screen 24. */
   | { readonly type: "revert-to"; readonly eventId: string }
   /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */

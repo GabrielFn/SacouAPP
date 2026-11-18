@@ -71,13 +71,14 @@ describe("the lines of screen 24 (set 2 at 18-15)", () => {
     expect(effectiveSelection(timeline, points[4]?.eventId ?? null)).toBe(points[4]?.eventId);
   });
 
-  test("a rotation that is off says who serves by team", async () => {
+  test("a rotation that is off says who serves by team, and a side-out has no number", async () => {
     const scenario = await startScenario(NO_ROTATION);
-    await score(scenario, "ab");
-    const [newest] = timelineRows(scenario.timeline(), ROSTER, null);
-    expect(newest?.serveName).toBeNull();
-    expect(newest?.serveText).toMatch(/^Saque do /);
-    expect(newest?.sideOutText).toBeNull();
+    await score(scenario, "aab");
+    const [newest, second] = timelineRows(scenario.timeline(), ROSTER, null);
+    expect(second?.serveName).toBeNull();
+    expect(second?.serveText).toMatch(/^Saque do /);
+    expect(second?.sideOutText).toBeNull();
+    expect(newest?.sideOutText).toBe("Side-out");
   });
 });
 
@@ -88,7 +89,9 @@ describe("the sheet of going back", () => {
     const target = getRecentPoints(timeline)[3];
     const sheet = revertSheet(timeline, ROSTER, target?.eventId ?? null);
     expect(sheet?.currentScore).toBe("18–15");
-    expect(sheet?.title).toBe(`Voltar o jogo para ${String(target?.score.a)}x${String(target?.score.b)}?`);
+    expect(sheet?.title).toBe(
+      `Voltar o jogo para ${String(target?.score.a)}x${String(target?.score.b)}?`,
+    );
     expect(sheet?.removedPointsText).toBe("3 pontos serão apagados.");
     expect(sheet?.serveText).toMatch(/^volta para o /);
     expect(sheet?.removedAlsoText).toBeNull();

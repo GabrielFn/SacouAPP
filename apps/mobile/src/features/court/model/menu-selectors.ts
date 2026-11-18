@@ -38,7 +38,12 @@ export function menuSubtitle(timeline: CourtSessionTimeline, roster: CourtRoster
 export type EndMatchSummary =
   /** The set is decided and waiting: the way is to confirm it (screen 25). */
   | { readonly kind: "confirm-set" }
-  | { readonly kind: "wins-on-sets"; readonly winner: string; readonly won: number; readonly lost: number }
+  | {
+      readonly kind: "wins-on-sets";
+      readonly winner: string;
+      readonly won: number;
+      readonly lost: number;
+    }
   | {
       readonly kind: "wins-on-points";
       readonly winner: string;
@@ -91,7 +96,12 @@ export function endMatchSentence(summary: EndMatchSummary): string {
     case "wins-on-sets":
       return endMatchDialog.winsOnSets(summary.winner, summary.won, summary.lost);
     case "wins-on-points":
-      return endMatchDialog.winsOnPoints(summary.winner, summary.won, summary.lost, summary.setNumber);
+      return endMatchDialog.winsOnPoints(
+        summary.winner,
+        summary.won,
+        summary.lost,
+        summary.setNumber,
+      );
     case "no-winner":
     case "confirm-set":
       return endMatchDialog.noWinner;

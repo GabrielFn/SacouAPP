@@ -16,28 +16,29 @@ const SUN = "sun";
  */
 export function createStoredCourtThemePreference(store: KeyValueStore): CourtThemePreference {
   const listeners = createListeners();
-  const state: { value: CourtThemeChoice; chosen: boolean } = { value: SUN, chosen: false };
+  const state: { value: { readonly choice: CourtThemeChoice; readonly chosen: boolean } } = {
+    value: { choice: SUN, chosen: false },
+  };
 
-  function change(next: CourtThemeChoice): void {
-    if (state.value === next) return;
-    state.value = next;
-    listeners.notify();
+  function change(next: CourtThemeChoice, chosen: boolean): void {
+    const changed = state.value.choice !== next;
+    state.value = { choice: next, chosen: state.value.chosen || chosen };
+    if (changed) listeners.notify();
   }
 
   void store
     .getItem(COURT_THEME_KEY)
     .then((stored) => {
       // A choice made before the first read wins over it.
-      if (!state.chosen && stored === NIGHT) change(NIGHT);
+      if (!state.value.chosen && stored === NIGHT) change(NIGHT, false);
     })
     .catch(() => undefined);
 
   return {
     subscribe: (listener) => listeners.add(listener),
-    snapshot: () => state.value,
+    snapshot: () => state.value.choice,
     async set(choice) {
-      state.chosen = true;
-      change(choice);
+      change(choice, true);
       await store.setItem(COURT_THEME_KEY, choice);
     },
   };

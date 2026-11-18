@@ -1,7 +1,13 @@
 import { describe, expect, test } from "vitest";
 
 import { describeUndo, undoNoticeText } from "./undo-notice";
-import { ROSTER, confirmSet, score, screen09, startScenario } from "./screen-scenarios.test.fixture";
+import {
+  ROSTER,
+  confirmSet,
+  score,
+  screen09,
+  startScenario,
+} from "./screen-scenarios.test.fixture";
 
 const label = (side: "a" | "b") => ROSTER.teamAppearance("any", side).label;
 

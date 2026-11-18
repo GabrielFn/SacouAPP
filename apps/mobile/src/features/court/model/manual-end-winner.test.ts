@@ -35,9 +35,24 @@ interface Row {
 
 const TABLE: readonly Row[] = [
   { name: "sets win over points", sets: { a: 1, b: 0 }, points: { a: 5, b: 12 }, winner: "a" },
-  { name: "level sets, A ahead in the set", sets: { a: 1, b: 1 }, points: { a: 10, b: 8 }, winner: "a" },
-  { name: "level sets, B ahead in the set", sets: { a: 1, b: 1 }, points: { a: 8, b: 10 }, winner: "b" },
-  { name: "level sets and level points", sets: { a: 1, b: 1 }, points: { a: 9, b: 9 }, winner: null },
+  {
+    name: "level sets, A ahead in the set",
+    sets: { a: 1, b: 1 },
+    points: { a: 10, b: 8 },
+    winner: "a",
+  },
+  {
+    name: "level sets, B ahead in the set",
+    sets: { a: 1, b: 1 },
+    points: { a: 8, b: 10 },
+    winner: "b",
+  },
+  {
+    name: "level sets and level points",
+    sets: { a: 1, b: 1 },
+    points: { a: 9, b: 9 },
+    winner: null,
+  },
   { name: "first set at 0-0", sets: { a: 0, b: 0 }, points: { a: 0, b: 0 }, winner: null },
   { name: "single set at 20-18", sets: { a: 0, b: 0 }, points: { a: 20, b: 18 }, winner: "a" },
   { name: "level sets and no set in play", sets: { a: 1, b: 1 }, points: null, winner: null },

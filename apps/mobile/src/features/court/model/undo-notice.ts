@@ -67,10 +67,7 @@ export function describeUndo(timeline: CourtSessionTimeline): UndoNotice | null 
 }
 
 /** The line of the middle strip for a notice; `teamLabel` names a side ("Laranja"). */
-export function undoNoticeText(
-  notice: UndoNotice,
-  teamLabel: (side: TeamSide) => string,
-): string {
+export function undoNoticeText(notice: UndoNotice, teamLabel: (side: TeamSide) => string): string {
   const { undoNotice } = strings.court;
   switch (notice.kind) {
     case "point":

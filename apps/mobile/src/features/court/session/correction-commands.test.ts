@@ -84,7 +84,10 @@ describe("revert-to", () => {
     if (target === undefined) throw new Error("no point");
     const { entries } = scenario.timeline();
     const expected = entries.find(({ event }) => event.eventId === target.eventId)?.state;
-    const result = await scenario.controller.dispatch({ type: "revert-to", eventId: target.eventId });
+    const result = await scenario.controller.dispatch({
+      type: "revert-to",
+      eventId: target.eventId,
+    });
     expect(result.ok).toBe(true);
     expect(stateOf(scenario)).toEqual(expected);
   });

@@ -84,7 +84,8 @@ export default function CourtRoute() {
         // The line is worked out before the command, from the action about to be taken back. DESFAZER
         // never buzzes, not even when the engine turns it down (answer of the Gabriel, ADR 0030).
         const undone = timeline === null ? null : describeUndo(timeline);
-        const matchId = timeline === null ? undefined : stateOfTimeline(timeline).currentMatch?.matchId;
+        const matchId =
+          timeline === null ? undefined : stateOfTimeline(timeline).currentMatch?.matchId;
         void dispatch({ type: "undo" }).then((result) => {
           if (result.ok) {
             guard.acceptUndo();

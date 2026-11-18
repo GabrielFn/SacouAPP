@@ -1,10 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
 import { createMemoryKeyValueStore } from "./memory-key-value-store";
-import {
-  COURT_THEME_KEY,
-  createStoredCourtThemePreference,
-} from "./stored-court-theme-preference";
+import { COURT_THEME_KEY, createStoredCourtThemePreference } from "./stored-court-theme-preference";
 
 async function settle(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));

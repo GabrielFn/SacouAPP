@@ -43,7 +43,8 @@ export function TimelineRow({ row, onPress }: TimelineRowProps) {
       <Text
         tabular
         style={{
-          minWidth: sizes.tag * 2,
+          flexBasis: "22%",
+          flexShrink: 0,
           fontFamily: fontFamilies.display800,
           fontSize: tokens.fontSizes.displayBrand,
           textDecorationLine: row.willUndo ? "line-through" : "none",

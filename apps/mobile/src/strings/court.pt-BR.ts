@@ -102,6 +102,8 @@ export const courtStrings = {
     groupLabel: "Ajustes do jogo",
     corrections: "Corrigir",
     correctionsHint: "linha do tempo",
+    hintAfter: (hint: string) => ` · ${hint}`,
+    hintLabel: (label: string, hint: string) => `${label} ${hint}`,
     flipSides: "Inverter lados",
     flipSidesLabel: (inverted: boolean) =>
       inverted ? "Inverter lados, lados invertidos" : "Inverter lados, lados normais",
@@ -175,6 +177,10 @@ export const courtStrings = {
     shiftChange: (team: string, from: number, to: number) =>
       `${team}: rotação ${String(from)} → ${String(to)}`,
     noRotation: "Sem rotação",
+    shiftTeamOff: (team: string) => `${team} · Sem rotação`,
+    shiftBoth: (forward: string, backward: string) => `${forward} · ${backward}`,
+    shiftButtonLabel: (button: string, change: string) => `${button}. ${change}`,
+    scoreChange: (from: string, to: string) => `${from} → ${to}`,
     shiftClose: "Fechar",
   },
   undoNotice: {

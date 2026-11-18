@@ -167,6 +167,23 @@ function scoreOf(snapshot: RevertPreview["current"]): string {
     : strings.court.corrections.score(snapshot.score.a, snapshot.score.b);
 }
 
+function titleOf(reverted: RevertPreview["reverted"]): string {
+  const score = reverted?.score ?? { a: NONE, b: NONE };
+  return strings.court.corrections.revertTitle(score.a, score.b);
+}
+
+function serveTextOf(
+  { servingTeam, servingPlayer }: RevertPreview,
+  roster: CourtRoster,
+  label: (side: TeamSide) => string,
+): string | null {
+  if (servingTeam === null) {
+    return null;
+  }
+  const name = servingPlayer === null ? null : roster.nameOf(servingPlayer);
+  return strings.court.corrections.revertServeReturns(label(servingTeam), name);
+}
+
 /** What the sheet "Voltar o jogo para 16x14?" shows, from the preview of the engine; `null` if it refuses. */
 export function revertSheet(
   timeline: CourtSessionTimeline,
@@ -179,20 +196,14 @@ export function revertSheet(
     return null;
   }
   const { corrections } = strings.court;
-  const { current, reverted, servingTeam, servingPlayer, rotationChanges, removed } = preview.value;
+  const { current, reverted, rotationChanges, removed } = preview.value;
   const label = (side: TeamSide) => roster.teamAppearance(matchId, side).label;
   const also = removedParts(removed);
   return {
-    title: corrections.revertTitle(reverted?.score.a ?? NONE, reverted?.score.b ?? NONE),
+    title: titleOf(reverted),
     currentScore: scoreOf(current),
     revertedScore: scoreOf(reverted),
-    serveText:
-      servingTeam === null
-        ? null
-        : corrections.revertServeReturns(
-            label(servingTeam),
-            servingPlayer === null ? null : roster.nameOf(servingPlayer),
-          ),
+    serveText: serveTextOf(preview.value, roster, label),
     rotationTexts: rotationChanges.map(({ team, to }) =>
       corrections.revertRotationReturns(label(team), to),
     ),

@@ -25,7 +25,7 @@ export interface MatchMenuSheetProps {
   readonly onEndMatch: () => void;
 }
 
-interface MenuRowProps {
+export interface MenuRowProps {
   readonly label: string;
   readonly hint?: string;
   readonly accessibilityLabel?: string;
@@ -38,7 +38,10 @@ function MenuRow({ label, hint, accessibilityLabel, chevron = false, onPress }: 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? (hint === undefined ? label : `${label} ${hint}`)}
+      accessibilityLabel={
+        accessibilityLabel ??
+        (hint === undefined ? label : strings.court.menu.hintLabel(label, hint))
+      }
       onPress={onPress}
       style={{
         minHeight: tokens.sizes.primaryButton,
@@ -50,7 +53,9 @@ function MenuRow({ label, hint, accessibilityLabel, chevron = false, onPress }: 
     >
       <Text variant="title" style={{ flexShrink: 1 }}>
         {label}
-        {hint === undefined ? null : <Text variant="muted">{` · ${hint}`}</Text>}
+        {hint === undefined ? null : (
+          <Text variant="muted">{strings.court.menu.hintAfter(hint)}</Text>
+        )}
       </Text>
       {chevron ? (
         <View style={{ marginLeft: "auto" }}>
@@ -107,12 +112,7 @@ export function MatchMenuSheet({
     }
   };
   return (
-    <CourtPage
-      title={menu.title}
-      subtitle={subtitle}
-      closeLabel={menu.close}
-      onClose={onClose}
-    >
+    <CourtPage title={menu.title} subtitle={subtitle} closeLabel={menu.close} onClose={onClose}>
       <ScrollView
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >

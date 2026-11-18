@@ -14,5 +14,7 @@ function leaderOf(counts: Readonly<Record<TeamSide, number>>): TeamSide | null {
  * nobody leaves the court. "Points" is the score of the set in play, the one the court shows.
  */
 export function manualEndWinner(match: MatchScore): TeamSide | null {
-  return leaderOf(match.setsWon) ?? (match.currentSet === null ? null : leaderOf(match.currentSet.score));
+  return (
+    leaderOf(match.setsWon) ?? (match.currentSet === null ? null : leaderOf(match.currentSet.score))
+  );
 }

@@ -51,7 +51,7 @@ export function ShiftRotationSheet({
         {options.map(({ side, label, zone }) => (
           <Chip
             key={side}
-            label={zone === null ? `${label} · ${corrections.noRotation}` : label}
+            label={zone === null ? corrections.shiftTeamOff(label) : label}
             selected={side === team}
             disabled={zone === null}
             onPress={() => {
@@ -64,20 +64,28 @@ export function ShiftRotationSheet({
         <>
           <Button
             label={corrections.shiftForward}
-            accessibilityLabel={`${corrections.shiftForward}. ${chosen.forwardText ?? ""}`}
+            accessibilityLabel={corrections.shiftButtonLabel(
+              corrections.shiftForward,
+              chosen.forwardText ?? "",
+            )}
             onPress={() => {
               onShift("forward");
             }}
           />
           <Button
             label={corrections.shiftBackward}
-            accessibilityLabel={`${corrections.shiftBackward}. ${chosen.backwardText ?? ""}`}
+            accessibilityLabel={corrections.shiftButtonLabel(
+              corrections.shiftBackward,
+              chosen.backwardText ?? "",
+            )}
             variant="outline"
             onPress={() => {
               onShift("backward");
             }}
           />
-          <Text variant="muted">{`${chosen.forwardText ?? ""} · ${chosen.backwardText ?? ""}`}</Text>
+          <Text variant="muted">
+            {corrections.shiftBoth(chosen.forwardText ?? "", chosen.backwardText ?? "")}
+          </Text>
         </>
       ) : null}
       <Button label={corrections.shiftClose} variant="link" onPress={onClose} />

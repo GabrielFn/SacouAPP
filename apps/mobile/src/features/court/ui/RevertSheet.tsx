@@ -13,7 +13,7 @@ export interface RevertSheetProps {
   readonly onCancel: () => void;
 }
 
-interface FactProps {
+export interface FactProps {
   readonly label: string;
   readonly children: string;
 }
@@ -49,7 +49,9 @@ export function RevertSheet({ model, onConfirm, onCancel }: RevertSheetProps) {
       <Text variant="display" displaySize="displayBlock" accessibilityRole="header">
         {model.title}
       </Text>
-      <Fact label={corrections.revertScore}>{`${model.currentScore} → ${model.revertedScore}`}</Fact>
+      <Fact label={corrections.revertScore}>
+        {corrections.scoreChange(model.currentScore, model.revertedScore)}
+      </Fact>
       {model.serveText === null ? null : (
         <Fact label={corrections.revertServe}>{model.serveText}</Fact>
       )}

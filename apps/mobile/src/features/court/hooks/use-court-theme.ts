@@ -11,10 +11,12 @@ export interface CourtThemeControl {
 /** The theme of the court, read from the preference and nowhere else (E4.10, D9). */
 export function useCourtTheme(): CourtThemeControl {
   const { courtThemePreference } = useServices();
-  const choice = useSyncExternalStore(
-    courtThemePreference.subscribe,
-    courtThemePreference.snapshot,
+  const subscribe = useCallback(
+    (listener: () => void) => courtThemePreference.subscribe(listener),
+    [courtThemePreference],
   );
+  const snapshot = useCallback(() => courtThemePreference.snapshot(), [courtThemePreference]);
+  const choice = useSyncExternalStore(subscribe, snapshot);
   const choose = useCallback(
     (next: CourtThemeChoice) => {
       void courtThemePreference.set(next).catch(() => undefined);
