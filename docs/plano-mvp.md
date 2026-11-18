@@ -181,6 +181,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E5.1 | Deploy da API no Railway e banco no Neon (teste e produção) | Deploy automático a partir da branch principal. Criar o projeto Neon com `pg_version` 18, a mesma versão principal dos testes (ADR 0020) | acesso Railway e Neon |
 | E5.2 | Sentry e logs estruturados (PostHog: pós-piloto, ADR 0046) | Erro proposital aparece no painel | acessos |
 | E5.3 | Backups diários, limite de requisições, feature flags e versão mínima | Restauração de backup testada | E5.1 |
+| E5.3b | Custo do replay do stream da quadra (revisão da E3.7 Parte 2) | Lote no 20.000º evento abaixo de 500 ms em Release, por snapshot do estado ou teto menor de eventos, com ADR. Bloqueia o piloto | E3.7 |
 | E5.4 | Builds EAS e envio para TestFlight e teste interno | Instalável por convite | acessos das lojas |
 
 ### E6 · Conformidade (M6)

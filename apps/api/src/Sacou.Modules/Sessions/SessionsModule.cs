@@ -7,6 +7,7 @@ using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.AccountData;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.CancelRound;
+using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Sessions.CreateRound;
 using Sacou.Modules.Sessions.DrawTeams;
 using Sacou.Modules.Sessions.GetRound;
@@ -43,6 +44,8 @@ public static class SessionsModule
         services.AddScoped<IAccountExportSection, SessionsExportSection>();
         services.AddSingleton<IDrawSeeds, RandomDrawSeeds>();
         services.AddScoped<DrawTeamsHandler>();
+        // The round of a court stream, for the Matches (E3.7, ADR 0060, D14).
+        services.AddScoped<IRoundDirectory, StoreRoundDirectory>();
         return services;
     }
 

@@ -21,6 +21,7 @@ public sealed class ProblemResultsTests
         { ErrorKind.NotFound, 404, "Not found", "https://tools.ietf.org/html/rfc9110#section-15.5.5" },
         { ErrorKind.Conflict, 409, "Conflict", "https://tools.ietf.org/html/rfc9110#section-15.5.10" },
         { ErrorKind.Gone, 410, "Gone", "https://tools.ietf.org/html/rfc9110#section-15.5.11" },
+        { ErrorKind.Unprocessable, 422, "Unprocessable content", "https://tools.ietf.org/html/rfc9110#section-15.5.21" },
     };
 
     [Theory]

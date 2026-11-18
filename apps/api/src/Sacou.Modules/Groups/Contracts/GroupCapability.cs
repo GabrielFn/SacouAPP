@@ -12,4 +12,7 @@ public enum GroupCapability
 
     /// <summary>Draws the teams of a round, seeing the private levels (ADR 0055).</summary>
     DrawTeams,
+
+    /// <summary>Writes the court stream of a round: every event type, the manual end included (ADR 0060, D5).</summary>
+    WriteCourt,
 }

@@ -3,7 +3,18 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <!-- Only for `dotnet ef migrations add`: never flows to the API or its output. -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
+        <ProjectReference Include="../../Sacou.Http/Sacou.Http.csproj" />
+        <!-- Only Identity.Contracts, Groups.Contracts and Sessions.Contracts are used: Sacou.Architecture.Tests checks it. -->
+        <ProjectReference Include="../Identity/Sacou.Modules.Identity.csproj" />
+        <ProjectReference Include="../Groups/Sacou.Modules.Groups.csproj" />
+        <ProjectReference Include="../Sessions/Sacou.Modules.Sessions.csproj" />
     </ItemGroup>
     <ItemGroup>
         <!-- The single source of the catalog, shared with TypeScript. A missing file fails the build. -->
