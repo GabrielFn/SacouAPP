@@ -30,20 +30,15 @@ internal sealed class RoundAccessFilter : AccessFilter<RoundAccess>
             return Result.Failure<RoundAccess>(user.Error);
         }
 
-        if (!Guid.TryParse(http.Request.RouteValues[GroupIdRouteValue] as string, out var id))
+        var authorized = await http.RequestServices.GetRequiredService<IGroupMembership>()
+            .AuthorizeAsync(http.Request.RouteValues[GroupIdRouteValue], user.Value.UserId, capability, cancellationToken)
+            .ConfigureAwait(false);
+        if (authorized.IsFailure)
         {
-            return Result.Failure<RoundAccess>(GroupAccessErrors.GroupNotFound);
+            return Result.Failure<RoundAccess>(authorized.Error);
         }
 
-        var groups = http.RequestServices.GetRequiredService<IGroupMembership>();
-        var member = await groups.FindActiveAsync(id, user.Value.UserId, cancellationToken).ConfigureAwait(false);
-        if (member is null)
-        {
-            return Result.Failure<RoundAccess>(GroupAccessErrors.GroupNotFound);
-        }
-
-        return groups.Allows(member.Role, capability)
-            ? Result.Success(new RoundAccess(new GroupId(id), user.Value.UserId, new MemberId(member.MemberId), member.Role, member.Type))
-            : Result.Failure<RoundAccess>(GroupAccessErrors.Forbidden);
+        var (id, member) = authorized.Value;
+        return Result.Success(new RoundAccess(new GroupId(id), user.Value.UserId, new MemberId(member.MemberId), member.Role, member.Type));
     }
 }
