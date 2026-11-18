@@ -62,7 +62,8 @@ export function endMatchSummary(
   if (match === null) {
     return null;
   }
-  if (selectCourtPhase(state) === "set-decided") {
+  const phase = selectCourtPhase(state);
+  if (phase === "set-decided" || phase === "match-pending") {
     return { kind: "confirm-set" };
   }
   const winner = manualEndWinner(match);

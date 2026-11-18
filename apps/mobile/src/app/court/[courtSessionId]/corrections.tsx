@@ -7,6 +7,7 @@ import {
 import {
   canShift,
   correctionsSubtitle,
+  currentPointNotice,
   currentSetNumber,
   effectiveSelection,
   revertSheet,
@@ -51,8 +52,9 @@ export default function CorrectionsRoute() {
       canShift: canShift(options),
       canSwitchServer: selectCourtPhase(stateOfTimeline(timeline)) === "playing",
       servingNotice: servingNotice(timeline, courtRoster),
+      currentNotice: currentPointNotice(timeline, state.selected),
     };
-  }, [timeline, courtRoster, selected]);
+  }, [timeline, courtRoster, selected, state.selected]);
   if (view.status === "failed") {
     return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
   }
@@ -61,6 +63,8 @@ export default function CorrectionsRoute() {
   }
   // A refusal says why nothing happened; a command that goes through clears the last one.
   const run = (command: PlayCommand, onDone?: () => void) => {
+    if (state.pending) return;
+    send({ type: "command-sent" });
     void dispatch(command).then((result) => {
       send(
         result.ok

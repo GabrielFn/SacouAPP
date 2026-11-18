@@ -38,6 +38,16 @@ describe.each([
     expect(await log.findOpenSessionOfRound("round-3")).toEqual({ ok: true, value: null });
   });
 
+  test("findOrigin reads the origin back; a sample session or a missing one has none", async () => {
+    const log = await open();
+    await log.openSession(SESSION_A, ORIGIN);
+    await log.openSession(SESSION_B);
+
+    expect(await log.findOrigin(SESSION_A)).toEqual({ ok: true, value: ORIGIN });
+    expect(await log.findOrigin(SESSION_B)).toEqual({ ok: true, value: null });
+    expect(await log.findOrigin("missing")).toEqual({ ok: true, value: null });
+  });
+
   test("the origin is written only when the session is created", async () => {
     const log = await open();
     await log.openSession(SESSION_A, ORIGIN);

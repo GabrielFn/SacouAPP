@@ -5,6 +5,7 @@ import type {
   CourtEventLog,
   CourtLogError,
   CourtLogResult,
+  CourtSessionOrigin,
   StoredCourtLog,
 } from "../ports/court-event-log";
 import type { IdGenerator } from "../../../services/id/id-generator";
@@ -31,6 +32,7 @@ import {
   SELECT_MAX_SEQUENCE,
   SELECT_OPEN_SESSION_OF_ROUND,
   SELECT_SESSION,
+  SELECT_SESSION_ORIGIN,
   UPDATE_SESSION_STATUS,
 } from "./court-queries.data";
 import {
@@ -148,6 +150,12 @@ async function appendEnvelopes(
   return ok(undefined);
 }
 
+/** Both ids or none: a sample session was opened without an origin. */
+function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
+  const groupId = readTextColumn(row, "group_id");
+  const roundId = readTextColumn(row, "round_id");
+  return groupId === null || roundId === null ? null : { groupId, roundId };
+}
 async function setStatus(
   transaction: SqlExecutor,
   courtSessionId: string,
@@ -175,6 +183,11 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
           origin?.ownerKey ?? null,
         ]);
         return ok(undefined);
+      }),
+    findOrigin: (courtSessionId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
+        return ok(originOf(row));
       }),
     findActiveSession: () =>
       guarded(async () => {

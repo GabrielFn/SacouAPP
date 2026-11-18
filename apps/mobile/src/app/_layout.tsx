@@ -20,7 +20,10 @@ import { expoFileShare } from "../adapters/expo-file-share";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
+import { expoCryptoShuffler } from "../adapters/expo-crypto-shuffler";
+import { createStoredNextMatchDrafts } from "../adapters/stored-next-match-drafts";
 import { createCachedCourtRoster } from "../adapters/cached-court-roster";
+import { createCachedCourtRoundSource } from "../adapters/cached-court-round-source";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
@@ -113,6 +116,9 @@ const realServices: Services = {
   clipboard: expoClipboard,
   idGenerator: expoCryptoIdGenerator,
   coinFlip: expoCryptoCoinFlip,
+  shuffler: expoCryptoShuffler,
+  nextMatchDrafts: createStoredNextMatchDrafts(cacheStore),
+  courtRounds: createCachedCourtRoundSource(queryClient),
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,
