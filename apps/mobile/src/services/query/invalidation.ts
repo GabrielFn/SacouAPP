@@ -147,7 +147,6 @@ export function cacheEffectsOf(event: MutationEvent): readonly CacheEffect[] {
     case "profileSaved":
       return [
         { action: "set", key: queryKeys.myProfile(), data: event.profile },
-        { action: "set", key: queryKeys.myNickname(), data: event.nickname },
         ...event.cachedGroupIds.map((groupId) => invalidate(queryKeys.members(groupId))),
       ];
   }

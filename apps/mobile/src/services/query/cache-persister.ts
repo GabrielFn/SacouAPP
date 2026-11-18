@@ -7,6 +7,7 @@ import type {
 } from "@tanstack/react-query-persist-client";
 
 import type { KeyValueStore } from "./key-value-store";
+import { queryKeys, type SacouQueryKey } from "./query-keys";
 import { cacheBuster, PERSISTED_CACHE_MAX_AGE_MS, shouldPersistQuery } from "./persist-policy";
 
 /** The one row of the persisted cache. */
@@ -15,9 +16,39 @@ const SAVE_THROTTLE_MS = 1_000;
 /** Written for a cache with nothing to keep: the store removes the row instead (see below). */
 const NOTHING_KEPT = "";
 
+const MY_PROFILE_KEY: SacouQueryKey = queryKeys.myProfile();
+
+function isMyProfile(queryKey: SacouQueryKey): boolean {
+  return (
+    queryKey.length === MY_PROFILE_KEY.length &&
+    MY_PROFILE_KEY.every((part, i) => queryKey[i] === part)
+  );
+}
+
+/** The profile goes to disk as its nickname alone: the level and the positions stay in memory (ADR 0047, 0057 D9). */
+function withNicknameOnly(client: PersistedClient): PersistedClient {
+  const queries = client.clientState.queries.map((query) => {
+    const { data } = query.state;
+    if (!isMyProfile(query.queryKey) || !hasNickname(data)) return query;
+    return { ...query, state: { ...query.state, data: { nickname: data.nickname } } };
+  });
+  return { ...client, clientState: { ...client.clientState, queries } };
+}
+
+function hasNickname(data: unknown): data is { readonly nickname: string } {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "nickname" in data &&
+    typeof data.nickname === "string"
+  );
+}
+
 function serialize(client: PersistedClient): string {
   const { queries, mutations } = client.clientState;
-  return queries.length === 0 && mutations.length === 0 ? NOTHING_KEPT : JSON.stringify(client);
+  return queries.length === 0 && mutations.length === 0
+    ? NOTHING_KEPT
+    : JSON.stringify(withNicknameOnly(client));
 }
 
 /**

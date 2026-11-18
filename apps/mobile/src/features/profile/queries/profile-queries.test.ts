@@ -42,7 +42,7 @@ describe("the profile query", () => {
       apiErr({ kind: "problem", status: 404, code: "identity.profile-not-found" }),
     );
     const client = createSacouQueryClient();
-    expect(await client.query(myProfileQuery(fake.api, true, client))).toBeNull();
+    expect(await client.query(myProfileQuery(fake.api, true))).toBeNull();
   });
 
   test("any other error is a failure", async () => {
@@ -50,7 +50,7 @@ describe("the profile query", () => {
     fake.respond("getMyProfile", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
     const client = createSacouQueryClient();
     await expect(
-      client.query({ ...myProfileQuery(fake.api, true, client), retry: false }),
+      client.query({ ...myProfileQuery(fake.api, true), retry: false }),
     ).rejects.toThrow();
   });
 
@@ -58,8 +58,7 @@ describe("the profile query", () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));
     const client = createSacouQueryClient();
-    await client.query(myProfileQuery(fake.api, true, client));
-    expect(client.getQueryData(queryKeys.myNickname())).toBe(PROFILE.nickname);
+    await client.query(myProfileQuery(fake.api, true));
     const store = createMemoryKeyValueStore();
     await persistQueryClientSave({
       queryClient: client,
@@ -68,13 +67,16 @@ describe("the profile query", () => {
     const file = store.entries().get(CACHE_STORAGE_KEY) ?? "";
     expect(file).toContain(PROFILE.nickname);
     expect(file).not.toContain(String(PLANTED_LEVEL));
+    expect(file).not.toContain("otherPositions");
+    expect(file).not.toContain("outsideHitter");
+    expect(client.getQueryData(queryKeys.myProfile())).toEqual(PROFILE);
   });
 
   test("the profile (with its level) is never written to sacou-cache.db, with or without the groups", async () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyProfile", apiOk(PROFILE));
     const client = createSacouQueryClient();
-    await client.query(myProfileQuery(fake.api, true, client));
+    await client.query(myProfileQuery(fake.api, true));
     client.setQueryData(queryKeys.groups(), [{ groupId: G1 }]);
     const store = createMemoryKeyValueStore();
     await persistQueryClientSave({
@@ -84,7 +86,7 @@ describe("the profile query", () => {
     const file = store.entries().get(CACHE_STORAGE_KEY) ?? "";
     expect(file).toContain(G1);
     expect(file).not.toContain(String(PLANTED_LEVEL));
-    expect(file).not.toContain('"profile"');
+    expect(file).not.toContain("suggestedLevel");
   });
 });
 

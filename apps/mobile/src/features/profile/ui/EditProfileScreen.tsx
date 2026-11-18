@@ -8,6 +8,7 @@ import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { accountRoutes } from "../../account/navigation";
 import { useMyProfile } from "../hooks/use-profile";
+import { isProfileStub } from "../model/profile-stub";
 import { initFromAccount, initFromProfile } from "../model/profile-form.reducer";
 import { QuickProfileScreen } from "./QuickProfileScreen";
 
@@ -27,14 +28,15 @@ export function EditProfileScreen({ account }: EditProfileScreenProps) {
     if (router.canGoBack()) router.back();
     else router.replace(accountRoutes.account);
   };
-  if (profile.status === "pending") {
+  const restoredFromDisk = profile.data != null && isProfileStub(profile.data);
+  if (profile.status === "pending" || (restoredFromDisk && profile.fetchStatus === "fetching")) {
     return (
       <Screen>
         <LoadingState accessibilityLabel={texts.loading} />
       </Screen>
     );
   }
-  if (profile.status === "error") {
+  if (profile.status === "error" || restoredFromDisk) {
     return (
       <ErrorScreen
         title={texts.loadFailed}
