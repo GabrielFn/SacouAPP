@@ -147,6 +147,9 @@ export const drawStrings = {
       openMatch: "Termine a partida aberta antes.",
       otherRound: "Há uma partida aberta em outra rodada. Encerre-a antes.",
       failed: "Não deu para começar a partida. Tente de novo.",
+      otherAccount:
+        "A quadra desta rodada foi aberta por outra conta. Entre com a conta que abriu a quadra.",
+      noAccount: "Entre na sua conta para começar a partida.",
     },
   },
 } as const;
