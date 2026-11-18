@@ -228,13 +228,17 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     return apiOk(tamper.value(page, after));
   }
 
-  function hold(target: { value: Promise<void> | null }): () => void {
+  /** A gate the next call waits on, and the function that opens it. */
+  function newGate(): { readonly promise: Promise<void>; readonly open: () => void } {
     const release: { value: () => void } = { value: () => undefined };
-    target.value = new Promise<void>((resolve) => {
+    const promise = new Promise<void>((resolve) => {
       release.value = resolve;
     });
-    return () => {
-      release.value();
+    return {
+      promise,
+      open: () => {
+        release.value();
+      },
     };
   }
 
@@ -256,8 +260,16 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     failNext(...next) {
       faults.value = [...faults.value, ...next];
     },
-    holdNext: () => hold(gate),
-    holdNextPage: () => hold(pageGate),
+    holdNext() {
+      const next = newGate();
+      gate.value = next.promise;
+      return next.open;
+    },
+    holdNextPage() {
+      const next = newGate();
+      pageGate.value = next.promise;
+      return next.open;
+    },
     forgetLast(count) {
       stream.value = stream.value.slice(0, Math.max(0, stream.value.length - count));
     },

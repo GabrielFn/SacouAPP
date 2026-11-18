@@ -145,10 +145,10 @@ export async function scorePoints(
   points: number,
   team: "a" | "b" = "a",
 ): Promise<void> {
-  for (let point = 1; point <= points; point += 1) {
-    const scored = await controller.dispatch({ type: "score-point", team });
-    expect(scored.ok).toBe(true);
-  }
+  if (points <= 0) return;
+  const scored = await controller.dispatch({ type: "score-point", team });
+  expect(scored.ok).toBe(true);
+  await scorePoints(controller, points - 1, team);
 }
 
 export interface TakeoverRun {

@@ -331,7 +331,15 @@ Implementado na E4.11 ([ADR 0067](../arquitetura/adr/0067-sincronizacao-da-quadr
 | I | Chave da conta no aparelho | Linha nova em [dados-pessoais.md](dados-pessoais.md): hash do UID com prefixo próprio, no sandbox do app, `allowBackup: false`, nunca enviado |
 | T/D | Sessão `unowned` já existente (aberta sem conta) ainda aceita pontos que nunca saem; aviso de "outra conta" que pisca antes de a conta carregar (achados do testador) | Sem perda de dado nem vazamento: nada dela é enviado (fecha em falha, D8). Pendência da Parte 2: recusar o comando em `unowned` ou adotar a sessão vazia para a conta logada, e só mostrar o aviso depois de a conta carregar |
 
-A importação do stream do servidor ao assumir a quadra (entrada não confiável, tetos, replay antes de gravar) é da Parte 2.
+**Assumir e importar o stream (E4.11, Parte 2, núcleo; ADR 0067, decisões 10 a 15):** `features/court/takeover/` e `persistence/server-stream-statements.ts`.
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| T | Stream do servidor como entrada não confiável: envelope de outro stream, JSON quebrado, posição que não segue, lacuna de sequência, stream que não faz replay | Página lida como `unknown`: `lastPosition` tem de ser `after` mais os eventos; cada envelope passa pelo `parseEventEnvelope` do log; todos do `courtSessionId` do resumo; `hasContiguousSequences`; replay completo **antes** de gravar. Qualquer falha é `import-invalid` e o `sacou.db` fica como estava (B4, seis casos). O repositório confere de novo (stream, sequências, `lastSequence`, lote) na mesma transação |
+| D | Importação sem fim ou que enche a memória (servidor que manda páginas vazias ou gigantes) | Tetos do ADR 0060: `eventsBefore` acima de 20.000 falha antes de qualquer chamada; a soma das páginas acima de 8 MiB falha antes do parser; página vazia antes do fim falha (sem laço). O 429 e o 503 esperam o `Retry-After` no máximo 3 vezes nas três rotas |
+| S/E | Assumir com uma conta e gravar a quadra para outra | A troca sai com o token da conta lida antes (`takeOverCourt` com `SessionIdentity`); antes de gravar, a conta é lida de novo e, se mudou, nada é gravado (`no-account`). A sessão importada guarda o `owner_key` dessa conta |
+| T | Marcar antes de ter o stream inteiro (o celular novo marcaria sobre um placar velho) | O log local só passa a existir quando a importação termina, numa transação (`replaceWithServerStream`): até lá a quadra não tem sessão para abrir (B2) |
+| R | Pontos do celular antigo somem sem aviso | `not-the-writer` com `lastSequence` (ausente: o aparelho nunca escreveu um lote, todos os pontos ficam de fora) move os eventos para `court_refused_events`; o modelo da 09c os lista com `refusedPoints` e avisa quando um "Desfazer" deste celular não entrou. Outras sessões abertas da rodada têm os pendentes movidos para os recusados e são fechadas na importação. Risco aceito: os pendentes de outra conta na mesma sessão (D8) são descartados ao assumir, porque só ela os enviaria e a sessão deixa de ser dela |
 
 ### 12.1 Convite no app (E4.5, Parte 2)
 

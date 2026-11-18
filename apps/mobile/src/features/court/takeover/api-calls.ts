@@ -22,24 +22,24 @@ export async function withRetryAfter<T>(
   return withRetryAfter(call, wait, attemptsLeft - 1);
 }
 
+type PlainKind = Exclude<ApiError["kind"], "problem">;
+
+/** The failures without a body to read: a closed table, so a new kind fails the build. */
+const PLAIN_FAILURES: Readonly<Record<PlainKind, TakeoverFailure>> = {
+  offline: "offline",
+  "account-changed": "no-account",
+  "session-expired": "no-account",
+  "not-registered": "no-account",
+  "too-large": "failed",
+  "rate-limited": "failed",
+  unavailable: "failed",
+  unexpected: "failed",
+};
+
 /** What screen 09a says about a failed call: a code from a closed list, never a server text. */
 export function takeoverFailureOf(error: ApiError): TakeoverFailure {
-  switch (error.kind) {
-    case "problem":
-      if (error.code === "matches.limit-reached") return "writers-limit";
-      if (error.status === HTTP_FORBIDDEN) return "no-permission";
-      if (error.status === HTTP_NOT_FOUND) return "not-found";
-      return "failed";
-    case "offline":
-      return "offline";
-    case "account-changed":
-    case "session-expired":
-    case "not-registered":
-      return "no-account";
-    case "too-large":
-    case "rate-limited":
-    case "unavailable":
-    case "unexpected":
-      return "failed";
-  }
+  if (error.kind !== "problem") return PLAIN_FAILURES[error.kind];
+  if (error.code === "matches.limit-reached") return "writers-limit";
+  if (error.status === HTTP_FORBIDDEN) return "no-permission";
+  return error.status === HTTP_NOT_FOUND ? "not-found" : "failed";
 }

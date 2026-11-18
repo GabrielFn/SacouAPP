@@ -39,31 +39,46 @@ export type TakeoverAction =
 
 export const INITIAL_TAKEOVER_STATE: TakeoverState = { status: "confirming", streamChanged: false };
 
+type Status = TakeoverState["status"];
+
+/** The next state only from the step it belongs to: a late or doubled action changes nothing. */
+function from(state: TakeoverState, steps: readonly Status[], next: () => TakeoverState) {
+  return steps.includes(state.status) ? next() : state;
+}
+
+function progressed(state: TakeoverState, imported: number): TakeoverState {
+  return state.status === "importing"
+    ? { ...state, imported: Math.min(imported, state.total) }
+    : state;
+}
+
 /** Pure and exhaustive: the calls, the writes and the navigation are in the hook. */
 export function takeoverReducer(state: TakeoverState, action: TakeoverAction): TakeoverState {
   switch (action.type) {
     case "confirmed":
-      return state.status === "confirming" ? { status: "taking-over" } : state;
+      return from(state, ["confirming"], () => ({ status: "taking-over" }));
     case "stream-changed":
-      return state.status === "taking-over" ? { status: "confirming", streamChanged: true } : state;
+      return from(state, ["taking-over"], () => ({ status: "confirming", streamChanged: true }));
     case "taken-over":
-      return state.status === "taking-over"
-        ? { status: "importing", imported: 0, total: action.eventsBefore }
-        : state;
+      return from(state, ["taking-over"], () => ({
+        status: "importing",
+        imported: 0,
+        total: action.eventsBefore,
+      }));
     case "page-imported":
-      return state.status === "importing"
-        ? { ...state, imported: Math.min(action.imported, state.total) }
-        : state;
+      return progressed(state, action.imported);
     case "imported":
-      return state.status === "importing"
-        ? { status: "done", courtSessionId: action.courtSessionId }
-        : state;
+      return from(state, ["importing"], () => ({
+        status: "done",
+        courtSessionId: action.courtSessionId,
+      }));
     case "failed":
-      return state.status === "taking-over" || state.status === "importing"
-        ? { status: "failed", reason: action.reason }
-        : state;
+      return from(state, ["taking-over", "importing"], () => ({
+        status: "failed",
+        reason: action.reason,
+      }));
     case "retried":
-      return state.status === "failed" ? INITIAL_TAKEOVER_STATE : state;
+      return from(state, ["failed"], () => INITIAL_TAKEOVER_STATE);
   }
 }
 
