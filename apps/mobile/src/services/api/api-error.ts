@@ -9,6 +9,7 @@ export type ApiError =
   | { readonly kind: "session-expired" }
   | { readonly kind: "not-registered" }
   | { readonly kind: "too-large" }
+  | { readonly kind: "rate-limited"; readonly retryAfterMs: number }
   | { readonly kind: "unavailable"; readonly retryAfterMs: number }
   | { readonly kind: "offline" }
   | { readonly kind: "unexpected"; readonly status: number };

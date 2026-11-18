@@ -1,11 +1,15 @@
 import type { ApiErrorCode } from "../api/generated/error-codes";
 
+/** The 429 of the API's rate limit (ADR 0062), by its kind and by its code. */
+const RATE_LIMITED_TEXT = "Muitas tentativas em pouco tempo. Espere um pouco e tente de novo.";
+
 /**
  * What the person reads for each rule error of the API, by `code` (ADR 0039 and 0042). A `Record` over the
  * generated union: a new code without a text, or a text for a code that is gone, does not compile. A code
  * this app does not know (an older app against a newer API) never reaches the screen as raw text.
  */
 export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
+  "api.rate-limited": RATE_LIMITED_TEXT,
   "groups.forbidden": "Você não tem permissão para fazer isso neste grupo.",
   "groups.group-not-found": "Esse grupo não existe ou você não faz mais parte dele.",
   "groups.invite-invalid": "Esse convite não vale mais. Peça um link novo a quem organiza o grupo.",
@@ -73,6 +77,7 @@ export const apiErrorKindTexts = {
   sessionExpired: "Sua sessão acabou. Entre de novo.",
   notRegistered: "Estamos terminando de preparar sua conta. Tente de novo.",
   tooLarge: "Esse conteúdo é grande demais.",
+  rateLimited: RATE_LIMITED_TEXT,
   unavailable: "O Sacou está fora do ar por um instante. Tentando de novo.",
   offline: "Sem conexão.",
   unexpected: "Algo deu errado. Tente de novo daqui a pouco.",

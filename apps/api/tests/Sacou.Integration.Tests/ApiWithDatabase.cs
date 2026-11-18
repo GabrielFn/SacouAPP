@@ -24,13 +24,28 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     /// <summary>One migrator at a time: every test class migrates the one shared database when it starts, and two runners applying a pending migration together fail on "already exists".</summary>
     private static readonly SemaphoreSlim MigrationGate = new(1, 1);
 
+    /// <summary>
+    /// Limits far above what any test sends, so only the rate limiting tests meet one (ADR 0062). The concurrency of the
+    /// two-connection routes stays the real one (shared and per user); both queues are long, so a race test waits instead of getting a 429.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string?> RoomyRateLimits = BuildRoomyRateLimits();
+
     private readonly IntegrationDatabase database;
+
+    private readonly IReadOnlyDictionary<string, string?> settings;
 
     private Func<Task>? afterCurrentUserResolved;
 
     public ApiWithDatabase(IntegrationDatabase database)
+        : this(database, new Dictionary<string, string?>())
+    {
+    }
+
+    /// <summary>The same API with more settings on top, applied last (the rate limiting tests set low limits and a small pool).</summary>
+    public ApiWithDatabase(IntegrationDatabase database, IReadOnlyDictionary<string, string?> settings)
     {
         this.database = database;
+        this.settings = settings;
         Key = TestSigningKey.Create(KeyId);
         Keys = new StubHttpHandler(_ => StubHttpHandler.Json(TestSigningKeys.Document(Key), TimeSpan.FromHours(1)));
     }
@@ -87,6 +102,11 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("Firebase:ProjectId", TestIdToken.ProjectId);
         builder.UseSetting("ConnectionStrings:Sacou", database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        foreach (var (key, value) in RoomyRateLimits.Concat(settings))
+        {
+            builder.UseSetting(key, value);
+        }
+
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(HookMembership);
         builder.ConfigureServices(HookCurrentUser);
@@ -120,6 +140,17 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.AddScoped<ICurrentUser>(provider => new HookedCurrentUser(
             (ICurrentUser)ActivatorUtilities.CreateInstance(provider, implementation),
             () => Interlocked.Exchange(ref afterCurrentUserResolved, null)));
+    }
+
+    private static Dictionary<string, string?> BuildRoomyRateLimits()
+    {
+        const string Section = "RateLimiting";
+        const string Roomy = "1000000";
+        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync"];
+        var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
+        limits[$"{Section}:DualConnectionQueue"] = Roomy;
+        limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;
+        return limits;
     }
 
     protected override void Dispose(bool disposing)

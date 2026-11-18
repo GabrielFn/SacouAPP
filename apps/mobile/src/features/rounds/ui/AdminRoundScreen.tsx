@@ -91,16 +91,22 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
 /** "Abrir quadra" only with a court of this round on the device, "Sortear times" for who draws (D1). */
 export interface RoundFooterProps {
   readonly actions: readonly PendingRoundScreen[];
+  /** With the draw off the 07 builds the teams by hand: "Montar times" (question 72). */
+  readonly drawOff: boolean;
   readonly onDraw: () => void;
   readonly onCourt: () => void;
 }
 
-function RoundFooter({ actions, onDraw, onCourt }: RoundFooterProps) {
+function RoundFooter({ actions, drawOff, onDraw, onCourt }: RoundFooterProps) {
   return (
     <>
       {actions.includes("court") ? <Button label={detail.openCourt} onPress={onCourt} /> : null}
       {actions.includes("draw") ? (
-        <Button label={detail.drawTimes} variant="secondary" onPress={onDraw} />
+        <Button
+          label={drawOff ? detail.buildTeams : detail.drawTimes}
+          variant="secondary"
+          onPress={onDraw}
+        />
       ) : null}
     </>
   );
@@ -210,6 +216,7 @@ export function AdminRoundScreen({
   const footer = (
     <RoundFooter
       actions={actions}
+      drawOff={settings?.values.draw.enabled === false}
       onDraw={() => {
         router.push(drawHref(groupId, round.roundId));
       }}

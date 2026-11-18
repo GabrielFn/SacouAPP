@@ -43,21 +43,29 @@ function chipOf(
   memberId: MemberId,
   label: string,
 ): PlayerChipView {
-  const level = formatLevel(arrangement.levels.get(memberId) ?? 0);
+  const tenths = arrangement.levels.get(memberId);
+  // "Montar times" has no level: the name goes alone (question 72).
+  const level = tenths === undefined ? "" : formatLevel(tenths);
   const locked = isLocked(state.locks, memberId);
   const lockedSuffix = locked ? drawStrings.player.lockedSuffix : "";
+  const spoken = level === "" ? label : drawStrings.player.accessibility(label, level);
   return {
     memberId,
     label,
     level,
     locked,
     selected: state.selection === memberId,
-    accessibilityLabel: `${drawStrings.player.accessibility(label, level)}${lockedSuffix}`,
+    accessibilityLabel: `${spoken}${lockedSuffix}`,
   };
 }
 
 function teamLevel(arrangement: DrawArrangement, members: readonly MemberId[]): string {
-  const average = teamAverageTenths(members.map((id) => arrangement.levels.get(id) ?? 0));
+  const levels = members.flatMap((id) => {
+    const tenths = arrangement.levels.get(id);
+    return tenths === undefined ? [] : [tenths];
+  });
+  if (levels.length < members.length) return "";
+  const average = teamAverageTenths(levels);
   return average.ok ? drawStrings.teamLevel(formatLevel(average.value)) : "";
 }
 

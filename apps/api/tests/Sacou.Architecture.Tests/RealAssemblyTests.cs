@@ -10,7 +10,7 @@ public sealed class RealAssemblyTests
 
     private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results", "Sacou.Shared.Members", "Sacou.Shared.Text", "Sacou.Shared.Persistence", "Sacou.Shared.Levels"];
 
-    private static readonly string[] HttpPublicNamespaces = ["Sacou.Http"];
+    private static readonly string[] HttpPublicNamespaces = ["Sacou.Http", "Sacou.Http.RateLimiting"];
 
     [Fact]
     public void ModuleAssembliesInOutput_MatchTheCatalog()

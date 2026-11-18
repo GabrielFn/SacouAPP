@@ -42,6 +42,22 @@ export const drawStrings = {
     accessibility: (name: string, level: string) => `${name}, nota ${level}`,
     lockedSuffix: ", travado",
   },
+  /** "Montar times" (question 72): the draw is off, the teams follow the order of arrival. */
+  manual: {
+    title: "Montar times",
+    intro: "Sorteio desligado: os times seguem a ordem de chegada. Toque em dois nomes pra trocar.",
+    privacy: "O que você compartilha mostra só os times.",
+    rebuild: "Montar de novo",
+    notEnough: (minPlayers: number) =>
+      `Precisa de pelo menos ${String(minPlayers)} confirmados para montar os times.`,
+    /** "Duda saiu da lista. Monte de novo." */
+    left: (name: string, others: number) =>
+      others === 0
+        ? `${name} saiu da lista. Monte de novo.`
+        : `${name} e mais ${String(others)} saíram da lista. Monte de novo.`,
+    arrived: (amount: number) =>
+      `${String(amount)} ${plural(amount, "confirmou", "confirmaram")} depois. Monte de novo para incluir.`,
+  },
   /** Question 71: the share is text until there is an image. */
   privacy: "Só admins veem as notas. O que você compartilha mostra só os times.",
   hint: {
