@@ -41,6 +41,7 @@ if (REVIEW === undefined) throw new Error("the review case is missing from the g
 
 const NAMES_ROSTER: CourtRoster = {
   nameOf: (memberId: MemberId) => memberId.slice(-2),
+  positionOf: () => null,
   teamAppearance: (_matchId, side: TeamSide) =>
     side === "a" ? { label: "Laranja", color: "orange" } : { label: "Azul", color: "blue" },
 };
