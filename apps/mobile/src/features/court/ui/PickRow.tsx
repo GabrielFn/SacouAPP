@@ -1,10 +1,13 @@
 import { Pressable } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
+import { Avatar } from "../../../ui/Avatar";
 import { Text } from "../../../ui/Text";
 
 export interface PickRowProps {
   readonly name: string;
+  /** "DU" in the round avatar of the design; `null` draws the neutral one. */
+  readonly initials: string | null;
   readonly detail: string | null;
   readonly checked: boolean;
   readonly disabled?: boolean;
@@ -19,6 +22,7 @@ export interface PickRowProps {
  */
 export function PickRow({
   name,
+  initials,
   detail,
   checked,
   disabled = false,
@@ -48,6 +52,7 @@ export function PickRow({
         backgroundColor: checked ? colors.text : colors.surface,
       }}
     >
+      <Avatar initials={initials} dashed={false} />
       <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1, color: foreground }}>
         {name}
       </Text>

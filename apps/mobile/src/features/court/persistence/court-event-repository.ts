@@ -195,11 +195,6 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
         const [row] = await database.getAll(SELECT_ACTIVE_SESSION, [OPEN_STATUS]);
         return ok(readTextColumn(row, "court_session_id"));
       }),
-    findSessionOrigin: (courtSessionId) =>
-      guarded(async () => {
-        const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
-        return ok(originOf(row));
-      }),
     findOpenSessionOfRound: (roundId) =>
       guarded(async () => {
         const [row] = await database.getAll(SELECT_OPEN_SESSION_OF_ROUND, [OPEN_STATUS, roundId]);

@@ -37,8 +37,7 @@ describe("whether screen 31 opens in a session (D10)", () => {
     expect(await readIndividualPoints(log, settings, "sample")).toBe(false);
     expect(await readIndividualPoints(log, settings, "unknown")).toBe(false);
     const failing = {
-      findSessionOrigin: () =>
-        Promise.resolve({ ok: false, error: { code: "storage-failed" } } as const),
+      findOrigin: () => Promise.resolve({ ok: false, error: { code: "storage-failed" } } as const),
     };
     expect(await readIndividualPoints(failing, settings, "from-round-on")).toBe(false);
   });

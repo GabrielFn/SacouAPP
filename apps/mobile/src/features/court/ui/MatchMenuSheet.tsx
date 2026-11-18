@@ -109,6 +109,43 @@ function Group({ children }: GroupProps) {
   );
 }
 
+export interface ScreenRowsProps {
+  readonly canSubstitute: boolean;
+  readonly onLineup: (() => void) | null;
+  readonly onSubstitution: () => void;
+  readonly onCorrections: () => void;
+}
+
+/** The rows that open another screen of the court, each only once its screen exists. */
+function ScreenRows({ canSubstitute, onLineup, onSubstitution, onCorrections }: ScreenRowsProps) {
+  const { menu } = strings.court;
+  const { courtPlayers } = strings;
+  return (
+    <>
+      {isMenuScreenReady("lineup") && onLineup !== null ? (
+        <MenuRow label={lineupStrings.menuItem} chevron onPress={onLineup} />
+      ) : null}
+      {isMenuScreenReady("substitution") ? (
+        <MenuRow
+          label={courtPlayers.substitution.menuItem}
+          {...(canSubstitute ? {} : { hint: courtPlayers.substitution.noBench })}
+          chevron={canSubstitute}
+          disabled={!canSubstitute}
+          onPress={onSubstitution}
+        />
+      ) : null}
+      {isMenuScreenReady("corrections") ? (
+        <MenuRow
+          label={menu.corrections}
+          hint={menu.correctionsHint}
+          chevron
+          onPress={onCorrections}
+        />
+      ) : null}
+    </>
+  );
+}
+
 /** Screen 23: the menu of the match, over the court. The dialog of "Encerrar partida" is its only state. */
 export function MatchMenuSheet({
   subtitle,
@@ -127,7 +164,6 @@ export function MatchMenuSheet({
   onEndMatch,
 }: MatchMenuSheetProps) {
   const { menu } = strings.court;
-  const { courtPlayers } = strings;
   const { colors, tokens } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
   const askToEnd = () => {
@@ -143,26 +179,12 @@ export function MatchMenuSheet({
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >
         <Group>
-          {isMenuScreenReady("lineup") && onLineup !== null ? (
-            <MenuRow label={lineupStrings.menuItem} chevron onPress={onLineup} />
-          ) : null}
-          {isMenuScreenReady("substitution") ? (
-            <MenuRow
-              label={courtPlayers.substitution.menuItem}
-              {...(canSubstitute ? {} : { hint: courtPlayers.substitution.noBench })}
-              chevron={canSubstitute}
-              disabled={!canSubstitute}
-              onPress={onSubstitution}
-            />
-          ) : null}
-          {isMenuScreenReady("corrections") ? (
-            <MenuRow
-              label={menu.corrections}
-              hint={menu.correctionsHint}
-              chevron
-              onPress={onCorrections}
-            />
-          ) : null}
+          <ScreenRows
+            canSubstitute={canSubstitute}
+            onLineup={onLineup}
+            onSubstitution={onSubstitution}
+            onCorrections={onCorrections}
+          />
           <MenuRow
             label={menu.flipSides}
             accessibilityLabel={menu.flipSidesLabel(inverted)}

@@ -3,10 +3,10 @@ import type { CourtRoundSettings } from "../ports/court-round-settings";
 
 /** The round a court session came from; `null` for a sample session or a log that cannot say. */
 export async function findSessionOrigin(
-  log: Pick<CourtEventLog, "findSessionOrigin">,
+  log: Pick<CourtEventLog, "findOrigin">,
   courtSessionId: string,
 ): Promise<CourtSessionOrigin | null> {
-  const origin = await log.findSessionOrigin(courtSessionId);
+  const origin = await log.findOrigin(courtSessionId);
   return origin.ok ? origin.value : null;
 }
 

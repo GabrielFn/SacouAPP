@@ -4,8 +4,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
+import { palette } from "../../../theme/tokens.data";
 import { Button } from "../../../ui/Button";
 import { Chip } from "../../../ui/Chip";
+import { CheckIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import type { AttributionSheetModel, AuthorOption } from "../attribution/attribution-selectors";
 import type { AuthoredPointKind } from "../attribution/attribution.reducer";
@@ -75,10 +77,29 @@ function QuestionColumn({ model, onChooseKind, onOpponentError, onSkip }: Attrib
   const { colors, tokens } = useTheme();
   return (
     <View style={{ flex: 1, gap: tokens.spacing.s }}>
-      <Text variant="title" accessibilityRole="header">
-        {model.title}
-        <Text variant="muted">{attribution.afterDot(attribution.onScore)}</Text>
-      </Text>
+      <View
+        accessibilityRole="header"
+        style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}
+      >
+        <View
+          style={{
+            flexShrink: 1,
+            minHeight: tokens.sizes.statusPill,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: tokens.spacing.xs,
+            paddingHorizontal: tokens.spacing.m,
+            borderRadius: tokens.radii.pill,
+            backgroundColor: colors.goingText,
+          }}
+        >
+          <CheckIcon color={palette.white} />
+          <Text variant="bodyStrong" style={{ flexShrink: 1, color: palette.white }}>
+            {model.title}
+          </Text>
+        </View>
+        <Text variant="muted">{attribution.onScore}</Text>
+      </View>
       <Text variant="bodyStrong">
         {attribution.question}
         <Text variant="muted">{attribution.afterSpace(attribution.questionHint)}</Text>
@@ -142,7 +163,6 @@ export function AttributionSheet(props: AttributionSheetProps) {
       }}
     >
       <View
-        accessibilityViewIsModal
         accessibilityLabel={props.model.title}
         style={{
           width: SHEET_WIDTH,

@@ -1,5 +1,6 @@
 import {
   getAttributionRally,
+  getCurrentServingPlayer,
   getOpponent,
   getTeamServeAlignment,
   isPlausibleAuthor,
@@ -11,12 +12,12 @@ import {
 } from "@sacou/match-engine";
 
 import { strings } from "../../../strings/pt-BR";
+import { FREE_SYSTEM } from "../court.data";
 import type { CourtRoster } from "../ports/court-roster";
 import { RALLY_DISPLAY_SLOTS } from "./attribution.data";
 import type { AttributionState, AuthoredPointKind } from "./attribution.reducer";
 
 const FIRST_SLOT = 1;
-const FREE_SYSTEM = "livre";
 const AUTHORED_KINDS: readonly AuthoredPointKind[] = ["attack", "block", "ace", "other"];
 
 export interface KindOption {
@@ -83,19 +84,24 @@ function roleOf(badge: string | null): string | null {
   return badge === zone.liberoBadge ? zone.liberoLabel : zone.setterLabel;
 }
 
-function slotDetail({ rally }: PlayerContext, slot: number | null): string | null {
+function slotDetail(
+  { rally }: PlayerContext,
+  memberId: MemberId,
+  slot: number | null,
+): string | null {
   const { attribution } = strings.courtPlayers;
   if (slot === null) {
     return null;
   }
-  const served = slot === FIRST_SLOT && rally.servingTeam === rally.team;
+  const served =
+    rally.servingTeam === rally.team && getCurrentServingPlayer(rally.match) === memberId;
   return served ? attribution.served(slot) : attribution.position(slot);
 }
 
 function optionOf(context: PlayerContext, memberId: MemberId, slot: number | null): AuthorOption {
   const { attribution } = strings.courtPlayers;
   const name = context.roster.nameOf(memberId);
-  const detail = slotDetail(context, slot);
+  const detail = slotDetail(context, memberId, slot);
   const badge = badgeOf(context, memberId);
   const enabled = isPlausibleAuthor(context.rally, context.kind, memberId);
   const label = attribution.playerLabel(name, detail, roleOf(badge));

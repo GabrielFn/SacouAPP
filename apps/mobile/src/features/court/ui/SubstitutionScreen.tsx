@@ -8,6 +8,7 @@ import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
 import type { SubstitutionRow, SubstitutionView } from "../substitution/substitution-selectors";
 import { CourtPage } from "./CourtPage";
+import { initialsOfName } from "../model/name-initials";
 import { PickRow } from "./PickRow";
 
 export interface SubstitutionScreenProps {
@@ -42,6 +43,7 @@ function PickColumn({ title, rows, onPick }: PickColumnProps) {
           <PickRow
             key={row.memberId}
             name={row.name}
+            initials={initialsOfName(row.name)}
             detail={row.detail}
             checked={row.selected}
             accessibilityLabel={row.accessibilityLabel}

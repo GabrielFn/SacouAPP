@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
@@ -12,7 +12,7 @@ import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { SubstitutionScreen } from "../../../features/court/ui/SubstitutionScreen";
 import { useServices } from "../../../services/services-context";
 
-/** Screen 23a, from the menu and back to it. With nobody on a bench it shows nothing. */
+/** Screen 23a, from the menu and back to it. With nobody on a bench it goes back to the menu. */
 export default function SubstitutionRoute() {
   const route = useCourtRoute();
   const { courtRoster } = useServices();
@@ -23,6 +23,14 @@ export default function SubstitutionRoute() {
     () => (timeline === null ? null : substitutionView(timeline, courtRoster, state)),
     [timeline, courtRoster, state],
   );
+  // Nobody on a bench (or the match gone): there is nothing to swap, so the screen hands back to the menu.
+  const { back } = route;
+  const nothingToSwap = timeline !== null && model === null;
+  useEffect(() => {
+    if (nothingToSwap) {
+      back();
+    }
+  }, [nothingToSwap, back]);
   if (view.status === "failed") {
     return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
   }

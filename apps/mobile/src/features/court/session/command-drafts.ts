@@ -122,9 +122,7 @@ function correctionDraftsFor(
     case "change-lineup":
       return refused(changeLineup(state, command.team, command.allocation));
     case "substitute-player":
-      return refused(
-        substitutePlayer(state, command.team, command.outgoing, command.incoming),
-      );
+      return refused(substitutePlayer(state, command.team, command.outgoing, command.incoming));
     case "attribute-point":
       return refused(attributePoint(timeline, command.pointEventId, command.authorship));
   }

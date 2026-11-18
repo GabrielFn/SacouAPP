@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { queryKeys } from "../../../services/query/query-keys";
+import { useCourtSessionOrigin } from "../../../services/query/use-court-session-origin";
 import { useServices } from "../../../services/services-context";
 import { findSessionOrigin, isIndividualPoints } from "../session/individual-points";
 import { useCourtRuntime } from "./court-runtime-context";
@@ -16,10 +14,8 @@ export function useIndividualPoints(): boolean {
   const { log } = useCourtRuntime();
   const { courtRoundSettings } = useServices();
   const { courtSessionId } = useCourtSession();
-  const origin = useQuery({
-    queryKey: queryKeys.courtSessionOrigin(courtSessionId),
-    queryFn: () => findSessionOrigin(log, courtSessionId),
-    staleTime: Infinity,
-  });
-  return isIndividualPoints(origin.data, courtRoundSettings);
+  const origin = useCourtSessionOrigin(courtSessionId, () =>
+    findSessionOrigin(log, courtSessionId),
+  );
+  return isIndividualPoints(origin, courtRoundSettings);
 }

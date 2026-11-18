@@ -93,8 +93,6 @@ export interface CourtEventLog {
   findOrigin(courtSessionId: string): Promise<CourtLogResult<CourtSessionOrigin | null>>;
   /** The open session of the device, or `null`. */
   findActiveSession(): Promise<CourtLogResult<string | null>>;
-  /** Where a session came from; `null` for a sample session or a session not on the device. */
-  findSessionOrigin(courtSessionId: string): Promise<CourtLogResult<CourtSessionOrigin | null>>;
   /** The open session that came from this round, or `null`. */
   findOpenSessionOfRound(roundId: string): Promise<CourtLogResult<string | null>>;
   closeSession(courtSessionId: string): Promise<CourtLogResult<void>>;

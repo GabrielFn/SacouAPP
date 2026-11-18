@@ -330,14 +330,15 @@ A importação do stream do servidor ao assumir a quadra (entrada não confiáve
 
 ### 12.4 Trocar jogador e ponto individual no app (E4.10, Parte 3)
 
-Telas 23a e 31, e o autor nas 24 e 25 ([ADR 0066](../arquitetura/adr/0066-controles-da-quadra-no-app.md), itens 9 a 13). O autor de cada ponto é dado de desempenho da pessoa (ADR 0031).
+Telas 23a e 31, e o autor nas 24 e 25 ([ADR 0066](../arquitetura/adr/0066-controles-da-quadra-no-app.md), itens 19 a 23). O autor de cada ponto é dado de desempenho da pessoa (ADR 0031).
 
 | | Ameaça | Mitigação |
 |---|---|---|
 | I | Nome ou apelido no `PointAttributed` ou no `LineupChanged` | Os comandos levam só `MemberId`, `eventId` do ponto e tipo de lista fechada; o nome vem do `CourtRoster` só na tela. Teste que confere as 4 chaves do payload e procura os nomes do roster e dos times no log inteiro (`attribution.test.ts`). A quadra não tem `console` nem logger, e a recusa só leva o código |
 | T | Autor forjado no aparelho (Ace de quem não sacou, líbero com Bloqueio, alguém de fora do rali) | A tela só mostra os do rali e desliga os implausíveis, mas a decisão é do comando `attributePoint`, que confere de novo; a E3.7 roda o comando no servidor antes de gravar (seção 3) |
-| E | Preencher autor sem a opção do grupo | A folha só abre com "Ponto individual" ligado na configuração da rodada, lida do cache (`CourtRoundSettings`); sessão sem origem ou rodada fora do cache fica desligada. O servidor confere o plano e a opção pelas configurações congeladas (E3.7, ADR 0060). Risco aceito no piloto: só o celular da quadra preenche |
+| E | Preencher autor sem a opção do grupo | A folha só abre com "Ponto individual" ligado na configuração da rodada, lida do cache (`CourtRoundSettings`); sessão sem origem ou rodada fora do cache fica desligada. **Pendente na E3.9:** o servidor ainda não confere a opção do ponto individual (a E3.7 grava o `PointAttributed` pelo motor, sem olhar a configuração da rodada); até lá a conferência é só do app, risco aceito no piloto (só o celular da quadra preenche). A opção vale até reabrir a quadra: é calculada a cada desenho a partir do cache de rodadas e a origem é lida uma vez por sessão |
 | T | Troca com alguém de fora do time ou da fila | "Entra" lista só o banco do time; o motor recusa quem não está no banco (`invalid-payload`) e a E3.7 confere o `LineupChanged` contra a escalação |
+| I | Autor do ponto no `sacou.db` depois do logout | O logout não apaga o `sacou.db` da quadra (ADR 0057): o `PointAttributed` (só `MemberId` e tipo) fica até a sincronização e a conta outra não o vê nem o envia (`owner_key`). Quando apagar fica para a E4.11 ou a E6.2 (`pendencias.md`). Teste: a tela 31 depois do `clearSession` (`attribution.test.ts`) |
 | I | Configuração da rodada copiada para o log | A configuração é lida do cache a cada abertura e nunca vai para o `sacou.db` nem para evento; o `sacou.db` só ganhou a leitura da origem que já existia (`findSessionOrigin`, só IDs) |
 
 ### 12.1 Convite no app (E4.5, Parte 2)

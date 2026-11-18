@@ -1,8 +1,9 @@
+import type { CourtSessionTimeline } from "@sacou/match-engine";
 import { useIsFocused } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 
-import { asksOverTheCourt, scoredPointId } from "../../../features/court/attribution/scored-point";
+import { asksOverTheCourt } from "../../../features/court/attribution/scored-point";
 import { useCourtBatteryWarning } from "../../../features/court/hooks/battery-warning-context";
 import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
 import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
@@ -17,12 +18,18 @@ import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import type { CourtPhase } from "../../../features/court/model/court-screen.types";
 import { courtSidesInverted } from "../../../features/court/model/court-sides";
 import { stateOfTimeline } from "../../../features/court/model/court-screen.selectors";
+import { scorePointAndAsk } from "../../../features/court/session/score-point-flow";
 import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { AttributionSheet } from "../../../features/court/ui/AttributionSheet";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { CourtBlockedView } from "../../../features/court/ui/CourtBlockedView";
 import { useServices } from "../../../services/services-context";
+
+/** The sides as the log leaves them (the tie-break swaps once), or the manual choice with no log. */
+function invertedOf(timeline: CourtSessionTimeline | null, manual: boolean): boolean {
+  return timeline === null ? manual : courtSidesInverted(stateOfTimeline(timeline), manual);
+}
 
 /** The phases with no court: the end of the set or the result is in front. */
 function isAwayFromCourt(phase: CourtPhase | null): boolean {
@@ -77,11 +84,7 @@ export default function CourtRoute() {
     <View style={{ flex: 1 }}>
       <CourtScreen
         model={model}
-        inverted={
-          timeline === null
-            ? sides.inverted
-            : courtSidesInverted(stateOfTimeline(timeline), sides.inverted)
-        }
+        inverted={invertedOf(timeline, sides.inverted)}
         battery={
           warning.state.status === "showing"
             ? { level: warning.state.level, onDismiss: warning.dismiss }
@@ -90,16 +93,10 @@ export default function CourtRoute() {
         onPoint={(team) => {
           // The zones wait after a point, even if the engine turns this one down.
           if (guard.acceptPoint()) {
-            void dispatch({ type: "score-point", team }).then((result) => {
-              if (!result.ok) {
-                courtFeedback.play("refused");
-                return;
-              }
-              const pointEventId = scoredPointId(result.value.written);
-              if (individualPoints && pointEventId !== null) {
-                openAttribution([pointEventId]);
-              }
-            });
+            void scorePointAndAsk(
+              { dispatch, feedback: courtFeedback, individualPoints, openAttribution },
+              team,
+            );
           }
         }}
         notice={undoNotice.text}

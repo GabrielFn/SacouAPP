@@ -7,13 +7,13 @@ import {
   type ServeAlignment,
   type TeamSide,
 } from "@sacou/match-engine";
+import { FREE_SYSTEM } from "../court.data";
 import { ROTATION_SLOTS } from "@sacou/volley-rules";
 
 import type { CourtRoster } from "../ports/court-roster";
 import type { PlayerChipModel, RotationModel, TeamPanelModel } from "./court-screen.types";
 
 const LIBERO_ROLE = "L";
-const FREE_SYSTEM = "livre";
 
 interface ChipContext {
   readonly alignment: ServeAlignment;

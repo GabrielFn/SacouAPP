@@ -11,6 +11,9 @@ import {
   SAMPLE_MATCH_WITH_LIBERO,
   SAMPLE_ORANGE_LINEUP,
 } from "../dev/sample-match.data";
+import { createFakeCacheSession } from "../../../adapters/fake-cache-session";
+import { createMemoryInviteLinkStore } from "../../../adapters/memory-invite-link-store";
+import { clearSession } from "../../../services/session/clear-session";
 import { SAMPLE_LIBERO_NAME } from "../dev/sample-names.data";
 import {
   ROSTER,
@@ -233,5 +236,21 @@ describe("answering screen 31 (ADR 0031)", () => {
       await answer(scenario, pointEventId, { kind: "attack", author: ANA ?? null });
     }
     expect(getUnattributedPoints(scenario.timeline())).toEqual([]);
+  });
+});
+
+describe("screen 31 after the sign-out (retention of the author, ADR 0057)", () => {
+  test("clearSession leaves the log of the court: the author stays and the sheet still opens", async () => {
+    const scenario = await startScenario();
+    await score(scenario, "a");
+    const pointId = lastPointId(scenario);
+    await answer(scenario, pointId, { kind: "attack", author: ANA ?? null });
+    await clearSession({
+      cacheSession: createFakeCacheSession(),
+      inviteLinkStore: createMemoryInviteLinkStore(),
+      onboardingSkip: { clear: () => Promise.resolve() },
+    });
+    expect(eventsOf(scenario).map(({ type }) => type)).toContain("PointAttributed");
+    expect(sheetOf(scenario, asking(pointId))).not.toBeNull();
   });
 });

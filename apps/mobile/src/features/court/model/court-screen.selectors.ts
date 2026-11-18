@@ -4,7 +4,6 @@ import {
   getSetPointTeams,
   getSetWinner,
   INITIAL_COURT_SESSION_STATE,
-  setsToWin,
   undoLastAction,
   type CourtSessionState,
   type CourtSessionTimeline,
@@ -22,6 +21,7 @@ import type {
   SetDotModel,
   SetEndModel,
 } from "./court-screen.types";
+import { confirmingClosesMatch } from "./set-closure";
 import { selectHintLine } from "./hint-line";
 import { selectQueue } from "./queue-model";
 import { withDisplayNames } from "./screen-display-names";
@@ -107,7 +107,7 @@ function labelOf(roster: CourtRoster, matchId: string, side: TeamSide): string {
 /** The deciding set of a series is preceded by the toss of who serves first. */
 function needsFirstServer(match: MatchScore, set: MatchSet, winner: TeamSide): boolean {
   const { bestOf } = match.scoring;
-  const matchEnds = match.setsWon[winner] + NEXT >= setsToWin(bestOf);
+  const matchEnds = confirmingClosesMatch(match, winner);
   return !matchEnds && bestOf > NEXT && set.setNumber + NEXT === bestOf;
 }
 

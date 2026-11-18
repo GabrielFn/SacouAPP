@@ -1,5 +1,6 @@
 import {
   getLineupBySlot,
+  getCurrentServingPlayer,
   getTeamServeAlignment,
   TEAM_SIDES,
   type CourtSessionTimeline,
@@ -10,12 +11,12 @@ import {
 
 import { strings } from "../../../strings/pt-BR";
 import type { TeamColorName } from "../../../theme/team-colors";
+import { FREE_SYSTEM } from "../court.data";
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import type { CourtRoster } from "../ports/court-roster";
 import type { SubstitutionState } from "./substitution.reducer";
 
 const FIRST_SLOT = 1;
-const FREE_SYSTEM = "livre";
 
 export interface SubstitutionTeam {
   readonly side: TeamSide;
@@ -64,7 +65,8 @@ export function canSubstitute(timeline: CourtSessionTimeline): boolean {
 function outgoingDetail(match: MatchScore, side: TeamSide, memberId: MemberId, slot: number) {
   const { substitution } = strings.courtPlayers;
   const alignment = getTeamServeAlignment(match, side);
-  const serving = match.currentSet?.servingTeam === side && slot === FIRST_SLOT;
+  const serving =
+    match.currentSet?.servingTeam === side && getCurrentServingPlayer(match) === memberId;
   const setter =
     alignment !== null && alignment.system !== FREE_SYSTEM && alignment.actingSetter === memberId;
   return substitution.detail([
