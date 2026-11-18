@@ -67,6 +67,9 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
       }
       return Promise.resolve(ok(undefined));
     },
+    findOrigin(courtSessionId) {
+      return Promise.resolve(ok(sessions.value[courtSessionId]?.origin ?? null));
+    },
     findActiveSession() {
       const open = Object.entries(sessions.value)
         .reverse()

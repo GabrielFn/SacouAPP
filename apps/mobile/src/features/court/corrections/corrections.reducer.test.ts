@@ -42,12 +42,14 @@ describe("the state of screen 24", () => {
       sheet: "none",
       shiftTeam: "b",
       refusal: null,
+      pending: false,
     };
     expect(correctionsReducer(state, { type: "selection-cleared" })).toEqual({
       selected: null,
       sheet: "none",
       shiftTeam: "b",
       refusal: null,
+      pending: false,
     });
   });
 });
@@ -62,5 +64,14 @@ describe("the refusal of screen 24", () => {
     expect(correctionsReducer(refused, { type: "point-tapped", eventId: "e1" }).refusal).toBeNull();
     expect(correctionsReducer(refused, { type: "shift-opened" }).refusal).toBeNull();
     expect(correctionsReducer(refused, { type: "command-accepted" }).refusal).toBeNull();
+  });
+});
+
+describe("a command on its way (finding of part 1: a double Voltar para este ponto)", () => {
+  test("command-sent marks it pending until the answer comes", () => {
+    const sent = correctionsReducer(INITIAL_CORRECTIONS, { type: "command-sent" });
+    expect(sent.pending).toBe(true);
+    expect(correctionsReducer(sent, { type: "command-accepted" }).pending).toBe(false);
+    expect(correctionsReducer(sent, { type: "command-refused", text: "x" }).pending).toBe(false);
   });
 });

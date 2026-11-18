@@ -32,6 +32,8 @@ export interface CourtEventLog {
   getDeviceId(): Promise<CourtLogResult<string>>;
   /** Idempotent: opening a session that exists changes nothing, and the origin is kept from its creation. */
   openSession(courtSessionId: string, origin?: CourtSessionOrigin): Promise<CourtLogResult<void>>;
+  /** Where the session came from, or `null` for a sample session without one (E4.10, D7). */
+  findOrigin(courtSessionId: string): Promise<CourtLogResult<CourtSessionOrigin | null>>;
   /** The open session of the device, or `null`. */
   findActiveSession(): Promise<CourtLogResult<string | null>>;
   /** The open session that came from this round, or `null`. */

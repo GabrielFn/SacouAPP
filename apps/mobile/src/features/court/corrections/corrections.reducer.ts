@@ -10,6 +10,8 @@ export interface CorrectionsState {
   readonly shiftTeam: TeamSide;
   /** Why the last command did nothing; any new pick or sheet clears it. */
   readonly refusal: string | null;
+  /** A command is on its way: a second tap (a double "Voltar para este ponto") does nothing. */
+  readonly pending: boolean;
 }
 
 export type CorrectionsAction =
@@ -18,6 +20,7 @@ export type CorrectionsAction =
   | { readonly type: "shift-opened" }
   | { readonly type: "shift-team-chosen"; readonly team: TeamSide }
   | { readonly type: "shift-closed" }
+  | { readonly type: "command-sent" }
   | { readonly type: "command-refused"; readonly text: string }
   | { readonly type: "command-accepted" };
 
@@ -26,6 +29,7 @@ export const INITIAL_CORRECTIONS: CorrectionsState = {
   sheet: "none",
   shiftTeam: "a",
   refusal: null,
+  pending: false,
 };
 
 export function correctionsReducer(
@@ -49,9 +53,11 @@ export function correctionsReducer(
       return { ...state, shiftTeam: action.team };
     case "shift-closed":
       return { ...state, sheet: "none" };
+    case "command-sent":
+      return { ...state, pending: true };
     case "command-refused":
-      return { ...state, refusal: action.text };
+      return { ...state, refusal: action.text, pending: false };
     case "command-accepted":
-      return { ...state, refusal: null };
+      return { ...state, refusal: null, pending: false };
   }
 }

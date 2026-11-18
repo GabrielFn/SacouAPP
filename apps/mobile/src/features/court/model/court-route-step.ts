@@ -1,16 +1,16 @@
 import type { CourtPhase } from "./court-screen.types";
 
 /** The routes of the court that decide where to go from the phase of the match. */
-export type CourtRouteName = "court" | "set-end";
+export type CourtRouteName = "court" | "set-end" | "match-end";
 
 /** What a route does about the phase it is in; navigation itself stays in the component. */
-export type CourtStep = "none" | "open-set-end" | "open-match-end" | "go-back";
+export type CourtStep = "none" | "open-set-end" | "open-match-end" | "open-court" | "go-back";
 
 /**
- * The one place that routes the court by phase, used by the court and by the end of the set:
+ * The one place that routes the court by phase, used by the court, the end of the set and the result:
  * - the court opens the end of the set when the set is decided (or the match waits for its end), and
- *   the result when the match ended
- *   (only while in front, so the one under the end of the set waits for it);
+ *   the result when the match ended (only while in front, so the one under the end of the set waits);
+ * - the result opens the court once the next match has started;
  * - the end of the set goes back when the next set is being played, and straight to the result when
  *   the confirmation ended the match (the deciding set stores `SetEnded` and `MatchEnded` together).
  */
@@ -19,6 +19,9 @@ export function nextCourtRoute(
   phase: CourtPhase | null,
   focused: boolean,
 ): CourtStep {
+  if (route === "match-end") {
+    return phase === "playing" ? "open-court" : "none";
+  }
   if (route === "set-end") {
     if (phase === "match-ended") return "open-match-end";
     return phase === "playing" ? "go-back" : "none";

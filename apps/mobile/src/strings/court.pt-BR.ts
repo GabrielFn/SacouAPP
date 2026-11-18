@@ -113,6 +113,8 @@ export const courtStrings = {
       `entra o time de ${names}. A escalação começa pela ordem de chegada.`,
     partialExit: (team: string, waiting: number, leaving: number, criterion: string) =>
       `saída parcial no ${team}. ${waiting === 1 ? "Tem 1 reserva esperando" : `Tem ${String(waiting)} reservas esperando`}: ${leaving === 1 ? "sai 1" : `saem ${String(leaving)}`} do ${team} (${criterion}).`,
+    fixedExit: (team: string, leaving: number, criterion: string) =>
+      `${leaving === 1 ? "sai 1" : `saem ${String(leaving)}`} do ${team} (${criterion}).`,
     sentence: (lead: string, body: string) => `${lead}: ${body}`,
     criteria: {
       "consecutive-matches": "quem está há mais partidas seguidas",
@@ -134,6 +136,8 @@ export const courtStrings = {
       count === 1
         ? `Toque em 1 jogador do ${team} para escolher quem sai.`
         : `Toque em ${String(count)} jogadores do ${team} para escolher quem sai.`,
+    rowLabel: (name: string, detail: string | null) =>
+      detail === null ? name : `${name}, ${detail}`,
     chosenLabel: (name: string, chosen: boolean) => (chosen ? `${name}, sai` : `${name}, fica`),
     confirm: "Confirmar e ir para a próxima partida",
     planFailed: "Não deu para montar a próxima partida.",
@@ -194,6 +198,8 @@ export const courtStrings = {
     sideOut: "Side-out",
     sideOutRotation: (zone: number) => `Side-out · rot. ${String(zone)}`,
     willUndo: "Será desfeito",
+    currentRow: "Placar atual",
+    currentPoint: "Esse é o placar de agora. Para tirar esse ponto, use DESFAZER na quadra.",
     selected: "Selecionado",
     rowLabel: (a: number, b: number, team: string, serve: string, sideOut: string | null) =>
       `${String(a)} a ${String(b)}, ponto do ${team}, ${serve}${sideOut === null ? "" : `. ${sideOut}`}`,

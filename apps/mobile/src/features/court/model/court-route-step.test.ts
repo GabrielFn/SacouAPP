@@ -12,6 +12,8 @@ describe("where each route of the court goes", () => {
     ["set-end", "playing", true, "go-back"],
     ["set-end", "set-decided", true, "none"],
     ["set-end", "match-pending", true, "none"],
+    ["match-end", "match-ended", true, "none"],
+    ["match-end", "playing", true, "open-court"],
     ["court", "match-pending", true, "open-set-end"],
     ["court", "match-pending", false, "open-set-end"],
     ["set-end", null, true, "none"],

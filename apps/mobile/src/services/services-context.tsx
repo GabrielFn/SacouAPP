@@ -6,6 +6,7 @@ import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
 import type { CourtThemePreference } from "../features/court/ports/court-theme-preference";
+import type { NextMatchDraftStore } from "../features/court/ports/next-match-draft-store";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
@@ -22,6 +23,7 @@ import type { IdGenerator } from "./id/id-generator";
 import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
 import type { CoinFlip } from "./random/coin-flip";
+import type { Shuffler } from "./random/shuffler";
 import type { FileShare } from "./share/file-share";
 import type { ShareSheet } from "./share/share-sheet";
 
@@ -62,6 +64,10 @@ export interface Services {
   readonly idGenerator: IdGenerator;
   /** "Sortear" of who serves first on sheet 08 (E4.7, D10). */
   readonly coinFlip: CoinFlip;
+  /** The draw of who leaves the court, once per finished match (E4.10, D7). */
+  readonly shuffler: Shuffler;
+  /** The draft of the next match on screen 11, kept until it starts (E4.10, D7; only ids). */
+  readonly nextMatchDrafts: NextMatchDraftStore;
   readonly qrEncoder: QrEncoder;
   /** The only place of an invite token on the phone (ADR 0049, D7). */
   readonly inviteLinkStore: InviteLinkStore;

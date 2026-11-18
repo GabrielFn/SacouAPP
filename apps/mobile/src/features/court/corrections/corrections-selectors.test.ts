@@ -6,6 +6,7 @@ import { ROSTER, score, screen09, startScenario } from "../model/screen-scenario
 import {
   canShift,
   correctionsSubtitle,
+  currentPointNotice,
   effectiveSelection,
   revertSheet,
   servingNotice,
@@ -138,5 +139,23 @@ describe("Girar and Trocar sacador", () => {
     expect(servingNotice(scenario.timeline(), ROSTER)).toBeNull();
     await scenario.controller.dispatch({ type: "switch-serving-team" });
     expect(servingNotice(scenario.timeline(), ROSTER)).toMatch(/^Agora saca o /);
+  });
+});
+
+describe("the newest point of screen 24 (finding of part 1)", () => {
+  test("tapping it explains that it is the score now, and an older point says nothing", async () => {
+    const timeline = (await screen09()).timeline();
+    const points = getRecentPoints(timeline);
+    expect(currentPointNotice(timeline, points[0]?.eventId ?? null)).toBe(
+      "Esse é o placar de agora. Para tirar esse ponto, use DESFAZER na quadra.",
+    );
+    expect(currentPointNotice(timeline, points[1]?.eventId ?? null)).toBeNull();
+    expect(currentPointNotice(timeline, null)).toBeNull();
+  });
+
+  test("its line is read as the score now", async () => {
+    const rows = timelineRows((await screen09()).timeline(), ROSTER, null);
+    expect(rows[0]?.accessibilityLabel).toContain("Placar atual");
+    expect(rows[1]?.accessibilityLabel).not.toContain("Placar atual");
   });
 });

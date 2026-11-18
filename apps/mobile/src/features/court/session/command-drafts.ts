@@ -37,6 +37,8 @@ export type CourtCommand =
     }
   /** "Voltar para este ponto" of screen 24. */
   | { readonly type: "revert-to"; readonly eventId: string }
+  /** "Confirmar e ir para a próxima partida" of screen 11: the `MatchStarted` the plan built (D7). */
+  | { readonly type: "start-next-match"; readonly input: MatchStartedPayload }
   /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */
   | { readonly type: "end-match-manually" };
 
@@ -69,6 +71,7 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
   const state = currentState(timeline);
   switch (command.type) {
     case "start-match":
+    case "start-next-match":
       return refused(startMatch(state, command.input));
     case "score-point":
       return refused(scorePoint(state, command.team));
