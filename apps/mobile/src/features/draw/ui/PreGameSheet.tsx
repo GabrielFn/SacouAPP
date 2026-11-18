@@ -26,6 +26,7 @@ import {
 } from "../model/pre-game-selectors";
 import { startBlockerText, startErrorText } from "../model/pre-game-texts";
 import { PointsStepper } from "./PointsStepper";
+import { PreGameLineup } from "./PreGameLineup";
 import { RotationPicker } from "./RotationPicker";
 import { teamSwatch } from "./team-swatch";
 
@@ -184,7 +185,20 @@ function RotationSection({ pre, model }: SectionProps) {
               model.dispatch({ type: "system-chosen", side: view.side, system, base });
             }}
           />
-          <Text variant="body">{view.picker.setterLine}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
+            <Text variant="body" style={{ flex: 1 }}>
+              {view.picker.setterLine}
+            </Text>
+            <Button
+              label={texts.lineup}
+              accessibilityLabel={texts.lineupLabel(view.team.name)}
+              variant="link"
+              disabled={pre.starting}
+              onPress={() => {
+                model.dispatch({ type: "lineup-opened" });
+              }}
+            />
+          </View>
         </>
       )}
       <Text variant="muted">{view.benchLine}</Text>
@@ -235,27 +249,31 @@ export function PreGameSheet({
     model.dispatch({ type: "pre-game-closed" });
   };
   const base = settings.scoring.pointsPerSet;
+  const match = matchNumber(courtOf(pre.court));
   return (
-    <BottomSheet
-      visible={model.state.sheet === "pre-game"}
-      title={texts.title(matchNumber(courtOf(pre.court)))}
-      closeLabel={texts.close}
-      onClose={close}
-    >
-      <Teams />
-      <PointsStepper
-        label={texts.points}
-        lessLabel={texts.lessPoints}
-        moreLabel={texts.morePoints}
-        view={pointsView(pre.input)}
-        onStep={(delta) => {
-          model.dispatch({ type: "points-stepped", delta, base });
-        }}
-      />
-      <SetsSection pre={pre} model={model} />
-      <ServerSection pre={pre} model={model} />
-      <RotationSection pre={pre} model={model} />
-      <StartButton pre={pre} leftSinceDraw={leftSinceDraw} />
-    </BottomSheet>
+    <>
+      <PreGameLineup model={model} input={pre.input} matchNumber={match} />
+      <BottomSheet
+        visible={model.state.sheet === "pre-game"}
+        title={texts.title(match)}
+        closeLabel={texts.close}
+        onClose={close}
+      >
+        <Teams />
+        <PointsStepper
+          label={texts.points}
+          lessLabel={texts.lessPoints}
+          moreLabel={texts.morePoints}
+          view={pointsView(pre.input)}
+          onStep={(delta) => {
+            model.dispatch({ type: "points-stepped", delta, base });
+          }}
+        />
+        <SetsSection pre={pre} model={model} />
+        <ServerSection pre={pre} model={model} />
+        <RotationSection pre={pre} model={model} />
+        <StartButton pre={pre} leftSinceDraw={leftSinceDraw} />
+      </BottomSheet>
+    </>
   );
 }

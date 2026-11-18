@@ -134,6 +134,11 @@ export const drawStrings = {
     noSetter: (name: string, zone: number) =>
       `Sem levantador fixo. ${name} começa na posição ${String(zone)}.`,
     fullTeam: (team: string, size: number) => `${team} tem ${String(size)}, sem banco.`,
+    /** "Laranja tem 6 e líbero Sofia." (E4.8, D5). */
+    withLibero: (team: string, size: number, libero: string) =>
+      `${team} tem ${String(size)} e líbero ${libero}.`,
+    lineup: "Escalação",
+    lineupLabel: (team: string) => `Escalação do ${team}`,
     noRotation: (team: string, size: number) => `${team} tem ${String(size)}: sem rotação.`,
     start: "Começar partida",
     starting: "Abrindo a quadra…",

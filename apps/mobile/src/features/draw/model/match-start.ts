@@ -19,11 +19,12 @@ import {
 import type { DrawArrangement } from "./draw-arrangement";
 import { defaultLineup, type PositionOf } from "./default-lineup";
 import { chosenOr, type PreGameChoices } from "./pre-game";
+import { liberosOf, savedRotation } from "./pre-game-lineup";
 
 /** Only a team of six rotates (ADR 0024): any other size plays with the rotation off. */
 export const ROTATING_TEAM_SIZE = ROTATION_SLOTS.length;
 
-/** The pre-game always starts with the setter in zone 1 (D6); screen 22 changes it (E4.8). */
+/** The default lineup starts with the setter in zone 1 (D6); screen 22 changes it (E4.8). */
 const STARTING_SETTER_ZONE = 1;
 
 const SIDES: readonly TeamSide[] = ["a", "b"];
@@ -55,7 +56,7 @@ export function rotates(settings: GroupSettings, team: readonly MemberId[]): boo
 }
 
 /** `null` turns the rotation off; else the default lineup, the setter in zone 1, no bench nor libero. */
-export function teamRotation(input: MatchStartInput, side: TeamSide): TeamState | null {
+export function defaultRotation(input: MatchStartInput, side: TeamSide): TeamState | null {
   const team = teamOfSide(input.arrangement, side);
   if (!rotates(input.settings, team)) return null;
   const system = systemOf(input.preGame, input.settings, side);
@@ -67,9 +68,29 @@ export function teamRotation(input: MatchStartInput, side: TeamSide): TeamState 
     lineup: lineup.value,
     setterZone: STARTING_SETTER_ZONE,
     bench: [],
-    // The libero is chosen on screen 22 (question 73): the match starts without one.
     libero: null,
   };
+}
+
+/** Who can be the libero of a team: the reserves, but never the libero of team A for team B (D5). */
+export function liberoPoolOf(input: MatchStartInput, side: TeamSide): readonly MemberId[] {
+  const { reserves } = input.arrangement;
+  if (side === "a") return reserves;
+  const taken = liberosOf([teamRotation(input, "a")]);
+  return reserves.filter((memberId) => !taken.includes(memberId));
+}
+
+/** The rotation a team starts with: the lineup saved on screen 22 while it holds, else the default. */
+export function teamRotation(input: MatchStartInput, side: TeamSide): TeamState | null {
+  const base = defaultRotation(input, side);
+  return base === null
+    ? null
+    : savedRotation(base, input.preGame.lineups[side], liberoPoolOf(input, side));
+}
+
+/** The team as the match freezes it: the six and, with one, the libero (D5). */
+function rosterOf(team: readonly MemberId[], rotation: TeamState | null) {
+  return { memberIds: [...team, ...liberosOf([rotation])] };
 }
 
 export function scoringOf({
@@ -99,20 +120,23 @@ export function buildMatchStart(
 ): Result<MatchStartedPayload, MatchStartError> {
   const { arrangement, preGame } = input;
   if (arrangement.teams.length < SIDES.length) return err("not-enough-teams");
+  const rotations = { a: teamRotation(input, "a"), b: teamRotation(input, "b") };
+  const liberos = liberosOf([rotations.a, rotations.b]);
   return ok({
     matchId,
     rulesVersion: CURRENT_RULES_VERSION,
     formationsVersion: FORMATION_CATALOG_VERSION,
     scoring: scoringOf(input),
     teams: {
-      a: { memberIds: teamOfSide(arrangement, "a") },
-      b: { memberIds: teamOfSide(arrangement, "b") },
+      a: rosterOf(teamOfSide(arrangement, "a"), rotations.a),
+      b: rosterOf(teamOfSide(arrangement, "b"), rotations.b),
     },
-    rotations: { a: teamRotation(input, "a"), b: teamRotation(input, "b") },
+    rotations,
     firstServer: preGame.firstServer,
     queue: {
       teams: arrangement.teams.slice(FIRST_QUEUED_TEAM).map((memberIds) => ({ memberIds })),
-      players: arrangement.reserves,
+      // A reserve who plays as a libero leaves the queue for the team (D5).
+      players: arrangement.reserves.filter((memberId) => !liberos.includes(memberId)),
     },
   });
 }
