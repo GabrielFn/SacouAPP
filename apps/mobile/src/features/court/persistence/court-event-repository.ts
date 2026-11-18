@@ -150,12 +150,6 @@ async function appendEnvelopes(
   return ok(undefined);
 }
 
-/** Both ids or none: a sample session was opened without an origin. */
-function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
-  const groupId = readTextColumn(row, "group_id");
-  const roundId = readTextColumn(row, "round_id");
-  return groupId === null || roundId === null ? null : { groupId, roundId };
-}
 async function setStatus(
   transaction: SqlExecutor,
   courtSessionId: string,

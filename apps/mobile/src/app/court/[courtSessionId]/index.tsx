@@ -87,7 +87,6 @@ export default function CourtRoute() {
             ? { level: warning.state.level, onDismiss: warning.dismiss }
             : null
         }
-        }
         onPoint={(team) => {
           // The zones wait after a point, even if the engine turns this one down.
           if (guard.acceptPoint()) {
