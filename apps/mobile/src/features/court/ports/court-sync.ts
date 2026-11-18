@@ -1,10 +1,8 @@
 import type { CourtSyncState } from "../sync/court-sync.reducer";
 
-/** What the upload loop shows: its state and the sessions it does not send for another account. */
+/** What the upload loop shows: its state. Whose each session is comes from its file (D8). */
 export interface CourtSyncSnapshot {
   readonly loop: CourtSyncState;
-  /** Sessions with events to send that belong to another account (or to none): never sent (D8). */
-  readonly otherAccountSessions: readonly string[];
 }
 
 /** The points of the account signed in that the server has not confirmed yet ("Sair", question 84). */
@@ -30,5 +28,7 @@ export interface CourtSync extends CourtSyncHooks {
   readonly getSnapshot: () => CourtSyncSnapshot;
   /** Told when the loop wrote a halt or a take-over in a session, so its court reads the file again. */
   onSessionChanged(listener: (courtSessionId: string) => void): () => void;
+  /** Told when another account signs in or out, so an open court asks again whose it is. */
+  onAccountChanged(listener: () => void): () => void;
   countUnsent(): Promise<UnsentSummary>;
 }

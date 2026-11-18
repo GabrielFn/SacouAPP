@@ -116,6 +116,8 @@ export function readSyncColumns(row: SqlRow | undefined): CourtLogResult<{
   ackedSequence: number;
   takenOverBatch: number | null;
   syncHalt: SyncHaltCode | null;
+  fromRound: boolean;
+  ownerKey: string | null;
 }> {
   const ackedSequence = readIntegerColumn(row, "acked_sequence");
   const halt = readSyncHalt(row);
@@ -124,5 +126,7 @@ export function readSyncColumns(row: SqlRow | undefined): CourtLogResult<{
     ackedSequence,
     takenOverBatch: readIntegerColumn(row, "taken_over_batch"),
     syncHalt: halt.value,
+    fromRound: readTextColumn(row, "round_id") !== null,
+    ownerKey: readTextColumn(row, "owner_key"),
   });
 }

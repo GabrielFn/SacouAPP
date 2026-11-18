@@ -1,26 +1,32 @@
 import type { SyncHaltCode } from "../ports/court-event-log";
+import type { SessionOwnership } from "./session-ownership";
 
 /** What the court says about the upload (question 85): the text of each one is in `strings`. */
 export type SyncNotice =
   /** Another phone writes the court now: the 09b, and no gesture is taken (D7). */
   | { readonly kind: "taken-over" }
+  /** Another account opened this court: it does not open for marking on this one (D8). */
+  | { readonly kind: "other-account" }
   /** The points stay on this phone: a line in the middle strip, and the court goes on. */
-  | { readonly kind: "stopped"; readonly reason: SyncHaltCode | "other-account" };
+  | { readonly kind: "stopped"; readonly reason: SyncHaltCode | "unowned" };
 
 export interface SyncNoticeInput {
   readonly takenOver: boolean;
   readonly syncHalt: SyncHaltCode | null;
-  /** The session belongs to another account (or to none) than the one signed in. */
-  readonly otherAccount: boolean;
+  readonly ownership: SessionOwnership;
 }
 
-/** By priority: taken over, then the halt the file keeps, then the account; `null` while it sends. */
+/**
+ * By priority: taken over, another account, then the halt the file keeps and a session without an
+ * owner (the generic line); `null` while it sends.
+ */
 export function selectSyncNotice({
   takenOver,
   syncHalt,
-  otherAccount,
+  ownership,
 }: SyncNoticeInput): SyncNotice | null {
   if (takenOver) return { kind: "taken-over" };
+  if (ownership === "other-account") return { kind: "other-account" };
   if (syncHalt !== null) return { kind: "stopped", reason: syncHalt };
-  return otherAccount ? { kind: "stopped", reason: "other-account" } : null;
+  return ownership === "unowned" ? { kind: "stopped", reason: "unowned" } : null;
 }

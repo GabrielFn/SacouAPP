@@ -47,6 +47,10 @@ export interface StoredCourtLog {
   /** The batch of the phone that took over the stream, or `null` while this one writes. */
   readonly takenOverBatch: number | null;
   readonly syncHalt: SyncHaltCode | null;
+  /** The session came from a round: the sample sessions have no origin and are never sent. */
+  readonly fromRound: boolean;
+  /** The key of the account that opened it (a hash, D8), or `null` when it was opened without one. */
+  readonly ownerKey: string | null;
 }
 
 /**

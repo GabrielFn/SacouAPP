@@ -195,7 +195,6 @@ describe("the court upload against an in-memory server (E4.11, acceptance)", () 
     await harness.write(2);
     await settled(harness.sync());
     expect(harness.server.requests()).toEqual([]);
-    expect(harness.sync().getSnapshot().otherAccountSessions).toEqual([SESSION_A]);
 
     harness.account.switchTo(harness.owner);
     await settled(harness.sync());
@@ -204,7 +203,41 @@ describe("the court upload against an in-memory server (E4.11, acceptance)", () 
     expect(
       harness.server.requests().every((request) => request.account === harness.owner.session),
     ).toBe(true);
-    expect(harness.sync().getSnapshot().otherAccountSessions).toEqual([]);
+  });
+
+  test("S1: A marks, signs out; B neither marks nor sends; A back sends its own points", async () => {
+    const harness = await createSyncHarness();
+    const deps = {
+      courtSessionId: SESSION_A,
+      log: harness.log,
+      replayer: createCourtReplayer(),
+      ids: createSequentialIdGenerator(),
+      sync: harness.sync(),
+    };
+    harness.network.set(false);
+    await startCourtMatch(deps, SAMPLE_MATCH_ONE_SET);
+    const onA = createCourtSessionController(deps);
+    await onA.whenIdle();
+    await onA.dispatch({ type: "score-point", team: "a" });
+    const written = await harness.log.load(SESSION_A);
+    if (!written.ok) throw new Error(written.error.code);
+
+    harness.account.switchTo(accountRef("b"));
+    harness.network.set(true);
+    const onB = createCourtSessionController(deps);
+    await onB.whenIdle();
+    const snapshot = onB.getSnapshot();
+    expect(snapshot.status === "ready" && snapshot.sync.ownership).toBe("other-account");
+    expect((await onB.dispatch({ type: "score-point", team: "b" })).ok).toBe(false);
+    await settled(harness.sync());
+    expect(harness.server.requests()).toEqual([]);
+
+    harness.account.switchTo(harness.owner);
+    await settled(harness.sync());
+    expect(harness.server.stored()).toEqual(written.value.events);
+    expect(
+      harness.server.requests().every((request) => request.account === harness.owner.session),
+    ).toBe(true);
   });
 
   test("signed out, nothing leaves", async () => {

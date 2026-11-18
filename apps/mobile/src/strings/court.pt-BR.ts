@@ -52,8 +52,13 @@ export const courtStrings = {
   upload: {
     stopped: "Os pontos não estão indo para o servidor. Peça ao admin para conferir.",
     roundCanceled: "A rodada foi cancelada. Os pontos ficam só neste celular.",
-    otherAccount: "Entre com a conta que abriu a quadra para enviar os pontos.",
     noPermission: "Sua conta não marca mais esta quadra. Peça ao admin para conferir.",
+  },
+  // The session of another account (ADR 0067, D8): the court does not open for marking.
+  otherAccount: {
+    title: "Entre com a conta que abriu a quadra",
+    body: "Os pontos desta quadra só podem ser marcados e enviados pela conta que a abriu.",
+    leave: "Sair da quadra",
   },
   // Screen 09b without the name until E3.8 (D7, answer 83).
   takenOver: {

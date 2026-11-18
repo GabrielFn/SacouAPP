@@ -26,23 +26,14 @@ export interface CourtSyncRunnerDeps extends Omit<UploadDeps, "onSessionChanged"
 
 type SessionListener = (courtSessionId: string) => void;
 
-const NO_SESSIONS: readonly string[] = [];
 const NOTHING_MORE: CourtSyncAction = { type: "pass-done", more: false };
 
-/** The sessions of the account signed in, and the others, which are never sent (D8). */
-function partition(
+/** The sessions of the account signed in: the others are never sent (D8). */
+function ownedBy(
   sessions: readonly SessionToSync[],
   account: CourtAccountRef | null,
-): { readonly owned: readonly SessionToSync[]; readonly others: readonly string[] } {
-  const owns = (session: SessionToSync) => account !== null && session.ownerKey === account.key;
-  return {
-    owned: sessions.filter(owns),
-    others: sessions.filter((session) => !owns(session)).map((session) => session.courtSessionId),
-  };
-}
-
-function sameList(a: readonly string[], b: readonly string[]): boolean {
-  return a.length === b.length && a.every((value, index) => value === b[index]);
+): readonly SessionToSync[] {
+  return account === null ? [] : sessions.filter((session) => session.ownerKey === account.key);
 }
 
 /**
@@ -50,10 +41,7 @@ function sameList(a: readonly string[], b: readonly string[]): boolean {
  * time, the waits, the listeners). It logs nothing: no ID, payload or answer of the server.
  */
 export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
-  const store = createSnapshotStore<CourtSyncSnapshot>({
-    loop: INITIAL_COURT_SYNC_STATE,
-    otherAccountSessions: NO_SESSIONS,
-  });
+  const store = createSnapshotStore<CourtSyncSnapshot>({ loop: INITIAL_COURT_SYNC_STATE });
   const inFlight = { value: false };
   const timer = { current: null as (() => void) | null };
   const unsubscribes = { value: [] as readonly (() => void)[] };
@@ -63,13 +51,6 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
     sessionListeners.value.forEach((listener) => {
       listener(courtSessionId);
     });
-  }
-
-  function publishOthers(others: readonly string[]): void {
-    const snapshot = store.getSnapshot();
-    if (!sameList(snapshot.otherAccountSessions, others)) {
-      store.set({ ...snapshot, otherAccountSessions: others });
-    }
   }
 
   function failed(afterMs: number | null): CourtSyncAction {
@@ -100,9 +81,7 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
     if (!device.ok) return failed(null);
     const sessions = await deps.log.findSessionsToSync(device.value);
     if (!sessions.ok) return failed(null);
-    const { owned, others } = partition(sessions.value, account);
-    publishOthers(others);
-    const [target] = owned;
+    const [target] = ownedBy(sessions.value, account);
     if (account === null || target === undefined) return NOTHING_MORE;
     // Offline, nothing is tried: the network coming back pokes the loop.
     if (!deps.network.isOnline()) return failed(null);
@@ -176,6 +155,7 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
     },
     subscribe: store.subscribe,
     getSnapshot: store.getSnapshot,
+    onAccountChanged: (listener) => deps.account.subscribe(listener),
     onSessionChanged(listener) {
       sessionListeners.value = [...sessionListeners.value, listener];
       return () => {

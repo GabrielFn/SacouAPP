@@ -148,6 +148,8 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
               ackedSequence: session.ackedSequence,
               takenOverBatch: session.takenOverBatch,
               syncHalt: session.syncHalt,
+              fromRound: session.origin !== null,
+              ownerKey: session.ownerKey,
             }),
       );
     },

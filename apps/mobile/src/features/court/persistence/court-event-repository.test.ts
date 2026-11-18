@@ -69,6 +69,8 @@ describe("append", () => {
         ackedSequence: 0,
         takenOverBatch: null,
         syncHalt: null,
+        fromRound: false,
+        ownerKey: null,
       },
     });
   });

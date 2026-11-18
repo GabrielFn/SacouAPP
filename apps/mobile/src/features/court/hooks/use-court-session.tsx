@@ -71,6 +71,14 @@ export function CourtSessionProvider({ courtSessionId, children }: CourtSessionP
       }),
     [sync, handle],
   );
+  // Another account signed in: whose the court is is read again (D8).
+  useEffect(
+    () =>
+      sync.onAccountChanged(() => {
+        void handle.controller.reload();
+      }),
+    [sync, handle],
+  );
   return <CourtSessionContext.Provider value={handle}>{children}</CourtSessionContext.Provider>;
 }
 
@@ -78,11 +86,8 @@ export function useCourtSession(): UseCourtSession {
   const handle = useContext(CourtSessionContext);
   if (!handle) throw new Error("CourtSessionProvider is missing from the tree.");
   const { replayer } = useCourtRuntime();
-  const sync = useCourtSync();
   const { courtSessionId, controller } = handle;
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
-  const upload = useSyncExternalStore(sync.subscribe, sync.getSnapshot);
-  const otherAccount = upload.otherAccountSessions.includes(courtSessionId);
   const view = useMemo<CourtSessionView>(() => {
     if (snapshot.status !== "ready") {
       return snapshot;
@@ -93,10 +98,10 @@ export function useCourtSession(): UseCourtSession {
       ? {
           status: "ready",
           timeline: replayed.value,
-          notice: selectSyncNotice({ ...snapshot.sync, otherAccount }),
+          notice: selectSyncNotice(snapshot.sync),
         }
       : { status: "failed", code: "replay-failed" };
-  }, [snapshot, replayer, courtSessionId, otherAccount]);
+  }, [snapshot, replayer, courtSessionId]);
   const dispatch = useCallback(
     (command: PlayCommand) => controller.dispatch(command),
     [controller],

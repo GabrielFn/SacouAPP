@@ -11,7 +11,15 @@ export const inertCourtSyncHooks: CourtSyncHooks = {
   ownerKey: () => Promise.resolve(null),
 };
 
-const IDLE: CourtSyncSnapshot = { loop: INITIAL_COURT_SYNC_STATE, otherAccountSessions: [] };
+/** The hooks of the court with an account signed in, read on each call so a test can switch it. */
+export function signedInCourtSyncHooks(account: { readonly key: string | null }): CourtSyncHooks {
+  return {
+    notifyAppended: () => undefined,
+    ownerKey: () => Promise.resolve(account.key),
+  };
+}
+
+const IDLE: CourtSyncSnapshot = { loop: INITIAL_COURT_SYNC_STATE };
 
 export interface FakeCourtSync extends CourtSync {
   /** How many writes the court told about. */
@@ -31,6 +39,7 @@ export function createFakeCourtSync(ownerKey: string | null = null): FakeCourtSy
     subscribe: () => () => undefined,
     getSnapshot: () => IDLE,
     onSessionChanged: () => () => undefined,
+    onAccountChanged: () => () => undefined,
     countUnsent: () => Promise.resolve({ events: 0, points: 0 }),
     appendedCount: () => appended.value,
   };

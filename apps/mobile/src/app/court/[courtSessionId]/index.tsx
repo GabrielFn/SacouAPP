@@ -13,7 +13,7 @@ import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
-import { TakenOverView } from "../../../features/court/ui/TakenOverView";
+import { CourtBlockedView } from "../../../features/court/ui/CourtBlockedView";
 import { useServices } from "../../../services/services-context";
 
 /** Screens 09 and 10. When the set is decided or the match ends, the court hands over to its route. */
@@ -25,7 +25,7 @@ export default function CourtRoute() {
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
   const undoNotice = useUndoNotice();
-  const { takenOver, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
+  const { block, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
 
   // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
   // changes, so coming back from the end of the set (same step) does not open it again.
@@ -43,8 +43,8 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-  if (takenOver) {
-    return <TakenOverView onLeave={route.leave} />;
+  if (block !== null) {
+    return <CourtBlockedView block={block} onLeave={route.leave} />;
   }
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;

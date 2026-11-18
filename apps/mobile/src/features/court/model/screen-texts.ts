@@ -24,7 +24,6 @@ export function hintText({ hint, teams }: CourtScreenModel): string {
 
 const UPLOAD_TEXTS: Partial<Record<UploadStoppedReason, string>> = {
   "round-canceled": strings.court.upload.roundCanceled,
-  "other-account": strings.court.upload.otherAccount,
   "no-permission": strings.court.upload.noPermission,
 };
 

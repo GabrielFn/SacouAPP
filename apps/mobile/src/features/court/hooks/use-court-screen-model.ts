@@ -9,12 +9,16 @@ import {
 } from "../model/court-screen.selectors";
 import type { CourtPhase, CourtScreenModel } from "../model/court-screen.types";
 import type { CourtRoster } from "../ports/court-roster";
+import type { SyncNotice } from "../sync/sync-notice";
 import type { CourtSessionView } from "./use-court-session";
 
+/** Why the court takes no gesture: another phone writes it (09b, D7), or another account opened it (D8). */
+export type CourtBlock = Extract<SyncNotice, { kind: "taken-over" | "other-account" }>["kind"];
+
 export interface CourtScreenModelView {
-  /** Another phone writes the court now: the 09b replaces it (D7). */
-  readonly takenOver: boolean;
-  /** `null` while loading, failed or taken over. */
+  /** The court is replaced by a screen that only leaves, or `null`. */
+  readonly block: CourtBlock | null;
+  /** `null` while loading, failed or blocked. */
   readonly timeline: CourtSessionTimeline | null;
   readonly phase: CourtPhase | null;
   readonly model: CourtScreenModel | null;
@@ -22,7 +26,7 @@ export interface CourtScreenModelView {
 
 /**
  * What the court route draws, derived from the session view: the phase and the model, with the upload
- * notice on the middle line (question 85). Taken over, there is no phase: nothing opens the end of a
+ * notice on the middle line (question 85). Blocked, there is no phase: nothing opens the end of a
  * set or of the match.
  */
 export function useCourtScreenModel(
@@ -30,8 +34,9 @@ export function useCourtScreenModel(
   roster: CourtRoster,
 ): CourtScreenModelView {
   const notice = view.status === "ready" ? view.notice : null;
-  const takenOver = notice?.kind === "taken-over";
-  const timeline = view.status === "ready" && !takenOver ? view.timeline : null;
+  const block =
+    notice?.kind === "taken-over" || notice?.kind === "other-account" ? notice.kind : null;
+  const timeline = view.status === "ready" && block === null ? view.timeline : null;
   const phase = useMemo(
     () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
     [timeline],
@@ -41,5 +46,5 @@ export function useCourtScreenModel(
     const screen = selectCourtScreen(timeline, roster);
     return screen === null ? null : { ...screen, hint: withUploadNotice(screen.hint, notice) };
   }, [timeline, roster, notice]);
-  return { takenOver, timeline, phase, model };
+  return { block, timeline, phase, model };
 }

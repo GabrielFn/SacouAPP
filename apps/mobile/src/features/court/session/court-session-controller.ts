@@ -7,6 +7,16 @@ import { runCourtCommand, type CommandRunnerDeps } from "./command-runner";
 import type { CommandError, LoadFailureCode } from "./court-errors";
 import { loadCourtSession, type SessionSyncState, type WriteContext } from "./court-session-loader";
 import { createSnapshotStore } from "./snapshot-store";
+import {
+  sessionOwnership,
+  type SessionOwner,
+  type SessionOwnership,
+} from "../sync/session-ownership";
+
+/** How the upload stands, and whose the session is for the account signed in (ADR 0067, D8). */
+export interface CourtSyncStanding extends SessionSyncState {
+  readonly ownership: SessionOwnership;
+}
 
 /**
  * `events` is exactly what the SQLite file holds: the screen reads it, never edits it. The state of
@@ -18,7 +28,7 @@ export type CourtSnapshot =
       readonly status: "ready";
       readonly courtSessionId: string;
       readonly events: readonly EventEnvelope[];
-      readonly sync: SessionSyncState;
+      readonly sync: CourtSyncStanding;
     }
   | { readonly status: "failed"; readonly code: LoadFailureCode };
 
@@ -42,8 +52,11 @@ export interface CourtSessionController {
 }
 
 export interface CourtSessionControllerDeps extends CommandRunnerDeps {
-  /** Told after each write that committed, so the events leave right away (ADR 0067, D3). */
-  readonly sync?: Pick<CourtSyncHooks, "notifyAppended">;
+  /**
+   * Told after each write that committed, so the events leave right away (ADR 0067, D3), and asked
+   * for the account signed in. Without it (benchmarks, tests) every session counts as this one's.
+   */
+  readonly sync?: Pick<CourtSyncHooks, "notifyAppended" | "ownerKey">;
 }
 
 const NOT_READY: CommandResult = err({ code: "not-ready" });
@@ -64,6 +77,10 @@ export function createCourtSessionController(
     return result;
   }
 
+  async function ownershipOf(owner: SessionOwner): Promise<SessionOwnership> {
+    return deps.sync === undefined ? "own" : sessionOwnership(owner, await deps.sync.ownerKey());
+  }
+
   async function load(): Promise<void> {
     const loaded = await loadCourtSession(deps.log, deps.replayer, deps.courtSessionId);
     if (!loaded.ok) {
@@ -75,13 +92,18 @@ export function createCourtSessionController(
       status: "ready",
       courtSessionId: deps.courtSessionId,
       events: loaded.value.events,
-      sync: loaded.value.sync,
+      sync: { ...loaded.value.sync, ownership: await ownershipOf(loaded.value.owner) },
     });
   }
 
   async function run(command: CourtCommand): Promise<CommandResult> {
     const snapshot = store.getSnapshot();
-    if (snapshot.status !== "ready" || context.current === null) {
+    // The session of another account takes no command: its points would leave with that account.
+    if (
+      snapshot.status !== "ready" ||
+      context.current === null ||
+      snapshot.sync.ownership === "other-account"
+    ) {
       return NOT_READY;
     }
     const outcome = await runCourtCommand(deps, context.current, snapshot.events, command);

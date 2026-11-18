@@ -7,7 +7,7 @@ import {
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
-import { inertCourtSyncHooks } from "../../../adapters/fake-court-sync";
+import { signedInCourtSyncHooks } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { withLeaf } from "../../groups/model/settings-patch";
 import { createCourtReplayer } from "../../court/session/court-replay";
@@ -132,7 +132,7 @@ describe("startFromDraw: from the 08 to the court (D7, fakes)", () => {
       log: createFakeCourtEventLog(ids),
       replayer: createCourtReplayer(),
       ids,
-      sync: inertCourtSyncHooks,
+      sync: signedInCourtSyncHooks({ key: "key-a" }),
     };
   }
 

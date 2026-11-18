@@ -2,6 +2,7 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtEventLog, SyncHaltCode } from "../ports/court-event-log";
+import type { SessionOwner } from "../sync/session-ownership";
 import type { LoadFailureCode } from "./court-errors";
 import type { CourtReplayer } from "./court-replay";
 
@@ -22,6 +23,7 @@ export interface LoadedSession {
   readonly context: WriteContext;
   readonly events: readonly EventEnvelope[];
   readonly sync: SessionSyncState;
+  readonly owner: SessionOwner;
 }
 
 /**
@@ -41,7 +43,7 @@ export async function loadCourtSession(
   if (!stored.ok) {
     return err(stored.error.code);
   }
-  const { batch, events, takenOverBatch, syncHalt } = stored.value;
+  const { batch, events, takenOverBatch, syncHalt, fromRound, ownerKey } = stored.value;
   if (!replayer.replay(courtSessionId, events).ok) {
     return err("replay-failed");
   }
@@ -49,5 +51,6 @@ export async function loadCourtSession(
     context: { deviceId: device.value, batch },
     events,
     sync: { takenOver: takenOverBatch !== null, syncHalt },
+    owner: { fromRound, ownerKey },
   });
 }

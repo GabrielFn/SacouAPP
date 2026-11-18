@@ -11,7 +11,7 @@ import { ROTATION_SLOTS } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
-import { inertCourtSyncHooks } from "../../../adapters/fake-court-sync";
+import { signedInCourtSyncHooks } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { createCourtReplayer } from "../../court/session/court-replay";
 import { sessionState } from "../../court/session/round-court";
@@ -37,7 +37,7 @@ function runtime() {
     log: createFakeCourtEventLog(ids),
     replayer: createCourtReplayer(),
     ids,
-    sync: inertCourtSyncHooks,
+    sync: signedInCourtSyncHooks({ key: "key-a" }),
   };
 }
 const MATCH_ID = "b0000000-0000-4000-8000-000000000001";
