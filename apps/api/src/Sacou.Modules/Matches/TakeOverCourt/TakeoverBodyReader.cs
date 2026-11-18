@@ -51,7 +51,7 @@ internal static class TakeoverBodyReader
             return Invalid(BodyField);
         }
 
-        if (!root.TryGetProperty(CourtTakeoverRequest.DeviceIdField, out var device) || device.ValueKind != JsonValueKind.String)
+        if (DeviceId(root) is not { } deviceId)
         {
             return Invalid(CourtTakeoverRequest.DeviceIdField);
         }
@@ -62,8 +62,30 @@ internal static class TakeoverBodyReader
         }
 
         return Integer(root, CourtTakeoverRequest.ExpectedEventCountField) is { } expectedEventCount
-            ? CourtTakeoverRequest.Create(device.GetString()!, expectedBatch, expectedEventCount)
+            ? CourtTakeoverRequest.Create(deviceId, expectedBatch, expectedEventCount)
             : Invalid(CourtTakeoverRequest.ExpectedEventCountField);
+    }
+
+    /// <summary>
+    /// The device id as text; null for a missing field, a non-string, or a string that does not transcode (a lone
+    /// surrogate escape or invalid UTF-8), as in <c>RawValueReader</c>. The exception message is not forwarded: it can
+    /// carry the received value.
+    /// </summary>
+    private static string? DeviceId(JsonElement root)
+    {
+        if (!root.TryGetProperty(CourtTakeoverRequest.DeviceIdField, out var device) || device.ValueKind != JsonValueKind.String)
+        {
+            return null;
+        }
+
+        try
+        {
+            return device.GetString();
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
+        {
+            return null;
+        }
     }
 
     /// <summary>A JSON integer that fits a <c>long</c>; null for anything else, a fraction and an exponent included.</summary>

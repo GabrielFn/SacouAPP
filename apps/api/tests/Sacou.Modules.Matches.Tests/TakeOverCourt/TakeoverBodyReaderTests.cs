@@ -45,6 +45,35 @@ public sealed class TakeoverBodyReaderTests
         Assert.Equal(new CourtWriteError(CourtWriteErrorCode.TakeoverInvalid, Field: field), read.Error);
     }
 
+    [Theory]
+    [MemberData(nameof(UntranscodableDeviceIds))]
+    public void ADeviceIdThatDoesNotTranscode_IsTheFieldDeviceId_WithoutTheValue(byte[] body)
+    {
+        var read = TakeoverBodyReader.Read(body);
+
+        Assert.True(read.IsFailure);
+        Assert.Equal(new CourtWriteError(CourtWriteErrorCode.TakeoverInvalid, Field: CourtTakeoverRequest.DeviceIdField), read.Error);
+    }
+
+    public static TheoryData<byte[]> UntranscodableDeviceIds() =>
+    [
+        Body(Encoding.ASCII.GetBytes(LoneSurrogateEscape)),
+        Body([InvalidUtf8Byte]),
+    ];
+
+    /// <summary>The JSON escape of a lone high surrogate, as six ASCII characters.</summary>
+    private const string LoneSurrogateEscape = @"\ud800";
+
+    private const byte InvalidUtf8Byte = 0xFF;
+
+    /// <summary>A body whose device id is exactly <paramref name="deviceId"/>, as raw bytes, and the rest valid.</summary>
+    private static byte[] Body(byte[] deviceId) =>
+    [
+        .. Encoding.ASCII.GetBytes("{\"deviceId\":\""),
+        .. deviceId,
+        .. Encoding.ASCII.GetBytes("\",\"expectedBatch\":1,\"expectedEventCount\":1}"),
+    ];
+
     private static Result<CourtTakeoverRequest, CourtWriteError> Read(string body) =>
         TakeoverBodyReader.Read(Encoding.UTF8.GetBytes(body));
 }
