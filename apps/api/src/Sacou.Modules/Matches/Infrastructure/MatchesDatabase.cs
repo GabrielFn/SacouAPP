@@ -17,6 +17,7 @@ internal static class MatchesDatabase
         services.AddScoped<ICourtStreamStore, PostgresCourtStreamStore>();
         services.AddScoped<ICourtEventStore, PostgresCourtStreamStore>();
         services.AddScoped<ICourtWriterReader, PostgresCourtStreamStore>();
+        services.AddScoped<ICourtSessionReader, PostgresCourtSessionReader>();
         return services;
     }
 
