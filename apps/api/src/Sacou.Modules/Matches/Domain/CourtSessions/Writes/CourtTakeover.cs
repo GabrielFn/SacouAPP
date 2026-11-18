@@ -68,6 +68,7 @@ internal static class CourtTakeover
     {
         ArgumentNullException.ThrowIfNull(stored);
         ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(callerMemberId);
         if (stored.Writer is not { } writer)
         {
             throw new ArgumentException("A takeover needs a stored stream; the store answers one that does not exist.", nameof(stored));

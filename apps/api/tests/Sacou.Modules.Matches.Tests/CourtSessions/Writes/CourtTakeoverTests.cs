@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Matches.Domain.CourtSessions;
+using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 using Sacou.Modules.Matches.Domain.CourtSessions.Score;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 using Xunit;
@@ -211,6 +212,36 @@ public sealed class CourtTakeoverTests
         Assert.True(request.IsFailure);
         Assert.Equal(CourtWriteErrorCode.TakeoverInvalid, request.Error.Code);
         Assert.Equal(field, request.Error.Field);
+    }
+
+    /// <summary>
+    /// T8, the chain of answer 74: the takeover adds no check, so the rule of the E3.7 stands. A `RevertedTo` of
+    /// the new writer cannot point at a `RevertedTo` of the first batch (docs/dominio/eventos.md), but still
+    /// points at the active event the earlier undo left.
+    /// </summary>
+    [Fact]
+    public void T8_RevertedToAnOldRevertedTo_FollowsTheRuleOfTheE37_NoNewCheck()
+    {
+        var stored = SixEvents.AddRange(Events(7, (EventLogSchema.RevertedToEventType, Revert(4))));
+        var stream = StoredStream.Of(stored, [FirstWriter, new CourtWriter(2, OtherDevice, OtherCaller, EventsBefore: 7)]);
+        var asOther = Context with { CallerMemberId = OtherCaller };
+
+        var toTheRevert = ImmutableArray.Create(Parse(Envelope(1, EventLogSchema.RevertedToEventType, Revert(7), device: OtherDevice, batch: 2, eventId: EventId(8))));
+        var toTheActive = ImmutableArray.Create(Parse(Envelope(1, EventLogSchema.RevertedToEventType, Revert(3), device: OtherDevice, batch: 2, eventId: EventId(8))));
+
+        Assert.True(CourtWriteFixture.Decide(stream, toTheActive, asOther).IsSuccess);
+        var refused = CourtWriteFixture.Decide(stream, toTheRevert, asOther);
+        Assert.True(refused.IsFailure);
+        Assert.Equal(CourtWriteErrorCode.EventRejected, refused.Error.Code);
+        Assert.Equal("invalid-revert-target", refused.Error.Reason);
+    }
+
+    [Fact]
+    public void Takeover_WithANullCaller_IsAProgrammingError_NeverAnAcceptedTakeover()
+    {
+        var request = Request(OtherDevice, 1, 6);
+
+        Assert.Throws<ArgumentNullException>(() => CourtTakeover.Decide(WithWriters(SixEvents, FirstWriter), request, null!));
     }
 
     [Fact]

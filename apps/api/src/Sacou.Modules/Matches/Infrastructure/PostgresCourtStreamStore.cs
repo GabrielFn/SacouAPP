@@ -145,7 +145,7 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
                 Batch = decision.Writer.Batch,
                 DeviceId = Guid.Parse(decision.Writer.DeviceId),
                 MemberId = Guid.Parse(decision.Writer.MemberId),
-                EventsBefore = session.EventCount,
+                EventsBefore = decision.Writer.EventsBefore,
                 StartedAt = append.Now,
             });
         }
