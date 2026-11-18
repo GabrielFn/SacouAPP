@@ -54,6 +54,7 @@
 | E4.7 | Feita | PRs #127, #135 e #140, ADR 0061 (sorteio no app, tela 07, folha 08, início da partida, "Montar times" à mão com o golden `draw-split.json` TS × C#). |
 | E5.3a | Feita | PR #136, ADR 0062 (limite por usuário, janela por rota, vagas das rotas de duas conexões com limite por conta). Riscos aceitos: achados baixos 2 e 3 da segurança, revistos na E5.3 com os 429 do piloto. |
 | E4.8 | Feita | PRs #144 e #150, ADR 0065 (escalação na 22 no pré-jogo e na partida, líbero da fila, banco, entre sets). Parte 2: revisor Opus reprovou o ciclo 1 (base desatualizada pelo número de eventos; trocada pelo último `eventId`), testador Sonnet confirmou com sabotagem. |
+| E3.8 | Feita | PRs #146 e #152, ADR 0063 (assumir a quadra com login normal, resumo e leitura do stream). Parte 2: revisão e segurança num Opus só aprovaram com condições; verificador Opus aprovou a correção (surrogate solto no `deviceId`, docs de risco aceito); testador Sonnet passou (6 de 6 sabotagens, 15 testes novos). Resposta 74: "Desfazer" sem restrição, risco aceito. |
 
 ## Em andamento
 
