@@ -9,9 +9,7 @@ import { Text } from "../../../ui/Text";
 import type { ExitRows, ManualPick, ResultView } from "../next-match/match-end-selectors";
 import { CourtPage } from "./CourtPage";
 import { ExitList, PickList } from "./ExitList";
-import { TeamTag } from "./TeamTag";
-
-const LETTERS: Readonly<Record<TeamSide, string>> = { a: "A", b: "B" };
+import { SIDE_LETTERS, TeamTag } from "./TeamTag";
 
 export interface NextMatchView {
   readonly teams: Readonly<
@@ -37,7 +35,11 @@ export interface MatchEndScreenProps {
   readonly onLeave: () => void;
 }
 
-function ResultColumn({ result }: Pick<MatchEndScreenProps, "result">) {
+export interface ResultColumnProps {
+  readonly result: ResultView;
+}
+
+function ResultColumn({ result }: ResultColumnProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ flex: 1, gap: tokens.spacing.xs }}>
@@ -61,7 +63,11 @@ function NextHeader({ next }: NextHeaderProps) {
   const { matchEnd } = strings.court;
   const { tokens } = useTheme();
   const tag = (side: TeamSide) => (
-    <TeamTag color={next.teams[side].color} letter={LETTERS[side]} label={next.teams[side].label} />
+    <TeamTag
+      color={next.teams[side].color}
+      letter={SIDE_LETTERS[side]}
+      label={next.teams[side].label}
+    />
   );
   return (
     <View

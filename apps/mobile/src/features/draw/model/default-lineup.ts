@@ -8,6 +8,12 @@ export type PrimaryPosition = Member["primaryPosition"];
 
 export type PositionOf = (memberId: MemberId) => PrimaryPosition;
 
+/** The position of each member, from the members query: joined here, never copied (D2). */
+export function positionsOf(members: readonly Member[]): PositionOf {
+  const positions = new Map(members.map((member) => [member.memberId, member.primaryPosition]));
+  return (memberId) => positions.get(memberId) ?? null;
+}
+
 /** The position each index of `lineup` asks for (ADR 0026): `S, OH1, MB1, OPP, OH2, MB2` in the 5x1. */
 type SlotPosition = "setter" | "outsideHitter" | "middleBlocker" | "opposite";
 

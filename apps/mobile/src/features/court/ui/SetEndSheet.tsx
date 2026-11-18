@@ -3,21 +3,18 @@ import { ScrollView, useWindowDimensions, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import type { TeamColorName } from "../../../theme/team-colors";
 import { Button } from "../../../ui/Button";
 import { Text } from "../../../ui/Text";
 import type { SetEndModel } from "../model/court-screen.types";
 import type { SetEndView } from "../model/set-end-view";
 import { CourtPage } from "./CourtPage";
 import { FirstServerToss } from "./FirstServerToss";
-import { TeamTag } from "./TeamTag";
-
-const LETTERS: Readonly<Record<TeamSide, string>> = { a: "A", b: "B" };
+import { SIDE_LETTERS, TeamTag, type TeamTagProps } from "./TeamTag";
 
 export interface SetEndSheetProps {
   readonly model: SetEndModel;
   readonly view: SetEndView;
-  readonly colors: Readonly<Record<TeamSide, TeamColorName>>;
+  readonly colors: Readonly<Record<TeamSide, TeamTagProps["color"]>>;
   readonly toss: TeamSide | null;
   readonly canConfirm: boolean;
   /** Why the last command did nothing, or `null`. */
@@ -28,7 +25,12 @@ export interface SetEndSheetProps {
   readonly onConfirm: () => void;
 }
 
-export interface TeamScoreProps extends Pick<SetEndSheetProps, "model" | "colors"> {
+export interface ScoreCardProps {
+  readonly model: SetEndModel;
+  readonly colors: SetEndSheetProps["colors"];
+}
+
+export interface TeamScoreProps extends ScoreCardProps {
   readonly side: TeamSide;
 }
 
@@ -37,7 +39,7 @@ function TeamScore({ model, colors, side }: TeamScoreProps) {
   const { label, score } = model.scores[side];
   return (
     <View style={{ flex: 1, alignItems: "center", gap: tokens.spacing.xs }}>
-      <TeamTag color={colors[side]} letter={LETTERS[side]} label={label} />
+      <TeamTag color={colors[side]} letter={SIDE_LETTERS[side]} label={label} />
       <Text variant="display" displaySize="displayTitleLarge" tabular>
         {String(score)}
       </Text>
@@ -46,7 +48,7 @@ function TeamScore({ model, colors, side }: TeamScoreProps) {
 }
 
 /** "A Laranja 25 x 22 B Azul", read as one line. */
-function ScoreCard({ model, colors }: Pick<SetEndSheetProps, "model" | "colors">) {
+function ScoreCard({ model, colors }: ScoreCardProps) {
   const { setEnd } = strings.court;
   const { colors: theme, tokens } = useTheme();
   const { a, b } = model.scores;

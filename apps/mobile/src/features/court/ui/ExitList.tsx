@@ -11,7 +11,12 @@ export interface ExitListProps {
   readonly rows: readonly ExitRow[];
 }
 
-function Row({ name, detail }: Pick<ExitRow, "name" | "detail">) {
+export interface RowProps {
+  readonly name: string;
+  readonly detail: string | null;
+}
+
+function Row({ name, detail }: RowProps) {
   const { colors, tokens } = useTheme();
   return (
     <View

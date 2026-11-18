@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-import { positionsOf } from "../features/draw/hooks/use-pre-game";
+import { positionsOf } from "../features/draw/model/default-lineup";
 import type { CourtRoundSource } from "../features/court/ports/court-round-source";
 import { roundSettingsOf } from "../features/rounds/model/round-detail";
 import type { Member, Round } from "../services/api/sacou-api";
