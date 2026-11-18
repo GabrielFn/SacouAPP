@@ -5,8 +5,11 @@ import type { ScreenAction } from "../../../ui/ActionButtons";
 import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { ErrorScreen } from "../../../ui/ErrorScreen";
 
+/** The courts of another account, or of none (ADR 0067, D8). */
+export type OwnerBlock = "other-account" | "unowned";
+
 export interface CourtBlockedViewProps {
-  readonly kind: "other-account" | "unowned";
+  readonly kind: OwnerBlock;
   /** Points of this phone the server never got: taking the court over leaves them out (S4). */
   readonly unsentPoints: number;
   readonly onLeave: () => void;
@@ -17,7 +20,7 @@ export interface CourtBlockedViewProps {
 const TEXTS = {
   "other-account": strings.court.otherAccount,
   unowned: strings.court.unowned,
-} as const satisfies Record<CourtBlockedViewProps["kind"], unknown>;
+} as const satisfies Record<OwnerBlock, unknown>;
 
 /**
  * The court of another account, or of none (ADR 0067, D8): no gesture, only "Sair da quadra" and
