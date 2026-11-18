@@ -41,7 +41,7 @@ function runtime(account: SignedIn = { key: ACCOUNT_A }): CourtRuntime {
 }
 
 async function sessionWithMatch(court: CourtRuntime, finished: boolean): Promise<void> {
-  await court.log.openSession(OTHER_SESSION, OTHER_ROUND);
+  await court.log.openSession(OTHER_SESSION, { ...OTHER_ROUND, ownerKey: ACCOUNT_A });
   const deps = { ...court, courtSessionId: OTHER_SESSION };
   await startCourtMatch(deps, ONE_POINT_MATCH);
   if (!finished) return;

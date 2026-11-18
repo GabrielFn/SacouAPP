@@ -152,6 +152,10 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       return apiErr(problem(HTTP_BAD_REQUEST, "matches.batch-invalid"));
     const [first] = envelopes;
     if (first === undefined) return apiErr(problem(HTTP_BAD_REQUEST, "matches.batch-invalid"));
+    // One court per round (answer 70): a session opened offline on another phone is refused.
+    if (streamId.value !== null && first.courtSessionId !== streamId.value) {
+      return apiErr(problem(HTTP_CONFLICT, "matches.round-has-court-session"));
+    }
     const current = writers.value.at(-1) ?? null;
     if (current !== null && (current.deviceId !== first.deviceId || current.account !== account)) {
       return apiErr(notTheWriter(current.batch, first.deviceId, account));

@@ -15,6 +15,10 @@ vi.mock("../../court/hooks/court-runtime-context", () => ({ useCourtRuntime: () 
 vi.mock("../../court/hooks/use-round-court", () => ({
   useRoundCourt: () => ({ status: "reading" }),
 }));
+vi.mock("../../court/hooks/use-court-summary-lookup", () => ({
+  useCourtSummaryLookup: () => ({ lookup: undefined, fetching: false, refresh: vi.fn() }),
+}));
+vi.mock("../../../services/api/use-online", () => ({ useOnline: () => false }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 vi.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ isPending: false, data: undefined, error: null, mutate: vi.fn() }),
