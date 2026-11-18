@@ -1,12 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo } from "react";
 
-import {
-  courtHref,
-  parseCourtTheme,
-  type CourtPathKey,
-  type CourtRouteParams,
-} from "../navigation";
+import { courtHref, type CourtPathKey, type CourtRouteParams } from "../navigation";
 
 export interface CourtRouteNavigation {
   readonly params: CourtRouteParams;
@@ -18,13 +13,13 @@ export interface CourtRouteNavigation {
   readonly leave: () => void;
 }
 
-/** The session and the theme come from the route; the court never keeps a copy of either. */
+/** The session comes from the route; the court never keeps a copy of it. */
 export function useCourtRoute(): CourtRouteNavigation {
   const router = useRouter();
-  const search = useLocalSearchParams<{ courtSessionId: string; theme?: string }>();
+  const search = useLocalSearchParams<{ courtSessionId: string }>();
   const params = useMemo<CourtRouteParams>(
-    () => ({ courtSessionId: search.courtSessionId, theme: parseCourtTheme(search.theme) }),
-    [search.courtSessionId, search.theme],
+    () => ({ courtSessionId: search.courtSessionId }),
+    [search.courtSessionId],
   );
   const push = useCallback(
     (path: CourtPathKey) => {

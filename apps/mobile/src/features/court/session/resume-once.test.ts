@@ -24,10 +24,7 @@ describe("resuming the court once per opening of the app", () => {
     // The gate decides when the app opens...
     const resume = createResumeOnce(await findResumableCourtSession(runtime));
     // ...the first home sends the user to the court...
-    expect(takeResumeTarget(resume)).toEqual({
-      courtSessionId: started.value.courtSessionId,
-      theme: "sun",
-    });
+    expect(takeResumeTarget(resume)).toEqual({ courtSessionId: started.value.courtSessionId });
     // ...and the home the user lands on after "Sair do modo quadra" finds nothing, though the
     // session is still open in the file.
     expect(takeResumeTarget(resume)).toBeNull();

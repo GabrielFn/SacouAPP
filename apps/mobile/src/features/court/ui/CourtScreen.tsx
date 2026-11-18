@@ -32,6 +32,7 @@ export function CourtScreen({
   onOpenMenu,
   inverted = false,
   battery = null,
+  notice = null,
 }: CourtScreenProps) {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
@@ -56,6 +57,7 @@ export function CourtScreen({
         onOpenMenu={onOpenMenu}
         inverted={inverted}
         battery={battery}
+        notice={notice}
       />
     );
   }
@@ -84,7 +86,7 @@ export function CourtScreen({
         }}
       />
       <CenterStrip
-        hint={hintText(model)}
+        hint={notice ?? hintText(model)}
         canUndo={model.canUndo}
         onUndo={onUndo}
         onCorrect={onCorrect}

@@ -9,4 +9,6 @@ export interface CourtExtras {
   readonly inverted?: boolean;
   /** `null` or missing: no alert. */
   readonly battery?: CourtBatteryAlert | null;
+  /** What DESFAZER just took back, shown for a few seconds where the hint is; `null` or missing: the hint. */
+  readonly notice?: string | null;
 }

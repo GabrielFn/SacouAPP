@@ -22,7 +22,7 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 - **Vencedor da partida:** quem alcança os sets para vencer.
 - **Fim de set é sempre confirmado** (`produto.md:69`; tela 25). A regra só detecta; `SetEnded` nasce da confirmação. Com o set decidido e sem confirmar, marcar ponto é recusado (`set-decided`), e desfazer o último ponto reabre o jogo normalmente.
 - **Fim de partida:** a confirmação do set decisivo gera dois eventos, `SetEnded` com `nextSet: null` e `MatchEnded`, gravados juntos pelo chamador. Se só o primeiro gravar, a partida fica sem set aberto e confirmar de novo emite o `MatchEnded` que falta.
-- **Encerrar partida antes do fim:** `MatchEnded` com `endReason: "manual"`. O vencedor (`a`, `b` ou `null`) vem de quem chama; o motor não decide (`perguntas.md`, item 7). O set em andamento fica em `currentSet` da partida terminada.
+- **Encerrar partida antes do fim:** `MatchEnded` com `endReason: "manual"`. O vencedor (`a`, `b` ou `null`) vem de quem chama; o motor não decide (`perguntas.md`, item 7). No app, `manualEndWinner` (ADR 0066) decide: vence quem lidera em sets; com os sets iguais, vence quem lidera em pontos do set em andamento; empate total (ou sem set aberto) fica sem vencedor (`null`) e ninguém sai da quadra. O set em andamento fica em `currentSet` da partida terminada.
 - **Limite de partidas por stream:** 200 terminadas podem existir. Um novo `MatchStarted` com 200 terminadas é rejeitado no replay (`event-rejected`), e `startMatch` recusa antes (`too-many-matches`). É limite técnico contra log hostil, não regra do vôlei: uma rodada real fica perto de 30 partidas.
 
 ## Comandos
