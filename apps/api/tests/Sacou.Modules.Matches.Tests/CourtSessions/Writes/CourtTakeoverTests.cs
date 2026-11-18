@@ -178,7 +178,7 @@ public sealed class CourtTakeoverTests
     [Fact]
     public void T6_TheNewWriter_WritesInItsBatch()
     {
-        var events = ImmutableArray.Create(Parse(Envelope(1, Pt, Point("b"), device: OtherDevice, batch: 2)));
+        var events = ImmutableArray.Create(Parse(Envelope(1, Pt, Point("b"), device: OtherDevice, batch: 2, eventId: EventId(7))));
 
         var decision = Accepted(CourtWriteFixture.Decide(AfterTakeover(), events, Context with { CallerMemberId = OtherCaller }));
 

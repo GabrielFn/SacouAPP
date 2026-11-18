@@ -83,7 +83,7 @@ internal static class CourtWriteRules
         {
             return request.Batch == CourtStreamLimits.FirstBatch
                 ? Result<CourtWriter, CourtWriteError>.Success(
-                    new CourtWriter(CourtStreamLimits.FirstBatch, request.DeviceId, context.CallerMemberId, EventsBefore: 0))
+                    new CourtWriter(CourtStreamLimits.FirstBatch, request.DeviceId, context.CallerMemberId, EventsBefore: stored.Events.Length))
                 : Result<CourtWriter, CourtWriteError>.Failure(new CourtWriteError(CourtWriteErrorCode.BatchMismatch));
         }
 

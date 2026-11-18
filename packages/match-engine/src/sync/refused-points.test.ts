@@ -2,7 +2,12 @@ import { describe, expect, test } from "vitest";
 
 import { attributePoint } from "../attributions/commands.js";
 import { undoLastAction } from "../corrections/commands.js";
-import { CorrectionPlayer, timelineOf } from "../corrections/correction-player.test.fixture.js";
+import {
+  CorrectionPlayer,
+  eventIdOf,
+  timelineOf,
+} from "../corrections/correction-player.test.fixture.js";
+import { parseEventEnvelope } from "../event-log/parse-envelope.js";
 import type { EventEnvelope } from "../event-log/types.js";
 import { confirmSetEnd, shiftRotation, switchServingTeam } from "../score/commands.js";
 import { rotationMatchInput } from "../score/match-player.test.fixture.js";
@@ -24,6 +29,30 @@ function refusedOf(player: CorrectionPlayer, lastStoredSequence = LAST_STORED) {
 
 function teamsOf(player: CorrectionPlayer, lastStoredSequence = LAST_STORED) {
   return refusedOf(player, lastStoredSequence).map(({ team }) => team);
+}
+
+/** Answers "De quem foi?" for the point, as the app records it: a `PointAttributed` of the same device. */
+function attributed(player: CorrectionPlayer, pointEventId: string): CorrectionPlayer {
+  const drafts = attributePoint(player.timeline(), pointEventId, {
+    kind: "opponent-error",
+    author: null,
+  });
+  const [draft] = drafts.ok ? drafts.value : [];
+  if (draft === undefined) {
+    throw new Error("attribution refused");
+  }
+  const sequence = player.events.length + 1;
+  const envelope = parseEventEnvelope({
+    ...player.last,
+    eventId: eventIdOf(sequence),
+    sequence,
+    type: draft.type,
+    payload: draft.payload,
+  });
+  if (!envelope.ok) {
+    throw new Error(`invalid envelope: ${envelope.error.field}`);
+  }
+  return new CorrectionPlayer([...player.events, envelope.value]);
 }
 
 describe("refusedPoints", () => {
@@ -57,9 +86,7 @@ describe("refusedPoints", () => {
       .run((state) => shiftRotation(state, "a", "forward"))
       .rallies("aa");
     const pointId = offline.last.eventId;
-    const ended = offline
-      .correct((timeline) => attributePoint(timeline, pointId, { kind: "ace", author: null }))
-      .run((state) => confirmSetEnd(state, {}));
+    const ended = attributed(offline, pointId).run((state) => confirmSetEnd(state, {}));
     const types = new Set(ended.events.map(({ type }) => type));
 
     expect(types).toStrictEqual(
