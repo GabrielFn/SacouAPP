@@ -1,10 +1,12 @@
 import type { RotationSlot } from "@sacou/volley-rules";
-import { Pressable, View } from "react-native";
 
 import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { Text } from "../../../ui/Text";
+import { RadioTiles } from "../../../ui/RadioTiles";
 import type { Choice } from "../model/lineup-selectors";
+
+/** No basis: the six share the row (Escalacao.dc.html, `repeat(6, 1fr)`). */
+const SHARED_ROW = 0;
 
 export interface RotationSelectorProps {
   readonly label: string;
@@ -14,42 +16,21 @@ export interface RotationSelectorProps {
 
 /** "Rotação 1…6" (Escalacao.dc.html radiogroup): the zone of the setter, absolute (D4). */
 export function RotationSelector({ label, options, onSelect }: RotationSelectorProps) {
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
+  const checked = options.find((option) => option.checked)?.value;
+  if (checked === undefined) return null;
   return (
-    <View
-      accessibilityRole="radiogroup"
-      accessibilityLabel={label}
-      style={{ flexDirection: "row", gap: tokens.spacing.s6 }}
-    >
-      {options.map((option) => (
-        <Pressable
-          key={option.value}
-          accessibilityRole="radio"
-          accessibilityLabel={texts.rotationOption(option.value)}
-          accessibilityState={{ checked: option.checked }}
-          onPress={() => {
-            onSelect(option.value);
-          }}
-          style={{
-            flex: 1,
-            minHeight: tokens.sizes.segment,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: tokens.radii.field,
-            borderWidth: tokens.borderWidths.thin,
-            borderColor: option.checked ? colors.text : colors.borderChip,
-            backgroundColor: option.checked ? colors.text : colors.surface,
-          }}
-        >
-          <Text
-            variant="display"
-            tabular
-            style={{ color: option.checked ? colors.background : colors.text }}
-          >
-            {option.label}
-          </Text>
-        </Pressable>
-      ))}
-    </View>
+    <RadioTiles<RotationSlot>
+      label={label}
+      options={options.map((option) => ({
+        value: option.value,
+        label: option.label,
+        accessibilityLabel: texts.rotationOption(option.value),
+      }))}
+      selected={checked}
+      onSelect={onSelect}
+      tileHeight={tokens.sizes.segment}
+      basis={SHARED_ROW}
+    />
   );
 }

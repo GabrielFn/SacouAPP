@@ -4,6 +4,7 @@ import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { Text } from "../../../ui/Text";
 import type { OrderCell } from "../model/lineup-selectors";
+import { SectionHeading } from "./SectionHeading";
 
 export interface OfficialOrderProps {
   readonly cells: readonly OrderCell[];
@@ -15,12 +16,7 @@ export function OfficialOrder({ cells, benchLine }: OfficialOrderProps) {
   const { colors, tokens } = useTheme();
   return (
     <View style={{ gap: tokens.spacing.s6 }}>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.spacing.s }}>
-        <Text variant="bodyStrong">{texts.officialOrder}</Text>
-        <Text variant="muted" style={{ marginLeft: "auto" }}>
-          {benchLine}
-        </Text>
-      </View>
+      <SectionHeading title={texts.officialOrder} detail={benchLine} />
       <View
         accessibilityRole="list"
         accessibilityLabel={texts.officialOrderLabel}

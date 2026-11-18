@@ -16,6 +16,7 @@ import { LineupCourt } from "./LineupCourt";
 import { OfficialOrder } from "./OfficialOrder";
 import { RoleWarningBanner } from "./RoleWarningBanner";
 import { RotationSelector } from "./RotationSelector";
+import { SectionHeading } from "./SectionHeading";
 
 /** What screen 22 can do; the host decides where "Salvar" and "Voltar" go (D1). */
 export interface LineupScreenHandlers {
@@ -82,12 +83,7 @@ function RotationBlock({ team, handlers }: TeamPartProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ gap: tokens.spacing.s6 }}>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.spacing.s }}>
-        <Text variant="bodyStrong">{texts.rotation}</Text>
-        <Text variant="muted" style={{ marginLeft: "auto" }}>
-          {team.phaseLabel}
-        </Text>
-      </View>
+      <SectionHeading title={texts.rotation} detail={team.phaseLabel} />
       {team.rotation === null ? null : (
         <RotationSelector
           label={team.rotation.label}
