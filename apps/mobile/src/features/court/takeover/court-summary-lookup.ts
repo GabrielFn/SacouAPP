@@ -42,7 +42,8 @@ export async function lookUpCourtSummary(
 /**
  * Whether opening the court of the round goes through screen 09a first (D5, case a): the server has a
  * stream, and this phone does not write it (no session with that ID, or another batch writes it now).
- * A session taken over whose refused points were not seen opens the court: the 09c comes first (D6).
+ * A session taken over whose refused points were not seen opens the court: the 09c comes first (D6),
+ * even when its ID is not the stream's (opened offline, case B6); after "Entendi" the 09a follows.
  * Without an answer (offline, still reading) or with no stream, the court opens as before.
  */
 export function opensTakeover(
@@ -50,7 +51,8 @@ export function opensTakeover(
   local: RoundCourt | null,
 ): boolean {
   if (lookup?.status !== "found") return false;
+  if (local?.takenOver === true && local.refusedUnseen) return false;
   if (local?.courtSessionId !== lookup.summary.courtSessionId) return true;
-  if (local.takenOver) return !local.refusedUnseen;
+  if (local.takenOver) return true;
   return local.batch !== lookup.summary.currentBatch;
 }

@@ -3,6 +3,7 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import type { CourtRuntime } from "../ports/court-runtime";
+import { countPoints, pendingEvents } from "../sync/pending-events";
 import type { LoadFailureCode } from "./court-errors";
 import { loadCourtSession, type LoadedSession } from "./court-session-loader";
 
@@ -19,15 +20,21 @@ export interface RoundCourt {
   readonly takenOver: boolean;
   /** Screen 09c still has points to show (D6). */
   readonly refusedUnseen: boolean;
+  /**
+   * Points of this phone the server never got, while it still writes (S4): taking the court over
+   * leaves them out, so screen 09a says so. Zero once taken over (the 09c shows the refused ones).
+   */
+  readonly unsentPoints: number;
 }
 
 export function summaryOf(
   courtSessionId: string,
   state: CourtSessionState,
-  loaded: Pick<LoadedSession, "context" | "sync">,
+  loaded: Pick<LoadedSession, "context" | "sync" | "events">,
 ): RoundCourt {
   const openMatch = state.currentMatch !== null;
-  const { takenOver, refused, refusedUnseen } = loaded.sync;
+  const { takenOver, refused, refusedUnseen, ackedSequence } = loaded.sync;
+  const pending = pendingEvents(loaded.events, { ...loaded.context, ackedSequence });
   return {
     courtSessionId,
     startedMatches: state.finishedMatches.length + (openMatch ? 1 : 0),
@@ -35,6 +42,7 @@ export function summaryOf(
     batch: loaded.context.batch,
     takenOver,
     refusedUnseen: refusedUnseen && refused.length > 0,
+    unsentPoints: takenOver ? 0 : countPoints(pending),
   };
 }
 

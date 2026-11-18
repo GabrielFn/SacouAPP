@@ -27,8 +27,9 @@ const FOUND: TakeOverInput = {
   refreshing: false,
   members: MEMBERS,
   state: INITIAL_TAKEOVER_STATE,
+  unsentPoints: 0,
 };
-const { takeover, takenOver, refused } = strings.court;
+const { takeover, takenOver, refused, discard } = strings.court;
 
 describe("screen 09a, derived from the summary and the flow (D5)", () => {
   test("who marks, the last point four minutes ago, the score, and Assumir o placar", () => {
@@ -41,6 +42,8 @@ describe("screen 09a, derived from the summary and the flow (D5)", () => {
       backdrop: { a: 12, b: 10 },
       notice: null,
       action: { kind: "confirm" },
+      leftOut: null,
+      canGoBack: true,
     });
   });
 
@@ -76,6 +79,27 @@ describe("screen 09a, derived from the summary and the flow (D5)", () => {
     });
     const done = { status: "done", courtSessionId: SUMMARY.courtSessionId } as const;
     expect(takeOverView({ ...FOUND, state: done }, NOW).action.kind).toBe("busy");
+  });
+
+  test("C2: Voltar is off while taking over, importing or opening the court; on otherwise", () => {
+    const importing = { status: "importing", imported: 1, total: 2 } as const;
+    const done = { status: "done", courtSessionId: SUMMARY.courtSessionId } as const;
+    const running = [{ status: "taking-over" } as const, importing, done];
+    for (const state of running) {
+      expect(takeOverView({ ...FOUND, state }, NOW).canGoBack).toBe(false);
+    }
+    const failed = { status: "failed", reason: "failed" } as const;
+    expect(takeOverView({ ...FOUND, state: failed }, NOW).canGoBack).toBe(true);
+    expect(takeOverView({ ...FOUND, lookup: undefined }, NOW).canGoBack).toBe(true);
+    expect(takeOverView({ ...FOUND, refreshing: true }, NOW).canGoBack).toBe(true);
+  });
+
+  test("S4: points of this phone never sent are said to be left out, with the text of 'Sair'", () => {
+    expect(takeOverView({ ...FOUND, unsentPoints: 3 }, NOW).leftOut).toBe(discard.title(3));
+    expect(takeOverView({ ...FOUND, unsentPoints: 1 }, NOW).leftOut).toBe(
+      "1 ponto não enviado vai ficar de fora",
+    );
+    expect(takeOverView({ ...FOUND, unsentPoints: 0 }, NOW).leftOut).toBeNull();
   });
 
   test("the stream moved: the new summary with the notice, and confirm again", () => {

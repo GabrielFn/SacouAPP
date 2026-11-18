@@ -16,6 +16,7 @@ import {
   type TakeoverState,
 } from "../takeover/takeover.reducer";
 import { useCourtRuntime } from "./court-runtime-context";
+import { useRoundCourt } from "./use-round-court";
 import { useCourtSummaryLookup } from "./use-court-summary-lookup";
 
 export interface TakeOverModel {
@@ -25,10 +26,17 @@ export interface TakeOverModel {
   readonly refreshing: boolean;
   readonly members: readonly Member[] | undefined;
   readonly state: TakeoverState;
+  /** Points of this phone the server never got: the 09a says they are left out (S4). */
+  readonly unsentPoints: number;
   readonly confirm: () => void;
   readonly retry: () => void;
-  /** "Voltar" closes the 09a (answer 82): nothing was taken over. */
+  /** "Voltar" closes the 09a (answer 82): nothing was taken over. Off while it runs (C2). */
   readonly close: () => void;
+}
+
+/** Taking over or importing runs (or it is done and the court opens): nothing to go back to. */
+function isRunning(state: TakeoverState): boolean {
+  return state.status === "taking-over" || state.status === "importing" || state.status === "done";
 }
 
 /**
@@ -41,6 +49,8 @@ export function useTakeOver(origin: CourtSessionOrigin): TakeOverModel {
   const router = useRouter();
   const summary = useCourtSummaryLookup(origin, true);
   const members = useGroupMembers(origin.groupId).data;
+  const roundCourt = useRoundCourt(origin.roundId);
+  const unsentPoints = roundCourt.status === "read" ? (roundCourt.court?.unsentPoints ?? 0) : 0;
   const [state, dispatch] = useReducer(takeoverReducer, INITIAL_TAKEOVER_STATE);
   const deps = useMemo(
     () => ({
@@ -76,14 +86,16 @@ export function useTakeOver(origin: CourtSessionOrigin): TakeOverModel {
     // Back to the court under the 09a when there is one (09b), in its place otherwise (06, 08).
     if (done !== null) router.dismissTo(courtHref("court", { courtSessionId: done }));
   }, [done, router]);
+  const running = isRunning(state);
   const close = useCallback(() => {
-    router.back();
-  }, [router]);
+    if (!running) router.back();
+  }, [running, router]);
   return {
     lookup,
     refreshing: summary.fetching,
     members,
     state,
+    unsentPoints,
     confirm,
     retry,
     close,

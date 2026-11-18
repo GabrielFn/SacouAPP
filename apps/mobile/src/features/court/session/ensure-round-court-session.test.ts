@@ -205,6 +205,7 @@ describe("readRoundCourt: what screens 06 and 08 know of the court (D1, D6)", ()
         batch: 1,
         takenOver: false,
         refusedUnseen: false,
+        unsentPoints: 0,
       },
     });
     expect(await readRoundCourt(ended, "r2")).toEqual({
@@ -216,6 +217,7 @@ describe("readRoundCourt: what screens 06 and 08 know of the court (D1, D6)", ()
         batch: 1,
         takenOver: false,
         refusedUnseen: false,
+        unsentPoints: 1,
       },
     });
   });

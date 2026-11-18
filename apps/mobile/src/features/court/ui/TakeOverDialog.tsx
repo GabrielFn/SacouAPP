@@ -16,6 +16,10 @@ export interface TakeOverDialogProps {
   /** "O placar mudou...", a failure, or `null`. */
   readonly notice: string | null;
   readonly action: TakeOverAction;
+  /** "N pontos não enviados vão ficar de fora", or `null` (S4). */
+  readonly leftOut: string | null;
+  /** Off while taking over or importing runs: leaving then would strand the import (C2). */
+  readonly canGoBack: boolean;
   readonly onConfirm: () => void;
   readonly onRetry: () => void;
   readonly onBack: () => void;
@@ -80,6 +84,8 @@ export function TakeOverDialog({
   backdrop,
   notice,
   action,
+  leftOut,
+  canGoBack,
   onConfirm,
   onRetry,
   onBack,
@@ -120,13 +126,21 @@ export function TakeOverDialog({
               <ScoreCard card={card} />
             </>
           )}
+          {leftOut === null ? null : (
+            <Text style={{ color: colors.refusal }}>{leftOut}</Text>
+          )}
           {notice === null ? null : (
             <Text accessibilityRole="alert" style={{ color: colors.refusal }}>
               {notice}
             </Text>
           )}
           <ActionButton action={action} onConfirm={onConfirm} onRetry={onRetry} />
-          <Button label={takeover.back} variant="outline" onPress={onBack} />
+          <Button
+            label={takeover.back}
+            variant="outline"
+            disabled={!canGoBack}
+            onPress={onBack}
+          />
         </View>
       </View>
     </ScoreBackdrop>

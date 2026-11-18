@@ -23,6 +23,8 @@ export interface TakeOverInput {
   readonly refreshing: boolean;
   readonly members: readonly Member[] | undefined;
   readonly state: TakeoverState;
+  /** Points of this phone the server never got: taking over leaves them out (S4). */
+  readonly unsentPoints: number;
 }
 
 /** What screen 09a draws, derived from the summary and the flow (never stored). */
@@ -31,9 +33,23 @@ export interface TakeOverView {
   readonly backdrop: BackdropScore | null;
   readonly notice: string | null;
   readonly action: TakeOverAction;
+  /** "N pontos não enviados vão ficar de fora", or `null` when this phone has none (S4). */
+  readonly leftOut: string | null;
+  /** "Voltar" (and the back of Android) is off while taking over or importing runs (C2). */
+  readonly canGoBack: boolean;
 }
 
-const { takeover } = strings.court;
+const { takeover, discard } = strings.court;
+
+type FlowView = Pick<TakeOverView, "card" | "backdrop" | "notice" | "action">;
+
+function withExits(view: FlowView, unsentPoints: number): TakeOverView {
+  return {
+    ...view,
+    leftOut: unsentPoints > 0 ? discard.title(unsentPoints) : null,
+    canGoBack: view.action.kind !== "busy",
+  };
+}
 
 /** Trying again cannot help a court that took all its changes of phone. */
 function failureAction(reason: TakeoverFailure): TakeOverAction {
@@ -68,6 +84,10 @@ function flowOf(
 }
 
 export function takeOverView(input: TakeOverInput, nowMs: number): TakeOverView {
+  return withExits(flowViewOf(input, nowMs), input.unsentPoints);
+}
+
+function flowViewOf(input: TakeOverInput, nowMs: number): FlowView {
   const { lookup } = input;
   if (lookup === undefined) {
     return { card: null, backdrop: null, notice: null, action: { kind: "reading" } };

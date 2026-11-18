@@ -83,6 +83,11 @@ describe("the screens of taking the court over (E4.11, part 3, acceptance)", () 
       strings.court.refused.bodyOtherFirst,
     );
     const lookup = await lookUpCourtSummary(lookupDeps(b, server), ROUND);
+    const beforeSeen = await readRoundCourt(b, ROUND.roundId);
+    if (!beforeSeen.ok) throw new Error(beforeSeen.error);
+    expect(opensTakeover(lookup, beforeSeen.value)).toBe(false);
+
+    await (await b.controller(SESSION_B)).markRefusedSeen();
     const local = await readRoundCourt(b, ROUND.roundId);
     if (!local.ok) throw new Error(local.error);
     expect(opensTakeover(lookup, local.value)).toBe(true);
@@ -101,6 +106,22 @@ describe("the screens of taking the court over (E4.11, part 3, acceptance)", () 
       after.ok &&
         opensTakeover(await lookUpCourtSummary(lookupDeps(b, server), ROUND), after.value),
     ).toBe(false);
+  });
+
+  test("S4: on its own account, an old batch with points not sent yet: the 09a says they are left out", async () => {
+    const server = createFakeCourtStreamServer();
+    const a = await createPhone(1, server);
+    const b = await createPhone(2, server);
+    const courtOfA = await openAndScore(a, SESSION_A, POINTS_OF_A);
+    expect((await takeOver(b, server)).final.status).toBe("done");
+    a.network.set(false);
+    await scorePoints(courtOfA, 2);
+
+    const local = await readRoundCourt(a, ROUND.roundId);
+    if (!local.ok || local.value === null) throw new Error("no round court");
+    expect(local.value).toMatchObject({ takenOver: false, unsentPoints: 2 });
+    const lookup = await lookUpCourtSummary(lookupDeps(a, server), ROUND);
+    expect(opensTakeover(lookup, local.value)).toBe(true);
   });
 
   test("S4: another account sees how many unsent points taking over leaves out, and cannot mark", async () => {

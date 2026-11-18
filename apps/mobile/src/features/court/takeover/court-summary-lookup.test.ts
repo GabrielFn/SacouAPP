@@ -36,6 +36,7 @@ function local(overrides: Partial<RoundCourt> = {}): RoundCourt {
     batch: 2,
     takenOver: false,
     refusedUnseen: false,
+    unsentPoints: 0,
     ...overrides,
   };
 }
@@ -60,6 +61,18 @@ describe("opensTakeover: the 09a before the court (D5, case a)", () => {
     ["another batch writes it now", FOUND, local({ batch: 1 }), true],
     ["taken over, refused already seen", FOUND, local({ takenOver: true }), true],
     ["taken over, 09c not seen yet", FOUND, local({ takenOver: true, refusedUnseen: true }), false],
+    [
+      "another session of the round, taken over, 09c not seen yet (B6)",
+      FOUND,
+      local({ courtSessionId: OTHER, takenOver: true, refusedUnseen: true }),
+      false,
+    ],
+    [
+      "another session of the round, taken over, 09c seen",
+      FOUND,
+      local({ courtSessionId: OTHER, takenOver: true }),
+      true,
+    ],
   ])("%s", (_name, lookup, court, expected) => {
     expect(opensTakeover(lookup, court)).toBe(expected);
   });
