@@ -179,3 +179,10 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 89. Domínio próprio (ex.: `api.sacou.com.br`, ~R$ 40/ano): (1) agora; (2) antes dos builds de loja (E5.4); (3) depois do piloto. **Recomendação: 2.**
 90. Ambiente de teste: (1) ligado o tempo todo; (2) "App Sleeping" (dorme sem uso). **Recomendação: 2.**
 91. Dados pessoais nos EUA (LGPD art. 33) com a 88 na opção 1. **Recomendação:** aceitar no piloto, registrar em `dados-pessoais.md` e citar na política de privacidade (E6.1).
+
+## 18/11/2026: bateria do testador
+- **Pergunta:** com o disco HD, a bateria completa leva de 30 a 50 min por testador. O testador pode rodar só os testes da pasta tocada, os novos e as sabotagens, e deixar a bateria completa para a CI? **Resposta do Gabriel (18/11): sim.** Regra 6 da economia de tokens do `CLAUDE.md` atualizada.
+
+## 18/11/2026: hospedagem da API (E5.1)
+- **Pergunta:** o Railway custa US$ 5 a 10/mês depois do teste. Opções grátis: (1) Google Cloud Run, grátis na faixa de uso do piloto, com cartão na conta de cobrança e alerta de orçamento; (2) Render free, sem cartão, dorme depois de 15 min (30 a 60 s na primeira chamada); (3) seguir no Railway. **Recomendação: 1.** **Resposta do Gabriel (18/11): 1, Cloud Run** no lugar do Railway. O Neon continua (`sacou-prod` e `sacou-test` criados em 18/11, AWS US East 1, Postgres 18, banco `sacou`, plano Free). O plano da E5.1 e o ADR 0068 serão refeitos para o Cloud Run; as perguntas 86 e 88 ficaram com as recomendações (dois projetos, Virgínia).
+- **Respostas do Gabriel (18/11) às perguntas do plano novo da E5.1:** 87 mesma imagem com aprovação no ambiente `production`; 89 sem domínio agora, EAS Update na E5.4 para poder trocar o endereço da API pelo ar e domínio próprio quando a E3.12 for aos jogadores; 90 escala a zero; 91 aceitar os dados nos EUA no piloto; 92 projeto novo `sacou-api` (criado); 93 um projeto com dois serviços; 94 teto de US$ 1 (R$ 5, conta em reais); 95 trocar "Railway" por "Secret Manager" no `CLAUDE.md` no PR da E5.1.
