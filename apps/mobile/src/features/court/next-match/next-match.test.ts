@@ -10,7 +10,7 @@ import {
   type MemberId,
   type NextMatchPlan,
   type QueueSettings,
-  type SetterZone,
+  type TeamState,
   type TeamQueue,
   type TeamSide,
 } from "@sacou/match-engine";
@@ -82,7 +82,10 @@ function withLast(
 }
 
 /** The review with Azul ending the match with its setter in `zone` (the golden has 1). */
-function reviewAt(zone: SetterZone, base: CourtSessionState = REVIEW as CourtSessionState) {
+function reviewAt(
+  zone: TeamState["setterZone"],
+  base: CourtSessionState = REVIEW as CourtSessionState,
+) {
   return withLast(base, (match) => ({
     ...match,
     rotations: {
@@ -150,7 +153,7 @@ describe("screen 11 in the scenario of the review (fila.md)", () => {
   });
 
   test("the position is the slot of the court, never the index of the lineup (pendência 22)", () => {
-    const positions = (zone: SetterZone) => {
+    const positions = (zone: TeamState["setterZone"]) => {
       const at = reviewAt(zone);
       return exitRows(lastOf(at), planOf(model(at)), ROSTER).entering.map(({ detail }) => detail);
     };

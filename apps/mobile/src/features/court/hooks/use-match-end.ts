@@ -6,14 +6,10 @@ import {
   type MemberId,
   type TeamSide,
 } from "@sacou/match-engine";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useReducer } from "react";
 
 import { useServices } from "../../../services/services-context";
-import { positionsOf } from "../../draw/hooks/use-pre-game";
-import { groupMembersQuery } from "../../groups/queries/group-queries";
-import { roundSettingsOf } from "../../rounds/model/round-detail";
-import { roundQuery } from "../../rounds/queries/round-queries";
+import type { PositionOf } from "../../draw/model/default-lineup";
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import { refusalText } from "../model/refusal-text";
 import {
@@ -24,6 +20,7 @@ import {
 import { nextMatchModel, type NextMatchModel } from "../next-match/next-match-model";
 import { startNextMatch } from "../next-match/start-next-match";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
+import type { CourtRoundSource } from "../ports/court-round-source";
 import type { NextMatchDraft } from "../ports/next-match-draft-store";
 import type { PlayCommand } from "../session/command-drafts";
 import type { CommandResult } from "../session/court-session-controller";
@@ -31,8 +28,7 @@ import { useCourtRuntime } from "./court-runtime-context";
 
 /** The sample sessions have no round: the defaults of the catalog stand in (D7). */
 const DEFAULT_SETTINGS = defaultGroupSettings();
-/** Never fetched: the query of a session without an origin is off. */
-const NO_ID = "";
+const NO_POSITION: PositionOf = () => null;
 
 export interface MatchEndScreen {
   readonly state: MatchEndState;
@@ -47,20 +43,14 @@ function finishedOf(timeline: CourtSessionTimeline): FinishedMatch | null {
   return state.currentMatch === null ? (state.finishedMatches.at(-1) ?? null) : null;
 }
 
-/** The round of the session, from the persisted cache, so screen 11 works offline (E4.7 D8). */
-function useRoundOf(origin: CourtSessionOrigin | null) {
-  const { sacouApi } = useServices();
-  const groupId = origin?.groupId ?? NO_ID;
-  const round = useQuery({
-    ...roundQuery(sacouApi, groupId, origin?.roundId ?? NO_ID),
-    enabled: origin !== null,
-  });
-  const members = useQuery({ ...groupMembersQuery(sacouApi, groupId), enabled: origin !== null });
-  const settings =
-    round.data === undefined
-      ? DEFAULT_SETTINGS
-      : (roundSettingsOf(round.data)?.values ?? DEFAULT_SETTINGS);
-  return { settings, confirmed: round.data?.going ?? [], members: members.data ?? [] };
+/** The round of the session from the phone; a sample session without one plays by the defaults. */
+function roundOf(source: CourtRoundSource, origin: CourtSessionOrigin | null) {
+  const round = origin === null ? null : source.read(origin);
+  return {
+    settings: round?.settings ?? DEFAULT_SETTINGS,
+    confirmed: round?.confirmed ?? [],
+    positionOf: round?.positionOf ?? NO_POSITION,
+  };
 }
 
 /**
@@ -74,7 +64,7 @@ export function useMatchEnd(
   dispatch: (command: PlayCommand) => Promise<CommandResult>,
 ): MatchEndScreen {
   const services = useServices();
-  const { courtRoster, nextMatchDrafts, shuffler } = services;
+  const { courtRoster, nextMatchDrafts, shuffler, courtRounds } = services;
   const runtime = useCourtRuntime();
   const [state, send] = useReducer(matchEndReducer, INITIAL_MATCH_END);
   const finished = useMemo(() => (timeline === null ? null : finishedOf(timeline)), [timeline]);
@@ -82,7 +72,7 @@ export function useMatchEnd(
 
   useEffect(() => {
     if (finished === null) return;
-    let alive = true;
+    const alive = { current: true };
     const fresh = (): NextMatchDraft => ({
       drawOrder: {
         a: shuffler.shuffle(finished.teams.a.memberIds),
@@ -94,16 +84,16 @@ export function useMatchEnd(
       runtime.log.findOrigin(courtSessionId),
       nextMatchDrafts.load(finished.matchId),
     ]).then(([origin, stored]) => {
-      if (!alive) return;
+      if (!alive.current) return;
       send({ type: "loaded", origin: origin.ok ? origin.value : null, draft: stored ?? fresh() });
     });
     return () => {
-      alive = false;
+      alive.current = false;
     };
   }, [finished, courtSessionId, runtime, nextMatchDrafts, shuffler]);
 
   const origin = state.status === "ready" ? state.origin : null;
-  const round = useRoundOf(origin);
+  const round = useMemo(() => roundOf(courtRounds, origin), [courtRounds, origin]);
   const draft = state.status === "ready" ? state.draft : null;
 
   // The draft on the phone follows the one of the screen, so closing the app keeps the draw and the
@@ -150,7 +140,7 @@ export function useMatchEnd(
           plan: model.plan,
           finished: model.match,
           settings: round.settings,
-          positionOf: positionsOf(round.members),
+          positionOf: round.positionOf,
         },
       ).then((result) => {
         if (!result.ok) send({ type: "start-failed", text: refusalText(result.error) });

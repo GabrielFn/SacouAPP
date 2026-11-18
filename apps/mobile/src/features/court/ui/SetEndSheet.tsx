@@ -28,13 +28,11 @@ export interface SetEndSheetProps {
   readonly onConfirm: () => void;
 }
 
-function TeamScore({
-  model,
-  colors,
-  side,
-}: Pick<SetEndSheetProps, "model" | "colors"> & {
+export interface TeamScoreProps extends Pick<SetEndSheetProps, "model" | "colors"> {
   readonly side: TeamSide;
-}) {
+}
+
+function TeamScore({ model, colors, side }: TeamScoreProps) {
   const { tokens } = useTheme();
   const { label, score } = model.scores[side];
   return (

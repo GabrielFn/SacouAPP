@@ -53,7 +53,11 @@ function ResultColumn({ result }: Pick<MatchEndScreenProps, "result">) {
   );
 }
 
-function NextHeader({ next }: { readonly next: NextMatchView }) {
+export interface NextHeaderProps {
+  readonly next: NextMatchView;
+}
+
+function NextHeader({ next }: NextHeaderProps) {
   const { matchEnd } = strings.court;
   const { tokens } = useTheme();
   const tag = (side: TeamSide) => (
@@ -77,10 +81,12 @@ function NextHeader({ next }: { readonly next: NextMatchView }) {
   );
 }
 
-function ExitsBlock({
-  next,
-  onToggle,
-}: { readonly next: NextMatchView } & Pick<MatchEndScreenProps, "onToggle">) {
+export interface ExitsBlockProps {
+  readonly next: NextMatchView;
+  readonly onToggle: MatchEndScreenProps["onToggle"];
+}
+
+function ExitsBlock({ next, onToggle }: ExitsBlockProps) {
   const { matchEnd } = strings.court;
   const { tokens } = useTheme();
   if (next.picks.length > 0) {

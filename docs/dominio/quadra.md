@@ -107,6 +107,13 @@ Desfazer não vibra como ponto (o placar volta). Bipe: fora (nenhuma tela o liga
 
 **Medição do Hermes.** `/dev/replay-benchmark` (só com `EXPO_PUBLIC_DEV_TOOLS=1`): cenários S1 (um set, cerca de 50 eventos), S2 (melhor de 5, 20 desfazer), S3 (rodada típica, 30 partidas) e S4 (limite, 200 partidas). Mede (a) ler e validar as linhas, (b) replay, (c) montar a tela, (d) `getOpenMatchStartIndex` × 10 e `getRecentPoints`, (e) o toque inteiro no SQLite de verdade e (f) a leitura das linhas, mais reabrir a quadra. Usa um arquivo de banco próprio (`sacou-benchmark.db`), nunca o das partidas. Resultado e orçamento no ADR 0038.
 
+## Fim do set, fim da partida e a próxima (E4.10 Parte 2, ADR 0066)
+
+- **Fases:** `playing` (quadra), `set-decided` (tela 25), `match-pending` (só o `SetEnded` do decisivo gravado: a 25 confirma de novo e grava o `MatchEnded`), `match-ended` (tela 11). A quadra abre a 25 nas duas do meio.
+- **Lados:** A à esquerda nos sets ímpares, B nos pares; no set decisivo com tie-break, os lados trocam quando um time chega à metade do alvo arredondada para cima (8 com 15, 6 com 11). "Inverter lados" inverte o resultado. É função do placar: desfazer o ponto da troca volta os lados.
+- **Saque do próximo set:** alterna sozinho (oposto de quem sacou primeiro no set, já corrigido por "Trocar sacador" no 0–0). Antes do set decisivo, sorteio na 25 ("Saca primeiro" ou "Sortear"); a escolha só vale ao confirmar.
+- **Próxima partida:** plano do motor (`planNextMatch`) com a configuração da rodada; quem entra numa vaga da escalação aparece como "posição N" (slot da quadra pela zona do levantador no fim). Quem saca na partida seguinte é sorteado ao confirmar (resposta 81).
+
 ## Pendente
 
 Teste no celular da parte 3 (roteiro em `docs/operacao/teste-no-celular.md`): vibração, tela ligada, trava do voltar, fechar e reabrir em modo avião e a medida do Hermes. E4.10: menu, correção, fim de set e de partida. Os nomes reais offline dependem da E4.2/E4.7.

@@ -20,6 +20,8 @@ import {
 const BEST_OF_FIVE = withScoring({ bestOf: 5, pointsPerSet: 25, tieBreakPoints: 15, winMargin: 2 });
 const SET_FOR_A = "a".repeat(25);
 const SET_FOR_B = "b".repeat(25);
+/** The winners of the sets are ASCII letters: splitting by nothing is safe. */
+const SET_SEPARATOR = "";
 
 function modelOf(timeline: CourtSessionTimeline): SetEndModel {
   const model = selectSetEnd(timeline, ROSTER);
@@ -30,7 +32,7 @@ function modelOf(timeline: CourtSessionTimeline): SetEndModel {
 /** Plays the sets in order, confirming all but the last one; each letter is who wins a set. */
 async function playSets(input: MatchStartedPayload, winners: string): Promise<Scenario> {
   const scenario = await startScenario(input);
-  const sets = [...winners];
+  const sets = winners.split(SET_SEPARATOR);
   for (const [index, winner] of sets.entries()) {
     await score(scenario, winner === "a" ? SET_FOR_A : SET_FOR_B);
     if (index < sets.length - 1) await confirmSet(scenario, toss(scenario));
