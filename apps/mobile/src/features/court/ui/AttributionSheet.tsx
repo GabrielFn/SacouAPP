@@ -98,7 +98,9 @@ function QuestionColumn({ model, onChooseKind, onOpponentError, onSkip }: Attrib
             {model.title}
           </Text>
         </View>
-        <Text variant="muted">{attribution.onScore}</Text>
+        <Text variant="muted" style={{ marginLeft: "auto" }}>
+          {attribution.onScore}
+        </Text>
       </View>
       <Text variant="bodyStrong">
         {attribution.question}

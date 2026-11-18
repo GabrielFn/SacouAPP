@@ -1,18 +1,49 @@
-import { describe, expect, test } from "vitest";
-import type { MatchScore } from "@sacou/match-engine";
+import type { MatchScore, MatchSet } from "@sacou/match-engine";
+import { beforeAll, describe, expect, test } from "vitest";
 
+import { stateOfTimeline } from "./court-screen.selectors";
+import { startScenario } from "./screen-scenarios.test.fixture";
 import { confirmingClosesMatch, decidedSetClosesMatch, decidedSetWinner } from "./set-closure";
 
-function matchWith(
-  setsWon: { a: number; b: number },
-  score: { a: number; b: number },
-  bestOf = 3,
+type BestOf = MatchScore["scoring"]["bestOf"];
+type Points = MatchSet["score"];
+
+const SET_POINTS = 25;
+const TIE_BREAK_POINTS = 15;
+const BEST_OF_THREE: BestOf = 3;
+const BEST_OF_FIVE: BestOf = 5;
+
+let base: MatchScore;
+let baseSet: MatchSet;
+
+beforeAll(async () => {
+  const scenario = await startScenario();
+  const { currentMatch } = stateOfTimeline(scenario.timeline());
+  if (currentMatch === null || currentMatch.currentSet === null) throw new Error("no open set");
+  base = currentMatch;
+  baseSet = currentMatch.currentSet;
+});
+
+/** A real engine match with the sets, rules and current set replaced, so the types stay checked. */
+function matchAt(
+  setsWon: MatchScore["setsWon"],
+  set: Pick<MatchSet, "setNumber" | "score" | "targetPoints">,
+  bestOf: BestOf,
 ): MatchScore {
   return {
+    ...base,
     setsWon,
-    scoring: { bestOf, winMargin: 2 },
-    currentSet: { setNumber: 1, score, targetPoints: 25, servingTeam: "a" },
-  } as unknown as MatchScore;
+    scoring: { ...base.scoring, bestOf, winMargin: 2 },
+    currentSet: { ...baseSet, ...set, servingTeam: "a" },
+  };
+}
+
+function matchWith(
+  setsWon: MatchScore["setsWon"],
+  score: Points,
+  bestOf: BestOf = BEST_OF_THREE,
+): MatchScore {
+  return matchAt(setsWon, { setNumber: 1, score, targetPoints: SET_POINTS }, bestOf);
 }
 
 describe("set closure", () => {
@@ -28,19 +59,19 @@ describe("set closure", () => {
   });
 
   test("the winner is the one the engine says, not whoever is ahead", () => {
-    const match = matchWith({ a: 1, b: 1 }, { a: 25, b: 24 }, 5);
+    const match = matchWith({ a: 1, b: 1 }, { a: 25, b: 24 }, BEST_OF_FIVE);
     expect(decidedSetWinner(match)).toBeNull();
     expect(decidedSetClosesMatch(match)).toBe(false);
   });
 });
 
-function tieBreakMatch(score: { a: number; b: number }, bestOf = 3): MatchScore {
+function tieBreakMatch(score: Points, bestOf: BestOf = BEST_OF_THREE): MatchScore {
   const sets = Math.floor(bestOf / 2);
-  return {
-    setsWon: { a: sets, b: sets },
-    scoring: { bestOf, winMargin: 2 },
-    currentSet: { setNumber: bestOf, score, targetPoints: 15, servingTeam: "a" },
-  } as unknown as MatchScore;
+  return matchAt(
+    { a: sets, b: sets },
+    { setNumber: bestOf, score, targetPoints: TIE_BREAK_POINTS },
+    bestOf,
+  );
 }
 
 describe("set closure in the tie-break (target 15)", () => {
@@ -57,10 +88,7 @@ describe("set closure in the tie-break (target 15)", () => {
 
   test("best of five: only the third set won closes it; the match with no current set decides nothing", () => {
     const two = { a: 2, b: 0 };
-    const third = {
-      ...tieBreakMatch({ a: 25, b: 10 }, 5),
-      setsWon: two,
-    } as unknown as MatchScore;
+    const third: MatchScore = { ...tieBreakMatch({ a: 25, b: 10 }, BEST_OF_FIVE), setsWon: two };
     expect(confirmingClosesMatch(third, "a")).toBe(true);
     expect(confirmingClosesMatch({ ...third, setsWon: { a: 1, b: 2 } }, "a")).toBe(false);
     expect(decidedSetWinner({ ...third, currentSet: null })).toBeNull();
