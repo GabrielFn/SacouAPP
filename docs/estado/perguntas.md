@@ -182,3 +182,6 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 
 ## 18/11/2026: bateria do testador
 - **Pergunta:** com o disco HD, a bateria completa leva de 30 a 50 min por testador. O testador pode rodar só os testes da pasta tocada, os novos e as sabotagens, e deixar a bateria completa para a CI? **Resposta do Gabriel (18/11): sim.** Regra 6 da economia de tokens do `CLAUDE.md` atualizada.
+
+## 18/11/2026: hospedagem da API (E5.1)
+- **Pergunta:** o Railway custa US$ 5 a 10/mês depois do teste. Opções grátis: (1) Google Cloud Run, grátis na faixa de uso do piloto, com cartão na conta de cobrança e alerta de orçamento; (2) Render free, sem cartão, dorme depois de 15 min (30 a 60 s na primeira chamada); (3) seguir no Railway. **Recomendação: 1.** **Resposta do Gabriel (18/11): 1, Cloud Run** no lugar do Railway. O Neon continua (`sacou-prod` e `sacou-test` criados em 18/11, AWS US East 1, Postgres 18, banco `sacou`, plano Free). O plano da E5.1 e o ADR 0068 serão refeitos para o Cloud Run; as perguntas 86 e 88 ficaram com as recomendações (dois projetos, Virgínia).
