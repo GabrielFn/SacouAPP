@@ -170,3 +170,12 @@ Detalhes em `docs/estado/tarefas/E4.8.md`, `E4.10.md` e `E4.11.md`. ADRs: 0065 (
 85. E4.11: o servidor para de aceitar os pontos (recusa definitiva): **recomendação e padrão: a quadra continua marcando no celular e mostra um aviso na faixa do meio.**
 - Interpretação do orquestrador da resposta 7, sem pergunta: "pontos" no desempate do "Encerrar partida" são os do set em andamento (E4.10).
 - **Respostas do Gabriel (17/11): "ok recomendações"** para 76 a 85: 76 (1) reserva da fila escolhida na 22; 77 (1) posição × função, com "Corrigir" e "Tornar levantador"; 78 (1) paisagem em duas colunas; 79 (1) só o banco no piloto e tarefa nova depois para entrar da fila (vai para `docs/ideias.md`); 80 (1) esconder "Encerrar rodada" e criar na E4.12; 81 (1) sorteio automático de quem saca; 82 "Voltar"; 83 "Este celular parou de marcar"; 84 aviso com "Sair mesmo assim"; 85 a quadra continua marcando com aviso na faixa do meio.
+
+## 18/11/2026: E5.1 (deploy no Railway e no Neon), perguntas 86 a 91 e acessos
+Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa fazer") e 6. ADR 0068. **A E5.1 só começa com as contas criadas pelo Gabriel e estas respostas.** Gasto novo: Railway Hobby, US$ 5/mês (provável US$ 5 a 10 com dois ambientes), com limite de uso de US$ 10; Neon Free, US$ 0. O primeiro deploy em produção precisa do ok explícito do Gabriel na hora.
+86. Banco de teste: (1) dois projetos no Neon, `sacou-test` e `sacou-prod`; (2) um projeto com branch `test` copiada da produção (copia dados pessoais). **Recomendação: 1.**
+87. De onde a produção faz deploy: (1) teste e produção da `main`; (2) produção de uma branch `production` avançada depois do roteiro no teste; (3) botão do Railway. **Recomendação: 1 até o piloto, 2 antes do primeiro jogador real.**
+88. Região: (1) Railway e Neon na Virgínia (EUA); (2) Railway na Virgínia e Neon em São Paulo (~120 ms por consulta). **Recomendação: 1.**
+89. Domínio próprio (ex.: `api.sacou.com.br`, ~R$ 40/ano): (1) agora; (2) antes dos builds de loja (E5.4); (3) depois do piloto. **Recomendação: 2.**
+90. Ambiente de teste: (1) ligado o tempo todo; (2) "App Sleeping" (dorme sem uso). **Recomendação: 2.**
+91. Dados pessoais nos EUA (LGPD art. 33) com a 88 na opção 1. **Recomendação:** aceitar no piloto, registrar em `dados-pessoais.md` e citar na política de privacidade (E6.1).
