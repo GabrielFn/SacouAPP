@@ -56,7 +56,7 @@ ensure_account() {
   fi
 }
 
-# Creates the service once, public (the API checks its own tokens), running as its own runtime account; the first real deploy replaces the image.
+# Creates the service once, private (the loop below opens it to allUsers: the API checks its own tokens), running as its own runtime account; the first real deploy replaces the image.
 ensure_service() {
   local service="$1" runner="$2"
   if ! gcloud run services describe "$service" --region="$REGION" >/dev/null 2>&1; then
