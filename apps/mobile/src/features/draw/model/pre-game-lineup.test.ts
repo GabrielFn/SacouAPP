@@ -58,17 +58,10 @@ const FIXTURE_NAMES = G1_ORDER.map((key) => nameOf(uuidOf(key)).toLowerCase());
 
 /** The texts of a value, with no keys: a position as a value is a profile that leaked. */
 function values(value: unknown): readonly string[] {
-  return leaves(value).filter((word) => !Object.keys(flatKeys(value)).includes(word));
-}
-
-function flatKeys(value: unknown): Record<string, true> {
-  if (Array.isArray(value)) return Object.assign({}, ...value.map(flatKeys));
-  if (value instanceof Map) return flatKeys([...value.entries()]);
-  if (value === null || typeof value !== "object") return {};
-  return Object.assign(
-    {},
-    ...Object.entries(value).map(([key, inner]) => ({ [key]: true as const, ...flatKeys(inner) })),
-  );
+  if (Array.isArray(value)) return value.flatMap(values);
+  if (value instanceof Map) return values([...value.entries()]);
+  if (value !== null && typeof value === "object") return Object.values(value).flatMap(values);
+  return [String(value)];
 }
 
 /** Every key and text of a value, to find a level anywhere. */
