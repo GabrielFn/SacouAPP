@@ -95,7 +95,14 @@ describe("scripts/ci-areas.mjs", () => {
 // .github/workflows/deploy-api.yml deploys only when the `api` area is on (ADR 0068, D4).
 describe("API deploy decision", () => {
   const SCRIPT = resolve(import.meta.dirname, "..", "ci-areas.mjs");
-  const WORKFLOW = resolve(import.meta.dirname, "..", "..", ".github", "workflows", "deploy-api.yml");
+  const WORKFLOW = resolve(
+    import.meta.dirname,
+    "..",
+    "..",
+    ".github",
+    "workflows",
+    "deploy-api.yml",
+  );
   const deploys = (files) =>
     execFileSync(process.execPath, [SCRIPT], { input: `${files.join("\n")}\n`, encoding: "utf8" })
       .split("\n")
@@ -106,7 +113,10 @@ describe("API deploy decision", () => {
   });
 
   it("skips the deploy for an app-only commit", () => {
-    assert.equal(deploys([MOBILE_FILE, "apps/mobile/src/texts/pt-BR.ts", "docs/estado/progresso.md"]), false);
+    assert.equal(
+      deploys([MOBILE_FILE, "apps/mobile/src/texts/pt-BR.ts", "docs/estado/progresso.md"]),
+      false,
+    );
   });
 
   it("deploys when the API, its image or the deploy itself changes", () => {
@@ -121,7 +131,11 @@ describe("API deploy decision", () => {
       ".github/actions/deploy-cloud-run/action.yml",
     ].forEach((file) => {
       assert.equal(deploys([file]), true, file);
-      assert.equal(deploys([MOBILE_FILE, "docs/decisoes.md", file]), true, `${file} with the app and docs`);
+      assert.equal(
+        deploys([MOBILE_FILE, "docs/decisoes.md", file]),
+        true,
+        `${file} with the app and docs`,
+      );
     });
   });
 
@@ -134,7 +148,10 @@ describe("API deploy decision", () => {
     const workflow = readFileSync(WORKFLOW, "utf8");
     assert.match(workflow, /node scripts\/ci-areas\.mjs \| tee -a "\$GITHUB_OUTPUT"/);
     assert.match(workflow, /\|\| files=""/);
-    assert.match(workflow, /build:\n {4}needs: changes\n {4}if: needs\.changes\.outputs\.api != 'false'\n/);
+    assert.match(
+      workflow,
+      /build:\n {4}needs: changes\n {4}if: needs\.changes\.outputs\.api != 'false'\n/,
+    );
     assert.match(workflow, /github\.event\.workflow_run\.conclusion == 'success'/);
   });
 });

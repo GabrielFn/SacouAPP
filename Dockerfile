@@ -2,7 +2,7 @@
 # Both images are pinned by digest (ADR 0020): updating one is a deliberate change, never a pull.
 # The SDK matches global.json; the runtime is the one that SDK ships (10.0.14).
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.403-noble@sha256:b6202fb3f5fde0992de4fae47918b5084e9d4be2f6ee6b1a41ddf591e2f96e4e AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.403-noble@sha256:212fe4cb74627d5adf9817a4088906ae3edff1bd853bb27565d4b46731efe61e AS build
 WORKDIR /source
 
 # Only what the API build reads. --locked-mode fails when a packages.lock.json is out of date.
