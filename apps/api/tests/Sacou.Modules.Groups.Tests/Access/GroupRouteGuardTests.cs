@@ -43,6 +43,7 @@ public sealed class GroupRouteGuardTests
         var withGroupId = endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null);
         Assert.Equal(GroupRoutes + RoundRoutes + CourtRoutes, withGroupId);
         Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null));
+        Assert.Equal(CourtRoutes, endpoints.OfType<RouteEndpoint>().Count(GroupRouteGuard.HasCourtFilter));
     }
 
     /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>

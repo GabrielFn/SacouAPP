@@ -68,6 +68,9 @@ internal static class GroupRouteGuard
         };
     }
 
+    /// <summary>Whether the route sits behind the Matches' court access filter.</summary>
+    public static bool HasCourtFilter(RouteEndpoint endpoint) => HasMarker(endpoint, CourtFilterMarker);
+
     private static bool HasMarker(RouteEndpoint endpoint, string marker) => CountMarkers(endpoint, marker) > 0;
 
     private static int CountMarkers(RouteEndpoint endpoint, string marker) => endpoint.Metadata.Count(item => item.GetType().Name == marker);
