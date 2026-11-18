@@ -2,6 +2,8 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
+import type { AppForeground } from "../features/court/ports/app-foreground";
+import type { Scheduler } from "../features/court/ports/scheduler";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
@@ -25,6 +27,7 @@ import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
 import type { CoinFlip } from "./random/coin-flip";
 import type { Shuffler } from "./random/shuffler";
+import type { RandomSource } from "./random/random-source";
 import type { FileShare } from "./share/file-share";
 import type { ShareSheet } from "./share/share-sheet";
 
@@ -53,6 +56,12 @@ export interface Services {
   /** The API, typed by the contract (E4.2). Its answers live only in the TanStack cache, never here. */
   readonly sacouApi: SacouApi;
   readonly networkStatus: NetworkStatus;
+  /** The court upload tries again when the app comes back to the front (E4.11). */
+  readonly appForeground: AppForeground;
+  /** The waits of the court upload (E4.11). */
+  readonly scheduler: Scheduler;
+  /** The variation of the backoff of the court upload: never a secret. */
+  readonly randomSource: RandomSource;
   /** The system share sheet, for the round message (E4.6). */
   readonly shareSheet: ShareSheet;
   /** The export of screen 30a: a temporary file handed to the share sheet, then deleted (E4.3, D9). */

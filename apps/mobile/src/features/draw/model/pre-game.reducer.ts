@@ -1,10 +1,13 @@
 import type { BestOf, TeamSide } from "@sacou/match-engine";
 import type { FormationSystem } from "@sacou/volley-rules";
 
-import { overrideOf, steppedPoints, type PreGameChoices } from "./pre-game";
+import { overrideOf, steppedPoints, type PreGameChoices, type SavedLineups } from "./pre-game";
 
-/** Sheet 08 lies over screen 07, in the same flow, so the draw never leaves the screen (D1). */
-export type DrawSheet = "none" | "pre-game";
+/**
+ * Sheet 08 lies over screen 07, in the same flow, so the draw never leaves the screen (D1); screen 22
+ * opens from it in the same flow too, because the draw lives only here (E4.8, D1).
+ */
+export type DrawSheet = "none" | "pre-game" | "lineup";
 
 /** The actions of sheet 08 (D3). Each `base` is the resolved setting of the round, never stored. */
 export type PreGameAction =
@@ -21,7 +24,12 @@ export type PreGameAction =
       readonly side: TeamSide;
       readonly system: FormationSystem;
       readonly base: FormationSystem;
-    };
+    }
+  /** "Escalação" of the 08, and back from screen 22 without saving. */
+  | { readonly type: "lineup-opened" }
+  | { readonly type: "lineup-closed" }
+  /** "Salvar escalação": the teams the admin changed, back to the 08. */
+  | { readonly type: "lineup-saved"; readonly lineups: SavedLineups };
 
 /** The part of the flow of screen 07 that the sheet reads and writes. */
 export interface PreGameSlice {
@@ -41,6 +49,9 @@ const PRE_GAME_ACTION_TYPES: Readonly<Record<PreGameAction["type"], true>> = {
   "first-server-chosen": true,
   "rotation-tab-chosen": true,
   "system-chosen": true,
+  "lineup-opened": true,
+  "lineup-closed": true,
+  "lineup-saved": true,
 };
 
 export function isPreGameAction<A extends { readonly type: string }>(
@@ -76,8 +87,46 @@ function opened<S extends PreGameSlice>(state: S): S {
     : { ...state, sheet: "pre-game", selection: null, notice: null };
 }
 
+/** Screen 22 opens only over the 08. */
+function lineupOpened<S extends PreGameSlice>(state: S): S {
+  return state.sheet === "pre-game" ? { ...state, sheet: "lineup" } : state;
+}
+
+function lineupSaved<S extends PreGameSlice>(state: S, lineups: SavedLineups): S {
+  const saved = withChoices(state, { lineups: { ...state.preGame.lineups, ...lineups } });
+  return { ...saved, sheet: "pre-game" };
+}
+
+type LineupSheetAction = Extract<
+  PreGameAction,
+  { type: "lineup-opened" | "lineup-closed" | "lineup-saved" }
+>;
+
+const LINEUP_SHEET_ACTION_TYPES: readonly PreGameAction["type"][] = [
+  "lineup-opened",
+  "lineup-closed",
+  "lineup-saved",
+];
+
+function isLineupSheetAction(action: PreGameAction): action is LineupSheetAction {
+  return LINEUP_SHEET_ACTION_TYPES.includes(action.type);
+}
+
+/** Screen 22 over the 08 (E4.8, D1). */
+function lineupSheetReducer<S extends PreGameSlice>(state: S, action: LineupSheetAction): S {
+  switch (action.type) {
+    case "lineup-opened":
+      return lineupOpened(state);
+    case "lineup-closed":
+      return state.sheet === "lineup" ? { ...state, sheet: "pre-game" } : state;
+    case "lineup-saved":
+      return lineupSaved(state, action.lineups);
+  }
+}
+
 /** The sheet keeps only what differs from the round: back to the base, the choice goes (D3, D6). */
 export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGameAction): S {
+  if (isLineupSheetAction(action)) return lineupSheetReducer(state, action);
   switch (action.type) {
     case "pre-game-opened":
       return opened(state);

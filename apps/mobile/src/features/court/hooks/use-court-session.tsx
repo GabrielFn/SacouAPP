@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
@@ -16,12 +17,19 @@ import {
   type CommandResult,
   type CourtSessionController,
 } from "../session/court-session-controller";
+import { selectSyncNotice, type SyncNotice } from "../sync/sync-notice";
 import { useCourtRuntime } from "./court-runtime-context";
+import { useCourtSync } from "./court-sync-context";
 
 export type CourtSessionView =
   | { readonly status: "loading" }
   | { readonly status: "failed"; readonly code: LoadFailureCode }
-  | { readonly status: "ready"; readonly timeline: CourtSessionTimeline };
+  | {
+      readonly status: "ready";
+      readonly timeline: CourtSessionTimeline;
+      /** Why the points are not reaching the server, or `null` (question 85); `taken-over` is the 09b. */
+      readonly notice: SyncNotice | null;
+    };
 
 export interface UseCourtSession {
   readonly courtSessionId: string;
@@ -54,6 +62,23 @@ export function CourtSessionProvider({ courtSessionId, children }: CourtSessionP
     courtSessionId,
     controller: createCourtSessionController({ courtSessionId, ...runtime }),
   }));
+  const sync = useCourtSync();
+  // The upload wrote a halt or a take-over in this session: the court reads the file again.
+  useEffect(
+    () =>
+      sync.onSessionChanged((changed) => {
+        if (changed === handle.courtSessionId) void handle.controller.reload();
+      }),
+    [sync, handle],
+  );
+  // Another account signed in: whose the court is is read again (D8).
+  useEffect(
+    () =>
+      sync.onAccountChanged(() => {
+        void handle.controller.reload();
+      }),
+    [sync, handle],
+  );
   return <CourtSessionContext.Provider value={handle}>{children}</CourtSessionContext.Provider>;
 }
 
@@ -70,7 +95,11 @@ export function useCourtSession(): UseCourtSession {
     // The replayer remembers the answer per array: the tap already simulated this very log.
     const replayed = replayer.replay(courtSessionId, snapshot.events);
     return replayed.ok
-      ? { status: "ready", timeline: replayed.value }
+      ? {
+          status: "ready",
+          timeline: replayed.value,
+          notice: selectSyncNotice(snapshot.sync),
+        }
       : { status: "failed", code: "replay-failed" };
   }, [snapshot, replayer, courtSessionId]);
   const dispatch = useCallback(

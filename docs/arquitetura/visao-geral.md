@@ -134,6 +134,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0060](adr/0060-sincronizacao-do-stream-da-quadra.md) | Sincronização do stream da quadra: idempotência por `eventId`, lote do servidor, tetos, plausibilidade e membros do grupo |
 | [0061](adr/0061-sorteio-no-app.md) | Sorteio no app: resultado só no reducer, medidor no TS com o golden do C#, trocas e travas |
 | [0062](adr/0062-limite-de-requisicoes.md) | Limite de requisições por usuário (janela fixa, chave com hash do UID) e concorrência das rotas de duas conexões |
+| [0063](adr/0063-placar-assume-a-quadra.md) | Placar assume a quadra: lote seguinte sob a trava, confirmação otimista, desfazer sem restrição (resposta 74), teto de 40 lotes |
 | [0064](adr/0064-ci-api-e-app-em-jobs-paralelos.md) | CI com a API e o app em jobs paralelos, cada um pulado pela sua área |
 
 ## Matriz: `decisoes.md` → ADR

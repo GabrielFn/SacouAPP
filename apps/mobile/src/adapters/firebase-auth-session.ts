@@ -47,6 +47,8 @@ export interface FirebaseAuthSdk {
    * ran, and then nothing is deleted (`"other-account"`).
    */
   deleteCurrentUser(identity: SessionIdentity): Promise<DeleteCurrentUserOutcome>;
+  /** A SHA-256 of the UID of an account seen on this phone (ADR 0067, D8), or `null`. */
+  accountKeyOf(identity: SessionIdentity): Promise<string | null>;
 }
 
 /** The native Google account picker (google-sign-in.ts). */
@@ -144,6 +146,7 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
       attempt(() => sdk.createAccountWithEmail(email, password)),
     sendPasswordReset: (email) => attempt(() => sdk.sendPasswordReset(email)),
     currentSession: () => currentUser.value?.identity ?? null,
+    accountKeyOf: (session) => sdk.accountKeyOf(session),
     async getIdToken({ forceRefresh }) {
       await firstState;
       const user = currentUser.value;

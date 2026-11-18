@@ -2,6 +2,7 @@ import type { MatchStartedPayload } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
+import { signedInCourtSyncHooks } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import type { CourtRuntime } from "../ports/court-runtime";
@@ -21,9 +22,22 @@ const ONE_POINT_MATCH: MatchStartedPayload = {
   scoring: { bestOf: 1, pointsPerSet: 1, tieBreakPoints: null, winMargin: 1 },
 };
 
-function runtime(): CourtRuntime {
+const ACCOUNT_A = "key-a";
+const ACCOUNT_B = "key-b";
+
+/** The account signed in; a test switches it as "Sair mesmo assim" and another sign-in would. */
+interface SignedIn {
+  key: string | null;
+}
+
+function runtime(account: SignedIn = { key: ACCOUNT_A }): CourtRuntime {
   const ids = createSequentialIdGenerator();
-  return { log: createFakeCourtEventLog(ids), replayer: createCourtReplayer(), ids };
+  return {
+    log: createFakeCourtEventLog(ids),
+    replayer: createCourtReplayer(),
+    ids,
+    sync: signedInCourtSyncHooks(account),
+  };
 }
 
 async function sessionWithMatch(court: CourtRuntime, finished: boolean): Promise<void> {
@@ -52,6 +66,65 @@ describe("ensureRoundCourtSession (D7, D8)", () => {
     const first = await ensureRoundCourtSession(court, ROUND);
 
     expect(await ensureRoundCourtSession(court, ROUND)).toEqual(first);
+  });
+
+  test("the session keeps the key of the account that opened it", async () => {
+    const court = runtime();
+
+    const ensured = await ensureRoundCourtSession(court, ROUND);
+
+    const stored = ensured.ok ? await court.log.load(ensured.value) : null;
+    expect(stored?.ok && stored.value.ownerKey).toBe(ACCOUNT_A);
+  });
+
+  test("nobody signed in: no session without an owner opens (S4)", async () => {
+    const court = runtime({ key: null });
+
+    expect(await ensureRoundCourtSession(court, ROUND)).toEqual({
+      ok: false,
+      error: { code: "no-account" },
+    });
+    expect(await court.log.findActiveSession()).toEqual({ ok: true, value: null });
+  });
+
+  test("S1: B cannot mark on the session A opened; A back marks again", async () => {
+    const account: SignedIn = { key: ACCOUNT_A };
+    const court = runtime(account);
+    const opened = await ensureRoundCourtSession(court, ROUND);
+    if (!opened.ok) throw new Error(opened.error.code);
+    const deps = { ...court, courtSessionId: opened.value };
+    await startCourtMatch(deps, SAMPLE_MATCH_ONE_SET);
+
+    // "Sair mesmo assim", and B signs in on the same phone.
+    account.key = ACCOUNT_B;
+    expect(await ensureRoundCourtSession(court, ROUND)).toEqual({
+      ok: false,
+      error: { code: "other-account" },
+    });
+    const onB = createCourtSessionController(deps);
+    await onB.whenIdle();
+    const snapshot = onB.getSnapshot();
+    expect(snapshot.status === "ready" && snapshot.sync.ownership).toBe("other-account");
+    expect(await onB.dispatch({ type: "score-point", team: "a" })).toEqual({
+      ok: false,
+      error: { code: "not-ready" },
+    });
+
+    account.key = ACCOUNT_A;
+    expect(await ensureRoundCourtSession(court, ROUND)).toEqual(opened);
+    const onA = createCourtSessionController(deps);
+    await onA.whenIdle();
+    expect((await onA.dispatch({ type: "score-point", team: "a" })).ok).toBe(true);
+  });
+
+  test("an open session of the round without an owner is not reused either", async () => {
+    const court = runtime();
+    await court.log.openSession(OTHER_SESSION, ROUND);
+
+    expect(await ensureRoundCourtSession(court, ROUND)).toEqual({
+      ok: false,
+      error: { code: "other-account" },
+    });
   });
 
   test("another round with a match on is refused, and nothing is closed", async () => {

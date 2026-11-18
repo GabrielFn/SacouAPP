@@ -5,3 +5,4 @@ export * from "./queue/index.js";
 export * from "./score/index.js";
 export * from "./settings/index.js";
 export * from "./stats/index.js";
+export * from "./sync/index.js";

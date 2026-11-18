@@ -15,7 +15,7 @@ export function positionsOf(members: readonly Member[]): PositionOf {
 }
 
 /** The position each index of `lineup` asks for (ADR 0026): `S, OH1, MB1, OPP, OH2, MB2` in the 5x1. */
-type SlotPosition = "setter" | "outsideHitter" | "middleBlocker" | "opposite";
+export type SlotPosition = "setter" | "outsideHitter" | "middleBlocker" | "opposite";
 
 const FIVE_ONE_SLOTS: readonly SlotPosition[] = [
   "setter",
@@ -36,15 +36,17 @@ const TWO_SETTER_SLOTS: readonly SlotPosition[] = [
   "middleBlocker",
 ];
 
-const SLOTS_OF: Readonly<Record<Exclude<FormationSystem, "livre">, readonly SlotPosition[]>> = {
+export const SLOTS_OF: Readonly<
+  Record<Exclude<FormationSystem, "livre">, readonly SlotPosition[]>
+> = {
   "5x1": FIVE_ONE_SLOTS,
   "6x2": TWO_SETTER_SLOTS,
   "4x2": TWO_SETTER_SLOTS,
 };
 
 /** Without a second setter, the opposite takes `S2` in the 6x2 and the 4x2 (D6). */
-const SECOND_SETTER_INDEX = 3;
-const SECOND_SETTER_STAND_IN: SlotPosition = "opposite";
+export const SECOND_SETTER_INDEX = 3;
+export const SECOND_SETTER_STAND_IN: SlotPosition = "opposite";
 
 type Seats = readonly (MemberId | null)[];
 
@@ -79,17 +81,17 @@ function byPosition(
 
 function withStandInSetter(
   team: readonly MemberId[],
-  system: FormationSystem,
+  standInIndex: number | null,
   seats: Seats,
   positionOf: PositionOf,
 ): Seats {
-  if (system === "5x1" || seats[SECOND_SETTER_INDEX] !== null) return seats;
+  if (standInIndex === null || seats[standInIndex] !== null) return seats;
   const standIn = firstFree(
     team,
     seats,
     (memberId) => positionOf(memberId) === SECOND_SETTER_STAND_IN,
   );
-  return seatWhere(seats, SECOND_SETTER_INDEX, standIn);
+  return seatWhere(seats, standInIndex, standIn);
 }
 
 /** The empty slots take the others in order of arrival: `any`, `libero`, no profile and the extras. */
@@ -112,6 +114,27 @@ function allSeated(seats: Seats): readonly MemberId[] | null {
 }
 
 /**
+ * Seats `team` on `slots`, in order: each slot takes the first member who plays its position, the
+ * second setter slot (`standInIndex`) takes an opposite when no setter is left, and the empty slots
+ * take the others in order. `null` when the team does not fill the slots. Screen 22 reuses it for
+ * "Corrigir" on the five slots after the setter (E4.8, D4).
+ */
+export function seatByPosition(
+  team: readonly MemberId[],
+  slots: readonly SlotPosition[],
+  standInIndex: number | null,
+  positionOf: PositionOf,
+): readonly MemberId[] | null {
+  const seats = byPosition(team, slots, positionOf);
+  return allSeated(withTheRest(team, withStandInSetter(team, standInIndex, seats, positionOf)));
+}
+
+/** The index of the second setter slot, where an opposite stands in: none in the 5x1 nor the free system. */
+export function standInIndexOf(system: FormationSystem): number | null {
+  return system === "5x1" || system === "livre" ? null : SECOND_SETTER_INDEX;
+}
+
+/**
  * The lineup a drawn team starts with (D6), from the positions of the profiles: the starting point that
  * screen 22 changes (E4.8). Only a team of six has one (ADR 0024); the free system keeps the order of
  * arrival. A team that cannot fill the six seats is an error, never an empty `MemberId`.
@@ -125,7 +148,6 @@ export function defaultLineup(
   // A drawn team has each member once: a repeat would put one person in two seats.
   if (new Set(team).size !== team.length) return err("duplicate-member");
   if (system === "livre") return ok(team);
-  const seats = byPosition(team, SLOTS_OF[system], positionOf);
-  const lineup = allSeated(withTheRest(team, withStandInSetter(team, system, seats, positionOf)));
+  const lineup = seatByPosition(team, SLOTS_OF[system], standInIndexOf(system), positionOf);
   return lineup === null ? err("wrong-team-size") : ok(lineup);
 }

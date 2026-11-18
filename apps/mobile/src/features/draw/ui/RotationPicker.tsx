@@ -1,8 +1,7 @@
 import type { FormationSystem } from "@sacou/volley-rules";
-import { Pressable, View } from "react-native";
 
 import { useTheme } from "../../../theme/theme-context";
-import { Text } from "../../../ui/Text";
+import { RadioTiles } from "../../../ui/RadioTiles";
 import type { Option } from "../model/pre-game-selectors";
 
 const OPTION_FLEX_BASIS = "22%";
@@ -23,47 +22,16 @@ export function RotationPicker({
   disabled,
   onSelect,
 }: RotationPickerProps) {
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
   return (
-    <View
-      accessibilityRole="radiogroup"
-      accessibilityLabel={label}
-      style={{ flexDirection: "row", gap: tokens.spacing.s6 }}
-    >
-      {options.map((option) => {
-        const checked = option.value === selected;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="radio"
-            accessibilityLabel={option.label}
-            accessibilityState={{ checked, disabled }}
-            disabled={disabled}
-            onPress={() => {
-              onSelect(option.value);
-            }}
-            style={{
-              flexGrow: 1,
-              flexBasis: OPTION_FLEX_BASIS,
-              minHeight: tokens.sizes.systemButton,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: tokens.radii.field,
-              borderWidth: tokens.borderWidths.thin,
-              borderColor: checked ? colors.text : colors.borderChip,
-              backgroundColor: checked ? colors.text : colors.surface,
-            }}
-          >
-            <Text
-              variant="display"
-              displaySize="displayBlock"
-              style={{ color: checked ? colors.background : colors.text }}
-            >
-              {option.label}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
+    <RadioTiles<FormationSystem>
+      label={label}
+      options={options}
+      selected={selected}
+      disabled={disabled}
+      onSelect={onSelect}
+      tileHeight={tokens.sizes.systemButton}
+      basis={OPTION_FLEX_BASIS}
+    />
   );
 }

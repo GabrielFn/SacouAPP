@@ -60,7 +60,10 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "matches.round-has-court-session": "Esta rodada já tem uma quadra aberta em outro celular.",
   "matches.sequence-conflict": "Outro celular está usando a mesma quadra.",
   "matches.sequence-gap": "Faltam pontos no envio. O app vai enviar de novo.",
+  "matches.stream-changed":
+    "O placar mudou enquanto você confirmava. Confira de novo antes de assumir.",
   "matches.stream-mismatch": "Os pontos são de outra quadra.",
+  "matches.takeover-invalid": "Não deu para assumir a quadra. Tente de novo.",
   "matches.unknown-event-type": "Este app enviou algo que o servidor não conhece. Atualize o app.",
   "matches.unsupported-schema-version": "Atualize o app para enviar os pontos.",
   "sessions.attendance-disabled": "A presença está desligada nesta rodada.",
@@ -98,6 +101,7 @@ export const apiErrorKindTexts = {
   rateLimited: RATE_LIMITED_TEXT,
   unavailable: "O Sacou está fora do ar por um instante. Tentando de novo.",
   offline: "Sem conexão.",
+  accountChanged: "A conta mudou antes do envio. Nada foi enviado.",
   unexpected: "Algo deu errado. Tente de novo daqui a pouco.",
 } as const;
 

@@ -134,6 +134,11 @@ export const drawStrings = {
     noSetter: (name: string, zone: number) =>
       `Sem levantador fixo. ${name} começa na posição ${String(zone)}.`,
     fullTeam: (team: string, size: number) => `${team} tem ${String(size)}, sem banco.`,
+    /** "Laranja tem 6 e líbero Sofia." (E4.8, D5). */
+    withLibero: (team: string, size: number, libero: string) =>
+      `${team} tem ${String(size)} e líbero ${libero}.`,
+    lineup: "Escalação",
+    lineupLabel: (team: string) => `Escalação do ${team}`,
     noRotation: (team: string, size: number) => `${team} tem ${String(size)}: sem rotação.`,
     start: "Começar partida",
     starting: "Abrindo a quadra…",
@@ -142,6 +147,9 @@ export const drawStrings = {
       openMatch: "Termine a partida aberta antes.",
       otherRound: "Há uma partida aberta em outra rodada. Encerre-a antes.",
       failed: "Não deu para começar a partida. Tente de novo.",
+      otherAccount:
+        "A quadra desta rodada foi aberta por outra conta. Entre com a conta que abriu a quadra.",
+      noAccount: "Entre na sua conta para começar a partida.",
     },
   },
 } as const;
