@@ -4,6 +4,9 @@ import type { TeamColorName } from "../../../theme/team-colors";
 import { strings } from "../../../strings/pt-BR";
 import { sidesOf } from "./court-sides";
 import type { CourtScreenModel, QueueModel } from "./court-screen.types";
+import type { HintLine } from "./hint-line";
+
+type UploadStoppedReason = Extract<HintLine, { kind: "upload-stopped" }>["reason"];
 
 /** The line in the middle strip. */
 export function hintText({ hint, teams }: CourtScreenModel): string {
@@ -14,7 +17,21 @@ export function hintText({ hint, teams }: CourtScreenModel): string {
       return strings.court.strip.oneMorePoint(teams[hint.side].label);
     case "next-point-closes":
       return strings.court.strip.nextPointCloses;
+    case "first-server-drawn":
+      return strings.court.strip.firstServerDrawn(teams[hint.side].label);
+    case "upload-stopped":
+      return uploadStoppedText(hint.reason);
   }
+}
+
+const UPLOAD_TEXTS: Partial<Record<UploadStoppedReason, string>> = {
+  "round-canceled": strings.court.upload.roundCanceled,
+  "no-permission": strings.court.upload.noPermission,
+};
+
+/** The reason when it is simple to say; the generic line for the others (question 85). */
+export function uploadStoppedText(reason: UploadStoppedReason): string {
+  return UPLOAD_TEXTS[reason] ?? strings.court.upload.stopped;
 }
 
 /** The color of whoever won each set, `null` for the set still open: the dots of the bar. */

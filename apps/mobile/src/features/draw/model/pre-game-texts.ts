@@ -13,6 +13,8 @@ const START_ERROR_TEXT: Readonly<Record<StartFromDrawError, string>> = {
   "other-round-match-open": blocked.otherRound,
   "match-open": blocked.openMatch,
   failed: blocked.failed,
+  "other-account": blocked.otherAccount,
+  "no-account": blocked.noAccount,
 };
 
 /** Why "Começar partida" is off, as the sheet says it (D6). */

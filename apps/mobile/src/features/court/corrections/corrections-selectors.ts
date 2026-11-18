@@ -61,6 +61,20 @@ function sideOutTextOf(point: RecentPoint): string | null {
     : corrections.sideOutRotation(point.setterZone);
 }
 
+/**
+ * Why tapping the newest point picks nothing: it is the score now, and going back to it would be
+ * refused (`nothing-to-undo`). The screen explains instead of trying (finding of part 1).
+ */
+export function currentPointNotice(
+  timeline: CourtSessionTimeline,
+  tapped: string | null,
+): string | null {
+  const [newest] = getRecentPoints(timeline);
+  return newest !== undefined && newest.eventId === tapped
+    ? strings.court.corrections.currentPoint
+    : null;
+}
+
 /** The picked point, if it is still on the list and is not the newest; otherwise `null`. */
 export function effectiveSelection(
   timeline: CourtSessionTimeline,
@@ -117,6 +131,7 @@ function rowOf(
     willUndo,
     accessibilityLabel: spokenLabel(point, appearance.label, serve, [
       authorText,
+      index === FIRST_ROW ? corrections.currentRow : null,
       selected ? corrections.selected : null,
       willUndo ? corrections.willUndo : null,
     ]),

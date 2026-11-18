@@ -10,40 +10,37 @@ import { useAttributionSheet } from "../../../features/court/hooks/use-attributi
 import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { useCourtScreenModel } from "../../../features/court/hooks/use-court-screen-model";
 import { useIndividualPoints } from "../../../features/court/hooks/use-individual-points";
 import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
-import {
-  selectCourtPhase,
-  selectCourtScreen,
-  stateOfTimeline,
-} from "../../../features/court/model/court-screen.selectors";
+import type { CourtPhase } from "../../../features/court/model/court-screen.types";
+import { courtSidesInverted } from "../../../features/court/model/court-sides";
+import { stateOfTimeline } from "../../../features/court/model/court-screen.selectors";
 import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { AttributionSheet } from "../../../features/court/ui/AttributionSheet";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
+import { CourtBlockedView } from "../../../features/court/ui/CourtBlockedView";
 import { useServices } from "../../../services/services-context";
+
+/** The phases with no court: the end of the set or the result is in front. */
+function isAwayFromCourt(phase: CourtPhase | null): boolean {
+  return phase === "match-ended" || phase === "match-pending";
+}
 
 /** Screens 09 and 10. When the set is decided or the match ends, the court hands over to its route. */
 export default function CourtRoute() {
   const route = useCourtRoute();
   const { courtRoster, courtFeedback } = useServices();
   const guard = useCourtGuard();
-  const { inverted } = useCourtSides();
+  const sides = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
   const undoNotice = useUndoNotice();
-  const timeline = view.status === "ready" ? view.timeline : null;
+  const { block, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
   const individualPoints = useIndividualPoints();
   const attribution = useAttributionSheet(timeline, dispatch);
-  const phase = useMemo(
-    () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
-    [timeline],
-  );
-  const model = useMemo(
-    () => (timeline === null ? null : selectCourtScreen(timeline, courtRoster)),
-    [timeline, courtRoster],
-  );
 
   // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
   // changes, so coming back from the end of the set (same step) does not open it again.
@@ -67,7 +64,10 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-  if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
+  if (block !== null) {
+    return <CourtBlockedView block={block} onLeave={route.leave} />;
+  }
+  if (view.status === "loading" || (view.status === "ready" && isAwayFromCourt(phase))) {
     return null;
   }
   if (model === null) {
@@ -77,11 +77,16 @@ export default function CourtRoute() {
     <View style={{ flex: 1 }}>
       <CourtScreen
         model={model}
-        inverted={inverted}
+        inverted={
+          timeline === null
+            ? sides.inverted
+            : courtSidesInverted(stateOfTimeline(timeline), sides.inverted)
+        }
         battery={
           warning.state.status === "showing"
             ? { level: warning.state.level, onDismiss: warning.dismiss }
             : null
+        }
         }
         onPoint={(team) => {
           // The zones wait after a point, even if the engine turns this one down.

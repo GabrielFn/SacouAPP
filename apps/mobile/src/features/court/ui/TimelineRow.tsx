@@ -74,8 +74,7 @@ function PointLine({ row, onPress }: PointLineProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={row.accessibilityLabel}
-      accessibilityState={{ selected: row.selected, disabled: !row.selectable }}
-      disabled={!row.selectable}
+      accessibilityState={{ selected: row.selected }}
       onPress={() => {
         onPress(row.eventId);
       }}

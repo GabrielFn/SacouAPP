@@ -8,7 +8,7 @@ import { manualEndWinner } from "./manual-end-winner";
 const NEXT = 1;
 
 /** The screens the menu points to that are not built yet: their items are hidden (E4.10, D1 and D8). */
-export const PENDING_COURT_MENU_SCREENS = ["lineup"] as const;
+export const PENDING_COURT_MENU_SCREENS = [] as const;
 
 export type MenuScreen = "lineup" | "substitution" | "corrections";
 
@@ -62,7 +62,8 @@ export function endMatchSummary(
   if (match === null) {
     return null;
   }
-  if (selectCourtPhase(state) === "set-decided") {
+  const phase = selectCourtPhase(state);
+  if (phase === "set-decided" || phase === "match-pending") {
     return { kind: "confirm-set" };
   }
   const winner = manualEndWinner(match);

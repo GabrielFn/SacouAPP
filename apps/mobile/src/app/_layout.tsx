@@ -5,6 +5,9 @@ import {
   expoBenchmarkRuntimeOpener,
   expoCourtRuntimeOpener,
 } from "../adapters/expo-court-runtime-opener";
+import { mathRandomSource } from "../adapters/math-random-source";
+import { reactNativeAppForeground } from "../adapters/react-native-app-foreground";
+import { timeoutScheduler } from "../adapters/timeout-scheduler";
 import { expoHapticsFeedback } from "../adapters/expo-haptics-feedback";
 import { expoKeepAwakeScreen } from "../adapters/expo-keep-awake-screen";
 import { expoBatteryMonitor } from "../adapters/expo-battery-monitor";
@@ -17,8 +20,11 @@ import { expoFileShare } from "../adapters/expo-file-share";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
+import { expoCryptoShuffler } from "../adapters/expo-crypto-shuffler";
+import { createStoredNextMatchDrafts } from "../adapters/stored-next-match-drafts";
 import { createCachedCourtRoster } from "../adapters/cached-court-roster";
 import { createCachedCourtRoundSettings } from "../adapters/cached-court-round-settings";
+import { createCachedCourtRoundSource } from "../adapters/cached-court-round-source";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
@@ -104,11 +110,17 @@ const realServices: Services = {
     idTokens: sessionIdTokens(authSession, sessionEnder),
   }),
   networkStatus,
+  appForeground: reactNativeAppForeground,
+  scheduler: timeoutScheduler,
+  randomSource: mathRandomSource,
   shareSheet: reactNativeShareSheet,
   fileShare: expoFileShare,
   clipboard: expoClipboard,
   idGenerator: expoCryptoIdGenerator,
   coinFlip: expoCryptoCoinFlip,
+  shuffler: expoCryptoShuffler,
+  nextMatchDrafts: createStoredNextMatchDrafts(cacheStore),
+  courtRounds: createCachedCourtRoundSource(queryClient),
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,

@@ -1,5 +1,5 @@
 import type { TeamSide } from "@sacou/match-engine";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
@@ -10,18 +10,27 @@ import {
   selectSetEnd,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
-import { buildSetEndActions } from "../../../features/court/model/set-end-actions";
+import { refusalText } from "../../../features/court/model/refusal-text";
+import {
+  canConfirmSetEnd,
+  firstServerToSend,
+  setEndView,
+} from "../../../features/court/model/set-end-view";
 import { confirmSetEnd } from "../../../features/court/session/confirm-set-end";
-import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
+import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { SetEndAttribution } from "../../../features/court/ui/SetEndAttribution";
+import { SetEndSheet } from "../../../features/court/ui/SetEndSheet";
 import { useServices } from "../../../services/services-context";
-import { strings } from "../../../strings/pt-BR";
 
-/** Placeholder of screen 25 (E4.10): confirms the end of the set, and takes the toss of the decider. */
+/** Screen 25: confirms the end of the set, with the toss of the deciding set (D5). */
 export default function SetEndRoute() {
   const route = useCourtRoute();
-  const { courtRoster, courtFeedback } = useServices();
-  const { view, dispatch } = useCourtSession();
+  const { courtRoster, courtFeedback, coinFlip } = useServices();
+  const { view, dispatch, retry } = useCourtSession();
+  // The toss is not recorded until the confirmation: leaving the screen forgets it.
+  const [toss, setToss] = useState<TeamSide | null>(null);
+  const [refusal, setRefusal] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const timeline = view.status === "ready" ? view.timeline : null;
   const model = useMemo(
     () => (timeline === null ? null : selectSetEnd(timeline, courtRoster)),
@@ -31,8 +40,8 @@ export default function SetEndRoute() {
   const { backOrCourt, replace } = route;
   const step = nextCourtRoute("set-end", phase, true);
 
-  // Confirming the set starts the next one (back to the court) or, for the deciding set, ends the
-  // match: the same confirmation stores both events, so this screen hands over to the result.
+  // Undoing the last point goes back to the court; confirming the next set too, and confirming the
+  // deciding set hands over to the result (the confirmation stores `SetEnded` and `MatchEnded`).
   useEffect(() => {
     if (step === "go-back") {
       backOrCourt();
@@ -41,32 +50,44 @@ export default function SetEndRoute() {
     }
   }, [step, backOrCourt, replace]);
 
+  if (view.status === "failed") {
+    return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
+  }
   if (model === null || timeline === null) {
     return null;
   }
-  const { setEnd } = strings.court;
-  const confirm = (firstServer?: TeamSide) => {
-    void confirmSetEnd({ dispatch, feedback: courtFeedback }, firstServer);
-  };
-  const confirmActions = buildSetEndActions(model, setEnd, confirm);
+  const matchId = stateOfTimeline(timeline).currentMatch?.matchId ?? "";
+  const colorOf = (side: TeamSide) => courtRoster.teamAppearance(matchId, side).color;
   return (
     <View style={{ flex: 1 }}>
-      <CourtPlaceholder
-        title={setEnd.title(model.setNumber)}
-        lines={[
-          setEnd.winner(model.winnerLabel),
-          setEnd.scoreLine(
-            model.scores.a.label,
-            model.scores.a.score,
-            model.scores.b.label,
-            model.scores.b.score,
-          ),
-          ...(model.needsFirstServer ? [setEnd.whoServes] : []),
-        ]}
-        actions={[
-          ...confirmActions,
-          { label: setEnd.back, variant: "secondary", onPress: backOrCourt },
-        ]}
+      <SetEndSheet
+        model={model}
+        view={setEndView(model)}
+        colors={{ a: colorOf("a"), b: colorOf("b") }}
+        toss={toss}
+        canConfirm={canConfirmSetEnd(model, toss) && !confirming}
+        refusal={refusal}
+        onChooseToss={setToss}
+        onDrawToss={() => {
+          setToss(coinFlip.flip());
+        }}
+        onUndo={() => {
+          void dispatch({ type: "undo" }).then((result) => {
+            setRefusal(result.ok ? null : refusalText(result.error));
+          });
+        }}
+        onConfirm={() => {
+          if (confirming) return;
+          setConfirming(true);
+          const sent = confirmSetEnd(
+            { dispatch, feedback: courtFeedback },
+            firstServerToSend(model, toss),
+          );
+          void sent.then((result) => {
+            setRefusal(result.ok ? null : refusalText(result.error));
+            setConfirming(false);
+          });
+        }}
       />
       <SetEndAttribution timeline={timeline} dispatch={dispatch} />
     </View>

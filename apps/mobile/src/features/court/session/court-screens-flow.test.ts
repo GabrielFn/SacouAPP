@@ -23,6 +23,7 @@ describe("retry after a failed opening", () => {
       status: "ready",
       courtSessionId: SESSION,
       events: [],
+      sync: { takenOver: false, syncHalt: null, ownership: "own" },
     });
   });
 

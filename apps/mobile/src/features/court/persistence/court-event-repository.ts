@@ -11,6 +11,13 @@ import type {
 import type { IdGenerator } from "../../../services/id/id-generator";
 import type { SqlDatabase, SqlExecutor, SqlRow } from "../ports/sql-database";
 import { continuesLog, hasContiguousSequences } from "./append-rules";
+import {
+  findSessionsToSync,
+  haltSync,
+  markTakenOver,
+  moveCursor,
+  readSyncColumns,
+} from "./court-sync-statements";
 import { FIRST_BATCH } from "./migrations.data";
 import {
   CLOSED_STATUS,
@@ -94,6 +101,10 @@ async function loadSession(
   if (batch === null) {
     return err({ code: "session-not-found" });
   }
+  const sync = readSyncColumns(session);
+  if (!sync.ok) {
+    return sync;
+  }
   const rows = await transaction.getAll(SELECT_EVENTS, [courtSessionId]);
   const parsed = rows.map(fromEventRow);
   const failure = parsed.find((result): result is Err<CourtLogError> => !result.ok);
@@ -104,7 +115,7 @@ async function loadSession(
   if (!hasContiguousSequences(events)) {
     return err({ code: "corrupted-log" });
   }
-  return ok({ batch, events });
+  return ok({ batch, events, ...sync.value });
 }
 
 async function appendEnvelopes(
@@ -112,9 +123,14 @@ async function appendEnvelopes(
   courtSessionId: string,
   envelopes: readonly EventEnvelope[],
 ): Promise<CourtLogResult<void>> {
-  const batch = readIntegerColumn(await readSession(transaction, courtSessionId), "batch");
+  const session = await readSession(transaction, courtSessionId);
+  const batch = readIntegerColumn(session, "batch");
   if (batch === null) {
     return err({ code: "session-not-found" });
+  }
+  // Read in the same transaction as the write: a point marked as the 409 arrives is never kept (D2).
+  if (readIntegerColumn(session, "taken_over_batch") !== null) {
+    return err({ code: "taken-over" });
   }
   const [first] = envelopes;
   if (first === undefined) {
@@ -134,6 +150,12 @@ async function appendEnvelopes(
   return ok(undefined);
 }
 
+/** Both ids or none: a sample session was opened without an origin. */
+function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
+  const groupId = readTextColumn(row, "group_id");
+  const roundId = readTextColumn(row, "round_id");
+  return groupId === null || roundId === null ? null : { groupId, roundId };
+}
 async function setStatus(
   transaction: SqlExecutor,
   courtSessionId: string,
@@ -165,8 +187,14 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
           FIRST_BATCH,
           origin?.groupId ?? null,
           origin?.roundId ?? null,
+          origin?.ownerKey ?? null,
         ]);
         return ok(undefined);
+      }),
+    findOrigin: (courtSessionId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
+        return ok(originOf(row));
       }),
     findActiveSession: () =>
       guarded(async () => {
@@ -189,5 +217,20 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       guarded(() => database.transaction((tx) => loadSession(tx, courtSessionId))),
     append: (courtSessionId, envelopes) =>
       guarded(() => database.transaction((tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
+    findSessionsToSync: (deviceId) => guarded(() => findSessionsToSync(database, deviceId)),
+    markAcknowledged: (courtSessionId, sequence) =>
+      guarded(() =>
+        database.transaction((tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: true })),
+      ),
+    rewindAcknowledged: (courtSessionId, sequence) =>
+      guarded(() =>
+        database.transaction((tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: false })),
+      ),
+    haltSync: (courtSessionId, code) =>
+      guarded(() => database.transaction((tx) => haltSync(tx, courtSessionId, code))),
+    markTakenOver: (courtSessionId, deviceId, notice) =>
+      guarded(() =>
+        database.transaction((tx) => markTakenOver(tx, courtSessionId, deviceId, notice)),
+      ),
   };
 }

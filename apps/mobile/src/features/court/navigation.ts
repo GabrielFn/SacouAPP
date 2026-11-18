@@ -7,6 +7,7 @@ export const COURT_PATHS = {
   menu: "/court/[courtSessionId]/menu",
   corrections: "/court/[courtSessionId]/corrections",
   substitution: "/court/[courtSessionId]/substitution",
+  lineup: "/court/[courtSessionId]/lineup",
 } as const;
 
 export type CourtPathKey = keyof typeof COURT_PATHS;

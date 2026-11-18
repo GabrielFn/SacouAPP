@@ -61,7 +61,18 @@ describe("append", () => {
 
     expect((await log.append(SESSION_A, envelopes)).ok).toBe(true);
 
-    expect(await log.load(SESSION_A)).toEqual({ ok: true, value: { batch: 1, events: envelopes } });
+    expect(await log.load(SESSION_A)).toEqual({
+      ok: true,
+      value: {
+        batch: 1,
+        events: envelopes,
+        ackedSequence: 0,
+        takenOverBatch: null,
+        syncHalt: null,
+        fromRound: false,
+        ownerKey: null,
+      },
+    });
   });
 
   test("stores both or none: a failure on the second insert leaves the file as it was", async () => {

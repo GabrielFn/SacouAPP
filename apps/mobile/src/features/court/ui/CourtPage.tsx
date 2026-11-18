@@ -9,8 +9,9 @@ import { Text } from "../../../ui/Text";
 export interface CourtPageProps {
   readonly title: string;
   readonly subtitle: string | null;
-  readonly closeLabel: string;
-  readonly onClose: () => void;
+  /** Without `onClose` the page has no cross: screen 25 is left only by its own buttons. */
+  readonly closeLabel?: string;
+  readonly onClose?: () => void;
   readonly children: ReactNode;
 }
 
@@ -40,19 +41,21 @@ export function CourtPage({ title, subtitle, closeLabel, onClose, children }: Co
           </Text>
           {subtitle === null ? null : <Text variant="muted">{subtitle}</Text>}
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={closeLabel}
-          onPress={onClose}
-          style={{
-            minWidth: tokens.sizes.iconButton,
-            minHeight: tokens.sizes.iconButton,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CloseIcon color={colors.text} />
-        </Pressable>
+        {onClose === undefined ? null : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={closeLabel}
+            onPress={onClose}
+            style={{
+              minWidth: tokens.sizes.iconButton,
+              minHeight: tokens.sizes.iconButton,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CloseIcon color={colors.text} />
+          </Pressable>
+        )}
       </View>
       {children}
     </View>

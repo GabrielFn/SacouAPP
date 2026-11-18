@@ -1,41 +1,78 @@
 import { useEffect, useState, type ReactNode } from "react";
 
 import { CourtRuntimeProvider } from "../features/court/hooks/court-runtime-context";
+import { CourtSyncProvider } from "../features/court/hooks/court-sync-context";
 import { ResumeProvider } from "../features/court/hooks/resume-context";
 import type { CourtRuntime, CourtRuntimeOpener } from "../features/court/ports/court-runtime";
+import type { CourtSync } from "../features/court/ports/court-sync";
+import { courtAccountOf } from "../features/court/sync/court-account";
+import { createCourtSyncRunner } from "../features/court/sync/court-sync-runner";
 import { findResumableCourtSession } from "../features/court/session/resume-court";
 import { createResumeOnce, type ResumeOnce } from "../features/court/session/resume-once";
 import { strings } from "../strings/pt-BR";
 import { ErrorScreen } from "../ui/ErrorScreen";
-import { useServices } from "./services-context";
+import { useServices, type Services } from "./services-context";
 
 type GateState =
   | { readonly status: "opening" }
-  | { readonly status: "ready"; readonly runtime: CourtRuntime; readonly resume: ResumeOnce }
+  | {
+      readonly status: "ready";
+      readonly runtime: CourtRuntime;
+      readonly sync: CourtSync;
+      readonly resume: ResumeOnce;
+    }
   | { readonly status: "failed" };
 
 export interface DatabaseGateProps {
   readonly children: ReactNode;
 }
 
-async function openRuntime(opener: CourtRuntimeOpener): Promise<GateState> {
+type SyncServices = Pick<
+  Services,
+  | "sacouApi"
+  | "authSession"
+  | "networkStatus"
+  | "appForeground"
+  | "clock"
+  | "scheduler"
+  | "randomSource"
+>;
+
+/** The upload loop over the database just opened and the services of the app (ADR 0067, D3). */
+function createSync(log: CourtRuntime["log"], services: SyncServices): CourtSync {
+  return createCourtSyncRunner({
+    log,
+    api: services.sacouApi,
+    account: courtAccountOf(services.authSession),
+    network: services.networkStatus,
+    foreground: services.appForeground,
+    clock: services.clock,
+    scheduler: services.scheduler,
+    random: services.randomSource,
+  });
+}
+
+async function openRuntime(opener: CourtRuntimeOpener, services: SyncServices): Promise<GateState> {
   const opened = await opener.open();
   if (!opened.ok) {
     return { status: "failed" };
   }
+  const sync = createSync(opened.value.log, services);
+  const runtime: CourtRuntime = { ...opened.value, sync };
   // Decided here, once per opening of the app, together with the database.
-  const resumable = await findResumableCourtSession(opened.value);
-  return { status: "ready", runtime: opened.value, resume: createResumeOnce(resumable) };
+  const resumable = await findResumableCourtSession(runtime);
+  return { status: "ready", runtime, sync, resume: createResumeOnce(resumable) };
 }
 
 /** Waits for the local database to open and migrate before any route shows (like the font gate). */
 export function DatabaseGate({ children }: DatabaseGateProps) {
-  const { courtRuntimeOpener } = useServices();
+  const services = useServices();
+  const { courtRuntimeOpener } = services;
   const [state, setState] = useState<GateState>({ status: "opening" });
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const alive = { current: true };
-    void openRuntime(courtRuntimeOpener).then((next) => {
+    void openRuntime(courtRuntimeOpener, services).then((next) => {
       if (alive.current) {
         setState(next);
       }
@@ -43,7 +80,15 @@ export function DatabaseGate({ children }: DatabaseGateProps) {
     return () => {
       alive.current = false;
     };
-  }, [courtRuntimeOpener, attempt]);
+  }, [courtRuntimeOpener, services, attempt]);
+  const sync = state.status === "ready" ? state.sync : null;
+  // The loop runs while the database is open; it sends on its own, also the sessions already closed.
+  useEffect(() => {
+    sync?.start();
+    return () => {
+      sync?.stop();
+    };
+  }, [sync]);
   if (state.status === "opening") {
     return null;
   }
@@ -67,7 +112,9 @@ export function DatabaseGate({ children }: DatabaseGateProps) {
   }
   return (
     <CourtRuntimeProvider runtime={state.runtime}>
-      <ResumeProvider resume={state.resume}>{children}</ResumeProvider>
+      <CourtSyncProvider sync={state.sync}>
+        <ResumeProvider resume={state.resume}>{children}</ResumeProvider>
+      </CourtSyncProvider>
     </CourtRuntimeProvider>
   );
 }

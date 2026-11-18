@@ -1,5 +1,7 @@
 // Texts of the court mode (screens 09 and 10, QuadraSol.dc.html). Plain functions interpolate.
 
+import { courtEndStrings } from "./court-end.pt-BR";
+
 export interface ZoneLabelInput {
   readonly team: string;
   readonly score: number;
@@ -47,6 +49,25 @@ export const courtStrings = {
     positions: "Posições no momento do saque",
     oneMorePoint: (team: string) => `Mais um ponto e o ${team} fecha o set`,
     nextPointCloses: "Quem fizer o próximo ponto fecha o set",
+    firstServerDrawn: (team: string) => `Saca primeiro: ${team} (sorteio)`,
+  },
+  // The points are not reaching the server (question 85): the court goes on, and the strip says why.
+  upload: {
+    stopped: "Os pontos não estão indo para o servidor. Peça ao admin para conferir.",
+    roundCanceled: "A rodada foi cancelada. Os pontos ficam só neste celular.",
+    noPermission: "Sua conta não marca mais esta quadra. Peça ao admin para conferir.",
+  },
+  // The session of another account (ADR 0067, D8): the court does not open for marking.
+  otherAccount: {
+    title: "Entre com a conta que abriu a quadra",
+    body: "Os pontos desta quadra só podem ser marcados e enviados pela conta que a abriu.",
+    leave: "Sair da quadra",
+  },
+  // Screen 09b without the name until E3.8 (D7, answer 83).
+  takenOver: {
+    title: "Outro celular assumiu o placar",
+    body: "Este celular parou de marcar.",
+    leave: "Sair da quadra",
   },
   queue: {
     title: "Na fila",
@@ -74,24 +95,7 @@ export const courtStrings = {
     retry: "Tentar de novo",
     back: "Voltar ao início",
   },
-  setEnd: {
-    title: (setNumber: number) => `Fim do ${String(setNumber)}º set`,
-    winner: (team: string) => `${team} venceu o set`,
-    confirm: "Confirmar fim do set",
-    back: "Voltar",
-    whoServes: "Quem saca primeiro no set decisivo?",
-    serves: (team: string) => `${team} saca`,
-    scoreLine: (first: string, a: number, second: string, b: number) =>
-      `${first} ${String(a)} x ${String(b)} ${second}`,
-  },
-  matchEnd: {
-    title: "Partida encerrada",
-    winner: (team: string) => `${team} venceu`,
-    noWinner: "Sem vencedor",
-    setScore: (setNumber: number, a: number, b: number) =>
-      `${String(setNumber)}º set: ${String(a)} x ${String(b)}`,
-    home: "Voltar ao início",
-  },
+  ...courtEndStrings,
   menu: {
     title: "Menu da partida",
     subtitle: (matchNumber: number, setNumber: number, scoreLine: string) =>
@@ -140,6 +144,8 @@ export const courtStrings = {
     sideOut: "Side-out",
     sideOutRotation: (zone: number) => `Side-out · rot. ${String(zone)}`,
     willUndo: "Será desfeito",
+    currentRow: "Placar atual",
+    currentPoint: "Esse é o placar de agora. Para tirar esse ponto, use DESFAZER na quadra.",
     selected: "Selecionado",
     rowLabel: (a: number, b: number, team: string, serve: string, sideOut: string | null) =>
       `${String(a)} a ${String(b)}, ponto do ${team}, ${serve}${sideOut === null ? "" : `. ${sideOut}`}`,

@@ -2,6 +2,10 @@ import type { MemberId, TeamSide } from "@sacou/match-engine";
 
 import type { TeamColorName } from "../../../theme/team-colors";
 
+/** The position a member said they play; `null` without a profile. */
+export type RosterPosition =
+  "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero" | "any" | null;
+
 export interface TeamAppearance {
   readonly label: string;
   readonly color: TeamColorName;
@@ -15,5 +19,7 @@ export interface TeamAppearance {
 export interface CourtRoster {
   /** A member without a known name gets a neutral one, so the court never shows an empty chip. */
   nameOf(memberId: MemberId): string;
+  /** For the "fora de ordem" of screen 22 (E4.8); `null` when unknown, which never warns. */
+  positionOf(memberId: MemberId): RosterPosition;
   teamAppearance(matchId: string, side: TeamSide): TeamAppearance;
 }

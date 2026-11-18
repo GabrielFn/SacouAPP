@@ -10,7 +10,7 @@ import {
 import { selectCourtScreen } from "../model/court-screen.selectors";
 import type { Clock } from "../ports/clock";
 import type { CourtRoster } from "../ports/court-roster";
-import type { CourtRuntime } from "../ports/court-runtime";
+import type { CourtStorage } from "../ports/court-runtime";
 import { createCourtReplayer, runCourtReplay } from "../session/court-replay";
 import { createCourtSessionController } from "../session/court-session-controller";
 import {
@@ -42,7 +42,7 @@ export interface BenchmarkDeps {
   readonly clock: Clock;
   readonly roster: CourtRoster;
   /** The database of the benchmark, never the one of the matches. */
-  readonly runtime: CourtRuntime;
+  readonly runtime: CourtStorage;
   /** Gives the screen time to draw between two measures. */
   readonly pause: () => Promise<void>;
   readonly repetitions?: number;

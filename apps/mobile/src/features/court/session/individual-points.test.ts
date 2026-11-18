@@ -3,9 +3,17 @@ import { describe, expect, test } from "vitest";
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
 import { createFakeCourtRoundSettings } from "../../../adapters/fake-court-round-settings";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
-import { readIndividualPoints } from "./individual-points";
+import { findSessionOrigin, isIndividualPoints } from "./individual-points";
 
 const ROUND_ON = "round-on";
+
+async function readIndividualPoints(
+  log: Parameters<typeof findSessionOrigin>[0],
+  settings: Parameters<typeof isIndividualPoints>[1],
+  courtSessionId: string,
+): Promise<boolean> {
+  return isIndividualPoints(await findSessionOrigin(log, courtSessionId), settings);
+}
 
 async function logWith() {
   const log = createFakeCourtEventLog(createSequentialIdGenerator());

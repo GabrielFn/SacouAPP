@@ -28,6 +28,8 @@ export interface CorrectionsScreenProps {
   readonly canSwitchServer: boolean;
   /** "Agora saca o Azul.", while that was the last thing done. */
   readonly servingNotice: string | null;
+  /** Why tapping the newest point picked nothing (it is the score now), or `null`. */
+  readonly currentNotice: string | null;
   /** Why the last command was turned down, or `null`. */
   readonly refusal: string | null;
   readonly onClose: () => void;
@@ -52,6 +54,9 @@ function ActionsColumn(props: CorrectionsScreenProps) {
   return (
     <>
       <MainPanel {...props} />
+      {props.currentNotice === null ? null : (
+        <Text accessibilityLiveRegion="polite">{props.currentNotice}</Text>
+      )}
       {props.servingNotice === null ? null : (
         <Text accessibilityLiveRegion="polite">{props.servingNotice}</Text>
       )}
