@@ -28,9 +28,14 @@ describe("deploy identities", () => {
   });
 
   it("binds each account to one subject: build to the main ref, each deployer to its environment", () => {
-    assert.equal(variableOf("SUBJECT_BUILD"), "repo:${GITHUB_REPO}:ref:refs/heads/main");
-    assert.equal(variableOf("SUBJECT_TEST"), "repo:${GITHUB_REPO}:environment:test");
-    assert.equal(variableOf("SUBJECT_PROD"), "repo:${GITHUB_REPO}:environment:production");
+    assert.equal(
+      variableOf("SUBJECT_PREFIX"),
+      "repo:${GITHUB_REPO%%/*}@${GITHUB_OWNER_ID}/${GITHUB_REPO#*/}@${GITHUB_REPO_ID}",
+    );
+    assert.equal(variableOf("GITHUB_OWNER_ID"), "5855069");
+    assert.equal(variableOf("SUBJECT_BUILD"), "${SUBJECT_PREFIX}:ref:refs/heads/main");
+    assert.equal(variableOf("SUBJECT_TEST"), "${SUBJECT_PREFIX}:environment:test");
+    assert.equal(variableOf("SUBJECT_PROD"), "${SUBJECT_PREFIX}:environment:production");
     assert.match(
       script,
       /grant_deployer "\$DEPLOYER_TEST" "\$SERVICE_TEST" "\$RUNNER_TEST" "\$SUBJECT_TEST"/,

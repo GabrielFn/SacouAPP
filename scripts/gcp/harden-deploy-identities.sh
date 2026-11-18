@@ -19,6 +19,7 @@ PROJECT_ID="sacou-api"
 REGION="us-east4"
 GITHUB_REPO="GabrielFn/SacouAPP"
 GITHUB_REPO_ID="1440184485"
+GITHUB_OWNER_ID="5855069"
 DEPLOY_WORKFLOW_REF="${GITHUB_REPO}/.github/workflows/deploy-api.yml@refs/heads/main"
 ARTIFACT_REPO="sacou"
 POOL="github"
@@ -34,10 +35,13 @@ RUNNER_TEST="sacou-api-test-run"
 RUNNER_PROD="sacou-api-run"
 RUNNERS=("$RUNNER_TEST" "$RUNNER_PROD")
 
-# The default GitHub OIDC subjects: a job without an environment carries the ref, a job with one carries its name.
-SUBJECT_BUILD="repo:${GITHUB_REPO}:ref:refs/heads/main"
-SUBJECT_TEST="repo:${GITHUB_REPO}:environment:test"
-SUBJECT_PROD="repo:${GITHUB_REPO}:environment:production"
+# The repository uses GitHub's immutable OIDC subject (owner and repository with their numeric ids), checked with
+# `gh api repos/GabrielFn/SacouAPP/actions/oidc/customization/sub`. A job without an environment carries the ref,
+# a job with one carries its name.
+SUBJECT_PREFIX="repo:${GITHUB_REPO%%/*}@${GITHUB_OWNER_ID}/${GITHUB_REPO#*/}@${GITHUB_REPO_ID}"
+SUBJECT_BUILD="${SUBJECT_PREFIX}:ref:refs/heads/main"
+SUBJECT_TEST="${SUBJECT_PREFIX}:environment:test"
+SUBJECT_PROD="${SUBJECT_PREFIX}:environment:production"
 
 sa_email() { echo "$1@${PROJECT_ID}.iam.gserviceaccount.com"; }
 
@@ -52,7 +56,7 @@ ensure_account() {
   fi
 }
 
-# Creates the service once, private, running as its own runtime account; the first real deploy replaces the image.
+# Creates the service once, public (the API checks its own tokens), running as its own runtime account; the first real deploy replaces the image.
 ensure_service() {
   local service="$1" runner="$2"
   if ! gcloud run services describe "$service" --region="$REGION" >/dev/null 2>&1; then
