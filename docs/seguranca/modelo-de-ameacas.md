@@ -341,6 +341,14 @@ Implementado na E4.11 ([ADR 0067](../arquitetura/adr/0067-sincronizacao-da-quadr
 | T | Marcar antes de ter o stream inteiro (o celular novo marcaria sobre um placar velho) | O log local só passa a existir quando a importação termina, numa transação (`replaceWithServerStream`): até lá a quadra não tem sessão para abrir (B2) |
 | R | Pontos do celular antigo somem sem aviso | `not-the-writer` com `lastSequence` (ausente: o aparelho nunca escreveu um lote, todos os pontos ficam de fora) move os eventos para `court_refused_events`; o modelo da 09c os lista com `refusedPoints` e avisa quando um "Desfazer" deste celular não entrou. Outras sessões abertas da rodada têm os pendentes movidos para os recusados e são fechadas na importação. Risco aceito: os pendentes de outra conta na mesma sessão (D8) são descartados ao assumir, porque só ela os enviaria e a sessão deixa de ser dela |
 
+**Telas da troca (E4.11, Parte 3; ADR 0067, decisões 16 a 21):** 09a, 09b, 09c e as entradas pela 06 e pela 08.
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| E | Marcar numa sessão sem dono (aberta antes da E4.11) ou antes de a conta ser lida: os pontos nunca seriam enviados, ou sairiam com a conta errada | O controlador só aceita comando com `ownership` `own`; `unowned` e `account-pending` respondem `not-ready` (achado 1 da Parte 1). Sem dono, a tela oferece só "Sair" e "Assumir a quadra"; com a conta ainda não lida, não desenha nada (sem o aviso que piscava, achado 2) |
+| R | Assumir a quadra de outra conta e perder, sem saber, os pontos que ela não enviou | "Assumir a quadra" diz antes quantos pontos deste celular não chegaram ao servidor ("N pontos não enviados vão ficar de fora", com "Assumir mesmo assim"; S4 da revisão do #156) |
+| I | Quem marca a quadra (o `memberId` do resumo) gravado no aparelho | O resumo fica só na memória do TanStack Query (`["groups", g, "rounds", r, "court-session"]`, `gcTime` de 30 s), fora da lista do cache persistido (`isPersistedKey`, teste em `policies.test.ts`); o nome vem do cache de membros só na tela |
+
 ### 12.4 Trocar jogador e ponto individual no app (E4.10, Parte 3)
 
 Telas 23a e 31, e o autor nas 24 e 25 ([ADR 0066](../arquitetura/adr/0066-controles-da-quadra-no-app.md), itens 19 a 23). O autor de cada ponto é dado de desempenho da pessoa (ADR 0031).

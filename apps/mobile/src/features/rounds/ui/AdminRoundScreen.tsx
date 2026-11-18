@@ -25,8 +25,7 @@ import {
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
 import type { CopyNote } from "../model/round-screen.reducer";
 import { canDraw } from "../../draw/model/can-draw";
-import { useRoundCourt } from "../../court/hooks/use-round-court";
-import { courtHref } from "../../court/navigation";
+import { useRoundCourtEntry } from "../../court/hooks/use-round-court-entry";
 import {
   addPlayerHref,
   drawHref,
@@ -88,7 +87,7 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
   );
 }
 
-/** "Abrir quadra" only with a court of this round on the device, "Sortear times" for who draws (D1). */
+/** "Abrir quadra" with a court of this round on the device or on the server (E4.11, D5), "Sortear times" for who draws (D1). */
 export interface RoundFooterProps {
   readonly actions: readonly PendingRoundScreen[];
   /** With the draw off the 07 builds the teams by hand: "Montar times" (question 72). */
@@ -206,12 +205,12 @@ export function AdminRoundScreen({
 }: AdminRoundScreenProps) {
   const router = useRouter();
   const roster = rosterView(round, settings, members);
-  const read = useRoundCourt(round.roundId);
-  const court = read.status === "read" ? read.court : null;
+  const canceled = isCanceled(round);
+  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, !canceled);
   const actions = roundFooterActions(
-    footerActions(PENDING_ROUND_SCREENS, isCanceled(round)),
+    footerActions(PENDING_ROUND_SCREENS, canceled),
     canDraw(group.role),
-    court !== null,
+    court.available,
   );
   const footer = (
     <RoundFooter
@@ -220,11 +219,7 @@ export function AdminRoundScreen({
       onDraw={() => {
         router.push(drawHref(groupId, round.roundId));
       }}
-      onCourt={() => {
-        if (court !== null) {
-          router.push(courtHref("court", { courtSessionId: court.courtSessionId }));
-        }
-      }}
+      onCourt={court.open}
     />
   );
   return (

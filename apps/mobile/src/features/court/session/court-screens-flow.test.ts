@@ -23,7 +23,15 @@ describe("retry after a failed opening", () => {
       status: "ready",
       courtSessionId: SESSION,
       events: [],
-      sync: { takenOver: false, syncHalt: null, ownership: "own" },
+      sync: {
+        takenOver: false,
+        syncHalt: null,
+        ackedSequence: 0,
+        refused: [],
+        refusedUnseen: false,
+        ownership: "own",
+      },
+      writer: { deviceId: expect.any(String) as string, batch: 1 },
     });
   });
 

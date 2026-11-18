@@ -165,6 +165,7 @@ describe("the allow list of the persisted cache (P6)", () => {
     [["groups", G, "rounds", "round-1", "extra"], false],
     [queryKeys.invites(G), false],
     [queryKeys.memberLevels(G), false],
+    [queryKeys.courtSummary(G, "round-1"), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [queryKeys.myProfile(), true],

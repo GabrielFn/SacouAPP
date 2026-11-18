@@ -6,7 +6,9 @@ import {
   ensureRoundCourtSession,
   type EnsureRoundCourtError,
 } from "../../court/session/ensure-round-court-session";
+import type { RoundCourt } from "../../court/session/round-court";
 import { startCourtMatch } from "../../court/session/start-court-match";
+import { opensTakeover, type CourtSummaryLookup } from "../../court/takeover/court-summary-lookup";
 import { buildMatchStart, type MatchStartInput } from "../model/match-start";
 
 /** Why the match did not start; only codes, never a value of the draw. */
@@ -41,4 +43,27 @@ export async function startFromDraw(
   const refusedAsOpen =
     started.error.code === "refused" && started.error.reason === "match-already-open";
   return err(refusedAsOpen ? "match-open" : "failed");
+}
+
+/** Where "Começar partida" leads: the court that started, or the 09a of the court of the round. */
+export type CourtOpening =
+  { readonly kind: "court"; readonly courtSessionId: string } | { readonly kind: "take-over" };
+
+export interface StartOrTakeOverDeps {
+  /** The summary read now, or `undefined` offline: offline the match starts as before. */
+  readonly lookUp: () => Promise<CourtSummaryLookup | undefined>;
+  readonly local: RoundCourt | null;
+  readonly start: () => Promise<Result<string, StartFromDrawError>>;
+}
+
+/**
+ * "Começar partida" with a network (E4.11, D5, case a): when the server has a stream of the round this
+ * phone does not write, the 09a comes first and nothing is started here.
+ */
+export async function startOrTakeOver(
+  deps: StartOrTakeOverDeps,
+): Promise<Result<CourtOpening, StartFromDrawError>> {
+  if (opensTakeover(await deps.lookUp(), deps.local)) return ok({ kind: "take-over" });
+  const started = await deps.start();
+  return started.ok ? ok({ kind: "court", courtSessionId: started.value }) : started;
 }

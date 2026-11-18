@@ -35,6 +35,23 @@ export const courtTakeoverStrings = {
       failed: "Não deu para assumir a quadra. Tente de novo.",
     },
   },
+  // A round court opened without an account (ADR 0067, D8): its points are never sent.
+  unowned: {
+    title: "Esta quadra foi aberta sem conta",
+    body: "Os pontos dela não vão para o servidor. Para seguir marcando, assuma a quadra com a sua conta.",
+    leave: "Sair da quadra",
+    takeOver: "Assumir a quadra",
+  },
+  // Before taking over a court with points of this phone the server never got (S4 of the review).
+  discard: {
+    title: (points: number) =>
+      points === 1
+        ? "1 ponto não enviado vai ficar de fora"
+        : `${String(points)} pontos não enviados vão ficar de fora`,
+    body: "Eles foram marcados neste celular e não chegaram ao servidor. Ao assumir, este celular fica com o placar do servidor.",
+    confirm: "Assumir mesmo assim",
+    cancel: "Cancelar",
+  },
   // Screen 09b (PlacarAssumido.dc.html), with the text of answer 83.
   takenOver: {
     title: "Outro celular assumiu o placar",

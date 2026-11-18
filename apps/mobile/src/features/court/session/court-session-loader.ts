@@ -17,6 +17,12 @@ export interface SessionSyncState {
   /** Another phone took the court over: this one writes nothing more (09b). */
   readonly takenOver: boolean;
   readonly syncHalt: SyncHaltCode | null;
+  /** The highest sequence of this device the server confirmed: the line between kept and pending. */
+  readonly ackedSequence: number;
+  /** The events of this device the server left out (D6): screen 09c lists their points. */
+  readonly refused: readonly EventEnvelope[];
+  /** Screen 09c was not closed with "Entendi" since they left the log (aceite B8). */
+  readonly refusedUnseen: boolean;
 }
 
 export interface LoadedSession {
@@ -44,13 +50,14 @@ export async function loadCourtSession(
     return err(stored.error.code);
   }
   const { batch, events, takenOverBatch, syncHalt, fromRound, ownerKey } = stored.value;
+  const { ackedSequence, refused, refusedUnseen } = stored.value;
   if (!replayer.replay(courtSessionId, events).ok) {
     return err("replay-failed");
   }
   return ok({
     context: { deviceId: device.value, batch },
     events,
-    sync: { takenOver: takenOverBatch !== null, syncHalt },
+    sync: { takenOver: takenOverBatch !== null, syncHalt, ackedSequence, refused, refusedUnseen },
     owner: { fromRound, ownerKey },
   });
 }

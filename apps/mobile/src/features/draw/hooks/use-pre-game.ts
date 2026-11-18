@@ -6,13 +6,20 @@ import { useRouter } from "expo-router";
 import type { Member } from "../../../services/api/sacou-api";
 import { useServices } from "../../../services/services-context";
 import { useCourtRuntime } from "../../court/hooks/court-runtime-context";
-import { courtHref } from "../../court/navigation";
+import { courtHref, takeOverHref } from "../../court/navigation";
+import { useCourtSummaryLookup } from "../../court/hooks/use-court-summary-lookup";
+import { useOnline } from "../../../services/api/use-online";
 import { useRoundCourt, type RoundCourtRead } from "../../court/hooks/use-round-court";
 import type { DrawArrangement } from "../model/draw-arrangement";
 import type { DrawFlowAction, DrawFlowState } from "../model/draw-flow.reducer";
 import { positionsOf } from "../model/default-lineup";
 import type { MatchStartInput } from "../model/match-start";
-import { startFromDraw, type StartFromDrawError } from "../session/start-from-draw";
+import {
+  startFromDraw,
+  startOrTakeOver,
+  type CourtOpening,
+  type StartFromDrawError,
+} from "../session/start-from-draw";
 
 export interface PreGameDeps {
   readonly groupId: string;
@@ -46,6 +53,10 @@ export function usePreGame(deps: PreGameDeps): PreGameModel {
   const runtime = useCourtRuntime();
   const router = useRouter();
   const court = useRoundCourt(deps.roundId);
+  const online = useOnline();
+  const origin = { groupId: deps.groupId, roundId: deps.roundId };
+  // Read only on the tap: the summary decides between the court and the 09a (E4.11, D5).
+  const summary = useCourtSummaryLookup(origin, false);
   const input: MatchStartInput = {
     arrangement: deps.arrangement,
     settings: deps.settings,
@@ -53,13 +64,22 @@ export function usePreGame(deps: PreGameDeps): PreGameModel {
     preGame: deps.state.preGame,
   };
   const start = useMutation({
-    mutationFn: (variables: MatchStartInput): Promise<Result<string, StartFromDrawError>> =>
-      startFromDraw(runtime, { groupId: deps.groupId, roundId: deps.roundId }, variables),
+    mutationFn: (variables: MatchStartInput): Promise<Result<CourtOpening, StartFromDrawError>> =>
+      startOrTakeOver({
+        lookUp: () => (online ? summary.refresh() : Promise.resolve(undefined)),
+        local: court.status === "read" ? court.court : null,
+        start: () => startFromDraw(runtime, origin, variables),
+      }),
     networkMode: "always",
     gcTime: 0,
     scope: { id: `court-start:${deps.roundId}` },
     onSuccess: (result) => {
-      if (result.ok) router.replace(courtHref("court", { courtSessionId: result.value }));
+      if (!result.ok) return;
+      if (result.value.kind === "court") {
+        router.replace(courtHref("court", { courtSessionId: result.value.courtSessionId }));
+      } else {
+        router.push(takeOverHref(origin));
+      }
     },
   });
   const answer = start.data;

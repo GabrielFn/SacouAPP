@@ -184,19 +184,22 @@ describe("the rotation of each team (D6, D9)", () => {
 
 describe("Partida N and Começar partida (D6)", () => {
   const session = "c0000000-0000-4000-8000-0000000000c1";
+  const standing = { batch: 1, takenOver: false, refusedUnseen: false, unsentPoints: 0 };
 
   test("no session: match 1; one finished: match 2", () => {
     expect(matchNumber(null)).toBe(1);
-    expect(matchNumber({ courtSessionId: session, startedMatches: 1, openMatch: false })).toBe(2);
-    expect(canStart(0, { courtSessionId: session, startedMatches: 1, openMatch: false })).toBe(
-      true,
-    );
+    expect(
+      matchNumber({ courtSessionId: session, startedMatches: 1, openMatch: false, ...standing }),
+    ).toBe(2);
+    expect(
+      canStart(0, { courtSessionId: session, startedMatches: 1, openMatch: false, ...standing }),
+    ).toBe(true);
   });
 
   test("a match on, or someone who left, turns the button off", () => {
-    expect(startBlocker(0, { courtSessionId: session, startedMatches: 1, openMatch: true })).toBe(
-      "open-match",
-    );
+    expect(
+      startBlocker(0, { courtSessionId: session, startedMatches: 1, openMatch: true, ...standing }),
+    ).toBe("open-match");
     expect(startBlocker(1, null)).toBe("stale");
     expect(canStart(1, null)).toBe(false);
   });

@@ -41,7 +41,7 @@ function runtime(account: SignedIn = { key: ACCOUNT_A }): CourtRuntime {
 }
 
 async function sessionWithMatch(court: CourtRuntime, finished: boolean): Promise<void> {
-  await court.log.openSession(OTHER_SESSION, OTHER_ROUND);
+  await court.log.openSession(OTHER_SESSION, { ...OTHER_ROUND, ownerKey: ACCOUNT_A });
   const deps = { ...court, courtSessionId: OTHER_SESSION };
   await startCourtMatch(deps, ONE_POINT_MATCH);
   if (!finished) return;
@@ -198,11 +198,27 @@ describe("readRoundCourt: what screens 06 and 08 know of the court (D1, D6)", ()
 
     expect(await readRoundCourt(open, "r2")).toEqual({
       ok: true,
-      value: { courtSessionId: OTHER_SESSION, startedMatches: 1, openMatch: true },
+      value: {
+        courtSessionId: OTHER_SESSION,
+        startedMatches: 1,
+        openMatch: true,
+        batch: 1,
+        takenOver: false,
+        refusedUnseen: false,
+        unsentPoints: 0,
+      },
     });
     expect(await readRoundCourt(ended, "r2")).toEqual({
       ok: true,
-      value: { courtSessionId: OTHER_SESSION, startedMatches: 1, openMatch: false },
+      value: {
+        courtSessionId: OTHER_SESSION,
+        startedMatches: 1,
+        openMatch: false,
+        batch: 1,
+        takenOver: false,
+        refusedUnseen: false,
+        unsentPoints: 1,
+      },
     });
   });
 });
