@@ -1,8 +1,13 @@
-import type { CorrectionRefusalCode, ScoreCommandError } from "@sacou/match-engine";
+import type {
+  AttributionRefusalCode,
+  CorrectionRefusalCode,
+  ScoreCommandError,
+} from "@sacou/match-engine";
 
 import type { CourtLogErrorCode } from "../ports/court-event-log";
 
-export type CommandRefusalReason = ScoreCommandError["code"] | CorrectionRefusalCode;
+export type CommandRefusalReason =
+  ScoreCommandError["code"] | CorrectionRefusalCode | AttributionRefusalCode;
 
 /** Why a command did not reach the log. Carries codes only, never a value of the log. */
 export type CommandError =

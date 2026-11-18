@@ -18,6 +18,7 @@ import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
 import { createCachedCourtRoster } from "../adapters/cached-court-roster";
+import { createCachedCourtRoundSettings } from "../adapters/cached-court-round-settings";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
@@ -87,6 +88,7 @@ const realServices: Services = {
     queryClient,
     DEV_TOOLS_ENABLED ? createSampleRoster() : null,
   ),
+  courtRoundSettings: createCachedCourtRoundSettings(queryClient),
   screenAwake: expoKeepAwakeScreen,
   screenOrientation: expoScreenOrientation,
   batteryMonitor: expoBatteryMonitor,

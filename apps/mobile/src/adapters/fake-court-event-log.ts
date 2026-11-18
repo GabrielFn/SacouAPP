@@ -73,6 +73,9 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
         .find(([, session]) => session.status === "open");
       return Promise.resolve(ok(open?.[0] ?? null));
     },
+    findSessionOrigin(courtSessionId) {
+      return Promise.resolve(ok(sessions.value[courtSessionId]?.origin ?? null));
+    },
     findOpenSessionOfRound(roundId) {
       const open = Object.entries(sessions.value)
         .reverse()

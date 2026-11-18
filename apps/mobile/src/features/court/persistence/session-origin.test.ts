@@ -48,6 +48,17 @@ describe.each([
     expect(await log.findOpenSessionOfRound("round-2")).toEqual({ ok: true, value: null });
   });
 
+  test("findSessionOrigin reads the IDs back; a sample or unknown session has none", async () => {
+    const log = await open();
+    await log.openSession(SESSION_A, ORIGIN);
+    await log.openSession(SESSION_B);
+    await log.closeSession(SESSION_A);
+
+    expect(await log.findSessionOrigin(SESSION_A)).toEqual({ ok: true, value: ORIGIN });
+    expect(await log.findSessionOrigin(SESSION_B)).toEqual({ ok: true, value: null });
+    expect(await log.findSessionOrigin("unknown")).toEqual({ ok: true, value: null });
+  });
+
   test("a closed session is not found, and a sample session has no round", async () => {
     const log = await open();
     await log.openSession(SESSION_A, ORIGIN);

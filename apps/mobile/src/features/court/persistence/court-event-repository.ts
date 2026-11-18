@@ -5,6 +5,7 @@ import type {
   CourtEventLog,
   CourtLogError,
   CourtLogResult,
+  CourtSessionOrigin,
   StoredCourtLog,
 } from "../ports/court-event-log";
 import type { IdGenerator } from "../../../services/id/id-generator";
@@ -24,6 +25,7 @@ import {
   SELECT_MAX_SEQUENCE,
   SELECT_OPEN_SESSION_OF_ROUND,
   SELECT_SESSION,
+  SELECT_SESSION_ORIGIN,
   UPDATE_SESSION_STATUS,
 } from "./court-queries.data";
 import {
@@ -144,6 +146,13 @@ async function setStatus(
   return ok(undefined);
 }
 
+/** Both IDs or none: a sample session has neither. */
+function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
+  const groupId = readTextColumn(row, "group_id");
+  const roundId = readTextColumn(row, "round_id");
+  return groupId === null || roundId === null ? null : { groupId, roundId };
+}
+
 /** The court log on SQLite. Every method is atomic: it commits whole or leaves the file as it was. */
 export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerator): CourtEventLog {
   return {
@@ -163,6 +172,11 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       guarded(async () => {
         const [row] = await database.getAll(SELECT_ACTIVE_SESSION, [OPEN_STATUS]);
         return ok(readTextColumn(row, "court_session_id"));
+      }),
+    findSessionOrigin: (courtSessionId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
+        return ok(originOf(row));
       }),
     findOpenSessionOfRound: (roundId) =>
       guarded(async () => {

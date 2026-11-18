@@ -14,6 +14,9 @@ describe("the text of a refusal", () => {
     expect(refusalText({ code: "refused", reason: "nothing-to-undo" })).toBe(
       "Não há nada para desfazer.",
     );
+    expect(refusalText({ code: "refused", reason: "invalid-point-author" })).toBe(
+      "Esse jogador não pode ter feito esse ponto.",
+    );
   });
 
   test("an unknown code and a failed write say the generic sentence", () => {

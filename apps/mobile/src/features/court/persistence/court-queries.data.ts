@@ -8,6 +8,8 @@ export const CLOSED_STATUS = "closed";
 export const INSERT_SESSION =
   "INSERT OR IGNORE INTO court_sessions (court_session_id, status, batch, group_id, round_id) VALUES (?, ?, ?, ?, ?)";
 export const SELECT_SESSION = "SELECT status, batch FROM court_sessions WHERE court_session_id = ?";
+export const SELECT_SESSION_ORIGIN =
+  "SELECT group_id, round_id FROM court_sessions WHERE court_session_id = ?";
 export const SELECT_ACTIVE_SESSION =
   "SELECT court_session_id FROM court_sessions WHERE status = ? ORDER BY rowid DESC LIMIT 1";
 export const SELECT_OPEN_SESSION_OF_ROUND =
