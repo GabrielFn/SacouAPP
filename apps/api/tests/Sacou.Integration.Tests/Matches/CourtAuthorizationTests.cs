@@ -62,4 +62,25 @@ public sealed class CourtAuthorizationTests(IntegrationDatabase database) : IAsy
 
         Assert.Equal(await CourtCalls.ProblemWithoutTraceAsync(missing), await CourtCalls.ProblemWithoutTraceAsync(nonMember));
     }
+
+    /// <summary>The role is read on every call: a co-admin who writes and is then made a player is refused, and nothing is stored.</summary>
+    [Fact]
+    public async Task ADemotedCoAdmin_IsForbidden_AndNothingIsStored()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var round = await CourtCalls.RoundAsync(world);
+        var phone = CourtPhone.New();
+        _ = await CourtCalls.AcceptedAsync(world, A.CoAdmin, round, phone, [phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player])]);
+        var stored = await CourtCalls.EventCountAsync(api.ConnectionString, phone.CourtSessionId);
+
+        await CourtCalls.ExecuteAsync(api.ConnectionString,
+            "UPDATE groups.members SET role = 'player' WHERE id = @member", ("member", world.MemberIds[A.CoAdmin]));
+        using var refused = await CourtCalls.SendAsync(world, A.CoAdmin, round, phone, phone.AlternatingPoints(2));
+
+        Assert.Equal(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.Equal(RoundCalls.Forbidden, await RoundCalls.CodeAsync(refused));
+        Assert.Equal(1, stored);
+        Assert.Equal(stored, await CourtCalls.EventCountAsync(api.ConnectionString, phone.CourtSessionId));
+    }
 }
