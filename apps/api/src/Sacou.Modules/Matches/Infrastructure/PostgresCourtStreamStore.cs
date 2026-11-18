@@ -21,19 +21,43 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
 
     private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-    public async Task<CourtAppendOutcome> AppendAsync(
+    public Task<CourtStreamOutcome<CourtWriteDecision>> AppendAsync(
         CourtAppend append,
         Func<StoredStream, Result<CourtWriteDecision, CourtWriteError>> decide,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(append);
         ArgumentNullException.ThrowIfNull(decide);
+        return InTransactionAsync(
+            () => AppendUnderLockAsync(append, decide, cancellationToken),
+            decision => !decision.NewEvents.IsEmpty,
+            cancellationToken);
+    }
+
+    public Task<CourtStreamOutcome<CourtTakeoverDecision>> TakeOverAsync(
+        CourtTakeoverCall call,
+        Func<StoredStream, Result<CourtTakeoverDecision, CourtWriteError>> decide,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(call);
+        ArgumentNullException.ThrowIfNull(decide);
+        return InTransactionAsync(
+            () => TakeOverUnderLockAsync(call, decide, cancellationToken),
+            decision => decision.OpensBatch,
+            cancellationToken);
+    }
+
+    /// <summary>Commits only an accepted decision that stores something; any other way out rolls back.</summary>
+    private async Task<CourtStreamOutcome<TDecision>> InTransactionAsync<TDecision>(
+        Func<Task<CourtStreamOutcome<TDecision>>> underLock, Func<TDecision, bool> stores, CancellationToken cancellationToken)
+        where TDecision : class
+    {
         // EF opens no transaction for raw SQL by itself: without this one, FOR UPDATE would lock nothing.
         var transaction = await database.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
         await using (transaction.ConfigureAwait(false))
         {
-            var outcome = await AppendUnderLockAsync(append, decide, cancellationToken).ConfigureAwait(false);
-            if (outcome.Decided is { IsSuccess: true } decided && !decided.Value.NewEvents.IsEmpty)
+            var outcome = await underLock().ConfigureAwait(false);
+            if (outcome.Decided is { IsSuccess: true } decided && stores(decided.Value))
             {
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -42,7 +66,7 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
         }
     }
 
-    private async Task<CourtAppendOutcome> AppendUnderLockAsync(
+    private async Task<CourtStreamOutcome<CourtWriteDecision>> AppendUnderLockAsync(
         CourtAppend append,
         Func<StoredStream, Result<CourtWriteDecision, CourtWriteError>> decide,
         CancellationToken cancellationToken)
@@ -52,12 +76,13 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
         if (session is null)
         {
             // Not created: either the round is canceled, or the insert met the other stream of the round.
-            return CourtAppendOutcome.Refused(append.MayCreate ? CourtStreamRefusal.RoundHasCourtSession : CourtStreamRefusal.RoundCanceled);
+            return CourtStreamOutcome<CourtWriteDecision>.Refused(
+                append.MayCreate ? CourtStreamRefusal.RoundHasCourtSession : CourtStreamRefusal.RoundCanceled);
         }
 
-        if (session.GroupId != append.GroupId || session.RoundId != append.RoundId)
+        if (!BelongsTo(session, append.GroupId, append.RoundId))
         {
-            return CourtAppendOutcome.Refused(CourtStreamRefusal.CourtSessionNotFound);
+            return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.CourtSessionNotFound);
         }
 
         var stored = created ? StoredStream.New : await LoadStoredAsync(session, cancellationToken).ConfigureAwait(false);
@@ -67,8 +92,61 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
             await WriteAsync(append, session, decided.Value, cancellationToken).ConfigureAwait(false);
         }
 
-        return CourtAppendOutcome.From(decided);
+        return CourtStreamOutcome<CourtWriteDecision>.From(decided);
     }
+
+    /// <summary>
+    /// The role is asked again only once the lock is held: a member made a player between the filter and the lock
+    /// does not take the court (ADR 0063, D4). A stream of another round or group is the same 404 as none.
+    /// </summary>
+    private async Task<CourtStreamOutcome<CourtTakeoverDecision>> TakeOverUnderLockAsync(
+        CourtTakeoverCall call,
+        Func<StoredStream, Result<CourtTakeoverDecision, CourtWriteError>> decide,
+        CancellationToken cancellationToken)
+    {
+        var session = await LockAsync(call.CourtSessionId, cancellationToken).ConfigureAwait(false);
+        if (session is null || !BelongsTo(session, call.GroupId, call.RoundId))
+        {
+            return CourtStreamOutcome<CourtTakeoverDecision>.Refused(CourtStreamRefusal.CourtSessionNotFound);
+        }
+
+        if (!await call.StillMayWrite(cancellationToken).ConfigureAwait(false))
+        {
+            return CourtStreamOutcome<CourtTakeoverDecision>.Refused(CourtStreamRefusal.Forbidden);
+        }
+
+        var decided = decide(await LoadStoredAsync(session, cancellationToken).ConfigureAwait(false));
+        if (decided.IsSuccess && decided.Value.OpensBatch)
+        {
+            await OpenBatchAsync(call, session, decided.Value.Writer, cancellationToken).ConfigureAwait(false);
+        }
+
+        return CourtStreamOutcome<CourtTakeoverDecision>.From(decided);
+    }
+
+    private static bool BelongsTo(CourtSessionRow session, Guid groupId, Guid roundId) =>
+        session.GroupId == groupId && session.RoundId == roundId;
+
+    /// <summary>The writer of the next batch and the new current batch, in the transaction of the lock (ADR 0063, D1).</summary>
+    private async Task OpenBatchAsync(CourtTakeoverCall call, CourtSessionRow session, CourtWriter writer, CancellationToken cancellationToken)
+    {
+        database.CourtWriters.Add(NewWriterRow(session.Id, writer, call.Now));
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _ = await database.CourtSessions
+            .Where(row => row.Id == session.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.CurrentBatch, writer.Batch), cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static CourtWriterRow NewWriterRow(Guid courtSessionId, CourtWriter writer, DateTimeOffset now) => new()
+    {
+        CourtSessionId = courtSessionId,
+        Batch = writer.Batch,
+        DeviceId = Guid.Parse(writer.DeviceId),
+        MemberId = Guid.Parse(writer.MemberId),
+        EventsBefore = writer.EventsBefore,
+        StartedAt = now,
+    };
 
     /// <summary>
     /// True when this call inserted the row. With no conflict target, the insert does nothing both when the stream
@@ -103,6 +181,12 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
             .Where(row => row.CourtSessionId == session.Id)
             .OrderBy(row => row.Batch)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
+        // The last writer is the one of the current batch, or the stream was changed outside the API: fail closed.
+        if (writers.Count == 0 || writers[^1].Batch != session.CurrentBatch)
+        {
+            throw new CorruptCourtStreamException(session.Id);
+        }
+
         var events = await LoadAsync(session.Id, cancellationToken).ConfigureAwait(false);
         return StoredStream.Of(events, [.. writers.Select(row => new CourtWriter(row.Batch, Text(row.DeviceId), Text(row.MemberId), row.EventsBefore))]);
     }
@@ -139,29 +223,36 @@ internal sealed class PostgresCourtStreamStore(MatchesDbContext database) : ICou
     {
         if (decision.CreatesStream)
         {
-            database.CourtWriters.Add(new CourtWriterRow
-            {
-                CourtSessionId = session.Id,
-                Batch = decision.Writer.Batch,
-                DeviceId = Guid.Parse(decision.Writer.DeviceId),
-                MemberId = Guid.Parse(decision.Writer.MemberId),
-                EventsBefore = decision.Writer.EventsBefore,
-                StartedAt = append.Now,
-            });
+            database.CourtWriters.Add(NewWriterRow(session.Id, decision.Writer, append.Now));
         }
 
         database.CourtEvents.AddRange(decision.NewEvents.Select((item, index) => ToRow(append, session.EventCount + FirstPosition + index, item)));
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await UpdateCountersAsync(append, session.Id, decision, cancellationToken).ConfigureAwait(false);
+    }
 
+    /// <summary>The counters, the time of the last event and the scoreboard after the write, null with no open match (ADR 0063, D6).</summary>
+    private async Task UpdateCountersAsync(CourtAppend append, Guid courtSessionId, CourtWriteDecision decision, CancellationToken cancellationToken)
+    {
         var addedEvents = decision.NewEvents.Length;
         var addedBytes = decision.NewEvents.Sum(item => item.ByteCount);
-        _ = await database.Database.ExecuteSqlAsync(
-            $"""
-            UPDATE matches.court_sessions
-            SET event_count = event_count + {addedEvents}, envelope_bytes = envelope_bytes + {addedBytes}, last_event_at = {append.Now}
-            WHERE id = {session.Id}
-            """,
-            cancellationToken).ConfigureAwait(false);
+        var board = decision.Scoreboard;
+        Guid? matchId = board is null ? null : Guid.Parse(board.MatchId);
+        _ = await database.CourtSessions
+            .Where(row => row.Id == courtSessionId)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(row => row.EventCount, row => row.EventCount + addedEvents)
+                    .SetProperty(row => row.EnvelopeBytes, row => row.EnvelopeBytes + addedBytes)
+                    .SetProperty(row => row.LastEventAt, append.Now)
+                    .SetProperty(row => row.OpenMatchId, matchId)
+                    .SetProperty(row => row.SetNumber, board?.SetNumber)
+                    .SetProperty(row => row.PointsA, board?.PointsA)
+                    .SetProperty(row => row.PointsB, board?.PointsB)
+                    .SetProperty(row => row.SetsA, board?.SetsA)
+                    .SetProperty(row => row.SetsB, board?.SetsB),
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static CourtEventRow ToRow(CourtAppend append, int position, StreamEvent item)

@@ -32,6 +32,8 @@ internal sealed record CourtProblem(Error Error, ImmutableDictionary<string, obj
     public const string ReasonExtension = "reason";
     public const string LimitExtension = "limit";
     public const string ExpectedSequenceExtension = "expectedSequence";
+    public const string CurrentBatchExtension = "currentBatch";
+    public const string LastSequenceExtension = "lastSequence";
 
     public static CourtProblem Of(Error error) => new(error, ImmutableDictionary<string, object?>.Empty);
 

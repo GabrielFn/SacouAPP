@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.CourtSessionJson;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 using Sacou.Modules.Matches.Infrastructure;
@@ -8,7 +9,8 @@ namespace Sacou.Modules.Matches.AppendCourtEvents;
 
 /// <summary>
 /// The answers of the court stream route (ADR 0060, D1 and D15): the request (400), the stream and its writer
-/// (404, 409) and the content (422). The pt-BR texts are the app's, by code (E4.11).
+/// (404, 409) and the content (422), and those of the takeover and of the stream read (ADR 0063). The pt-BR texts are
+/// the app's, by code (E4.11).
 /// </summary>
 internal static class CourtErrors
 {
@@ -21,6 +23,9 @@ internal static class CourtErrors
     public static readonly Error UnsupportedSchemaVersion = Validation(CourtWriteErrorCode.UnsupportedSchemaVersion.Code);
     public static readonly Error UnknownEventType = Validation(CourtWriteErrorCode.UnknownEventType.Code);
     public static readonly Error TakeoverInvalid = Validation(CourtWriteErrorCode.TakeoverInvalid.Code);
+
+    /// <summary>The <c>after</c> of the stream read is not an integer from zero (ADR 0063, D7).</summary>
+    public static readonly Error PositionInvalid = Validation("position-invalid");
 
     /// <summary>Another round's or group's stream looks like no stream at all.</summary>
     public static readonly Error CourtSessionNotFound = new(Prefix + "court-session-not-found", ErrorKind.NotFound);
@@ -67,6 +72,7 @@ internal static class CourtErrors
         CourtStreamRefusal.CourtSessionNotFound => CourtSessionNotFound,
         CourtStreamRefusal.RoundHasCourtSession => RoundHasCourtSession,
         CourtStreamRefusal.RoundCanceled => RoundCanceled,
+        CourtStreamRefusal.Forbidden => GroupAccessErrors.Forbidden,
         _ => throw new ArgumentOutOfRangeException(nameof(refusal), refusal, "Every refusal has an answer."),
     };
 

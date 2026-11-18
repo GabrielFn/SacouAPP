@@ -23,7 +23,7 @@ internal sealed class CourtAccessFilter : AccessFilter<CourtAccess>
             Declared<CourtCapabilityMetadata>(http).Capability,
             http.RequestAborted).ConfigureAwait(false);
         return authorized.Match(
-            access => Result.Success(new CourtAccess(access.GroupId, access.Membership.MemberId, access.Membership.Role)),
+            access => Result.Success(new CourtAccess(access.GroupId, access.UserId, access.Membership.MemberId, access.Membership.Role)),
             Result.Failure<CourtAccess>);
     }
 }
