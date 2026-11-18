@@ -118,7 +118,7 @@ describe("match-pending is resumed from the home", () => {
 
     const resumable = await findResumableCourtSession({
       log: scenario.harness.log,
-      replayer: { replay: () => ok(timeline) } as typeof scenario.harness.replayer,
+      replayer: { replay: () => ok(timeline) },
     });
     expect(resumable).toBe(COURT_SESSION_ID);
   });

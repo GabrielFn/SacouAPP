@@ -85,7 +85,7 @@ function slotsOfEntering(zone: TeamState["setterZone"]): number[] {
   });
   if (planned.kind !== "planned") throw new Error(`no plan: ${planned.kind}`);
   return exitRows(lastOf(state), planned.plan, NAMES_ROSTER).entering.map(({ detail }) =>
-    Number(detail.replace("posição ", "")),
+    Number((detail ?? "").replace("posição ", "")),
   );
 }
 
