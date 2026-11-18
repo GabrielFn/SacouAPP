@@ -1,0 +1,91 @@
+# Deploys one Cloud Run service from deploy/cloud-run/service.yaml and checks /health (ADR 0068, D4).
+# The caller job holds `id-token: write` and an environment; the federated token reaches only that environment's
+# deployer (sacou-deployer-test or sacou-deployer-prod), which can change only its own service.
+name: Deploy to Cloud Run
+description: Replaces a Cloud Run service with an image pinned by digest, then calls /health.
+
+inputs:
+  service:
+    description: Cloud Run service name
+    required: true
+  aspnetcore-environment:
+    description: Staging or Production
+    required: true
+  runtime-account:
+    description: Service account name the revision runs as (without the domain)
+    required: true
+  database-secret:
+    description: Secret Manager secret that holds the database URL
+    required: true
+  image:
+    description: Image reference ending in @sha256:<digest>
+    required: true
+  project-id:
+    description: Google Cloud project id
+    required: true
+  workload-identity-provider:
+    description: Full name of the Workload Identity Federation provider
+    required: true
+  deployer:
+    description: E-mail of the deployer service account of this environment
+    required: true
+
+outputs:
+  url:
+    description: Service URL
+    value: ${{ steps.deploy.outputs.url }}
+
+runs:
+  using: composite
+  steps:
+    # From here on a credential file sits in the workspace: no build, no script from the repository other than the
+    # steps below, and no third-party action after this one (only setup-gcloud, pinned by SHA). Never add one.
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+      with:
+        workload_identity_provider: ${{ inputs.workload-identity-provider }}
+        service_account: ${{ inputs.deployer }}
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+    # Only the listed names are replaced, and only after the image is proved to be a digest of the sacou repository.
+    - name: Deploy the service
+      id: deploy
+      shell: bash
+      env:
+        SERVICE_NAME: ${{ inputs.service }}
+        ASPNETCORE_ENVIRONMENT: ${{ inputs.aspnetcore-environment }}
+        RUNTIME_NAME: ${{ inputs.runtime-account }}
+        DATABASE_SECRET: ${{ inputs.database-secret }}
+        IMAGE: ${{ inputs.image }}
+        PROJECT_ID: ${{ inputs.project-id }}
+        REGION: us-east4
+      run: |
+        set -euo pipefail
+        if ! [[ "$IMAGE" =~ ^us-east4-docker\.pkg\.dev/[a-z0-9-]+/sacou/api@sha256:[0-9a-f]{64}$ ]]; then
+          echo "The image is not pinned by digest: $IMAGE"
+          exit 1
+        fi
+        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET IMAGE
+        export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+        manifest="$RUNNER_TEMP/service.yaml"
+        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${IMAGE}' \
+          < deploy/cloud-run/service.yaml > "$manifest"
+        gcloud run services replace "$manifest" --project="$PROJECT_ID" --region="$REGION" --quiet
+        url="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+        echo "url=$url" >> "$GITHUB_OUTPUT"
+
+    # The service must be public (turned on once in the console): until then this step fails with 403.
+    - name: Check /health
+      shell: bash
+      env:
+        SERVICE_URL: ${{ steps.deploy.outputs.url }}
+      run: |
+        set -euo pipefail
+        if ! [[ "$SERVICE_URL" =~ ^https://[a-z0-9.-]+\.run\.app$ ]]; then
+          echo "Unexpected service URL: $SERVICE_URL"
+          exit 1
+        fi
+        curl --fail --silent --show-error --retry 5 --retry-delay 5 --retry-all-errors --max-time 30 "$SERVICE_URL/health"
+        echo

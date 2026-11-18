@@ -53,7 +53,7 @@ Só o repositório bloqueia o início; as outras contas só são necessárias no
 | Repositório vazio `sacou` no seu GitHub (privado) | Todo o código, backlog e progresso | Agora | Grátis |
 | Projeto no Firebase | Login com Google, Apple e e-mail | M2 | Grátis |
 | Conta Expo (EAS) | Builds do app e atualizações | M3 | Grátis no início |
-| Railway + Neon | API e banco de testes e produção | M4 | ~US$ 5/mês |
+| Google Cloud (Cloud Run) + Neon | API e banco de testes e produção (ADR 0068; era Railway até 18/11/2026) | M4 | US$ 0 na faixa grátis, teto de US$ 1 |
 | Cloudflare (R2 e DNS) | Backups (E5.3) e domínio; fotos da cartinha só depois do piloto (ADR 0046) | M5 | Grátis no início |
 | Chave de API de um provedor de IA | Texto do resumo da rodada: **pós-piloto** (ADR 0046) | Depois do M7 | Centavos por resumo |
 | Apple Developer (com Small Business Program) | TestFlight e App Store | M6 | US$ 99/ano |
@@ -61,7 +61,7 @@ Só o repositório bloqueia o início; as outras contas só são necessárias no
 | Sentry | Erros do piloto (PostHog só depois do piloto, ADR 0046) | M6 | Grátis |
 | Domínios sacou.app / sacou.com.br | Página da rodada e links | M5 | ~R$ 150/ano |
 
-**Como passar segredos:** nunca pelo chat. Você cadastra as chaves nos segredos do repositório (GitHub Actions) e no painel do Railway; eu só referencio pelo nome.
+**Como passar segredos:** nunca pelo chat. Você cadastra as chaves nos segredos do repositório (GitHub Actions) e no Secret Manager do Google Cloud; eu só referencio pelo nome.
 
 **Fora do código, com você:** registrar o nome no INPI, recrutar os 3 a 5 grupos do piloto e falar com um contador.
 
@@ -178,7 +178,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 
 | ID | Tarefa | Aceite | Depende de |
 |---|---|---|---|
-| E5.1 | Deploy da API no Railway e banco no Neon (teste e produção) | Deploy automático a partir da branch principal. Criar o projeto Neon com `pg_version` 18, a mesma versão principal dos testes (ADR 0020) | acesso Railway e Neon |
+| E5.1 | Deploy da API no Google Cloud Run e banco no Neon (teste e produção) | Deploy automático a partir da branch principal. Criar o projeto Neon com `pg_version` 18, a mesma versão principal dos testes (ADR 0020) | acesso Google Cloud e Neon |
 | E5.2 | Sentry e logs estruturados (PostHog: pós-piloto, ADR 0046) | Erro proposital aparece no painel | acessos |
 | E5.3 | Backups diários, limite de requisições, feature flags e versão mínima | Restauração de backup testada | E5.1 |
 | E5.3b | Custo do replay do stream da quadra (revisão da E3.7 Parte 2) | Lote no 20.000º evento abaixo de 500 ms em Release, por snapshot do estado ou teto menor de eventos, com ADR. Bloqueia o piloto | E3.7 |

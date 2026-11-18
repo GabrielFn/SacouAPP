@@ -20,9 +20,9 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | V9 Self-contained Tokens | Parcial (E3.1): só RS256, `kid` obrigatório e só a chave dele, chaves só da URL fixa do Google, `aud` string única, `iss` exato, `exp`/`iat`/`auth_time` obrigatórios com 60 s, `nbf`, sem tenant, até 8 KB, JWE recusado; matriz R1 a R24 com controle positivo. O token de placar saiu (ADR 0046): quem assume a quadra usa o login normal (E3.8, ADR 0063) | — |
 | V10 OAuth and OIDC | Parcial (E3.1): a API é só resource server do Firebase e confere emissor, audiência e provedor. Google pelo SDK nativo no app (E4.3); Apple depois do piloto (pergunta 58) | E4.3 |
 | V11 Cryptography | Parcial (E3.2): token de convite de 256 bits de `RandomNumberGenerator`, em Base64url, guardado só como SHA-256 (vetor fixo testado), nunca em log nem em outra resposta (ADR 0040, D10). O token do placar saiu (ADR 0046; E3.8 usa o login normal). Pendente: pagamentos | E3.10 |
-| V12 Secure Communication | Pendente | E5.1 |
-| V13 Configuration | Parcial: CI e dependências conferidas; produção pendente | E0.9, E5.1, E5.3 |
-| V14 Data Protection | Parcial (E3.16 completa, ADR 0056: exportação só da própria pessoa, `no-store`, e exclusão com marca; telas 30a e 30b no app, E4.3 Parte 3) | E3.10, E5.3, E6.2 |
+| V12 Secure Communication | Atendido no desenho (E5.1, ADR 0068): TLS do Cloud Run em `*.run.app`, banco com `SSL Mode=VerifyFull` e `sslmode` inseguro recusado fora de `Development`. A conferir no ambiente: `http://` redirecionado ou recusado (roteiro de `deploy.md`) | E5.1 |
+| V13 Configuration | Parcial: CI e dependências conferidas; deploy com mínimo privilégio (E5.1, ADR 0068, D3): uma conta por job do Google, cada uma presa a um *subject* do OIDC (`build` sem ambiente só envia imagem; `sacou-deployer-test` e `sacou-deployer-prod` só mexem no próprio serviço e só agem como a própria conta de execução), provedor só para o `deploy-api.yml` da `main`, nenhum papel no projeto inteiro (teste de arquitetura e `test:tooling`). Pendente: produção com jogadores (E5.3) | E0.9, E5.1, E5.3 |
+| V14 Data Protection | Parcial (E3.16 completa, ADR 0056: exportação só da própria pessoa, `no-store`, e exclusão com marca; telas 30a e 30b no app, E4.3 Parte 3; E5.1: URL do banco só no Secret Manager, por conta de execução, e erro de conexão sem a URL; o deploy de teste não consegue subir um serviço como `sacou-api-run` (a conta que lê o banco de produção), porque a `sacou-deployer-test` só age como `sacou-api-test-run`; dados e logs com IP nos EUA, resposta 91) | E3.10, E5.3, E6.2 |
 | V15 Secure Coding and Architecture | Parcial: dependências e análise estática conferidas; domínio C# sem infraestrutura e eventos só com `MemberId`, com testes de arquitetura e de reflexão (E2.10) | E0.9, E6.2 |
 | V16 Security Logging and Error Handling | Pendente | E5.2 |
 | V17 WebRTC | Pendente | Nenhum documento prevê WebRTC; confirmar se não se aplica na E6.2 |
@@ -34,7 +34,7 @@ Baseado em **OWASP ASVS 5.0** (API e página web) e **OWASP MASVS 2.1.0** (app),
 | MASVS-STORAGE | Parcial (E4.3): credencial só no SDK nativo, `allowBackup: false`, sem token em log ou cache; senha só em memória. Pendente: `sacou.db` da quadra no logout | E4.9, E4.11 |
 | MASVS-CRYPTO | Pendente | E4.3, E4.9 |
 | MASVS-AUTH | Parcial (E4.3): login pelo Firebase, saída que invalida a sessão local, sessão expirada termina uma vez. Reautenticação para excluir feita (tela 30b, ADR 0057). Pendente: placar | E3.8 |
-| MASVS-NETWORK | Parcial (E4.2, seção 12 do modelo): só `https:` fora de `__DEV__` (`http:` só em `__DEV__` para localhost e rede privada), conferência de origem, sem `usesCleartextTraffic`; certificate pinning recusado (certificado rotativo do Railway). Pendente: sincronização do placar | E4.11 |
+| MASVS-NETWORK | Parcial (E4.2, seção 12 do modelo): só `https:` fora de `__DEV__` (`http:` só em `__DEV__` para localhost e rede privada), conferência de origem, sem `usesCleartextTraffic`; certificate pinning recusado (certificado rotativo da hospedagem, hoje o Cloud Run). Pendente: sincronização do placar | E4.11 |
 | MASVS-PLATFORM | Pendente | E4.9, E4.17 (E4.14 e E4.16 pós-piloto, ADR 0046) |
 | MASVS-CODE | Parcial: dependências conferidas; versão mínima pendente | E0.9, E5.3 (versão mínima), E5.4 |
 | MASVS-RESILIENCE | Pendente | E5.4, E6.2 |

@@ -94,7 +94,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.api != 'false'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -178,6 +178,22 @@ jobs:
           docker compose --env-file .env.example exec -T postgres pg_isready -h 127.0.0.1
           docker compose --env-file .env.example port postgres 5432 | grep --fixed-strings --line-regexp '127.0.0.1:5432'
           docker compose --env-file .env.example down -v
+
+      # The deploy image (ADR 0068, D1), built without push and without credentials, so a broken Dockerfile or
+      # .dockerignore fails the PR. The run proves it starts as a non-root user and answers /health.
+      - name: Check API image
+        run: |
+          docker build --provenance=false --tag sacou-api:ci .
+          user="$(docker image inspect --format '{{.Config.User}}' sacou-api:ci)"
+          echo "Image user: ${user:-<none>}"
+          case "$user" in
+            "" | 0 | 0:* | root | root:*) exit 1 ;;
+          esac
+          docker run --detach --name sacou-api-ci --publish 127.0.0.1:18080:8080 sacou-api:ci
+          curl --fail --silent --show-error --retry 10 --retry-delay 2 --retry-all-errors --max-time 5 \
+            http://127.0.0.1:18080/health || { docker logs sacou-api-ci; exit 1; }
+          echo
+          docker rm --force sacou-api-ci
 
       - name: Audit NuGet dependencies
         run: pnpm audit:api

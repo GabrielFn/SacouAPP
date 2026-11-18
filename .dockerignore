@@ -1,0 +1,19 @@
+# The API image context (ADR 0068, D1): closed by default, opened only for what the build reads.
+*
+
+!global.json
+!nuget.config
+!Directory.Build.props
+!Directory.Build.targets
+!Directory.Packages.props
+!CodeMetricsConfig.txt
+!.editorconfig
+!apps/api/src/
+!packages/volley-rules/src/formations/formations.json
+!packages/match-engine/src/settings/settings-catalog.json
+
+# Closed again after every opening, so nothing inside the opened folders slips in.
+**/bin/
+**/obj/
+**/node_modules/
+**/.env*
