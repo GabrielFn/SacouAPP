@@ -42,3 +42,24 @@ describe("whether screen 31 opens in a session (D10)", () => {
     expect(await readIndividualPoints(failing, settings, "from-round-on")).toBe(false);
   });
 });
+
+describe("an unknown origin is off even when the settings say yes to everything (D10)", () => {
+  const everyRound = { individualPoints: () => true };
+
+  test("null and undefined origins never open screen 31", () => {
+    expect(isIndividualPoints(null, everyRound)).toBe(false);
+    expect(isIndividualPoints(undefined, everyRound)).toBe(false);
+    expect(isIndividualPoints({ groupId: "g1", roundId: "r1" }, everyRound)).toBe(true);
+  });
+
+  test("the option follows the settings on each read: turned off, it is off at once", () => {
+    const rounds = ["r1"];
+    const live = {
+      individualPoints: ({ roundId }: { roundId: string }) => rounds.includes(roundId),
+    };
+    const origin = { groupId: "g1", roundId: "r1" };
+    expect(isIndividualPoints(origin, live)).toBe(true);
+    rounds.length = 0;
+    expect(isIndividualPoints(origin, live)).toBe(false);
+  });
+});

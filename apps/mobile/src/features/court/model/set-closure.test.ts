@@ -33,3 +33,37 @@ describe("set closure", () => {
     expect(decidedSetClosesMatch(match)).toBe(false);
   });
 });
+
+function tieBreakMatch(score: { a: number; b: number }, bestOf = 3): MatchScore {
+  const sets = Math.floor(bestOf / 2);
+  return {
+    setsWon: { a: sets, b: sets },
+    scoring: { bestOf, winMargin: 2 },
+    currentSet: { setNumber: bestOf, score, targetPoints: 15, servingTeam: "a" },
+  } as unknown as MatchScore;
+}
+
+describe("set closure in the tie-break (target 15)", () => {
+  test("15-14 is not decided; 16-14 is, and closes the match", () => {
+    expect(decidedSetWinner(tieBreakMatch({ a: 15, b: 14 }))).toBeNull();
+    expect(decidedSetWinner(tieBreakMatch({ a: 14, b: 16 }))).toBe("b");
+    expect(decidedSetClosesMatch(tieBreakMatch({ a: 14, b: 16 }))).toBe(true);
+  });
+
+  test("15-13 decides it, and 25 points do not matter when the target is 15", () => {
+    expect(decidedSetWinner(tieBreakMatch({ a: 15, b: 13 }))).toBe("a");
+    expect(decidedSetWinner(tieBreakMatch({ a: 24, b: 14 }))).toBe("a");
+  });
+
+  test("best of five: only the third set won closes it; the match with no current set decides nothing", () => {
+    const two = { a: 2, b: 0 };
+    const third = {
+      ...tieBreakMatch({ a: 25, b: 10 }, 5),
+      setsWon: two,
+    } as unknown as MatchScore;
+    expect(confirmingClosesMatch(third, "a")).toBe(true);
+    expect(confirmingClosesMatch({ ...third, setsWon: { a: 1, b: 2 } }, "a")).toBe(false);
+    expect(decidedSetWinner({ ...third, currentSet: null })).toBeNull();
+    expect(decidedSetClosesMatch({ ...third, currentSet: null })).toBe(false);
+  });
+});
