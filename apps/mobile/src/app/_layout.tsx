@@ -5,6 +5,9 @@ import {
   expoBenchmarkRuntimeOpener,
   expoCourtRuntimeOpener,
 } from "../adapters/expo-court-runtime-opener";
+import { mathRandomSource } from "../adapters/math-random-source";
+import { reactNativeAppForeground } from "../adapters/react-native-app-foreground";
+import { timeoutScheduler } from "../adapters/timeout-scheduler";
 import { expoHapticsFeedback } from "../adapters/expo-haptics-feedback";
 import { expoKeepAwakeScreen } from "../adapters/expo-keep-awake-screen";
 import { expoBatteryMonitor } from "../adapters/expo-battery-monitor";
@@ -99,6 +102,9 @@ const realServices: Services = {
     idTokens: sessionIdTokens(authSession, sessionEnder),
   }),
   networkStatus,
+  appForeground: reactNativeAppForeground,
+  scheduler: timeoutScheduler,
+  randomSource: mathRandomSource,
   shareSheet: reactNativeShareSheet,
   fileShare: expoFileShare,
   clipboard: expoClipboard,

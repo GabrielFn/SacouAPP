@@ -35,6 +35,8 @@ export async function ensureRoundCourtSession(
     if (!closed.ok) return err({ code: "load-failed", cause: closed.error.code });
   }
   const courtSessionId = ids.newId();
-  const opened = await log.openSession(courtSessionId, origin);
+  // The account that opens the session is the only one that ever sends it (ADR 0067, D8).
+  const ownerKey = await runtime.sync.ownerKey();
+  const opened = await log.openSession(courtSessionId, { ...origin, ownerKey });
   return opened.ok ? ok(courtSessionId) : err({ code: "load-failed", cause: opened.error.code });
 }

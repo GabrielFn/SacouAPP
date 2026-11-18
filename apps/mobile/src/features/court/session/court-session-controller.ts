@@ -2,9 +2,10 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtCommand } from "./command-drafts";
+import type { CourtSyncHooks } from "../ports/court-sync";
 import { runCourtCommand, type CommandRunnerDeps } from "./command-runner";
 import type { CommandError, LoadFailureCode } from "./court-errors";
-import { loadCourtSession, type WriteContext } from "./court-session-loader";
+import { loadCourtSession, type SessionSyncState, type WriteContext } from "./court-session-loader";
 import { createSnapshotStore } from "./snapshot-store";
 
 /**
@@ -17,6 +18,7 @@ export type CourtSnapshot =
       readonly status: "ready";
       readonly courtSessionId: string;
       readonly events: readonly EventEnvelope[];
+      readonly sync: SessionSyncState;
     }
   | { readonly status: "failed"; readonly code: LoadFailureCode };
 
@@ -35,9 +37,14 @@ export interface CourtSessionController {
    * app. A log that is still broken stays `failed`, with nothing erased.
    */
   readonly retry: () => Promise<void>;
+  /** Reads the file again without showing the loading state: the upload changed the session. */
+  readonly reload: () => Promise<void>;
 }
 
-export type CourtSessionControllerDeps = CommandRunnerDeps;
+export interface CourtSessionControllerDeps extends CommandRunnerDeps {
+  /** Told after each write that committed, so the events leave right away (ADR 0067, D3). */
+  readonly sync?: Pick<CourtSyncHooks, "notifyAppended">;
+}
 
 const NOT_READY: CommandResult = err({ code: "not-ready" });
 
@@ -68,6 +75,7 @@ export function createCourtSessionController(
       status: "ready",
       courtSessionId: deps.courtSessionId,
       events: loaded.value.events,
+      sync: loaded.value.sync,
     });
   }
 
@@ -85,6 +93,7 @@ export function createCourtSessionController(
       return outcome;
     }
     store.set({ ...snapshot, events: outcome.value });
+    deps.sync?.notifyAppended();
     return ok(undefined);
   }
 
@@ -94,6 +103,7 @@ export function createCourtSessionController(
     getSnapshot: store.getSnapshot,
     dispatch: (command) => enqueue(() => run(command)),
     whenIdle: () => queue.current,
+    reload: () => enqueue(load),
     retry: () =>
       enqueue(() => {
         store.set({ status: "loading" });

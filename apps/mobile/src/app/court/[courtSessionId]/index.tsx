@@ -15,6 +15,8 @@ import {
 } from "../../../features/court/model/court-screen.selectors";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
+import { TakenOverView } from "../../../features/court/ui/TakenOverView";
+import { withUploadNotice } from "../../../features/court/model/hint-line";
 import { useServices } from "../../../services/services-context";
 
 /** Screens 09 and 10. When the set is decided or the match ends, the court hands over to its route. */
@@ -25,15 +27,19 @@ export default function CourtRoute() {
   const { inverted } = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
-  const timeline = view.status === "ready" ? view.timeline : null;
+  const notice = view.status === "ready" ? view.notice : null;
+  // Taken over (09b), the court has no phase: nothing of it opens the end of the set or of the match.
+  const takenOver = notice?.kind === "taken-over";
+  const timeline = view.status === "ready" && !takenOver ? view.timeline : null;
   const phase = useMemo(
     () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
     [timeline],
   );
-  const model = useMemo(
-    () => (timeline === null ? null : selectCourtScreen(timeline, courtRoster)),
-    [timeline, courtRoster],
-  );
+  const model = useMemo(() => {
+    if (timeline === null) return null;
+    const screen = selectCourtScreen(timeline, courtRoster);
+    return screen === null ? null : { ...screen, hint: withUploadNotice(screen.hint, notice) };
+  }, [timeline, courtRoster, notice]);
 
   // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
   // changes, so coming back from the end of the set (same step) does not open it again.
@@ -51,6 +57,9 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
+  if (takenOver) {
+    return <TakenOverView onLeave={route.leave} />;
+  }
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
   }

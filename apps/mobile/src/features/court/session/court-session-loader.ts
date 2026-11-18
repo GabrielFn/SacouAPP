@@ -1,7 +1,7 @@
 import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
-import type { CourtEventLog } from "../ports/court-event-log";
+import type { CourtEventLog, SyncHaltCode } from "../ports/court-event-log";
 import type { LoadFailureCode } from "./court-errors";
 import type { CourtReplayer } from "./court-replay";
 
@@ -11,9 +11,17 @@ export interface WriteContext {
   readonly batch: number;
 }
 
+/** How the upload of the session stands, as the file says (ADR 0067, D1). */
+export interface SessionSyncState {
+  /** Another phone took the court over: this one writes nothing more (09b). */
+  readonly takenOver: boolean;
+  readonly syncHalt: SyncHaltCode | null;
+}
+
 export interface LoadedSession {
   readonly context: WriteContext;
   readonly events: readonly EventEnvelope[];
+  readonly sync: SessionSyncState;
 }
 
 /**
@@ -33,9 +41,13 @@ export async function loadCourtSession(
   if (!stored.ok) {
     return err(stored.error.code);
   }
-  const { batch, events } = stored.value;
+  const { batch, events, takenOverBatch, syncHalt } = stored.value;
   if (!replayer.replay(courtSessionId, events).ok) {
     return err("replay-failed");
   }
-  return ok({ context: { deviceId: device.value, batch }, events });
+  return ok({
+    context: { deviceId: device.value, batch },
+    events,
+    sync: { takenOver: takenOverBatch !== null, syncHalt },
+  });
 }

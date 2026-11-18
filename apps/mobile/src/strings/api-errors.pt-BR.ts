@@ -98,6 +98,7 @@ export const apiErrorKindTexts = {
   rateLimited: RATE_LIMITED_TEXT,
   unavailable: "O Sacou está fora do ar por um instante. Tentando de novo.",
   offline: "Sem conexão.",
+  accountChanged: "A conta mudou antes do envio. Nada foi enviado.",
   unexpected: "Algo deu errado. Tente de novo daqui a pouco.",
 } as const;
 

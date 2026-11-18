@@ -48,6 +48,19 @@ export const courtStrings = {
     oneMorePoint: (team: string) => `Mais um ponto e o ${team} fecha o set`,
     nextPointCloses: "Quem fizer o próximo ponto fecha o set",
   },
+  // The points are not reaching the server (question 85): the court goes on, and the strip says why.
+  upload: {
+    stopped: "Os pontos não estão indo para o servidor. Peça ao admin para conferir.",
+    roundCanceled: "A rodada foi cancelada. Os pontos ficam só neste celular.",
+    otherAccount: "Entre com a conta que abriu a quadra para enviar os pontos.",
+    noPermission: "Sua conta não marca mais esta quadra. Peça ao admin para conferir.",
+  },
+  // Screen 09b without the name until E3.8 (D7, answer 83).
+  takenOver: {
+    title: "Outro celular assumiu o placar",
+    body: "Este celular parou de marcar.",
+    leave: "Sair da quadra",
+  },
   queue: {
     title: "Na fila",
     reserves: "reservas",
