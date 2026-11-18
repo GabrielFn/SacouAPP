@@ -191,7 +191,7 @@ describe("take-over gaps (E4.11 part 2, tester)", () => {
     expect(before.refused).toHaveLength(2);
     server.tamperPages((page: CourtEventsPage) => ({
       ...page,
-      lastPosition: page.lastPosition + 1,
+      lastPosition: Number(page.lastPosition) + 1,
     }));
 
     expect((await runTakeoverOf(server, a)).final).toBe("import-invalid");
