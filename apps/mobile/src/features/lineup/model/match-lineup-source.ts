@@ -10,10 +10,11 @@ import type { LineupSource, LineupTeamSource } from "./lineup-source";
 
 /**
  * The base of a team in a match moves with any event of the log: a point, a turn, another lineup.
- * The number of events is the key, so a draft that started before is ignored, never saved (D3, D7).
+ * The id of the last active event is the key, not the count: an undo drops events, so the count repeats.
+ * So a draft that started before is ignored, never saved (D3, D7).
  */
 export function matchBaseKey(timeline: CourtSessionTimeline): string {
-  return String(timeline.entries.length);
+  return timeline.entries.at(-1)?.event.eventId ?? "";
 }
 
 function baseOf(match: MatchScore, side: TeamSide, key: string): LineupBase | null {

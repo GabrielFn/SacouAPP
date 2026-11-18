@@ -208,6 +208,17 @@ describe("the base moved under the draft (D3, D7)", () => {
     expect(view.canSave).toBe(false);
     expect(view.team?.rotation?.options.find((option) => option.checked)?.value).toBe(1);
   });
+
+  test("the base moved: edit, undo, a new point; the draft is stale and Salvar is off", async () => {
+    const scenario = await startScenario();
+    await score(scenario, "a");
+    const state = edit(scenario, rotation(NEXT_ZONE));
+    expect((await scenario.controller.dispatch({ type: "undo" })).ok).toBe(true);
+    await score(scenario, "b");
+    const view = lineupView(state, sourceOf(scenario));
+    expect(view.team?.stale).toBe(true);
+    expect(view.canSave).toBe(false);
+  });
 });
 
 describe("the libero and the bench in a match (D5, D6)", () => {

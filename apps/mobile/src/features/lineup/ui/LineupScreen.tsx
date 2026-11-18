@@ -216,7 +216,11 @@ export function LineupScreen({ view, handlers, refusal = null, busy = false }: L
       {view.team === null ? (
         <Text variant="muted">{view.noRotation}</Text>
       ) : (
-        <TeamBody team={view.team} handlers={handlers} landscape={width > height} />
+        <TeamBody
+          team={busy ? { ...view.team, stale: false } : view.team}
+          handlers={handlers}
+          landscape={width > height}
+        />
       )}
     </Screen>
   );

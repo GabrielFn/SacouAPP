@@ -1,10 +1,9 @@
 import type { MemberId, TeamSide } from "@sacou/match-engine";
 
-import type { Member } from "../../../services/api/sacou-api";
 import type { TeamColorName } from "../../../theme/team-colors";
 
 /** The position a member said they play; `null` without a profile. */
-export type RosterPosition = Member["primaryPosition"];
+export type RosterPosition = string | null;
 
 export interface TeamAppearance {
   readonly label: string;
