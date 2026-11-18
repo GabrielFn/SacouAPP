@@ -14,7 +14,7 @@ inputs:
     description: Service account name the revision runs as (without the domain)
     required: true
   database-secret:
-    description: Secret Manager secret that holds SACOU_DATABASE_URL
+    description: Secret Manager secret that holds the database URL
     required: true
   image:
     description: Image reference ending in @sha256:<digest>
