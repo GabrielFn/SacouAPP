@@ -2,7 +2,7 @@ import { useIsFocused } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 
-import { scoredPointId } from "../../../features/court/attribution/scored-point";
+import { asksOverTheCourt, scoredPointId } from "../../../features/court/attribution/scored-point";
 import { useCourtBatteryWarning } from "../../../features/court/hooks/battery-warning-context";
 import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
 import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
@@ -49,6 +49,11 @@ export default function CourtRoute() {
   // changes, so coming back from the end of the set (same step) does not open it again.
   const { push, replace } = route;
   const { open: openAttribution } = attribution;
+  const sheet = attribution.model;
+  const showSheet = useMemo(
+    () => timeline !== null && sheet !== null && asksOverTheCourt(timeline, sheet.pointEventId),
+    [timeline, sheet],
+  );
   const focused = useIsFocused();
   // The back button of Android stays where it is while the court is in front (not on its menu);
   // leaving is by the Menu.
@@ -56,13 +61,11 @@ export default function CourtRoute() {
   const step = nextCourtRoute("court", phase, focused);
   useEffect(() => {
     if (step === "open-set-end") {
-      // The question about the last point moves to the end of the set ("Preencher").
-      openAttribution([]);
       push("setEnd");
     } else if (step === "open-match-end") {
       replace("matchEnd");
     }
-  }, [step, push, replace, openAttribution]);
+  }, [step, push, replace]);
 
   if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
     return null;
@@ -115,9 +118,9 @@ export default function CourtRoute() {
           route.push("menu");
         }}
       />
-      {attribution.model === null ? null : (
+      {sheet === null || !showSheet ? null : (
         <AttributionSheet
-          model={attribution.model}
+          model={sheet}
           onChooseKind={attribution.onChooseKind}
           onAuthor={attribution.onAuthor}
           onOpponentError={attribution.onOpponentError}

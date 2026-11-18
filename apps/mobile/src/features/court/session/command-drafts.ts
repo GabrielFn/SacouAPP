@@ -81,8 +81,37 @@ function manualWinnerOf(state: CourtSessionState): TeamSide | null {
   return state.currentMatch === null ? null : manualEndWinner(state.currentMatch);
 }
 
+type PlayerCommand = Extract<
+  CourtCommand,
+  { readonly type: "substitute-player" } | { readonly type: "attribute-point" }
+>;
+
+const PLAYER_COMMAND_TYPES: readonly CourtCommand["type"][] = [
+  "substitute-player",
+  "attribute-point",
+];
+
+function isPlayerCommand(command: CourtCommand): command is PlayerCommand {
+  return PLAYER_COMMAND_TYPES.includes(command.type);
+}
+
+/** Who plays and who scored: screens 23a and 31. */
+function playerDrafts(command: PlayerCommand, timeline: CourtSessionTimeline): DraftsResult {
+  switch (command.type) {
+    case "substitute-player":
+      return refused(
+        substitutePlayer(currentState(timeline), command.team, command.outgoing, command.incoming),
+      );
+    case "attribute-point":
+      return refused(attributePoint(timeline, command.pointEventId, command.authorship));
+  }
+}
+
 /** Runs the command of the engine on the state at the moment of execution, never on a stale one. */
 export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline): DraftsResult {
+  if (isPlayerCommand(command)) {
+    return playerDrafts(command, timeline);
+  }
   const state = currentState(timeline);
   switch (command.type) {
     case "start-match":
@@ -101,9 +130,5 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
       return refused(revertToEvent(timeline, command.eventId));
     case "end-match-manually":
       return refused(endMatchManually(state, manualWinnerOf(state)));
-    case "substitute-player":
-      return refused(substitutePlayer(state, command.team, command.outgoing, command.incoming));
-    case "attribute-point":
-      return refused(attributePoint(timeline, command.pointEventId, command.authorship));
   }
 }

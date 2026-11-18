@@ -9,6 +9,7 @@ import { Chip } from "../../../ui/Chip";
 import { Text } from "../../../ui/Text";
 import type { AttributionSheetModel, AuthorOption } from "../attribution/attribution-selectors";
 import type { AuthoredPointKind } from "../attribution/attribution.reducer";
+import { FLUSH } from "../court.data";
 
 /** The sheet leaves the top of the court free, so the next point is still a tap (question 76). */
 const SHEET_WIDTH = "94%";
@@ -131,10 +132,10 @@ export function AttributionSheet(props: AttributionSheetProps) {
       pointerEvents="box-none"
       style={{
         position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
+        top: FLUSH,
+        right: FLUSH,
+        bottom: FLUSH,
+        left: FLUSH,
         justifyContent: "flex-end",
         alignItems: "center",
         paddingBottom: insets.bottom,

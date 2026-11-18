@@ -9,10 +9,10 @@ import {
   startScenario,
   type Scenario,
 } from "../model/screen-scenarios.test.fixture";
-import { scoredPointId } from "./scored-point";
+import { asksOverTheCourt, scoredPointId } from "./scored-point";
 import { setEndAttribution } from "./set-end-attribution";
 
-const [PEDRO] = SAMPLE_ORANGE_LINEUP as readonly string[];
+const [PEDRO] = SAMPLE_ORANGE_LINEUP;
 
 function pointIds(scenario: Scenario): readonly string[] {
   return getRecentPoints(scenario.timeline()).map(({ eventId }) => eventId);
@@ -121,5 +121,23 @@ describe("the point a command wrote", () => {
       authorship: { kind: "attack", author: PEDRO ?? null },
     });
     expect(answered.ok ? scoredPointId(answered.value.written) : "refused").toBeNull();
+  });
+});
+
+describe("screen 31 over the court", () => {
+  test("asks only about the newest point while the set is in play", async () => {
+    const scenario = await startScenario();
+    await score(scenario, "a");
+    const [first] = pointIds(scenario);
+    expect(asksOverTheCourt(scenario.timeline(), first ?? "")).toBe(true);
+    await score(scenario, "b");
+    expect(asksOverTheCourt(scenario.timeline(), first ?? "")).toBe(false);
+  });
+
+  test("the point that decides the set is asked about on screen 25, not over the court", async () => {
+    const scenario = await startScenario();
+    await score(scenario, "a".repeat(25));
+    const [decisive] = pointIds(scenario);
+    expect(asksOverTheCourt(scenario.timeline(), decisive ?? "")).toBe(false);
   });
 });

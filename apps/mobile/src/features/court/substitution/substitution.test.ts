@@ -21,7 +21,7 @@ import {
   type SubstitutionState,
 } from "./substitution.reducer";
 
-const [PEDRO, , , MARCOS] = SAMPLE_ORANGE_LINEUP as readonly string[];
+const [PEDRO, , , MARCOS] = SAMPLE_ORANGE_LINEUP;
 /** "Tati" in the sample roster: here she waits on the bench of Laranja. */
 const TATI = SAMPLE_LIBERO_ID;
 const MARCOS_SLOT = 4;

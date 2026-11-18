@@ -27,7 +27,7 @@ import {
   type AuthoredPointKind,
 } from "./attribution.reducer";
 
-const [PEDRO, ANA] = SAMPLE_ORANGE_LINEUP as readonly string[];
+const [PEDRO, ANA] = SAMPLE_ORANGE_LINEUP;
 
 function eventsOf(scenario: Scenario) {
   const snapshot = scenario.controller.getSnapshot();

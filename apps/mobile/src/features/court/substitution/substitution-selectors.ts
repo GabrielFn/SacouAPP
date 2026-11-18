@@ -157,28 +157,33 @@ function chosenTeam(match: MatchScore, state: SubstitutionState): TeamSide | nul
   return sides.find((side) => side === state.team) ?? sides[0] ?? null;
 }
 
+interface OpenTeam {
+  readonly match: MatchScore;
+  readonly team: TeamSide;
+  readonly court: TeamOnCourt;
+}
+
+function openTeamOf(timeline: CourtSessionTimeline, state: SubstitutionState): OpenTeam | null {
+  const match = stateOfTimeline(timeline).currentMatch;
+  const team = match === null ? null : chosenTeam(match, state);
+  const court = match === null || team === null ? null : teamOnCourt(match, team);
+  return match === null || team === null || court === null ? null : { match, team, court };
+}
+
 /** Screen 23a, or `null` when nobody is on a bench (the menu keeps the item off then). */
 export function substitutionView(
   timeline: CourtSessionTimeline,
   roster: CourtRoster,
   state: SubstitutionState,
 ): SubstitutionView | null {
-  const match = stateOfTimeline(timeline).currentMatch;
-  const team = match === null ? null : chosenTeam(match, state);
-  const court = match === null || team === null ? null : teamOnCourt(match, team);
-  if (match === null || team === null || court === null) {
+  const open = openTeamOf(timeline, state);
+  if (open === null) {
     return null;
   }
+  const { match, team, court } = open;
   const picks = validPicks(state, court);
-  const texts =
-    picks === null
-      ? null
-      : picksText(
-          roster,
-          picks.outgoing,
-          picks.incoming,
-          court.bySlot.indexOf(picks.outgoing) + FIRST_SLOT,
-        );
+  const position = picks === null ? 0 : court.bySlot.indexOf(picks.outgoing) + FIRST_SLOT;
+  const texts = picks === null ? null : picksText(roster, picks.outgoing, picks.incoming, position);
   return {
     teams: substitutableTeams(match).map((side) => ({
       side,

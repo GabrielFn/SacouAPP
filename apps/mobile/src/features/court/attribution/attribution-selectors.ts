@@ -12,12 +12,11 @@ import {
 
 import { strings } from "../../../strings/pt-BR";
 import type { CourtRoster } from "../ports/court-roster";
+import { RALLY_DISPLAY_SLOTS } from "./attribution.data";
 import type { AttributionState, AuthoredPointKind } from "./attribution.reducer";
 
 const FIRST_SLOT = 1;
 const FREE_SYSTEM = "livre";
-/** As the canvas lays them out: the front row (2, 3, 4), then the back row (1, 6, 5). */
-const DISPLAY_SLOTS = [2, 3, 4, 1, 6, 5] as const;
 const AUTHORED_KINDS: readonly AuthoredPointKind[] = ["attack", "block", "ace", "other"];
 
 export interface KindOption {
@@ -119,7 +118,7 @@ function rallyPlayers(context: PlayerContext): readonly AuthorOption[] {
   if (match.rotations[team] === null) {
     return onCourt.map((memberId) => optionOf(context, memberId, null));
   }
-  return DISPLAY_SLOTS.flatMap((slot) => {
+  return RALLY_DISPLAY_SLOTS.flatMap((slot) => {
     const memberId = onCourt[slot - FIRST_SLOT];
     return memberId === undefined ? [] : [optionOf(context, memberId, slot)];
   });
