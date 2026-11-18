@@ -31,6 +31,7 @@ export type MutationEvent =
   | {
       readonly type: "profileSaved";
       readonly profile: unknown;
+      readonly nickname: string;
       readonly cachedGroupIds: readonly string[];
     }
   | {

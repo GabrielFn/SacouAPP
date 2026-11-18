@@ -22,7 +22,7 @@ import {
   type RotationSetup,
 } from "../score/match-player.test.fixture.js";
 import type { MemberId, PointKind, ScoringRules } from "../score/types.js";
-import { attributePoint } from "./commands.js";
+import { attributePoint, getAttributionRally } from "./commands.js";
 import { resolvePointAttributions } from "./resolve.js";
 import type { PointAuthorship } from "./types.js";
 import { getUnattributedPoints } from "./unattributed.js";
@@ -336,6 +336,29 @@ describe("attributePoint: the target", () => {
 
     expect(attribute(decided, 26, attack(PEDRO)).ok).toBe(true);
     expect(attribute(player.timeline(), 26, attack(PEDRO)).ok).toBe(true);
+  });
+});
+
+describe("getAttributionRally: the rally screen 31 shows", () => {
+  test("the court before the point, the team that scored and the team that served", () => {
+    let player = screenMatch();
+    player = player.point("b");
+    const rally = getAttributionRally(player.timeline(), eventIdOf(2));
+
+    expect(rally?.team).toBe("b");
+    expect(rally?.servingTeam).toBe("a");
+    expect(rally?.match.currentSet?.score).toStrictEqual({ a: 0, b: 0 });
+  });
+
+  test("null wherever the command refuses the target", () => {
+    let player = start({ zones: [1, 5] }, SINGLE_SHORT_SET);
+    player = player.rallies("ab");
+    player = player.correct(undoLastAction);
+
+    [1, 3, 99].forEach((sequence) => {
+      expect(getAttributionRally(player.timeline(), eventIdOf(sequence))).toBeNull();
+    });
+    expect(getAttributionRally(timelineOf([]), eventIdOf(2))).toBeNull();
   });
 });
 

@@ -30,9 +30,9 @@ describe("the header of the menu", () => {
 });
 
 describe("the pending screens of the menu", () => {
-  test("Trocar jogador waits for its screen; Escalação (E4.8) and Corrigir are ready", () => {
+  test("Escalação (E4.8), Trocar jogador and Corrigir are ready", () => {
     expect(isMenuScreenReady("lineup")).toBe(true);
-    expect(isMenuScreenReady("substitution")).toBe(false);
+    expect(isMenuScreenReady("substitution")).toBe(true);
     expect(isMenuScreenReady("corrections")).toBe(true);
   });
 });

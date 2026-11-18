@@ -11,7 +11,7 @@ using Sacou.Modules.Matches.Infrastructure;
 namespace Sacou.Modules.Matches.Infrastructure.Migrations
 {
     [DbContext(typeof(MatchesDbContext))]
-    internal partial class MatchesDbContextModelSnapshot : ModelSnapshot
+    partial class MatchesDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -159,11 +159,13 @@ namespace Sacou.Modules.Matches.Infrastructure.Migrations
 
                     b.ToTable("court_sessions", "matches", t =>
                         {
-                            t.HasCheckConstraint("ck_court_sessions_current_batch", "current_batch >= 1");
+                            t.HasCheckConstraint("ck_court_sessions_current_batch", "current_batch BETWEEN 1 AND 40");
 
                             t.HasCheckConstraint("ck_court_sessions_envelope_bytes", "envelope_bytes BETWEEN 0 AND 8388608");
 
                             t.HasCheckConstraint("ck_court_sessions_event_count", "event_count BETWEEN 0 AND 20000");
+
+                            t.HasCheckConstraint("ck_court_sessions_scoreboard", "num_nulls(open_match_id, set_number, points_a, points_b, sets_a, sets_b) IN (0, 6)");
                         });
                 });
 
@@ -201,7 +203,7 @@ namespace Sacou.Modules.Matches.Infrastructure.Migrations
 
                     b.ToTable("court_writers", "matches", t =>
                         {
-                            t.HasCheckConstraint("ck_court_writers_batch", "batch >= 1");
+                            t.HasCheckConstraint("ck_court_writers_batch", "batch BETWEEN 1 AND 40");
 
                             t.HasCheckConstraint("ck_court_writers_events_before", "events_before BETWEEN 0 AND 20000");
                         });

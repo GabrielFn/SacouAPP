@@ -61,6 +61,7 @@ public sealed class CourtErrorsTests
     [InlineData(nameof(CourtStreamRefusal.CourtSessionNotFound), "matches.court-session-not-found", ErrorKind.NotFound)]
     [InlineData(nameof(CourtStreamRefusal.RoundHasCourtSession), "matches.round-has-court-session", ErrorKind.Conflict)]
     [InlineData(nameof(CourtStreamRefusal.RoundCanceled), "matches.round-canceled", ErrorKind.Conflict)]
+    [InlineData(nameof(CourtStreamRefusal.Forbidden), "groups.forbidden", ErrorKind.Forbidden)]
     public void EachStreamRefusal_HasItsAnswer(string refusal, string code, ErrorKind kind)
     {
         Assert.Equal(new Error(code, kind), CourtErrors.Of(Enum.Parse<CourtStreamRefusal>(refusal)));
@@ -80,5 +81,21 @@ public sealed class CourtErrorsTests
         Assert.Equal(4L, gap.Extensions["expectedSequence"]);
         Assert.Equal(["field", "index"], field.Extensions.Keys.Order(StringComparer.Ordinal));
         Assert.Equal(["eventId"], member.Extensions.Keys);
+    }
+
+    /// <summary>ADR 0063, D8 and D13: the refused writer learns the batch and its own last sequence; a bad takeover body, the field.</summary>
+    [Fact]
+    public void ATakeoverProblem_CarriesTheBatchTheSequenceAndTheField()
+    {
+        var formerWriter = CourtProblems.From(new CourtWriteError(CourtWriteErrorCode.NotTheWriter, CurrentBatch: 2, LastSequence: 10));
+        var stranger = CourtProblems.From(new CourtWriteError(CourtWriteErrorCode.NotTheWriter, CurrentBatch: 2));
+        var invalid = CourtProblems.From(new CourtWriteError(CourtWriteErrorCode.TakeoverInvalid, Field: "deviceId"));
+
+        Assert.Equal(["currentBatch", "lastSequence"], formerWriter.Extensions.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal(10L, formerWriter.Extensions["lastSequence"]);
+        Assert.Equal(["currentBatch"], stranger.Extensions.Keys);
+        Assert.Equal(["field"], invalid.Extensions.Keys);
+        Assert.Equal("matches.position-invalid", CourtErrors.PositionInvalid.Code);
+        Assert.Equal(ErrorKind.Validation, CourtErrors.PositionInvalid.Kind);
     }
 }

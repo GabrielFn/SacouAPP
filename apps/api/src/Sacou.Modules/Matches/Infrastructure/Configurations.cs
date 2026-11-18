@@ -8,18 +8,28 @@ namespace Sacou.Modules.Matches.Infrastructure;
 /// <c>matches.court_sessions</c>: the id is the one the phone made when it opened the court (ADR 0038).
 /// One court per round in the pilot (question 70): the unique index on <c>round_id</c> (ADR 0060, D7). No
 /// foreign key to another module's table: <c>group_id</c> and <c>round_id</c> are checked by the contracts
-/// (ADR 0037). The counters carry the stream ceilings as CHECKs, the last barrier after the domain's.
+/// (ADR 0037). The counters and the batch carry the stream ceilings as CHECKs, the last barrier after the domain's
+/// (ADR 0060, D9; ADR 0063, D10).
 /// </summary>
 internal sealed class CourtSessionConfiguration : IEntityTypeConfiguration<CourtSessionRow>
 {
     public const string Table = "court_sessions";
     public const string RoundIndex = "ux_court_sessions_round";
 
+    /// <summary>The columns of the stored scoreboard: the open match, the set, and the points and sets of each team.</summary>
+    private const int ScoreboardColumns = 6;
+
     public void Configure(EntityTypeBuilder<CourtSessionRow> builder)
     {
         builder.ToTable(Table, table =>
         {
-            table.HasCheckConstraint("ck_court_sessions_current_batch", $"current_batch >= {CourtStreamLimits.FirstBatch}");
+            table.HasCheckConstraint(
+                "ck_court_sessions_current_batch",
+                $"current_batch BETWEEN {CourtStreamLimits.FirstBatch} AND {CourtStreamLimits.MaxWritersPerStream}");
+            // The scoreboard is all there (an open match) or all null (ADR 0063, D6).
+            table.HasCheckConstraint(
+                "ck_court_sessions_scoreboard",
+                $"num_nulls(open_match_id, set_number, points_a, points_b, sets_a, sets_b) IN (0, {ScoreboardColumns})");
             table.HasCheckConstraint("ck_court_sessions_event_count", $"event_count BETWEEN 0 AND {CourtStreamLimits.MaxStreamEvents}");
             table.HasCheckConstraint("ck_court_sessions_envelope_bytes", $"envelope_bytes BETWEEN 0 AND {CourtStreamLimits.MaxStreamBytes}");
         });
@@ -55,7 +65,8 @@ internal sealed class CourtWriterConfiguration : IEntityTypeConfiguration<CourtW
     {
         builder.ToTable(Table, table =>
         {
-            table.HasCheckConstraint("ck_court_writers_batch", $"batch >= {CourtStreamLimits.FirstBatch}");
+            table.HasCheckConstraint(
+                "ck_court_writers_batch", $"batch BETWEEN {CourtStreamLimits.FirstBatch} AND {CourtStreamLimits.MaxWritersPerStream}");
             table.HasCheckConstraint("ck_court_writers_events_before", $"events_before BETWEEN 0 AND {CourtStreamLimits.MaxStreamEvents}");
         });
         builder.HasKey(writer => new { writer.CourtSessionId, writer.Batch }).HasName("pk_court_writers");

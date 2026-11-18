@@ -5,9 +5,10 @@ namespace Sacou.Modules.Matches.Access;
 
 /// <summary>
 /// What <see cref="CourtAccessFilter"/> proved: the caller is an active member of the group in the route, with a
-/// role that holds the endpoint's capability. Read from the database on every request (ADR 0060, D5).
+/// role that holds the endpoint's capability. Read from the database on every request (ADR 0060, D5); the user id lets
+/// a takeover ask again under the stream's lock (ADR 0063, D4).
 /// </summary>
-internal sealed record CourtAccess(Guid GroupId, Guid MemberId, GroupRole Role)
+internal sealed record CourtAccess(Guid GroupId, Guid UserId, Guid MemberId, GroupRole Role)
 {
     /// <summary>Never the member id: it does not go to a log (ADR 0060, D15).</summary>
     public override string ToString() => nameof(CourtAccess);

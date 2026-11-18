@@ -27,6 +27,6 @@ export function saveMatchLineups(
           ? result
           : dispatch({ type: "change-lineup", team, allocation: toAllocation(draft) });
       }),
-    Promise.resolve(ok(undefined)),
+    Promise.resolve(ok({ written: [] })),
   );
 }

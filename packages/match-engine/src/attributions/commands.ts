@@ -61,6 +61,18 @@ function findRally(
   return { match: before, team, servingTeam: set.servingTeam };
 }
 
+/**
+ * The rally of an active point of the open match, as screen 31 shows it before an answer: the same
+ * target the command accepts, or `null` where it would refuse it.
+ */
+export function getAttributionRally(
+  timeline: CourtSessionTimeline,
+  pointEventId: string,
+): Rally | null {
+  const match = getOpenMatch(timeline);
+  return match === null ? null : findRally(timeline, match.matchId, pointEventId);
+}
+
 function isPointKind(kind: unknown): kind is PointKind {
   return (POINT_KINDS as readonly unknown[]).includes(kind);
 }

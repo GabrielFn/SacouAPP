@@ -1,19 +1,17 @@
 import {
   getSetPointTeams,
-  getSetWinner,
-  setsToWin,
   type CourtSessionState,
   type MatchScore,
   type TeamSide,
 } from "@sacou/match-engine";
+
+import { confirmingClosesMatch, decidedSetWinner } from "./set-closure";
 
 /** In order of strength: the phone plays the last one of a list. */
 export type FeedbackKind =
   "point" | "side-out" | "set-point" | "set-ended" | "match-ended" | "refused";
 
 const ONE_POINT = 1;
-/** One set more for the winner of the point that decides it. */
-const ONE_SET = 1;
 
 function setPointSides(match: MatchScore): readonly TeamSide[] {
   const set = match.currentSet;
@@ -34,17 +32,9 @@ function isOnePointLater(before: MatchScore, after: MatchScore): boolean {
   );
 }
 
-/** The set is won on the court but not confirmed yet: the engine still holds it as the current set. */
-function decidedWinner(match: MatchScore): TeamSide | null {
-  const set = match.currentSet;
-  return set === null ? null : getSetWinner(set.score, set.targetPoints, match.scoring.winMargin);
-}
-
 /** What the deciding point means: the end of the match, or only the end of a set of a series. */
 function decidingPointFeedback(match: MatchScore, winner: TeamSide): FeedbackKind {
-  return match.setsWon[winner] + ONE_SET >= setsToWin(match.scoring.bestOf)
-    ? "match-ended"
-    : "set-ended";
+  return confirmingClosesMatch(match, winner) ? "match-ended" : "set-ended";
 }
 
 function pointFeedback(before: MatchScore, after: MatchScore): readonly FeedbackKind[] {
@@ -74,7 +64,7 @@ export function deriveFeedback(
   const { currentMatch: previous } = before;
   const { currentMatch: next } = after;
   // The buzz already played at the point that decided the set: confirming it is silent.
-  const confirmsDecidedSet = previous !== null && decidedWinner(previous) !== null;
+  const confirmsDecidedSet = previous !== null && decidedSetWinner(previous) !== null;
   if (after.finishedMatches.length > before.finishedMatches.length) {
     return confirmsDecidedSet ? [] : ["match-ended"];
   }
@@ -89,7 +79,7 @@ export function deriveFeedback(
 
 /** A point of the same set: the one that decides the set buzzes as its end, any other as a point. */
 function scoredFeedback(previous: MatchScore, next: MatchScore): readonly FeedbackKind[] {
-  const winner = decidedWinner(next);
+  const winner = decidedSetWinner(next);
   return winner === null ? pointFeedback(previous, next) : [decidingPointFeedback(next, winner)];
 }
 

@@ -1,10 +1,10 @@
-import { Pressable, View } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { LockIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
-import { SELF_LEVEL_OPTIONS, type SelfLevelOption } from "../model/self-levels";
+import { levelCardsStacked, SELF_LEVEL_OPTIONS, type SelfLevelOption } from "../model/self-levels";
 import { ProfileSection } from "./ProfileSection";
 
 export interface LevelPickerProps {
@@ -16,14 +16,16 @@ export interface LevelPickerProps {
 export interface LevelOptionProps {
   readonly option: SelfLevelOption;
   readonly selected: boolean;
+  /** Cards one under the other: the text keeps its size, the card is wide enough. */
+  readonly stacked: boolean;
   readonly onPick: (level: number) => void;
 }
 
-/** The cards of screen 27 are narrow: a long word ("aprendendo") shrinks to fit instead of breaking in the middle. */
+/** Side by side the cards are narrow: a long word ("aprendendo") shrinks to fit instead of breaking in the middle. */
 const LEVEL_TEXT_MIN_SCALE = 0.6;
 const LEVEL_TEXT_MAX_LINES = 3;
 
-function LevelOption({ option, selected, onPick }: LevelOptionProps) {
+function LevelOption({ option, selected, stacked, onPick }: LevelOptionProps) {
   const { colors, tokens } = useTheme();
   const { level, text } = option;
   return (
@@ -35,7 +37,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         onPick(level);
       }}
       style={{
-        flex: 1,
+        flex: stacked ? undefined : 1,
         minHeight: tokens.sizes.levelOption,
         borderRadius: tokens.radii.button,
         borderWidth: tokens.borderWidths.thin,
@@ -52,7 +54,7 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
         {String(level)}
       </Text>
       <Text
-        adjustsFontSizeToFit
+        adjustsFontSizeToFit={!stacked}
         minimumFontScale={LEVEL_TEXT_MIN_SCALE}
         numberOfLines={LEVEL_TEXT_MAX_LINES}
         variant={selected ? "bodyStrong" : "muted"}
@@ -72,18 +74,20 @@ function LevelOption({ option, selected, onPick }: LevelOptionProps) {
 export function LevelPicker({ level, onPick }: LevelPickerProps) {
   const { colors, tokens } = useTheme();
   const { profile } = strings;
+  const stacked = levelCardsStacked(useWindowDimensions().fontScale);
   return (
     <ProfileSection title={profile.levelTitle} note={profile.levelNote}>
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel={profile.levelGroupLabel}
-        style={{ flexDirection: "row", gap: tokens.spacing.s6 }}
+        style={{ flexDirection: stacked ? "column" : "row", gap: tokens.spacing.s6 }}
       >
         {SELF_LEVEL_OPTIONS.map((option) => (
           <LevelOption
             key={option.level}
             option={option}
             selected={level === option.level}
+            stacked={stacked}
             onPick={onPick}
           />
         ))}

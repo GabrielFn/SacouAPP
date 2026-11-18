@@ -56,6 +56,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "matches.limit-reached": "A quadra chegou ao limite de pontos desta rodada.",
   "matches.member-not-in-group": "Alguém na partida não faz parte deste grupo.",
   "matches.not-the-writer": "Outro celular está com a quadra.",
+  "matches.position-invalid": "Não deu para ler a quadra. Tente de novo.",
   "matches.round-canceled": "Esta rodada foi cancelada.",
   "matches.round-has-court-session": "Esta rodada já tem uma quadra aberta em outro celular.",
   "matches.sequence-conflict": "Outro celular está usando a mesma quadra.",
@@ -108,7 +109,7 @@ export const apiErrorKindTexts = {
 /** The strip over data kept from the last time, without a network (question 20, option 1). */
 export const offlineTexts = {
   banner: (updated: string) => `Sem conexão · atualizado ${updated}`,
-  justNow: "agora há pouco",
+  bannerNow: "Sem conexão",
   minutesAgo: (minutes: number) => `há ${String(minutes)} min`,
   hoursAgo: (hours: number) => `há ${String(hours)} h`,
   daysAgo: (days: number) => (days === 1 ? "há 1 dia" : `há ${String(days)} dias`),

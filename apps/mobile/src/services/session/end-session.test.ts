@@ -134,6 +134,19 @@ describe("endSession", () => {
     expect(harness.client.getQueryData(queryKeys.myProfile())).toBeUndefined();
   });
 
+  test("clearSession removes the nickname from memory and from sacou-cache.db", async () => {
+    const harness = setup();
+    harness.client.setQueryData(queryKeys.myProfile(), { nickname: "Ana", suggestedLevel: 4 });
+    await persistQueryClientSave({
+      queryClient: harness.client,
+      ...persistOptions(harness.persister, VERSION),
+    });
+    expect(harness.store.entries().get(CACHE_STORAGE_KEY)).toContain("Ana");
+    await harness.ender.end("signedOut");
+    expect(harness.store.entries().has(CACHE_STORAGE_KEY)).toBe(false);
+    expect(harness.client.getQueryData(queryKeys.myProfile())).toBeUndefined();
+  });
+
   test("a query in flight during the exit does not write the cache again", async () => {
     const harness = setup();
     const answer: { current: (groups: unknown) => void } = { current: () => undefined };

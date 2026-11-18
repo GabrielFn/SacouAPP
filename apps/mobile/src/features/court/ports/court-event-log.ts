@@ -51,6 +51,10 @@ export interface StoredCourtLog {
   readonly fromRound: boolean;
   /** The key of the account that opened it (a hash, D8), or `null` when it was opened without one. */
   readonly ownerKey: string | null;
+  /** The events of this device the server left out (D6), in the order of the log; never sent. */
+  readonly refused: readonly EventEnvelope[];
+  /** Screen 09c was not closed with "Entendi" since they left the log. */
+  readonly refusedUnseen: boolean;
 }
 
 /**
@@ -81,6 +85,21 @@ export interface TakeOverNotice {
   readonly currentBatch: number;
   /** The highest sequence of this device the server kept; the ones above it leave the log. */
   readonly lastStoredSequence: number;
+}
+
+/**
+ * A stream read from the server after taking the court over (D5), already parsed and replayed: it
+ * replaces the local log of the session, and this device writes the batch the server gave it.
+ */
+export interface ServerStreamImport {
+  readonly courtSessionId: string;
+  /** The round, and the key of the account that took the court over (never the UID). */
+  readonly origin: CourtSessionOrigin & { readonly ownerKey: string };
+  readonly deviceId: string;
+  readonly events: readonly EventEnvelope[];
+  readonly batch: number;
+  /** The highest sequence of this device the server holds: the cursor of the upload. */
+  readonly lastSequence: number;
 }
 
 /** The persisted log of the court sessions of this device: the one source of the match state. */
@@ -125,4 +144,12 @@ export interface CourtEventLog {
     deviceId: string,
     notice: TakeOverNotice,
   ): Promise<CourtLogResult<void>>;
+  /**
+   * In one transaction (D5): the events of this device the server does not hold, in any open session
+   * of the round, leave for the refused ones; the other open sessions of the round are closed; the
+   * session gets exactly `events`, the batch and the cursor of the server, and writes again.
+   */
+  replaceWithServerStream(stream: ServerStreamImport): Promise<CourtLogResult<void>>;
+  /** "Entendi" on screen 09c: the refused events stay, only no longer shown (D6). */
+  markRefusedSeen(courtSessionId: string): Promise<CourtLogResult<void>>;
 }
