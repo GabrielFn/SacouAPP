@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Levels;
@@ -27,7 +28,7 @@ internal static class SetMemberLevelsEndpoint
 
     public static RouteGroupBuilder MapSetMemberLevels(this RouteGroupBuilder group)
     {
-        group.MapPut(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ManageMemberLevels)
+        group.MapPut(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.MemberLevels).RequireGroupPermission(GroupPermission.ManageMemberLevels)
             .ProducesProblem(StatusCodes.Status400BadRequest);
         return group;
     }

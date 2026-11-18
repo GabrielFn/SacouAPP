@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 
 namespace Sacou.Modules.Groups.CreateGroup;
@@ -14,7 +15,7 @@ internal static class CreateGroupEndpoint
 
     public static IEndpointRouteBuilder MapCreateGroup(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+        endpoints.MapPost(GroupRouteExtensions.GroupsRoute, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.GroupCreate).WithMetadata(GroupRouteExtensions.SmallBody())
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status409Conflict);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Identity.Domain.Users;
 
 namespace Sacou.Modules.Identity.SignIn;
@@ -19,7 +20,7 @@ internal static class SignInEndpoint
 
     public static IEndpointRouteBuilder MapSignIn(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireAuthorization()
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.SignIn).RequireAuthorization()
             .ProducesProblem(StatusCodes.Status410Gone);
         return endpoints;
     }

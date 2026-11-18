@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 
 namespace Sacou.Modules.Groups.PreviewInvite;
@@ -18,7 +19,7 @@ internal static class PreviewInviteEndpoint
 
     public static IEndpointRouteBuilder MapPreviewInvite(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.Invite).WithMetadata(GroupRouteExtensions.SmallBody())
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound);
         return endpoints;

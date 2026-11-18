@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Domain.Permissions;
 
@@ -23,7 +24,7 @@ internal static class CreateInviteEndpoint
 
     public static RouteGroupBuilder MapCreateInvite(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ManageInvites)
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.InviteCreate).RequireGroupPermission(GroupPermission.ManageInvites)
             .ProducesProblem(StatusCodes.Status409Conflict);
         return group;
     }

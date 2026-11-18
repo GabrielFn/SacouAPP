@@ -1,6 +1,9 @@
 import { apiErrorOf } from "../api/api-error";
 
-/** A query (a GET) is tried again up to twice, only when the failure may pass by itself (D6). */
+/**
+ * A query (a GET) is tried again up to twice, only when the failure may pass by itself (D6). Never a 429: trying
+ * again only spends the quota (ADR 0062, D7).
+ */
 export const MAX_QUERY_RETRIES = 2;
 const FIRST_SERVER_ERROR = 500;
 const BASE_RETRY_DELAY_MS = 1_000;

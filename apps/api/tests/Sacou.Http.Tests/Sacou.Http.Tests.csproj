@@ -11,4 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="../../src/Sacou.Http/Sacou.Http.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../TestSupport/CollectingLoggerProvider.cs" Link="TestSupport/CollectingLoggerProvider.cs" />
+    </ItemGroup>
 </Project>
