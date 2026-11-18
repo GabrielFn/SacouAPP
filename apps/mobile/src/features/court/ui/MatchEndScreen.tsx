@@ -24,6 +24,9 @@ export interface NextMatchView {
   readonly canConfirm: boolean;
 }
 
+/** The next-match column is a little wider than the result beside it (question 78). */
+const NEXT_COLUMN_WEIGHT = 1.3;
+
 export interface MatchEndScreenProps {
   readonly result: ResultView;
   /** `null` when the plan was turned down: the screen says so and offers only the way home. */
@@ -129,7 +132,7 @@ function NextColumn(props: MatchEndScreenProps) {
   const { next } = props;
   return (
     <ScrollView
-      style={{ flex: 1.3 }}
+      style={{ flex: NEXT_COLUMN_WEIGHT }}
       contentContainerStyle={{ gap: tokens.spacing.s, paddingBottom: tokens.spacing.xl }}
     >
       {next === null ? (

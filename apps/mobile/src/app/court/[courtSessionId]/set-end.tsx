@@ -28,6 +28,7 @@ export default function SetEndRoute() {
   // The toss is not recorded until the confirmation: leaving the screen forgets it.
   const [toss, setToss] = useState<TeamSide | null>(null);
   const [refusal, setRefusal] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const timeline = view.status === "ready" ? view.timeline : null;
   const model = useMemo(
     () => (timeline === null ? null : selectSetEnd(timeline, courtRoster)),
@@ -61,7 +62,7 @@ export default function SetEndRoute() {
       view={setEndView(model)}
       colors={{ a: colorOf("a"), b: colorOf("b") }}
       toss={toss}
-      canConfirm={canConfirmSetEnd(model, toss)}
+      canConfirm={canConfirmSetEnd(model, toss) && !confirming}
       refusal={refusal}
       onChooseToss={setToss}
       onDrawToss={() => {
@@ -73,12 +74,15 @@ export default function SetEndRoute() {
         });
       }}
       onConfirm={() => {
+        if (confirming) return;
+        setConfirming(true);
         const sent = confirmSetEnd(
           { dispatch, feedback: courtFeedback },
           firstServerToSend(model, toss),
         );
         void sent.then((result) => {
           setRefusal(result.ok ? null : refusalText(result.error));
+          setConfirming(false);
         });
       }}
     />

@@ -7,7 +7,12 @@ import { createMemoryKeyValueStore } from "../../../adapters/memory-key-value-st
 import { createStoredNextMatchDrafts } from "../../../adapters/stored-next-match-drafts";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import { nextCourtRoute } from "../model/court-route-step";
-import { selectCourtPhase, selectSetEnd, stateOfTimeline } from "../model/court-screen.selectors";
+import {
+  selectCourtPhase,
+  selectCourtScreen,
+  selectSetEnd,
+  stateOfTimeline,
+} from "../model/court-screen.selectors";
 import { ROSTER, confirmSet, score, startScenario } from "../model/screen-scenarios.test.fixture";
 import { firstServerToSend } from "../model/set-end-view";
 import { nextMatchModel } from "./next-match-model";
@@ -64,5 +69,11 @@ describe("from the decided set to the next match (D5 to D7)", () => {
     expect(match?.currentSet).toMatchObject({ score: { a: 0, b: 0 }, servingTeam: "b" });
     expect(store.entries().size).toBe(0);
     expect(shuffler.calls()).toBe(2);
+
+    // The coin shows on the court at 0-0 and goes away with the first point (question 81).
+    const hint = () => selectCourtScreen(scenario.timeline(), ROSTER)?.hint;
+    expect(hint()).toEqual({ kind: "first-server-drawn", side: "b" });
+    await score(scenario, "b");
+    expect(hint()).toEqual({ kind: "positions" });
   });
 });

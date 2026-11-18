@@ -29,6 +29,7 @@ import { buildTeamPanel } from "./team-panel";
 import { selectWinStreak } from "./win-streak";
 
 const NEXT = 1;
+const FIRST_SET_NUMBER = 1;
 
 export function stateOfTimeline(timeline: CourtSessionTimeline): CourtSessionState {
   return timeline.entries.at(-1)?.state ?? INITIAL_COURT_SESSION_STATE;
@@ -59,6 +60,12 @@ function selectDots(match: MatchScore): readonly SetDotModel[] {
   return match.currentSet === null ? played : [...played, { winner: null }];
 }
 
+/** The next match opens at 0-0 with a coin-flip server, until the first point of its first set. */
+function drawnFirstServer(state: CourtSessionState, set: MatchSet): TeamSide | null {
+  const opening = set.setNumber === FIRST_SET_NUMBER && set.score.a === 0 && set.score.b === 0;
+  return state.finishedMatches.length > 0 && opening ? set.servingTeam : null;
+}
+
 /** What the court shows, derived from the replay of the log: the model has no state of its own. */
 export function selectCourtScreen(
   timeline: CourtSessionTimeline,
@@ -85,7 +92,10 @@ export function selectCourtScreen(
       streak === null
         ? null
         : { ...streak, label: roster.teamAppearance(match.matchId, streak.side).label },
-    hint: selectHintLine(getSetPointTeams(set.score, set.targetPoints, match.scoring.winMargin)),
+    hint: selectHintLine(
+      getSetPointTeams(set.score, set.targetPoints, match.scoring.winMargin),
+      drawnFirstServer(state, set),
+    ),
     canUndo: undoLastAction(timeline).ok,
   };
 }

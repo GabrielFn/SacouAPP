@@ -17,6 +17,7 @@ import {
 } from "../../../features/court/next-match/match-end-selectors";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { MatchEndScreen } from "../../../features/court/ui/MatchEndScreen";
+import { strings } from "../../../strings/pt-BR";
 import { useServices } from "../../../services/services-context";
 
 /** Screen 11: the result, the next match of the queue, and "Confirmar" starts it (D6, D7). */
@@ -68,7 +69,9 @@ export default function MatchEndRoute() {
       result={resultView(courtState, match, courtRoster)}
       next={next}
       starting={state.starting}
-      failure={state.failure}
+      failure={
+        state.failure ?? (screen.roundUnavailable ? strings.court.matchEnd.roundUnavailable : null)
+      }
       onToggle={screen.toggle}
       onConfirm={screen.start}
       onLeave={route.leave}

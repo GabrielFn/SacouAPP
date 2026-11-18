@@ -14,6 +14,8 @@ export function hintText({ hint, teams }: CourtScreenModel): string {
       return strings.court.strip.oneMorePoint(teams[hint.side].label);
     case "next-point-closes":
       return strings.court.strip.nextPointCloses;
+    case "first-server-drawn":
+      return strings.court.strip.firstServerDrawn(teams[hint.side].label);
   }
 }
 

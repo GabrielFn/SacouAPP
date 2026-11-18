@@ -68,6 +68,8 @@ export const courtEndStrings = {
     chosenLabel: (name: string, chosen: boolean) => (chosen ? `${name}, sai` : `${name}, fica`),
     confirm: "Confirmar e ir para a próxima partida",
     planFailed: "Não deu para montar a próxima partida.",
+    roundUnavailable:
+      "A rodada desta quadra não está no celular. Abra a rodada com internet e volte aqui.",
     startFailed: "Não deu para começar a próxima partida. Tente de novo.",
     home: "Voltar ao início",
   },

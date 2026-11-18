@@ -49,6 +49,7 @@ export const courtStrings = {
     positions: "Posições no momento do saque",
     oneMorePoint: (team: string) => `Mais um ponto e o ${team} fecha o set`,
     nextPointCloses: "Quem fizer o próximo ponto fecha o set",
+    firstServerDrawn: (team: string) => `Saca primeiro: ${team} (sorteio)`,
   },
   queue: {
     title: "Na fila",
