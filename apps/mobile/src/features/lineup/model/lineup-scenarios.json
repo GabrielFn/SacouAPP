@@ -1,0 +1,101 @@
+{
+  "_comment": "Golden of screen 22 (Escalacao.dc.html, E4.8 D4). Positions: the main position of each member's profile.",
+  "scenarios": [
+    {
+      "name": "the canvas: 5x1, Pedro sets from zone 2, Ana and Lia in each other's seat",
+      "system": "5x1",
+      "lineup": ["pedro", "ana", "lia", "marcos", "bia", "joao"],
+      "setterZone": 2,
+      "phase": "serving",
+      "positions": {
+        "pedro": "setter",
+        "ana": "middleBlocker",
+        "lia": "outsideHitter",
+        "marcos": "opposite",
+        "bia": "outsideHitter",
+        "joao": "middleBlocker"
+      },
+      "expected": {
+        "officialOrder": ["joao", "pedro", "ana", "lia", "marcos", "bia"],
+        "server": "joao",
+        "setters": ["pedro"],
+        "misplaced": ["ana", "lia"],
+        "warning": "Lia e Ana estão fora de ordem",
+        "checkedRotation": 2,
+        "fixedLineup": ["pedro", "lia", "ana", "marcos", "bia", "joao"]
+      }
+    },
+    {
+      "name": "6x2 with an opposite in S2: no warning, two setters",
+      "system": "6x2",
+      "lineup": ["s1", "oh1", "mb1", "opp", "oh2", "mb2"],
+      "setterZone": 1,
+      "phase": "receiving",
+      "positions": {
+        "s1": "setter",
+        "oh1": "outsideHitter",
+        "mb1": "middleBlocker",
+        "opp": "opposite",
+        "oh2": "outsideHitter",
+        "mb2": "middleBlocker"
+      },
+      "expected": {
+        "officialOrder": ["s1", "oh1", "mb1", "opp", "oh2", "mb2"],
+        "server": null,
+        "setters": ["s1", "opp"],
+        "misplaced": [],
+        "warning": null,
+        "checkedRotation": 1,
+        "fixedLineup": ["s1", "oh1", "mb1", "opp", "oh2", "mb2"]
+      }
+    },
+    {
+      "name": "6x2 with the two setters side by side: both out of place, Corrigir puts S2 on the diagonal",
+      "system": "6x2",
+      "lineup": ["s1", "s2", "mb1", "oh1", "oh2", "mb2"],
+      "setterZone": 1,
+      "phase": "serving",
+      "positions": {
+        "s1": "setter",
+        "s2": "setter",
+        "mb1": "middleBlocker",
+        "oh1": "outsideHitter",
+        "oh2": "outsideHitter",
+        "mb2": "middleBlocker"
+      },
+      "expected": {
+        "officialOrder": ["s1", "s2", "mb1", "oh1", "oh2", "mb2"],
+        "server": "s1",
+        "setters": ["s1", "oh1"],
+        "misplaced": ["s2", "oh1"],
+        "warning": "Oh1 e S2 estão fora de ordem",
+        "checkedRotation": 1,
+        "fixedLineup": ["s1", "oh1", "mb1", "s2", "oh2", "mb2"]
+      }
+    },
+    {
+      "name": "free system: no setter, no rotation number, no warning",
+      "system": "livre",
+      "lineup": ["a1", "a2", "a3", "a4", "a5", "a6"],
+      "setterZone": 1,
+      "phase": "serving",
+      "positions": {
+        "a1": "middleBlocker",
+        "a2": "setter",
+        "a3": "opposite",
+        "a4": "outsideHitter",
+        "a5": "setter",
+        "a6": "libero"
+      },
+      "expected": {
+        "officialOrder": ["a1", "a2", "a3", "a4", "a5", "a6"],
+        "server": "a1",
+        "setters": [],
+        "misplaced": [],
+        "warning": null,
+        "checkedRotation": null,
+        "fixedLineup": ["a1", "a2", "a3", "a4", "a5", "a6"]
+      }
+    }
+  ]
+}
