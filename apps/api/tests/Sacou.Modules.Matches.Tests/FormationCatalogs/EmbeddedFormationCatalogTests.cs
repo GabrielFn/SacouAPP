@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sacou.Modules.Matches.Domain.Formations;
 using Sacou.Modules.Matches.FormationCatalogs;
@@ -29,7 +30,7 @@ public sealed class EmbeddedFormationCatalogTests
     [Fact]
     public void AddMatchesModule_RegistersTheCatalogAsASingleton()
     {
-        using var provider = new ServiceCollection().AddMatchesModule().BuildServiceProvider();
+        using var provider = new ServiceCollection().AddMatchesModule(new ConfigurationBuilder().Build()).BuildServiceProvider();
 
         var catalog = provider.GetRequiredService<FormationCatalog>();
 

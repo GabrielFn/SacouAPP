@@ -7,6 +7,7 @@ using Sacou.Modules.Groups;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
+using Sacou.Modules.Matches;
 using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
@@ -79,7 +80,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref afterCurrentUserResolved, value);
     }
 
-    /// <summary>Applies the Identity, Groups and then Sessions migrations, through the entry points Program uses, in its order.</summary>
+    /// <summary>Applies the Identity, Groups, Sessions and then Matches migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
         await MigrationGate.WaitAsync(TestContext.Current.CancellationToken);
@@ -88,6 +89,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             await IdentityModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await SessionsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await MatchesModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
         }
         finally
         {

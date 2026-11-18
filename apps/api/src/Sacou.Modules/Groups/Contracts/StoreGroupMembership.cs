@@ -25,6 +25,10 @@ internal sealed class StoreGroupMembership(IGroupStore store) : IGroupMembership
         return [.. memberships.Select(membership => membership.Member.Id.Value)];
     }
 
+    public Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(
+        Guid groupId, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken) =>
+        store.FindMembersOfGroupAsync(new GroupId(groupId), memberIds, cancellationToken);
+
     public bool Allows(GroupRole role, GroupCapability capability) =>
         RolePermissions.Allows(ContractValues.ToDomain(role), ContractValues.ToDomain(capability));
 
