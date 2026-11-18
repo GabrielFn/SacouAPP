@@ -53,3 +53,19 @@ export const COPY_TO_REFUSED = `INSERT INTO court_refused_events
   FROM court_events WHERE court_session_id = ? AND device_id = ? AND sequence > ?`;
 export const DELETE_REFUSED_FROM_LOG =
   "DELETE FROM court_events WHERE court_session_id = ? AND device_id = ? AND sequence > ?";
+
+// Screen 09c (E4.11, D6): the events of this device the server left out, in the order of the log.
+export const SELECT_REFUSED = `SELECT event_id, court_session_id, device_id, batch, sequence, schema_version, type, payload, seen
+  FROM court_refused_events WHERE court_session_id = ? ORDER BY position`;
+export const MARK_REFUSED_SEEN =
+  "UPDATE court_refused_events SET seen = 1 WHERE court_session_id = ?";
+
+// Taking the court over (E4.11, D5): the stream of the server replaces the local log in one transaction.
+export const SELECT_OPEN_SESSIONS_OF_ROUND = `SELECT court_session_id, acked_sequence, taken_over_batch
+  FROM court_sessions WHERE status = ? AND round_id = ? AND court_session_id <> ?`;
+export const DELETE_REFUSED_OF_SESSION =
+  "DELETE FROM court_refused_events WHERE court_session_id = ?";
+export const DELETE_EVENTS_OF_SESSION = "DELETE FROM court_events WHERE court_session_id = ?";
+export const SET_IMPORTED_SESSION = `UPDATE court_sessions SET status = ?, batch = ?, acked_sequence = ?,
+  taken_over_batch = NULL, sync_halt = NULL, group_id = ?, round_id = ?, owner_key = ?
+  WHERE court_session_id = ?`;

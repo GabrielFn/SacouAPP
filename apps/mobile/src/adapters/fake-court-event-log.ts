@@ -21,6 +21,8 @@ interface FakeSession {
   readonly takenOverBatch: number | null;
   readonly syncHalt: SyncHaltCode | null;
   readonly refused: readonly EventEnvelope[];
+  readonly refusedSeen: boolean;
+  readonly batch: number;
 }
 
 type FakeSessions = Readonly<Record<string, FakeSession>>;
@@ -39,7 +41,7 @@ function hasPending(session: FakeSession, deviceId: string): boolean {
   return session.events.some(
     (event) =>
       event.deviceId === deviceId &&
-      event.batch === FIRST_BATCH &&
+      event.batch === session.batch &&
       event.sequence > session.ackedSequence,
   );
 }
@@ -83,7 +85,7 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
       return err({ code: "storage-failed" });
     }
     const lastSequence = highestSequence(session.events, envelopes[0]?.deviceId ?? "");
-    if (!continuesLog(envelopes, { courtSessionId, batch: FIRST_BATCH, lastSequence })) {
+    if (!continuesLog(envelopes, { courtSessionId, batch: session.batch, lastSequence })) {
       return err({ code: "sequence-conflict" });
     }
     put(courtSessionId, { ...session, events: [...session.events, ...envelopes] });
@@ -119,6 +121,8 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
           takenOverBatch: null,
           syncHalt: null,
           refused: [],
+          refusedSeen: true,
+          batch: FIRST_BATCH,
         });
       }
       return Promise.resolve(ok(undefined));
@@ -146,13 +150,15 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
         session === undefined
           ? NOT_FOUND
           : ok({
-              batch: FIRST_BATCH,
+              batch: session.batch,
               events: session.events,
               ackedSequence: session.ackedSequence,
               takenOverBatch: session.takenOverBatch,
               syncHalt: session.syncHalt,
               fromRound: session.origin !== null,
               ownerKey: session.ownerKey,
+              refused: session.refused,
+              refusedUnseen: !session.refusedSeen,
             }),
       );
     },
@@ -175,9 +181,33 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
           ...session,
           events: session.events.filter((event) => !leaves(event)),
           refused: [...session.refused, ...session.events.filter(leaves)],
+          refusedSeen: session.refusedSeen && !session.events.some(leaves),
           ackedSequence: lastStoredSequence,
           takenOverBatch: currentBatch,
         };
       }),
+    replaceWithServerStream({ courtSessionId, origin, events, batch, lastSequence }) {
+      // The other open sessions of the round close; their unsent points are not modeled here.
+      Object.entries(sessions.value).forEach(([id, session]) => {
+        if (id !== courtSessionId && session.origin?.roundId === origin.roundId) {
+          put(id, { ...session, status: "closed", takenOverBatch: session.takenOverBatch ?? batch });
+        }
+      });
+      put(courtSessionId, {
+        status: "open",
+        events,
+        origin: { groupId: origin.groupId, roundId: origin.roundId },
+        ownerKey: origin.ownerKey,
+        ackedSequence: lastSequence,
+        takenOverBatch: null,
+        syncHalt: null,
+        refused: [],
+        refusedSeen: true,
+        batch,
+      });
+      return Promise.resolve(ok(undefined));
+    },
+    markRefusedSeen: (courtSessionId) =>
+      update(courtSessionId, (session) => ({ ...session, refusedSeen: true })),
   };
 }

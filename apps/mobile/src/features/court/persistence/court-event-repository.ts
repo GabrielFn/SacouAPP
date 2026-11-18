@@ -19,6 +19,7 @@ import {
   readSyncColumns,
 } from "./court-sync-statements";
 import { FIRST_BATCH } from "./migrations.data";
+import { loadRefused, markRefusedSeen, replaceWithServerStream } from "./server-stream-statements";
 import {
   CLOSED_STATUS,
   INSERT_DEVICE_ID,
@@ -115,7 +116,11 @@ async function loadSession(
   if (!hasContiguousSequences(events)) {
     return err({ code: "corrupted-log" });
   }
-  return ok({ batch, events, ...sync.value });
+  const refused = await loadRefused(transaction, courtSessionId);
+  if (!refused.ok) {
+    return refused;
+  }
+  return ok({ batch, events, ...sync.value, ...refused.value });
 }
 
 async function appendEnvelopes(
@@ -220,5 +225,9 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       guarded(() =>
         database.transaction((tx) => markTakenOver(tx, courtSessionId, deviceId, notice)),
       ),
+    replaceWithServerStream: (stream) =>
+      guarded(() => database.transaction((tx) => replaceWithServerStream(tx, stream))),
+    markRefusedSeen: (courtSessionId) =>
+      guarded(() => database.transaction((tx) => markRefusedSeen(tx, courtSessionId))),
   };
 }
