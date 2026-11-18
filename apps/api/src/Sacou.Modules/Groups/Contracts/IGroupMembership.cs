@@ -19,6 +19,13 @@ public interface IGroupMembership
     /// </summary>
     Task<IReadOnlyList<Guid>> ListMemberIdsOfUserAsync(Guid userId, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The ids among <paramref name="memberIds"/> that are members of the group, in any status (active, left,
+    /// removed, guest), in one query: a member id is never deleted (ADR 0012), so the answer never changes
+    /// for an id once it is a member (ADR 0060, D11). Empty for a group that does not exist.
+    /// </summary>
+    Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(Guid groupId, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken);
+
     /// <summary>Whether the role may do it, read from the single permission table of the Groups domain.</summary>
     bool Allows(GroupRole role, GroupCapability capability);
 }

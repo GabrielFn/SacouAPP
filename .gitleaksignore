@@ -1,3 +1,5 @@
 # False positives only, one global fingerprint (file:rule:line) per line. Policy: docs/seguranca/varredura-ci.md
 # The contract hash of the generated types is a public hash of apps/api/openapi/v1.json, not a key (ADR 0042).
 apps/mobile/src/api/generated/contract-hash.ts:generic-api-key:5
+# A test marker for a JSON property name the court route must never log (E3.7, L1), not a key.
+apps/api/tests/Sacou.Integration.Tests/Matches/CourtStreamTests.cs:generic-api-key:248

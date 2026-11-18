@@ -42,4 +42,8 @@ public static class AccountExportSections
 
     public const string Attendances = "attendances";
     public const int AttendancesOrder = 400;
+
+    /// <summary>The court batches the person wrote (E3.7, ADR 0060, D16).</summary>
+    public const string CourtWrites = "courtWrites";
+    public const int CourtWritesOrder = 500;
 }

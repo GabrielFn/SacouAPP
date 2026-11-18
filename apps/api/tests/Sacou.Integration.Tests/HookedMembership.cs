@@ -24,5 +24,9 @@ internal sealed class HookedMembership(IGroupMembership inner, Func<Func<int, Ta
     public Task<IReadOnlyList<Guid>> ListMemberIdsOfUserAsync(Guid userId, CancellationToken cancellationToken) =>
         inner.ListMemberIdsOfUserAsync(userId, cancellationToken);
 
+    public Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(
+        Guid groupId, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken) =>
+        inner.FindMembersOfGroupAsync(groupId, memberIds, cancellationToken);
+
     public bool Allows(GroupRole role, GroupCapability capability) => inner.Allows(role, capability);
 }

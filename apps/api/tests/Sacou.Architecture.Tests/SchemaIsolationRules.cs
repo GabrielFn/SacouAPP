@@ -3,22 +3,32 @@ using System.Text.RegularExpressions;
 namespace Sacou.Architecture.Tests;
 
 /// <summary>
-/// A2 of E3.4 (ADR 0043, D5 and D9): the Sessions never reads the <c>groups</c> schema; it asks the Groups'
-/// contract. The rule reads the SQL text of the module. It matches text, so it is an alarm against a slip, and
-/// the model half of the rule (every entity in the <c>sessions</c> schema) is in the Sessions tests.
+/// A2 of E3.4 (ADR 0043, D5 and D9) and G4 of E3.7 (ADR 0060, D14): a module never reads another module's schema;
+/// it asks that module's contract. The Sessions never names <c>groups</c>; the Matches never names <c>groups</c>,
+/// <c>sessions</c> nor <c>identity</c>. The rule reads the SQL text of the module. It matches text, so it is an
+/// alarm against a slip, and the model half of the rule (every entity in the module's own schema) is in the
+/// module's tests.
 /// </summary>
-internal static partial class SchemaIsolationRules
+internal static class SchemaIsolationRules
 {
     internal const string ForbiddenSchema = "groups";
 
-    internal static IReadOnlyList<string> Violations(string file, string source) =>
-        [.. SqlOnTheForbiddenSchema().Matches(source).Select(match => $"{file}: {match.Value.Trim()}"),
-            .. QuotedSchemaName().Matches(source).Select(match => $"{file}: {match.Value}")];
+    private const RegexOptions Options = RegexOptions.CultureInvariant;
 
-    internal static IReadOnlyList<string> ModuleViolations(string moduleDirectory) =>
+    internal static IReadOnlyList<string> Violations(string file, string source) => Violations(file, source, ForbiddenSchema);
+
+    internal static IReadOnlyList<string> Violations(string file, string source, string schema) =>
+        [.. SqlOn(schema).Matches(source).Select(match => $"{file}: {match.Value.Trim()}"),
+            .. QuotedName(schema).Matches(source).Select(match => $"{file}: {match.Value}")];
+
+    internal static IReadOnlyList<string> ModuleViolations(string moduleDirectory) => ModuleViolations(moduleDirectory, [ForbiddenSchema]);
+
+    internal static IReadOnlyList<string> ModuleViolations(string moduleDirectory, IReadOnlyList<string> forbiddenSchemas) =>
         [.. from file in Directory.EnumerateFiles(moduleDirectory, "*.cs", SearchOption.AllDirectories)
             where !IsBuildOutput(file)
-            from violation in Violations(Path.GetRelativePath(moduleDirectory, file), File.ReadAllText(file))
+            let source = File.ReadAllText(file)
+            from schema in forbiddenSchemas
+            from violation in Violations(Path.GetRelativePath(moduleDirectory, file), source, schema)
             select violation];
 
     private static bool IsBuildOutput(string path) =>
@@ -26,10 +36,9 @@ internal static partial class SchemaIsolationRules
         || path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal);
 
     /// <summary><c>FROM groups.members</c>, <c>JOIN "groups"."x"</c>, <c>UPDATE groups.x</c> and the like.</summary>
-    [GeneratedRegex(@"\b(?:from|join|into|update|table|references)\s+""?groups""?\s*\.", RegexOptions.IgnoreCase)]
-    private static partial Regex SqlOnTheForbiddenSchema();
+    private static Regex SqlOn(string schema) =>
+        new($@"\b(?:from|join|into|update|table|references)\s+""?{Regex.Escape(schema)}""?\s*\.", Options | RegexOptions.IgnoreCase);
 
     /// <summary>The schema name as a string literal: <c>HasDefaultSchema("groups")</c>, <c>ToTable("x", "groups")</c>.</summary>
-    [GeneratedRegex(@"""groups""")]
-    private static partial Regex QuotedSchemaName();
+    private static Regex QuotedName(string schema) => new($@"""{Regex.Escape(schema)}""", Options);
 }

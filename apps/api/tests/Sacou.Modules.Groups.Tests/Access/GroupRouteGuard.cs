@@ -5,16 +5,19 @@ using Sacou.Modules.Groups.Access;
 namespace Sacou.Modules.Groups.Tests.Access;
 
 /// <summary>
-/// A4 (ADR 0040, D3; ADR 0043, D9): every route with a group id has one of the two access filters (the Groups' or the Sessions') and exactly one permission or capability; every
+/// A4 (ADR 0040, D3; ADR 0043, D9; ADR 0060, D5): every route with a group id has exactly one of the three access filters (the Groups', the
+/// Sessions' or the Matches') and exactly one permission or capability; every
 /// other route of the API is on a closed list. Like the fallback policy of E3.1, a forgotten line fails.
 /// </summary>
 internal static class GroupRouteGuard
 {
     private const string AnyMethod = "*";
 
-    /// <summary>The Sessions' markers are internal to that module, so the guard recognizes them by type name.</summary>
+    /// <summary>The Sessions' and the Matches' markers are internal to those modules, so the guard recognizes them by type name.</summary>
     private const string RoundFilterMarker = "RoundAccessFilterMetadata";
     private const string RoundCapabilityMarker = "RoundCapabilityMetadata";
+    private const string CourtFilterMarker = "CourtAccessFilterMetadata";
+    private const string CourtCapabilityMarker = "CourtCapabilityMetadata";
 
     /// <summary>Routes without a group id, written by hand. A new one means a reviewed change here.</summary>
     public static readonly IReadOnlySet<string> RoutesOutsideTheGroupFilter = new HashSet<string>(StringComparer.Ordinal)
@@ -53,15 +56,24 @@ internal static class GroupRouteGuard
         }
 
         var groupFilter = endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null;
-        var roundFilter = endpoint.Metadata.Any(item => item.GetType().Name == RoundFilterMarker);
-        return (groupFilter, roundFilter) switch
+        var roundFilter = HasMarker(endpoint, RoundFilterMarker);
+        var courtFilter = HasMarker(endpoint, CourtFilterMarker);
+        return (groupFilter, roundFilter, courtFilter) switch
         {
-            (true, true) => [$"{route}: has both access filters"],
-            (false, false) => [$"{route}: without the group access filter"],
-            (true, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
-            (false, true) => ExactlyOne(route, endpoint.Metadata.Count(item => item.GetType().Name == RoundCapabilityMarker), "capabilities"),
+            (false, false, false) => [$"{route}: without the group access filter"],
+            (true, false, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
+            (false, true, false) => ExactlyOne(route, CountMarkers(endpoint, RoundCapabilityMarker), "capabilities"),
+            (false, false, true) => ExactlyOne(route, CountMarkers(endpoint, CourtCapabilityMarker), "capabilities"),
+            _ => [$"{route}: has more than one access filter"],
         };
     }
+
+    /// <summary>Whether the route sits behind the Matches' court access filter.</summary>
+    public static bool HasCourtFilter(RouteEndpoint endpoint) => HasMarker(endpoint, CourtFilterMarker);
+
+    private static bool HasMarker(RouteEndpoint endpoint, string marker) => CountMarkers(endpoint, marker) > 0;
+
+    private static int CountMarkers(RouteEndpoint endpoint, string marker) => endpoint.Metadata.Count(item => item.GetType().Name == marker);
 
     private static string[] ExactlyOne(string route, int declared, string what) =>
         declared == 1 ? [] : [$"{route}: declares {declared} {what}, not one"];
