@@ -101,3 +101,69 @@ describe("appendCourtEvents over HTTP (E4.11, D9)", () => {
     });
   });
 });
+
+describe("taking the court over over HTTP (E4.11, D9)", () => {
+  const STREAM = `${BASE}/v1/groups/${REF.groupId}/rounds/${REF.roundId}/court-sessions/${REF.courtSessionId}`;
+
+  test("reads the summary of the round", async () => {
+    const { api, http, tokens } = setup();
+    const summary = {
+      courtSessionId: REF.courtSessionId,
+      currentBatch: 1,
+      eventCount: 3,
+      writer: { memberId: GROUP, since: "2026-11-18T21:14:00Z" },
+      lastEventAt: null,
+      scoreboard: null,
+    };
+    http.enqueue(jsonAnswer(200, summary));
+
+    expect(await api.getCourtSession(REF.groupId, REF.roundId, sessionOf(tokens))).toEqual({
+      ok: true,
+      value: summary,
+    });
+    expect(only(http).url).toBe(
+      `${BASE}/v1/groups/${REF.groupId}/rounds/${REF.roundId}/court-session`,
+    );
+  });
+
+  test("takes over with the token of the account and the expected stream", async () => {
+    const { api, http, tokens } = setup();
+    http.enqueue(jsonAnswer(200, { batch: 2, eventsBefore: 3, lastSequence: 0 }));
+    const body = {
+      deviceId: "d0000000-0000-4000-8000-000000000001",
+      expectedBatch: 1,
+      expectedEventCount: 3,
+    };
+
+    expect(await api.takeOverCourt(REF, body, sessionOf(tokens))).toEqual({
+      ok: true,
+      value: { batch: 2, eventsBefore: 3, lastSequence: 0 },
+    });
+    const request = only(http);
+    expect(request.method).toBe("POST");
+    expect(request.url).toBe(`${STREAM}/takeover`);
+    expect(JSON.parse(request.body ?? "")).toEqual(body);
+  });
+
+  test("lists a page after a position, untyped", async () => {
+    const { api, http, tokens } = setup();
+    http.enqueue(jsonAnswer(200, { events: [], lastPosition: 5, eventCount: 5 }));
+
+    expect(await api.listCourtEvents(REF, 5, sessionOf(tokens))).toEqual({
+      ok: true,
+      value: { events: [], lastPosition: 5, eventCount: 5 },
+    });
+    expect(only(http).url).toBe(`${STREAM}/events?after=5`);
+    expect(new Headers(only(http).headers).get("authorization")).toBe(`Bearer ${FAKE_ID_TOKEN}`);
+  });
+
+  test("another account signed in: neither the summary nor a page is read", async () => {
+    const { api, http } = setup();
+    const other: SessionIdentity = Object.freeze({ opaque: Symbol("other") });
+    const changed = { ok: false, error: { kind: "account-changed" } };
+
+    expect(await api.getCourtSession(REF.groupId, REF.roundId, other)).toEqual(changed);
+    expect(await api.listCourtEvents(REF, 0, other)).toEqual(changed);
+    expect(http.requests()).toEqual([]);
+  });
+});

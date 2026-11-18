@@ -71,6 +71,8 @@ describe("append", () => {
         syncHalt: null,
         fromRound: false,
         ownerKey: null,
+        refused: [],
+        refusedUnseen: false,
       },
     });
   });

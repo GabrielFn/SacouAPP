@@ -69,10 +69,10 @@ describe("decideSync: one line per answer of ADR 0067, D4 (P3)", () => {
     ).toEqual({ type: "take-over", notice: { currentBatch: 3, lastStoredSequence: 6 } });
   });
 
-  test("not-the-writer without extensions keeps what was confirmed", () => {
-    expect(decide(problem(409, "matches.not-the-writer"))).toEqual({
+  test("not-the-writer without lastSequence: this device never wrote there, every point leaves", () => {
+    expect(decide(problem(409, "matches.not-the-writer", { currentBatch: 3 }))).toEqual({
       type: "take-over",
-      notice: { currentBatch: 2, lastStoredSequence: 4 },
+      notice: { currentBatch: 3, lastStoredSequence: 0 },
     });
   });
 

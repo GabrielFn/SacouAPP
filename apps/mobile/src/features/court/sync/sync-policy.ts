@@ -70,8 +70,9 @@ function sequenceGap(details: ProblemDetails, sent: SentRequest): SyncDecision {
 }
 
 function notTheWriter(details: ProblemDetails, sent: SentRequest): SyncDecision {
-  // Without the extension (before E3.8), what the server confirmed is what it kept.
-  const kept = Math.min(details.lastSequence ?? sent.ackedSequence, sent.lastOwnSequence);
+  // Without `lastSequence` the pair never wrote a batch of this stream (ADR 0063, D8): nothing of this
+  // device is there, so every local point is left out.
+  const kept = Math.min(details.lastSequence ?? 0, sent.lastOwnSequence);
   const currentBatch = details.currentBatch ?? sent.batch + 1;
   return { type: "take-over", notice: { currentBatch, lastStoredSequence: kept } };
 }

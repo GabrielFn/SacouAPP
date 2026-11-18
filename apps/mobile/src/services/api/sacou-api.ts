@@ -59,6 +59,22 @@ export interface CourtStreamRef {
 /** 200 of the court stream: the highest sequence of this device the server holds, and how many are new. */
 export type AppendCourtEventsAnswer = Schemas["AppendCourtEventsResponse"];
 
+/** Who writes the court of a round now, the count and the last score (ADR 0063, D5). Never cached on disk. */
+export type CourtSessionSummary = Schemas["GetCourtSessionResponse"];
+export type TakeOverCourtBody = Schemas["TakeOverCourtRequest"];
+/** The batch this device writes from now on, and where the stream stood (ADR 0063, D2). */
+export type TakeOverCourtAnswer = Schemas["TakeOverCourtResponse"];
+
+/**
+ * A page of the stream of a court, as the server sent it: every field is untrusted input until the
+ * import parses it (E4.11, D5), so nothing here is typed as an event.
+ */
+export interface CourtEventsPage {
+  readonly events: unknown;
+  readonly lastPosition: unknown;
+  readonly eventCount: unknown;
+}
+
 export interface MemberRef {
   readonly groupId: string;
   readonly memberId: string;
@@ -157,6 +173,30 @@ export interface SacouApi {
     envelopes: readonly EventEnvelope[],
     account: SessionIdentity,
   ): Promise<ApiResult<AppendCourtEventsAnswer>>;
+  /**
+   * 404 `court-session-not-found` when the round has no stream yet (ADR 0063, D5). Only with the token
+   * of `account`, as the take-over that follows it (ADR 0067, D8).
+   */
+  getCourtSession(
+    groupId: string,
+    roundId: string,
+    account: SessionIdentity,
+  ): Promise<ApiResult<CourtSessionSummary>>;
+  /** Only with the token of `account`: the batch is of the pair device and member (ADR 0063, D3). */
+  takeOverCourt(
+    ref: CourtStreamRef,
+    body: TakeOverCourtBody,
+    account: SessionIdentity,
+  ): Promise<ApiResult<TakeOverCourtAnswer>>;
+  /**
+   * The envelopes after `after`, up to 500 or 1 MiB per page (ADR 0063, D7). Only with the token of
+   * the account that took the court over: another one signed in meanwhile reads nothing (D8).
+   */
+  listCourtEvents(
+    ref: CourtStreamRef,
+    after: number,
+    account: SessionIdentity,
+  ): Promise<ApiResult<CourtEventsPage>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

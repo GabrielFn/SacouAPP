@@ -19,6 +19,7 @@ import {
   readSyncColumns,
 } from "./court-sync-statements";
 import { FIRST_BATCH } from "./migrations.data";
+import { loadRefused, markRefusedSeen, replaceWithServerStream } from "./server-stream-statements";
 import {
   CLOSED_STATUS,
   INSERT_DEVICE_ID,
@@ -44,6 +45,33 @@ import {
 } from "./row-mapping";
 
 const VALUE_COLUMN = "value";
+
+/** Carries an `Err` out of a transaction so it rolls back; it never leaves this file. */
+class RollbackSignal extends Error {
+  constructor(readonly failure: Err<CourtLogError>) {
+    super("rollback");
+  }
+}
+
+/**
+ * The transaction of the port commits whenever `work` resolves, so an `Err` returned after a write
+ * would keep that write. Here an `Err` rolls everything back and comes out as the same `Err`.
+ */
+async function atomically<T>(
+  database: SqlDatabase,
+  work: (transaction: SqlExecutor) => Promise<CourtLogResult<T>>,
+): Promise<CourtLogResult<T>> {
+  try {
+    return await database.transaction(async (transaction) => {
+      const result = await work(transaction);
+      if (!result.ok) throw new RollbackSignal(result);
+      return result;
+    });
+  } catch (error) {
+    if (error instanceof RollbackSignal) return error.failure;
+    throw error;
+  }
+}
 
 /** The database may throw anything, so a failure becomes a code and never forwards its message. */
 async function guarded<T>(work: () => Promise<CourtLogResult<T>>): Promise<CourtLogResult<T>> {
@@ -115,7 +143,11 @@ async function loadSession(
   if (!hasContiguousSequences(events)) {
     return err({ code: "corrupted-log" });
   }
-  return ok({ batch, events, ...sync.value });
+  const refused = await loadRefused(transaction, courtSessionId);
+  if (!refused.ok) {
+    return refused;
+  }
+  return ok({ batch, events, ...sync.value, ...refused.value });
 }
 
 async function appendEnvelopes(
@@ -172,7 +204,7 @@ function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
 /** The court log on SQLite. Every method is atomic: it commits whole or leaves the file as it was. */
 export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerator): CourtEventLog {
   return {
-    getDeviceId: () => guarded(() => database.transaction((tx) => readOrCreateDeviceId(tx, ids))),
+    getDeviceId: () => guarded(() => atomically(database, (tx) => readOrCreateDeviceId(tx, ids))),
     openSession: (courtSessionId, origin) =>
       guarded(async () => {
         await database.run(INSERT_SESSION, [
@@ -201,25 +233,29 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
         return ok(readTextColumn(row, "court_session_id"));
       }),
     closeSession: (courtSessionId) =>
-      guarded(() => database.transaction((tx) => setStatus(tx, courtSessionId, CLOSED_STATUS))),
+      guarded(() => atomically(database, (tx) => setStatus(tx, courtSessionId, CLOSED_STATUS))),
     load: (courtSessionId) =>
-      guarded(() => database.transaction((tx) => loadSession(tx, courtSessionId))),
+      guarded(() => atomically(database, (tx) => loadSession(tx, courtSessionId))),
     append: (courtSessionId, envelopes) =>
-      guarded(() => database.transaction((tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
+      guarded(() => atomically(database, (tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
     findSessionsToSync: (deviceId) => guarded(() => findSessionsToSync(database, deviceId)),
     markAcknowledged: (courtSessionId, sequence) =>
       guarded(() =>
-        database.transaction((tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: true })),
+        atomically(database, (tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: true })),
       ),
     rewindAcknowledged: (courtSessionId, sequence) =>
       guarded(() =>
-        database.transaction((tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: false })),
+        atomically(database, (tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: false })),
       ),
     haltSync: (courtSessionId, code) =>
-      guarded(() => database.transaction((tx) => haltSync(tx, courtSessionId, code))),
+      guarded(() => atomically(database, (tx) => haltSync(tx, courtSessionId, code))),
     markTakenOver: (courtSessionId, deviceId, notice) =>
       guarded(() =>
-        database.transaction((tx) => markTakenOver(tx, courtSessionId, deviceId, notice)),
+        atomically(database, (tx) => markTakenOver(tx, courtSessionId, deviceId, notice)),
       ),
+    replaceWithServerStream: (stream) =>
+      guarded(() => atomically(database, (tx) => replaceWithServerStream(tx, stream))),
+    markRefusedSeen: (courtSessionId) =>
+      guarded(() => atomically(database, (tx) => markRefusedSeen(tx, courtSessionId))),
   };
 }
