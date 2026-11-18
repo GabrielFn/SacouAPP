@@ -1,6 +1,6 @@
 # ADR 0065 · Escalação no app (tela 22)
 
-**Status:** aceito (18/11/2026) para a Parte 1 da E4.8 (modelo, tela e pré-jogo). A Parte 2 (a 22 na partida, `change-lineup`) completa os itens 7 e 8. **Decidido por:** plano da E4.8 (`docs/estado/tarefas/E4.8.md`) e respostas 76 a 78 do Gabriel (17/11/2026). O plano chamava este ADR de 0062; o 0062 foi para o limite de requisições.
+**Status:** aceito (18/11/2026). A Parte 1 da E4.8 (modelo, tela e pré-jogo) fez os itens 1 a 10; a Parte 2 (a 22 na partida) acrescentou os itens 11 a 16. **Decidido por:** plano da E4.8 (`docs/estado/tarefas/E4.8.md`) e respostas 76 a 78 do Gabriel (17/11/2026). O plano chamava este ADR de 0062; o 0062 foi para o limite de requisições.
 
 ## Contexto
 
@@ -19,8 +19,15 @@ A tela 22 edita a escalação de um time: troca de dois jogadores, rotação, le
 9. **Nenhuma nota na 22.** A `LineupSource` do pré-jogo leva só IDs, nomes e posições; um teste varre a fonte, a vista e o `MatchStarted` com líbero.
 10. **O que sai ou muda do canvas (D9):** o selo "Pro" (ADR 0046); a linha "Líbero" (nova, um `radiogroup` sempre aberto, no lugar de uma lista que abre); "Tornar levantador" (novo); "Partida N · antes de começar" no pré-jogo; a malha da rede é a `NetMesh` da quadra.
 
+11. **Comando `change-lineup` (D7, Parte 2).** `CourtCommand` ganha `{ type: "change-lineup", team, allocation }`, e `draftsFor` chama só o `changeLineup` do motor, sobre o estado do momento: a regra fica toda no motor (partição contra `teams`, líbero só no 5x1 e no 6x2, `lineup-unchanged`). `toAllocation` monta a alocação campo a campo (`bench`, `libero`, `lineup`, `setterZone`), nunca com espalhamento do `TeamState`, então o `system` não vai. O motor e o C# não mudaram. Com os dois times mudados, "Salvar" grava um `LineupChanged` por time, na ordem das abas; a primeira recusa para o resto. Cada um é desfeito à parte pelo "Desfazer" da quadra.
+12. **Rota da partida (D7).** `app/court/[courtSessionId]/lineup.tsx` (`COURT_PATHS.lineup`), com o parâmetro `team` (`a` ou `b`; qualquer outro valor abre o A). A `LineupSource` da partida (`matchLineupSource`) vem do replay do log: base de cada time em `rotations`, fase pelo time que saca, nomes e cores pelo `CourtRoster`. A chave da base é o **número de eventos** do log: qualquer evento novo com o rascunho aberto faz a tela mostrar "A partida mudou enquanto você editava." e desligar "Salvar". "Salvar" volta direto à quadra (`dismissTo`); "Voltar" com rascunho pergunta "Descartar as mudanças?". As recusas têm textos da escalação (`rotation-off`, `no-open-match`, `invalid-payload`) e, para outro código, o texto da quadra. Sem partida aberta, a rota volta.
+13. **Menu (D7).** O item "Escalação" abre a 22 e só aparece com pelo menos um time com rotação (`hasLineupToEdit`); `"lineup"` saiu de `PENDING_COURT_MENU_SCREENS`.
+14. **Líbero e banco na partida (D5, D6).** As opções de líbero são o **banco do rascunho**, não o da base: desligar o líbero o põe no fim do banco, e ele pode voltar na mesma edição; trocar põe o novo e manda o antigo para o fim do banco (`withLibero(..., "bench")`). Time de 6 sem líbero: "Sem líbero: o time tem 6.".
+15. **Posição na quadra.** O `CourtRoster` ganhou `positionOf` (a posição principal do cache de membros; `null` sem perfil, que nunca avisa), para o aviso "fora de ordem" da 22 na partida. Nada disso vai para o log.
+16. **Entre sets (D7, desvio pequeno).** Com o set decidido e ainda não confirmado, a fase é `null`: ninguém aparece sacando, a legenda da meia quadra diz "Vale para o próximo set." e a da rotação "Entre sets". A confirmação do set leva a zona salva para o próximo (`chooseNextSetZones`). **Desvio do plano:** o plano tirava o desenho entre sets; ele fica, desenhado como recepção e sem sacador, porque é nele que se toca para trocar dois jogadores. Quem abre a 22 nesse estado é a tela 25 (E4.10 Parte 2, com `route.push("lineup")`): com o set decidido a quadra já leva à 25, então hoje o menu não chega lá.
+
 ## Consequências
 
 - `PENDING_PRE_GAME_SCREENS` ficou vazio.
 - A 07 continua mostrando a líbero entre as reservas, porque trocá-la para um time ali é o jeito de desfazer a escolha. Só a 08 e o `MatchStarted` a tiram da fila.
-- A Parte 2 acrescenta o comando `change-lineup`, a rota da partida e o líbero trocado com o banco (`withLibero(..., "bench")` já existe).
+- Um `LineupChanged` de outro aparelho que chegue depois pode desfazer um giro (ADR 0027); a chave da base só protege o rascunho do próprio aparelho (E4.11).
