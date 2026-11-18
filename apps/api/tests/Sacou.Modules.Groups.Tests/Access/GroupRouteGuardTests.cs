@@ -25,8 +25,8 @@ public sealed class GroupRouteGuardTests
     private const int GroupRoutes = 21;
     private const int RoundRoutes = 9;
 
-    /// <summary>The court stream's write (E3.7, ADR 0060), behind the Matches' filter.</summary>
-    private const int CourtRoutes = 1;
+    /// <summary>The court stream's write (E3.7, ADR 0060), its takeover, summary and read (E3.8, ADR 0063), behind the Matches' filter.</summary>
+    private const int CourtRoutes = 4;
 
     private const string Development = "Development";
     private const string Production = "Production";

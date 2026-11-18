@@ -56,6 +56,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "matches.limit-reached": "A quadra chegou ao limite de pontos desta rodada.",
   "matches.member-not-in-group": "Alguém na partida não faz parte deste grupo.",
   "matches.not-the-writer": "Outro celular está com a quadra.",
+  "matches.position-invalid": "Não deu para ler a quadra. Tente de novo.",
   "matches.round-canceled": "Esta rodada foi cancelada.",
   "matches.round-has-court-session": "Esta rodada já tem uma quadra aberta em outro celular.",
   "matches.sequence-conflict": "Outro celular está usando a mesma quadra.",
