@@ -8,7 +8,7 @@ import { courtHref } from "../../features/court/navigation";
 import { takeResumeTarget } from "../../features/court/session/resume-target";
 import { useGroupsScreen } from "../../features/groups/hooks/use-groups-screen";
 import { greetingText } from "../../features/groups/model/greeting";
-import { useMyProfile } from "../../features/profile/hooks/use-profile";
+import { useGreetingNickname } from "../../features/profile/hooks/use-profile";
 import { createGroupHref, groupsHref, notificationsHref } from "../../features/groups/navigation";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
 import { roundHref } from "../../features/rounds/navigation";
@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const { tokens } = useTheme();
   const resume = useResumeOnce();
   const { state, bannerText, retry } = useGroupsScreen();
-  const profile = useMyProfile();
+  const nickname = useGreetingNickname();
   // The court is resumed once per opening of the app: leaving it for the home must not bring it back.
   useEffect(() => {
     const target = takeResumeTarget(resume);
@@ -71,7 +71,7 @@ export default function HomeScreen() {
         }
       />
       <Text variant="display" displaySize="displayTitle">
-        {greetingText(profile.data?.nickname)}
+        {greetingText(nickname)}
       </Text>
       {bannerText !== null ? <OfflineBanner text={bannerText} /> : null}
       <GroupsStateView

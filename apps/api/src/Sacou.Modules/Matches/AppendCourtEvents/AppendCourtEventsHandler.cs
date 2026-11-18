@@ -82,16 +82,11 @@ internal sealed class AppendCourtEventsHandler(
             received.Value.ToImmutableDictionary(item => item.Event.Envelope.EventId, item => StrictUtf8.GetString(item.Utf8Json.Span), StringComparer.Ordinal));
         var outcome = await store.AppendAsync(append, stored => CourtWriteRules.Decide(stored, request.Value, context), cancellationToken)
             .ConfigureAwait(false);
-        if (outcome.Refusal is { } refusal)
-        {
-            return Refuse(CourtProblem.Of(CourtErrors.Of(refusal)));
-        }
-
-        var decided = outcome.Decided!;
+        var decided = CourtProblems.From(outcome);
         return decided.IsSuccess
             ? Result<(AppendCourtEventsResponse, int), CourtProblem>.Success(
                 (new AppendCourtEventsResponse(decided.Value.LastSequence, decided.Value.NewEvents.Length), decided.Value.Duplicates))
-            : Refuse(CourtProblems.From(decided.Error));
+            : Refuse(decided.Error);
     }
 
     /// <summary>The member ids the request names that belong to the group, in one query (ADR 0060, D11).</summary>

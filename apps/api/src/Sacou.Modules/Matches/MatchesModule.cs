@@ -7,11 +7,14 @@ using Sacou.Modules.Matches.Access;
 using Sacou.Modules.Matches.AccountData;
 using Sacou.Modules.Matches.AppendCourtEvents;
 using Sacou.Modules.Matches.FormationCatalogs;
+using Sacou.Modules.Matches.GetCourtSession;
 using Sacou.Modules.Matches.Infrastructure;
+using Sacou.Modules.Matches.ListCourtEvents;
+using Sacou.Modules.Matches.TakeOverCourt;
 
 namespace Sacou.Modules.Matches;
 
-/// <summary>The court stream, in the <c>matches</c> schema (ADR 0060), and the formation catalog.</summary>
+/// <summary>The court stream, in the <c>matches</c> schema (ADR 0060), its takeover (ADR 0063), and the formation catalog.</summary>
 public static class MatchesModule
 {
     /// <summary>Loads the catalog right here: with a corrupt one, the API does not start.</summary>
@@ -22,6 +25,7 @@ public static class MatchesModule
         services.AddSingleton(EmbeddedFormationCatalog.Load());
         services.AddMatchesDatabase(configuration);
         services.AddScoped<AppendCourtEventsHandler>();
+        services.AddScoped<TakeOverCourtHandler>();
         // The court batches the person wrote, for the export of the Identity (ADR 0060, D16).
         services.AddScoped<IAccountExportSection, MatchesExportSection>();
         return services;
@@ -34,7 +38,10 @@ public static class MatchesModule
     public static IEndpointRouteBuilder MapMatchesEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapCourtRoutes()
-            .MapAppendCourtEvents();
+            .MapAppendCourtEvents()
+            .MapTakeOverCourt()
+            .MapGetCourtSession()
+            .MapListCourtEvents();
         return endpoints;
     }
 

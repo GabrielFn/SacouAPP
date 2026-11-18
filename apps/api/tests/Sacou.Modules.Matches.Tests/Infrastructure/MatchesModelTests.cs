@@ -67,6 +67,18 @@ public sealed class MatchesModelTests : IDisposable
             && index.Properties.Select(property => property.Name).SequenceEqual([nameof(CourtEventRow.CourtSessionId), nameof(CourtEventRow.EventId)]));
     }
 
+    /// <summary>The ceiling of batches (ADR 0063, D10) and the all-or-nothing scoreboard (D6) are the last barrier in the database.</summary>
+    [Fact]
+    public void TheBatchCeiling_AndTheScoreboard_AreChecked()
+    {
+        var sessions = Entity(typeof(CourtSessionRow)).GetCheckConstraints().ToDictionary(check => check.ModelName, check => check.Sql, StringComparer.Ordinal);
+        var writers = Entity(typeof(CourtWriterRow)).GetCheckConstraints().ToDictionary(check => check.ModelName, check => check.Sql, StringComparer.Ordinal);
+
+        Assert.Equal("current_batch BETWEEN 1 AND 40", sessions["ck_court_sessions_current_batch"]);
+        Assert.Equal("num_nulls(open_match_id, set_number, points_a, points_b, sets_a, sets_b) IN (0, 6)", sessions["ck_court_sessions_scoreboard"]);
+        Assert.Equal("batch BETWEEN 1 AND 40", writers["ck_court_writers_batch"]);
+    }
+
     public void Dispose() => context.Dispose();
 
     /// <summary>The design-time model keeps check constraints; the runtime one drops them.</summary>

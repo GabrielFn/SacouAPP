@@ -43,6 +43,7 @@ export const apiErrorCodes = [
   "matches.limit-reached",
   "matches.member-not-in-group",
   "matches.not-the-writer",
+  "matches.position-invalid",
   "matches.round-canceled",
   "matches.round-has-court-session",
   "matches.sequence-conflict",

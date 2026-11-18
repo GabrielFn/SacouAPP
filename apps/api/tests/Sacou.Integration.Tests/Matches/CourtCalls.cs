@@ -30,6 +30,15 @@ internal sealed class CourtPhone(Guid courtSessionId, Guid deviceId, long batch 
     /// <summary>The same stream from another installation (a second phone).</summary>
     public CourtPhone OtherDevice() => new(CourtSessionId, Guid.NewGuid());
 
+    /// <summary>Another installation that takes the court over and writes <paramref name="batch"/> of the same match (ADR 0063).</summary>
+    public CourtPhone TakingOver(long batch) => new(CourtSessionId, Guid.NewGuid(), batch) { MatchId = MatchId };
+
+    /// <summary>This installation writing <paramref name="batch"/> after taking the court back, from sequence 1.</summary>
+    public CourtPhone TakingBack(long batch) => new(CourtSessionId, DeviceId, batch) { MatchId = MatchId };
+
+    /// <summary>Undoes back to <paramref name="targetEventId"/> (ADR 0030).</summary>
+    public string RevertedTo(Guid targetEventId) => Envelope("RevertedTo", $$"""{"targetEventId":"{{targetEventId}}"}""");
+
     public string MatchStarted(Guid teamA, Guid teamB)
     {
         MatchId = Guid.NewGuid();
@@ -59,6 +68,39 @@ internal static class CourtCalls
 
     public static string EventsPath(GroupWorld world, string roundId, Guid courtSessionId) =>
         $"{RoundCalls.RoundPath(world, roundId)}/court-sessions/{courtSessionId}/events";
+
+    public static string TakeoverPath(GroupWorld world, string roundId, Guid courtSessionId) =>
+        $"{RoundCalls.RoundPath(world, roundId)}/court-sessions/{courtSessionId}/takeover";
+
+    public static string SummaryPath(GroupWorld world, string roundId) => $"{RoundCalls.RoundPath(world, roundId)}/court-session";
+
+    public static string TakeoverBody(Guid deviceId, long expectedBatch, long expectedEventCount) =>
+        $$"""{"deviceId":"{{deviceId}}","expectedBatch":{{expectedBatch}},"expectedEventCount":{{expectedEventCount}}}""";
+
+    public static Task<HttpResponseMessage> TakeOverAsync(
+        GroupWorld world, GroupActor actor, string roundId, CourtPhone phone, long expectedBatch, long expectedEventCount) =>
+        world.SendAsync(actor, HttpMethod.Post, TakeoverPath(world, roundId, phone.CourtSessionId), TakeoverBody(phone.DeviceId, expectedBatch, expectedEventCount));
+
+    /// <summary>A takeover that must be accepted: its <c>batch</c>, <c>eventsBefore</c> and <c>lastSequence</c>.</summary>
+    public static async Task<(long Batch, long EventsBefore, long LastSequence)> TakenOverAsync(
+        GroupWorld world, GroupActor actor, string roundId, CourtPhone phone, long expectedBatch, long expectedEventCount)
+    {
+        using var response = await TakeOverAsync(world, actor, roundId, phone, expectedBatch, expectedEventCount);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var json = JsonNode.Parse(body)!.AsObject();
+        Assert.Equal(["batch", "eventsBefore", "lastSequence"], json.Select(member => member.Key).Order(StringComparer.Ordinal));
+        return (json["batch"]!.GetValue<long>(), json["eventsBefore"]!.GetValue<long>(), json["lastSequence"]!.GetValue<long>());
+    }
+
+    /// <summary>The summary of the round's stream, which must exist.</summary>
+    public static async Task<JsonObject> SummaryAsync(GroupWorld world, GroupActor actor, string roundId)
+    {
+        using var response = await world.SendAsync(actor, HttpMethod.Get, SummaryPath(world, roundId));
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        return JsonNode.Parse(body)!.AsObject();
+    }
 
     public static async Task<string> RoundAsync(GroupWorld world) => (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
 
