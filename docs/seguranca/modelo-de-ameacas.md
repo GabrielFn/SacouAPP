@@ -306,6 +306,18 @@ Tela 07 ([ADR 0061](../arquitetura/adr/0061-sorteio-no-app.md)). A regra de quem
 | D | Abrir a quadra de uma rodada derruba a partida em curso de outra | `ensureRoundCourtSession` recusa ("Há uma partida aberta em outra rodada. Encerre-a antes.") e não fecha nada quando a sessão aberta tem partida em curso; fechar uma sessão sem partida não apaga eventos (a E4.11 sincroniza) |
 | I | Nomes da quadra fora do cache de membros | O `CourtRoster` real só lê o cache do TanStack, que já é persistido (E4.2); nada do roster vai para o log da quadra nem para evento |
 
+### 12.4 Trocar jogador e ponto individual no app (E4.10, Parte 3)
+
+Telas 23a e 31, e o autor nas 24 e 25 ([ADR 0066](../arquitetura/adr/0066-controles-da-quadra-no-app.md), itens 9 a 13). O autor de cada ponto é dado de desempenho da pessoa (ADR 0031).
+
+| | Ameaça | Mitigação |
+|---|---|---|
+| I | Nome ou apelido no `PointAttributed` ou no `LineupChanged` | Os comandos levam só `MemberId`, `eventId` do ponto e tipo de lista fechada; o nome vem do `CourtRoster` só na tela. Teste que confere as 4 chaves do payload e procura os nomes do roster e dos times no log inteiro (`attribution.test.ts`). A quadra não tem `console` nem logger, e a recusa só leva o código |
+| T | Autor forjado no aparelho (Ace de quem não sacou, líbero com Bloqueio, alguém de fora do rali) | A tela só mostra os do rali e desliga os implausíveis, mas a decisão é do comando `attributePoint`, que confere de novo; a E3.7 roda o comando no servidor antes de gravar (seção 3) |
+| E | Preencher autor sem a opção do grupo | A folha só abre com "Ponto individual" ligado na configuração da rodada, lida do cache (`CourtRoundSettings`); sessão sem origem ou rodada fora do cache fica desligada. O servidor confere o plano e a opção pelas configurações congeladas (E3.7, ADR 0060). Risco aceito no piloto: só o celular da quadra preenche |
+| T | Troca com alguém de fora do time ou da fila | "Entra" lista só o banco do time; o motor recusa quem não está no banco (`invalid-payload`) e a E3.7 confere o `LineupChanged` contra a escalação |
+| I | Configuração da rodada copiada para o log | A configuração é lida do cache a cada abertura e nunca vai para o `sacou.db` nem para evento; o `sacou.db` só ganhou a leitura da origem que já existia (`findSessionOrigin`, só IDs) |
+
 ### 12.1 Convite no app (E4.5, Parte 2)
 
 Telas 19 e 19d ([ADR 0049](../arquitetura/adr/0049-ajustes-do-grupo-e-convite-no-app.md), D7). O token do convite sai uma vez, na resposta de `createInvite`, e no aparelho fica em um lugar só: a porta `InviteLinkStore`.

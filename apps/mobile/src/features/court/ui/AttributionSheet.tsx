@@ -56,7 +56,9 @@ function AuthorButton({ option, onPress }: AuthorButtonProps) {
       }}
     >
       <Text variant="bodyStrong" numberOfLines={1} style={{ color }}>
-        {option.badge === null ? option.name : `${option.name} · ${option.badge}`}
+        {option.badge === null
+          ? option.name
+          : strings.courtPlayers.attribution.nameWithBadge(option.name, option.badge)}
       </Text>
       {option.detail === null ? null : (
         <Text variant="muted" numberOfLines={1} style={{ color }}>
@@ -74,11 +76,11 @@ function QuestionColumn({ model, onChooseKind, onOpponentError, onSkip }: Attrib
     <View style={{ flex: 1, gap: tokens.spacing.s }}>
       <Text variant="title" accessibilityRole="header">
         {model.title}
-        <Text variant="muted">{` · ${attribution.onScore}`}</Text>
+        <Text variant="muted">{attribution.afterDot(attribution.onScore)}</Text>
       </Text>
       <Text variant="bodyStrong">
         {attribution.question}
-        <Text variant="muted">{` ${attribution.questionHint}`}</Text>
+        <Text variant="muted">{attribution.afterSpace(attribution.questionHint)}</Text>
       </Text>
       <View
         accessibilityRole="radiogroup"
@@ -162,7 +164,7 @@ export function AttributionSheet(props: AttributionSheetProps) {
           <View style={{ flex: 1, gap: tokens.spacing.s }}>
             <Text variant="bodyStrong">
               {props.model.teamOnCourt}
-              <Text variant="muted">{` (${attribution.onCourtHint})`}</Text>
+              <Text variant="muted">{attribution.inParentheses(attribution.onCourtHint)}</Text>
             </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.spacing.s6 }}>
               {props.model.players.map((option) => (

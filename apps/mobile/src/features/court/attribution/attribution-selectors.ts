@@ -106,7 +106,9 @@ function optionOf(context: PlayerContext, memberId: MemberId, slot: number | nul
     detail,
     badge,
     enabled,
-    accessibilityLabel: enabled ? label : `${label}, ${attribution.notPlausible}`,
+    accessibilityLabel: enabled
+      ? label
+      : attribution.playerLabel(label, null, attribution.notPlausible),
   };
 }
 

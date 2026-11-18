@@ -24,6 +24,10 @@ export const courtPlayersStrings = {
   attribution: {
     title: (team: string, a: number, b: number) => `Ponto do ${team} · ${String(a)}–${String(b)}`,
     onScore: "já está no placar",
+    afterDot: (hint: string) => ` · ${hint}`,
+    afterSpace: (hint: string) => ` ${hint}`,
+    inParentheses: (hint: string) => ` (${hint})`,
+    nameWithBadge: (name: string, badge: string) => `${name} · ${badge}`,
     question: "De quem foi?",
     questionHint: "toque no jogador",
     kindsLabel: "Tipo do ponto",
