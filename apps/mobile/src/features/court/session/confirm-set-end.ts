@@ -11,12 +11,12 @@ export interface ConfirmSetEndDeps {
 
 /**
  * Confirms the end of the set (with the toss of the deciding set when `firstServer` is given). When
- * the engine turns the confirmation down, the phone buzzes "refused" and nothing else happens.
+ * the engine turns the confirmation down, the phone buzzes "refused"; the result says why.
  */
 export async function confirmSetEnd(
   { dispatch, feedback }: ConfirmSetEndDeps,
   firstServer?: TeamSide,
-): Promise<void> {
+): Promise<CommandResult> {
   const command: PlayCommand =
     firstServer === undefined
       ? { type: "confirm-set-end" }
@@ -25,4 +25,5 @@ export async function confirmSetEnd(
   if (!result.ok) {
     feedback.play("refused");
   }
+  return result;
 }

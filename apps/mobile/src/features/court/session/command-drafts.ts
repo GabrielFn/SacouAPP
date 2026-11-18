@@ -1,4 +1,5 @@
 import {
+  changeLineup,
   confirmSetEnd,
   endMatchManually,
   INITIAL_COURT_SESSION_STATE,
@@ -11,6 +12,7 @@ import {
   type ConfirmSetEndOptions,
   type CourtSessionState,
   type CourtSessionTimeline,
+  type LineupAllocation,
   type MatchStartedPayload,
   type RotationDirection,
   type TeamSide,
@@ -37,8 +39,16 @@ export type CourtCommand =
     }
   /** "Voltar para este ponto" of screen 24. */
   | { readonly type: "revert-to"; readonly eventId: string }
+  /** "Confirmar e ir para a próxima partida" of screen 11: the `MatchStarted` the plan built (D7). */
+  | { readonly type: "start-next-match"; readonly input: MatchStartedPayload }
   /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */
-  | { readonly type: "end-match-manually" };
+  | { readonly type: "end-match-manually" }
+  /** "Salvar escalação" of screen 22 in a match: the whole allocation, never the `system` (E4.8, D7). */
+  | {
+      readonly type: "change-lineup";
+      readonly team: TeamSide;
+      readonly allocation: LineupAllocation;
+    };
 
 /** What a screen can ask for: starting a match goes only through `startCourtMatch`. */
 export type PlayCommand = Exclude<CourtCommand, { readonly type: "start-match" }>;
@@ -64,18 +74,24 @@ function manualWinnerOf(state: CourtSessionState): TeamSide | null {
   return state.currentMatch === null ? null : manualEndWinner(state.currentMatch);
 }
 
-/** Runs the command of the engine on the state at the moment of execution, never on a stale one. */
-export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline): DraftsResult {
-  const state = currentState(timeline);
+type CorrectionCommand = Extract<
+  CourtCommand,
+  {
+    readonly type:
+      | "switch-serving-team"
+      | "shift-rotation"
+      | "revert-to"
+      | "end-match-manually"
+      | "change-lineup";
+  }
+>;
+
+function correctionDraftsFor(
+  command: CorrectionCommand,
+  timeline: CourtSessionTimeline,
+  state: CourtSessionState,
+): DraftsResult {
   switch (command.type) {
-    case "start-match":
-      return refused(startMatch(state, command.input));
-    case "score-point":
-      return refused(scorePoint(state, command.team));
-    case "confirm-set-end":
-      return refused(confirmSetEnd(state, confirmOptions(command.firstServer)));
-    case "undo":
-      return refused(undoLastAction(timeline));
     case "switch-serving-team":
       return refused(switchServingTeam(state));
     case "shift-rotation":
@@ -84,5 +100,25 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
       return refused(revertToEvent(timeline, command.eventId));
     case "end-match-manually":
       return refused(endMatchManually(state, manualWinnerOf(state)));
+    case "change-lineup":
+      return refused(changeLineup(state, command.team, command.allocation));
+  }
+}
+
+/** Runs the command of the engine on the state at the moment of execution, never on a stale one. */
+export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline): DraftsResult {
+  const state = currentState(timeline);
+  switch (command.type) {
+    case "start-match":
+    case "start-next-match":
+      return refused(startMatch(state, command.input));
+    case "score-point":
+      return refused(scorePoint(state, command.team));
+    case "confirm-set-end":
+      return refused(confirmSetEnd(state, confirmOptions(command.firstServer)));
+    case "undo":
+      return refused(undoLastAction(timeline));
+    default:
+      return correctionDraftsFor(command, timeline, state);
   }
 }

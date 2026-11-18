@@ -10,7 +10,7 @@ import { courtHref } from "../../court/navigation";
 import { useRoundCourt, type RoundCourtRead } from "../../court/hooks/use-round-court";
 import type { DrawArrangement } from "../model/draw-arrangement";
 import type { DrawFlowAction, DrawFlowState } from "../model/draw-flow.reducer";
-import type { PositionOf } from "../model/default-lineup";
+import { positionsOf } from "../model/default-lineup";
 import type { MatchStartInput } from "../model/match-start";
 import { startFromDraw, type StartFromDrawError } from "../session/start-from-draw";
 
@@ -34,12 +34,6 @@ export interface PreGameModel {
   /** "Sortear": the coin decides who serves first (D10). */
   readonly flip: () => void;
   readonly start: () => void;
-}
-
-/** The position of each member, from the members query: joined here, never copied (D2). */
-export function positionsOf(members: readonly Member[]): PositionOf {
-  const positions = new Map(members.map((member) => [member.memberId, member.primaryPosition]));
-  return (memberId) => positions.get(memberId) ?? null;
 }
 
 /**

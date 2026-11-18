@@ -1,5 +1,10 @@
 import { getLineupBySlot, LIBERO_SYSTEMS, type MemberId, type TeamSide } from "@sacou/match-engine";
-import { ROTATION_SLOTS, type FormationSystem, type RotationSlot } from "@sacou/volley-rules";
+import {
+  ROTATION_SLOTS,
+  type FormationPhase,
+  type FormationSystem,
+  type RotationSlot,
+} from "@sacou/volley-rules";
 
 import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import type { TeamColorName } from "../../../theme/team-colors";
@@ -16,6 +21,8 @@ import type { LineupDraft } from "./lineup-moves";
 import { basesOf, LINEUP_SIDES, type LineupSource, type LineupTeamSource } from "./lineup-source";
 
 const TWO = 2;
+/** Between sets nobody serves yet: the court is drawn as if receiving, with no server (D7). */
+const BETWEEN_SETS_DRAWING: FormationPhase = "receiving";
 
 export interface LineupTab {
   readonly side: TeamSide;
@@ -48,6 +55,8 @@ export interface LineupTeamView {
   readonly color: TeamColorName;
   readonly system: FormationSystem;
   readonly phaseLabel: string;
+  /** Over the half court: "No saque", or "Vale para o próximo set." between sets (D7). */
+  readonly courtCaption: string;
   /** `null` in the free system: the zone has no number on the screen (D2). */
   readonly rotation: {
     readonly label: string;
@@ -117,6 +126,11 @@ function otherLibero(state: LineupEditorState, source: LineupSource, side: TeamS
   return other === null ? null : (shownAllocation(state, other).libero?.memberId ?? null);
 }
 
+/** The reserves of the queue (pre-game), or the bench of the draft (match), where a libero goes (D5). */
+function liberoPoolOf(draft: LineupDraft, team: LineupTeamSource): readonly MemberId[] {
+  return team.base?.liberoExit === "bench" ? draft.bench : team.liberoPool;
+}
+
 function liberoRow(
   draft: LineupDraft,
   team: LineupTeamSource,
@@ -127,7 +141,7 @@ function liberoRow(
   if (!LIBERO_SYSTEMS.includes(draft.system))
     return { label, options: [], note: texts.liberoSystemsOnly };
   const current = draft.libero?.memberId ?? null;
-  const pool = team.liberoPool.filter((id) => id !== taken && id !== current);
+  const pool = liberoPoolOf(draft, team).filter((id) => id !== taken && id !== current);
   const candidates = current === null ? pool : [current, ...pool];
   if (candidates.length === 0) return { label, options: [], note: team.noLiberoText };
   const options = [null, ...candidates].map((value) => ({
@@ -138,9 +152,20 @@ function liberoRow(
   return { label, options, note: null };
 }
 
+/** The phase the half court is drawn in: the real one, or receiving between sets (D7). */
+function drawnPhase(team: LineupTeamSource): FormationPhase {
+  return team.phase ?? BETWEEN_SETS_DRAWING;
+}
+
+function phaseLabelOf(team: LineupTeamSource): string {
+  if (team.phase === null) return texts.betweenSets;
+  return team.phase === "serving" ? texts.serving(team.name) : texts.receiving(team.name);
+}
+
 function serverChange(draft: LineupDraft, team: LineupTeamSource, nameOf: LineupSource["nameOf"]) {
-  const before = team.base === null ? null : serverOf(team.base.state, team.phase);
-  const now = serverOf(draft, team.phase);
+  const phase = drawnPhase(team);
+  const before = team.base === null ? null : serverOf(team.base.state, phase);
+  const now = serverOf(draft, phase);
   return now === null || now === before ? null : texts.newServer(nameOf(now));
 }
 
@@ -151,7 +176,7 @@ function officialOrder(
   nameOf: LineupSource["nameOf"],
 ): readonly OrderCell[] {
   const bySlot = getLineupBySlot(draft.lineup, draft.setterZone);
-  const server = serverOf(draft, team.phase);
+  const server = serverOf(draft, drawnPhase(team));
   return ROTATION_SLOTS.flatMap((slot, index) => {
     const memberId = bySlot[index];
     return memberId === undefined
@@ -175,9 +200,16 @@ function teamView(
     name: team.name,
     color: team.color,
     system: draft.system,
-    phaseLabel: team.phase === "serving" ? texts.serving(team.name) : texts.receiving(team.name),
+    phaseLabel: phaseLabelOf(team),
+    courtCaption: team.phase === null ? texts.nextSet : texts.atServe,
     rotation: rotationChoices(draft, team.name),
-    chips: courtChips({ draft, phase: team.phase, misplaced, selection: state.selection, nameOf }),
+    chips: courtChips({
+      draft,
+      phase: drawnPhase(team),
+      misplaced,
+      selection: state.selection,
+      nameOf,
+    }),
     canMakeSetter:
       draft.system !== "livre" && state.selection !== null && state.selection !== draft.lineup[0],
     warning: warningText(inDiagramOrder(draft, misplaced).map(nameOf)),

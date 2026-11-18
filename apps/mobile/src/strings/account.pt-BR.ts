@@ -17,6 +17,18 @@ export const accountStrings = {
   terms: "Termos de uso",
   privacy: "Política de privacidade",
   signOut: "Sair",
+  // "Sair" with court events the server has not confirmed (question 84).
+  unsent: {
+    title: "Pontos ainda não enviados",
+    points: (count: number) =>
+      count === 1
+        ? "1 ponto desta quadra ainda não foi enviado. Ele só vai ser enviado quando você entrar de novo com esta conta."
+        : `${String(count)} pontos desta quadra ainda não foram enviados. Eles só vão ser enviados quando você entrar de novo com esta conta.`,
+    otherEvents:
+      "A quadra tem marcações que ainda não foram enviadas. Elas só vão ser enviadas quando você entrar de novo com esta conta.",
+    confirm: "Sair mesmo assim",
+    cancel: "Cancelar",
+  },
   exportRow: "Exportar meus dados",
   deleteTitle: "Excluir conta",
   deleteNote: "Apaga seu perfil. Seu histórico nas partidas fica como Ex-jogador.",

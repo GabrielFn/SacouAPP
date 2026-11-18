@@ -6,6 +6,7 @@ import { strings } from "../../../strings/pt-BR";
 import { AccountScreen } from "./AccountScreen";
 
 const ender = vi.hoisted(() => ({ end: vi.fn(() => Promise.resolve()) }));
+const unsent = vi.hoisted(() => ({ value: Promise.resolve({ events: 0, points: 0 }) }));
 
 vi.mock("react", async (original) => ({
   ...(await original<typeof import("react")>()),
@@ -16,6 +17,10 @@ vi.mock("react-native", () => ({ View: "View" }));
 vi.mock("../../../services/services-context", () => ({
   useServices: () => ({ sessionEnder: ender, legalLinks: {}, externalLink: {} }),
 }));
+vi.mock("../../court/hooks/court-sync-context", () => ({
+  useCourtSync: () => ({ countUnsent: () => unsent.value }),
+}));
+vi.mock("../../../ui/ConfirmSheet", () => ({ ConfirmSheet: () => null }));
 vi.mock("../../profile/hooks/use-profile", () => ({ useMyProfile: () => ({ data: null }) }));
 vi.mock("../../../theme/theme-context", () => ({ useTheme: () => ({ tokens: {}, colors: {} }) }));
 vi.mock("../../../ui/BackBar", () => ({ BackBar: () => null }));
@@ -46,11 +51,13 @@ function rowsOf(node: ReactNode): readonly RowProps[] {
 const ACCOUNT: AccountView = { email: null, provider: "google" } as unknown as AccountView;
 
 describe("the account screen (30)", () => {
-  test("Sair goes through the SessionEnder, so the cache, the links and the skip are forgotten", () => {
+  test("Sair goes through the SessionEnder, so the cache, the links and the skip are forgotten", async () => {
     const signOut = rowsOf(AccountScreen({ account: ACCOUNT })).find(
       (row) => row.label === strings.account.signOut,
     );
     signOut?.onPress?.();
-    expect(ender.end).toHaveBeenCalledExactlyOnceWith("signedOut");
+    await vi.waitFor(() => {
+      expect(ender.end).toHaveBeenCalledExactlyOnceWith("signedOut");
+    });
   });
 });

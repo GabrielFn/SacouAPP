@@ -1,6 +1,8 @@
 import { err, ok, type Result } from "@sacou/volley-rules";
 
+import { HALTS_LIFTED_ON_OPEN } from "../ports/court-event-log";
 import type { SqlDatabase, SqlExecutor } from "../ports/sql-database";
+import { LIFT_HALTS_ON_OPEN } from "./court-queries.data";
 import { MIGRATION_STEPS, USER_VERSION_PRAGMA } from "./migrations.data";
 
 export type MigrationErrorCode = "storage-failed" | "unsupported-database-version";
@@ -32,8 +34,9 @@ async function applySteps(transaction: SqlExecutor, from: number): Promise<void>
 }
 
 /**
- * Brings the database to the latest schema, in one transaction. A database from a newer app is
- * left untouched: an old app must not write over a schema it does not know.
+ * Brings the database to the latest schema, in one transaction, and lifts the halts a new start may
+ * clear (ADR 0067, D4): it runs once per opening of the app. A database from a newer app is left
+ * untouched: an old app must not write over a schema it does not know.
  */
 export async function migrateDatabase(
   database: SqlDatabase,
@@ -45,6 +48,7 @@ export async function migrateDatabase(
         return err({ code: "unsupported-database-version" as const });
       }
       await applySteps(transaction, version);
+      await transaction.run(LIFT_HALTS_ON_OPEN, HALTS_LIFTED_ON_OPEN);
       return ok(undefined);
     });
   } catch {

@@ -5,8 +5,12 @@ import type { TeamColorName } from "../../../theme/team-colors";
 import type { HintLine } from "./hint-line";
 import type { WinStreak } from "./win-streak";
 
-/** `playing` is the court; `set-decided` waits for the confirmation of the set; the others have no court. */
-export type CourtPhase = "no-match" | "playing" | "set-decided" | "match-ended";
+/**
+ * `playing` is the court; `set-decided` waits for the confirmation of the set; `match-pending` is a
+ * match whose deciding `SetEnded` is stored without its `MatchEnded` (a confirmation stored half);
+ * the others have no court.
+ */
+export type CourtPhase = "no-match" | "playing" | "set-decided" | "match-pending" | "match-ended";
 
 export interface PlayerChipModel {
   readonly memberId: MemberId;
@@ -79,13 +83,22 @@ export interface CourtScreenModel {
   readonly canUndo: boolean;
 }
 
-/** What the placeholder of the end of the set shows (screen 25 is E4.10). */
+/** What screen 25 shows: the set that was decided and what its confirmation does. */
 export interface SetEndModel {
   readonly setNumber: number;
+  readonly winner: TeamSide;
   readonly winnerLabel: string;
   readonly scores: Readonly<Record<TeamSide, { readonly label: string; readonly score: number }>>;
+  /** The sets of each team once this one is confirmed. */
+  readonly setsAfter: Readonly<Record<TeamSide, number>>;
   /** The deciding set of a series needs the toss: who serves first. */
   readonly needsFirstServer: boolean;
+  /** Who serves first in the next set (it alternates); `null` with the toss or when the match ends. */
+  readonly nextFirstServer: TeamSide | null;
+  /** The confirmation ends the match: "Confirmar fim da partida". */
+  readonly endsMatch: boolean;
+  /** The `SetEnded` of the deciding set is stored and only the `MatchEnded` is missing. */
+  readonly pendingMatchEnd: boolean;
 }
 
 export interface MatchEndModel {

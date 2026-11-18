@@ -38,6 +38,16 @@ describe.each([
     expect(await log.findOpenSessionOfRound("round-3")).toEqual({ ok: true, value: null });
   });
 
+  test("findOrigin reads the origin back; a sample session or a missing one has none", async () => {
+    const log = await open();
+    await log.openSession(SESSION_A, ORIGIN);
+    await log.openSession(SESSION_B);
+
+    expect(await log.findOrigin(SESSION_A)).toEqual({ ok: true, value: ORIGIN });
+    expect(await log.findOrigin(SESSION_B)).toEqual({ ok: true, value: null });
+    expect(await log.findOrigin("missing")).toEqual({ ok: true, value: null });
+  });
+
   test("the origin is written only when the session is created", async () => {
     const log = await open();
     await log.openSession(SESSION_A, ORIGIN);
@@ -70,8 +80,14 @@ describe("migration 2: the origin of the court sessions", () => {
 
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
 
-    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(2);
-    expect(sqlite.raw.prepare("SELECT * FROM court_sessions").all()).toEqual([
+    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(
+      MIGRATION_STEPS.length,
+    );
+    expect(
+      sqlite.raw
+        .prepare("SELECT court_session_id, status, batch, group_id, round_id FROM court_sessions")
+        .all(),
+    ).toEqual([
       { court_session_id: SESSION_A, status: "open", batch: 1, group_id: null, round_id: null },
     ]);
     const log = repositoryOn(sqlite);
