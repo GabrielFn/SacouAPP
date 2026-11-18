@@ -64,7 +64,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 3. **Uma revisão por parte depois da primeira.** Em tarefa sensível, a primeira parte tem `revisor` e `revisor-seguranca` separados. Nas partes seguintes, um único agente Opus faz as duas revisões.
 4. **Menos partes.** Só dividir uma tarefa quando o PR passaria de cerca de 1.500 linhas alteradas.
 5. **Entrega completa.** Antes de devolver, o desenvolvedor roda a bateria completa (build, lint, testes e portões) **depois do último commit** e espera a CI verde.
-6. **Saídas e relatórios curtos** (skills `bateria` e `sabotagem` em `.claude/skills/`). Comandos com saída resumida (`tail`, modo silencioso); o testador escolhe as 5 ou 6 sabotagens mais importantes; relatórios de até 15 linhas, com achados numerados.
+6. **Saídas e relatórios curtos** (skills `bateria` e `sabotagem` em `.claude/skills/`). Comandos com saída resumida (`tail`, modo silencioso); o testador roda só os testes da pasta tocada, os testes novos e as 5 ou 6 sabotagens mais importantes, e deixa a bateria completa para a CI (Gabriel, 18/11/2026); relatórios de até 15 linhas, com achados numerados.
 7. **Retomada sem reler histórico** (pedido do Gabriel, 15/11/2026, depois de ~1 milhão de tokens em 2 minutos). Depois de qualquer pausa (limite do plano, parada pedida, fim de sessão), **nunca retome um agente parado com `SendMessage`**: ele relê o histórico inteiro sem cache. Primeiro veja o estado da branch (`git log`, `gh pr checks`). O passo mecânico (lint, bateria, abrir PR, esperar a CI) o orquestrador faz. O que faltar de trabalho vai para um agente **novo**, com brief curto: branch, último commit e o que falta.
 
 ## Autonomia

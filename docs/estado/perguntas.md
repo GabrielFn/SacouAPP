@@ -179,3 +179,6 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 89. Domínio próprio (ex.: `api.sacou.com.br`, ~R$ 40/ano): (1) agora; (2) antes dos builds de loja (E5.4); (3) depois do piloto. **Recomendação: 2.**
 90. Ambiente de teste: (1) ligado o tempo todo; (2) "App Sleeping" (dorme sem uso). **Recomendação: 2.**
 91. Dados pessoais nos EUA (LGPD art. 33) com a 88 na opção 1. **Recomendação:** aceitar no piloto, registrar em `dados-pessoais.md` e citar na política de privacidade (E6.1).
+
+## 18/11/2026: bateria do testador
+- **Pergunta:** com o disco HD, a bateria completa leva de 30 a 50 min por testador. O testador pode rodar só os testes da pasta tocada, os novos e as sabotagens, e deixar a bateria completa para a CI? **Resposta do Gabriel (18/11): sim.** Regra 6 da economia de tokens do `CLAUDE.md` atualizada.
