@@ -250,7 +250,7 @@ Monólito modular em ASP.NET Core (.NET 10), com DDD enxuto: agregados só onde 
 | Login | Firebase Auth: Google, Apple e e-mail com senha; a API valida o token com FirebaseAdmin |
 | Página da rodada | Razor Pages no mesmo projeto, com meta tags para a prévia no WhatsApp |
 | Push | Expo Push Service |
-| Hospedagem | Railway, plano Hobby |
+| Hospedagem | ~~Railway, plano Hobby~~ Google Cloud Run, faixa grátis (ADR 0068, 18/11/2026) |
 
 ### Módulos
 

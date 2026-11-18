@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it } from "node:test";
 
@@ -34,6 +35,11 @@ const SHARED_FILES = [
   "Directory.Build.props",
   "scripts/ci-areas.mjs",
   ".github/workflows/ci.yml",
+  ".github/workflows/deploy-api.yml",
+  ".github/actions/deploy-cloud-run/action.yml",
+  "deploy/cloud-run/service.yaml",
+  "Dockerfile",
+  ".dockerignore",
   "docs/dominio/rotacoes.md",
   "apps/mobile-copy/file.ts",
 ];
@@ -83,5 +89,69 @@ describe("scripts/ci-areas.mjs", () => {
     assert.equal(run(`${API_FILE}\n`), "code=true\napi=true\napp=false\n");
     assert.equal(run("docs/decisoes.md\n"), "code=false\napi=false\napp=false\n");
     assert.equal(run("\n"), "code=true\napi=true\napp=true\n");
+  });
+});
+
+// .github/workflows/deploy-api.yml deploys only when the `api` area is on (ADR 0068, D4).
+describe("API deploy decision", () => {
+  const SCRIPT = resolve(import.meta.dirname, "..", "ci-areas.mjs");
+  const WORKFLOW = resolve(
+    import.meta.dirname,
+    "..",
+    "..",
+    ".github",
+    "workflows",
+    "deploy-api.yml",
+  );
+  const deploys = (files) =>
+    execFileSync(process.execPath, [SCRIPT], { input: `${files.join("\n")}\n`, encoding: "utf8" })
+      .split("\n")
+      .includes("api=true");
+
+  it("skips the deploy for a docs-only commit", () => {
+    assert.equal(deploys(["docs/decisoes.md", "docs/estado/progresso.md"]), false);
+  });
+
+  it("skips the deploy for an app-only commit", () => {
+    assert.equal(
+      deploys([MOBILE_FILE, "apps/mobile/src/texts/pt-BR.ts", "docs/estado/progresso.md"]),
+      false,
+    );
+  });
+
+  it("deploys when the API, its image or the deploy itself changes", () => {
+    [
+      API_FILE,
+      "apps/api/src/Sacou.Modules/Groups/Sacou.Modules.Groups.csproj",
+      "packages/volley-rules/src/formations/formations.json",
+      "Dockerfile",
+      ".dockerignore",
+      "deploy/cloud-run/service.yaml",
+      ".github/workflows/deploy-api.yml",
+      ".github/actions/deploy-cloud-run/action.yml",
+    ].forEach((file) => {
+      assert.equal(deploys([file]), true, file);
+      assert.equal(
+        deploys([MOBILE_FILE, "docs/decisoes.md", file]),
+        true,
+        `${file} with the app and docs`,
+      );
+    });
+  });
+
+  it("deploys when the diff is empty or failed", () => {
+    assert.equal(deploys([]), true);
+    assert.equal(deploys([""]), true);
+  });
+
+  it("is the rule the workflow runs, and the build waits for it", () => {
+    const workflow = readFileSync(WORKFLOW, "utf8");
+    assert.match(workflow, /node scripts\/ci-areas\.mjs \| tee -a "\$GITHUB_OUTPUT"/);
+    assert.match(workflow, /\|\| files=""/);
+    assert.match(
+      workflow,
+      /build:\n {4}needs: changes\n {4}if: needs\.changes\.outputs\.api != 'false'\n/,
+    );
+    assert.match(workflow, /github\.event\.workflow_run\.conclusion == 'success'/);
   });
 });

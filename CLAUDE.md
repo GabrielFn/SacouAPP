@@ -92,7 +92,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 
 ## Segredos
 
-**Nunca** peça nem aceite segredos pelo chat e nunca os coloque no código, em logs ou em commits. O Gabriel cadastra as chaves nos segredos do GitHub Actions, no Railway e num `.env` local (que está no `.gitignore`). `docs/seguranca/segredos.md` lista só os **nomes** e onde ficam.
+**Nunca** peça nem aceite segredos pelo chat e nunca os coloque no código, em logs ou em commits. O Gabriel cadastra as chaves nos segredos do GitHub Actions, no Secret Manager do Google Cloud e num `.env` local (que está no `.gitignore`). `docs/seguranca/segredos.md` lista só os **nomes** e onde ficam.
 
 ## Definição de pronto
 
