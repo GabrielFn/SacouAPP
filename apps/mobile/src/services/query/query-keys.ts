@@ -18,6 +18,8 @@ export const queryKeys = {
   templates: (groupId: string) => ["groups", groupId, "templates"] as const,
   rounds: (groupId: string) => ["groups", groupId, "rounds"] as const,
   round: (groupId: string, roundId: string) => ["groups", groupId, "rounds", roundId] as const,
+  /** Where a court session came from, read from the court log: outside the persisted allow list. */
+  courtSessionOrigin: (courtSessionId: string) => ["court-session-origin", courtSessionId] as const,
 };
 
 export type SacouQueryKey = readonly unknown[];

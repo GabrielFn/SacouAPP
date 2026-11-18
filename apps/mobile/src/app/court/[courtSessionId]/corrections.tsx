@@ -1,4 +1,5 @@
 import { useMemo, useReducer } from "react";
+import { View } from "react-native";
 
 import {
   correctionsReducer,
@@ -15,6 +16,8 @@ import {
   shiftOptions,
   timelineRows,
 } from "../../../features/court/corrections/corrections-selectors";
+import { useAttributionSheet } from "../../../features/court/hooks/use-attribution-sheet";
+import { useIndividualPoints } from "../../../features/court/hooks/use-individual-points";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import {
@@ -23,6 +26,7 @@ import {
 } from "../../../features/court/model/court-screen.selectors";
 import { refusalText } from "../../../features/court/model/refusal-text";
 import type { PlayCommand } from "../../../features/court/session/command-drafts";
+import { AttributionSheet } from "../../../features/court/ui/AttributionSheet";
 import { CorrectionsScreen } from "../../../features/court/ui/CorrectionsScreen";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { useServices } from "../../../services/services-context";
@@ -34,6 +38,8 @@ export default function CorrectionsRoute() {
   const { view, dispatch, retry } = useCourtSession();
   const [state, send] = useReducer(correctionsReducer, INITIAL_CORRECTIONS);
   const timeline = view.status === "ready" ? view.timeline : null;
+  const individualPoints = useIndividualPoints();
+  const attribution = useAttributionSheet(timeline, dispatch);
   const selected = useMemo(
     () => (timeline === null ? null : effectiveSelection(timeline, state.selected)),
     [timeline, state.selected],
@@ -46,7 +52,7 @@ export default function CorrectionsRoute() {
     return {
       subtitle: correctionsSubtitle(timeline, courtRoster),
       setNumber: currentSetNumber(timeline),
-      rows: timelineRows(timeline, courtRoster, selected),
+      rows: timelineRows(timeline, courtRoster, selected, individualPoints),
       revert: revertSheet(timeline, courtRoster, selected),
       shiftOptions: options,
       canShift: canShift(options),
@@ -54,7 +60,7 @@ export default function CorrectionsRoute() {
       servingNotice: servingNotice(timeline, courtRoster),
       currentNotice: currentPointNotice(timeline, state.selected),
     };
-  }, [timeline, courtRoster, selected, state.selected]);
+  }, [timeline, courtRoster, selected, state.selected, individualPoints]);
   if (view.status === "failed") {
     return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
   }
@@ -78,37 +84,55 @@ export default function CorrectionsRoute() {
   };
   const sheetState = { ...state, selected };
   return (
-    <CorrectionsScreen
-      {...model}
-      state={sheetState}
-      refusal={state.refusal}
-      onClose={route.backOrCourt}
-      onPointTapped={(eventId) => {
-        send({ type: "point-tapped", eventId });
-      }}
-      onSwitchServer={() => {
-        run({ type: "switch-serving-team" });
-      }}
-      onOpenShift={() => {
-        send({ type: "shift-opened" });
-      }}
-      onChooseShiftTeam={(team) => {
-        send({ type: "shift-team-chosen", team });
-      }}
-      onShift={(direction) => {
-        run({ type: "shift-rotation", team: state.shiftTeam, direction });
-      }}
-      onCloseShift={() => {
-        send({ type: "shift-closed" });
-      }}
-      onRevert={() => {
-        if (selected !== null) {
-          run({ type: "revert-to", eventId: selected }, route.backOrCourt);
-        }
-      }}
-      onCancelRevert={() => {
-        send({ type: "selection-cleared" });
-      }}
-    />
+    <View style={{ flex: 1 }}>
+      <CorrectionsScreen
+        {...model}
+        {...(individualPoints
+          ? {
+              onAuthor: (eventId: string) => {
+                attribution.open([eventId]);
+              },
+            }
+          : {})}
+        state={sheetState}
+        refusal={state.refusal}
+        onClose={route.backOrCourt}
+        onPointTapped={(eventId) => {
+          send({ type: "point-tapped", eventId });
+        }}
+        onSwitchServer={() => {
+          run({ type: "switch-serving-team" });
+        }}
+        onOpenShift={() => {
+          send({ type: "shift-opened" });
+        }}
+        onChooseShiftTeam={(team) => {
+          send({ type: "shift-team-chosen", team });
+        }}
+        onShift={(direction) => {
+          run({ type: "shift-rotation", team: state.shiftTeam, direction });
+        }}
+        onCloseShift={() => {
+          send({ type: "shift-closed" });
+        }}
+        onRevert={() => {
+          if (selected !== null) {
+            run({ type: "revert-to", eventId: selected }, route.backOrCourt);
+          }
+        }}
+        onCancelRevert={() => {
+          send({ type: "selection-cleared" });
+        }}
+      />
+      {attribution.model === null ? null : (
+        <AttributionSheet
+          model={attribution.model}
+          onChooseKind={attribution.onChooseKind}
+          onAuthor={attribution.onAuthor}
+          onOpponentError={attribution.onOpponentError}
+          onSkip={attribution.onSkip}
+        />
+      )}
+    </View>
   );
 }

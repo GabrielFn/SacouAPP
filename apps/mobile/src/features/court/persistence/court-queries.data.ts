@@ -9,12 +9,12 @@ export const INSERT_SESSION =
   "INSERT OR IGNORE INTO court_sessions (court_session_id, status, batch, group_id, round_id, owner_key) VALUES (?, ?, ?, ?, ?, ?)";
 export const SELECT_SESSION =
   "SELECT status, batch, acked_sequence, taken_over_batch, sync_halt, round_id, owner_key FROM court_sessions WHERE court_session_id = ?";
+export const SELECT_SESSION_ORIGIN =
+  "SELECT group_id, round_id FROM court_sessions WHERE court_session_id = ?";
 export const SELECT_ACTIVE_SESSION =
   "SELECT court_session_id FROM court_sessions WHERE status = ? ORDER BY rowid DESC LIMIT 1";
 export const SELECT_OPEN_SESSION_OF_ROUND =
   "SELECT court_session_id FROM court_sessions WHERE status = ? AND round_id = ? ORDER BY rowid DESC LIMIT 1";
-export const SELECT_SESSION_ORIGIN =
-  "SELECT group_id, round_id FROM court_sessions WHERE court_session_id = ?";
 export const UPDATE_SESSION_STATUS =
   "UPDATE court_sessions SET status = ? WHERE court_session_id = ?";
 

@@ -7,6 +7,7 @@ import type { Scheduler } from "../features/court/ports/scheduler";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
+import type { CourtRoundSettings } from "../features/court/ports/court-round-settings";
 import type { CourtThemePreference } from "../features/court/ports/court-theme-preference";
 import type { CourtRoundSource } from "../features/court/ports/court-round-source";
 import type { NextMatchDraftStore } from "../features/court/ports/next-match-draft-store";
@@ -39,6 +40,8 @@ export interface Services {
   readonly courtRuntimeOpener: CourtRuntimeOpener;
   /** Names and team colors of the court, from the members cache, so they show offline (E4.7, D7). */
   readonly courtRoster: CourtRoster;
+  /** "Ponto individual" of the round of a court session, from the rounds cache (E4.10, D10). */
+  readonly courtRoundSettings: CourtRoundSettings;
   /** What the phone does for the court: stay awake, buzz, block the back button, keep time. */
   readonly screenAwake: ScreenAwake;
   /** The court turns the phone on its side and puts it back (E4.17). */

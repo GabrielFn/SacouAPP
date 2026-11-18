@@ -47,10 +47,8 @@ describe("retry after a failed opening", () => {
     controller.subscribe(() => seen.push(controller.getSnapshot().status));
     await controller.retry();
     expect(seen).toEqual(["loading", "ready"]);
-    expect(await controller.dispatch({ type: "score-point", team: "a" })).toEqual({
-      ok: true,
-      value: undefined,
-    });
+    const scored = await controller.dispatch({ type: "score-point", team: "a" });
+    expect(scored.ok && scored.value.written.map(({ type }) => type)).toEqual(["PointScored"]);
   });
 });
 

@@ -6,6 +6,7 @@ export const COURT_PATHS = {
   matchEnd: "/court/[courtSessionId]/match-end",
   menu: "/court/[courtSessionId]/menu",
   corrections: "/court/[courtSessionId]/corrections",
+  substitution: "/court/[courtSessionId]/substitution",
   lineup: "/court/[courtSessionId]/lineup",
 } as const;
 
