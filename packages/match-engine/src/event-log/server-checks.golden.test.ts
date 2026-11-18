@@ -133,7 +133,10 @@ describe("server checks golden", () => {
       expect(reverts.length).toBeGreaterThan(0);
       expect(reverts.every(({ batch }) => batch === 2)).toBe(true);
       expect(
-        reverts.some(({ payload }) => firstBatchIds.has(String(payload["targetEventId"]))),
+        reverts.some(({ payload }) => {
+          const target = payload["targetEventId"];
+          return typeof target === "string" && firstBatchIds.has(target);
+        }),
       ).toBe(true);
     },
   );
