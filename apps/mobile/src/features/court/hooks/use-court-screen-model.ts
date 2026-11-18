@@ -9,15 +9,15 @@ import {
 } from "../model/court-screen.selectors";
 import type { CourtPhase, CourtScreenModel } from "../model/court-screen.types";
 import type { CourtRoster } from "../ports/court-roster";
-import type { SyncNotice } from "../sync/sync-notice";
+import { localScoreOf, type BlockedCourt } from "../takeover/blocked-court";
+import type { BackdropScore } from "../takeover/takeover-texts";
 import type { CourtSessionView } from "./use-court-session";
 
-/** Why the court takes no gesture: another phone writes it (09b, D7), or another account opened it (D8). */
-export type CourtBlock = Extract<SyncNotice, { kind: "taken-over" | "other-account" }>["kind"];
-
 export interface CourtScreenModelView {
-  /** The court is replaced by a screen that only leaves, or `null`. */
-  readonly block: CourtBlock | null;
+  /** The court is replaced by a screen without its gestures (09b, 09c, D8), or `null`. */
+  readonly block: BlockedCourt | null;
+  /** The score of this phone behind a blocked court (09b, 09c), or `null`. */
+  readonly blockedScore: BackdropScore | null;
   /** `null` while loading, failed or blocked. */
   readonly timeline: CourtSessionTimeline | null;
   readonly phase: CourtPhase | null;
@@ -34,8 +34,7 @@ export function useCourtScreenModel(
   roster: CourtRoster,
 ): CourtScreenModelView {
   const notice = view.status === "ready" ? view.notice : null;
-  const block =
-    notice?.kind === "taken-over" || notice?.kind === "other-account" ? notice.kind : null;
+  const block = view.status === "ready" ? view.blocked : null;
   const timeline = view.status === "ready" && block === null ? view.timeline : null;
   const phase = useMemo(
     () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
@@ -46,5 +45,9 @@ export function useCourtScreenModel(
     const screen = selectCourtScreen(timeline, roster);
     return screen === null ? null : { ...screen, hint: withUploadNotice(screen.hint, notice) };
   }, [timeline, roster, notice]);
-  return { block, timeline, phase, model };
+  const blockedScore = useMemo(
+    () => (view.status === "ready" && block !== null ? localScoreOf(view.timeline) : null),
+    [view, block],
+  );
+  return { block, blockedScore, timeline, phase, model };
 }

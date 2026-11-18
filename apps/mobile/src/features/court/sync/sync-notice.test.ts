@@ -25,12 +25,14 @@ describe("selectSyncNotice (question 85, D7, D8)", () => {
     });
   });
 
-  test("a session without an owner says the generic line of a stop (S4, R5)", () => {
-    expect(selectSyncNotice({ ...SENDING, ownership: "unowned" })).toEqual({
-      kind: "stopped",
-      reason: "unowned",
+  test("a session without an owner, or an account not read yet, blocks the court (D8)", () => {
+    expect(selectSyncNotice({ ...SENDING, ownership: "unowned" })).toEqual({ kind: "unowned" });
+    expect(selectSyncNotice({ ...SENDING, ownership: "account-pending" })).toEqual({
+      kind: "account-pending",
     });
-    expect(uploadStoppedText("unowned")).toBe(strings.court.upload.stopped);
+    expect(
+      selectSyncNotice({ ...SENDING, syncHalt: "not-found", ownership: "account-pending" }),
+    ).toEqual({ kind: "account-pending" });
   });
 });
 
@@ -44,6 +46,7 @@ describe("the line of the middle strip with the upload stopped", () => {
     expect(withUploadNotice(hint, null)).toBe(hint);
     expect(withUploadNotice(hint, { kind: "taken-over" })).toBe(hint);
     expect(withUploadNotice(hint, { kind: "other-account" })).toBe(hint);
+    expect(withUploadNotice(hint, { kind: "unowned" })).toBe(hint);
   });
 
   test("says the reason when it is simple, the generic line otherwise", () => {

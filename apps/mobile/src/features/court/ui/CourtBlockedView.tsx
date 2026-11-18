@@ -1,29 +1,77 @@
+import { useState } from "react";
+
 import { strings } from "../../../strings/pt-BR";
+import type { ScreenAction } from "../../../ui/ActionButtons";
+import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { ErrorScreen } from "../../../ui/ErrorScreen";
-import type { CourtBlock } from "../hooks/use-court-screen-model";
 
 export interface CourtBlockedViewProps {
-  readonly block: CourtBlock;
+  readonly kind: "other-account" | "unowned";
+  /** Points of this phone the server never got: taking the court over leaves them out (S4). */
+  readonly unsentPoints: number;
   readonly onLeave: () => void;
+  /** `null` while the round of the session is not known: no 09a to open. */
+  readonly onTakeOver: (() => void) | null;
 }
 
 const TEXTS = {
-  "taken-over": strings.court.takenOver,
   "other-account": strings.court.otherAccount,
-} as const satisfies Record<CourtBlock, unknown>;
+  unowned: strings.court.unowned,
+} as const satisfies Record<CourtBlockedViewProps["kind"], unknown>;
 
 /**
- * The court that takes no gesture, only "Sair da quadra": screen 09b in its first form (D7, Parte 1),
- * another phone writes the court now; or the session of another account (D8), whose points leave
- * only with it. The name of who took over and "Assumir de volta" come with E3.8.
+ * The court of another account, or of none (ADR 0067, D8): no gesture, only "Sair da quadra" and
+ * "Assumir a quadra", which first says how many points of this phone will be left out.
  */
-export function CourtBlockedView({ block, onLeave }: CourtBlockedViewProps) {
-  const texts = TEXTS[block];
+export function CourtBlockedView({
+  kind,
+  unsentPoints,
+  onLeave,
+  onTakeOver,
+}: CourtBlockedViewProps) {
+  const texts = TEXTS[kind];
+  const { discard } = strings.court;
+  const [confirming, setConfirming] = useState(false);
+  const takeOver: readonly ScreenAction[] =
+    onTakeOver === null
+      ? []
+      : [
+          {
+            label: texts.takeOver,
+            onPress: () => {
+              if (unsentPoints > 0) setConfirming(true);
+              else onTakeOver();
+            },
+          },
+        ];
   return (
-    <ErrorScreen
-      title={texts.title}
-      body={texts.body}
-      actions={[{ label: texts.leave, onPress: onLeave }]}
-    />
+    <>
+      <ErrorScreen
+        title={texts.title}
+        body={texts.body}
+        actions={[
+          ...takeOver,
+          {
+            label: texts.leave,
+            variant: takeOver.length > 0 ? "outline" : undefined,
+            onPress: onLeave,
+          },
+        ]}
+      />
+      <ConfirmSheet
+        visible={confirming && onTakeOver !== null}
+        title={discard.title(unsentPoints)}
+        body={discard.body}
+        confirmLabel={discard.confirm}
+        cancelLabel={discard.cancel}
+        onConfirm={() => {
+          setConfirming(false);
+          onTakeOver?.();
+        }}
+        onCancel={() => {
+          setConfirming(false);
+        }}
+      />
+    </>
   );
 }

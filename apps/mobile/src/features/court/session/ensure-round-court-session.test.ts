@@ -198,11 +198,25 @@ describe("readRoundCourt: what screens 06 and 08 know of the court (D1, D6)", ()
 
     expect(await readRoundCourt(open, "r2")).toEqual({
       ok: true,
-      value: { courtSessionId: OTHER_SESSION, startedMatches: 1, openMatch: true },
+      value: {
+        courtSessionId: OTHER_SESSION,
+        startedMatches: 1,
+        openMatch: true,
+        batch: 1,
+        takenOver: false,
+        refusedUnseen: false,
+      },
     });
     expect(await readRoundCourt(ended, "r2")).toEqual({
       ok: true,
-      value: { courtSessionId: OTHER_SESSION, startedMatches: 1, openMatch: false },
+      value: {
+        courtSessionId: OTHER_SESSION,
+        startedMatches: 1,
+        openMatch: false,
+        batch: 1,
+        takenOver: false,
+        refusedUnseen: false,
+      },
     });
   });
 });
