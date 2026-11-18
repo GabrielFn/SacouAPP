@@ -50,6 +50,8 @@ const SAMPLE_NAMES: ReadonlyMap<MemberId, string> = new Map([
 export function createSampleRoster(): CourtRoster {
   return {
     nameOf: (memberId) => SAMPLE_NAMES.get(memberId) ?? strings.court.roster.unknownPlayer,
+    // The sample has no profiles: nobody is ever out of place on screen 22.
+    positionOf: () => null,
     teamAppearance: (_matchId, side) => SAMPLE_TEAMS[side],
   };
 }

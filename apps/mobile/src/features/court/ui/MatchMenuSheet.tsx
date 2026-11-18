@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
+import { lineupStrings } from "../../../strings/lineup.pt-BR";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { ChevronRightIcon } from "../../../ui/Icons";
@@ -19,6 +20,8 @@ export interface MatchMenuSheetProps {
   /** Why "Encerrar partida" did nothing, in words. */
   readonly refusal?: string | null;
   readonly onClose: () => void;
+  /** "Escalação" (screen 22, E4.8): absent when no team of the match rotates. */
+  readonly onLineup?: (() => void) | null;
   readonly onCorrections: () => void;
   readonly onFlipSides: () => void;
   readonly onChooseTheme: (choice: CourtThemeChoice) => void;
@@ -98,6 +101,7 @@ export function MatchMenuSheet({
   endSummary,
   refusal = null,
   onClose,
+  onLineup = null,
   onCorrections,
   onFlipSides,
   onChooseTheme,
@@ -120,6 +124,9 @@ export function MatchMenuSheet({
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >
         <Group>
+          {isMenuScreenReady("lineup") && onLineup !== null ? (
+            <MenuRow label={lineupStrings.menuItem} chevron onPress={onLineup} />
+          ) : null}
           {isMenuScreenReady("corrections") ? (
             <MenuRow
               label={menu.corrections}
