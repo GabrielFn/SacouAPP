@@ -28,6 +28,8 @@ interface ServerCheckCase {
   readonly events: readonly unknown[];
   readonly groupMemberIds: readonly string[];
   readonly commands?: readonly GoldenCommand[];
+  /** The index of the first event of batch 2, written by the phone that took the court over. */
+  readonly takeoverAt?: number;
   readonly expected: AcceptedExpectation | RefusedExpectation;
 }
 
@@ -59,6 +61,9 @@ const EXPECTED_IDS: readonly string[] = [
   "r13-two-set-ended-at-0-0-and-a-match-won",
   "r14-match-won-by-the-wrong-team",
   "r15-unsupported-formations-version",
+  "t8a-undo-right-after-the-takeover",
+  "t8b-revert-to-the-last-event-of-the-first-batch",
+  "t8c-revert-to-the-middle-of-the-first-batch",
 ];
 
 function parseEnvelopes(events: readonly unknown[]): readonly EventEnvelope[] {
@@ -105,7 +110,34 @@ describe("server checks golden", () => {
   });
 
   // An accepted log is what an honest phone records: the commands emit exactly it.
-  test.each(accepted)("$id comes from the commands", ({ commands, events }) => {
-    expect(playCommands(commands ?? [])).toStrictEqual(parseEnvelopes(events));
+  test.each(accepted)("$id comes from the commands", ({ commands, events, takeoverAt }) => {
+    expect(playCommands(commands ?? [], takeoverAt)).toStrictEqual(parseEnvelopes(events));
   });
+
+  // Answer 74 (ADR 0063, D9): whoever writes after a takeover undoes points of the earlier batch.
+  const takeovers = CASES.filter(({ takeoverAt }) => takeoverAt !== undefined);
+
+  test("has the takeover cases of answer 74", () => {
+    expect(takeovers.map(({ id }) => id)).toStrictEqual(
+      EXPECTED_IDS.filter((id) => id.startsWith("t8")),
+    );
+  });
+
+  test.each(takeovers)(
+    "$id reverts to an event of batch 1 from batch 2",
+    ({ events, takeoverAt }) => {
+      const parsed = parseEnvelopes(events);
+      const firstBatchIds = new Set(parsed.slice(0, takeoverAt).map(({ eventId }) => eventId));
+      const reverts = parsed.slice(takeoverAt).filter(({ type }) => type === "RevertedTo");
+
+      expect(reverts.length).toBeGreaterThan(0);
+      expect(reverts.every(({ batch }) => batch === 2)).toBe(true);
+      expect(
+        reverts.some(({ payload }) => {
+          const target = payload["targetEventId"];
+          return typeof target === "string" && firstBatchIds.has(target);
+        }),
+      ).toBe(true);
+    },
+  );
 });

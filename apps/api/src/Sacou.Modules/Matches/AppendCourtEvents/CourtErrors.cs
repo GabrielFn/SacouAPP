@@ -20,6 +20,7 @@ internal static class CourtErrors
     public static readonly Error StreamMismatch = Validation(CourtWriteErrorCode.StreamMismatch.Code);
     public static readonly Error UnsupportedSchemaVersion = Validation(CourtWriteErrorCode.UnsupportedSchemaVersion.Code);
     public static readonly Error UnknownEventType = Validation(CourtWriteErrorCode.UnknownEventType.Code);
+    public static readonly Error TakeoverInvalid = Validation(CourtWriteErrorCode.TakeoverInvalid.Code);
 
     /// <summary>Another round's or group's stream looks like no stream at all.</summary>
     public static readonly Error CourtSessionNotFound = new(Prefix + "court-session-not-found", ErrorKind.NotFound);
@@ -31,6 +32,7 @@ internal static class CourtErrors
     public static readonly Error EventIdConflict = Conflict(CourtWriteErrorCode.EventIdConflict.Code);
     public static readonly Error SequenceGap = Conflict(CourtWriteErrorCode.SequenceGap.Code);
     public static readonly Error SequenceConflict = Conflict(CourtWriteErrorCode.SequenceConflict.Code);
+    public static readonly Error StreamChanged = Conflict(CourtWriteErrorCode.StreamChanged.Code);
 
     public static readonly Error LimitReached = Unprocessable(CourtWriteErrorCode.LimitReached.Code);
     public static readonly Error EventRejected = Unprocessable(CourtWriteErrorCode.EventRejected.Code);
@@ -40,7 +42,8 @@ internal static class CourtErrors
     private static readonly ImmutableDictionary<string, Error> ByWriteCode = new[]
     {
         BatchInvalid, StreamMismatch, UnsupportedSchemaVersion, UnknownEventType, NotTheWriter, BatchMismatch, EventIdConflict,
-        SequenceGap, SequenceConflict, LimitReached, EventRejected, EventImplausible, MemberNotInGroup,
+        SequenceGap, SequenceConflict, LimitReached, EventRejected, EventImplausible, MemberNotInGroup, TakeoverInvalid,
+        StreamChanged,
     }.ToImmutableDictionary(error => error.Code[Prefix.Length..], StringComparer.Ordinal);
 
     private static readonly ImmutableDictionary<string, Error> ByReadCode = new[] { BatchInvalid, EventTooLarge, InvalidEnvelope }
