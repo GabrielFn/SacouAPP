@@ -117,6 +117,39 @@ describe("the court upload against an in-memory server (E4.11, acceptance)", () 
     expect(await ackedOf(harness.log)).toBe(11);
   });
 
+  test("S2: a server that asks again for the same expectedSequence stops the session, no burst", async () => {
+    const harness = await createSyncHarness();
+    await harness.write(10);
+    await settled(harness.sync());
+    const gap = errorFault({
+      kind: "problem",
+      status: 409,
+      code: "matches.sequence-gap",
+      details: { expectedSequence: 6 },
+    });
+    harness.server.failNext(gap, gap, gap);
+
+    await harness.write(1);
+    await settled(harness.sync());
+
+    // The first gap moves the cursor down to 5 and sends 6..11 once; the same gap again stops.
+    expect(
+      harness.server
+        .requests()
+        .slice(1)
+        .map((request) => request.envelopes.length),
+    ).toEqual([1, 6]);
+    const loaded = await harness.log.load(SESSION_A);
+    expect(loaded.ok && loaded.value).toMatchObject({
+      ackedSequence: 5,
+      syncHalt: "stream-diverged",
+    });
+    await harness.write(1);
+    harness.scheduler.advance(RETRY_AFTER_MS);
+    await settled(harness.sync());
+    expect(harness.server.requests()).toHaveLength(3);
+  });
+
   test("A6: five 429 in a row: five waits of Retry-After, nothing before the time, and all arrive", async () => {
     const harness = await createSyncHarness();
     const limited = errorFault({ kind: "rate-limited", retryAfterMs: RETRY_AFTER_MS });
@@ -241,6 +274,58 @@ describe("the court upload against an in-memory server (E4.11, acceptance)", () 
       8, 4, 2, 6,
     ]);
     expect(harness.server.stored()).toHaveLength(8);
+  });
+
+  test("a 413 with a single event stops the session at event-too-large (R3)", async () => {
+    const harness = await createSyncHarness({ online: false });
+    await harness.write(1);
+    harness.server.failNext(errorFault({ kind: "too-large" }));
+
+    harness.network.set(true);
+    await settled(harness.sync());
+
+    expect(harness.server.requests()).toHaveLength(1);
+    const loaded = await harness.log.load(SESSION_A);
+    expect(loaded.ok && loaded.value.syncHalt).toBe("event-too-large");
+  });
+
+  test("a 413 on the prefix of a 422 stops at event-refused instead of trying again (R4)", async () => {
+    const harness = await createSyncHarness({ online: false });
+    const written = await harness.write(5);
+    harness.server.failNext(
+      errorFault({
+        kind: "problem",
+        status: 422,
+        code: "matches.event-rejected",
+        details: { eventId: written[3]?.eventId },
+      }),
+      errorFault({ kind: "too-large" }),
+    );
+
+    harness.network.set(true);
+    await settled(harness.sync());
+    harness.foreground.bringToFront();
+    await settled(harness.sync());
+
+    expect(harness.server.requests().map((request) => request.envelopes.length)).toEqual([5, 3]);
+    const loaded = await harness.log.load(SESSION_A);
+    expect(loaded.ok && loaded.value.syncHalt).toBe("event-refused");
+  });
+
+  test("the loop stops on leaving: nothing leaves after stop, and start sends again (R3)", async () => {
+    const harness = await createSyncHarness();
+    harness.sync().stop();
+
+    await harness.write(2);
+    harness.network.set(false);
+    harness.network.set(true);
+    await settled(harness.sync());
+    expect(harness.server.requests()).toEqual([]);
+    expect(harness.sync().getSnapshot().loop.status).toBe("stopped");
+
+    harness.sync().start();
+    await settled(harness.sync());
+    expect(harness.server.stored()).toHaveLength(2);
   });
 
   test("the sample sessions of the development screen are never sent", async () => {

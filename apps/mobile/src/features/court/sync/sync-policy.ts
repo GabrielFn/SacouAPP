@@ -55,11 +55,18 @@ function acknowledged(answer: AppendCourtEventsAnswer, sent: SentRequest): SyncD
   return plausible ? { type: "acknowledge", sequence: lastSequence } : DIVERGED;
 }
 
+/**
+ * The cursor only goes down, and it has to move: a gap at the cursor or above it is a server that
+ * contradicts what it confirmed, and sending again at once would turn into a burst (ADR 0067, D4).
+ * Two gaps in a row at the same sequence end here too: the first one left the cursor right there.
+ */
 function sequenceGap(details: ProblemDetails, sent: SentRequest): SyncDecision {
   const expected = details.expectedSequence;
-  if (expected === undefined || expected < 1 || expected - 1 > sent.lastOwnSequence)
-    return DIVERGED;
-  return { type: "rewind", sequence: expected - 1 };
+  if (expected === undefined) return DIVERGED;
+  const cursor = expected - 1;
+  return cursor >= 0 && cursor < sent.ackedSequence
+    ? { type: "rewind", sequence: cursor }
+    : DIVERGED;
 }
 
 function notTheWriter(details: ProblemDetails, sent: SentRequest): SyncDecision {

@@ -51,6 +51,18 @@ describe("decideSync: one line per answer of ADR 0067, D4 (P3)", () => {
     expect(decide(problem(409, "matches.sequence-gap"))).toEqual(diverged);
   });
 
+  test("sequence-gap only moves the cursor down: at the cursor or above it, it stops (S2, S3)", () => {
+    const diverged = { type: "halt", code: "stream-diverged" };
+    // The cursor is 4: the server asking for 5 is asking for what it got, and 6 for what it never confirmed.
+    expect(decide(problem(409, "matches.sequence-gap", { expectedSequence: 5 }))).toEqual(diverged);
+    expect(decide(problem(409, "matches.sequence-gap", { expectedSequence: 6 }))).toEqual(diverged);
+    expect(decide(problem(409, "matches.sequence-gap", { expectedSequence: 4 }))).toEqual({
+      type: "rewind",
+      sequence: 3,
+    });
+    expect(decide(problem(409, "matches.sequence-gap", { expectedSequence: 0 }))).toEqual(diverged);
+  });
+
   test("not-the-writer takes over with what the server kept", () => {
     expect(
       decide(problem(409, "matches.not-the-writer", { currentBatch: 3, lastSequence: 6 })),

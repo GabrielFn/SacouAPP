@@ -19,7 +19,9 @@ export type CourtSyncState =
   | { readonly status: "stopped" };
 
 export type CourtSyncAction =
-  /** A point was written, the network or the app came back, the account changed, the loop started. */
+  /** The loop starts, also after a stop: the only way out of `stopped`. */
+  | { readonly type: "started" }
+  /** A point was written, the network or the app came back, the account changed. */
   | { readonly type: "poked" }
   /** A pass ended well; `more`: it moved something and the next one may have work. */
   | { readonly type: "pass-done"; readonly more: boolean }
@@ -71,6 +73,8 @@ function failed(
 
 export function courtSyncReducer(state: CourtSyncState, action: CourtSyncAction): CourtSyncState {
   switch (action.type) {
+    case "started":
+      return state.status === "stopped" ? sending(0) : poked(state);
     case "poked":
       return poked(state);
     case "pass-done":

@@ -161,7 +161,7 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
         deps.foreground.subscribe(poke),
         deps.account.subscribe(poke),
       ];
-      poke();
+      dispatch({ type: "started" });
     },
     stop() {
       unsubscribes.value.forEach((unsubscribe) => {

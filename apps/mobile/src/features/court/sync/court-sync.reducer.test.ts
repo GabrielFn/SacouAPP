@@ -113,6 +113,18 @@ describe("courtSyncReducer (P4)", () => {
     expect(courtSyncReducer(stopped, { type: "wait-elapsed" })).toBe(stopped);
   });
 
+  test("starting again after a stop sends, and starting a running loop is a poke (R3)", () => {
+    const stopped = courtSyncReducer(sending, { type: "stopped" });
+    expect(courtSyncReducer(stopped, { type: "started" })).toEqual({
+      status: "sending",
+      again: false,
+      attempt: 0,
+    });
+    expect(courtSyncReducer(INITIAL_COURT_SYNC_STATE, { type: "started" })).toEqual(
+      courtSyncReducer(INITIAL_COURT_SYNC_STATE, { type: "poked" }),
+    );
+  });
+
   test("a late timer or answer outside its state changes nothing", () => {
     expect(courtSyncReducer(INITIAL_COURT_SYNC_STATE, { type: "wait-elapsed" })).toBe(
       INITIAL_COURT_SYNC_STATE,

@@ -47,6 +47,7 @@ interface Pending {
 const PROGRESS: UploadOutcome = { type: "progress" };
 const NOTHING: UploadOutcome = { type: "nothing" };
 const BACKOFF: UploadOutcome = { type: "retry", afterMs: null };
+const REFUSED: SyncDecision = { type: "halt", code: "event-refused" };
 
 function written(result: CourtLogResult<void>): UploadOutcome {
   return result.ok ? PROGRESS : BACKOFF;
@@ -104,12 +105,12 @@ async function apply(
 /** The events before the refused one go in alone; then the session stops (D4, 422). */
 async function sendPrefix(context: UploadContext, sent: SentRequest): Promise<UploadOutcome> {
   const decision = decideSync(await send(context, sent.chunk), sent);
+  // A 413 on the prefix would send the whole request, and the 422, again on every pass (R4).
+  if (decision.type === "shrink") return apply(context, REFUSED, sent);
   if (decision.type !== "acknowledge") return apply(context, decision, sent);
   const outcome = await apply(context, decision, sent);
   if (outcome.type !== "progress") return outcome;
-  return stopped(context, () =>
-    context.log.haltSync(context.target.courtSessionId, "event-refused"),
-  );
+  return apply(context, REFUSED, sent);
 }
 
 async function sendFirstChunk(
