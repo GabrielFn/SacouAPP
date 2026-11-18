@@ -37,8 +37,19 @@ export interface DrawFlowState {
   readonly preGame: PreGameChoices;
 }
 
+/** "Montar times" (draw off, question 72). */
+export type ManualTeamsAction =
+  /**
+   * "Montar times" (draw off): the teams by arrival, kept from the first edit on. Until then the screen
+   * derives them from the round, so a late confirmation still joins them.
+   */
+  | { readonly type: "teams-built"; readonly arrangement: DrawArrangement }
+  /** "Montar de novo": back to the teams by arrival, derived from the round again. */
+  | { readonly type: "teams-reset" };
+
 export type DrawFlowAction =
   | { readonly type: "drawn"; readonly answer: DrawTeamsAnswer }
+  | ManualTeamsAction
   | { readonly type: "player-tapped"; readonly memberId: MemberId }
   | { readonly type: "swap-mode-chosen" }
   | { readonly type: "lock-mode-chosen" }
@@ -105,11 +116,46 @@ function unlockChosen(state: DrawFlowState): DrawFlowState {
   };
 }
 
-export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
-  if (isPreGameAction(action)) return preGameReducer(state, action);
+/** "Montar times": keep the teams by arrival once, or go back to them (question 72). */
+function isManualTeamsAction(action: DrawFlowAction): action is ManualTeamsAction {
+  return action.type === "teams-built" || action.type === "teams-reset";
+}
+
+function manualTeams(state: DrawFlowState, action: ManualTeamsAction): DrawFlowState {
+  const cleared = { ...state, locks: [], selection: null, notice: null };
+  if (action.type === "teams-reset") return { ...cleared, arrangement: null };
+  return state.arrangement === null ? { ...cleared, arrangement: action.arrangement } : state;
+}
+
+type TapAction = Extract<
+  DrawFlowAction,
+  {
+    type:
+      | "player-tapped"
+      | "swap-mode-chosen"
+      | "lock-mode-chosen"
+      | "unlock-chosen"
+      | "selection-cleared"
+      | "lock-undone";
+  }
+>;
+
+const TAP_ACTION_TYPES: readonly DrawFlowAction["type"][] = [
+  "player-tapped",
+  "swap-mode-chosen",
+  "lock-mode-chosen",
+  "unlock-chosen",
+  "selection-cleared",
+  "lock-undone",
+];
+
+/** The swaps and locks: the taps on names and the mode buttons. */
+function isTapAction(action: DrawFlowAction): action is TapAction {
+  return TAP_ACTION_TYPES.includes(action.type);
+}
+
+function tapReducer(state: DrawFlowState, action: TapAction): DrawFlowState {
   switch (action.type) {
-    case "drawn":
-      return drawn(state, action.answer);
     case "player-tapped":
       return playerTapped(state, action.memberId);
     case "swap-mode-chosen":
@@ -120,10 +166,20 @@ export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): D
       return unlockChosen(state);
     case "selection-cleared":
       return { ...state, selection: null, notice: null };
-    case "offline-refused":
-      return { ...state, notice: { kind: "offline" } };
     case "lock-undone":
       return { ...state, locks: state.locks.filter((lock) => !sameLock(lock, action.lock)) };
+  }
+}
+
+export function drawFlowReducer(state: DrawFlowState, action: DrawFlowAction): DrawFlowState {
+  if (isPreGameAction(action)) return preGameReducer(state, action);
+  if (isManualTeamsAction(action)) return manualTeams(state, action);
+  if (isTapAction(action)) return tapReducer(state, action);
+  switch (action.type) {
+    case "drawn":
+      return drawn(state, action.answer);
+    case "offline-refused":
+      return { ...state, notice: { kind: "offline" } };
   }
 }
 

@@ -14,7 +14,7 @@ import { RoundLoading } from "../../rounds/ui/RoundHeading";
 import { roundHref } from "../../rounds/navigation";
 import { useDrawScreen } from "../hooks/use-draw-screen";
 import { MIN_DRAW_PLAYERS } from "../model/draw-limits";
-import type { DrawBlocker, DrawScreenState } from "../model/draw-screen-state";
+import { isManualDraw, type DrawBlocker, type DrawScreenState } from "../model/draw-screen-state";
 import { DrawHeader } from "./DrawHeader";
 import { DrawnView } from "./DrawnView";
 
@@ -31,6 +31,8 @@ interface StateTexts {
 }
 
 interface StateActions {
+  /** The draw is off: the texts speak of building the teams (question 72). */
+  readonly manual: boolean;
   readonly back: ScreenAction;
   readonly retry: ScreenAction;
   readonly settings: ScreenAction | null;
@@ -48,7 +50,10 @@ function blockedTexts(blocker: DrawBlocker, actions: StateActions): StateTexts {
     case "forbidden":
       return { body: draw.blocked.forbidden, actions: [{ ...actions.back, label: draw.back }] };
     case "not-enough":
-      return { body: draw.blocked.notEnough(MIN_DRAW_PLAYERS), actions: [actions.back] };
+      return {
+        body: (actions.manual ? draw.manual.notEnough : draw.blocked.notEnough)(MIN_DRAW_PLAYERS),
+        actions: [actions.back],
+      };
   }
 }
 
@@ -74,7 +79,7 @@ function useStateActions(
   groupId: string,
   roundId: string,
   role: GroupRole,
-  retry: () => void,
+  { manual, retry }: { readonly manual: boolean; readonly retry: () => void },
 ): StateActions {
   const router = useRouter();
   const backHref = roundHref(groupId, roundId);
@@ -82,6 +87,7 @@ function useStateActions(
     router.push(href);
   };
   return {
+    manual,
     back: {
       label: draw.backToRound,
       variant: "secondary",
@@ -106,7 +112,11 @@ function useStateActions(
 export function DrawScreen({ groupId, roundId }: DrawScreenProps) {
   const model = useDrawScreen(groupId, roundId);
   const { group, round, screen } = model;
-  const actions = useStateActions(groupId, roundId, group.data?.role ?? "player", model.retry);
+  const manual = model.settings !== null && isManualDraw(model.settings);
+  const actions = useStateActions(groupId, roundId, group.data?.role ?? "player", {
+    manual,
+    retry: model.retry,
+  });
   if (group.data === undefined || round.data === undefined) {
     return <RoundLoading queries={[group, round]} />;
   }
@@ -118,6 +128,7 @@ export function DrawScreen({ groupId, roundId }: DrawScreenProps) {
         groupId={groupId}
         model={model}
         arrangement={screen.arrangement}
+        manual={screen.manual}
         round={round.data}
         header={header}
         backHref={backHref}
@@ -127,7 +138,11 @@ export function DrawScreen({ groupId, roundId }: DrawScreenProps) {
   const texts = stateTexts(screen, actions);
   return (
     <Screen>
-      <DrawHeader header={header} title={draw.blocked.title} backHref={backHref} />
+      <DrawHeader
+        header={header}
+        title={manual ? draw.manual.title : draw.blocked.title}
+        backHref={backHref}
+      />
       {texts === null ? (
         <>
           <Text variant="muted" accessibilityLiveRegion="polite">

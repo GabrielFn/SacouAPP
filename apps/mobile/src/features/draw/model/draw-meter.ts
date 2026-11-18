@@ -62,16 +62,22 @@ function percentOn(axis: MeterAxis, tenths: number): number {
 }
 
 function levelsOf(arrangement: DrawArrangement, team: readonly MemberId[]): readonly number[] {
-  return team.map((memberId) => arrangement.levels.get(memberId) ?? 0);
+  return team.flatMap((memberId) => {
+    const tenths = arrangement.levels.get(memberId);
+    return tenths === undefined ? [] : [tenths];
+  });
 }
 
 /**
  * The meter of screen 07, recalculated in TS from the arrangement (golden `draw-balance.json`), so a
- * "Trocar" moves it without a network. `null` when a team is empty, which a draw never gives.
+ * "Trocar" moves it without a network. `null` when a team has no level: "Montar times" (question 72)
+ * has none, and a draw always has them all.
  */
 export function meterView(arrangement: DrawArrangement): MeterView | null {
-  const balance = drawBalance(arrangement.teams.map((team) => levelsOf(arrangement, team)));
-  if (!balance.ok) return null;
+  const levels = arrangement.teams.map((team) => levelsOf(arrangement, team));
+  const complete = levels.every((team, index) => team.length === arrangement.teams[index]?.length);
+  const balance = drawBalance(levels);
+  if (!complete || !balance.ok) return null;
   const { averagesTenths, differenceTenths } = balance.value;
   const teams = averagesTenths.map((tenths, index) => ({ tenths, team: teamIdentity(index) }));
   const lowest = Math.min(...averagesTenths);
