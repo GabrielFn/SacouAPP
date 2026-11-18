@@ -29,14 +29,14 @@ export function createCourtOperations(
           }),
         account,
       ),
-    getCourtSession: (groupId, roundId) =>
+    getCourtSession: (groupId, roundId, account) =>
       executeAs(
         (init) =>
           client.GET("/v1/groups/{groupId}/rounds/{roundId}/court-session", {
             ...init,
             params: { path: { groupId, roundId } },
           }),
-        null,
+        account,
       ),
     takeOverCourt: (ref, body, account) =>
       executeAs(
@@ -47,7 +47,7 @@ export function createCourtOperations(
           ),
         account,
       ),
-    listCourtEvents: (ref, after) =>
+    listCourtEvents: (ref, after, account) =>
       executeAs(
         (init) =>
           client.GET(STREAM_PATH, {
@@ -55,7 +55,7 @@ export function createCourtOperations(
             // Only digits reach the server (ADR 0063, D13): the import passes a whole count.
             params: { path: ref, query: { after: String(after) } },
           }),
-        null,
+        account,
       ),
   };
 }

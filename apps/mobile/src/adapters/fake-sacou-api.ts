@@ -123,9 +123,10 @@ export function createFakeSacouApi(): FakeSacouApi {
     drawTeams: (groupId, roundId, body) => answer("drawTeams", [groupId, roundId, body]),
     appendCourtEvents: (ref, envelopes, account) =>
       answer("appendCourtEvents", [ref, envelopes, account]),
-    getCourtSession: (groupId, roundId) => answer("getCourtSession", [groupId, roundId]),
+    getCourtSession: (groupId, roundId, account) =>
+      answer("getCourtSession", [groupId, roundId, account]),
     takeOverCourt: (ref, body, account) => answer("takeOverCourt", [ref, body, account]),
-    listCourtEvents: (ref, after) => answer("listCourtEvents", [ref, after]),
+    listCourtEvents: (ref, after, account) => answer("listCourtEvents", [ref, after, account]),
   };
 
   return {

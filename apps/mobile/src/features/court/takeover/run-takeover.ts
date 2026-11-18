@@ -6,7 +6,7 @@ import type {
 } from "../../../services/api/sacou-api";
 import type { CourtAccountRef } from "../ports/court-account";
 import type { CourtEventLog, CourtSessionOrigin } from "../ports/court-event-log";
-import { takeoverFailureOf, withRetryAfter } from "./api-calls";
+import { isRecord, takeoverFailureOf, withRetryAfter } from "./api-calls";
 import { MAX_IMPORTED_EVENTS, readServerStream, type ImportDeps } from "./import-stream";
 import type { TakeoverAction } from "./takeover.reducer";
 
@@ -29,19 +29,21 @@ function isStreamChanged(error: ApiError): boolean {
   return error.kind === "problem" && error.code === "matches.stream-changed";
 }
 
-function isCount(value: number): boolean {
-  return Number.isSafeInteger(value) && value >= 0;
+function isCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-/** The answer is read as untrusted too: a batch, and counts the import can hold. */
-function isPlausible({ batch, eventsBefore, lastSequence }: TakeOverCourtAnswer): boolean {
-  return (
+/** The answer is read as untrusted too: an object with a batch, and counts the import can hold. */
+function readAnswer(value: unknown): TakeOverCourtAnswer | null {
+  if (!isRecord(value)) return null;
+  const { batch, eventsBefore, lastSequence } = value;
+  const plausible =
     isCount(batch) &&
     batch >= 1 &&
     isCount(eventsBefore) &&
     eventsBefore <= MAX_IMPORTED_EVENTS &&
-    isCount(lastSequence)
-  );
+    isCount(lastSequence);
+  return plausible ? { batch, eventsBefore, lastSequence } : null;
 }
 
 async function importAndKeep(
@@ -57,6 +59,7 @@ async function importAndKeep(
   const read = await readServerStream(deps, {
     ref,
     eventsBefore: answer.eventsBefore,
+    account: account.session,
     onProgress: (imported) => {
       dispatch({ type: "page-imported", imported });
     },
@@ -120,14 +123,11 @@ export async function runTakeover(
     );
     return;
   }
-  if (!isPlausible(answer.value)) {
+  const untrusted: unknown = answer.value;
+  const read = readAnswer(untrusted);
+  if (read === null) {
     dispatch({ type: "failed", reason: "import-invalid" });
     return;
   }
-  await importAndKeep(
-    deps,
-    target,
-    { account, deviceId: device.value, answer: answer.value },
-    dispatch,
-  );
+  await importAndKeep(deps, target, { account, deviceId: device.value, answer: read }, dispatch);
 }

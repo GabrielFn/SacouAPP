@@ -162,7 +162,11 @@ export async function takeOver(
   server: FakeCourtStreamServer,
   onAction: (action: TakeoverAction) => void = () => undefined,
 ): Promise<TakeoverRun> {
-  const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId);
+  const summary = await server.api.getCourtSession(
+    ROUND.groupId,
+    ROUND.roundId,
+    phone.owner.session,
+  );
   if (!summary.ok) throw new Error("no summary");
   const state = { value: takeoverReducer(INITIAL_TAKEOVER_STATE, { type: "confirmed" }) };
   const states = { value: [state.value] as readonly TakeoverState[] };

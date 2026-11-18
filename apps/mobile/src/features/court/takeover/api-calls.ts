@@ -2,6 +2,11 @@ import type { ApiError } from "../../../services/api/api-error";
 import type { ApiResult } from "../../../services/api/api-result";
 import type { TakeoverFailure } from "./takeover.reducer";
 
+/** A body of the server is untrusted: only an object (not `null`, not an array) is read further. */
+export function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /** A 429 of the `court-sync` policy is waited for, never sooner (ADR 0062), up to this many times. */
 export const RATE_LIMIT_ATTEMPTS = 3;
 

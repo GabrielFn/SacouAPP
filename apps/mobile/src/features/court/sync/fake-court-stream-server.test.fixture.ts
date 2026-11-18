@@ -97,6 +97,18 @@ function isWholeRequest(envelopes: readonly EventEnvelope[]): boolean {
   );
 }
 
+/**
+ * Bodies as a broken server could send them (`null`, a text, an array): the HTTP adapter would hand
+ * them on typed as the contract says, so the test does the same.
+ */
+export function brokenPage(body: unknown): CourtEventsPage {
+  return body as CourtEventsPage;
+}
+
+export function brokenTakeOverAnswer(body: unknown): TakeOverCourtAnswer {
+  return body as TakeOverCourtAnswer;
+}
+
 export function createFakeCourtStreamServer(): FakeCourtStreamServer {
   const stream = { value: [] as readonly EventEnvelope[] };
   const writers = { value: [] as readonly Writer[] };

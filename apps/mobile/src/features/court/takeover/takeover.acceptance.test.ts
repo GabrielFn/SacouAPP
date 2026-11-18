@@ -5,8 +5,11 @@ import type { CourtEventsPage } from "../../../services/api/sacou-api";
 import { stateOfTimeline } from "../model/court-screen.selectors";
 import { SESSION_A, SESSION_B } from "../persistence/log-envelopes.test.fixture";
 import { ROUND, settled } from "../sync/court-sync.test.fixture";
+import { apiOk } from "../../../services/api/api-result";
 import {
   createFakeCourtStreamServer,
+  brokenPage,
+  brokenTakeOverAnswer,
   type FakeCourtStreamServer,
 } from "../sync/fake-court-stream-server.test.fixture";
 import { refusedPointsModel } from "./refused-points-model";
@@ -111,7 +114,7 @@ describe("taking the court over (E4.11, part 2, acceptance)", () => {
 
   test("B3: the stream moved after the summary: 09a again, nothing written on B", async () => {
     const { server, a, b } = await courtOfA();
-    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId);
+    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId, b.owner.session);
     if (!summary.ok) throw new Error("no summary");
     await scorePoints(await a.controller(SESSION_A), 1);
     await settled(a.sync);
@@ -151,6 +154,9 @@ describe("taking the court over (E4.11, part 2, acceptance)", () => {
       }),
     ],
     ["an empty page before the end", (page) => ({ ...page, events: [], lastPosition: 0 })],
+    ["a null page", () => brokenPage(null)],
+    ["an empty text as the page", () => brokenPage("")],
+    ["an array as the page", (page) => brokenPage([page])],
   ];
 
   test.each(breakers)("B4: %s fails closed and leaves the file as it was", async (_, breaker) => {
@@ -212,7 +218,7 @@ describe("taking the court over (E4.11, part 2, acceptance)", () => {
         },
       },
     };
-    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId);
+    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId, b.owner.session);
     if (!summary.ok) throw new Error("no summary");
     const actions: string[] = [];
 
@@ -224,10 +230,34 @@ describe("taking the court over (E4.11, part 2, acceptance)", () => {
     expect(actions.at(-1)).toBe("imported");
   });
 
+  test("a null answer to the take-over fails closed, without importing", async () => {
+    const { server, b } = await courtOfA();
+    const deps = b.takeoverDeps();
+    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId, b.owner.session);
+    if (!summary.ok) throw new Error("no summary");
+    const listed = vi.fn(deps.api.listCourtEvents);
+    const broken = {
+      ...deps,
+      api: {
+        takeOverCourt: () => Promise.resolve(apiOk(brokenTakeOverAnswer(null))),
+        listCourtEvents: listed,
+      },
+    };
+    const reasons: string[] = [];
+
+    await runTakeover(broken, { origin: ROUND, summary: summary.value }, (action) => {
+      if (action.type === "failed") reasons.push(action.reason);
+    });
+
+    expect(reasons).toEqual(["import-invalid"]);
+    expect(listed).not.toHaveBeenCalled();
+    expect(await sessionMissing(b)).toBe(true);
+  });
+
   test("the stream reached its ceiling of take-overs: the court takes no more changes", async () => {
     const { server, b } = await courtOfA();
     const deps = b.takeoverDeps();
-    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId);
+    const summary = await server.api.getCourtSession(ROUND.groupId, ROUND.roundId, b.owner.session);
     if (!summary.ok) throw new Error("no summary");
     const reasons: string[] = [];
     const full = {

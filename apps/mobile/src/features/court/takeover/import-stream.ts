@@ -2,9 +2,10 @@ import { parseEventEnvelope, type EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtStreamRef, SacouApi } from "../../../services/api/sacou-api";
+import type { SessionIdentity } from "../../../services/auth/auth-session";
 import { hasContiguousSequences } from "../persistence/append-rules";
 import type { CourtReplayer } from "../session/court-replay";
-import { takeoverFailureOf, withRetryAfter } from "./api-calls";
+import { isRecord, takeoverFailureOf, withRetryAfter } from "./api-calls";
 import type { TakeoverFailure } from "./takeover.reducer";
 
 const BYTES_PER_MIB = 1_048_576;
@@ -23,6 +24,8 @@ export interface ImportRequest {
   readonly ref: CourtStreamRef;
   /** The events the stream had when this device took it over: exactly these are read. */
   readonly eventsBefore: number;
+  /** The account that took the court over: every page is read only with its token (ADR 0067, D8). */
+  readonly account: SessionIdentity;
   readonly onProgress: (imported: number) => void;
 }
 
@@ -45,15 +48,19 @@ function isCount(value: unknown): value is number {
 }
 
 /** A page is read as untrusted input: it must start right after `after` and say where it ends. */
-function readPage(value: { readonly [K in keyof Page]?: unknown }, after: number): Page | null {
+function readPage(value: unknown, after: number): Page | null {
+  if (!isRecord(value)) return null;
   const { events, lastPosition } = value;
   if (!Array.isArray(events) || events.length === 0 || !isCount(lastPosition)) return null;
   const list: readonly unknown[] = events;
   return lastPosition === after + list.length ? { events: list, lastPosition } : null;
 }
 
+const utf8 = new TextEncoder();
+
+/** The size the server counts: UTF-8 bytes, so an accented text weighs what it weighs on the wire. */
 function sizeOf(raw: unknown): number {
-  return JSON.stringify(raw).length;
+  return utf8.encode(JSON.stringify(raw)).byteLength;
 }
 
 async function readPages(
@@ -64,11 +71,12 @@ async function readPages(
   const after = collected.raw.length;
   if (after >= request.eventsBefore) return ok(collected.raw.slice(0, request.eventsBefore));
   const answer = await withRetryAfter(
-    () => deps.api.listCourtEvents(request.ref, after),
+    () => deps.api.listCourtEvents(request.ref, after, request.account),
     deps.wait,
   );
   if (!answer.ok) return err(takeoverFailureOf(answer.error));
-  const page = readPage(answer.value, after);
+  const body: unknown = answer.value;
+  const page = readPage(body, after);
   if (page === null) return INVALID;
   const bytes = collected.bytes + page.events.reduce<number>((sum, raw) => sum + sizeOf(raw), 0);
   if (bytes > MAX_IMPORTED_BYTES) return INVALID;
