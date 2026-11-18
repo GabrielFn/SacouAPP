@@ -49,6 +49,7 @@
 | E3.16 | Feita | PRs #93 e #101, ADR 0056 (exportar e excluir a conta, histórico como Ex-jogador). Corrida com o aceite de convite e a criação de grupo corrigida no #107 (D7a), achada pela CI em 16/11. |
 | E4.9 | Feita | PRs #44, #45, #48 e #51, ADR 0038. Teste no celular feito em 17/11 (ponto, rotação, Desfazer, Inverter lados, tela ligada, paisagem, vibração). |
 | E4.3 | Feita | PRs #98 (login), #102 (perfil rápido e conta) e #110 (telas 30a e 30b), ADR 0057. Testada no celular em 16/11 (Galaxy, Android 17, build de desenvolvimento contra a API local pelo USB, PRs #112 a #114): login com Google, 27, criar grupo, 30, exportar (arquivo temporário apagado) e excluir (banco conferido: usuário apagado, marca gravada, vínculo `left`). Segunda rodada no mesmo dia: troca de conta, e-mail e senha, modo avião e fonte grande. O 302 passou no teste de 17/11 (o app não segue redirecionamento para outra origem). Defeitos em `pendencias.md`. |
+| E4.10 | Em andamento | Parte 1 (comandos de correção, telas 23 e 24, Desfazer com aviso, encerrar partida, tema como preferência) na branch `task/E4.10-court-controls-p1`, ADR 0066 (Sonnet). Partes 2 (telas 25 e 11) e 3 (23a e 31) esperam o merge da Parte 1; plano em `docs/estado/tarefas/E4.10.md`. |
 
 ## Em andamento
 

@@ -92,6 +92,7 @@ export function CenterStrip({ hint, canUndo, onUndo, onCorrect }: CenterStripPro
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Text
           numberOfLines={1}
+          accessibilityLiveRegion="polite"
           style={{
             color: colors.textMuted,
             fontFamily: fontFamilies.body600,

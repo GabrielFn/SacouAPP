@@ -1,17 +1,23 @@
 import {
   confirmSetEnd,
+  endMatchManually,
   INITIAL_COURT_SESSION_STATE,
+  revertToEvent,
   scorePoint,
+  shiftRotation,
   startMatch,
+  switchServingTeam,
   undoLastAction,
   type ConfirmSetEndOptions,
   type CourtSessionState,
   type CourtSessionTimeline,
   type MatchStartedPayload,
+  type RotationDirection,
   type TeamSide,
 } from "@sacou/match-engine";
 import { err, type Result } from "@sacou/volley-rules";
 
+import { manualEndWinner } from "../model/manual-end-winner";
 import type { CommandError, CommandRefusalReason } from "./court-errors";
 import type { EventDraft } from "./envelope-factory";
 
@@ -20,7 +26,15 @@ export type CourtCommand =
   | { readonly type: "start-match"; readonly input: MatchStartedPayload }
   | { readonly type: "score-point"; readonly team: TeamSide }
   | { readonly type: "undo" }
-  | { readonly type: "confirm-set-end"; readonly firstServer?: TeamSide };
+  | { readonly type: "confirm-set-end"; readonly firstServer?: TeamSide }
+  /** "Trocar sacador" of screen 24. */
+  | { readonly type: "switch-serving-team" }
+  /** "Girar / desgirar" of screen 24. */
+  | { readonly type: "shift-rotation"; readonly team: TeamSide; readonly direction: RotationDirection }
+  /** "Voltar para este ponto" of screen 24. */
+  | { readonly type: "revert-to"; readonly eventId: string }
+  /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */
+  | { readonly type: "end-match-manually" };
 
 /** What a screen can ask for: starting a match goes only through `startCourtMatch`. */
 export type PlayCommand = Exclude<CourtCommand, { readonly type: "start-match" }>;
@@ -42,6 +56,10 @@ function confirmOptions(firstServer: TeamSide | undefined): ConfirmSetEndOptions
   return firstServer === undefined ? {} : { firstServer };
 }
 
+function manualWinnerOf(state: CourtSessionState): TeamSide | null {
+  return state.currentMatch === null ? null : manualEndWinner(state.currentMatch);
+}
+
 /** Runs the command of the engine on the state at the moment of execution, never on a stale one. */
 export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline): DraftsResult {
   const state = currentState(timeline);
@@ -54,5 +72,13 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
       return refused(confirmSetEnd(state, confirmOptions(command.firstServer)));
     case "undo":
       return refused(undoLastAction(timeline));
+    case "switch-serving-team":
+      return refused(switchServingTeam(state));
+    case "shift-rotation":
+      return refused(shiftRotation(state, command.team, command.direction));
+    case "revert-to":
+      return refused(revertToEvent(timeline, command.eventId));
+    case "end-match-manually":
+      return refused(endMatchManually(state, manualWinnerOf(state)));
   }
 }

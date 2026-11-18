@@ -166,3 +166,6 @@ export const BATTERY_WARNING_LEVEL = 0.2;
 
 /** The battery level is shown as a percentage of this. */
 export const PERCENT_BASE = 100;
+
+/** How long the line "Desfeito: ..." stays in the middle strip after DESFAZER (E4.10, D12). */
+export const UNDO_NOTICE_MS = 3000;

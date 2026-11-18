@@ -7,12 +7,14 @@ import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
 import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import {
   selectCourtPhase,
   selectCourtScreen,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
+import { describeUndo, undoNoticeText } from "../../../features/court/model/undo-notice";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
@@ -25,6 +27,7 @@ export default function CourtRoute() {
   const { inverted } = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
+  const undoNotice = useUndoNotice();
   const timeline = view.status === "ready" ? view.timeline : null;
   const phase = useMemo(
     () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
@@ -76,12 +79,20 @@ export default function CourtRoute() {
           });
         }
       }}
+      notice={undoNotice.text}
       onUndo={() => {
+        // The line is worked out before the command, from the action about to be taken back. DESFAZER
+        // never buzzes, not even when the engine turns it down (answer of the Gabriel, ADR 0030).
+        const undone = timeline === null ? null : describeUndo(timeline);
+        const matchId = timeline === null ? undefined : stateOfTimeline(timeline).currentMatch?.matchId;
         void dispatch({ type: "undo" }).then((result) => {
           if (result.ok) {
             guard.acceptUndo();
-          } else {
-            courtFeedback.play("refused");
+            if (undone !== null && matchId !== undefined) {
+              undoNotice.show(
+                undoNoticeText(undone, (side) => courtRoster.teamAppearance(matchId, side).label),
+              );
+            }
           }
         });
       }}
