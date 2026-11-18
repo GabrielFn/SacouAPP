@@ -8,7 +8,9 @@ import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtScreenModel } from "../../../features/court/hooks/use-court-screen-model";
+import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
+import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { TakenOverView } from "../../../features/court/ui/TakenOverView";
@@ -22,7 +24,8 @@ export default function CourtRoute() {
   const { inverted } = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
-  const { takenOver, phase, model } = useCourtScreenModel(view, courtRoster);
+  const undoNotice = useUndoNotice();
+  const { takenOver, timeline, phase, model } = useCourtScreenModel(view, courtRoster);
 
   // Navigation is an effect of the step the phase asks for, never of the data: it runs when the step
   // changes, so coming back from the end of the set (same step) does not open it again.
@@ -68,13 +71,17 @@ export default function CourtRoute() {
           });
         }
       }}
+      notice={undoNotice.text}
       onUndo={() => {
-        void dispatch({ type: "undo" }).then((result) => {
-          if (result.ok) {
+        void undoCourtAction(timeline, {
+          dispatch,
+          teamLabel: (matchId, side) => courtRoster.teamAppearance(matchId, side).label,
+          onUndone: (text) => {
             guard.acceptUndo();
-          } else {
-            courtFeedback.play("refused");
-          }
+            if (text !== null) {
+              undoNotice.show(text);
+            }
+          },
         });
       }}
       onCorrect={() => {

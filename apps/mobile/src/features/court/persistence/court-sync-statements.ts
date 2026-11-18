@@ -112,9 +112,7 @@ export async function markTakenOver(
 }
 
 /** The columns of the upload in a session row; `null` when the row is not a session of this schema. */
-export function readSyncColumns(
-  row: SqlRow | undefined,
-): CourtLogResult<{
+export function readSyncColumns(row: SqlRow | undefined): CourtLogResult<{
   ackedSequence: number;
   takenOverBatch: number | null;
   syncHalt: SyncHaltCode | null;

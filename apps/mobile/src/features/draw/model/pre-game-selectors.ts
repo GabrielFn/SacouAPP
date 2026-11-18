@@ -131,6 +131,19 @@ function tabLabel(input: MatchStartInput, side: TeamSide, team: TeamIdentity): s
   return rotating ? texts.rotationTab(team.name, texts.systems[system]) : team.name;
 }
 
+/** "Laranja tem 6, sem banco.", "Laranja tem 6 e líbero Sofia." or "Laranja tem 5: sem rotação." */
+function benchLine(
+  rotation: TeamState | null,
+  teamName: string,
+  size: number,
+  nameOf: DrawNameOf,
+): string {
+  if (rotation === null) return texts.noRotation(teamName, size);
+  return rotation.libero === null
+    ? texts.fullTeam(teamName, size)
+    : texts.withLibero(teamName, size, nameOf(rotation.libero.memberId));
+}
+
 /** The section "Rotação de cada time": `null` when the round has the rotation off (D6). */
 export function rotationView(input: MatchStartInput, nameOf: DrawNameOf): RotationView | null {
   if (!input.settings.rotation.enabled) return null;
@@ -153,8 +166,7 @@ export function rotationView(input: MatchStartInput, nameOf: DrawNameOf): Rotati
             options: PICKER_SYSTEMS.map((value) => ({ value, label: texts.systems[value] })),
             setterLine: setterLine(rotation, team.name, nameOf),
           },
-    benchLine:
-      rotation === null ? texts.noRotation(team.name, size) : texts.fullTeam(team.name, size),
+    benchLine: benchLine(rotation, team.name, size, nameOf),
   };
 }
 

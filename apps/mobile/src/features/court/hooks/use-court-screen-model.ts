@@ -1,3 +1,4 @@
+import type { CourtSessionTimeline } from "@sacou/match-engine";
 import { useMemo } from "react";
 
 import { withUploadNotice } from "../model/hint-line";
@@ -13,6 +14,8 @@ import type { CourtSessionView } from "./use-court-session";
 export interface CourtScreenModelView {
   /** Another phone writes the court now: the 09b replaces it (D7). */
   readonly takenOver: boolean;
+  /** `null` while loading, failed or taken over. */
+  readonly timeline: CourtSessionTimeline | null;
   readonly phase: CourtPhase | null;
   readonly model: CourtScreenModel | null;
 }
@@ -38,5 +41,5 @@ export function useCourtScreenModel(
     const screen = selectCourtScreen(timeline, roster);
     return screen === null ? null : { ...screen, hint: withUploadNotice(screen.hint, notice) };
   }, [timeline, roster, notice]);
-  return { takenOver, phase, model };
+  return { takenOver, timeline, phase, model };
 }

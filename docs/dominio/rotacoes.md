@@ -132,6 +132,15 @@ Líbero ligado implementado na E2.11 ([ADR 0028](../arquitetura/adr/0028-libero-
 - **Um rali entre trocas:** só um ponto muda quem está em quadra, e a vaga coberta nunca muda num mesmo ponto.
 - **Trocar ou desligar o líbero em partida** é um `LineupChanged`, que grava o líbero junto com a alocação. O líbero não entra nem sai por troca com o banco.
 
+### No app: tela 22, Escalação (E4.8, [ADR 0065](../arquitetura/adr/0065-escalacao-no-app.md))
+
+- **"Rotação N"** é o levantador na zona N: o seletor é absoluto e muda só `setterZone`. Todos giram juntos e, no time que saca, muda quem saca ("João passa a sacar."). Na Livre não há seletor.
+- **Trocar dois jogadores** troca os dois índices de `lineup`: cada um vai para a posição do outro e herda a função do índice; `setterZone` fica.
+- **"Tornar levantador" (reancorar):** gira `lineup` para o escolhido ficar em `lineup[0]` e põe `setterZone` na zona atual dele. Ninguém muda de lugar (`getLineupBySlot` igual antes e depois); muda só quem é levantador e, por isso, as funções.
+- **"Fora de ordem" (resposta 77):** a posição principal do perfil não bate com a função do índice (`S, OH, MB, OPP, OH, MB` no 5x1; `S1, OH, MB, S2, OH, MB` no 6x2 e no 4x2, com o oposto aceito em `S2` quando não há outro levantador). `any`, `libero` e sem perfil nunca avisam; a Livre nunca avisa. O texto lista os nomes na ordem do diagrama da quadra (4, 3, 2, 5, 6, 1). Só informa: salvar continua possível.
+- **"Corrigir":** `lineup[0]` e a zona ficam; as outras cinco vagas são preenchidas de novo pela regra da escalação padrão, na ordem atual.
+- **Líbero do início (resposta 76):** uma reserva da fila, escolhida na 22 do pré-jogo, só no 5x1 e no 6x2, cobrindo sempre `[2, 5]`. Ela sai da fila e entra no time no `MatchStarted` (`teams.<lado>` com 7). A mesma reserva não é líbero dos dois times. Mudar o sistema para 4x2 ou Livre, ou trocar o time na 07, descarta a escalação salva e o líbero sem ação nenhuma (derivado).
+
 ## Erros comuns de implementação
 - Misturar as duas numerações de rotação.
 - Guardar o líbero dentro da ordem de rotação.
