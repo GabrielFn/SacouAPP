@@ -28,7 +28,10 @@ import type { EventEnvelope, JsonObject, ReplayedTimeline } from "./types.js";
 /** Test-only: plays the commands of an accepted case of `server-checks.json`, as the app would. */
 export const SERVER_CHECKS_COURT_SESSION_ID = "c0000000-0000-4000-8000-000000000001";
 const DEVICE_ID = "d0000000-0000-4000-8000-000000000001";
+/** The phone that takes the court over in a case with `takeoverAt` (ADR 0063). */
+const TAKEOVER_DEVICE_ID = "d0000000-0000-4000-8000-000000000002";
 const FIRST_BATCH = 1;
+const TAKEOVER_BATCH = 2;
 const SCHEMA_VERSION = 1;
 const ID_DIGITS = 12;
 
@@ -64,14 +67,33 @@ function eventIdOf(sequence: number): string {
   return `e0000000-0000-4000-8000-${String(sequence).padStart(ID_DIGITS, "0")}`;
 }
 
+/** Who stamps an envelope: the device, its batch, and its own sequence, which starts at 1 for each device. */
+interface Stamp {
+  readonly deviceId: string;
+  readonly batch: number;
+  readonly sequence: number;
+}
+
+/**
+ * The stamp of the event at `position` (from 1): the first phone writes batch 1, and from `takeoverAt`
+ * (an index of the log) on, the phone that took the court over writes batch 2.
+ */
+function stampOf(position: number, takeoverAt: number | undefined): Stamp {
+  return takeoverAt === undefined || position <= takeoverAt
+    ? { deviceId: DEVICE_ID, batch: FIRST_BATCH, sequence: position }
+    : { deviceId: TAKEOVER_DEVICE_ID, batch: TAKEOVER_BATCH, sequence: position - takeoverAt };
+}
+
 /** The envelope as the app writes it, through the parser: the golden file holds the same object. */
-export function toGoldenEnvelope({ type, payload }: Draft, sequence: number): EventEnvelope {
+export function toGoldenEnvelope(
+  { type, payload }: Draft,
+  position: number,
+  stamp: Stamp,
+): EventEnvelope {
   const parsed = parseEventEnvelope({
-    eventId: eventIdOf(sequence),
+    eventId: eventIdOf(position),
     courtSessionId: SERVER_CHECKS_COURT_SESSION_ID,
-    deviceId: DEVICE_ID,
-    batch: FIRST_BATCH,
-    sequence,
+    ...stamp,
     schemaVersion: SCHEMA_VERSION,
     type,
     payload: payload as JsonObject,
@@ -127,8 +149,14 @@ function run(
   }
 }
 
-/** Every envelope the commands emit, numbered one after the other; a refused command throws. */
-export function playCommands(commands: readonly GoldenCommand[]): readonly EventEnvelope[] {
+/**
+ * Every envelope the commands emit, numbered one after the other; a refused command throws. With
+ * `takeoverAt`, the events from that index on are written by the phone that took the court over.
+ */
+export function playCommands(
+  commands: readonly GoldenCommand[],
+  takeoverAt?: number,
+): readonly EventEnvelope[] {
   return commands.reduce<readonly EventEnvelope[]>((events, command) => {
     const drafts = run(command, replay(events));
     if (!drafts.ok) {
@@ -136,7 +164,10 @@ export function playCommands(commands: readonly GoldenCommand[]): readonly Event
     }
     return [
       ...events,
-      ...drafts.value.map((draft, index) => toGoldenEnvelope(draft, events.length + index + 1)),
+      ...drafts.value.map((draft, index) => {
+        const position = events.length + index + 1;
+        return toGoldenEnvelope(draft, position, stampOf(position, takeoverAt));
+      }),
     ];
   }, []);
 }

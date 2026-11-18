@@ -2697,5 +2697,578 @@
       "eventId": "e0000000-0000-4000-8000-000000000001",
       "reason": "unsupported-formations-version"
     }
+  },
+  {
+    "id": "t8a-undo-right-after-the-takeover",
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000003"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      }
+    ],
+    "groupMemberIds": [
+      "a0000000-0000-4000-8000-000000000001",
+      "b0000000-0000-4000-8000-000000000001"
+    ],
+    "commands": [
+      {
+        "command": "startMatch",
+        "input": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "undoLastAction"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      }
+    ],
+    "takeoverAt": 4,
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "t8b-revert-to-the-last-event-of-the-first-batch",
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000004"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000007",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000003"
+        }
+      }
+    ],
+    "groupMemberIds": [
+      "a0000000-0000-4000-8000-000000000001",
+      "b0000000-0000-4000-8000-000000000001"
+    ],
+    "commands": [
+      {
+        "command": "startMatch",
+        "input": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      },
+      {
+        "command": "undoLastAction"
+      },
+      {
+        "command": "undoLastAction"
+      }
+    ],
+    "takeoverAt": 3,
+    "expected": {
+      "ok": true
+    }
+  },
+  {
+    "id": "t8c-revert-to-the-middle-of-the-first-batch",
+    "events": [
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000001",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "MatchStarted",
+        "payload": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000002",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000003",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000004",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000005",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000001",
+        "batch": 1,
+        "sequence": 5,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "b"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000006",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 1,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000004"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000007",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 2,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000003"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000008",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 3,
+        "schemaVersion": 1,
+        "type": "RevertedTo",
+        "payload": {
+          "targetEventId": "e0000000-0000-4000-8000-000000000002"
+        }
+      },
+      {
+        "eventId": "e0000000-0000-4000-8000-000000000009",
+        "courtSessionId": "c0000000-0000-4000-8000-000000000001",
+        "deviceId": "d0000000-0000-4000-8000-000000000002",
+        "batch": 2,
+        "sequence": 4,
+        "schemaVersion": 1,
+        "type": "PointScored",
+        "payload": {
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "setNumber": 1,
+          "team": "a"
+        }
+      }
+    ],
+    "groupMemberIds": [
+      "a0000000-0000-4000-8000-000000000001",
+      "b0000000-0000-4000-8000-000000000001"
+    ],
+    "commands": [
+      {
+        "command": "startMatch",
+        "input": {
+          "firstServer": "a",
+          "formationsVersion": 1,
+          "matchId": "f0000000-0000-4000-8000-000000000001",
+          "queue": {
+            "players": [],
+            "teams": []
+          },
+          "rotations": {
+            "a": null,
+            "b": null
+          },
+          "rulesVersion": 1,
+          "scoring": {
+            "bestOf": 3,
+            "pointsPerSet": 25,
+            "tieBreakPoints": 15,
+            "winMargin": 2
+          },
+          "teams": {
+            "a": {
+              "memberIds": ["a0000000-0000-4000-8000-000000000001"]
+            },
+            "b": {
+              "memberIds": ["b0000000-0000-4000-8000-000000000001"]
+            }
+          }
+        }
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      },
+      {
+        "command": "scorePoint",
+        "team": "b"
+      },
+      {
+        "command": "undoLastAction"
+      },
+      {
+        "command": "undoLastAction"
+      },
+      {
+        "command": "undoLastAction"
+      },
+      {
+        "command": "scorePoint",
+        "team": "a"
+      }
+    ],
+    "takeoverAt": 5,
+    "expected": {
+      "ok": true
+    }
   }
 ]
