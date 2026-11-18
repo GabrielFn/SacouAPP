@@ -38,6 +38,24 @@ export const lineupStrings = {
   /** "João passa a sacar." when the rotation of the team that serves changes who serves (D4). */
   newServer: (name: string) => `${name} passa a sacar.`,
   save: "Salvar escalação",
+  /** Between sets nobody serves yet: the change holds for the next set (D7). */
+  betweenSets: "Entre sets",
+  nextSet: "Vale para o próximo set.",
+  /** Item of the menu of the match (MenuQuadra.dc.html), shown only with a team that rotates. */
+  menuItem: "Escalação",
+  /** "Voltar" with a draft (D7). */
+  discard: {
+    title: "Descartar as mudanças?",
+    body: "A escalação volta a ser a da partida.",
+    confirm: "Descartar",
+    cancel: "Continuar editando",
+  },
+  /** Why the engine did not save the lineup, by code (D7); any other code has the court's text. */
+  refusals: {
+    "rotation-off": "Esse time joga sem rotação.",
+    "no-open-match": "A partida já terminou.",
+    "invalid-payload": "Não deu para salvar. Confira a escalação.",
+  },
   chip: {
     position: (zone: number) => `posição ${String(zone)}`,
     serving: "sacando",

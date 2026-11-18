@@ -8,6 +8,7 @@ import { endMatchSummary, menuSubtitle } from "../../../features/court/model/men
 import { refusalText } from "../../../features/court/model/refusal-text";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { MatchMenuSheet } from "../../../features/court/ui/MatchMenuSheet";
+import { hasLineupToEdit } from "../../../features/lineup/model/match-lineup-source";
 import { useServices } from "../../../services/services-context";
 
 /**
@@ -58,6 +59,13 @@ export default function MenuRoute() {
       endSummary={summary}
       refusal={refusal}
       onClose={route.back}
+      onLineup={
+        timeline !== null && hasLineupToEdit(timeline)
+          ? () => {
+              route.push("lineup");
+            }
+          : null
+      }
       onCorrections={() => {
         route.push("corrections");
       }}

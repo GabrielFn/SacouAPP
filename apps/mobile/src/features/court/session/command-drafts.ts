@@ -1,4 +1,5 @@
 import {
+  changeLineup,
   confirmSetEnd,
   endMatchManually,
   INITIAL_COURT_SESSION_STATE,
@@ -11,6 +12,7 @@ import {
   type ConfirmSetEndOptions,
   type CourtSessionState,
   type CourtSessionTimeline,
+  type LineupAllocation,
   type MatchStartedPayload,
   type RotationDirection,
   type TeamSide,
@@ -38,7 +40,13 @@ export type CourtCommand =
   /** "Voltar para este ponto" of screen 24. */
   | { readonly type: "revert-to"; readonly eventId: string }
   /** "Encerrar partida" of the menu: the winner is worked out when it runs (D3). */
-  | { readonly type: "end-match-manually" };
+  | { readonly type: "end-match-manually" }
+  /** "Salvar escalação" of screen 22 in a match: the whole allocation, never the `system` (E4.8, D7). */
+  | {
+      readonly type: "change-lineup";
+      readonly team: TeamSide;
+      readonly allocation: LineupAllocation;
+    };
 
 /** What a screen can ask for: starting a match goes only through `startCourtMatch`. */
 export type PlayCommand = Exclude<CourtCommand, { readonly type: "start-match" }>;
@@ -84,5 +92,7 @@ export function draftsFor(command: CourtCommand, timeline: CourtSessionTimeline)
       return refused(revertToEvent(timeline, command.eventId));
     case "end-match-manually":
       return refused(endMatchManually(state, manualWinnerOf(state)));
+    case "change-lineup":
+      return refused(changeLineup(state, command.team, command.allocation));
   }
 }

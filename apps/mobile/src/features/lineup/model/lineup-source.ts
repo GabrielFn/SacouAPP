@@ -14,9 +14,15 @@ export interface LineupTeamSource {
   readonly size: number;
   /** `null` for a team without rotation: the tab only says so. */
   readonly base: LineupBase | null;
-  /** `serving` for the team that serves first (pre-game) or serves now (match). */
-  readonly phase: FormationPhase;
-  /** Who can be the libero: the reserves of the queue (pre-game) or the bench (match), in order. */
+  /**
+   * `serving` for the team that serves first (pre-game) or serves now (match); `null` between sets,
+   * when who serves next is not known yet (E4.8, D7).
+   */
+  readonly phase: FormationPhase | null;
+  /**
+   * Who can be the libero in the pre-game: the reserves of the queue, in order. In a match the pool is
+   * the bench of the draft, so a libero turned off can come back (`liberoExit: "bench"`, D5).
+   */
   readonly liberoPool: readonly MemberId[];
   /** What the "Líbero" row says with nobody to choose. */
   readonly noLiberoText: string;
