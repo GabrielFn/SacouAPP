@@ -33,6 +33,7 @@ import { createGoogleAccountPicker } from "../adapters/google-sign-in";
 import { fetchHttpTransport } from "../adapters/fetch-http-transport";
 import { createHttpSacouApi } from "../adapters/http-sacou-api";
 import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
+import { createStoredCourtThemePreference } from "../adapters/stored-court-theme-preference";
 import { createStoredOnboardingSkip } from "../adapters/stored-onboarding-skip";
 import { buildApiBaseUrl } from "../config/api-url";
 import { buildGoogleWebClientId } from "../config/google-sign-in";
@@ -60,6 +61,7 @@ const cacheStore = createExpoCacheStore();
 const cachePersister = createCachePersister(cacheStore);
 // A row of its own in sacou-cache.db, apart from the persisted cache: a flag, never the profile.
 const onboardingSkip = createStoredOnboardingSkip(cacheStore);
+const courtThemePreference = createStoredCourtThemePreference(cacheStore);
 const networkStatus = createNetInfoNetworkStatus();
 const googleWebClientId = buildGoogleWebClientId();
 // The session lives in the native Firebase SDK; the app only reads it (ADR 0057, D2 and D5).
@@ -89,6 +91,7 @@ const realServices: Services = {
   screenOrientation: expoScreenOrientation,
   batteryMonitor: expoBatteryMonitor,
   courtFeedback: expoHapticsFeedback,
+  courtThemePreference,
   backGuard: reactNativeBackGuard,
   reducedMotion: createReactNativeReducedMotion(),
   clock: performanceClock,

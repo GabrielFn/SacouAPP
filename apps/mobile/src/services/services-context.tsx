@@ -5,6 +5,7 @@ import type { BackGuard } from "../features/court/ports/back-guard";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
+import type { CourtThemePreference } from "../features/court/ports/court-theme-preference";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
@@ -39,6 +40,8 @@ export interface Services {
   /** The court warns once when the battery is low (E4.17). */
   readonly batteryMonitor: BatteryMonitor;
   readonly courtFeedback: CourtFeedback;
+  /** Sun or night, chosen in the menu of the court and kept on the phone (E4.10, D9). */
+  readonly courtThemePreference: CourtThemePreference;
   readonly backGuard: BackGuard;
   readonly reducedMotion: ReducedMotion;
   readonly clock: Clock;

@@ -49,8 +49,8 @@ export const nightAlpha = {
 } as const;
 
 export const courtPalette = {
-  sun: { background: "#FFFFFF", foreground: "#000000", muted: "#3A3A3A" },
-  night: { background: "#000000", foreground: "#FFFFFF", muted: "#C8C8C8" },
+  sun: { background: "#FFFFFF", foreground: "#000000", muted: "#3A3A3A", refusal: "#B42318" },
+  night: { background: "#000000", foreground: "#FFFFFF", muted: "#C8C8C8", refusal: "#FF8A80" },
 } as const;
 
 /**

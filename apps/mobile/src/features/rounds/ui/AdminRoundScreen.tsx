@@ -222,7 +222,7 @@ export function AdminRoundScreen({
       }}
       onCourt={() => {
         if (court !== null) {
-          router.push(courtHref("court", { courtSessionId: court.courtSessionId, theme: "sun" }));
+          router.push(courtHref("court", { courtSessionId: court.courtSessionId }));
         }
       }}
     />

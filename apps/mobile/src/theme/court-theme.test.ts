@@ -84,6 +84,10 @@ describe.each([
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(SCORE_MIN);
   });
 
+  it("the refusal text reaches AA on the court", () => {
+    expect(ratio(theme.refusal, theme.background)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
   it("black on the yellow of the server and of the set point tag reaches 7:1", () => {
     expect(ratio(palette.black, theme.accent)).toBeGreaterThanOrEqual(SCORE_MIN);
   });

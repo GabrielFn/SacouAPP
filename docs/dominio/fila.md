@@ -12,7 +12,7 @@ Regras da fila de uma `CourtSession` (E2.6, [ADR 0029](../arquitetura/adr/0029-f
 ## Partidas seguidas
 
 - Conta as partidas **terminadas** seguidas, terminando na última, em que o membro estava no time: na escalação, no banco ou como líbero (decisão do Gabriel).
-- Fim manual e partida sem vencedor contam. A partida aberta não conta.
+- Fim manual e partida sem vencedor contam. Quem vence um fim manual segue `manualEndWinner` (`placar.md`, ADR 0066); sem vencedor, ninguém sai. A partida aberta não conta.
 - "Partidas na rodada" é o total, seguidas ou não: só desempata.
 - Exemplo do cenário da revisão: Gil jogou a 1ª e a 3ª partidas, então tem 2 na rodada e 1 seguida.
 

@@ -7,12 +7,14 @@ import { useBackGuard } from "../../../features/court/hooks/use-back-guard";
 import { useCourtGuard } from "../../../features/court/hooks/use-court-guard";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import {
   selectCourtPhase,
   selectCourtScreen,
   stateOfTimeline,
 } from "../../../features/court/model/court-screen.selectors";
+import { undoCourtAction } from "../../../features/court/session/undo-court-action";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
@@ -25,6 +27,7 @@ export default function CourtRoute() {
   const { inverted } = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
+  const undoNotice = useUndoNotice();
   const timeline = view.status === "ready" ? view.timeline : null;
   const phase = useMemo(
     () => (timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline))),
@@ -76,13 +79,17 @@ export default function CourtRoute() {
           });
         }
       }}
+      notice={undoNotice.text}
       onUndo={() => {
-        void dispatch({ type: "undo" }).then((result) => {
-          if (result.ok) {
+        void undoCourtAction(timeline, {
+          dispatch,
+          teamLabel: (matchId, side) => courtRoster.teamAppearance(matchId, side).label,
+          onUndone: (text) => {
             guard.acceptUndo();
-          } else {
-            courtFeedback.play("refused");
-          }
+            if (text !== null) {
+              undoNotice.show(text);
+            }
+          },
         });
       }}
       onCorrect={() => {

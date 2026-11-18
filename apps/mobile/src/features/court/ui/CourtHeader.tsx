@@ -54,6 +54,7 @@ export function CourtHeader({
         <View style={{ flex: 1, minWidth: FLUSH, alignItems: "center", justifyContent: "center" }}>
           <Text
             numberOfLines={1}
+            accessibilityLiveRegion="polite"
             style={{
               color: colors.textMuted,
               fontFamily: fontFamilies.body600,
