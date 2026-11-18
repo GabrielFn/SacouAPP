@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Matches;
@@ -13,7 +14,8 @@ namespace Sacou.Api.OpenApi;
 /// <summary>
 /// Every error code a module can put in an <c>ApiProblem</c>: the <c>static readonly Error</c> fields of its
 /// <c>*Errors</c> classes (<c>GroupErrors</c>, <c>CurrentUserErrors</c>, <c>UserErrors</c>, and the ones to
-/// come), sorted. A private error inside a calculator never reaches HTTP and stays out.
+/// come), and the codes the pipeline writes itself (the 429, ADR 0062), sorted. A private error inside a calculator
+/// never reaches HTTP and stays out.
 /// </summary>
 internal static class ErrorCodeCatalog
 {
@@ -39,6 +41,7 @@ internal static class ErrorCodeCatalog
             .SelectMany(type => type.GetFields(StaticFields))
             .Where(field => field.IsInitOnly && field.FieldType == typeof(Error))
             .Select(field => ((Error)field.GetValue(null)!).Code)
+            .Concat(PipelineErrorCodes.All)
             .Distinct(StringComparer.Ordinal)
             .Order(StringComparer.Ordinal)];
 }

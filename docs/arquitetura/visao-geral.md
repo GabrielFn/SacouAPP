@@ -133,6 +133,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0059](adr/0059-icone-do-app.md) | Ícone do app: silhueta sacando, azul-marinho sobre laranja |
 | [0060](adr/0060-sincronizacao-do-stream-da-quadra.md) | Sincronização do stream da quadra: idempotência por `eventId`, lote do servidor, tetos, plausibilidade e membros do grupo |
 | [0061](adr/0061-sorteio-no-app.md) | Sorteio no app: resultado só no reducer, medidor no TS com o golden do C#, trocas e travas |
+| [0062](adr/0062-limite-de-requisicoes.md) | Limite de requisições por usuário (janela fixa, chave com hash do UID) e concorrência das rotas de duas conexões |
 | [0064](adr/0064-ci-api-e-app-em-jobs-paralelos.md) | CI com a API e o app em jobs paralelos, cada um pulado pela sua área |
 
 ## Matriz: `decisoes.md` → ADR
