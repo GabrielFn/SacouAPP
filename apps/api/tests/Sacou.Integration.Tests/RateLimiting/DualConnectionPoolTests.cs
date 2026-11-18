@@ -17,8 +17,15 @@ public sealed class DualConnectionPoolTests(IntegrationDatabase database)
     private const int PoolWaitSeconds = 3;
     private static readonly TimeSpan Deadline = TimeSpan.FromSeconds(60);
 
+    /// <summary>
+    /// A smoke test, not a proof: the requests are not held after the lock (the C4/C5 hook of
+    /// <see cref="ApiWithDatabase.AfterCurrentUserResolved"/> runs once and before the transaction), so on a fast machine
+    /// they may never overlap inside the two connections. It shows the limit lets every request through on a small pool;
+    /// the bound itself is proven by the start check (<see cref="ConcurrencyThatDoesNotFitThePool_StopsTheStart"/>) and
+    /// the limiter tests of <c>Sacou.Http.Tests</c>.
+    /// </summary>
     [Fact]
-    public async Task SimultaneousTwoConnectionRequests_NeverExhaustTheSmallPool()
+    public async Task Smoke_SimultaneousTwoConnectionRequests_AllFinishOnTheSmallPool()
     {
         await using var api = await StartAsync(new Dictionary<string, string?>(StringComparer.Ordinal)
         {
@@ -73,7 +80,7 @@ public sealed class DualConnectionPoolTests(IntegrationDatabase database)
         return api;
     }
 
-    /// <summary>Twelve new people create a group and twelve others accept one invite, all released by one barrier.</summary>
+    /// <summary>Twelve new people create a group and twelve others accept one invite, all released together by one signal.</summary>
     private static async Task<HttpStatusCode[]> RaceAsync(ApiWithDatabase api)
     {
         using var client = api.CreateClient();
@@ -85,14 +92,14 @@ public sealed class DualConnectionPoolTests(IntegrationDatabase database)
             .Concat(joiners.Select(subject => (Subject: subject, Path: GroupWorld.AcceptPath, Body: body)))
             .ToList();
 
-        using var gate = new Barrier(calls.Count);
+        var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var race = calls.Select(async call =>
         {
-            await Task.Yield();
-            gate.SignalAndWait(TestContext.Current.CancellationToken);
+            await start.Task.WaitAsync(TestContext.Current.CancellationToken);
             using var response = await RateLimitingTests.SendAsync(api, client, call.Subject, HttpMethod.Post, call.Path, call.Body);
             return response.StatusCode;
-        });
+        }).ToList();
+        start.SetResult();
         return await Task.WhenAll(race).WaitAsync(Deadline, TestContext.Current.CancellationToken);
     }
 

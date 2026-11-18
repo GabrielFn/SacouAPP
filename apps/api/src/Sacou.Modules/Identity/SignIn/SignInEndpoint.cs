@@ -20,7 +20,7 @@ internal static class SignInEndpoint
 
     public static IEndpointRouteBuilder MapSignIn(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireAuthorization().RequireRateLimiting(RateLimitPolicies.SignIn)
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.SignIn).RequireAuthorization()
             .ProducesProblem(StatusCodes.Status410Gone);
         return endpoints;
     }

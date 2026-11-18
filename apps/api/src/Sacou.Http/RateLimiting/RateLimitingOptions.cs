@@ -47,6 +47,15 @@ public sealed class RateLimitingOptions
     /// <summary>How many more of them wait for a turn, oldest first, before a 429.</summary>
     public int DualConnectionQueue { get; init; }
 
+    /// <summary>
+    /// How many requests of the two-connection routes one user runs at once. The shared gate is taken only after this
+    /// one, so an account that sends its bodies slowly holds at most this many places of everyone's gate.
+    /// </summary>
+    public int DualConnectionPerUser { get; init; }
+
+    /// <summary>How many more requests of one user wait for that user's turn, holding no place of the shared gate, before a 429.</summary>
+    public int DualConnectionPerUserQueue { get; init; }
+
     /// <summary>Connections of the pool kept for every other route, on top of the two per running request.</summary>
     public int DualConnectionHeadroom { get; init; }
 

@@ -26,7 +26,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     /// <summary>
     /// Limits far above what any test sends, so only the rate limiting tests meet one (ADR 0062). The concurrency of the
-    /// two-connection routes stays the real one; its queue is long, so a race test waits instead of getting a 429.
+    /// two-connection routes stays the real one (shared and per user); both queues are long, so a race test waits instead of getting a 429.
     /// </summary>
     private static readonly IReadOnlyDictionary<string, string?> RoomyRateLimits = BuildRoomyRateLimits();
 
@@ -149,6 +149,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
+        limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;
         return limits;
     }
 

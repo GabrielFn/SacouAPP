@@ -38,6 +38,8 @@ public sealed class RateLimitingOptionsTests
     [InlineData("DualConnectionConcurrency", "0")]
     [InlineData("DualConnectionQueue", "0")]
     [InlineData("DualConnectionHeadroom", "-2")]
+    [InlineData("DualConnectionPerUser", "0")]
+    [InlineData("DualConnectionPerUserQueue", "0")]
     public void NumberBelowOne_FailsTheStart(string setting, string value)
     {
         var settings = RateLimitSettings.Complete();

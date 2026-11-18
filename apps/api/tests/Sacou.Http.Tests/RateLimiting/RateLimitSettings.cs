@@ -16,6 +16,8 @@ internal static class RateLimitSettings
             [$"{RateLimitingOptions.SectionName}:DualConnectionConcurrency"] = "8",
             [$"{RateLimitingOptions.SectionName}:DualConnectionQueue"] = "16",
             [$"{RateLimitingOptions.SectionName}:DualConnectionHeadroom"] = "4",
+            [$"{RateLimitingOptions.SectionName}:DualConnectionPerUser"] = "1",
+            [$"{RateLimitingOptions.SectionName}:DualConnectionPerUserQueue"] = "4",
         };
         foreach (var section in Sections)
         {

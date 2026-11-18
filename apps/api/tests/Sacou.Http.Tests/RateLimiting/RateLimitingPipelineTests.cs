@@ -14,6 +14,7 @@ public sealed class RateLimitingPipelineTests
 {
     private const int Permits = 3;
     private const int ManyRequests = 30;
+    private static readonly TimeSpan TurnDeadline = TimeSpan.FromSeconds(10);
 
     [Fact]
     public void Global_RefusesTheSameUserPastTheLimit_NotAnother()
@@ -63,6 +64,31 @@ public sealed class RateLimitingPipelineTests
         Assert.True(second.IsAcquired);
         Assert.False(third.IsAcquired);
         Assert.True(elsewhere.IsAcquired);
+    }
+
+    /// <summary>
+    /// The limiters run before the body is read, so a slow body keeps its lease. One account holding its request and
+    /// waiting with more never takes a second place of the shared gate: another person still gets one at once.
+    /// </summary>
+    [Fact]
+    public async Task SlowAccount_HoldsOnePlaceOfTheGate_NotTheOthers()
+    {
+        var settings = RateLimitSettings.Complete(permitLimit: ManyRequests);
+        settings[$"{RateLimitingOptions.SectionName}:DualConnectionConcurrency"] = "2";
+        using var services = Build(settings);
+        var global = Global(services);
+
+        using var slow = global.AttemptAcquire(Context("uid-slow", RateLimitPolicies.GroupCreate));
+        var waiting = global.AcquireAsync(Context("uid-slow", RateLimitPolicies.Invite), cancellationToken: TestContext.Current.CancellationToken);
+        using var other = global.AttemptAcquire(Context("uid-other", RateLimitPolicies.GroupCreate));
+
+        Assert.True(slow.IsAcquired);
+        Assert.False(waiting.IsCompleted);
+        Assert.True(other.IsAcquired);
+        slow.Dispose();
+        other.Dispose();
+        using var turn = await waiting.AsTask().WaitAsync(TurnDeadline, TestContext.Current.CancellationToken);
+        Assert.True(turn.IsAcquired);
     }
 
     [Fact]
