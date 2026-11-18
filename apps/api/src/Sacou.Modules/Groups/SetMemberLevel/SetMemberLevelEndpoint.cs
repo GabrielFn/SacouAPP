@@ -27,8 +27,8 @@ internal static class SetMemberLevelEndpoint
     public static RouteGroupBuilder MapSetMemberLevel(this RouteGroupBuilder group)
     {
         group.MapPut(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.MemberLevels)
-            .RequireGroupPermission(GroupPermission.ManageMemberLevels)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireGroupPermission(GroupPermission.ManageMemberLevels);
         return group;
     }
 
