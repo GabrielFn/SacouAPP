@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
+using Sacou.Modules.Matches.Domain.CourtSessions.Score;
 using Sacou.Modules.Matches.Domain.CourtSessions.Score.Appliers;
 
 namespace Sacou.Modules.Matches.Domain.CourtSessions.Writes;
@@ -38,16 +39,38 @@ internal static class CourtWriteRules
         var lastSequence = stored.LastSequenceOf(request.DeviceId);
         if (newEvents.IsEmpty)
         {
-            return Accept(new CourtWriteDecision([], lastSequence, duplicates, writer.Value, CreatesStream: false));
+            return Accept(new CourtWriteDecision([], lastSequence, duplicates, writer.Value, CreatesStream: false, Scoreboard: null));
         }
 
-        var refusal = CheckSequence(newEvents[0].Envelope, lastSequence)
-            ?? StreamLimitCheck.FindExceeded(stored, newEvents)
-            ?? CheckReplay(stored, newEvents, context)
-            ?? FindForeignMember(newEvents, context);
-        return refusal is not null
-            ? Refuse(refusal)
-            : Accept(new CourtWriteDecision(newEvents, newEvents[^1].Envelope.Sequence, duplicates, writer.Value, stored.Writer is null));
+        var decided = DecideNewEvents(stored, newEvents, lastSequence, context);
+        return decided.IsFailure
+            ? decided.Forward<CourtWriteDecision>()
+            : Accept(new CourtWriteDecision(
+                newEvents,
+                newEvents[^1].Envelope.Sequence,
+                duplicates,
+                writer.Value,
+                CreatesStream: stored.Writer is null,
+                CourtScoreboard.From(decided.Value)));
+    }
+
+    /// <summary>The sequence, the ceilings, the replay with its plausibility, then the members; the state after them.</summary>
+    private static Result<CourtSessionState, CourtWriteError> DecideNewEvents(
+        StoredStream stored,
+        ImmutableArray<StreamEvent> newEvents,
+        long lastSequence,
+        CourtWriteContext context)
+    {
+        var refusal = CheckSequence(newEvents[0].Envelope, lastSequence) ?? StreamLimitCheck.FindExceeded(stored, newEvents);
+        if (refusal is not null)
+        {
+            return Result<CourtSessionState, CourtWriteError>.Failure(refusal);
+        }
+
+        var replayed = Replay(stored, newEvents, context);
+        return replayed.IsSuccess && FindForeignMember(newEvents, context) is { } foreign
+            ? Result<CourtSessionState, CourtWriteError>.Failure(foreign)
+            : replayed;
     }
 
     /// <summary>
@@ -59,21 +82,32 @@ internal static class CourtWriteRules
         if (stored.Writer is not { } writer)
         {
             return request.Batch == CourtStreamLimits.FirstBatch
-                ? Result<CourtWriter, CourtWriteError>.Success(new CourtWriter(CourtStreamLimits.FirstBatch, request.DeviceId, context.CallerMemberId))
+                ? Result<CourtWriter, CourtWriteError>.Success(
+                    new CourtWriter(CourtStreamLimits.FirstBatch, request.DeviceId, context.CallerMemberId, EventsBefore: 0))
                 : Result<CourtWriter, CourtWriteError>.Failure(new CourtWriteError(CourtWriteErrorCode.BatchMismatch));
         }
 
-        var isTheWriter = string.Equals(writer.DeviceId, request.DeviceId, StringComparison.Ordinal)
-            && string.Equals(writer.MemberId, context.CallerMemberId, StringComparison.Ordinal);
-        if (!isTheWriter)
+        if (!stored.IsCurrentWriter(request.DeviceId, context.CallerMemberId))
         {
-            return Result<CourtWriter, CourtWriteError>.Failure(new CourtWriteError(CourtWriteErrorCode.NotTheWriter));
+            return Result<CourtWriter, CourtWriteError>.Failure(NotTheWriter(stored, writer, request.DeviceId, context.CallerMemberId));
         }
 
         return request.Batch == writer.Batch
             ? Result<CourtWriter, CourtWriteError>.Success(writer)
             : Result<CourtWriter, CourtWriteError>.Failure(new CourtWriteError(CourtWriteErrorCode.BatchMismatch));
     }
+
+    /// <summary>
+    /// The current batch, never who writes it; the largest stored sequence of the device only when this
+    /// pair wrote an earlier batch, so a phone that lost the court tells what got in (ADR 0063, D8). The
+    /// batch of the request does not matter: the old phone is refused for the takeover the server
+    /// recorded, never for its clock nor for a forged batch.
+    /// </summary>
+    private static CourtWriteError NotTheWriter(StoredStream stored, CourtWriter writer, string deviceId, string memberId) =>
+        new(
+            CourtWriteErrorCode.NotTheWriter,
+            CurrentBatch: writer.Batch,
+            LastSequence: stored.PreviousWriterOf(deviceId, memberId) is null ? null : stored.LastSequenceOf(deviceId));
 
     /// <summary>
     /// The first new event follows the largest sequence of the device, as in the local log. Ahead is a
@@ -88,8 +122,12 @@ internal static class CourtWriteRules
             : null;
     }
 
-    /// <summary>The replay of the whole stream, then the plausibility of each new event on the timeline right before it.</summary>
-    private static CourtWriteError? CheckReplay(StoredStream stored, ImmutableArray<StreamEvent> newEvents, CourtWriteContext context)
+    /// <summary>
+    /// The replay of the whole stream, then the plausibility of each new event on the timeline right
+    /// before it. The state at the end gives the scoreboard. A <c>RevertedTo</c> may name any earlier
+    /// event, of this batch or of an earlier one: whoever writes undoes any point (ADR 0063, D9).
+    /// </summary>
+    private static Result<CourtSessionState, CourtWriteError> Replay(StoredStream stored, ImmutableArray<StreamEvent> newEvents, CourtWriteContext context)
     {
         var newIds = newEvents.Select(item => item.Envelope.EventId).ToImmutableHashSet(StringComparer.Ordinal);
         var replayed = EventReplayer.ReplaySteps(
@@ -98,14 +136,18 @@ internal static class CourtWriteRules
             envelope => newIds.Contains(envelope.EventId));
         if (replayed.IsFailure)
         {
-            return new CourtWriteError(CourtWriteErrorCode.EventRejected, replayed.Error.EventId, Reason: replayed.Error.Code.Code);
+            return Result<CourtSessionState, CourtWriteError>.Failure(
+                new CourtWriteError(CourtWriteErrorCode.EventRejected, replayed.Error.EventId, Reason: replayed.Error.Code.Code));
         }
 
-        return replayed.Value.Steps
+        var implausible = replayed.Value.Steps
             .Select(step => EventPlausibility.Check(step.Event, step.Before, context) is { } reason
                 ? new CourtWriteError(CourtWriteErrorCode.EventImplausible, step.Event.EventId, Reason: reason)
                 : null)
             .FirstOrDefault(error => error is not null);
+        return implausible is null
+            ? Result<CourtSessionState, CourtWriteError>.Success(replayed.Value.Head.StateOr(CourtSessionState.Initial))
+            : Result<CourtSessionState, CourtWriteError>.Failure(implausible);
     }
 
     /// <summary>Never names the member: only the event that names it (ADR 0060, D15).</summary>

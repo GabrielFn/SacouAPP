@@ -46,6 +46,12 @@ internal static class CourtStreamLimits
     /// <summary>Up to ~1.2 MB in the worst case.</summary>
     public const int MaxStreamQueueChanges = 300;
 
+    /// <summary>
+    /// Batches of one stream, so takeovers (ADR 0063, D10): a round of 15 matches with a takeover and a
+    /// take back at each match fits with room. No minimum interval: it would hinder the legitimate take back.
+    /// </summary>
+    public const long MaxWritersPerStream = 40;
+
     /// <summary>The batch of the first writer of a stream, which is also the value of the local log (ADR 0038).</summary>
     public const long FirstBatch = 1;
 }
