@@ -54,7 +54,7 @@ export interface CourtSessionOrigin {
  * UID, ADR 0067, D8), or `null` when there was none: that session is then never sent.
  */
 export interface OpenedCourtSession extends CourtSessionOrigin {
-  readonly ownerKey: string | null;
+  readonly ownerKey?: string | null;
 }
 
 /** A session with events of this device the server has not confirmed yet (ADR 0067, D3). */

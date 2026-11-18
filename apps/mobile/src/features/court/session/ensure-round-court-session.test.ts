@@ -2,6 +2,7 @@ import type { MatchStartedPayload } from "@sacou/match-engine";
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
+import { inertCourtSyncHooks } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import type { CourtRuntime } from "../ports/court-runtime";
@@ -23,7 +24,12 @@ const ONE_POINT_MATCH: MatchStartedPayload = {
 
 function runtime(): CourtRuntime {
   const ids = createSequentialIdGenerator();
-  return { log: createFakeCourtEventLog(ids), replayer: createCourtReplayer(), ids };
+  return {
+    log: createFakeCourtEventLog(ids),
+    replayer: createCourtReplayer(),
+    ids,
+    sync: inertCourtSyncHooks,
+  };
 }
 
 async function sessionWithMatch(court: CourtRuntime, finished: boolean): Promise<void> {

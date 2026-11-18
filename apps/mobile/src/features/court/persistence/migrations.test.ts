@@ -31,7 +31,12 @@ describe("migrateDatabase", () => {
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
 
     expect(userVersion(sqlite)).toBe(MIGRATION_STEPS.length);
-    expect(tableNames(sqlite)).toEqual(["court_events", "court_sessions", "device"]);
+    expect(tableNames(sqlite)).toEqual([
+      "court_events",
+      "court_refused_events",
+      "court_sessions",
+      "device",
+    ]);
   });
 
   test("running again changes nothing", async () => {
