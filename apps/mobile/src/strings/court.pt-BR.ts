@@ -1,6 +1,7 @@
 // Texts of the court mode (screens 09 and 10, QuadraSol.dc.html). Plain functions interpolate.
 
 import { courtEndStrings } from "./court-end.pt-BR";
+import { courtTakeoverStrings } from "./court-takeover.pt-BR";
 
 export interface ZoneLabelInput {
   readonly team: string;
@@ -62,12 +63,7 @@ export const courtStrings = {
     title: "Entre com a conta que abriu a quadra",
     body: "Os pontos desta quadra só podem ser marcados e enviados pela conta que a abriu.",
     leave: "Sair da quadra",
-  },
-  // Screen 09b without the name until E3.8 (D7, answer 83).
-  takenOver: {
-    title: "Outro celular assumiu o placar",
-    body: "Este celular parou de marcar.",
-    leave: "Sair da quadra",
+    takeOver: "Assumir a quadra",
   },
   queue: {
     title: "Na fila",
@@ -96,6 +92,7 @@ export const courtStrings = {
     back: "Voltar ao início",
   },
   ...courtEndStrings,
+  ...courtTakeoverStrings,
   menu: {
     title: "Menu da partida",
     subtitle: (matchNumber: number, setNumber: number, scoreLine: string) =>

@@ -190,7 +190,11 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
       // The other open sessions of the round close; their unsent points are not modeled here.
       Object.entries(sessions.value).forEach(([id, session]) => {
         if (id !== courtSessionId && session.origin?.roundId === origin.roundId) {
-          put(id, { ...session, status: "closed", takenOverBatch: session.takenOverBatch ?? batch });
+          put(id, {
+            ...session,
+            status: "closed",
+            takenOverBatch: session.takenOverBatch ?? batch,
+          });
         }
       });
       put(courtSessionId, {

@@ -5,7 +5,10 @@ import type { Call } from "./http-sacou-api";
 import type { Client } from "./http-path-params";
 
 /** Runs a call only with the token of `account` (ADR 0067, D8). */
-export type ExecuteAs = <T>(call: Call<T>, account: SessionIdentity | null) => Promise<ApiResult<T>>;
+export type ExecuteAs = <T>(
+  call: Call<T>,
+  account: SessionIdentity | null,
+) => Promise<ApiResult<T>>;
 
 const STREAM_PATH = "/v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events";
 

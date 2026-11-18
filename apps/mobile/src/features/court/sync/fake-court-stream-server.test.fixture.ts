@@ -5,8 +5,12 @@ import type { ApiError, ProblemDetails } from "../../../services/api/api-error";
 import { apiErr, apiOk, type ApiResult } from "../../../services/api/api-result";
 import type {
   AppendCourtEventsAnswer,
+  CourtEventsPage,
+  CourtSessionSummary,
   CourtStreamRef,
   SacouApi,
+  TakeOverCourtAnswer,
+  TakeOverCourtBody,
 } from "../../../services/api/sacou-api";
 import type { SessionIdentity } from "../../../services/auth/auth-session";
 import { envelopeBytes } from "./chunk-for-upload";
@@ -14,6 +18,10 @@ import { envelopeBytes } from "./chunk-for-upload";
 const MAX_EVENTS = 200;
 const HTTP_BAD_REQUEST = 400;
 const HTTP_CONFLICT = 409;
+const HTTP_NOT_FOUND = 404;
+const PAGE_SIZE = 500;
+const WRITER_SINCE = "2026-11-18T21:14:00.000Z";
+const WRITER_MEMBER = "a0000000-0000-4000-8000-000000000001";
 
 export interface ReceivedRequest {
   readonly ref: CourtStreamRef;
@@ -26,7 +34,13 @@ interface Writer {
   readonly deviceId: string;
   readonly account: SessionIdentity;
   readonly batch: number;
+  readonly eventsBefore: number;
 }
+
+export type TakeoverServerApi = Pick<
+  SacouApi,
+  "appendCourtEvents" | "getCourtSession" | "takeOverCourt" | "listCourtEvents"
+>;
 
 /** What the next request gets instead of the rules: an error, or "stored but the answer was lost". */
 type Fault =
@@ -37,7 +51,11 @@ type Fault =
  * (idempotence by `eventId`, all or nothing, sequence per device, one writer) and injectable faults.
  */
 export interface FakeCourtStreamServer {
-  readonly api: Pick<SacouApi, "appendCourtEvents">;
+  readonly api: TakeoverServerApi;
+  /** The size of the pages of `listCourtEvents`. */
+  setPageSize(size: number): void;
+  /** Each page goes through this before it leaves: a test breaks the stream here. */
+  tamperPages(change: (page: CourtEventsPage, after: number) => CourtEventsPage): void;
   /** The stored stream, in order. */
   stored(): readonly EventEnvelope[];
   requests(): readonly ReceivedRequest[];
@@ -45,6 +63,8 @@ export interface FakeCourtStreamServer {
   failNext(...faults: readonly Fault[]): void;
   /** The next request waits until the returned function is called. */
   holdNext(): () => void;
+  /** The next page of the stream waits until the returned function is called. */
+  holdNextPage(): () => void;
   /** As if the server lost its last `count` events (a restored backup). */
   forgetLast(count: number): void;
   /** Another phone writes the stream now. */
@@ -83,6 +103,12 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
   const log = { value: [] as readonly ReceivedRequest[] };
   const faults = { value: [] as readonly Fault[] };
   const gate = { value: null as Promise<void> | null };
+  const streamId = { value: null as string | null };
+  const pageSize = { value: PAGE_SIZE };
+  const tamper = {
+    value: (page: CourtEventsPage, _after: number): CourtEventsPage => page,
+  };
+  const pageGate = { value: null as Promise<void> | null };
 
   function highest(deviceId: string): number {
     return stream.value
@@ -91,7 +117,11 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
   }
 
   /** `lastSequence` only for a pair that wrote an earlier batch (ADR 0063, D8). */
-  function notTheWriter(currentBatch: number, deviceId: string, account: SessionIdentity): ApiError {
+  function notTheWriter(
+    currentBatch: number,
+    deviceId: string,
+    account: SessionIdentity,
+  ): ApiError {
     const wrote = writers.value.some(
       (other) => other.deviceId === deviceId && other.account === account,
     );
@@ -124,7 +154,10 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     if (firstNew !== undefined && firstNew.sequence < expected) {
       return apiErr(problem(HTTP_CONFLICT, "matches.sequence-conflict"));
     }
-    if (current === null) writers.value = [{ deviceId: first.deviceId, account, batch: 1 }];
+    if (current === null) {
+      writers.value = [{ deviceId: first.deviceId, account, batch: 1, eventsBefore: 0 }];
+      streamId.value = first.courtSessionId;
+    }
     stream.value = [...stream.value, ...fresh];
     return apiOk({ lastSequence: highest(first.deviceId), stored: fresh.length });
   }
@@ -146,22 +179,85 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     return fault?.kind === "lose-answer" ? apiErr({ kind: "offline" }) : answer;
   }
 
+  function summary(): ApiResult<CourtSessionSummary> {
+    const current = writers.value.at(-1);
+    if (current === undefined || streamId.value === null) {
+      return apiErr(problem(HTTP_NOT_FOUND, "matches.court-session-not-found"));
+    }
+    return apiOk({
+      courtSessionId: streamId.value,
+      currentBatch: current.batch,
+      eventCount: stream.value.length,
+      writer: { memberId: WRITER_MEMBER, since: WRITER_SINCE },
+      lastEventAt: null,
+      scoreboard: null,
+    });
+  }
+
+  function takeOver(
+    body: TakeOverCourtBody,
+    account: SessionIdentity,
+  ): ApiResult<TakeOverCourtAnswer> {
+    const current = writers.value.at(-1);
+    if (current === undefined) {
+      return apiErr(problem(HTTP_NOT_FOUND, "matches.court-session-not-found"));
+    }
+    const lastSequence = highest(body.deviceId);
+    if (current.deviceId === body.deviceId && current.account === account) {
+      return apiOk({ batch: current.batch, eventsBefore: current.eventsBefore, lastSequence });
+    }
+    if (body.expectedBatch !== current.batch || body.expectedEventCount !== stream.value.length) {
+      return apiErr(problem(HTTP_CONFLICT, "matches.stream-changed"));
+    }
+    const next = {
+      deviceId: body.deviceId,
+      account,
+      batch: current.batch + 1,
+      eventsBefore: stream.value.length,
+    };
+    writers.value = [...writers.value, next];
+    return apiOk({ batch: next.batch, eventsBefore: next.eventsBefore, lastSequence });
+  }
+
+  async function listEvents(after: number): Promise<ApiResult<CourtEventsPage>> {
+    const waiting = pageGate.value;
+    pageGate.value = null;
+    if (waiting !== null) await waiting;
+    const events = stream.value.slice(after, after + pageSize.value).map((event) => ({ ...event }));
+    const page = { events, lastPosition: after + events.length, eventCount: stream.value.length };
+    return apiOk(tamper.value(page, after));
+  }
+
+  function hold(target: { value: Promise<void> | null }): () => void {
+    const release: { value: () => void } = { value: () => undefined };
+    target.value = new Promise<void>((resolve) => {
+      release.value = resolve;
+    });
+    return () => {
+      release.value();
+    };
+  }
+
   return {
-    api: { appendCourtEvents: append },
+    api: {
+      appendCourtEvents: append,
+      getCourtSession: () => Promise.resolve(summary()),
+      takeOverCourt: (_, body, account) => Promise.resolve(takeOver(body, account)),
+      listCourtEvents: (_, after) => listEvents(after),
+    },
+    setPageSize(size) {
+      pageSize.value = size;
+    },
+    tamperPages(change) {
+      tamper.value = change;
+    },
     stored: () => stream.value,
     requests: () => log.value,
     failNext(...next) {
       faults.value = [...faults.value, ...next];
     },
-    holdNext() {
-      const release: { value: () => void } = { value: () => undefined };
-      gate.value = new Promise<void>((resolve) => {
-        release.value = resolve;
-      });
-      return () => {
-        release.value();
-      };
-    },
+    holdNext: () => hold(gate),
+    holdNextPage: () => hold(pageGate),
     forgetLast(count) {
       stream.value = stream.value.slice(0, Math.max(0, stream.value.length - count));
     },
@@ -172,6 +268,7 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
           deviceId: "another-device",
           account: Object.freeze({ opaque: Symbol("b") }),
           batch: writers.value.length + 1,
+          eventsBefore: stream.value.length,
         },
       ];
     },

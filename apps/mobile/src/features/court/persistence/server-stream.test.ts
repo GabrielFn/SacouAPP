@@ -87,17 +87,11 @@ describe("replaceWithServerStream (E4.11, D5)", () => {
     await log.append(SESSION_A, own);
     await log.markTakenOver(SESSION_A, DEVICE, { currentBatch: 2, lastStoredSequence: 2 });
     expect((await loadOk(log)).refused).toHaveLength(2);
-    const stream = [
-      ...own.slice(0, 2),
-      ...otherPhoneEvents(2).map((event) => withBatch(event, 2)),
-    ];
+    const stream = [...own.slice(0, 2), ...otherPhoneEvents(2).map((event) => withBatch(event, 2))];
 
     expect(
-      (
-        await log.replaceWithServerStream(
-          imported({ events: stream, batch: 3, lastSequence: 2 }),
-        )
-      ).ok,
+      (await log.replaceWithServerStream(imported({ events: stream, batch: 3, lastSequence: 2 })))
+        .ok,
     ).toBe(true);
 
     const stored = await loadOk(log);

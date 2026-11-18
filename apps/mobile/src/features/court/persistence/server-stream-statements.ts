@@ -1,11 +1,7 @@
 import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Err } from "@sacou/volley-rules";
 
-import type {
-  CourtLogError,
-  CourtLogResult,
-  ServerStreamImport,
-} from "../ports/court-event-log";
+import type { CourtLogError, CourtLogResult, ServerStreamImport } from "../ports/court-event-log";
 import type { SqlExecutor } from "../ports/sql-database";
 import { hasContiguousSequences, highestSequence } from "./append-rules";
 import {
@@ -81,7 +77,8 @@ async function leaveUnsent(
 ): Promise<CourtLogResult<void>> {
   const [row] = await transaction.getAll(SELECT_SESSION, [courtSessionId]);
   const acked = readIntegerColumn(row, "acked_sequence");
-  if (row === undefined || readIntegerColumn(row, "taken_over_batch") !== null) return ok(undefined);
+  if (row === undefined || readIntegerColumn(row, "taken_over_batch") !== null)
+    return ok(undefined);
   if (acked === null) return err({ code: "corrupted-log" });
   return markTakenOver(transaction, courtSessionId, deviceId, {
     currentBatch: batch,
