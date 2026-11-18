@@ -11,8 +11,6 @@ internal static class DatabaseConnectionSetup
     internal const string ConnectionStringKey = "ConnectionStrings:Sacou";
     internal const string MigrateOnStartupKey = "Database:MigrateOnStartup";
 
-    internal static readonly Error Missing = new("database_url.missing", ErrorKind.Validation);
-
     internal static Result Apply(IConfiguration configuration, bool isDevelopment)
     {
         ArgumentNullException.ThrowIfNull(configuration);
@@ -25,7 +23,7 @@ internal static class DatabaseConnectionSetup
         if (string.IsNullOrWhiteSpace(url))
         {
             // Nothing to migrate against: the start stops here instead of on an Npgsql error.
-            return configuration.GetValue<bool>(MigrateOnStartupKey) ? Result.Failure(Missing) : Result.Success();
+            return configuration.GetValue<bool>(MigrateOnStartupKey) ? Result.Failure(DatabaseUrlErrors.Missing) : Result.Success();
         }
 
         var connectionString = DatabaseUrl.ToConnectionString(url, isDevelopment);

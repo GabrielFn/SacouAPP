@@ -16,5 +16,8 @@ public static class DatabaseUrlErrors
     public static readonly Error InsecureSslMode = Invalid("database_url.insecure_ssl_mode");
     public static readonly Error ChannelBinding = Invalid("database_url.channel_binding");
 
+    /// <summary>No connection string and no URL while the start must migrate.</summary>
+    public static readonly Error Missing = Invalid("database_url.missing");
+
     private static Error Invalid(string code) => new(code, ErrorKind.Validation);
 }

@@ -1,6 +1,8 @@
 # Deploys the API to Cloud Run after a green CI on main (ADR 0068, D4; routine in docs/operacao/deploy.md).
 # Runs only the main code: workflow_run always uses this file from the default branch, never from a PR.
-# No secret here: the provider and the deployer are repository variables, and the database URL stays in Secret Manager.
+# No secret here: the provider and the three accounts are repository variables, and the database URL stays in Secret Manager.
+# Each Google job has its own account, bound to its own OIDC subject (scripts/gcp/harden-deploy-identities.sh):
+# build (no environment) only pushes images; deploy-test and deploy-production each deploy only their service.
 name: Deploy API
 
 on:
@@ -11,11 +13,6 @@ on:
 
 permissions:
   contents: read
-
-# One deploy at a time, in order; a running deploy is never cancelled halfway.
-concurrency:
-  group: deploy-api
-  cancel-in-progress: false
 
 jobs:
   # Deploys only when the commit touches what the API is built from: the `api` area of scripts/lib/ci-areas.mjs
@@ -75,7 +72,7 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+          service_account: ${{ vars.GCP_BUILDER_SA }}
           token_format: access_token
           create_credentials_file: false
 
@@ -96,10 +93,15 @@ jobs:
           echo "image=${IMAGE_TAG%:*}@$digest" >> "$GITHUB_OUTPUT"
           docker logout https://us-east4-docker.pkg.dev
 
+  # One deploy per service at a time, never cancelled halfway. Per job, not per workflow: a run waiting for the
+  # production approval must not hold back the next test deploy.
   deploy-test:
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    concurrency:
+      group: deploy-api-test
+      cancel-in-progress: false
     environment:
       name: test
       url: ${{ steps.deploy.outputs.url }}
@@ -123,7 +125,7 @@ jobs:
           image: ${{ needs.build.outputs.image }}
           project-id: ${{ vars.GCP_PROJECT_ID }}
           workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}
-          deployer: ${{ vars.GCP_DEPLOYER_SA }}
+          deployer: ${{ vars.GCP_DEPLOYER_TEST_SA }}
 
   # The same image, by digest, after the test /health passed. The production environment requires the owner's
   # approval on every run (question 87): that approval is the explicit ok of each production deploy.
@@ -131,6 +133,9 @@ jobs:
     needs: [build, deploy-test]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    concurrency:
+      group: deploy-api-production
+      cancel-in-progress: false
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
@@ -154,4 +159,4 @@ jobs:
           image: ${{ needs.build.outputs.image }}
           project-id: ${{ vars.GCP_PROJECT_ID }}
           workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}
-          deployer: ${{ vars.GCP_DEPLOYER_SA }}
+          deployer: ${{ vars.GCP_DEPLOYER_PROD_SA }}

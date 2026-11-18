@@ -32,8 +32,6 @@ public sealed class DeploySetupTests
             workflows: [CI]
         permissions:
           contents: read
-        concurrency:
-          cancel-in-progress: false
         jobs:
           changes:
             if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
@@ -42,7 +40,13 @@ public sealed class DeploySetupTests
           build:
             permissions:
               id-token: write
+            steps:
+              - with:
+                  service_account: ${{ vars.GCP_BUILDER_SA }}
           deploy-test:
+            concurrency:
+              group: deploy-api-test
+              cancel-in-progress: false
             environment:
               name: test
             permissions:
@@ -51,8 +55,12 @@ public sealed class DeploySetupTests
               - uses: ./.github/actions/deploy-cloud-run
                 with:
                   image: ${{ needs.build.outputs.image }}
+                  deployer: ${{ vars.GCP_DEPLOYER_TEST_SA }}
           deploy-production:
             needs: [build, deploy-test]
+            concurrency:
+              group: deploy-api-production
+              cancel-in-progress: false
             environment:
               name: production
             permissions:
@@ -61,6 +69,7 @@ public sealed class DeploySetupTests
               - uses: ./.github/actions/deploy-cloud-run
                 with:
                   image: ${{ needs.build.outputs.image }}
+                  deployer: ${{ vars.GCP_DEPLOYER_PROD_SA }}
         """;
 
     private static readonly string ValidAction = $$"""
@@ -188,10 +197,17 @@ public sealed class DeploySetupTests
     [InlineData("conclusion == 'success'", "conclusion != 'cancelled'")]
     [InlineData("workflow_run:", "pull_request:\n  workflow_run:")]
     [InlineData("    needs: [build, deploy-test]", "    needs: build")]
-    [InlineData("cancel-in-progress: false", "cancel-in-progress: true")]
-    [InlineData("image: ${{ needs.build.outputs.image }}\n  deploy-production", "image: us-east4-docker.pkg.dev/p/sacou/api:latest\n  deploy-production")]
-    [InlineData("contents: read\nconcurrency", "contents: read\nenv:\n  SACOU_DATABASE_URL: x\nconcurrency")]
-    [InlineData("contents: read\nconcurrency", "contents: read\nenv:\n  TOKEN: ${{ secrets.TOKEN }}\nconcurrency")]
+    [InlineData("cancel-in-progress: false\n    environment:\n      name: test", "cancel-in-progress: true\n    environment:\n      name: test")]
+    [InlineData("      group: deploy-api-production\n      cancel-in-progress: false\n", "")]
+    [InlineData("contents: read\njobs:", "contents: read\nconcurrency:\n  group: deploy-api\njobs:")]
+    [InlineData("image: ${{ needs.build.outputs.image }}\n          deployer: ${{ vars.GCP_DEPLOYER_TEST_SA }}", "image: us-east4-docker.pkg.dev/p/sacou/api:latest\n          deployer: ${{ vars.GCP_DEPLOYER_TEST_SA }}")]
+    [InlineData("contents: read\njobs:", "contents: read\nenv:\n  SACOU_DATABASE_URL: x\njobs:")]
+    [InlineData("contents: read\njobs:", "contents: read\nenv:\n  TOKEN: ${{ secrets.TOKEN }}\njobs:")]
+    [InlineData("vars.GCP_BUILDER_SA", "vars.GCP_DEPLOYER_PROD_SA")]
+    [InlineData("vars.GCP_DEPLOYER_TEST_SA", "vars.GCP_DEPLOYER_PROD_SA")]
+    [InlineData("vars.GCP_DEPLOYER_PROD_SA", "vars.GCP_DEPLOYER_TEST_SA")]
+    [InlineData("vars.GCP_DEPLOYER_PROD_SA", "vars.GCP_DEPLOYER_SA")]
+    [InlineData("    permissions:\n      id-token: write\n    steps:\n      - with:", "    environment: production\n    permissions:\n      id-token: write\n    steps:\n      - with:")]
     public void Workflow_Violations(string valid, string planted)
     {
         var workflow = ValidWorkflow.ReplaceLineEndings("\n");

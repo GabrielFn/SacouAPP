@@ -44,7 +44,7 @@ public sealed class DatabaseConnectionSetupTests
 
         var result = DatabaseConnectionSetup.Apply(configuration, isDevelopment: false);
 
-        Assert.Equal(DatabaseConnectionSetup.Missing, result.Error);
+        Assert.Equal(DatabaseUrlErrors.Missing, result.Error);
         Assert.Contains(DatabaseUrl.EnvironmentVariable, DatabaseConnectionSetup.FailureMessage(result.Error), StringComparison.Ordinal);
     }
 

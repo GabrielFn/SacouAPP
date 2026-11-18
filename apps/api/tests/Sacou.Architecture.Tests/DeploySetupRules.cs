@@ -24,8 +24,21 @@ internal static partial class DeploySetupRules
     private const string MaxScaleKey = "autoscaling.knative.dev/maxScale";
     private const string OneInstance = "\"1\"";
 
-    /// <summary>The jobs that talk to Google: they push the image or deploy it. Nothing else gets an OIDC token.</summary>
-    private static readonly HashSet<string> FederatedJobs = new(["build", "deploy-test", "deploy-production"], StringComparer.Ordinal);
+    private const string BuildJob = "build";
+    private const string EnvironmentKey = "environment:";
+    private const string ConcurrencyKey = "concurrency:";
+    private const string NoCancel = "cancel-in-progress: false";
+
+    /// <summary>
+    /// The jobs that talk to Google, each with its own account (ADR 0068, D3): build only pushes, each deploy only
+    /// changes its service. Nothing else gets an OIDC token, and no job names another job's account.
+    /// </summary>
+    private static readonly Dictionary<string, string> FederatedJobs = new(StringComparer.Ordinal)
+    {
+        [BuildJob] = "vars.GCP_BUILDER_SA",
+        ["deploy-test"] = "vars.GCP_DEPLOYER_TEST_SA",
+        ["deploy-production"] = "vars.GCP_DEPLOYER_PROD_SA",
+    };
 
     private static readonly HashSet<string> RootUsers = new(["", "0", "root"], StringComparer.Ordinal);
 
@@ -46,7 +59,7 @@ internal static partial class DeploySetupRules
         "github.event.workflow_run.event == 'push'",
         "github.event.workflow_run.head_branch == 'main'",
         "needs: [build, deploy-test]",
-        "cancel-in-progress: false",
+        NoCancel,
     ];
 
     private static readonly string[] ForbiddenWorkflowFragments =
@@ -58,6 +71,7 @@ internal static partial class DeploySetupRules
         "|| true",
         "if: false",
         "outputs.api ==",
+        "GCP_DEPLOYER_SA",
         DatabaseUrlVariable,
     ];
 
@@ -117,14 +131,21 @@ internal static partial class DeploySetupRules
                 .Where(fragment => code.Contains(fragment, StringComparison.Ordinal))
                 .Select(fragment => $"deploy-api.yml contains: {fragment}"),
             .. header.Contains("id-token", StringComparison.Ordinal) ? ["deploy-api.yml grants id-token outside a job"] : Array.Empty<string>(),
+            .. header.Contains(ConcurrencyKey, StringComparison.Ordinal) ? ["deploy-api.yml: concurrency belongs to each deploy job, not the workflow"] : Array.Empty<string>(),
             .. jobs
-                .Where(job => job.Value.Contains(IdTokenWrite, StringComparison.Ordinal) && !FederatedJobs.Contains(job.Key))
+                .Where(job => job.Value.Contains(IdTokenWrite, StringComparison.Ordinal) && !FederatedJobs.ContainsKey(job.Key))
                 .Select(job => $"deploy-api.yml grants {IdTokenWrite} to {job.Key}"),
+            .. IdentityViolations(jobs),
             .. DeployEnvironments
                 .Where(deploy => !jobs.TryGetValue(deploy.Key, out var body)
                     || !body.Contains(deploy.Value, StringComparison.Ordinal)
                     || !body.Contains(ImageFromBuild, StringComparison.Ordinal))
                 .Select(deploy => $"deploy-api.yml: {deploy.Key} needs {deploy.Value} and the image digest from build"),
+            .. DeployEnvironments.Keys
+                .Where(deploy => !jobs.TryGetValue(deploy, out var body)
+                    || !body.Contains(ConcurrencyKey, StringComparison.Ordinal)
+                    || !body.Contains(NoCancel, StringComparison.Ordinal))
+                .Select(deploy => $"deploy-api.yml: {deploy} needs its own concurrency without cancelling"),
             .. UnpinnedActions(code),
         ];
     }
@@ -173,6 +194,23 @@ internal static partial class DeploySetupRules
         var match = HealthPathPattern().Match(program);
         return match.Success ? match.Groups["path"].Value : string.Empty;
     }
+
+    /// <summary>
+    /// Each federated job names its own account and no other; build has no environment, so only the builder's
+    /// subject (the main ref) matches it, and a deploy account is reachable only from its environment.
+    /// </summary>
+    private static IEnumerable<string> IdentityViolations(Dictionary<string, string> jobs) =>
+    [
+        .. FederatedJobs
+            .Where(owner => !jobs.TryGetValue(owner.Key, out var body) || !body.Contains(owner.Value, StringComparison.Ordinal))
+            .Select(owner => $"deploy-api.yml: {owner.Key} must use {owner.Value}"),
+        .. jobs.SelectMany(job => FederatedJobs
+            .Where(owner => owner.Key != job.Key && job.Value.Contains(owner.Value, StringComparison.Ordinal))
+            .Select(owner => $"deploy-api.yml: {job.Key} uses {owner.Value}, the account of {owner.Key}")),
+        .. jobs.TryGetValue(BuildJob, out var build) && build.Contains(EnvironmentKey, StringComparison.Ordinal)
+            ? [$"deploy-api.yml: {BuildJob} must run without an environment"]
+            : Array.Empty<string>(),
+    ];
 
     private static IEnumerable<string> UnpinnedActions(string code) =>
         UsesPattern().Matches(code)
