@@ -2,12 +2,21 @@ import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtSessionOrigin } from "../../court/ports/court-event-log";
 import type { CourtRuntime } from "../../court/ports/court-runtime";
-import { ensureRoundCourtSession } from "../../court/session/ensure-round-court-session";
+import {
+  ensureRoundCourtSession,
+  type EnsureRoundCourtError,
+} from "../../court/session/ensure-round-court-session";
 import { startCourtMatch } from "../../court/session/start-court-match";
 import { buildMatchStart, type MatchStartInput } from "../model/match-start";
 
 /** Why the match did not start; only codes, never a value of the draw. */
-export type StartFromDrawError = "other-round-match-open" | "match-open" | "failed";
+export type StartFromDrawError =
+  "other-round-match-open" | "other-account" | "no-account" | "match-open" | "failed";
+
+/** The session errors the pre-game says as they are; a load that failed is the generic line. */
+function sessionError(error: EnsureRoundCourtError): StartFromDrawError {
+  return error.code === "load-failed" ? "failed" : error.code;
+}
 
 /**
  * "Começar partida" (D7): the session of the round on this device, then the `MatchStarted` of the draw
@@ -22,7 +31,7 @@ export async function startFromDraw(
   if (!payload.ok) return err("failed");
   const session = await ensureRoundCourtSession(runtime, origin);
   if (!session.ok) {
-    return err(session.error.code === "other-round-match-open" ? session.error.code : "failed");
+    return err(sessionError(session.error));
   }
   const started = await startCourtMatch(
     { ...runtime, courtSessionId: session.value },

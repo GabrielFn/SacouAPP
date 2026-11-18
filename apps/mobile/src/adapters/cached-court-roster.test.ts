@@ -54,4 +54,14 @@ describe("the court roster from the members cache (D7)", () => {
     expect(roster.nameOf(sampleId)).toBe(createSampleRoster().nameOf(sampleId));
     expect(roster.nameOf(PEDRO)).toBe("Pedro");
   });
+
+  test("the position comes from the members cache, and an unknown member has none (E4.8)", () => {
+    const client = new QueryClient();
+    client.setQueryData(queryKeys.members("g1"), [
+      memberOf(PEDRO, "Pedro", { primaryPosition: "setter" }),
+    ]);
+    const roster = createCachedCourtRoster(client, createSampleRoster());
+    expect(roster.positionOf(PEDRO)).toBe("setter");
+    expect(roster.positionOf(STRANGER)).toBeNull();
+  });
 });

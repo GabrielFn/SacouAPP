@@ -18,6 +18,8 @@ export function apiErrorText(error: ApiError): string {
       return apiErrorKindTexts.unavailable;
     case "offline":
       return apiErrorKindTexts.offline;
+    case "account-changed":
+      return apiErrorKindTexts.accountChanged;
     case "unexpected":
       return apiErrorKindTexts.unexpected;
   }

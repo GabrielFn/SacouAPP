@@ -1,5 +1,6 @@
 import {
   getMatchWinner,
+  getNextSetFirstServer,
   getSetPointTeams,
   getSetWinner,
   INITIAL_COURT_SESSION_STATE,
@@ -9,6 +10,7 @@ import {
   type CourtSessionTimeline,
   type MatchScore,
   type MatchSet,
+  type SetScore,
   type TeamSide,
 } from "@sacou/match-engine";
 
@@ -27,6 +29,7 @@ import { buildTeamPanel } from "./team-panel";
 import { selectWinStreak } from "./win-streak";
 
 const NEXT = 1;
+const FIRST_SET_NUMBER = 1;
 
 export function stateOfTimeline(timeline: CourtSessionTimeline): CourtSessionState {
   return timeline.entries.at(-1)?.state ?? INITIAL_COURT_SESSION_STATE;
@@ -44,7 +47,7 @@ export function selectCourtPhase(state: CourtSessionState): CourtPhase {
   }
   const set = currentMatch.currentSet;
   if (set === null) {
-    return "match-ended";
+    return "match-pending";
   }
   return decidedWinner(currentMatch, set) === null ? "playing" : "set-decided";
 }
@@ -55,6 +58,12 @@ function selectDots(match: MatchScore): readonly SetDotModel[] {
   }
   const played = match.completedSets.map(({ winner }) => ({ winner }));
   return match.currentSet === null ? played : [...played, { winner: null }];
+}
+
+/** The next match opens at 0-0 with a coin-flip server, until the first point of its first set. */
+function drawnFirstServer(state: CourtSessionState, set: MatchSet): TeamSide | null {
+  const opening = set.setNumber === FIRST_SET_NUMBER && set.score.a === 0 && set.score.b === 0;
+  return state.finishedMatches.length > 0 && opening ? set.servingTeam : null;
 }
 
 /** What the court shows, derived from the replay of the log: the model has no state of its own. */
@@ -83,7 +92,10 @@ export function selectCourtScreen(
       streak === null
         ? null
         : { ...streak, label: roster.teamAppearance(match.matchId, streak.side).label },
-    hint: selectHintLine(getSetPointTeams(set.score, set.targetPoints, match.scoring.winMargin)),
+    hint: selectHintLine(
+      getSetPointTeams(set.score, set.targetPoints, match.scoring.winMargin),
+      drawnFirstServer(state, set),
+    ),
     canUndo: undoLastAction(timeline).ok,
   };
 }
@@ -99,27 +111,77 @@ function needsFirstServer(match: MatchScore, set: MatchSet, winner: TeamSide): b
   return !matchEnds && bestOf > NEXT && set.setNumber + NEXT === bestOf;
 }
 
-/** For the end-of-set placeholder; `null` while the set is still being played. */
+interface DecidedSet {
+  readonly setNumber: number;
+  readonly winner: TeamSide;
+  readonly score: SetScore;
+}
+
+function sideScores(roster: CourtRoster, matchId: string, score: SetScore) {
+  const side = (team: TeamSide) => ({ label: labelOf(roster, matchId, team), score: score[team] });
+  return { a: side("a"), b: side("b") };
+}
+
+function baseModel(roster: CourtRoster, match: MatchScore, decided: DecidedSet) {
+  return {
+    setNumber: decided.setNumber,
+    winner: decided.winner,
+    winnerLabel: labelOf(roster, match.matchId, decided.winner),
+    scores: sideScores(roster, match.matchId, decided.score),
+  };
+}
+
+/** The confirmation of a decided set: the next set alternates the serve, or the toss, or the end. */
+function decidedSetModel(
+  roster: CourtRoster,
+  match: MatchScore,
+  set: MatchSet,
+  winner: TeamSide,
+): SetEndModel {
+  const setsAfter = { ...match.setsWon, [winner]: match.setsWon[winner] + NEXT };
+  const endsMatch = getMatchWinner(setsAfter, match.scoring.bestOf) !== null;
+  const toss = needsFirstServer(match, set, winner);
+  return {
+    ...baseModel(roster, match, { setNumber: set.setNumber, winner, score: set.score }),
+    setsAfter,
+    needsFirstServer: toss,
+    nextFirstServer: endsMatch || toss ? null : getNextSetFirstServer(set.firstServer),
+    endsMatch,
+    pendingMatchEnd: false,
+  };
+}
+
+/** Only the `SetEnded` of the deciding set is stored: confirming again stores the `MatchEnded`. */
+function pendingMatchModel(roster: CourtRoster, match: MatchScore): SetEndModel | null {
+  const last = match.completedSets.at(-1);
+  if (last === undefined || getMatchWinner(match.setsWon, match.scoring.bestOf) === null) {
+    return null;
+  }
+  return {
+    ...baseModel(roster, match, last),
+    setsAfter: match.setsWon,
+    needsFirstServer: false,
+    nextFirstServer: null,
+    endsMatch: true,
+    pendingMatchEnd: true,
+  };
+}
+
+/** Screen 25; `null` while the set is still being played or without an open match. */
 export function selectSetEnd(
   timeline: CourtSessionTimeline,
   roster: CourtRoster,
 ): SetEndModel | null {
   const match = stateOfTimeline(timeline).currentMatch;
-  const set = match?.currentSet ?? null;
-  const winner = match === null || set === null ? null : decidedWinner(match, set);
-  if (match === null || set === null || winner === null) {
+  if (match === null) {
     return null;
   }
-  const side = (team: TeamSide) => ({
-    label: labelOf(roster, match.matchId, team),
-    score: set.score[team],
-  });
-  return {
-    setNumber: set.setNumber,
-    winnerLabel: labelOf(roster, match.matchId, winner),
-    scores: { a: side("a"), b: side("b") },
-    needsFirstServer: needsFirstServer(match, set, winner),
-  };
+  const set = match.currentSet;
+  if (set === null) {
+    return pendingMatchModel(roster, match);
+  }
+  const winner = decidedWinner(match, set);
+  return winner === null ? null : decidedSetModel(roster, match, set, winner);
 }
 
 /** For the end-of-match placeholder; `null` while a match is open. */

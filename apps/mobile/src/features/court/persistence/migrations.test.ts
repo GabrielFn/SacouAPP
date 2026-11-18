@@ -15,6 +15,16 @@ function tableNames(sqlite: ReturnType<typeof openNodeSqliteDatabase>): readonly
     .map((row) => row["name"]);
 }
 
+function columnNames(
+  sqlite: ReturnType<typeof openNodeSqliteDatabase>,
+  table: string,
+): readonly unknown[] {
+  return sqlite.raw
+    .prepare(`PRAGMA table_info(${table})`)
+    .all()
+    .map((row) => row["name"]);
+}
+
 describe("isKnownSchemaVersion", () => {
   test("knows an empty file and every step up to the latest, and nothing else", () => {
     expect(isKnownSchemaVersion(0)).toBe(true);
@@ -31,7 +41,55 @@ describe("migrateDatabase", () => {
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
 
     expect(userVersion(sqlite)).toBe(MIGRATION_STEPS.length);
-    expect(tableNames(sqlite)).toEqual(["court_events", "court_sessions", "device"]);
+    expect(tableNames(sqlite)).toEqual([
+      "court_events",
+      "court_refused_events",
+      "court_sessions",
+      "device",
+    ]);
+  });
+
+  test("migration 3 adds the upload columns and the table of the refused events (R1)", async () => {
+    const sqlite = openNodeSqliteDatabase();
+    await migrateDatabase(sqlite.database);
+
+    expect(columnNames(sqlite, "court_sessions")).toEqual(
+      expect.arrayContaining(["acked_sequence", "taken_over_batch", "sync_halt", "owner_key"]),
+    );
+    expect(columnNames(sqlite, "court_refused_events")).toEqual([
+      "court_session_id",
+      "position",
+      "event_id",
+      "device_id",
+      "batch",
+      "sequence",
+      "schema_version",
+      "type",
+      "payload",
+      "refused_at_batch",
+      "seen",
+    ]);
+  });
+
+  test("opening again lifts only the halts a new start may clear (D4, R2)", async () => {
+    const sqlite = openNodeSqliteDatabase();
+    await migrateDatabase(sqlite.database);
+    const halts = ["no-permission", "not-found", "stream-diverged", "event-refused"];
+    halts.forEach((halt, index) => {
+      sqlite.raw
+        .prepare(
+          "INSERT INTO court_sessions (court_session_id, status, batch, sync_halt) VALUES (?, 'closed', 1, ?)",
+        )
+        .run(`session-${String(index)}`, halt);
+    });
+
+    expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
+
+    const rows = sqlite.raw
+      .prepare("SELECT sync_halt FROM court_sessions ORDER BY court_session_id")
+      .all()
+      .map((row) => row["sync_halt"]);
+    expect(rows).toEqual([null, null, "stream-diverged", "event-refused"]);
   });
 
   test("running again changes nothing", async () => {

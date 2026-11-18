@@ -13,19 +13,32 @@ import {
   signOut,
   type User,
 } from "@react-native-firebase/auth";
+import { CryptoDigestAlgorithm, digestStringAsync } from "expo-crypto";
 
 import type { SessionIdentity } from "../services/auth/auth-session";
 import type { FirebaseAuthSdk, FirebaseUserView } from "./firebase-auth-session";
 
+/** Separates this hash from any other use of the UID (ADR 0067, D8). */
+const ACCOUNT_KEY_PREFIX = "sacou.court-owner.v1:";
+
+interface Identities {
+  readonly identityOf: (uid: string) => SessionIdentity;
+  readonly uidOf: (identity: SessionIdentity) => string | null;
+}
+
 /** One opaque identity per account seen on this phone, so the UID itself never leaves this file. */
-function createIdentities(): (uid: string) => SessionIdentity {
+function createIdentities(): Identities {
   const byUid: { value: ReadonlyMap<string, SessionIdentity> } = { value: new Map() };
-  return (uid) => {
-    const known = byUid.value.get(uid);
-    if (known !== undefined) return known;
-    const identity: SessionIdentity = Object.freeze({ opaque: Symbol("session") });
-    byUid.value = new Map([...byUid.value, [uid, identity]]);
-    return identity;
+  return {
+    identityOf: (uid) => {
+      const known = byUid.value.get(uid);
+      if (known !== undefined) return known;
+      const identity: SessionIdentity = Object.freeze({ opaque: Symbol("session") });
+      byUid.value = new Map([...byUid.value, [uid, identity]]);
+      return identity;
+    },
+    uidOf: (identity) =>
+      [...byUid.value.entries()].find(([, known]) => known === identity)?.[0] ?? null,
   };
 }
 
@@ -46,7 +59,7 @@ const NO_USER = Object.assign(new Error("no current user"), { code: "auth/no-cur
 /** `@react-native-firebase/auth`, which keeps the session in the private area of the app (D5). */
 export function createFirebaseAuthSdk(): FirebaseAuthSdk {
   const auth = getAuth();
-  const identityOf = createIdentities();
+  const { identityOf, uidOf } = createIdentities();
   function current(): User {
     const user = auth.currentUser;
     if (user === null) throw NO_USER;
@@ -75,6 +88,11 @@ export function createFirebaseAuthSdk(): FirebaseAuthSdk {
       const user = current();
       if (user.email === null) throw NO_USER;
       await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    },
+    async accountKeyOf(identity) {
+      const uid = uidOf(identity);
+      if (uid === null) return null;
+      return digestStringAsync(CryptoDigestAlgorithm.SHA256, ACCOUNT_KEY_PREFIX + uid);
     },
     async deleteCurrentUser(identity) {
       const user = current();

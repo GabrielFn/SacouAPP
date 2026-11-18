@@ -136,9 +136,14 @@ describe("set point and the end of the set", () => {
     expect(selectCourtPhase(stateOfTimeline(scenario.timeline()))).toBe("set-decided");
     expect(selectSetEnd(scenario.timeline(), ROSTER)).toEqual({
       setNumber: 1,
+      winner: "a",
       winnerLabel: "Laranja",
       scores: { a: { label: "Laranja", score: 25 }, b: { label: "Azul", score: 23 } },
+      setsAfter: { a: 1, b: 0 },
       needsFirstServer: false,
+      nextFirstServer: null,
+      endsMatch: true,
+      pendingMatchEnd: false,
     });
     expect(screenOf(scenario).phase).toBe("set-decided");
   });

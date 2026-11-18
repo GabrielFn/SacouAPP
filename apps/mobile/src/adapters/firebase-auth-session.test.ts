@@ -87,6 +87,7 @@ function fakeSdk(): FakeSdk {
     reauthenticateWithGoogleIdToken: (idToken) =>
       run(`reauth-google:${idToken === GOOGLE_TOKEN ? "ok" : "?"}`),
     reauthenticateWithPassword: (password) => run(`reauth-password:${password}`),
+    accountKeyOf: () => Promise.resolve(null),
     deleteCurrentUser: (identity) =>
       sdkUser.identity === identity
         ? run("delete").then(() => "deleted" as const)

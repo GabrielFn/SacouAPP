@@ -1,6 +1,7 @@
-import type { SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
+import type { EventEnvelope, SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
 
 import type { components } from "../../api/generated/schema";
+import type { SessionIdentity } from "../auth/auth-session";
 import type { ApiResult } from "./api-result";
 
 type Schemas = components["schemas"];
@@ -47,6 +48,16 @@ export type AddedGuest = Schemas["AddGuestResponse"];
 export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
 /** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
 export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
+
+/** The stream of a court: the round it is in and the UUID the phone made when it opened (ADR 0060). */
+export interface CourtStreamRef {
+  readonly groupId: string;
+  readonly roundId: string;
+  readonly courtSessionId: string;
+}
+
+/** 200 of the court stream: the highest sequence of this device the server holds, and how many are new. */
+export type AppendCourtEventsAnswer = Schemas["AppendCourtEventsResponse"];
 
 export interface MemberRef {
   readonly groupId: string;
@@ -136,6 +147,16 @@ export interface SacouApi {
     roundId: string,
     body: DrawTeamsBody,
   ): Promise<ApiResult<DrawTeamsAnswer>>;
+  /**
+   * From 1 to 200 events of one device, all or nothing (ADR 0060). It leaves only with the token of
+   * `account`: when another account is signed in by then, it answers `account-changed` and sends nothing
+   * (ADR 0067, D8). The envelopes go as the log has them.
+   */
+  appendCourtEvents(
+    ref: CourtStreamRef,
+    envelopes: readonly EventEnvelope[],
+    account: SessionIdentity,
+  ): Promise<ApiResult<AppendCourtEventsAnswer>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

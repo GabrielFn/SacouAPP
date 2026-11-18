@@ -72,6 +72,11 @@ export interface AuthSession {
   sendPasswordReset(email: string): Promise<AuthResult>;
   /** The account signed in now; `null` when nobody is (or the SDK has not answered yet). */
   currentSession(): SessionIdentity | null;
+  /**
+   * The key of the account of `session` that the court log keeps as the owner of a session (ADR 0067,
+   * D8): a hash made in the adapter, never the UID. The same account always gives the same key.
+   */
+  accountKeyOf(session: SessionIdentity): Promise<string | null>;
   /** `null` when nobody is signed in; `forceRefresh` asks the SDK for a new token. */
   getIdToken(options: { readonly forceRefresh: boolean }): Promise<string | null>;
   /** Ends the session in the SDK: from here on `getIdToken` gives `null`. */

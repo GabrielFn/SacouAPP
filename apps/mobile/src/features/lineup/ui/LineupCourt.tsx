@@ -23,6 +23,8 @@ export interface LineupCourtProps {
   readonly team: string;
   readonly color: TeamColorName;
   readonly chips: readonly LineupChip[];
+  /** "No saque", or "Vale para o próximo set." between sets (D7). */
+  readonly caption: string;
   readonly onPress: (memberId: string) => void;
 }
 
@@ -55,7 +57,7 @@ function ChipSpot({ chip, onPress }: ChipSpotProps) {
 }
 
 /** The half court at the moment of the serve, the net below, as the admin looks from it (Escalacao.dc.html). */
-export function LineupCourt({ team, color, chips, onPress }: LineupCourtProps) {
+export function LineupCourt({ team, color, chips, caption, onPress }: LineupCourtProps) {
   const { colors, tokens } = useTheme();
   const frame = tokens.court.borderWidths.frame;
   const teamColor = TEAM_PALETTES[color].fill;
@@ -76,7 +78,7 @@ export function LineupCourt({ team, color, chips, onPress }: LineupCourtProps) {
         variant="caption"
         style={{ position: "absolute", top: tokens.spacing.s14, right: tokens.spacing.l }}
       >
-        {texts.atServe}
+        {caption}
       </Text>
       <View
         style={{

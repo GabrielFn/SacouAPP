@@ -34,6 +34,10 @@ export interface LineupScreenProps {
   /** Everything derived (D2): names, places and texts, never a level. */
   readonly view: LineupView;
   readonly handlers: LineupScreenHandlers;
+  /** Why the last "Salvar" did nothing, in words (match only, D7). */
+  readonly refusal?: string | null;
+  /** "Salvar" is on its way: it stays off until the host answers. */
+  readonly busy?: boolean;
 }
 
 export interface LineupHeaderProps {
@@ -146,6 +150,7 @@ function TeamBody({ team, handlers, landscape }: TeamBodyProps) {
       team={team.name}
       color={team.color}
       chips={team.chips}
+      caption={team.courtCaption}
       onPress={handlers.onPlayer}
     />
   );
@@ -171,12 +176,34 @@ function TeamBody({ team, handlers, landscape }: TeamBodyProps) {
   );
 }
 
+export interface SaveFooterProps {
+  readonly refusal: string | null;
+  readonly disabled: boolean;
+  readonly onSave: () => void;
+}
+
+function SaveFooter({ refusal, disabled, onSave }: SaveFooterProps) {
+  const { colors, tokens } = useTheme();
+  return (
+    <View style={{ gap: tokens.spacing.s }}>
+      {refusal === null ? null : (
+        <Text accessibilityRole="alert" style={{ color: colors.refusal }}>
+          {refusal}
+        </Text>
+      )}
+      <Button label={texts.save} disabled={disabled} onPress={onSave} />
+    </View>
+  );
+}
+
 /** Screen 22, Escalação (Escalacao.dc.html): the same for the pre-game and the match (D1). */
-export function LineupScreen({ view, handlers }: LineupScreenProps) {
+export function LineupScreen({ view, handlers, refusal = null, busy = false }: LineupScreenProps) {
   const { width, height } = useWindowDimensions();
   return (
     <Screen
-      footer={<Button label={texts.save} disabled={!view.canSave} onPress={handlers.onSave} />}
+      footer={
+        <SaveFooter refusal={refusal} disabled={busy || !view.canSave} onSave={handlers.onSave} />
+      }
     >
       <LineupHeader view={view} onBack={handlers.onBack} />
       <SegmentBar<TeamSide>
@@ -189,7 +216,11 @@ export function LineupScreen({ view, handlers }: LineupScreenProps) {
       {view.team === null ? (
         <Text variant="muted">{view.noRotation}</Text>
       ) : (
-        <TeamBody team={view.team} handlers={handlers} landscape={width > height} />
+        <TeamBody
+          team={busy ? { ...view.team, stale: false } : view.team}
+          handlers={handlers}
+          landscape={width > height}
+        />
       )}
     </Screen>
   );
