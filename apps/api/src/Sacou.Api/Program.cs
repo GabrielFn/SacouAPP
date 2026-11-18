@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Sacou.Api.Configuration;
 using Sacou.Api.OpenApi;
 using Sacou.Http;
 using Sacou.Http.RateLimiting;
@@ -10,9 +11,19 @@ using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;
 using Sacou.Modules.Summaries;
 
-const string MigrateOnStartupKey = "Database:MigrateOnStartup";
+// Cloud Run sends SIGKILL 10 s after SIGTERM: the host stops on its own before that (ADR 0068, D11).
+const int ShutdownTimeoutSeconds = 8;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Before the modules read ConnectionStrings:Sacou. The message never carries the URL or the password (ADR 0068, D5).
+var database = DatabaseConnectionSetup.Apply(builder.Configuration, builder.Environment.IsDevelopment());
+if (database.IsFailure)
+{
+    throw new InvalidOperationException(DatabaseConnectionSetup.FailureMessage(database.Error));
+}
+
+builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromSeconds(ShutdownTimeoutSeconds));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
@@ -59,7 +70,7 @@ if (app.Environment.IsDevelopment())
 // permission, ADR 0040, D4) stops the start instead of failing on its first call.
 _ = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints).Count();
 
-if (app.Configuration.GetValue<bool>(MigrateOnStartupKey))
+if (app.Configuration.GetValue<bool>(DatabaseConnectionSetup.MigrateOnStartupKey))
 {
     await IdentityModule.MigrateAsync(app.Services);
     await GroupsModule.MigrateAsync(app.Services);
