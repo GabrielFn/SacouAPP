@@ -9,6 +9,8 @@ import { useCourtSession } from "../../../features/court/hooks/use-court-session
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useUndoNotice } from "../../../features/court/hooks/use-undo-notice";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
+import type { CourtPhase } from "../../../features/court/model/court-screen.types";
+import { courtSidesInverted } from "../../../features/court/model/court-sides";
 import {
   selectCourtPhase,
   selectCourtScreen,
@@ -19,12 +21,17 @@ import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
 import { CourtScreen } from "../../../features/court/ui/CourtScreen";
 import { useServices } from "../../../services/services-context";
 
+/** The phases with no court: the end of the set or the result is in front. */
+function isAwayFromCourt(phase: CourtPhase | null): boolean {
+  return phase === "match-ended" || phase === "match-pending";
+}
+
 /** Screens 09 and 10. When the set is decided or the match ends, the court hands over to its route. */
 export default function CourtRoute() {
   const route = useCourtRoute();
   const { courtRoster, courtFeedback } = useServices();
   const guard = useCourtGuard();
-  const { inverted } = useCourtSides();
+  const sides = useCourtSides();
   const warning = useCourtBatteryWarning();
   const { view, dispatch, retry } = useCourtSession();
   const undoNotice = useUndoNotice();
@@ -54,7 +61,7 @@ export default function CourtRoute() {
     }
   }, [step, push, replace]);
 
-  if (view.status === "loading" || (view.status === "ready" && phase === "match-ended")) {
+  if (view.status === "loading" || (view.status === "ready" && isAwayFromCourt(phase))) {
     return null;
   }
   if (model === null) {
@@ -63,7 +70,11 @@ export default function CourtRoute() {
   return (
     <CourtScreen
       model={model}
-      inverted={inverted}
+      inverted={
+        timeline === null
+          ? sides.inverted
+          : courtSidesInverted(stateOfTimeline(timeline), sides.inverted)
+      }
       battery={
         warning.state.status === "showing"
           ? { level: warning.state.level, onDismiss: warning.dismiss }
