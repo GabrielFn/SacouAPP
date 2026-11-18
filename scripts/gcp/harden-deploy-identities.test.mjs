@@ -31,16 +31,28 @@ describe("deploy identities", () => {
     assert.equal(variableOf("SUBJECT_BUILD"), "repo:${GITHUB_REPO}:ref:refs/heads/main");
     assert.equal(variableOf("SUBJECT_TEST"), "repo:${GITHUB_REPO}:environment:test");
     assert.equal(variableOf("SUBJECT_PROD"), "repo:${GITHUB_REPO}:environment:production");
-    assert.match(script, /grant_deployer "\$DEPLOYER_TEST" "\$SERVICE_TEST" "\$RUNNER_TEST" "\$SUBJECT_TEST"/);
-    assert.match(script, /grant_deployer "\$DEPLOYER_PROD" "\$SERVICE_PROD" "\$RUNNER_PROD" "\$SUBJECT_PROD"/);
+    assert.match(
+      script,
+      /grant_deployer "\$DEPLOYER_TEST" "\$SERVICE_TEST" "\$RUNNER_TEST" "\$SUBJECT_TEST"/,
+    );
+    assert.match(
+      script,
+      /grant_deployer "\$DEPLOYER_PROD" "\$SERVICE_PROD" "\$RUNNER_PROD" "\$SUBJECT_PROD"/,
+    );
     assert.doesNotMatch(script, /principalSet:\/\//);
   });
 
   it("matches the environments and the accounts of the workflow", () => {
     assert.match(workflow, /^ {6}name: test$/m);
     assert.match(workflow, /^ {6}name: production$/m);
-    assert.match(workflow, /service: sacou-api-test\n(?:.*\n)*? {10}deployer: \$\{\{ vars\.GCP_DEPLOYER_TEST_SA \}\}/);
-    assert.match(workflow, /service: sacou-api\n(?:.*\n)*? {10}deployer: \$\{\{ vars\.GCP_DEPLOYER_PROD_SA \}\}/);
+    assert.match(
+      workflow,
+      /service: sacou-api-test\n(?:.*\n)*? {10}deployer: \$\{\{ vars\.GCP_DEPLOYER_TEST_SA \}\}/,
+    );
+    assert.match(
+      workflow,
+      /service: sacou-api\n(?:.*\n)*? {10}deployer: \$\{\{ vars\.GCP_DEPLOYER_PROD_SA \}\}/,
+    );
     for (const variable of ["GCP_BUILDER_SA", "GCP_DEPLOYER_TEST_SA", "GCP_DEPLOYER_PROD_SA"]) {
       assert.match(script, new RegExp(`Create: ${variable}=`));
     }
@@ -50,7 +62,13 @@ describe("deploy identities", () => {
   it("grants nothing on the whole project and retires the shared deployer", () => {
     assert.doesNotMatch(script, PROJECT_GRANT);
     assert.equal(variableOf("OLD_DEPLOYER"), "sacou-deployer");
-    assert.match(script, /gcloud iam service-accounts delete "\$\(sa_email "\$OLD_DEPLOYER"\)" --quiet/);
-    assert.match(script, /gcloud run services add-iam-policy-binding "\$service" --region="\$REGION" \\\n\s+--member="serviceAccount:\$\(sa_email "\$deployer"\)" --role=roles\/run\.developer/);
+    assert.match(
+      script,
+      /gcloud iam service-accounts delete "\$\(sa_email "\$OLD_DEPLOYER"\)" --quiet/,
+    );
+    assert.match(
+      script,
+      /gcloud run services add-iam-policy-binding "\$service" --region="\$REGION" \\\n\s+--member="serviceAccount:\$\(sa_email "\$deployer"\)" --role=roles\/run\.developer/,
+    );
   });
 });
