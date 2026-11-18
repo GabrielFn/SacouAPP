@@ -45,3 +45,7 @@ A API precisava subir para teste e produção com deploy automático a partir da
 - `max-instances` pode ser passado por pouco tempo em picos: as cotas da E5.3a valem dobradas nesse instante. Aceito no piloto.
 - Sem backup próprio até a E5.3: vale a restauração de 6 h do Neon Free, e a produção só recebe jogadores reais depois da E5.3.
 - Um push com vários commits na `main` só olha o último para decidir o deploy; com merge squash isso não acontece. Se acontecer, um commit seguinte que toque a API faz o deploy de tudo.
+
+## Emenda (18/11/2026): ações permitidas no repositório
+
+O repositório só aceita ações de uma lista (configuração do GitHub Actions, "selected actions", com SHA fixo obrigatório): `actions/cache`, `actions/checkout`, `actions/setup-dotnet`, `actions/setup-node` e `pnpm/action-setup`. O primeiro deploy falhou com `startup_failure` porque `google-github-actions/auth` e `google-github-actions/setup-gcloud` não estavam nela. Com o ok do Gabriel (18/11), as duas entraram na lista (`google-github-actions/auth@*` e `google-github-actions/setup-gcloud@*`); o SHA fixo continua obrigatório. Ação nova em qualquer workflow precisa entrar nessa lista, com o ok do Gabriel.
