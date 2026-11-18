@@ -42,6 +42,7 @@ export interface DrawScreenModel {
   readonly error: unknown;
   readonly dispatch: (action: DrawFlowAction) => void;
   readonly tap: (memberId: MemberId) => void;
+  /** "Sortear de novo"; with the draw off, "Montar de novo" (back to the order of arrival). */
   readonly redraw: () => void;
   /** "Tentar de novo" of the first draw. */
   readonly retry: () => void;
@@ -125,11 +126,20 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
 
   const nameOf = drawNamesOf(members.data ?? []);
   const settings = input.loaded?.settings ?? null;
+  const screen = drawScreenState(input);
+  const manual = screen.kind === "drawn" && screen.manual;
+  const shown = screen.kind === "drawn" ? screen.arrangement : null;
+  /** By hand, the teams by arrival are derived until the first edit; from it on the reducer keeps them. */
+  const keepBuilt = () => {
+    if (manual && state.arrangement === null && shown !== null) {
+      dispatch({ type: "teams-built", arrangement: shown });
+    }
+  };
   return {
     group,
     round,
     state,
-    screen: drawScreenState(input),
+    screen,
     nameOf,
     members: members.data ?? [],
     settings,
@@ -138,21 +148,27 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
     error: draw.error,
     dispatch,
     tap: (memberId) => {
-      tapPlayer(deps, memberId);
+      if (!manual) {
+        tapPlayer(deps, memberId);
+        return;
+      }
+      keepBuilt();
+      dispatch({ type: "player-tapped", memberId });
     },
     redraw: () => {
-      redraw(deps);
+      if (manual) dispatch({ type: "teams-reset" });
+      else redraw(deps);
     },
     retry: () => {
       runDraw(deps, state);
     },
     share: () => {
-      const arrangement = state.arrangement;
       const groupName = group.data?.name;
-      if (arrangement === null || groupName === undefined || round.data === undefined) return;
+      if (shown === null || groupName === undefined || round.data === undefined) return;
       if (!deps.claim()) return;
+      keepBuilt();
       void shareSheet
-        .share(drawShareText(groupName, round.data, arrangement, nameOf))
+        .share(drawShareText(groupName, round.data, shown, nameOf))
         .catch(() => undefined)
         .finally(() => {
           deps.release();

@@ -164,8 +164,9 @@ describe("the states of screen 07, one per row of D4", () => {
     expect(shouldDrawFirst(three)).toBe(false);
   });
 
-  test("draw turned off: disabled, never asked", () => {
-    expect(drawScreenState(withSettings(false))).toEqual({ kind: "blocked", blocker: "disabled" });
+  test("draw turned off: the teams by arrival, never asked (question 72)", () => {
+    const state = drawScreenState(withSettings(false));
+    expect(state.kind === "drawn" && state.manual).toBe(true);
     expect(shouldDrawFirst(withSettings(false))).toBe(false);
   });
 
@@ -211,7 +212,7 @@ describe("the states of screen 07, one per row of D4", () => {
       arrangement: g1,
       error: problem(400, "sessions.draw-locks-unsatisfiable"),
     });
-    expect(drawScreenState(refused)).toEqual({ kind: "drawn", arrangement: g1 });
+    expect(drawScreenState(refused)).toEqual({ kind: "drawn", arrangement: g1, manual: false });
   });
 
   test("waiting for the first draw, then drawn; redrawing keeps the teams", () => {

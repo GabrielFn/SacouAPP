@@ -1,0 +1,171 @@
+[
+  {
+    "id": "fourteen-indoor",
+    "source": "Tela 07: 14 confirmados em 6x6, 2 times de 6 e 2 reservas",
+    "playerCount": 14,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12]
+      ],
+      "reserves": [13, 14]
+    }
+  },
+  {
+    "id": "twelve-indoor",
+    "source": "12 em 6x6: 2 times de 6, sem reserva",
+    "playerCount": 12,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12]
+      ],
+      "reserves": []
+    }
+  },
+  {
+    "id": "thirteen-indoor",
+    "source": "13 em 6x6: 2 times de 6 e 1 reserva",
+    "playerCount": 13,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12]
+      ],
+      "reserves": [13]
+    }
+  },
+  {
+    "id": "seventeen-indoor",
+    "source": "17 em 6x6: 2 times de 6 e 5 reservas na fila",
+    "playerCount": 17,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12]
+      ],
+      "reserves": [13, 14, 15, 16, 17]
+    }
+  },
+  {
+    "id": "eighteen-indoor",
+    "source": "18 em 6x6: 3 times de 6",
+    "playerCount": 18,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12],
+        [13, 14, 15, 16, 17, 18]
+      ],
+      "reserves": []
+    }
+  },
+  {
+    "id": "ten-indoor-halves",
+    "source": "Pergunta 53: 10 em 6x6 não fecham 2 times, ficam 2 de 5",
+    "playerCount": 10,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10]
+      ],
+      "reserves": []
+    }
+  },
+  {
+    "id": "eleven-indoor-halves",
+    "source": "11 em 6x6: 2 times de 5 e 1 reserva",
+    "playerCount": 11,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10]
+      ],
+      "reserves": [11]
+    }
+  },
+  {
+    "id": "four-indoor-halves",
+    "source": "O mínimo: 4 em 6x6 são 2 times de 2",
+    "playerCount": 4,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2],
+        [3, 4]
+      ],
+      "reserves": []
+    }
+  },
+  {
+    "id": "five-indoor-halves",
+    "source": "5 em 6x6: 2 times de 2 e 1 reserva",
+    "playerCount": 5,
+    "playersPerTeam": 6,
+    "expected": {
+      "teams": [
+        [1, 2],
+        [3, 4]
+      ],
+      "reserves": [5]
+    }
+  },
+  {
+    "id": "nine-beach-pairs",
+    "source": "9 em 2x2: 4 duplas e 1 reserva",
+    "playerCount": 9,
+    "playersPerTeam": 2,
+    "expected": {
+      "teams": [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8]
+      ],
+      "reserves": [9]
+    }
+  },
+  {
+    "id": "twelve-beach-fours",
+    "source": "12 em 4x4: 3 times de 4",
+    "playerCount": 12,
+    "playersPerTeam": 4,
+    "expected": {
+      "teams": [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12]
+      ],
+      "reserves": []
+    }
+  },
+  {
+    "id": "seven-beach-fours-halves",
+    "source": "7 em 4x4: 2 times de 3 e 1 reserva",
+    "playerCount": 7,
+    "playersPerTeam": 4,
+    "expected": {
+      "teams": [
+        [1, 2, 3],
+        [4, 5, 6]
+      ],
+      "reserves": [7]
+    }
+  },
+  {
+    "id": "three-not-enough",
+    "source": "3 confirmados: menos de 4, não dá para montar",
+    "playerCount": 3,
+    "playersPerTeam": 6,
+    "expected": {
+      "error": "not-enough-players"
+    }
+  }
+]

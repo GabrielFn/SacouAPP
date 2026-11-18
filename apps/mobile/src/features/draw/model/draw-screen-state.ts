@@ -3,10 +3,14 @@ import type { GroupSettings } from "@sacou/match-engine";
 import { apiErrorOf } from "../../../services/api/api-error";
 import type { GroupRole, Round } from "../../../services/api/sacou-api";
 import type { DrawArrangement } from "./draw-arrangement";
-import { MIN_DRAW_PLAYERS } from "./draw-limits";
 import { canDraw } from "./can-draw";
+import { MIN_DRAW_PLAYERS } from "./draw-limits";
+import { arrivalArrangement } from "./manual-teams";
 
-/** What stops a draw before asking, or what the server said stops it (D4). */
+/**
+ * What stops a draw before asking, or what the server said stops it (D4). "disabled" comes only from the
+ * server now: with the draw off in the cache, screen 07 builds the teams by hand (question 72).
+ */
 export type DrawBlocker = "forbidden" | "canceled" | "disabled" | "not-enough";
 
 const FORBIDDEN_STATUS = 403;
@@ -25,16 +29,19 @@ export function blockerOfError(error: unknown): DrawBlocker | null {
   return BLOCKING_CODES[apiError.code] ?? null;
 }
 
-/** Checked before asking, from what the cache has: the role, the round and its resolved settings. */
+/** Checked before asking, from what the cache has: the role and the round. Holds for "Montar times" too. */
 export function drawBlocker(
   role: GroupRole,
   round: Pick<Round, "status" | "goingCount">,
-  settings: GroupSettings,
 ): DrawBlocker | null {
   if (!canDraw(role)) return "forbidden";
   if (round.status === "canceled") return "canceled";
-  if (!settings.draw.enabled) return "disabled";
   return round.goingCount < MIN_DRAW_PLAYERS ? "not-enough" : null;
+}
+
+/** The draw is off in the resolved settings: the teams are built by hand, with no call (question 72). */
+export function isManualDraw(settings: GroupSettings): boolean {
+  return !settings.draw.enabled;
 }
 
 export interface DrawScreenInput {
@@ -59,7 +66,8 @@ export type DrawScreenState =
   | { readonly kind: "offline" }
   | { readonly kind: "failed"; readonly error: unknown }
   | { readonly kind: "drawing" }
-  | { readonly kind: "drawn"; readonly arrangement: DrawArrangement };
+  /** `manual`: built by hand with the draw off, no level and no meter (question 72). */
+  | { readonly kind: "drawn"; readonly arrangement: DrawArrangement; readonly manual: boolean };
 
 function blockerOf(input: DrawScreenInput): DrawBlocker | null {
   const fromError = blockerOfError(input.error);
@@ -67,7 +75,21 @@ function blockerOf(input: DrawScreenInput): DrawBlocker | null {
     return fromError;
   }
   const { role, round, settings } = input.loaded;
-  return drawBlocker(role, round, settings) ?? fromError;
+  // Built by hand, nothing is asked: an earlier refusal of the server no longer stops the screen.
+  if (isManualDraw(settings)) return drawBlocker(role, round);
+  return drawBlocker(role, round) ?? fromError;
+}
+
+/** The teams the admin edited, else the ones by arrival, derived from the round as it is now. */
+function manualDraw(
+  input: DrawScreenInput,
+  round: Round,
+  settings: GroupSettings,
+): DrawScreenState {
+  const arrangement = input.arrangement ?? arrivalArrangement(round, settings.format.modality);
+  return arrangement === null
+    ? { kind: "blocked", blocker: "not-enough" }
+    : { kind: "drawn", arrangement, manual: true };
 }
 
 function firstDraw(input: DrawScreenInput): DrawScreenState {
@@ -81,10 +103,12 @@ export function drawScreenState(input: DrawScreenInput): DrawScreenState {
   const blocker = blockerOf(input);
   if (blocker !== null) return { kind: "blocked", blocker };
   if (input.loaded === null) return { kind: "loading" };
-  if (input.loaded.settings === null) return { kind: "unreadable" };
+  const { round, settings } = input.loaded;
+  if (settings === null) return { kind: "unreadable" };
+  if (isManualDraw(settings)) return manualDraw(input, round, settings);
   return input.arrangement === null
     ? firstDraw(input)
-    : { kind: "drawn", arrangement: input.arrangement };
+    : { kind: "drawn", arrangement: input.arrangement, manual: false };
 }
 
 /** The first draw goes once, by itself, when nothing stops it (D4); "Tentar de novo" asks again. */
