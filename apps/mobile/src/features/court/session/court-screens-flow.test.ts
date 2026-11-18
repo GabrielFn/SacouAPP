@@ -23,6 +23,15 @@ describe("retry after a failed opening", () => {
       status: "ready",
       courtSessionId: SESSION,
       events: [],
+      sync: {
+        takenOver: false,
+        syncHalt: null,
+        ackedSequence: 0,
+        refused: [],
+        refusedUnseen: false,
+        ownership: "own",
+      },
+      writer: { deviceId: expect.any(String) as string, batch: 1 },
     });
   });
 
@@ -46,10 +55,8 @@ describe("retry after a failed opening", () => {
     controller.subscribe(() => seen.push(controller.getSnapshot().status));
     await controller.retry();
     expect(seen).toEqual(["loading", "ready"]);
-    expect(await controller.dispatch({ type: "score-point", team: "a" })).toEqual({
-      ok: true,
-      value: undefined,
-    });
+    const scored = await controller.dispatch({ type: "score-point", team: "a" });
+    expect(scored.ok && scored.value.written.map(({ type }) => type)).toEqual(["PointScored"]);
   });
 });
 

@@ -149,3 +149,40 @@ Detalhes em `docs/estado/tarefas/E3.7.md` (69 e 70) e `docs/estado/tarefas/E4.7.
 
 ## 17/11/2026: alerta alto no `picomatch` (GHSA-fc5q-39xc-vjpf)
 - **Pergunta:** ReDoS no `picomatch` <=4.0.7, sem versão corrigida, só pelas ferramentas de build e teste (Metro, Jest, mapa de arquivos do Expo; não entra no app). O portão `pnpm audit --audit-level high` reprovava todos os PRs. **Resposta do Gabriel (17/11):** exceção até 31/12/2026, como a do `zod` (ADR 0007), em `scripts/npm-audit-exceptions.json`; sai assim que houver versão corrigida.
+
+## 17/11/2026: E3.8 (Placar assume a quadra), perguntas 74 e 75 (padrões adotados)
+Detalhes em `docs/estado/tarefas/E3.8.md`. Nenhuma trava a Parte 1. Os ADRs ficam assim: 0062 para a E5.3a (limite de requisições) e 0063 para a E3.8.
+74. Quem desfaz pontos marcados antes da troca (lista 3.1, item 6): (1) o Placar que assumiu só desfaz o que entrou depois, e Admin e Co-admin desfazem tudo; (2) só o Admin; (3) sem restrição. **Recomendação e padrão: 1** (um pouco mais aberta que "só o Admin", da revisão do M2). Precisa da resposta antes do merge da E3.8 Parte 2.
+75. "Só olhar" da tela 09a sem placar ao vivo no piloto (vale para a E4.11): (1) mostra o último placar que o servidor recebeu, atualizado ao abrir; (2) só fecha a confirmação. **Recomendação e padrão: 1.**
+- **Respostas do Gabriel (17/11):** 74: **(3) sem restrição**: quem está com a quadra desfaz qualquer ponto, de antes ou de depois da troca (contra a recomendação e a revisão do M2; entra como risco aceito pelo Gabriel em `modelo-de-ameacas.md`, lista 3.1 item 6, na E3.8; a capacidade `RevertCourtHistory` do plano deixa de existir). 75: **tirar o botão "Só olhar"** da tela 09a (vale para a E4.11).
+
+## 17/11/2026: planos da E4.8, E4.10 e E4.11, perguntas 76 a 85 (padrões adotados; nenhuma trava a Parte 1 de nenhuma delas)
+Detalhes em `docs/estado/tarefas/E4.8.md`, `E4.10.md` e `E4.11.md`. ADRs: 0065 (E4.8), 0066 (E4.10), 0067 (E4.11).
+76. E4.8: de onde vem o líbero no início da partida (resposta 73 esbarra no motor: ele precisa entrar no `MatchStarted`): (1) uma reserva da fila, escolhida na 22 do pré-jogo; (2) o sorteio já separa um líbero; (3) sem líbero no piloto. **Recomendação e padrão: 1.** Precisa da resposta antes do merge da E4.8 Parte 1.
+77. E4.8: o que é "fora de ordem" na 22: (1) a posição principal do jogador não bate com a função da vaga, e "Corrigir" reorganiza sem mexer no levantador nem na rotação, mais o botão "Tornar levantador"; (2) a ordem mudou desde o início; (3) tirar o aviso. **Recomendação e padrão: 1.**
+78. E4.8 e E4.10: as telas 22 a 25 foram desenhadas em retrato e a quadra é sempre paisagem (ADR 0052): (1) paisagem em duas colunas; (2) retrato só nessas telas. **Recomendação e padrão: 1.**
+79. E4.10: a 23a oferece gente da fila, mas o motor só troca com o banco, que começa vazio no piloto: (1) só o banco, item desligado no piloto; (2) tarefa nova para entrar da fila (motor e C#). **Padrão: 1; recomendação do analista: 2 depois do piloto.**
+80. E4.10: "Encerrar rodada" não tem regra escrita: (1) esconder agora e criar a rota na E4.12; (2) implementar já. **Recomendação e padrão: 1.**
+81. E4.10: quem saca na partida seguinte da fila: (1) sorteio automático ao confirmar, "Trocar sacador" no 0–0 corrige; (2) perguntar sempre. **Recomendação e padrão: 1.**
+82. E4.11: como fechar a 09a sem o "Só olhar" (resposta 75): **recomendação e padrão: botão "Voltar".**
+83. E4.11: texto da 09b, já que "Agora você só olha" não vale sem placar ao vivo: **recomendação e padrão: "Este celular parou de marcar".**
+84. E4.11: "Sair" com pontos ainda não enviados: **recomendação e padrão: aviso com "Sair mesmo assim".**
+85. E4.11: o servidor para de aceitar os pontos (recusa definitiva): **recomendação e padrão: a quadra continua marcando no celular e mostra um aviso na faixa do meio.**
+- Interpretação do orquestrador da resposta 7, sem pergunta: "pontos" no desempate do "Encerrar partida" são os do set em andamento (E4.10).
+- **Respostas do Gabriel (17/11): "ok recomendações"** para 76 a 85: 76 (1) reserva da fila escolhida na 22; 77 (1) posição × função, com "Corrigir" e "Tornar levantador"; 78 (1) paisagem em duas colunas; 79 (1) só o banco no piloto e tarefa nova depois para entrar da fila (vai para `docs/ideias.md`); 80 (1) esconder "Encerrar rodada" e criar na E4.12; 81 (1) sorteio automático de quem saca; 82 "Voltar"; 83 "Este celular parou de marcar"; 84 aviso com "Sair mesmo assim"; 85 a quadra continua marcando com aviso na faixa do meio.
+
+## 18/11/2026: E5.1 (deploy no Railway e no Neon), perguntas 86 a 91 e acessos
+Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa fazer") e 6. ADR 0068. **A E5.1 só começa com as contas criadas pelo Gabriel e estas respostas.** Gasto novo: Railway Hobby, US$ 5/mês (provável US$ 5 a 10 com dois ambientes), com limite de uso de US$ 10; Neon Free, US$ 0. O primeiro deploy em produção precisa do ok explícito do Gabriel na hora.
+86. Banco de teste: (1) dois projetos no Neon, `sacou-test` e `sacou-prod`; (2) um projeto com branch `test` copiada da produção (copia dados pessoais). **Recomendação: 1.**
+87. De onde a produção faz deploy: (1) teste e produção da `main`; (2) produção de uma branch `production` avançada depois do roteiro no teste; (3) botão do Railway. **Recomendação: 1 até o piloto, 2 antes do primeiro jogador real.**
+88. Região: (1) Railway e Neon na Virgínia (EUA); (2) Railway na Virgínia e Neon em São Paulo (~120 ms por consulta). **Recomendação: 1.**
+89. Domínio próprio (ex.: `api.sacou.com.br`, ~R$ 40/ano): (1) agora; (2) antes dos builds de loja (E5.4); (3) depois do piloto. **Recomendação: 2.**
+90. Ambiente de teste: (1) ligado o tempo todo; (2) "App Sleeping" (dorme sem uso). **Recomendação: 2.**
+91. Dados pessoais nos EUA (LGPD art. 33) com a 88 na opção 1. **Recomendação:** aceitar no piloto, registrar em `dados-pessoais.md` e citar na política de privacidade (E6.1).
+
+## 18/11/2026: bateria do testador
+- **Pergunta:** com o disco HD, a bateria completa leva de 30 a 50 min por testador. O testador pode rodar só os testes da pasta tocada, os novos e as sabotagens, e deixar a bateria completa para a CI? **Resposta do Gabriel (18/11): sim.** Regra 6 da economia de tokens do `CLAUDE.md` atualizada.
+
+## 18/11/2026: hospedagem da API (E5.1)
+- **Pergunta:** o Railway custa US$ 5 a 10/mês depois do teste. Opções grátis: (1) Google Cloud Run, grátis na faixa de uso do piloto, com cartão na conta de cobrança e alerta de orçamento; (2) Render free, sem cartão, dorme depois de 15 min (30 a 60 s na primeira chamada); (3) seguir no Railway. **Recomendação: 1.** **Resposta do Gabriel (18/11): 1, Cloud Run** no lugar do Railway. O Neon continua (`sacou-prod` e `sacou-test` criados em 18/11, AWS US East 1, Postgres 18, banco `sacou`, plano Free). O plano da E5.1 e o ADR 0068 serão refeitos para o Cloud Run; as perguntas 86 e 88 ficaram com as recomendações (dois projetos, Virgínia).
+- **Respostas do Gabriel (18/11) às perguntas do plano novo da E5.1:** 87 mesma imagem com aprovação no ambiente `production`; 89 sem domínio agora, EAS Update na E5.4 para poder trocar o endereço da API pelo ar e domínio próprio quando a E3.12 for aos jogadores; 90 escala a zero; 91 aceitar os dados nos EUA no piloto; 92 projeto novo `sacou-api` (criado); 93 um projeto com dois serviços; 94 teto de US$ 1 (R$ 5, conta em reais); 95 trocar "Railway" por "Secret Manager" no `CLAUDE.md` no PR da E5.1.

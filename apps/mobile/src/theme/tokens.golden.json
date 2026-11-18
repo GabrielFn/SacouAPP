@@ -68,18 +68,28 @@
     "goingText": {
       "hex": "#0C6B35",
       "source": "Inicio.dc.html (pill Vou)"
+    },
+    "selectFill": {
+      "hex": "#E8EEFF",
+      "source": "design/mvp/Sorteio.dc.html (selected name)"
+    },
+    "meterBand": {
+      "hex": "#12A150",
+      "source": "design/mvp/Sorteio.dc.html (meter band)"
     }
   },
   "court": {
     "sun": {
       "background": "#FFFFFF",
       "foreground": "#000000",
-      "muted": "#3A3A3A"
+      "muted": "#3A3A3A",
+      "refusal": "#B42318"
     },
     "night": {
       "background": "#000000",
       "foreground": "#FFFFFF",
-      "muted": "#C8C8C8"
+      "muted": "#C8C8C8",
+      "refusal": "#FF8A80"
     }
   },
   "sizes": {
@@ -135,7 +145,16 @@
     "levelStep": 56,
     "levelShortcut": 48,
     "levelOption": 84,
-    "loginBadge": 24
+    "loginBadge": 24,
+    "teamStrip": 8,
+    "teamBadge": 26,
+    "meterArea": 34,
+    "meterTrack": 8,
+    "meterMarker": 22,
+    "lockIcon": 13,
+    "swapIcon": 18,
+    "orderCell": 52,
+    "lineupBadge": 20
   },
   "radii": {
     "field": 12,
@@ -145,7 +164,9 @@
     "statusPill": 15,
     "tabPill": 15,
     "roleBadge": 13,
-    "sheet": 24
+    "sheet": 24,
+    "playerChip": 10,
+    "reservesRow": 14
   },
   "borderWidths": {
     "thin": 1.5,
@@ -172,7 +193,9 @@
     "displayLevel": 72,
     "displayLevelCard": 28,
     "displayLevelBadge": 20,
-    "levelCaption": 11
+    "levelCaption": 11,
+    "drawTitle": 29,
+    "teamTitle": 22
   },
   "iconStroke": {
     "plus": 2.2

@@ -5,6 +5,9 @@ import {
   expoBenchmarkRuntimeOpener,
   expoCourtRuntimeOpener,
 } from "../adapters/expo-court-runtime-opener";
+import { mathRandomSource } from "../adapters/math-random-source";
+import { reactNativeAppForeground } from "../adapters/react-native-app-foreground";
+import { timeoutScheduler } from "../adapters/timeout-scheduler";
 import { expoHapticsFeedback } from "../adapters/expo-haptics-feedback";
 import { expoKeepAwakeScreen } from "../adapters/expo-keep-awake-screen";
 import { expoBatteryMonitor } from "../adapters/expo-battery-monitor";
@@ -16,6 +19,13 @@ import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
 import { expoFileShare } from "../adapters/expo-file-share";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
+import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
+import { expoCryptoShuffler } from "../adapters/expo-crypto-shuffler";
+import { createStoredNextMatchDrafts } from "../adapters/stored-next-match-drafts";
+import { createCachedCourtRoster } from "../adapters/cached-court-roster";
+import { createCachedCourtRoundSettings } from "../adapters/cached-court-round-settings";
+import { createCachedCourtRoundSource } from "../adapters/cached-court-round-source";
+import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
 import { secureStoreInviteLinkStore } from "../adapters/secure-store-invite-link-store";
@@ -30,6 +40,7 @@ import { createGoogleAccountPicker } from "../adapters/google-sign-in";
 import { fetchHttpTransport } from "../adapters/fetch-http-transport";
 import { createHttpSacouApi } from "../adapters/http-sacou-api";
 import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
+import { createStoredCourtThemePreference } from "../adapters/stored-court-theme-preference";
 import { createStoredOnboardingSkip } from "../adapters/stored-onboarding-skip";
 import { buildApiBaseUrl } from "../config/api-url";
 import { buildGoogleWebClientId } from "../config/google-sign-in";
@@ -57,6 +68,7 @@ const cacheStore = createExpoCacheStore();
 const cachePersister = createCachePersister(cacheStore);
 // A row of its own in sacou-cache.db, apart from the persisted cache: a flag, never the profile.
 const onboardingSkip = createStoredOnboardingSkip(cacheStore);
+const courtThemePreference = createStoredCourtThemePreference(cacheStore);
 const networkStatus = createNetInfoNetworkStatus();
 const googleWebClientId = buildGoogleWebClientId();
 // The session lives in the native Firebase SDK; the app only reads it (ADR 0057, D2 and D5).
@@ -76,12 +88,18 @@ void removeExportLeftovers(expoFileShare);
 const realServices: Services = {
   fontLoader: expoFontLoader,
   courtRuntimeOpener: expoCourtRuntimeOpener,
-  // The sample names until the pre-game brings the real roster, which works offline (E4.2, E4.7).
-  courtRoster: createSampleRoster(),
+  // The names of the members cache, persisted, so the court has them offline (E4.2, E4.7). The sample
+  // names stay behind them only for the development screen.
+  courtRoster: createCachedCourtRoster(
+    queryClient,
+    DEV_TOOLS_ENABLED ? createSampleRoster() : null,
+  ),
+  courtRoundSettings: createCachedCourtRoundSettings(queryClient),
   screenAwake: expoKeepAwakeScreen,
   screenOrientation: expoScreenOrientation,
   batteryMonitor: expoBatteryMonitor,
   courtFeedback: expoHapticsFeedback,
+  courtThemePreference,
   backGuard: reactNativeBackGuard,
   reducedMotion: createReactNativeReducedMotion(),
   clock: performanceClock,
@@ -92,10 +110,17 @@ const realServices: Services = {
     idTokens: sessionIdTokens(authSession, sessionEnder),
   }),
   networkStatus,
+  appForeground: reactNativeAppForeground,
+  scheduler: timeoutScheduler,
+  randomSource: mathRandomSource,
   shareSheet: reactNativeShareSheet,
   fileShare: expoFileShare,
   clipboard: expoClipboard,
   idGenerator: expoCryptoIdGenerator,
+  coinFlip: expoCryptoCoinFlip,
+  shuffler: expoCryptoShuffler,
+  nextMatchDrafts: createStoredNextMatchDrafts(cacheStore),
+  courtRounds: createCachedCourtRoundSource(queryClient),
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,

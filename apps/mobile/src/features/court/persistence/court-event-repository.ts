@@ -5,12 +5,21 @@ import type {
   CourtEventLog,
   CourtLogError,
   CourtLogResult,
+  CourtSessionOrigin,
   StoredCourtLog,
 } from "../ports/court-event-log";
 import type { IdGenerator } from "../../../services/id/id-generator";
 import type { SqlDatabase, SqlExecutor, SqlRow } from "../ports/sql-database";
 import { continuesLog, hasContiguousSequences } from "./append-rules";
+import {
+  findSessionsToSync,
+  haltSync,
+  markTakenOver,
+  moveCursor,
+  readSyncColumns,
+} from "./court-sync-statements";
 import { FIRST_BATCH } from "./migrations.data";
+import { loadRefused, markRefusedSeen, replaceWithServerStream } from "./server-stream-statements";
 import {
   CLOSED_STATUS,
   INSERT_DEVICE_ID,
@@ -22,7 +31,9 @@ import {
   SELECT_EVENTS,
   SELECT_MAX_POSITION,
   SELECT_MAX_SEQUENCE,
+  SELECT_OPEN_SESSION_OF_ROUND,
   SELECT_SESSION,
+  SELECT_SESSION_ORIGIN,
   UPDATE_SESSION_STATUS,
 } from "./court-queries.data";
 import {
@@ -34,6 +45,33 @@ import {
 } from "./row-mapping";
 
 const VALUE_COLUMN = "value";
+
+/** Carries an `Err` out of a transaction so it rolls back; it never leaves this file. */
+class RollbackSignal extends Error {
+  constructor(readonly failure: Err<CourtLogError>) {
+    super("rollback");
+  }
+}
+
+/**
+ * The transaction of the port commits whenever `work` resolves, so an `Err` returned after a write
+ * would keep that write. Here an `Err` rolls everything back and comes out as the same `Err`.
+ */
+async function atomically<T>(
+  database: SqlDatabase,
+  work: (transaction: SqlExecutor) => Promise<CourtLogResult<T>>,
+): Promise<CourtLogResult<T>> {
+  try {
+    return await database.transaction(async (transaction) => {
+      const result = await work(transaction);
+      if (!result.ok) throw new RollbackSignal(result);
+      return result;
+    });
+  } catch (error) {
+    if (error instanceof RollbackSignal) return error.failure;
+    throw error;
+  }
+}
 
 /** The database may throw anything, so a failure becomes a code and never forwards its message. */
 async function guarded<T>(work: () => Promise<CourtLogResult<T>>): Promise<CourtLogResult<T>> {
@@ -91,6 +129,10 @@ async function loadSession(
   if (batch === null) {
     return err({ code: "session-not-found" });
   }
+  const sync = readSyncColumns(session);
+  if (!sync.ok) {
+    return sync;
+  }
   const rows = await transaction.getAll(SELECT_EVENTS, [courtSessionId]);
   const parsed = rows.map(fromEventRow);
   const failure = parsed.find((result): result is Err<CourtLogError> => !result.ok);
@@ -101,7 +143,11 @@ async function loadSession(
   if (!hasContiguousSequences(events)) {
     return err({ code: "corrupted-log" });
   }
-  return ok({ batch, events });
+  const refused = await loadRefused(transaction, courtSessionId);
+  if (!refused.ok) {
+    return refused;
+  }
+  return ok({ batch, events, ...sync.value, ...refused.value });
 }
 
 async function appendEnvelopes(
@@ -109,9 +155,14 @@ async function appendEnvelopes(
   courtSessionId: string,
   envelopes: readonly EventEnvelope[],
 ): Promise<CourtLogResult<void>> {
-  const batch = readIntegerColumn(await readSession(transaction, courtSessionId), "batch");
+  const session = await readSession(transaction, courtSessionId);
+  const batch = readIntegerColumn(session, "batch");
   if (batch === null) {
     return err({ code: "session-not-found" });
+  }
+  // Read in the same transaction as the write: a point marked as the 409 arrives is never kept (D2).
+  if (readIntegerColumn(session, "taken_over_batch") !== null) {
+    return err({ code: "taken-over" });
   }
   const [first] = envelopes;
   if (first === undefined) {
@@ -143,25 +194,68 @@ async function setStatus(
   return ok(undefined);
 }
 
+/** Both IDs or none: a sample session has neither. */
+function originOf(row: SqlRow | undefined): CourtSessionOrigin | null {
+  const groupId = readTextColumn(row, "group_id");
+  const roundId = readTextColumn(row, "round_id");
+  return groupId === null || roundId === null ? null : { groupId, roundId };
+}
+
 /** The court log on SQLite. Every method is atomic: it commits whole or leaves the file as it was. */
 export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerator): CourtEventLog {
   return {
-    getDeviceId: () => guarded(() => database.transaction((tx) => readOrCreateDeviceId(tx, ids))),
-    openSession: (courtSessionId) =>
+    getDeviceId: () => guarded(() => atomically(database, (tx) => readOrCreateDeviceId(tx, ids))),
+    openSession: (courtSessionId, origin) =>
       guarded(async () => {
-        await database.run(INSERT_SESSION, [courtSessionId, OPEN_STATUS, FIRST_BATCH]);
+        await database.run(INSERT_SESSION, [
+          courtSessionId,
+          OPEN_STATUS,
+          FIRST_BATCH,
+          origin?.groupId ?? null,
+          origin?.roundId ?? null,
+          origin?.ownerKey ?? null,
+        ]);
         return ok(undefined);
+      }),
+    findOrigin: (courtSessionId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
+        return ok(originOf(row));
       }),
     findActiveSession: () =>
       guarded(async () => {
         const [row] = await database.getAll(SELECT_ACTIVE_SESSION, [OPEN_STATUS]);
         return ok(readTextColumn(row, "court_session_id"));
       }),
+    findOpenSessionOfRound: (roundId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_OPEN_SESSION_OF_ROUND, [OPEN_STATUS, roundId]);
+        return ok(readTextColumn(row, "court_session_id"));
+      }),
     closeSession: (courtSessionId) =>
-      guarded(() => database.transaction((tx) => setStatus(tx, courtSessionId, CLOSED_STATUS))),
+      guarded(() => atomically(database, (tx) => setStatus(tx, courtSessionId, CLOSED_STATUS))),
     load: (courtSessionId) =>
-      guarded(() => database.transaction((tx) => loadSession(tx, courtSessionId))),
+      guarded(() => atomically(database, (tx) => loadSession(tx, courtSessionId))),
     append: (courtSessionId, envelopes) =>
-      guarded(() => database.transaction((tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
+      guarded(() => atomically(database, (tx) => appendEnvelopes(tx, courtSessionId, envelopes))),
+    findSessionsToSync: (deviceId) => guarded(() => findSessionsToSync(database, deviceId)),
+    markAcknowledged: (courtSessionId, sequence) =>
+      guarded(() =>
+        atomically(database, (tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: true })),
+      ),
+    rewindAcknowledged: (courtSessionId, sequence) =>
+      guarded(() =>
+        atomically(database, (tx) => moveCursor(tx, courtSessionId, sequence, { onlyUp: false })),
+      ),
+    haltSync: (courtSessionId, code) =>
+      guarded(() => atomically(database, (tx) => haltSync(tx, courtSessionId, code))),
+    markTakenOver: (courtSessionId, deviceId, notice) =>
+      guarded(() =>
+        atomically(database, (tx) => markTakenOver(tx, courtSessionId, deviceId, notice)),
+      ),
+    replaceWithServerStream: (stream) =>
+      guarded(() => atomically(database, (tx) => replaceWithServerStream(tx, stream))),
+    markRefusedSeen: (courtSessionId) =>
+      guarded(() => atomically(database, (tx) => markRefusedSeen(tx, courtSessionId))),
   };
 }

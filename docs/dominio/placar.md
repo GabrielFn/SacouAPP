@@ -22,7 +22,7 @@ Vem por valor no `MatchStarted`, todos os campos obrigatórios e sem padrão no 
 - **Vencedor da partida:** quem alcança os sets para vencer.
 - **Fim de set é sempre confirmado** (`produto.md:69`; tela 25). A regra só detecta; `SetEnded` nasce da confirmação. Com o set decidido e sem confirmar, marcar ponto é recusado (`set-decided`), e desfazer o último ponto reabre o jogo normalmente.
 - **Fim de partida:** a confirmação do set decisivo gera dois eventos, `SetEnded` com `nextSet: null` e `MatchEnded`, gravados juntos pelo chamador. Se só o primeiro gravar, a partida fica sem set aberto e confirmar de novo emite o `MatchEnded` que falta.
-- **Encerrar partida antes do fim:** `MatchEnded` com `endReason: "manual"`. O vencedor (`a`, `b` ou `null`) vem de quem chama; o motor não decide (`perguntas.md`, item 7). O set em andamento fica em `currentSet` da partida terminada.
+- **Encerrar partida antes do fim:** `MatchEnded` com `endReason: "manual"`. O vencedor (`a`, `b` ou `null`) vem de quem chama; o motor não decide (`perguntas.md`, item 7). No app, `manualEndWinner` (ADR 0066) decide: vence quem lidera em sets; com os sets iguais, vence quem lidera em pontos do set em andamento; empate total (ou sem set aberto) fica sem vencedor (`null`) e ninguém sai da quadra. O set em andamento fica em `currentSet` da partida terminada.
 - **Limite de partidas por stream:** 200 terminadas podem existir. Um novo `MatchStarted` com 200 terminadas é rejeitado no replay (`event-rejected`), e `startMatch` recusa antes (`too-many-matches`). É limite técnico contra log hostil, não regra do vôlei: uma rodada real fica perto de 30 partidas.
 
 ## Comandos
@@ -77,3 +77,22 @@ FinishedMatch: MatchScore + endReason (depois de currentSet) + winner (no fim)
 ```
 
 Decisões técnicas e reversíveis, para o relatório do M2: limites de 1 a 99 pontos e de 24 membros por time, `winMargin` 1 ou 2 com o mesmo valor no tie-break, sem teto de pontos, 200 partidas terminadas por stream.
+
+## Conferências do servidor
+
+O evento prova o formato, não a verdade. Ao receber eventos do celular (E3.7, [ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)), o servidor roda o replay de todo o stream e recusa, com `event-implausible` e um `reason` da lista fechada, o que um celular honesto nunca grava, porque os comandos do motor recusam. Cada conferência lê só o próprio stream, pelo estado logo antes do evento, e catálogos imutáveis.
+
+| Evento | Regra | `reason` |
+|---|---|---|
+| Qualquer um, entre um `SetEnded` que decide a partida e o `MatchEnded` | Só entram `MatchEnded`, `PointAttributed` e `RevertedTo` (o "desfazer" e o "De quem foi?" seguem valendo) | `match-pending` |
+| `PointScored` | O set aberto ainda não tem vencedor (`getSetWinner` nulo): 25–23 com vantagem já decidiu; 24–24, não | `set-decided` |
+| `SetEnded` | O set tem vencedor e é o do evento; `nextSet` nulo só quando o set decide a partida; `targetPoints` do próximo set por `targetPointsForSet`; `setterZones` iguais aos atuais; `firstServer` alternado, salvo quando o próximo set é o decisivo (sorteio de quem escreve) | `set-not-decided`, `wrong-set-winner`, `wrong-next-set`, `wrong-target-points`, `wrong-setter-zones`, `wrong-first-server` |
+| `MatchEnded` | `sets-won`: o vencedor é o de `getMatchWinner`. `manual`: aceito, com o vencedor escolhido | `wrong-match-winner` |
+| `ServingTeamChanged` | Set aberto e sem vencedor; saca o adversário de quem sacava; em 0–0 ele também passa a ter sacado primeiro, depois de 0–0 quem sacou primeiro fica | `set-decided`, `wrong-serving-team`, `wrong-first-server` |
+| `PointAttributed` | O alvo é `PointScored` ativo da partida aberta; o autor segue `isValidAuthor` e `isPlausibleAuthor` (na quadra do rali, Ace só do sacador, líbero sem Ace nem Bloqueio, `opponent-error` sem autor). O resolvedor ignoraria em silêncio; o servidor recusa | `invalid-attribution-target`, `invalid-point-author` |
+| `QueueChanged` | A fila muda (igual à atual é recusada) | `queue-unchanged` |
+| `MatchStarted` | `rulesVersion` e `formationsVersion` nas listas de versões suportadas (listas, para um app antigo offline) | `unsupported-rules-version`, `unsupported-formations-version` |
+
+**Desfazer depois da troca de quem escreve** (E3.8, resposta 74 do Gabriel, [ADR 0063](../arquitetura/adr/0063-placar-assume-a-quadra.md)): livre para quem escreve o lote atual. O `RevertedTo` pode apontar qualquer evento do stream, de antes ou de depois da troca, com a mesma regra de sempre (ADR 0030). Não há conferência nova: o controle é a autoria pelo lote, porque o `RevertedTo` fica no lote de quem desfez (com o `MemberId` e a hora do servidor) e o evento desfeito continua no stream, só inativo. Os casos `t8a` a `t8c` do `server-checks.json` provam isso nos dois lados.
+
+**Não recusado** (pergunta 69, padrão adotado): o que depende de dado que muda durante a rodada, como times e fila contra a presença, a fila recalculada pelo modo do grupo e o plano Pro. Recusar travaria para sempre a sincronização de um celular honesto; o risco fica com quem tem papel, registrado pelo lote. Os casos estão no golden `packages/match-engine/golden/server-checks.json`, lido pelo TS (os recusados passam no replay do motor; os aceitos saem dos comandos) e pelo C#.

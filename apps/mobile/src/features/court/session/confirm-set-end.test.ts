@@ -16,7 +16,7 @@ function run(result: CommandResult, firstServer?: "a" | "b") {
 
 describe("confirming the end of the set", () => {
   test("a confirmation that goes through does not buzz", async () => {
-    const { dispatch, feedback } = await run(ok(undefined));
+    const { dispatch, feedback } = await run(ok({ written: [] }));
     expect(dispatch).toHaveBeenCalledWith({ type: "confirm-set-end" });
     expect(feedback.played()).toEqual([]);
   });
@@ -32,7 +32,7 @@ describe("confirming the end of the set", () => {
   });
 
   test("the toss of the deciding set goes in the command", async () => {
-    const { dispatch } = await run(ok(undefined), "b");
+    const { dispatch } = await run(ok({ written: [] }), "b");
     expect(dispatch).toHaveBeenCalledWith({ type: "confirm-set-end", firstServer: "b" });
   });
 });

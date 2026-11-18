@@ -12,6 +12,9 @@ internal static class DrawFixture
     public const int BeachTwo = 2;
     public const ulong Seed = 20261114;
 
+    /// <summary>3,0: the level of a member nobody rated (ADR 0047).</summary>
+    public const int DefaultLevel = 30;
+
     /// <summary>Screen 07 (G1): 14 confirmed in order of arrival, levels in tenths.</summary>
     public static readonly (string Name, int Level)[] ScreenSeven =
     [

@@ -3,12 +3,26 @@ import { err, ok } from "@sacou/volley-rules";
 
 import { continuesLog, highestSequence } from "../features/court/persistence/append-rules";
 import { FIRST_BATCH } from "../features/court/persistence/migrations.data";
-import type { CourtEventLog, CourtLogResult } from "../features/court/ports/court-event-log";
+import type {
+  CourtEventLog,
+  CourtLogResult,
+  CourtSessionOrigin,
+  SessionToSync,
+  SyncHaltCode,
+} from "../features/court/ports/court-event-log";
 import type { IdGenerator } from "../services/id/id-generator";
 
 interface FakeSession {
   readonly status: "open" | "closed";
   readonly events: readonly EventEnvelope[];
+  readonly origin: CourtSessionOrigin | null;
+  readonly ownerKey: string | null;
+  readonly ackedSequence: number;
+  readonly takenOverBatch: number | null;
+  readonly syncHalt: SyncHaltCode | null;
+  readonly refused: readonly EventEnvelope[];
+  readonly refusedSeen: boolean;
+  readonly batch: number;
 }
 
 type FakeSessions = Readonly<Record<string, FakeSession>>;
@@ -17,6 +31,23 @@ type FakeSessions = Readonly<Record<string, FakeSession>>;
 export interface FakeCourtEventLog extends CourtEventLog {
   /** The next `append` fails as a full disk would, writing nothing. */
   failNextAppend(): void;
+  /** The events of this device the server left out (E4.11, D6), for the assertions. */
+  refusedOf(courtSessionId: string): readonly EventEnvelope[];
+}
+
+const NOT_FOUND: CourtLogResult<never> = err({ code: "session-not-found" });
+
+function hasPending(session: FakeSession, deviceId: string): boolean {
+  return session.events.some(
+    (event) =>
+      event.deviceId === deviceId &&
+      event.batch === session.batch &&
+      event.sequence > session.ackedSequence,
+  );
+}
+
+function isSending(session: FakeSession): session is FakeSession & { origin: CourtSessionOrigin } {
+  return session.origin !== null && session.syncHalt === null && session.takenOverBatch === null;
 }
 
 export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
@@ -28,39 +59,76 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
     sessions.value = { ...sessions.value, [courtSessionId]: session };
   }
 
+  function update(
+    courtSessionId: string,
+    change: (session: FakeSession) => FakeSession,
+  ): Promise<CourtLogResult<void>> {
+    const session = sessions.value[courtSessionId];
+    if (session === undefined) return Promise.resolve(NOT_FOUND);
+    put(courtSessionId, change(session));
+    return Promise.resolve(ok(undefined));
+  }
+
   function append(
     courtSessionId: string,
     envelopes: readonly EventEnvelope[],
   ): CourtLogResult<void> {
     const session = sessions.value[courtSessionId];
     if (session === undefined) {
-      return err({ code: "session-not-found" });
+      return NOT_FOUND;
+    }
+    if (session.takenOverBatch !== null) {
+      return err({ code: "taken-over" });
     }
     if (fault.value) {
       fault.value = false;
       return err({ code: "storage-failed" });
     }
     const lastSequence = highestSequence(session.events, envelopes[0]?.deviceId ?? "");
-    if (!continuesLog(envelopes, { courtSessionId, batch: FIRST_BATCH, lastSequence })) {
+    if (!continuesLog(envelopes, { courtSessionId, batch: session.batch, lastSequence })) {
       return err({ code: "sequence-conflict" });
     }
     put(courtSessionId, { ...session, events: [...session.events, ...envelopes] });
     return ok(undefined);
   }
 
+  function sessionsToSync(deviceId: string): readonly SessionToSync[] {
+    return Object.entries(sessions.value).flatMap(([courtSessionId, session]) =>
+      isSending(session) && hasPending(session, deviceId)
+        ? [{ courtSessionId, ...session.origin, ownerKey: session.ownerKey }]
+        : [],
+    );
+  }
+
   return {
     failNextAppend() {
       fault.value = true;
     },
+    refusedOf: (courtSessionId) => sessions.value[courtSessionId]?.refused ?? [],
     getDeviceId() {
       device.value ??= ids.newId();
       return Promise.resolve(ok(device.value));
     },
-    openSession(courtSessionId) {
+    openSession(courtSessionId, origin) {
       if (sessions.value[courtSessionId] === undefined) {
-        put(courtSessionId, { status: "open", events: [] });
+        put(courtSessionId, {
+          status: "open",
+          events: [],
+          origin:
+            origin === undefined ? null : { groupId: origin.groupId, roundId: origin.roundId },
+          ownerKey: origin?.ownerKey ?? null,
+          ackedSequence: 0,
+          takenOverBatch: null,
+          syncHalt: null,
+          refused: [],
+          refusedSeen: true,
+          batch: FIRST_BATCH,
+        });
       }
       return Promise.resolve(ok(undefined));
+    },
+    findOrigin(courtSessionId) {
+      return Promise.resolve(ok(sessions.value[courtSessionId]?.origin ?? null));
     },
     findActiveSession() {
       const open = Object.entries(sessions.value)
@@ -68,22 +136,82 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
         .find(([, session]) => session.status === "open");
       return Promise.resolve(ok(open?.[0] ?? null));
     },
-    closeSession(courtSessionId) {
-      const session = sessions.value[courtSessionId];
-      if (session === undefined) {
-        return Promise.resolve(err({ code: "session-not-found" }));
-      }
-      put(courtSessionId, { ...session, status: "closed" });
-      return Promise.resolve(ok(undefined));
+    findOpenSessionOfRound(roundId) {
+      const open = Object.entries(sessions.value)
+        .reverse()
+        .find(([, session]) => session.status === "open" && session.origin?.roundId === roundId);
+      return Promise.resolve(ok(open?.[0] ?? null));
     },
+    closeSession: (courtSessionId) =>
+      update(courtSessionId, (session) => ({ ...session, status: "closed" })),
     load(courtSessionId) {
       const session = sessions.value[courtSessionId];
       return Promise.resolve(
         session === undefined
-          ? err({ code: "session-not-found" })
-          : ok({ batch: FIRST_BATCH, events: session.events }),
+          ? NOT_FOUND
+          : ok({
+              batch: session.batch,
+              events: session.events,
+              ackedSequence: session.ackedSequence,
+              takenOverBatch: session.takenOverBatch,
+              syncHalt: session.syncHalt,
+              fromRound: session.origin !== null,
+              ownerKey: session.ownerKey,
+              refused: session.refused,
+              refusedUnseen: !session.refusedSeen,
+            }),
       );
     },
     append: (courtSessionId, envelopes) => Promise.resolve(append(courtSessionId, envelopes)),
+    findSessionsToSync: (deviceId) => Promise.resolve(ok(sessionsToSync(deviceId))),
+    markAcknowledged: (courtSessionId, sequence) =>
+      update(courtSessionId, (session) => ({
+        ...session,
+        ackedSequence: Math.max(session.ackedSequence, sequence),
+      })),
+    rewindAcknowledged: (courtSessionId, sequence) =>
+      update(courtSessionId, (session) => ({ ...session, ackedSequence: sequence })),
+    haltSync: (courtSessionId, code) =>
+      update(courtSessionId, (session) => ({ ...session, syncHalt: code })),
+    markTakenOver: (courtSessionId, deviceId, { currentBatch, lastStoredSequence }) =>
+      update(courtSessionId, (session) => {
+        const leaves = (event: EventEnvelope) =>
+          event.deviceId === deviceId && event.sequence > lastStoredSequence;
+        return {
+          ...session,
+          events: session.events.filter((event) => !leaves(event)),
+          refused: [...session.refused, ...session.events.filter(leaves)],
+          refusedSeen: session.refusedSeen && !session.events.some(leaves),
+          ackedSequence: lastStoredSequence,
+          takenOverBatch: currentBatch,
+        };
+      }),
+    replaceWithServerStream({ courtSessionId, origin, events, batch, lastSequence }) {
+      // The other open sessions of the round close; their unsent points are not modeled here.
+      Object.entries(sessions.value).forEach(([id, session]) => {
+        if (id !== courtSessionId && session.origin?.roundId === origin.roundId) {
+          put(id, {
+            ...session,
+            status: "closed",
+            takenOverBatch: session.takenOverBatch ?? batch,
+          });
+        }
+      });
+      put(courtSessionId, {
+        status: "open",
+        events,
+        origin: { groupId: origin.groupId, roundId: origin.roundId },
+        ownerKey: origin.ownerKey,
+        ackedSequence: lastSequence,
+        takenOverBatch: null,
+        syncHalt: null,
+        refused: [],
+        refusedSeen: true,
+        batch,
+      });
+      return Promise.resolve(ok(undefined));
+    },
+    markRefusedSeen: (courtSessionId) =>
+      update(courtSessionId, (session) => ({ ...session, refusedSeen: true })),
   };
 }

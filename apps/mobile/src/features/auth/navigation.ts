@@ -25,6 +25,8 @@ export const SIGNED_IN_ROUTES = [
   "groups/[groupId]/rounds/new",
   "groups/[groupId]/rounds/[roundId]/index",
   "groups/[groupId]/rounds/[roundId]/add",
+  "groups/[groupId]/rounds/[roundId]/draw",
+  "groups/[groupId]/rounds/[roundId]/take-over",
 ] as const;
 
 /**

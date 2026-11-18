@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 
 namespace Sacou.Modules.Groups.PreviewInvite;
 
 /// <summary>
 /// <c>POST /v1/invites/preview</c> <c>{ token }</c>. A POST, so the token travels in the body: hosting and
-/// Railway logs keep the path and the query, never the body. Outside the group filter, on the closed list.
+/// Cloud Run request logs keep the path and the query, never the body. Outside the group filter, on the closed list.
 /// </summary>
 internal static class PreviewInviteEndpoint
 {
@@ -18,7 +19,7 @@ internal static class PreviewInviteEndpoint
 
     public static IEndpointRouteBuilder MapPreviewInvite(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name).WithMetadata(GroupRouteExtensions.SmallBody())
+        endpoints.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.Invite).WithMetadata(GroupRouteExtensions.SmallBody())
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .ProducesProblem(StatusCodes.Status404NotFound);
         return endpoints;

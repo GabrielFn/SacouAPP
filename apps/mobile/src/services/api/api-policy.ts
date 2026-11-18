@@ -1,5 +1,5 @@
 import { apiErrorCodes, type ApiErrorCode } from "../../api/generated/error-codes";
-import type { ApiError } from "./api-error";
+import type { ApiError, ProblemDetails } from "./api-error";
 
 /** What the client read from one HTTP answer, before deciding what it means (E4.2, D5). */
 export interface RawAnswer {
@@ -10,7 +10,7 @@ export interface RawAnswer {
 }
 
 const MS_PER_SECOND = 1_000;
-/** A 503 without a usable `Retry-After`, and the ceiling of any wait (D5). */
+/** A 503 or a 429 without a usable `Retry-After`, and the ceiling of any wait (D5). */
 export const DEFAULT_RETRY_AFTER_MS = 30_000;
 export const MAX_RETRY_AFTER_MS = 60_000;
 
@@ -25,6 +25,10 @@ const HTTP = {
   // `POST /v1/me` of an account deleted on the server (ADR 0056, D5).
   gone: 410,
   tooLarge: 413,
+  // The content rules of the court stream (ADR 0060, D9).
+  unprocessable: 422,
+  // The per-user rate limit, whatever the code of its body (ADR 0062, D7).
+  tooManyRequests: 429,
   unavailable: 503,
 } as const;
 
@@ -34,7 +38,10 @@ const RULE_STATUSES: ReadonlySet<number> = new Set([
   HTTP.notFound,
   HTTP.conflict,
   HTTP.gone,
+  HTTP.unprocessable,
 ]);
+const LOWERCASE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const COUNT_FIELDS = ["expectedSequence", "currentBatch", "lastSequence"] as const;
 const JSON_TYPES = /^application\/(?:problem\+)?json(?:;|$)/i;
 const DELTA_SECONDS = /^[0-9]+$/;
 // An HTTP date names the day and the month ("Tue, 10 Nov 2026 12:00:20 GMT"); a bare number is not one.
@@ -71,12 +78,40 @@ function codeOf(body: unknown): ApiErrorCode | null {
   return isKnownCode(body.code) ? body.code : null;
 }
 
+function isCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+type CountField = (typeof COUNT_FIELDS)[number];
+
+function fieldOf(body: object, name: string): unknown {
+  if (!Object.prototype.hasOwnProperty.call(body, name)) return undefined;
+  const value: unknown = Reflect.get(body, name);
+  return value;
+}
+
+/** Only the fields of the closed list, each in its format; a value out of it is dropped (D4). */
+export function detailsOf(body: unknown): ProblemDetails {
+  if (typeof body !== "object" || body === null) return {};
+  const counts = COUNT_FIELDS.reduce<Partial<Record<CountField, number>>>((found, name) => {
+    const value = fieldOf(body, name);
+    return isCount(value) ? { ...found, [name]: value } : found;
+  }, {});
+  const eventId = fieldOf(body, "eventId");
+  return typeof eventId === "string" && LOWERCASE_UUID.test(eventId)
+    ? { ...counts, eventId }
+    : counts;
+}
+
 function ruleError(answer: RawAnswer): ApiError {
   // A code this app does not know (a newer API) is never shown nor kept as free text.
   const code = isJson(answer.contentType) ? codeOf(answer.body) : null;
   if (code === null) return { kind: "unexpected", status: answer.status };
   if (code === NOT_REGISTERED) return { kind: "not-registered" };
-  return { kind: "problem", status: answer.status, code };
+  const details = detailsOf(answer.body);
+  return Object.keys(details).length === 0
+    ? { kind: "problem", status: answer.status, code }
+    : { kind: "problem", status: answer.status, code, details };
 }
 
 /** The error of a non-2xx answer. A redirect is `unexpected`: the client never follows one (D7). */
@@ -86,6 +121,8 @@ export function classifyFailure(answer: RawAnswer, nowMs: number): ApiError {
       return { kind: "session-expired" };
     case HTTP.tooLarge:
       return { kind: "too-large" };
+    case HTTP.tooManyRequests:
+      return { kind: "rate-limited", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
     case HTTP.unavailable:
       return { kind: "unavailable", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
     default:

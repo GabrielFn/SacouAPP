@@ -32,6 +32,7 @@ export function CourtLandscape({
   onOpenMenu,
   inverted = false,
   battery = null,
+  notice = null,
 }: CourtLandscapeProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -52,7 +53,7 @@ export function CourtLandscape({
         setNumber={model.setNumber}
         sets={dotColors(model)}
         setsLabel={setsLabel(model, inverted)}
-        hint={hintText(model)}
+        hint={notice ?? hintText(model)}
         onOpenMenu={onOpenMenu}
       />
       <View style={{ flex: LANDSCAPE_FLEX_WEIGHTS.middle, flexDirection: "row" }}>

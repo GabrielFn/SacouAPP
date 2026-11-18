@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Sacou.Http;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Domain;
 
@@ -21,27 +20,12 @@ internal static class RoundRouteExtensions
     /// </summary>
     public const long MaxBodyBytes = SessionLimits.MaxSettingsLayerBytes + EnvelopeAllowanceBytes;
 
-    public static RouteGroupBuilder MapRoundRoutes(this IEndpointRouteBuilder endpoints)
-    {
-        var group = endpoints.MapGroup(GroupRoute);
-        group.AddEndpointFilter<RoundAccessFilter>();
-        group.WithMetadata(RoundAccessFilterMetadata.Instance, new RequestSizeLimitAttribute(MaxBodyBytes));
-        // What the filter itself answers: not registered or no capability (403), not a member (404).
-        group.ProducesProblem(StatusCodes.Status403Forbidden).ProducesProblem(StatusCodes.Status404NotFound);
-        ((IEndpointConventionBuilder)group).Finally(RequireOneCapability);
-        return group;
-    }
+    /// <summary>How the start-up error names a route of this group.</summary>
+    private const string RouteKind = "round";
+
+    public static RouteGroupBuilder MapRoundRoutes(this IEndpointRouteBuilder endpoints) =>
+        endpoints.MapGuardedGroup<RoundAccessFilter, RoundCapabilityMetadata>(GroupRoute, RoundAccessFilterMetadata.Instance, MaxBodyBytes, RouteKind);
 
     public static RouteHandlerBuilder RequireCapability(this RouteHandlerBuilder builder, GroupCapability capability) =>
         builder.WithMetadata(new RoundCapabilityMetadata(capability));
-
-    /// <summary>The API refuses to start with a round route that declares zero or two capabilities, instead of failing on its first call.</summary>
-    private static void RequireOneCapability(EndpointBuilder endpoint)
-    {
-        var declared = endpoint.Metadata.OfType<RoundCapabilityMetadata>().Count();
-        if (declared != 1)
-        {
-            throw new InvalidOperationException($"{endpoint.DisplayName}: a round route declares {declared} capabilities, not one.");
-        }
-    }
 }

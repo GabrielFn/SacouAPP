@@ -2,6 +2,9 @@ import { accessibilityFloors, courtBorderWidths, courtSpacing } from "../../them
 
 // Constants of the court screens. Measures come from QuadraSol.dc.html (390 x 844 canvas).
 
+/** The `system` of a team that plays with no formation (Livre): there is no setter to point at. */
+export const FREE_SYSTEM = "livre";
+
 /**
  * The height of the screen is shared in weights, not in pixels: the bar, a team zone, the middle
  * strip and the queue (the canvas has 44 + 288 + 104 + 288 + 120 = 844).
@@ -172,3 +175,6 @@ export const BATTERY_WARNING_LEVEL = 0.2;
 
 /** The battery level is shown as a percentage of this. */
 export const PERCENT_BASE = 100;
+
+/** How long the line "Desfeito: ..." stays in the middle strip after DESFAZER (E4.10, D12). */
+export const UNDO_NOTICE_MS = 3000;

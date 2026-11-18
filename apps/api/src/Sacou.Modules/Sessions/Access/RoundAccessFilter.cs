@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Sacou.Http;
 using Sacou.Modules.Groups.Contracts;
-using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Shared.Members;
 using Sacou.Shared.Results;
@@ -22,28 +20,12 @@ internal sealed class RoundAccessFilter : AccessFilter<RoundAccess>
 
     protected override async Task<Result<RoundAccess>> ResolveAsync(HttpContext http)
     {
-        var capability = Declared<RoundCapabilityMetadata>(http).Capability;
-        var cancellationToken = http.RequestAborted;
-        var user = await http.RequestServices.GetRequiredService<ICurrentUser>().GetAsync(cancellationToken).ConfigureAwait(false);
-        if (user.IsFailure)
-        {
-            return Result.Failure<RoundAccess>(user.Error);
-        }
-
-        if (!Guid.TryParse(http.Request.RouteValues[GroupIdRouteValue] as string, out var id))
-        {
-            return Result.Failure<RoundAccess>(GroupAccessErrors.GroupNotFound);
-        }
-
-        var groups = http.RequestServices.GetRequiredService<IGroupMembership>();
-        var member = await groups.FindActiveAsync(id, user.Value.UserId, cancellationToken).ConfigureAwait(false);
-        if (member is null)
-        {
-            return Result.Failure<RoundAccess>(GroupAccessErrors.GroupNotFound);
-        }
-
-        return groups.Allows(member.Role, capability)
-            ? Result.Success(new RoundAccess(new GroupId(id), user.Value.UserId, new MemberId(member.MemberId), member.Role, member.Type))
-            : Result.Failure<RoundAccess>(GroupAccessErrors.Forbidden);
+        var authorized = await http.RequestServices.AuthorizeGroupMemberAsync(
+            http.Request.RouteValues[GroupIdRouteValue],
+            Declared<RoundCapabilityMetadata>(http).Capability,
+            http.RequestAborted).ConfigureAwait(false);
+        return authorized.Match(
+            access => Result.Success(new RoundAccess(new GroupId(access.GroupId), access.UserId, new MemberId(access.Membership.MemberId), access.Membership.Role, access.Membership.Type)),
+            Result.Failure<RoundAccess>);
     }
 }

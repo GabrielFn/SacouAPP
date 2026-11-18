@@ -47,10 +47,13 @@ set -a; . ./.env; set +a   # lê o POSTGRES_PASSWORD sem imprimir
 export ConnectionStrings__Sacou="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=$POSTGRES_PASSWORD"
 export Database__MigrateOnStartup=true
 ASPNETCORE_URLS=http://localhost:5080 ASPNETCORE_ENVIRONMENT=Development dotnet run --project apps/api/src/Sacou.Api
-adb reverse tcp:5080 tcp:5080 && adb reverse tcp:8081 tcp:8081
+adb reverse tcp:5080 tcp:5080   # túnel da API
+adb reverse tcp:8081 tcp:8081   # túnel do Metro
 pnpm --filter @sacou/volley-rules --filter @sacou/match-engine run build   # o app lê o dist/ dos pacotes
-pnpm --filter @sacou/mobile start
+CI=1 EXPO_PUBLIC_DEV_TOOLS=1 pnpm --filter @sacou/mobile start
 ```
+
+**Neste PC o Metro só sobe com `CI=1`.** Sem ele, o `FallbackWatcher` do Windows (o observador de arquivos sem o Watchman) não termina a varredura em 4 minutos no HD, e o Metro nunca fica pronto. Com `CI=1` o Metro não observa mudanças: depois de editar o código, recarregue o app (ou reinicie o Metro com `--clear`). O `EXPO_PUBLIC_DEV_TOOLS=1` liga as telas de desenvolvimento.
 
 Abra o app no celular: ele carrega o JavaScript do Metro pela porta 8081. Com o `dist/` dos pacotes desatualizado, o app abre com `Cannot read property ... of undefined`: compile os pacotes e reinicie o Metro com `--clear`. A conexão segue [`postgres-local.md`](postgres-local.md).
 

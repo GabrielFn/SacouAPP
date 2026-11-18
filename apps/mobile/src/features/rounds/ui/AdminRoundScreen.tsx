@@ -16,6 +16,7 @@ import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { hasRoundLayer, roundChips, sourceReader } from "../model/round-chips";
 import {
   footerActions,
+  roundFooterActions,
   isCanceled,
   roleHeader,
   statsCells,
@@ -23,7 +24,14 @@ import {
 } from "../model/round-detail";
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
 import type { CopyNote } from "../model/round-screen.reducer";
-import { addPlayerHref, PENDING_ROUND_SCREENS, type PendingRoundScreen } from "../navigation";
+import { canDraw } from "../../draw/model/can-draw";
+import { useRoundCourtEntry } from "../../court/hooks/use-round-court-entry";
+import {
+  addPlayerHref,
+  drawHref,
+  PENDING_ROUND_SCREENS,
+  type PendingRoundScreen,
+} from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
@@ -79,24 +87,28 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
   );
 }
 
-/** "Sortear times" and "Abrir quadra" appear when their screens exist (D1). */
+/** "Abrir quadra" with a court of this round on the device or on the server (E4.11, D5), "Sortear times" for who draws (D1). */
 export interface RoundFooterProps {
   readonly actions: readonly PendingRoundScreen[];
+  /** With the draw off the 07 builds the teams by hand: "Montar times" (question 72). */
+  readonly drawOff: boolean;
+  readonly onDraw: () => void;
+  readonly onCourt: () => void;
 }
 
-function RoundFooter({ actions }: RoundFooterProps) {
+function RoundFooter({ actions, drawOff, onDraw, onCourt }: RoundFooterProps) {
   return (
     <>
-      {actions.includes("court") ? <Button label={detail.openCourt} onPress={noAction} /> : null}
+      {actions.includes("court") ? <Button label={detail.openCourt} onPress={onCourt} /> : null}
       {actions.includes("draw") ? (
-        <Button label={detail.drawTimes} variant="secondary" onPress={noAction} />
+        <Button
+          label={drawOff ? detail.buildTeams : detail.drawTimes}
+          variant="secondary"
+          onPress={onDraw}
+        />
       ) : null}
     </>
   );
-}
-
-function noAction(): void {
-  // The destinations (E4.7 and the court) take over these buttons when they exist.
 }
 
 export interface AdminRoundScreenProps {
@@ -193,9 +205,25 @@ export function AdminRoundScreen({
 }: AdminRoundScreenProps) {
   const router = useRouter();
   const roster = rosterView(round, settings, members);
-  const actions = footerActions(PENDING_ROUND_SCREENS, isCanceled(round));
+  const canceled = isCanceled(round);
+  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, !canceled);
+  const actions = roundFooterActions(
+    footerActions(PENDING_ROUND_SCREENS, canceled),
+    canDraw(group.role),
+    court.available,
+  );
+  const footer = (
+    <RoundFooter
+      actions={actions}
+      drawOff={settings?.values.draw.enabled === false}
+      onDraw={() => {
+        router.push(drawHref(groupId, round.roundId));
+      }}
+      onCourt={court.open}
+    />
+  );
   return (
-    <Screen footer={actions.length === 0 ? undefined : <RoundFooter actions={actions} />}>
+    <Screen footer={actions.length === 0 ? undefined : footer}>
       <AdminHeader
         role={group.role}
         canCopy={canCopyList(round, settings)}

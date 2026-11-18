@@ -11,6 +11,9 @@ export interface TeamTagProps {
   readonly label: string;
 }
 
+/** The letter of each side on the badge ("A Laranja", "B Azul"). */
+export const SIDE_LETTERS: Readonly<Record<"a" | "b", string>> = { a: "A", b: "B" };
+
 /** The name of the team in its color, with the letter of its side in a round badge. */
 export function TeamTag({ color, letter, label }: TeamTagProps) {
   const { tokens } = useTheme();

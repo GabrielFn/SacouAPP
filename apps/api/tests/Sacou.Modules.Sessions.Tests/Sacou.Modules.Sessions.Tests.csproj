@@ -14,5 +14,6 @@
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/draw-balance.json" LogicalName="golden/draw-balance.json" />
+        <EmbeddedResource Include="../../../../packages/volley-rules/golden/draw-split.json" LogicalName="golden/draw-split.json" />
     </ItemGroup>
 </Project>

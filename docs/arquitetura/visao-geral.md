@@ -16,7 +16,7 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 | App | Expo + TypeScript strict, com log de eventos em expo-sqlite; tipos da API gerados do contrato OpenAPI versionado (`apps/api/openapi/v1.json`), que a API só serve em `Development` ([ADR 0042](adr/0042-contrato-openapi-e-cliente.md)) |
 | Regras compartilhadas | `packages/match-engine`, `packages/volley-rules` |
 | Serviços | Cloudflare R2 (backups no piloto; fotos depois), Sentry, Resend, Expo Push; RevenueCat e PostHog depois do piloto ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)) |
-| Hospedagem | Railway Hobby |
+| Hospedagem | Google Cloud Run (`us-east4`, escala a zero) e Neon Free (`us-east-1`), deploy pelo GitHub Actions com federação de identidade ([ADR 0068](adr/0068-deploy-cloud-run-neon.md), [`deploy.md`](../operacao/deploy.md)) |
 
 ## Módulos da API
 
@@ -131,6 +131,11 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0055](adr/0055-sorteio-no-servidor.md) | Sorteio equilibrado no servidor, com semente própria |
 | [0058](adr/0058-repositorio-publico.md) | Repositório público, para a CI não ter limite de minutos |
 | [0059](adr/0059-icone-do-app.md) | Ícone do app: silhueta sacando, azul-marinho sobre laranja |
+| [0060](adr/0060-sincronizacao-do-stream-da-quadra.md) | Sincronização do stream da quadra: idempotência por `eventId`, lote do servidor, tetos, plausibilidade e membros do grupo |
+| [0061](adr/0061-sorteio-no-app.md) | Sorteio no app: resultado só no reducer, medidor no TS com o golden do C#, trocas e travas |
+| [0062](adr/0062-limite-de-requisicoes.md) | Limite de requisições por usuário (janela fixa, chave com hash do UID) e concorrência das rotas de duas conexões |
+| [0063](adr/0063-placar-assume-a-quadra.md) | Placar assume a quadra: lote seguinte sob a trava, confirmação otimista, desfazer sem restrição (resposta 74), teto de 40 lotes |
+| [0064](adr/0064-ci-api-e-app-em-jobs-paralelos.md) | CI com a API e o app em jobs paralelos, cada um pulado pela sua área |
 
 ## Matriz: `decisoes.md` → ADR
 

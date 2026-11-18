@@ -35,6 +35,7 @@ describe("shouldRetryQuery (P4)", () => {
     ["too large", { kind: "too-large" }],
     ["a 4xx without code", { kind: "unexpected", status: 400 }],
     ["a request never sent", { kind: "unexpected", status: 0 }],
+    ["a 429, which would only spend the quota", { kind: "rate-limited", retryAfterMs: 1_000 }],
   ])("%s is never tried again", (_name, error) => {
     expect(shouldRetryQuery(0, failure(error))).toBe(false);
   });
@@ -76,10 +77,13 @@ describe("cacheEffectsOf (P5, golden)", () => {
       [`invalidate groups/${G}/rounds/r1`, `invalidateExact groups/${G}/rounds`],
     ],
     [
-      { type: "profileSaved", profile: {}, cachedGroupIds: [G, "g2"] },
+      { type: "profileSaved", profile: {}, nickname: "Ana", cachedGroupIds: [G, "g2"] },
       ["set me/profile", `invalidate groups/${G}/members`, "invalidate groups/g2/members"],
     ],
-    [{ type: "profileSaved", profile: {}, cachedGroupIds: [] }, ["set me/profile"]],
+    [
+      { type: "profileSaved", profile: {}, nickname: "Ana", cachedGroupIds: [] },
+      ["set me/profile"],
+    ],
     ...(["changeMemberRole", "changeMemberType", "removeMember"] as const).flatMap(
       (type): [MutationEvent, readonly string[]][] => [
         [
@@ -161,9 +165,13 @@ describe("the allow list of the persisted cache (P6)", () => {
     [["groups", G, "rounds", "round-1", "extra"], false],
     [queryKeys.invites(G), false],
     [queryKeys.memberLevels(G), false],
+    [queryKeys.courtSummary(G, "round-1"), false],
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
-    [queryKeys.myProfile(), false],
+    [queryKeys.myProfile(), true],
+    [queryKeys.deletionBlockers(), false],
+    [["me", "profile", "x"], false],
+    [["me", "nickname"], false],
     [["groups", G, "members", "extra"], false],
     [["groups", 1], false],
     [["unknown"], false],
@@ -194,6 +202,7 @@ describe("the allow list of the persisted cache (P6)", () => {
   test.each<[string, ApiError, boolean]>([
     ["no network", { kind: "offline" }, true],
     ["the server down", { kind: "unavailable", retryAfterMs: 0 }, true],
+    ["too many requests (429)", { kind: "rate-limited", retryAfterMs: 0 }, true],
     [
       "removed from the group (403)",
       { kind: "problem", status: 403, code: "groups.forbidden" },

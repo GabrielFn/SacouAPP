@@ -115,6 +115,7 @@ export const roundsStrings = {
     notFound: "Essa rodada não existe mais.",
     backToGroups: "Voltar aos grupos",
     drawTimes: "Sortear times",
+    buildTeams: "Montar times",
     openCourt: "Abrir quadra",
     back: "Voltar",
     copyList: "Copiar lista",

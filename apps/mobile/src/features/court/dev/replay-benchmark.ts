@@ -1,5 +1,6 @@
 import {
   getRecentPoints,
+  previewRevert,
   parseEventEnvelope,
   undoLastAction,
   type CourtSessionTimeline,
@@ -9,7 +10,7 @@ import {
 import { selectCourtScreen } from "../model/court-screen.selectors";
 import type { Clock } from "../ports/clock";
 import type { CourtRoster } from "../ports/court-roster";
-import type { CourtRuntime } from "../ports/court-runtime";
+import type { CourtStorage } from "../ports/court-runtime";
 import { createCourtReplayer, runCourtReplay } from "../session/court-replay";
 import { createCourtSessionController } from "../session/court-session-controller";
 import {
@@ -41,7 +42,7 @@ export interface BenchmarkDeps {
   readonly clock: Clock;
   readonly roster: CourtRoster;
   /** The database of the benchmark, never the one of the matches. */
-  readonly runtime: CourtRuntime;
+  readonly runtime: CourtStorage;
   /** Gives the screen time to draw between two measures. */
   readonly pause: () => Promise<void>;
   readonly repetitions?: number;
@@ -96,15 +97,23 @@ function replayOrFail(
   return replayed.value;
 }
 
+/** The third newest point: the one a person picks to see what going back to it does. */
+const BENCHMARK_PICKED_POINT = 2;
+
 /**
- * (d) the work of the screen of corrections (screen 24). `getOpenMatchStartIndex` is not public: it
+ * (d) the work of the screen of corrections (screen 24: the list, and opening the preview of one point). `getOpenMatchStartIndex` is not public: it
  * runs inside `undoLastAction`, which the court asks for on every draw (`canUndo`), so it is asked 10 times.
  */
 function askCorrections(timeline: CourtSessionTimeline): void {
   range(BENCHMARK_START_INDEX_CALLS).forEach(() => {
     undoLastAction(timeline);
   });
-  getRecentPoints(timeline);
+  const points = getRecentPoints(timeline);
+  // Picking a line: the preview of going back runs for the picked point only (E4.10, D4).
+  const picked = points[BENCHMARK_PICKED_POINT];
+  if (picked !== undefined) {
+    previewRevert(timeline, picked.eventId);
+  }
 }
 
 async function storeScenario(

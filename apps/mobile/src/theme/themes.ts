@@ -26,6 +26,7 @@ export const THEME_ROLES = [
   "infoFill",
   "infoText",
   "danger",
+  "refusal",
   "dangerFill",
   "dangerTitle",
   "panelSurface",
@@ -36,6 +37,9 @@ export const THEME_ROLES = [
   "suggestText",
   "goingFill",
   "goingText",
+  "selectFill",
+  "selectOutline",
+  "meterBand",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -62,6 +66,10 @@ const memberColors = {
   suggestText: palette.suggestText,
   goingFill: palette.goingFill,
   goingText: palette.goingText,
+  // The draw (Sorteio.dc.html): a selected name and the band of the meter.
+  selectFill: palette.selectFill,
+  selectOutline: palette.netBlue,
+  meterBand: palette.meterBand,
 } as const;
 
 /** One ground and its text for the day strip of a round card (Grupos.dc.html .day). */
@@ -85,6 +93,7 @@ export const appTheme = {
   surface: palette.white,
   text: palette.night,
   textMuted: palette.textSecondary,
+  refusal: palette.danger,
   primary: palette.serveOrange,
   onPrimary: palette.night,
   accent: palette.ballYellow,
@@ -115,6 +124,7 @@ interface CourtColors {
   readonly background: string;
   readonly foreground: string;
   readonly muted: string;
+  readonly refusal: string;
   readonly scoreHighlight: string;
   readonly serverOutline: string;
   readonly queueSurface: string;
@@ -126,6 +136,7 @@ function courtTheme(colors: CourtColors): Theme {
     surface: colors.background,
     text: colors.foreground,
     textMuted: colors.muted,
+    refusal: colors.refusal,
     primary: palette.serveOrange,
     onPrimary: palette.night,
     accent: palette.ballYellow,

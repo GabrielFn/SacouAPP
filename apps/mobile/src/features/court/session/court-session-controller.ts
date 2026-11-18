@@ -2,10 +2,21 @@ import type { EventEnvelope } from "@sacou/match-engine";
 import { err, ok, type Result } from "@sacou/volley-rules";
 
 import type { CourtCommand } from "./command-drafts";
+import type { CourtSyncHooks } from "../ports/court-sync";
 import { runCourtCommand, type CommandRunnerDeps } from "./command-runner";
 import type { CommandError, LoadFailureCode } from "./court-errors";
-import { loadCourtSession, type WriteContext } from "./court-session-loader";
+import { loadCourtSession, type SessionSyncState, type WriteContext } from "./court-session-loader";
 import { createSnapshotStore } from "./snapshot-store";
+import {
+  sessionOwnership,
+  type SessionOwner,
+  type SessionOwnership,
+} from "../sync/session-ownership";
+
+/** How the upload stands, and whose the session is for the account signed in (ADR 0067, D8). */
+export interface CourtSyncStanding extends SessionSyncState {
+  readonly ownership: SessionOwnership;
+}
 
 /**
  * `events` is exactly what the SQLite file holds: the screen reads it, never edits it. The state of
@@ -17,10 +28,18 @@ export type CourtSnapshot =
       readonly status: "ready";
       readonly courtSessionId: string;
       readonly events: readonly EventEnvelope[];
+      readonly sync: CourtSyncStanding;
+      /** This device and its batch: what tells its own pending and refused events apart. */
+      readonly writer: WriteContext;
     }
   | { readonly status: "failed"; readonly code: LoadFailureCode };
 
-export type CommandResult = Result<void, CommandError>;
+/** The events a command wrote, in order: the screen reads their IDs (the point screen 31 asks about). */
+export interface CommandOutcome {
+  readonly written: readonly EventEnvelope[];
+}
+
+export type CommandResult = Result<CommandOutcome, CommandError>;
 
 export interface CourtSessionController {
   /** For `useSyncExternalStore`. */
@@ -35,9 +54,19 @@ export interface CourtSessionController {
    * app. A log that is still broken stays `failed`, with nothing erased.
    */
   readonly retry: () => Promise<void>;
+  /** Reads the file again without showing the loading state: the upload changed the session. */
+  readonly reload: () => Promise<void>;
+  /** "Entendi" of screen 09c (D6): the refused points stay, the sheet does not show again. */
+  readonly markRefusedSeen: () => Promise<void>;
 }
 
-export type CourtSessionControllerDeps = CommandRunnerDeps;
+export interface CourtSessionControllerDeps extends CommandRunnerDeps {
+  /**
+   * Told after each write that committed, so the events leave right away (ADR 0067, D3), and asked
+   * for the account signed in. Without it (benchmarks, tests) every session counts as this one's.
+   */
+  readonly sync?: Pick<CourtSyncHooks, "notifyAppended" | "ownerKey">;
+}
 
 const NOT_READY: CommandResult = err({ code: "not-ready" });
 
@@ -57,6 +86,10 @@ export function createCourtSessionController(
     return result;
   }
 
+  async function ownershipOf(owner: SessionOwner): Promise<SessionOwnership> {
+    return deps.sync === undefined ? "own" : sessionOwnership(owner, await deps.sync.ownerKey());
+  }
+
   async function load(): Promise<void> {
     const loaded = await loadCourtSession(deps.log, deps.replayer, deps.courtSessionId);
     if (!loaded.ok) {
@@ -68,12 +101,20 @@ export function createCourtSessionController(
       status: "ready",
       courtSessionId: deps.courtSessionId,
       events: loaded.value.events,
+      sync: { ...loaded.value.sync, ownership: await ownershipOf(loaded.value.owner) },
+      writer: loaded.value.context,
     });
   }
 
   async function run(command: CourtCommand): Promise<CommandResult> {
     const snapshot = store.getSnapshot();
-    if (snapshot.status !== "ready" || context.current === null) {
+    // Only the account that owns the session marks it: the points of another one (or of none) would
+    // leave with that account, or never (tester of part 1, finding 1).
+    if (
+      snapshot.status !== "ready" ||
+      context.current === null ||
+      snapshot.sync.ownership !== "own"
+    ) {
       return NOT_READY;
     }
     const outcome = await runCourtCommand(deps, context.current, snapshot.events, command);
@@ -85,7 +126,8 @@ export function createCourtSessionController(
       return outcome;
     }
     store.set({ ...snapshot, events: outcome.value });
-    return ok(undefined);
+    deps.sync?.notifyAppended();
+    return ok({ written: outcome.value.slice(snapshot.events.length) });
   }
 
   void enqueue(load);
@@ -94,6 +136,13 @@ export function createCourtSessionController(
     getSnapshot: store.getSnapshot,
     dispatch: (command) => enqueue(() => run(command)),
     whenIdle: () => queue.current,
+    reload: () => enqueue(load),
+    markRefusedSeen: () =>
+      enqueue(async () => {
+        // A write that failed leaves the sheet up: it shows again until "Entendi" is kept.
+        await deps.log.markRefusedSeen(deps.courtSessionId);
+        await load();
+      }),
     retry: () =>
       enqueue(() => {
         store.set({ status: "loading" });

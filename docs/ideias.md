@@ -14,3 +14,7 @@
 - **Trocar os lados a cada set** ("Inverter lados" automático, como a troca de quadra do vôlei): decidido em 13/11/2026 que o "Inverter lados" vale só enquanto a quadra está aberta e é manual (E4.17); a troca sozinha a cada set fica aqui.
 
 - **Bloqueio do app por biometria ou PIN** (E4.3, ADR 0057, D5): o piloto confia no bloqueio do próprio celular; pedir a digital antes de abrir o app ou de ações sensíveis fica para depois.
+
+- **Imagem dos times no "Confirmar e compartilhar"** (E4.7, pergunta 71): uma imagem com os times e as cores, gerada por `react-native-view-shot` (biblioteca nativa nova e APK novo). O piloto compartilha texto ("Laranja: Ana, João…").
+
+- **Trocar jogador com quem está na fila** (E4.10, pergunta 79): no piloto a tela 23a troca só com o banco, como o motor (`substitutePlayer`; os times ficam congelados no `MatchStarted`, ADR 0029). "Entrar da fila" pede um evento novo que tire o jogador da fila e o ponha no time no meio da partida.

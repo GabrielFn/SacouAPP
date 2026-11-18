@@ -16,11 +16,13 @@ import type { Member, Round, RoundSummary } from "../../../services/api/sacou-ap
 import { queryKeys } from "../../../services/query/query-keys";
 import { afterCreateGroupHref } from "../../groups/navigation";
 import { withLeaf } from "../../groups/model/settings-patch";
+import { canDraw } from "../../draw/model/can-draw";
 import { createRoundHref, PENDING_ROUND_SCREENS, roundHref } from "../navigation";
 import { createRoundMutation, roundScope } from "../queries/round-mutations";
 import { hasRoundLayer, roundChips, sourceReader } from "./round-chips";
 import {
   footerActions,
+  roundFooterActions,
   managesRounds,
   roleHeader,
   roundSettingsOf,
@@ -197,6 +199,14 @@ describe("one route for every role", () => {
     expect(managesRounds("player")).toBe(false);
   });
 
+  test.each(["admin", "coAdmin", "scorekeeper", "player"] as const)(
+    "'Sortear times' (only on the manager's screen) follows who draws: %s",
+    (role) => {
+      // Screen 26 has no footer, so a role that does not manage never sees the button (E4.7, D1).
+      expect(managesRounds(role)).toBe(canDraw(role));
+    },
+  );
+
   test("the header names the role", () => {
     expect(roleHeader("admin")).toBe("Você é admin");
     expect(roleHeader("coAdmin")).toBe("Você é co-admin");
@@ -204,9 +214,17 @@ describe("one route for every role", () => {
     expect(roleHeader("scorekeeper")).toBe("Você é placar");
   });
 
-  test("with the draw and the court pending there is no footer", () => {
-    expect(PENDING_ROUND_SCREENS).toEqual(["draw", "court"]);
-    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual([]);
+  test("with the pre-game built (E4.7 part 2) nothing is pending: court and draw", () => {
+    expect(PENDING_ROUND_SCREENS).toEqual([]);
+    expect(footerActions(PENDING_ROUND_SCREENS, false)).toEqual(["court", "draw"]);
+  });
+
+  test("'Abrir quadra' only with a court of the round; 'Sortear times' only for who draws (D1)", () => {
+    const all = footerActions(PENDING_ROUND_SCREENS, false);
+    expect(roundFooterActions(all, true, false)).toEqual(["draw"]);
+    expect(roundFooterActions(all, true, true)).toEqual(["court", "draw"]);
+    expect(roundFooterActions(all, false, true)).toEqual(["court"]);
+    expect(roundFooterActions(all, false, false)).toEqual([]);
   });
 
   test("taking 'draw' out of the pending list shows 'Sortear times'", () => {

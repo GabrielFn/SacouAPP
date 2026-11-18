@@ -1,0 +1,69 @@
+# Deploy da API
+
+Decisões: [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md). Configuração feita uma vez: [`gcp-configuracao.md`](gcp-configuracao.md).
+
+## Ambientes
+
+| Ambiente | Serviço do Cloud Run | `ASPNETCORE_ENVIRONMENT` | Banco (Neon, `us-east-1`, Postgres 18) | Segredo | Conta de execução |
+|---|---|---|---|---|---|
+| Teste | `sacou-api-test` | `Staging` | projeto `sacou-test`, banco `sacou` | `sacou-database-url-test` | `sacou-api-test-run` |
+| Produção | `sacou-api` | `Production` | projeto `sacou-prod`, banco `sacou` | `sacou-database-url-prod` | `sacou-api-run` |
+
+Os dois na `us-east4`, projeto `sacou-api`, com a configuração de `deploy/cloud-run/service.yaml`: 1 vCPU, 512 MiB, de 0 a 1 instância, cobrança por requisição, tempo limite de 60 s, sonda de partida em `/health`. As URLs são as `*.run.app` mostradas no run do GitHub (ambiente `test` e `production`) e no console; não há domínio próprio agora (resposta 89: a E5.4 usa EAS Update para poder trocar o endereço pelo ar, e o domínio entra quando a E3.12 for aos jogadores).
+
+Variáveis (só nomes): `SACOU_DATABASE_URL` (do Secret Manager, por referência), `ASPNETCORE_ENVIRONMENT`, `Database__MigrateOnStartup=true`. Lista completa em [`segredos.md`](../seguranca/segredos.md).
+
+## Fluxo
+
+1. PR com CI verde → merge squash na `main`.
+2. O `CI` roda na `main`. Só com ele verde o workflow **Deploy API** (`.github/workflows/deploy-api.yml`) começa. CI vermelha: nada sobe; corrigir com um PR novo.
+3. Job `changes`: se o commit só mexe em `docs/` (fora de `docs/dominio/`) ou só em `apps/mobile/`, o deploy é pulado (`api=false` de `scripts/ci-areas.mjs`). Qualquer outra coisa, ou um diff que falhe, faz o deploy.
+4. Job `build` (conta `sacou-builder`, sem ambiente): monta a imagem e envia para o Artifact Registry; a saída é a imagem **por digest**.
+5. Job `deploy-test` (ambiente `test`, conta `sacou-deployer-test`): aplica o `service.yaml` no `sacou-api-test` e chama `/health`.
+6. Job `deploy-production` (ambiente `production`, conta `sacou-deployer-prod`): espera a **aprovação do Gabriel** (Actions → o run → "Review deployments" → Approve). Sobe a mesma imagem, pelo digest, no `sacou-api` e chama `/health`. Sem aprovação, só o teste muda.
+
+Cada deploy tem o seu grupo de `concurrency` (`deploy-api-test` e `deploy-api-production`), sem cancelar o que já roda: um run parado à espera da aprovação da produção não segura o deploy do teste do run seguinte. Por grupo, o GitHub mantém no máximo um job rodando e um pendente: um pendente novo cancela o pendente mais velho antes de ele começar, então a produção sobe sempre o run mais novo que chegou lá.
+
+As migrações rodam na partida de cada revisão, antes de a porta abrir. Se falharem, a revisão nova não recebe tráfego e a anterior continua no ar; o job falha.
+
+**Toda migração tem de ser compatível com a versão anterior** (expandir e depois contrair): durante o deploy, a revisão velha e a nova convivem. Renomear ou apagar coluna leva dois deploys: primeiro o código para de usar, depois a migração remove.
+
+## Primeiro deploy de cada serviço
+
+Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".
+
+## Voltar para a revisão anterior
+
+Quando a revisão nova sobe mas se comporta mal:
+
+1. Console → Cloud Run → serviço → aba **Revisões** → "Gerenciar tráfego" → 100% na revisão anterior → Salvar. Ou, no Cloud Shell: `gcloud run services update-traffic <serviço> --region=us-east4 --to-revisions=<revisão>=100`.
+2. A revisão anterior sobe com o esquema já migrado. Por isso as migrações precisam ser compatíveis com ela.
+3. Corrigir num PR novo. O próximo deploy volta a mandar 100% para a revisão mais nova (`latestRevision` no `service.yaml`).
+
+Desfazer uma migração não é automático: com dado errado, use a restauração do Neon (abaixo).
+
+## Roteiro depois de um deploy (casos 17 a 27 do plano da E5.1)
+
+1. Neon: `SHOW server_version;` começa com `18.` nos dois projetos.
+2. `GET https://<url>/health` responde 200; `http://` é redirecionado ou recusado.
+3. Uma rota protegida sem token responde 401 com `ProblemDetails`; `/openapi/v1.json` responde 404 ou 401.
+4. Com uma conta de teste, `POST /v1/me` responde 200 e a linha aparece **só** no banco do ambiente.
+5. Logs Explorer (partida e requisições): procurar `Password`, `postgresql://` e `Bearer`; nenhum aparece.
+6. Partida a frio: com zero instâncias e o Neon parado, medir a primeira requisição. Acima de 10 s, levar o número ao Gabriel (resposta 90).
+7. No Cloud Shell, impersonando `sacou-api-test-run`, ler `sacou-database-url-prod` deve dar 403.
+8. Uma branch descartável que tente `google-github-actions/auth` recebe recusa do STS.
+9. Faturamento → Relatórios: US$ 0,00 no fim do primeiro dia; teto e alerta ativos; Artifact Registry abaixo de 0,5 GB.
+10. Neon depois de 15 min sem uso: a compute aparece como **Suspended**. Se não aparecer, a conexão ociosa a mantém acordada (ADR 0068, D6).
+
+Resultados no PR da tarefa ou no diário da sessão.
+
+## Custo
+
+Esperado: US$ 0 (faixa grátis do Cloud Run na `us-east4`, 0,5 GB do Artifact Registry, Secret Manager e Logging dentro do grátis; Neon Free, 100 CU-hora por projeto e por mês). Onde olhar:
+
+- Google Cloud → Faturamento → Relatórios (filtro do projeto `sacou-api`). O teto de gasto do Cloud Run **pausa os serviços** quando atingido; o alerta avisa em 50, 90 e 100%.
+- Neon → projeto → Billing / Usage: horas de compute. Se acabarem, a compute fica suspensa até o mês seguinte.
+
+## Backup
+
+Até a E5.3, só a restauração do Neon Free (6 h de histórico): Neon → projeto → Restore. A produção só recebe jogadores reais depois da E5.3 (condição 2 da revisão do M3).

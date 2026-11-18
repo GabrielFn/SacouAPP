@@ -9,7 +9,7 @@ const MINUTE = 60_000;
 
 describe("offlineBannerText", () => {
   test.each([
-    [30_000, "Sem conexão · atualizado agora há pouco"],
+    [30_000, "Sem conexão"],
     [5 * MINUTE, "Sem conexão · atualizado há 5 min"],
     [125 * MINUTE, "Sem conexão · atualizado há 2 h"],
     [25 * 60 * MINUTE, "Sem conexão · atualizado há 1 dia"],

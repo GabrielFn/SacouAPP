@@ -1,11 +1,15 @@
 import type { ApiErrorCode } from "../api/generated/error-codes";
 
+/** The 429 of the API's rate limit (ADR 0062), by its kind and by its code. */
+const RATE_LIMITED_TEXT = "Muitas tentativas em pouco tempo. Espere um pouco e tente de novo.";
+
 /**
  * What the person reads for each rule error of the API, by `code` (ADR 0039 and 0042). A `Record` over the
  * generated union: a new code without a text, or a text for a code that is gone, does not compile. A code
  * this app does not know (an older app against a newer API) never reaches the screen as raw text.
  */
 export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
+  "api.rate-limited": RATE_LIMITED_TEXT,
   "groups.forbidden": "Você não tem permissão para fazer isso neste grupo.",
   "groups.group-not-found": "Esse grupo não existe ou você não faz mais parte dele.",
   "groups.invite-invalid": "Esse convite não vale mais. Peça um link novo a quem organiza o grupo.",
@@ -41,6 +45,28 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "identity.recent-login-required": "Por segurança, entre de novo antes de excluir a conta.",
   "identity.subject-invalid": "Não deu para confirmar sua conta. Entre de novo.",
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
+  "matches.batch-invalid": "Os pontos chegaram fora de ordem. O app vai enviar de novo.",
+  "matches.batch-mismatch": "Este celular não está mais com a quadra.",
+  "matches.court-session-not-found": "Essa quadra não existe nesta rodada.",
+  "matches.event-id-conflict": "Um ponto chegou diferente do que já estava salvo.",
+  "matches.event-implausible": "Um ponto não confere com o placar e não foi salvo.",
+  "matches.event-rejected": "Um ponto não confere com a partida e não foi salvo.",
+  "matches.event-too-large": "Um ponto chegou grande demais e não foi salvo.",
+  "matches.invalid-envelope": "Um ponto chegou com defeito e não foi salvo.",
+  "matches.limit-reached": "A quadra chegou ao limite de pontos desta rodada.",
+  "matches.member-not-in-group": "Alguém na partida não faz parte deste grupo.",
+  "matches.not-the-writer": "Outro celular está com a quadra.",
+  "matches.position-invalid": "Não deu para ler a quadra. Tente de novo.",
+  "matches.round-canceled": "Esta rodada foi cancelada.",
+  "matches.round-has-court-session": "Esta rodada já tem uma quadra aberta em outro celular.",
+  "matches.sequence-conflict": "Outro celular está usando a mesma quadra.",
+  "matches.sequence-gap": "Faltam pontos no envio. O app vai enviar de novo.",
+  "matches.stream-changed":
+    "O placar mudou enquanto você confirmava. Confira de novo antes de assumir.",
+  "matches.stream-mismatch": "Os pontos são de outra quadra.",
+  "matches.takeover-invalid": "Não deu para assumir a quadra. Tente de novo.",
+  "matches.unknown-event-type": "Este app enviou algo que o servidor não conhece. Atualize o app.",
+  "matches.unsupported-schema-version": "Atualize o app para enviar os pontos.",
   "sessions.attendance-disabled": "A presença está desligada nesta rodada.",
   "sessions.draw-disabled": "O sorteio está desligado nesta rodada.",
   // "24" is DrawLimits.MaxLocks in apps/api/src/Sacou.Modules/Sessions/Domain/Draw/DrawLimits.cs.
@@ -73,15 +99,17 @@ export const apiErrorKindTexts = {
   sessionExpired: "Sua sessão acabou. Entre de novo.",
   notRegistered: "Estamos terminando de preparar sua conta. Tente de novo.",
   tooLarge: "Esse conteúdo é grande demais.",
+  rateLimited: RATE_LIMITED_TEXT,
   unavailable: "O Sacou está fora do ar por um instante. Tentando de novo.",
   offline: "Sem conexão.",
+  accountChanged: "A conta mudou antes do envio. Nada foi enviado.",
   unexpected: "Algo deu errado. Tente de novo daqui a pouco.",
 } as const;
 
 /** The strip over data kept from the last time, without a network (question 20, option 1). */
 export const offlineTexts = {
   banner: (updated: string) => `Sem conexão · atualizado ${updated}`,
-  justNow: "agora há pouco",
+  bannerNow: "Sem conexão",
   minutesAgo: (minutes: number) => `há ${String(minutes)} min`,
   hoursAgo: (hours: number) => `há ${String(hours)} h`,
   daysAgo: (days: number) => (days === 1 ? "há 1 dia" : `há ${String(days)} dias`),

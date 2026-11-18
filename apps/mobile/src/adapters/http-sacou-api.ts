@@ -12,14 +12,17 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { createGuardedFetch, NetworkFailure, refuseEverything } from "./http-guarded-fetch";
 import { createAccountOperations } from "./http-account-operations";
+import { createCourtOperations } from "./http-court-operations";
 import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
 import { createRoundOperations } from "./http-round-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
-import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
+import type { HttpTransport } from "../services/api/http-transport";
 import type { IdTokenProvider } from "../services/api/id-token-provider";
+import type { SessionIdentity } from "../services/auth/auth-session";
 import type { SacouApi } from "../services/api/sacou-api";
 
 /** A request that takes longer is treated as no network (E4.2, D5). */
@@ -45,48 +48,8 @@ interface FetchOutcome<T> {
 
 export type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
 
-/** The transport failed (no network, timeout): `offline`. Anything else thrown is `unexpected`. */
-class NetworkFailure extends Error {}
-/** A URL outside the API's origin: refused before anything is sent (D7). */
-class OtherOriginRefused extends Error {}
-
 const NOT_SENT: ApiError = { kind: "unexpected", status: 0 };
-const BODYLESS_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "DELETE"]);
-
-async function bodyOf(request: Request): Promise<string | null> {
-  if (BODYLESS_METHODS.has(request.method)) return null;
-  const text = await request.text();
-  return text === "" ? null : text;
-}
-
-function createGuardedFetch(baseUrl: string, transport: HttpTransport, timeoutMs: number) {
-  return async (request: Request): Promise<Response> => {
-    if (!isApiUrl(baseUrl, request.url)) throw new OtherOriginRefused();
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      controller.abort();
-    }, timeoutMs);
-    try {
-      const sent: HttpRequest = {
-        url: request.url,
-        method: request.method,
-        headers: request.headers,
-        body: await bodyOf(request),
-        signal: controller.signal,
-      };
-      return await transport(sent);
-    } catch {
-      // The reason may carry the URL: only the kind goes on.
-      throw new NetworkFailure();
-    } finally {
-      clearTimeout(timer);
-    }
-  };
-}
-
-function refuseEverything(): Promise<Response> {
-  return Promise.reject(new OtherOriginRefused());
-}
+const ACCOUNT_CHANGED: ApiError = { kind: "account-changed" };
 
 function readOutcome<T>(baseUrl: string, outcome: FetchOutcome<T>, nowMs: number): ApiResult<T> {
   const { response } = outcome;
@@ -164,9 +127,28 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     }
   }
 
-  async function run<T>(call: Call<T>, state: AttemptState): Promise<ApiResult<T>> {
+  /** A call tied to an account leaves only while that account is signed in (ADR 0067, D8). */
+  function switchedFrom(account: SessionIdentity | null): boolean {
+    return account !== null && idTokens.currentSession() !== account;
+  }
+
+  async function tokenOf(
+    state: AttemptState,
+    account: SessionIdentity | null,
+  ): Promise<ApiResult<string | null>> {
+    if (switchedFrom(account)) return apiErr(ACCOUNT_CHANGED);
+    const token = await tokenFor(state);
+    // The token was read while waiting: the account may have changed meanwhile.
+    return token.ok && switchedFrom(account) ? apiErr(ACCOUNT_CHANGED) : token;
+  }
+
+  async function run<T>(
+    call: Call<T>,
+    state: AttemptState,
+    account: SessionIdentity | null,
+  ): Promise<ApiResult<T>> {
     const session = idTokens.currentSession();
-    const tokenResult = await tokenFor(state);
+    const tokenResult = await tokenOf(state, account);
     if (!tokenResult.ok) return tokenResult;
     const token = tokenResult.value;
     if (token === null) return giveUp({ kind: "session-expired" });
@@ -174,10 +156,10 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     if (result.ok) return result;
     switch (nextStep(result.error, state)) {
       case "renew-token":
-        return run(call, { ...state, renewedToken: true });
+        return run(call, { ...state, renewedToken: true }, account);
       case "sign-in": {
         const signed = await attempt(signInCall, token);
-        if (signed.ok) return run(call, { ...state, signedIn: true });
+        if (signed.ok) return run(call, { ...state, signedIn: true }, account);
         if (isAccountDeleted(signed.error) && session !== null) idTokens.onAccountDeleted(session);
         return giveUp(signed.error);
       }
@@ -186,9 +168,13 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     }
   }
 
-  function execute<T>(call: Call<T>): Promise<ApiResult<T>> {
+  function executeAs<T>(call: Call<T>, account: SessionIdentity | null): Promise<ApiResult<T>> {
     if (baseUrl === null) return Promise.resolve(apiErr(NOT_SENT));
-    return run(call, { renewedToken: false, signedIn: false });
+    return run(call, { renewedToken: false, signedIn: false }, account);
+  }
+
+  function execute<T>(call: Call<T>): Promise<ApiResult<T>> {
+    return executeAs(call, null);
   }
 
   async function executeEmpty(call: Call<unknown>): Promise<ApiResult<null>> {
@@ -296,5 +282,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createRoundOperations(client, execute),
     ...createProfileOperations(client, execute),
     ...createAccountOperations(client, execute),
+    ...createCourtOperations(client, executeAs),
   };
 }

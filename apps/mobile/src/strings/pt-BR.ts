@@ -1,9 +1,12 @@
 import { accountStrings } from "./account.pt-BR";
 import { authStrings } from "./auth.pt-BR";
 import { courtStrings } from "./court.pt-BR";
+import { courtPlayersStrings } from "./court-players.pt-BR";
 import { createGroupStrings } from "./create-group.pt-BR";
+import { drawStrings } from "./draw.pt-BR";
 import { groupsStrings } from "./groups.pt-BR";
 import { inviteStrings } from "./invite.pt-BR";
+import { lineupStrings } from "./lineup.pt-BR";
 import { membersStrings } from "./members.pt-BR";
 import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
@@ -15,10 +18,13 @@ export const strings = {
   profile: profileStrings,
   account: accountStrings,
   court: courtStrings,
+  courtPlayers: courtPlayersStrings,
   groups: groupsStrings,
   createGroup: createGroupStrings,
   settings: settingsStrings,
   rounds: roundsStrings,
+  draw: drawStrings,
+  lineup: lineupStrings,
   members: membersStrings,
   invite: inviteStrings,
   ratings: ratingsStrings,

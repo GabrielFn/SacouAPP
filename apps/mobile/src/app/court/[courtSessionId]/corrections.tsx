@@ -1,16 +1,138 @@
-import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
-import { CourtPlaceholder } from "../../../features/court/ui/CourtPlaceholder";
-import { strings } from "../../../strings/pt-BR";
+import { useMemo, useReducer } from "react";
+import { View } from "react-native";
 
-/** Placeholder of screen 24 (E4.10). */
+import {
+  correctionsReducer,
+  INITIAL_CORRECTIONS,
+} from "../../../features/court/corrections/corrections.reducer";
+import {
+  canShift,
+  correctionsSubtitle,
+  currentPointNotice,
+  currentSetNumber,
+  effectiveSelection,
+  revertSheet,
+  servingNotice,
+  shiftOptions,
+  timelineRows,
+} from "../../../features/court/corrections/corrections-selectors";
+import { useAttributionSheet } from "../../../features/court/hooks/use-attribution-sheet";
+import { useIndividualPoints } from "../../../features/court/hooks/use-individual-points";
+import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
+import { useCourtSession } from "../../../features/court/hooks/use-court-session";
+import {
+  selectCourtPhase,
+  stateOfTimeline,
+} from "../../../features/court/model/court-screen.selectors";
+import { refusalText } from "../../../features/court/model/refusal-text";
+import type { PlayCommand } from "../../../features/court/session/command-drafts";
+import { AttributionSheet } from "../../../features/court/ui/AttributionSheet";
+import { CorrectionsScreen } from "../../../features/court/ui/CorrectionsScreen";
+import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
+import { useServices } from "../../../services/services-context";
+
+/** Screen 24: the points of the set, going back to one of them, "Trocar sacador" and "Girar". */
 export default function CorrectionsRoute() {
-  const { back } = useCourtRoute();
-  const { correctionsPlaceholder } = strings.court;
+  const route = useCourtRoute();
+  const { courtRoster } = useServices();
+  const { view, dispatch, retry } = useCourtSession();
+  const [state, send] = useReducer(correctionsReducer, INITIAL_CORRECTIONS);
+  const timeline = view.status === "ready" ? view.timeline : null;
+  const individualPoints = useIndividualPoints();
+  const attribution = useAttributionSheet(timeline, dispatch);
+  const selected = useMemo(
+    () => (timeline === null ? null : effectiveSelection(timeline, state.selected)),
+    [timeline, state.selected],
+  );
+  const model = useMemo(() => {
+    if (timeline === null) {
+      return null;
+    }
+    const options = shiftOptions(timeline, courtRoster);
+    return {
+      subtitle: correctionsSubtitle(timeline, courtRoster),
+      setNumber: currentSetNumber(timeline),
+      rows: timelineRows(timeline, courtRoster, selected, individualPoints),
+      revert: revertSheet(timeline, courtRoster, selected),
+      shiftOptions: options,
+      canShift: canShift(options),
+      canSwitchServer: selectCourtPhase(stateOfTimeline(timeline)) === "playing",
+      servingNotice: servingNotice(timeline, courtRoster),
+      currentNotice: currentPointNotice(timeline, state.selected),
+    };
+  }, [timeline, courtRoster, selected, state.selected, individualPoints]);
+  if (view.status === "failed") {
+    return <CourtFailedView onRetry={retry} onLeave={route.leave} />;
+  }
+  if (model === null) {
+    return null;
+  }
+  // A refusal says why nothing happened; a command that goes through clears the last one.
+  const run = (command: PlayCommand, onDone?: () => void) => {
+    if (state.pending) return;
+    send({ type: "command-sent" });
+    void dispatch(command).then((result) => {
+      send(
+        result.ok
+          ? { type: "command-accepted" }
+          : { type: "command-refused", text: refusalText(result.error) },
+      );
+      if (result.ok) {
+        onDone?.();
+      }
+    });
+  };
+  const sheetState = { ...state, selected };
   return (
-    <CourtPlaceholder
-      title={correctionsPlaceholder.title}
-      lines={[correctionsPlaceholder.soon]}
-      actions={[{ label: correctionsPlaceholder.back, onPress: back }]}
-    />
+    <View style={{ flex: 1 }}>
+      <CorrectionsScreen
+        {...model}
+        {...(individualPoints
+          ? {
+              onAuthor: (eventId: string) => {
+                attribution.open([eventId]);
+              },
+            }
+          : {})}
+        state={sheetState}
+        refusal={state.refusal}
+        onClose={route.backOrCourt}
+        onPointTapped={(eventId) => {
+          send({ type: "point-tapped", eventId });
+        }}
+        onSwitchServer={() => {
+          run({ type: "switch-serving-team" });
+        }}
+        onOpenShift={() => {
+          send({ type: "shift-opened" });
+        }}
+        onChooseShiftTeam={(team) => {
+          send({ type: "shift-team-chosen", team });
+        }}
+        onShift={(direction) => {
+          run({ type: "shift-rotation", team: state.shiftTeam, direction });
+        }}
+        onCloseShift={() => {
+          send({ type: "shift-closed" });
+        }}
+        onRevert={() => {
+          if (selected !== null) {
+            run({ type: "revert-to", eventId: selected }, route.backOrCourt);
+          }
+        }}
+        onCancelRevert={() => {
+          send({ type: "selection-cleared" });
+        }}
+      />
+      {attribution.model === null ? null : (
+        <AttributionSheet
+          model={attribution.model}
+          onChooseKind={attribution.onChooseKind}
+          onAuthor={attribution.onAuthor}
+          onOpponentError={attribution.onOpponentError}
+          onSkip={attribution.onSkip}
+        />
+      )}
+    </View>
   );
 }

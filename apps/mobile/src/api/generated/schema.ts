@@ -481,6 +481,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ListCourtEvents"];
+    put?: never;
+    post: operations["AppendCourtEvents"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/takeover": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["TakeOverCourt"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/groups/{groupId}/rounds/{roundId}/court-session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetCourtSession"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -513,6 +561,15 @@ export interface components {
       status: number;
       code: string;
       traceId?: string;
+    };
+    AppendCourtEventsRequest: {
+      events: components["schemas"]["JsonObject"][];
+    };
+    AppendCourtEventsResponse: {
+      /** Format: int64 */
+      lastSequence: number;
+      /** Format: int32 */
+      stored: number;
     };
     ApplyTemplateRequest: {
       templateKey: null | string;
@@ -552,6 +609,26 @@ export interface components {
     CorrectGuestRequest: {
       name: null | string;
       primaryPosition: null | string;
+    };
+    CourtScoreboardResponse: {
+      /** Format: uuid */
+      matchId: string;
+      /** Format: int32 */
+      setNumber: number;
+      /** Format: int32 */
+      pointsA: number;
+      /** Format: int32 */
+      pointsB: number;
+      /** Format: int32 */
+      setsA: number;
+      /** Format: int32 */
+      setsB: number;
+    };
+    CourtWriterResponse: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: date-time */
+      since: string;
     };
     CreateGroupRequest: {
       name: null | string;
@@ -623,6 +700,18 @@ export interface components {
       /** Format: int32 */
       differenceTenths: number;
     };
+    GetCourtSessionResponse: {
+      /** Format: uuid */
+      courtSessionId: string;
+      /** Format: int64 */
+      currentBatch: number;
+      /** Format: int32 */
+      eventCount: number;
+      writer: components["schemas"]["CourtWriterResponse"];
+      /** Format: date-time */
+      lastEventAt: null | string;
+      scoreboard: null | components["schemas"]["CourtScoreboardResponse"];
+    };
     GoingEntry: {
       /** Format: uuid */
       memberId: string;
@@ -680,6 +769,13 @@ export interface components {
     JsonNode: unknown;
     JsonObject: {
       [key: string]: unknown;
+    };
+    ListCourtEventsResponse: {
+      events: components["schemas"]["JsonObject"][];
+      /** Format: int64 */
+      lastPosition: number;
+      /** Format: int32 */
+      eventCount: number;
     };
     MemberLevelResponse: {
       /** Format: uuid */
@@ -862,6 +958,22 @@ export interface components {
       /** Format: int32 */
       position: null | number;
     };
+    TakeOverCourtRequest: {
+      /** Format: uuid */
+      deviceId: string;
+      /** Format: int64 */
+      expectedBatch: number;
+      /** Format: int64 */
+      expectedEventCount: number;
+    };
+    TakeOverCourtResponse: {
+      /** Format: int64 */
+      batch: number;
+      /** Format: int64 */
+      eventsBefore: number;
+      /** Format: int64 */
+      lastSequence: number;
+    };
     UpdateGroupSettingsRequest: {
       settings: null | components["schemas"]["JsonElement"];
     };
@@ -932,6 +1044,17 @@ export interface operations {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -997,6 +1120,17 @@ export interface operations {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1053,6 +1187,17 @@ export interface operations {
         };
         content: {
           "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
         };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
@@ -1124,6 +1269,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1173,6 +1329,17 @@ export interface operations {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1220,6 +1387,17 @@ export interface operations {
         };
         content: {
           "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
         };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
@@ -1277,6 +1455,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -1356,6 +1545,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1433,6 +1633,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -1530,6 +1741,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1596,6 +1818,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -1677,6 +1910,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1743,6 +1987,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -1834,6 +2089,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -1914,6 +2180,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -1999,6 +2276,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2073,6 +2361,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2139,6 +2438,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2216,6 +2526,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2281,6 +2602,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2348,6 +2680,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2429,6 +2772,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2509,6 +2863,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2575,6 +2940,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2665,6 +3041,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2730,6 +3117,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2797,6 +3195,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -2878,6 +3287,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -2958,6 +3378,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3057,6 +3488,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -3138,6 +3580,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -3204,6 +3657,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3294,6 +3758,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -3361,6 +3836,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3452,6 +3938,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -3519,6 +4016,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3609,6 +4117,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3701,6 +4220,17 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
         headers: {
@@ -3766,6 +4296,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {
@@ -3856,6 +4397,409 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  ListCourtEvents: {
+    parameters: {
+      query?: {
+        after?: string;
+      };
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+        courtSessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListCourtEventsResponse"];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  AppendCourtEvents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+        courtSessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppendCourtEventsRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AppendCourtEventsResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  TakeOverCourt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+        courtSessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TakeOverCourtRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TakeOverCourtResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetCourtSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetCourtSessionResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
       503: {

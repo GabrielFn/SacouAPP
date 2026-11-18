@@ -7,7 +7,9 @@ using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.AccountData;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.CancelRound;
+using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Sessions.CreateRound;
+using Sacou.Modules.Sessions.Domain.Time;
 using Sacou.Modules.Sessions.DrawTeams;
 using Sacou.Modules.Sessions.GetRound;
 using Sacou.Modules.Sessions.Infrastructure;
@@ -25,6 +27,8 @@ public static class SessionsModule
     public static IServiceCollection AddSessionsModule(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
+        // Fails the start, not the first round: an image without tzdata must never take traffic.
+        _ = SessionsTime.TimeZone;
         services.TryAddSingleton(TimeProvider.System);
         services.AddSessionsDatabase(configuration);
         services.AddScoped<GroupRoundContext>();
@@ -43,6 +47,8 @@ public static class SessionsModule
         services.AddScoped<IAccountExportSection, SessionsExportSection>();
         services.AddSingleton<IDrawSeeds, RandomDrawSeeds>();
         services.AddScoped<DrawTeamsHandler>();
+        // The round of a court stream, for the Matches (E3.7, ADR 0060, D14).
+        services.AddScoped<IRoundDirectory, StoreRoundDirectory>();
         return services;
     }
 

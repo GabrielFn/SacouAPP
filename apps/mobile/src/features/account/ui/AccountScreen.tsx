@@ -7,12 +7,15 @@ import { useServices } from "../../../services/services-context";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { BackBar } from "../../../ui/BackBar";
+import { ConfirmSheet } from "../../../ui/ConfirmSheet";
 import { DocumentIcon, DownloadIcon, ShieldIcon, SignOutIcon } from "../../../ui/MenuIcons";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
 import { meHref } from "../../groups/navigation";
 import { useMyProfile } from "../../profile/hooks/use-profile";
+import { useSignOut } from "../hooks/use-sign-out";
 import { accountScreenView } from "../model/account-view";
+import { unsentWarningText } from "../model/sign-out-flow";
 import { accountRoutes, isAccountScreenReady } from "../navigation";
 import { AccountCard, AccountRow } from "./AccountRow";
 import { DeleteAccountCard } from "./DeleteAccountCard";
@@ -73,7 +76,8 @@ export function AccountScreen({ account }: AccountScreenProps) {
   const router = useRouter();
   // Simple state of one field (frontend.md, rule 4): the sheet is mounted only while open.
   const [exporting, setExporting] = useState(false);
-  const { legalLinks, sessionEnder } = useServices();
+  const { legalLinks } = useServices();
+  const signOut = useSignOut();
   const profile = useMyProfile();
   const view = accountScreenView({ account, profile: profile.data, legalLinks });
   const texts = strings.account;
@@ -123,9 +127,7 @@ export function AccountScreen({ account }: AccountScreenProps) {
           icon={<SignOutIcon />}
           label={texts.signOut}
           chevron={false}
-          onPress={() => {
-            void sessionEnder.end("signedOut");
-          }}
+          onPress={signOut.request}
           last
         />
       </AccountCard>
@@ -143,6 +145,15 @@ export function AccountScreen({ account }: AccountScreenProps) {
           }}
         />
       ) : null}
+      <ConfirmSheet
+        visible={signOut.warning !== null}
+        title={texts.unsent.title}
+        body={signOut.warning === null ? "" : unsentWarningText(signOut.warning)}
+        confirmLabel={texts.unsent.confirm}
+        cancelLabel={texts.unsent.cancel}
+        onConfirm={signOut.confirm}
+        onCancel={signOut.cancel}
+      />
     </Screen>
   );
 }

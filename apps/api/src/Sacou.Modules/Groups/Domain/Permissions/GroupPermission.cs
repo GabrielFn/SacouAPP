@@ -24,4 +24,7 @@ internal enum GroupPermission
 
     /// <summary>Draws the teams of a round with the private levels (ADR 0055): the answer carries them.</summary>
     DrawTeams,
+
+    /// <summary>Writes the court stream of a round (ADR 0046, decision 2; ADR 0060, D5): the scorekeeper's one extra.</summary>
+    WriteCourt,
 }

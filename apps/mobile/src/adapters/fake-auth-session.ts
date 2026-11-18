@@ -50,6 +50,17 @@ export interface FakeAuthSession extends AuthSession {
   calls(): readonly FakeAuthCall[];
 }
 
+const accountKeys = { value: new Map<SessionIdentity, string>() };
+
+/** The key of a fake account, the same for the same identity (the real one hashes the UID). */
+export function fakeAccountKeyOf(identity: SessionIdentity): string {
+  const known = accountKeys.value.get(identity);
+  if (known !== undefined) return known;
+  const key = `fake-account-key-${String(accountKeys.value.size + 1)}`;
+  accountKeys.value = new Map([...accountKeys.value, [identity, key]]);
+  return key;
+}
+
 /** A new account for the fake session, to test an account switch. */
 export function fakeSessionIdentity(): SessionIdentity {
   return Object.freeze({ opaque: Symbol("fake-account") });
@@ -112,6 +123,7 @@ export function createFakeAuthSession(options: FakeAuthSessionOptions = {}): Fak
     createAccountWithEmail: () => run("createAccountWithEmail"),
     sendPasswordReset: () => run("sendPasswordReset"),
     currentSession: () => (snapshot.value.status === "signedIn" ? identity.value : null),
+    accountKeyOf: (session) => Promise.resolve(fakeAccountKeyOf(session)),
     getIdToken({ forceRefresh }) {
       record({ method: "getIdToken", forceRefresh });
       return Promise.resolve(snapshot.value.status === "signedIn" ? FAKE_SESSION_TOKEN : null);

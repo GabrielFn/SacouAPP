@@ -1,6 +1,7 @@
-import type { SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
+import type { EventEnvelope, SettingsLayer, SettingsTemplateKey } from "@sacou/match-engine";
 
 import type { components } from "../../api/generated/schema";
+import type { SessionIdentity } from "../auth/auth-session";
 import type { ApiResult } from "./api-result";
 
 type Schemas = components["schemas"];
@@ -43,6 +44,36 @@ export type AttendanceResponse = Schemas["AttendanceResponse"];
 /** A guest without an account: a name of someone who accepted no terms, and a private level (ADR 0053). */
 export type AddGuestBody = Schemas["AddGuestRequest"];
 export type AddedGuest = Schemas["AddGuestResponse"];
+/** The draw of screen 07: `together` locks and the queue of reserves the admin set (ADR 0055). */
+export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
+/** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
+export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
+
+/** The stream of a court: the round it is in and the UUID the phone made when it opened (ADR 0060). */
+export interface CourtStreamRef {
+  readonly groupId: string;
+  readonly roundId: string;
+  readonly courtSessionId: string;
+}
+
+/** 200 of the court stream: the highest sequence of this device the server holds, and how many are new. */
+export type AppendCourtEventsAnswer = Schemas["AppendCourtEventsResponse"];
+
+/** Who writes the court of a round now, the count and the last score (ADR 0063, D5). Never cached on disk. */
+export type CourtSessionSummary = Schemas["GetCourtSessionResponse"];
+export type TakeOverCourtBody = Schemas["TakeOverCourtRequest"];
+/** The batch this device writes from now on, and where the stream stood (ADR 0063, D2). */
+export type TakeOverCourtAnswer = Schemas["TakeOverCourtResponse"];
+
+/**
+ * A page of the stream of a court, as the server sent it: every field is untrusted input until the
+ * import parses it (E4.11, D5), so nothing here is typed as an event.
+ */
+export interface CourtEventsPage {
+  readonly events: unknown;
+  readonly lastPosition: unknown;
+  readonly eventCount: unknown;
+}
 
 export interface MemberRef {
   readonly groupId: string;
@@ -126,6 +157,46 @@ export interface SacouApi {
   deleteMyAccount(): Promise<ApiResult<null>>;
   /** The same `requestId` in the same group answers the same `memberId` (ADR 0053, D5). Admin and co-admin. */
   addGuest(groupId: string, body: AddGuestBody): Promise<ApiResult<AddedGuest>>;
+  /** Admin and co-admin only (`DrawTeams`). Stores nothing on the server: each call is a new draw. */
+  drawTeams(
+    groupId: string,
+    roundId: string,
+    body: DrawTeamsBody,
+  ): Promise<ApiResult<DrawTeamsAnswer>>;
+  /**
+   * From 1 to 200 events of one device, all or nothing (ADR 0060). It leaves only with the token of
+   * `account`: when another account is signed in by then, it answers `account-changed` and sends nothing
+   * (ADR 0067, D8). The envelopes go as the log has them.
+   */
+  appendCourtEvents(
+    ref: CourtStreamRef,
+    envelopes: readonly EventEnvelope[],
+    account: SessionIdentity,
+  ): Promise<ApiResult<AppendCourtEventsAnswer>>;
+  /**
+   * 404 `court-session-not-found` when the round has no stream yet (ADR 0063, D5). Only with the token
+   * of `account`, as the take-over that follows it (ADR 0067, D8).
+   */
+  getCourtSession(
+    groupId: string,
+    roundId: string,
+    account: SessionIdentity,
+  ): Promise<ApiResult<CourtSessionSummary>>;
+  /** Only with the token of `account`: the batch is of the pair device and member (ADR 0063, D3). */
+  takeOverCourt(
+    ref: CourtStreamRef,
+    body: TakeOverCourtBody,
+    account: SessionIdentity,
+  ): Promise<ApiResult<TakeOverCourtAnswer>>;
+  /**
+   * The envelopes after `after`, up to 500 or 1 MiB per page (ADR 0063, D7). Only with the token of
+   * the account that took the court over: another one signed in meanwhile reads nothing (D8).
+   */
+  listCourtEvents(
+    ref: CourtStreamRef,
+    after: number,
+    account: SessionIdentity,
+  ): Promise<ApiResult<CourtEventsPage>>;
 }
 
 export type SacouApiOperation = keyof SacouApi;

@@ -9,7 +9,18 @@ import {
 
 const EXPECTED_COLUMNS = {
   device: ["singleton", "device_id"],
-  court_sessions: ["court_session_id", "status", "batch"],
+  court_sessions: [
+    "court_session_id",
+    "status",
+    "batch",
+    "group_id",
+    "round_id",
+    "acked_sequence",
+    "taken_over_batch",
+    "sync_halt",
+    // A hash of the account, never the UID nor a name (ADR 0067, D8).
+    "owner_key",
+  ],
   court_events: [
     "court_session_id",
     "position",
@@ -20,6 +31,19 @@ const EXPECTED_COLUMNS = {
     "schema_version",
     "type",
     "payload",
+  ],
+  court_refused_events: [
+    "court_session_id",
+    "position",
+    "event_id",
+    "device_id",
+    "batch",
+    "sequence",
+    "schema_version",
+    "type",
+    "payload",
+    "refused_at_batch",
+    "seen",
   ],
 };
 

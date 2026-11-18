@@ -10,7 +10,7 @@ public sealed class RealAssemblyTests
 
     private static readonly string[] SharedPublicNamespaces = ["Sacou.Shared.Results", "Sacou.Shared.Members", "Sacou.Shared.Text", "Sacou.Shared.Persistence", "Sacou.Shared.Levels"];
 
-    private static readonly string[] HttpPublicNamespaces = ["Sacou.Http"];
+    private static readonly string[] HttpPublicNamespaces = ["Sacou.Http", "Sacou.Http.RateLimiting"];
 
     [Fact]
     public void ModuleAssembliesInOutput_MatchTheCatalog()
@@ -47,6 +47,7 @@ public sealed class RealAssemblyTests
     [InlineData("Sacou.Modules.Stats.Domain.")]
     [InlineData(CourtSessionsNamespace + ".")]
     [InlineData(CourtSessionJsonNamespace + ".")]
+    [InlineData(CourtSessionsNamespace + ".Writes.")]
     public void RealDomain_IsInspected(string domainNamespace)
     {
         Assert.Contains(

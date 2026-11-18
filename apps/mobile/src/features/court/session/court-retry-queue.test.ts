@@ -1,4 +1,3 @@
-import { ok } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
 
 import { createFakeCourtRuntime } from "../../../adapters/fake-court-runtime-opener";
@@ -57,7 +56,7 @@ describe("retry goes through the queue of the controller", () => {
     expect(statuses).toEqual([]);
 
     release();
-    expect(await point).toEqual(ok(undefined));
+    expect((await point).ok).toBe(true);
     await retry;
     expect(statuses).toEqual(["ready", "loading", "ready"]);
     const loaded = await runtime.log.load(SESSION);

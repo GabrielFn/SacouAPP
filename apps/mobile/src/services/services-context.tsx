@@ -2,9 +2,15 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
+import type { AppForeground } from "../features/court/ports/app-foreground";
+import type { Scheduler } from "../features/court/ports/scheduler";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
+import type { CourtRoundSettings } from "../features/court/ports/court-round-settings";
+import type { CourtThemePreference } from "../features/court/ports/court-theme-preference";
+import type { CourtRoundSource } from "../features/court/ports/court-round-source";
+import type { NextMatchDraftStore } from "../features/court/ports/next-match-draft-store";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
 import type { ScreenAwake } from "../features/court/ports/screen-awake";
@@ -20,6 +26,9 @@ import type { FontLoader } from "./font-loader";
 import type { IdGenerator } from "./id/id-generator";
 import type { ExternalLink } from "./links/external-link";
 import type { QrEncoder } from "./qr/qr-encoder";
+import type { CoinFlip } from "./random/coin-flip";
+import type { Shuffler } from "./random/shuffler";
+import type { RandomSource } from "./random/random-source";
 import type { FileShare } from "./share/file-share";
 import type { ShareSheet } from "./share/share-sheet";
 
@@ -29,8 +38,10 @@ import type { SessionEnder } from "./session/end-session";
 export interface Services {
   readonly fontLoader: FontLoader;
   readonly courtRuntimeOpener: CourtRuntimeOpener;
-  /** Names and team colors of the court; the sample one until the pre-game exists (E4.7). */
+  /** Names and team colors of the court, from the members cache, so they show offline (E4.7, D7). */
   readonly courtRoster: CourtRoster;
+  /** "Ponto individual" of the round of a court session, from the rounds cache (E4.10, D10). */
+  readonly courtRoundSettings: CourtRoundSettings;
   /** What the phone does for the court: stay awake, buzz, block the back button, keep time. */
   readonly screenAwake: ScreenAwake;
   /** The court turns the phone on its side and puts it back (E4.17). */
@@ -38,6 +49,8 @@ export interface Services {
   /** The court warns once when the battery is low (E4.17). */
   readonly batteryMonitor: BatteryMonitor;
   readonly courtFeedback: CourtFeedback;
+  /** Sun or night, chosen in the menu of the court and kept on the phone (E4.10, D9). */
+  readonly courtThemePreference: CourtThemePreference;
   readonly backGuard: BackGuard;
   readonly reducedMotion: ReducedMotion;
   readonly clock: Clock;
@@ -46,6 +59,12 @@ export interface Services {
   /** The API, typed by the contract (E4.2). Its answers live only in the TanStack cache, never here. */
   readonly sacouApi: SacouApi;
   readonly networkStatus: NetworkStatus;
+  /** The court upload tries again when the app comes back to the front (E4.11). */
+  readonly appForeground: AppForeground;
+  /** The waits of the court upload (E4.11). */
+  readonly scheduler: Scheduler;
+  /** The variation of the backoff of the court upload: never a secret. */
+  readonly randomSource: RandomSource;
   /** The system share sheet, for the round message (E4.6). */
   readonly shareSheet: ShareSheet;
   /** The export of screen 30a: a temporary file handed to the share sheet, then deleted (E4.3, D9). */
@@ -56,6 +75,14 @@ export interface Services {
   readonly externalLink: ExternalLink;
   /** The `requestId` of a guest, made once per opening of the sheet 21a (ADR 0053, D5). */
   readonly idGenerator: IdGenerator;
+  /** "Sortear" of who serves first on sheet 08 (E4.7, D10). */
+  readonly coinFlip: CoinFlip;
+  /** The draw of who leaves the court, once per finished match (E4.10, D7). */
+  readonly shuffler: Shuffler;
+  /** The draft of the next match on screen 11, kept until it starts (E4.10, D7; only ids). */
+  readonly nextMatchDrafts: NextMatchDraftStore;
+  /** The round of a court session from the persisted cache, never the network (E4.10, D7). */
+  readonly courtRounds: CourtRoundSource;
   readonly qrEncoder: QrEncoder;
   /** The only place of an invite token on the phone (ADR 0049, D7). */
   readonly inviteLinkStore: InviteLinkStore;

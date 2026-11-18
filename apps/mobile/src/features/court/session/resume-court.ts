@@ -23,5 +23,7 @@ export async function findResumableCourtSession({
     return null;
   }
   const phase = selectCourtPhase(stateOfTimeline(replayed.value));
-  return phase === "playing" || phase === "set-decided" ? active.value : null;
+  return phase === "playing" || phase === "set-decided" || phase === "match-pending"
+    ? active.value
+    : null;
 }

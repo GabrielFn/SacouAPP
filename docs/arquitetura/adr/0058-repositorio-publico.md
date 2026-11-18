@@ -10,7 +10,7 @@ Com o repositório privado, a CI usava a cota de 2.000 min/mês do plano Free. E
 
 1. **`GabrielFn/SacouAPP` passa a ser público** (16/11/2026). Em repositório público, os runners padrão do GitHub Actions não têm limite de minutos. O `ci.yml` não muda.
 2. **Workflows de PR de fora pedem aprovação:** a política de aprovação de PR de fork passou de `first_time_contributors` para `all_external_contributors`. Nenhum PR de quem não é colaborador roda a CI sem o Gabriel aprovar.
-3. **O resto continua igual:** `permissions: contents: read`, sem segredos na CI, actions fixadas por SHA e gitleaks em todo o histórico (ADR 0007). Os segredos do Actions e do Railway não ficam visíveis para PR de fork.
+3. **O resto continua igual:** `permissions: contents: read`, sem segredos na CI, actions fixadas por SHA e gitleaks em todo o histórico (ADR 0007). Os segredos do Actions e do Railway não ficam visíveis para PR de fork. (Desde o ADR 0068 não há Railway: o deploy usa federação de identidade só com a `main`, e a URL do banco fica no Secret Manager do Google Cloud.)
 
 ## Alternativas
 
