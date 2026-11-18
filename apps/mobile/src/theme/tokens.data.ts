@@ -209,6 +209,9 @@ export const sizes = {
   meterMarker: 22,
   lockIcon: 13,
   swapIcon: 18,
+  // The lineup (Escalacao.dc.html .oc, .st, .wn): a cell of the official order and the badges of a chip.
+  orderCell: 52,
+  lineupBadge: 20,
 } as const;
 
 /**

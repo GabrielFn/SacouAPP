@@ -150,7 +150,9 @@
     "meterTrack": 8,
     "meterMarker": 22,
     "lockIcon": 13,
-    "swapIcon": 18
+    "swapIcon": 18,
+    "orderCell": 52,
+    "lineupBadge": 20
   },
   "radii": {
     "field": 12,
