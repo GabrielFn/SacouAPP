@@ -1,4 +1,7 @@
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using System.Text.Unicode;
+using Microsoft.Extensions.WebEncoders;
 using Microsoft.Extensions.Options;
 using Sacou.Http.RateLimiting;
 
@@ -17,6 +20,9 @@ internal static partial class WebSetup
     public static IServiceCollection AddSacouWeb(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddRazorPages(options => options.RootDirectory = PagesRoot);
+        // Accents stay letters ("Vôlei", not "V&#xF4;lei") in the page and in the preview; <, >, &, quotes and the
+        // invisible characters are still encoded (ADR 0070, D5).
+        services.Configure<WebEncoderOptions>(options => options.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
         services.AddOptions<FirebaseWebOptions>().Bind(configuration.GetSection(FirebaseWebOptions.SectionName)).ValidateOnStart();
         services.AddSingleton<IValidateOptions<FirebaseWebOptions>, FirebaseWebOptionsValidator>();
         services.AddOptions<WebPageOptions>().Bind(configuration.GetSection(WebPageOptions.SectionName));
