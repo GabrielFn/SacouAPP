@@ -33,7 +33,10 @@ interface Props {
   readonly pointerEvents?: string;
 }
 
-function find(node: unknown, match: (element: ReactElement<Props>) => boolean): ReactElement<Props>[] {
+function find(
+  node: unknown,
+  match: (element: ReactElement<Props>) => boolean,
+): ReactElement<Props>[] {
   if (Array.isArray(node)) return node.flatMap((child) => find(child, match));
   if (typeof node !== "object" || node === null || !("props" in node)) return [];
   const element = node as ReactElement<Props>;

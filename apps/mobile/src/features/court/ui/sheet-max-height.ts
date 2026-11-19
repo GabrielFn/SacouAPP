@@ -8,7 +8,9 @@ export const BOTTOM_SHEET_HEIGHT_SHARE = 0.66;
  */
 export function bottomSheetMaxHeight(windowHeight: number, safeTop: number): number {
   const available = Math.max(0, windowHeight - safeTop);
-  return isShortWindow(windowHeight) ? available : Math.min(available, windowHeight * BOTTOM_SHEET_HEIGHT_SHARE);
+  return isShortWindow(windowHeight)
+    ? available
+    : Math.min(available, windowHeight * BOTTOM_SHEET_HEIGHT_SHARE);
 }
 
 /** Windows shorter than this, in dp, are the court on its side: the sheet tightens its spacing. */

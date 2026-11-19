@@ -102,14 +102,11 @@ export function SheetSurface({
           />
           <View
             accessibilityLabel={accessibilityLabel}
-            style={[
-              sheetStyle,
-              { maxHeight: bottomSheetMaxHeight(windowHeight, insets.top) },
-            ]}
+            style={[sheetStyle, { maxHeight: bottomSheetMaxHeight(windowHeight, insets.top) }]}
           >
             <ScrollView persistentScrollbar indicatorStyle="black">
-                {content}
-              </ScrollView>
+              {content}
+            </ScrollView>
           </View>
         </View>
       ) : (

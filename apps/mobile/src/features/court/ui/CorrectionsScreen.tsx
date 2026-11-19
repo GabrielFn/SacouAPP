@@ -107,7 +107,13 @@ function QuickAction({ label, disabled = false, renderIcon, onPress }: QuickActi
     >
       <View style={{ flexShrink: 0 }}>{renderIcon(color)}</View>
       <Text
-        style={{ flexShrink: 1, textAlign: "center", color, fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.small }}
+        style={{
+          flexShrink: 1,
+          textAlign: "center",
+          color,
+          fontFamily: fontFamilies.body700,
+          fontSize: tokens.fontSizes.small,
+        }}
       >
         {label}
       </Text>
