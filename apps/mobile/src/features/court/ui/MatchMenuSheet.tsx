@@ -1,26 +1,18 @@
 import { Children, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { lineupStrings } from "../../../strings/lineup.pt-BR";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
-import { ChevronRightIcon } from "../../../ui/Icons";
 import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
-import { isMenuScreenReady, type EndMatchSummary } from "../model/menu-selectors";
+import type { EndMatchSummary } from "../model/menu-selectors";
 import type { CourtThemeChoice } from "../ports/court-theme-preference";
 import { CourtPage } from "./CourtPage";
-import {
-  EndMatchIcon,
-  FlipSidesIcon,
-  LeaveCourtIcon,
-  LineupIcon,
-  SwapPlayersIcon,
-  ThemeIcon,
-  TimelineIcon,
-} from "./MenuIcons";
+import { EndMatchIcon, FlipSidesIcon, LeaveCourtIcon, ThemeIcon } from "./MenuIcons";
 import { EndMatchDialog } from "./EndMatchDialog";
+import { MenuRow } from "./MenuRow";
+import { screenRows } from "./MenuScreenRows";
 
 export interface MatchMenuSheetProps {
   readonly subtitle: string | null;
@@ -41,68 +33,6 @@ export interface MatchMenuSheetProps {
   readonly onLeave: () => void;
   /** Confirmed in the dialog (or, with the set decided, the way to the end of the set). */
   readonly onEndMatch: () => void;
-}
-
-export interface MenuRowProps {
-  readonly label: string;
-  /** The icon before the label, drawn in the color it receives. */
-  readonly renderIcon: (color: string) => ReactNode;
-  readonly hint?: string;
-  readonly accessibilityLabel?: string;
-  readonly chevron?: boolean;
-  readonly disabled?: boolean;
-  readonly onPress: () => void;
-}
-
-function MenuRow({
-  label,
-  renderIcon,
-  hint,
-  accessibilityLabel,
-  chevron = false,
-  disabled = false,
-  onPress,
-}: MenuRowProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      accessibilityLabel={
-        accessibilityLabel ??
-        (hint === undefined ? label : strings.court.menu.hintLabel(label, hint))
-      }
-      onPress={onPress}
-      style={{
-        minHeight: tokens.sheet.sizes.menuRow,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.s14,
-        paddingHorizontal: tokens.spacing.xs,
-      }}
-    >
-      {renderIcon(disabled ? colors.textMuted : colors.text)}
-      <Text
-        variant="title"
-        style={{
-          flexShrink: 1,
-          fontFamily: fontFamilies.body600,
-          ...(disabled ? { color: colors.textMuted } : null),
-        }}
-      >
-        {label}
-        {hint === undefined ? null : (
-          <Text variant="muted">{strings.court.menu.hintAfter(hint)}</Text>
-        )}
-      </Text>
-      {chevron ? (
-        <View style={{ marginLeft: "auto" }}>
-          <ChevronRightIcon color={colors.textMuted} />
-        </View>
-      ) : null}
-    </Pressable>
-  );
 }
 
 export interface GroupProps {
@@ -134,50 +64,6 @@ function Group({ children }: GroupProps) {
         </View>
       ))}
     </View>
-  );
-}
-
-export interface ScreenRowsProps {
-  readonly canSubstitute: boolean;
-  readonly onLineup: (() => void) | null;
-  readonly onSubstitution: () => void;
-  readonly onCorrections: () => void;
-}
-
-/** The rows that open another screen of the court, each only once its screen exists. */
-function ScreenRows({ canSubstitute, onLineup, onSubstitution, onCorrections }: ScreenRowsProps) {
-  const { menu } = strings.court;
-  const { courtPlayers } = strings;
-  return (
-    <>
-      {isMenuScreenReady("lineup") && onLineup !== null ? (
-        <MenuRow
-          label={lineupStrings.menuItem}
-          renderIcon={(color) => <LineupIcon color={color} />}
-          chevron
-          onPress={onLineup}
-        />
-      ) : null}
-      {isMenuScreenReady("substitution") ? (
-        <MenuRow
-          label={courtPlayers.substitution.menuItem}
-          renderIcon={(color) => <SwapPlayersIcon color={color} />}
-          {...(canSubstitute ? {} : { hint: courtPlayers.substitution.noBench })}
-          chevron={canSubstitute}
-          disabled={!canSubstitute}
-          onPress={onSubstitution}
-        />
-      ) : null}
-      {isMenuScreenReady("corrections") ? (
-        <MenuRow
-          label={menu.corrections}
-          renderIcon={(color) => <TimelineIcon color={color} />}
-          hint={menu.correctionsHint}
-          chevron
-          onPress={onCorrections}
-        />
-      ) : null}
-    </>
   );
 }
 
@@ -221,12 +107,7 @@ export function MatchMenuSheet({
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >
         <Group>
-          <ScreenRows
-            canSubstitute={canSubstitute}
-            onLineup={onLineup}
-            onSubstitution={onSubstitution}
-            onCorrections={onCorrections}
-          />
+          {screenRows({ canSubstitute, onLineup, onSubstitution, onCorrections })}
           <MenuRow
             label={menu.flipSides}
             renderIcon={(color) => <FlipSidesIcon color={color} />}

@@ -40,7 +40,7 @@ export function AuthorButton({ option, onPress }: AuthorButtonProps) {
         height: tokens.sheet.sizes.playerCard,
         alignItems: "center",
         justifyContent: "center",
-        gap: tokens.spacing.xs,
+        gap: tokens.sheet.sizes.playerCardGap,
         paddingHorizontal: tokens.spacing.xs,
         borderRadius: tokens.radii.field,
         borderWidth: tokens.borderWidths.thick,

@@ -5,6 +5,8 @@ import { nightRgb } from "./tokens.data";
 export const sheetSizes = {
   /** A player card of the point author sheet (.pl). */
   playerCard: 64,
+  /** The gap between the lines inside that card (.pl). */
+  playerCardGap: 2,
   /** The setter badge on that card (.st). */
   authorBadge: 18,
   /** A row of the match menu (.it). */
@@ -19,6 +21,7 @@ export const sheetFontSizes = {
   titleLarge: 30,
   titleMenu: 28,
   authorBadge: 10,
+  teamLetter: 16,
   rowScore: 23,
   revertTitle: 26,
 } as const;

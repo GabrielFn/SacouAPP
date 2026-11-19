@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme, ThemeProvider } from "../../../theme/theme-context";
 import { sheetColors } from "../../../theme/sheet-tokens.data";
 import { palette } from "../../../theme/tokens.data";
 import { FLUSH } from "../court.data";
+import { bottomSheetMaxHeight } from "./sheet-max-height";
 
 const HANDLE_WIDTH = "10%";
-const BOTTOM_MAX_HEIGHT = "88%";
 /** The 3 of the black top border of the point author sheet over the 2 of the other outlines. */
 const TOP_BORDER_RATIO = 1.5;
 
@@ -37,6 +37,7 @@ export function SheetSurface({
 }: SheetSurfaceProps) {
   const { tokens } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const bottom = placement === "bottom";
   const sheetStyle = {
     backgroundColor: palette.sand,
@@ -95,7 +96,10 @@ export function SheetSurface({
           />
           <View
             accessibilityLabel={accessibilityLabel}
-            style={[sheetStyle, { maxHeight: BOTTOM_MAX_HEIGHT }]}
+            style={[
+              sheetStyle,
+              { maxHeight: bottomSheetMaxHeight(windowHeight, tokens.court.sizes.menuButton) },
+            ]}
           >
             <ScrollView>{content}</ScrollView>
           </View>

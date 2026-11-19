@@ -117,7 +117,7 @@ function PointLine({ row, onPress }: PointLineProps) {
           style={{
             color: palette.onFill,
             fontFamily: fontFamilies.display800,
-            fontSize: tokens.fontSizes.small,
+            fontSize: tokens.sheet.fontSizes.teamLetter,
           }}
         >
           {strings.court.zone.teamLetter[row.team]}
