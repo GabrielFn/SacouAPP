@@ -114,6 +114,7 @@ export function useCreateRound(
               formatTime(round.localTime),
               round.venue,
               capacity,
+              round.shareUrl ?? null,
             ),
           );
         },
