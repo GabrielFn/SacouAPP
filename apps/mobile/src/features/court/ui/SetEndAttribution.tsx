@@ -64,6 +64,7 @@ export function SetEndAttribution({ timeline, dispatch }: SetEndAttributionProps
           onAuthor={sheet.onAuthor}
           onOpponentError={sheet.onOpponentError}
           onSkip={sheet.onSkip}
+          onClose={sheet.onClose}
         />
       )}
     </>

@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme, ThemeProvider } from "../../../theme/theme-context";
 import { sheetColors } from "../../../theme/sheet-tokens.data";
 import { palette } from "../../../theme/tokens.data";
 import { FLUSH } from "../court.data";
-import { bottomSheetMaxHeight } from "./sheet-max-height";
+import { bottomSheetMaxHeight, isShortWindow, sheetGap } from "./sheet-max-height";
 
 const HANDLE_WIDTH = "10%";
 /** The 3 of the black top border of the point author sheet over the 2 of the other outlines. */
@@ -21,6 +21,8 @@ export interface SheetSurfaceProps {
   /** The black line on the top edge of the sheet. */
   readonly inkTopBorder?: boolean;
   readonly accessibilityLabel?: string;
+  /** `bottom` only: a tap on the scrim, outside the sheet. */
+  readonly onDismiss?: () => void;
   readonly children: ReactNode;
 }
 
@@ -33,12 +35,15 @@ export function SheetSurface({
   placement,
   inkTopBorder = false,
   accessibilityLabel,
+  onDismiss,
   children,
 }: SheetSurfaceProps) {
   const { tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const bottom = placement === "bottom";
+  const short = bottom && isShortWindow(windowHeight);
+  const gap = bottom ? sheetGap(tokens.spacing, windowHeight) : tokens.spacing.m;
   const sheetStyle = {
     backgroundColor: palette.sand,
     borderTopLeftRadius: tokens.radii.sheet,
@@ -55,24 +60,26 @@ export function SheetSurface({
       style={{
         flexGrow: bottom ? undefined : 1,
         flexShrink: 1,
-        gap: tokens.spacing.m,
+        gap,
         paddingTop: tokens.spacing.s10,
         paddingLeft: insets.left + tokens.spacing.l,
         paddingRight: insets.right + tokens.spacing.l,
-        paddingBottom: insets.bottom + tokens.spacing.m,
+        paddingBottom: insets.bottom + gap,
       }}
     >
-      <View
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={{
-          alignSelf: "center",
-          width: HANDLE_WIDTH,
-          height: tokens.sizes.sheetHandle,
-          borderRadius: tokens.sizes.sheetHandle,
-          backgroundColor: sheetColors.handle,
-        }}
-      />
+      {short ? null : (
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{
+            alignSelf: "center",
+            width: HANDLE_WIDTH,
+            height: tokens.sizes.sheetHandle,
+            borderRadius: tokens.sizes.sheetHandle,
+            backgroundColor: sheetColors.handle,
+          }}
+        />
+      )}
       {children}
     </View>
   );
@@ -90,18 +97,20 @@ export function SheetSurface({
             justifyContent: "flex-end",
           }}
         >
-          <View
-            pointerEvents="none"
+          <Pressable
+            accessible={false}
+            disabled={onDismiss === undefined}
+            onPress={onDismiss}
             style={[StyleSheet.absoluteFill, { backgroundColor: sheetColors.scrim }]}
           />
           <View
+            accessibilityViewIsModal
             accessibilityLabel={accessibilityLabel}
-            style={[
-              sheetStyle,
-              { maxHeight: bottomSheetMaxHeight(windowHeight, tokens.court.sizes.menuButton) },
-            ]}
+            style={[sheetStyle, { maxHeight: bottomSheetMaxHeight(windowHeight, insets.top) }]}
           >
-            <ScrollView>{content}</ScrollView>
+            <ScrollView persistentScrollbar indicatorStyle="black">
+              {content}
+            </ScrollView>
           </View>
         </View>
       ) : (

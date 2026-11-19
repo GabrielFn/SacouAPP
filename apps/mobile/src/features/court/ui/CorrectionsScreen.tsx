@@ -12,6 +12,8 @@ import type {
   TimelineRowModel,
 } from "../corrections/corrections-selectors";
 import type { CorrectionsState } from "../corrections/corrections.reducer";
+import { quickActionsDirection } from "../corrections/corrections-layout";
+import { FLUSH } from "../court.data";
 import { CourtPage } from "./CourtPage";
 import { RotateTeamIcon, SwitchServerIcon } from "./MenuIcons";
 import { RevertSheet } from "./RevertSheet";
@@ -89,7 +91,8 @@ function QuickAction({ label, disabled = false, renderIcon, onPress }: QuickActi
       disabled={disabled}
       onPress={onPress}
       style={{
-        flex: 1,
+        flexGrow: 1,
+        flexBasis: FLUSH,
         minHeight: tokens.sizes.chip,
         flexDirection: "row",
         alignItems: "center",
@@ -98,13 +101,19 @@ function QuickAction({ label, disabled = false, renderIcon, onPress }: QuickActi
         borderRadius: tokens.radii.field,
         borderWidth: tokens.borderWidths.thin,
         borderColor: color,
-        paddingHorizontal: tokens.spacing.s,
+        paddingHorizontal: tokens.spacing.m,
+        paddingVertical: tokens.spacing.s,
       }}
     >
-      {renderIcon(color)}
+      <View style={{ flexShrink: 0 }}>{renderIcon(color)}</View>
       <Text
-        numberOfLines={1}
-        style={{ color, fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.small }}
+        style={{
+          flexShrink: 1,
+          textAlign: "center",
+          color,
+          fontFamily: fontFamilies.body700,
+          fontSize: tokens.fontSizes.small,
+        }}
       >
         {label}
       </Text>
@@ -116,6 +125,7 @@ function MainPanel(props: CorrectionsScreenProps) {
   const { corrections } = strings.court;
   const { tokens } = useTheme();
   const { state, revert } = props;
+  const { width, height } = useWindowDimensions();
   if (state.sheet === "shift") {
     return (
       <ShiftRotationSheet
@@ -133,7 +143,7 @@ function MainPanel(props: CorrectionsScreenProps) {
     );
   }
   return (
-    <View style={{ flexDirection: "row", gap: tokens.spacing.s }}>
+    <View style={{ flexDirection: quickActionsDirection(width, height), gap: tokens.spacing.s }}>
       <QuickAction
         label={corrections.switchServer}
         disabled={!props.canSwitchServer}
