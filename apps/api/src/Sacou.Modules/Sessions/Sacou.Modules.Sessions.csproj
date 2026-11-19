@@ -17,7 +17,5 @@
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Sacou.Modules.Sessions.Tests" />
-        <!-- Only to swap the link code generator for one that repeats a code (RoundLinkClashTests). -->
-        <InternalsVisibleTo Include="Sacou.Integration.Tests" />
     </ItemGroup>
 </Project>

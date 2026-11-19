@@ -1,19 +1,18 @@
-using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Globalization;
+using Npgsql;
 using Sacou.Integration.Tests.Groups;
-using Sacou.Modules.Sessions.Domain.Rounds;
-using Sacou.Modules.Sessions.Infrastructure;
 using Xunit;
 
 namespace Sacou.Integration.Tests.Sessions;
 
 /// <summary>
-/// Case 1 of the E3.12 plan against the real index: a weekly series whose first code is another round's is drawn again,
-/// and its series row, already saved and then rolled back, goes in once with the second attempt.
+/// Case 1 of the E3.12 plan against the real database: the first insert of a weekly series' round is told its link code
+/// is taken, so the series row, already saved in that rolled-back transaction, has to go in again with the second attempt.
 /// </summary>
 public sealed class RoundLinkClashTests(IntegrationDatabase database) : IAsyncLifetime
 {
+    private const string LinkCodeIndex = "ux_rounds_link_code";
+
     private readonly ApiWithDatabase api = new(database);
 
     public async ValueTask InitializeAsync() => await api.MigrateAsync();
@@ -23,37 +22,54 @@ public sealed class RoundLinkClashTests(IntegrationDatabase database) : IAsyncLi
     [Fact]
     public async Task Series_WhoseFirstCodeIsTaken_GoesInWithTheNextOne()
     {
-        var generator = new RepeatingGenerator();
-        await using var clashing = api.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
-        {
-            _ = services.RemoveAll<IRoundLinkCodeGenerator>();
-            _ = services.AddSingleton<IRoundLinkCodeGenerator>(generator);
-        }));
-        using var client = clashing.CreateClient();
+        using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        var (_, taken) = await RoundLinkCalls.RoundAsync(world);
-        generator.Repeat(RoundLinkCode.TryParse(taken)!);
+        var clash = $"clash_{Guid.NewGuid():N}";
+        await RunAsync(ClashOnceSql(clash, world.GroupId));
+        try
+        {
+            var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(repeat: true));
 
-        using var response = await world.SendAsync(
-            GroupActor.Admin, HttpMethod.Post, $"{world.GroupPath}/rounds", RoundCalls.CreateBody(RoundCalls.FutureDate(4), repeat: true));
-        var created = await RoundCalls.JsonAsync(response);
-
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.NotNull(created["seriesId"]);
-        Assert.NotEqual(taken, RoundLinkCalls.CodeOf(created));
-        Assert.Equal(0, generator.PendingRepeats);
+            Assert.NotNull(created["seriesId"]);
+            Assert.NotEmpty(RoundLinkCalls.CodeOf(created));
+            Assert.Equal(1, await ScalarAsync($"SELECT count(*) FROM sessions.series WHERE group_id = '{world.GroupId}'"));
+            Assert.Equal(2, await ScalarAsync($"SELECT last_value FROM {clash}"));
+        }
+        finally
+        {
+            await RunAsync($"DROP TRIGGER {clash} ON sessions.rounds; DROP FUNCTION {clash}(); DROP SEQUENCE {clash};");
+        }
     }
 
-    /// <summary>Random codes, except a repeated one handed out once when asked.</summary>
-    private sealed class RepeatingGenerator : IRoundLinkCodeGenerator
+    /// <summary>
+    /// The first insert of a round of that group fails as a clash on the link code index; the sequence survives the
+    /// rollback, so the next insert goes through. Only that group: the database is shared by the whole run.
+    /// </summary>
+    private static string ClashOnceSql(string name, Guid group) =>
+        $"""
+        CREATE SEQUENCE {name};
+        CREATE FUNCTION {name}() RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+            IF nextval('{name}') = 1 THEN
+                RAISE EXCEPTION 'link code taken' USING ERRCODE = 'unique_violation', CONSTRAINT = '{LinkCodeIndex}';
+            END IF;
+            RETURN NEW;
+        END $$;
+        CREATE TRIGGER {name} BEFORE INSERT ON sessions.rounds
+            FOR EACH ROW WHEN (NEW.group_id = '{group}') EXECUTE FUNCTION {name}();
+        """;
+
+    private async Task RunAsync(string sql)
     {
-        private readonly RandomRoundLinkCodeGenerator random = new();
-        private RoundLinkCode? repeated;
+        await using var connection = await MemberRows.OpenAsync(api.ConnectionString);
+        await using var command = new NpgsqlCommand(sql, connection);
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+    }
 
-        public int PendingRepeats => repeated is null ? 0 : 1;
-
-        public void Repeat(RoundLinkCode code) => Volatile.Write(ref repeated, code);
-
-        public RoundLinkCode NewCode() => Interlocked.Exchange(ref repeated, null) ?? random.NewCode();
+    private async Task<long> ScalarAsync(string sql)
+    {
+        await using var connection = await MemberRows.OpenAsync(api.ConnectionString);
+        await using var command = new NpgsqlCommand(sql, connection);
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
     }
 }
