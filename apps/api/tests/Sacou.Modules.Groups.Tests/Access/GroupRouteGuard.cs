@@ -35,6 +35,9 @@ internal static class GroupRouteGuard
         "POST /v1/invites/accept",
         "POST /v1/round-links/resolve",
         "POST /v1/round-links/attendance",
+
+        // The round's public page (E3.12 Part 2, ADR 0070, D5): anonymous, GET and HEAD only, a Razor page.
+        "GET,HEAD r/{code}",
     };
 
     /// <summary>The OpenAPI document, mapped only in Development (ADR 0042, D2): in Production the list above is all.</summary>
