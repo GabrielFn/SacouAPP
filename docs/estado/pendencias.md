@@ -3,7 +3,7 @@
 - Lint, lacunas que não violam o aceite da E0.3: `Reflect.get(globalThis, "fetch")` passa na pureza; `*.test.ts` importado por código de produção vai para o `dist`; `scripts/lint-regression.mjs` não tem casos para `functional/immutable-data`, `prefer-readonly` e `no-param-reassign` (as regras funcionam, só a regressão não as cobre).
 - CI: rodar sempre `pnpm install --frozen-lockfile` antes do Turbo: editar o `pnpm-lock.yaml` sem reinstalar não invalida o cache.
 - Revisão do M1, A4: a E2.1 só entra na `main` com teste de esquema fechado do envelope e nomes proibidos; a regra em C#, por reflexão, fica na E2.10 ou E3.7 (tratado na E2.10, ADR 0033).
-- Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42` e de `design/mvp/Conta.dc.html:42`; sem Google Fonts na página web da E3.12.
+- Revisão do M1, B5: trocar o e-mail realista de `design/telas/Conta.dc.html:42` e de `design/mvp/Conta.dc.html:42`; sem Google Fonts na página web da E3.12 (essa parte feita na E3.12 Parte 2: fontes próprias em `woff2` e teste de arquitetura).
 - E5.3 (dono definido na revisão do M2, antes do primeiro deploy): as ressalvas do SEC-M1 abaixo e os "não verificados" do M1 (`NuGetAuditSuppress` e `allowBuilds`).
 - SEC-M1, ressalvas não bloqueantes: apagar um `packages.lock.json` não reprova, pois o restore o recria (exigir um lock por `.csproj` em `test:tooling`); `expires` aceita data impossível; `auditConfig.ignoreCves` passa sem par, sem confirmar se o pnpm 12 o respeita; a validade em `nuget-audit-exceptions.json` não tem teto.
 - E3.10: validar tipo e formato na fronteira, conferir o dígito verificador de CPF e CNPJ e mostrar tipo e chave para confirmação; confirmar se chave de e-mail aceita maiúsculas (Manual do DICT).
