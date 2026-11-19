@@ -1,6 +1,6 @@
 namespace Sacou.Http.RateLimiting;
 
-/// <summary>One fixed window: at most <see cref="PermitLimit"/> requests per user in <see cref="WindowSeconds"/>.</summary>
+/// <summary>One fixed window: at most <see cref="PermitLimit"/> requests per user (or per client address) in <see cref="WindowSeconds"/>.</summary>
 public sealed class WindowLimitOptions
 {
     public int PermitLimit { get; init; }
@@ -43,6 +43,9 @@ public sealed class RateLimitingOptions
 
     public WindowLimitOptions? RoundLink { get; init; }
 
+    /// <summary>Per client address, not per user: the round page is anonymous (ADR 0070, D6).</summary>
+    public WindowLimitOptions? RoundPage { get; init; }
+
     /// <summary>How many requests of the two-connection routes run at once, for everyone together.</summary>
     public int DualConnectionConcurrency { get; init; }
 
@@ -78,5 +81,6 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.AccountDelete] = AccountDelete,
         [RateLimitPolicies.CourtSync] = CourtSync,
         [RateLimitPolicies.RoundLink] = RoundLink,
+        [RateLimitPolicies.RoundPage] = RoundPage,
     };
 }

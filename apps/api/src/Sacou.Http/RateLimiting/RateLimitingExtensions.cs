@@ -47,7 +47,14 @@ public static class RateLimitingExtensions
         foreach (var policy in windows.Keys.Where(name => name != RateLimitPolicies.Global))
         {
             var window = Required(windows, policy);
-            limiter.AddPolicy(policy, context => UserWindow(context, window));
+            if (RateLimitPolicies.PerClientAddress.Contains(policy))
+            {
+                limiter.AddPolicy(policy, context => Window(ClientAddressKey.Of(context), window));
+            }
+            else
+            {
+                limiter.AddPolicy(policy, context => UserWindow(context, window));
+            }
         }
     }
 
@@ -57,16 +64,17 @@ public static class RateLimitingExtensions
     private static RateLimitPartition<string> UserWindow(HttpContext context, WindowLimitOptions window)
     {
         var key = RateLimitPartitionKey.Of(context.User);
-        return key is null
-            ? RateLimitPartition.GetNoLimiter(string.Empty)
-            : RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = window.PermitLimit,
-                Window = window.Window,
-                QueueLimit = 0,
-                AutoReplenishment = true,
-            });
+        return key is null ? RateLimitPartition.GetNoLimiter(string.Empty) : Window(key, window);
     }
+
+    private static RateLimitPartition<string> Window(string key, WindowLimitOptions window) =>
+        RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = window.PermitLimit,
+            Window = window.Window,
+            QueueLimit = 0,
+            AutoReplenishment = true,
+        });
 
     /// <summary>
     /// Before the shared gate, and acquired first by the chain: the limiters run before the endpoint reads the body, so

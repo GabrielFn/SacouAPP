@@ -35,3 +35,6 @@ credentials.json
 # Firebase Android config: public inside the APK, but kept out until the API key is restricted to com.sacou.app and the SHA-1 (ADR 0057, ADR 0058, M3-B6).
 apps/mobile/google-services.json
 *.stackdump
+
+# The round page build (apps/web, Vite), served by the API; the Docker image builds it (ADR 0070, D7).
+apps/api/src/Sacou.Api/wwwroot/web/
