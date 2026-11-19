@@ -97,13 +97,6 @@ export const fontSizes = {
   // The draw (Sorteio.dc.html): the title, the name of a team card.
   drawTitle: 29,
   teamTitle: 22,
-  // The point author sheet (PontoIndividual.dc.html): the title "De quem foi?" and the setter badge.
-  sheetTitleLarge: 30,
-  sheetTitleMenu: 28,
-  // Corrigir.dc.html: the score of a line and the title of the "Voltar o jogo" panel.
-  rowScore: 23,
-  revertTitle: 26,
-  authorBadge: 10,
 } as const;
 
 export const spacing = {
@@ -132,8 +125,6 @@ export const radii = {
   // The top of the light sheet of the login (Login.dc.html:39); then the draw (Sorteio.dc.html .p, reserves).
   sheet: 24,
   playerChip: 10,
-  // The team mark of a line of Corrigir (Corrigir.dc.html .tm).
-  teamMark: 7,
   reservesRow: 14,
 } as const;
 
@@ -219,13 +210,6 @@ export const sizes = {
   swapIcon: 18,
   orderCell: 52,
   lineupBadge: 20,
-  // The point author sheet (PontoIndividual.dc.html .pl, .st): a player card and its setter badge.
-  playerCard: 64,
-  // MenuQuadra.dc.html .it and Corrigir.dc.html .tm, buttons of the revert panel.
-  menuRow: 52,
-  teamMark: 24,
-  revertButton: 52,
-  authorBadge: 18,
 } as const;
 
 /**
@@ -239,7 +223,6 @@ export const dayStripBasis = "22%";
 
 export const interactiveHeights = [
   sizes.primaryButton,
-  sizes.playerCard,
   sizes.iconButton,
   sizes.field,
   sizes.chip,

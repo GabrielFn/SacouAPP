@@ -71,7 +71,7 @@ function ActionsColumn(props: CorrectionsScreenProps) {
   );
 }
 
-interface QuickActionProps {
+export interface QuickActionProps {
   readonly label: string;
   readonly disabled?: boolean;
   readonly renderIcon: (color: string) => ReactNode;

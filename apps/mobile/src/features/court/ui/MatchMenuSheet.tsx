@@ -75,7 +75,7 @@ function MenuRow({
       }
       onPress={onPress}
       style={{
-        minHeight: tokens.sizes.menuRow,
+        minHeight: tokens.sheet.sizes.menuRow,
         flexDirection: "row",
         alignItems: "center",
         gap: tokens.spacing.s14,
@@ -235,7 +235,7 @@ export function MatchMenuSheet({
           />
           <View
             style={{
-              minHeight: tokens.sizes.menuRow,
+              minHeight: tokens.sheet.sizes.menuRow,
               flexDirection: "row",
               alignItems: "center",
               gap: tokens.spacing.s14,

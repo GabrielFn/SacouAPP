@@ -3,12 +3,10 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme, ThemeProvider } from "../../../theme/theme-context";
-import { nightRgb, palette } from "../../../theme/tokens.data";
+import { sheetColors } from "../../../theme/sheet-tokens.data";
+import { palette } from "../../../theme/tokens.data";
 import { FLUSH } from "../court.data";
 
-/** Darkens the court behind a sheet (rgba(15,27,45,0.62) in the prototypes). */
-export const SHEET_SCRIM = `rgba(${nightRgb}, 0.62)`;
-const HANDLE_COLOR = `rgba(${nightRgb}, 0.25)`;
 const HANDLE_WIDTH = "10%";
 const BOTTOM_MAX_HEIGHT = "88%";
 /** The 3 of the black top border of the point author sheet over the 2 of the other outlines. */
@@ -71,7 +69,7 @@ export function SheetSurface({
           width: HANDLE_WIDTH,
           height: tokens.sizes.sheetHandle,
           borderRadius: tokens.sizes.sheetHandle,
-          backgroundColor: HANDLE_COLOR,
+          backgroundColor: sheetColors.handle,
         }}
       />
       {children}
@@ -93,7 +91,7 @@ export function SheetSurface({
         >
           <View
             pointerEvents="none"
-            style={[StyleSheet.absoluteFill, { backgroundColor: SHEET_SCRIM }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: sheetColors.scrim }]}
           />
           <View
             accessibilityLabel={accessibilityLabel}

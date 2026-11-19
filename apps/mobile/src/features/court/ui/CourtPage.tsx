@@ -29,7 +29,7 @@ function PageHeader({
 }: Omit<CourtPageProps, "children">) {
   const { colors, tokens } = useTheme();
   const fontSize =
-    titleSize === "menu" ? tokens.fontSizes.sheetTitleMenu : tokens.fontSizes.sheetTitleLarge;
+    titleSize === "menu" ? tokens.sheet.fontSizes.titleMenu : tokens.sheet.fontSizes.titleLarge;
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
       <View style={{ flex: 1 }}>
@@ -41,7 +41,7 @@ function PageHeader({
           {title}
         </Text>
         {subtitle === null ? null : (
-          <Text variant="caption" style={{ marginTop: tokens.spacing.xs / 2 }}>
+          <Text variant="caption" style={{ marginTop: tokens.spacing.xs }}>
             {subtitle}
           </Text>
         )}

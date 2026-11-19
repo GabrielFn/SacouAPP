@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Circle, Path, Rect } from "react-native-svg";
+import { Circle, Path } from "react-native-svg";
 
 import { useTheme } from "../../../theme/theme-context";
 import { StrokeIcon, type IconProps } from "../../../ui/Icons";
@@ -19,7 +19,7 @@ function MenuStroke({ color, children }: IconProps & { readonly children: ReactN
 export function LineupIcon({ color }: IconProps) {
   return (
     <MenuStroke color={color}>
-      <Rect x="4" y="3" width="16" height="18" rx="1" />
+      <Path d="M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
       <Path d="M4 15h16" />
       <Circle cx="9" cy="8" r="1.4" />
       <Circle cx="15" cy="8" r="1.4" />

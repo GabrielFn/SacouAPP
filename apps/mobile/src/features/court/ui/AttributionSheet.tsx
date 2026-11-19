@@ -1,28 +1,24 @@
 import type { MemberId } from "@sacou/match-engine";
-import type { ReactNode } from "react";
-import { Pressable, useWindowDimensions, View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { courtPalette, fontFamilies, palette } from "../../../theme/tokens.data";
+import { fontFamilies } from "../../../theme/tokens.data";
 import { AlertCircleIcon, CheckIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import { attributionLayoutFor } from "../attribution/attribution-layout";
-import type { AttributionSheetModel, AuthorOption } from "../attribution/attribution-selectors";
+import type { AttributionSheetModel } from "../attribution/attribution-selectors";
 import type { AuthoredPointKind } from "../attribution/attribution.reducer";
+import {
+  AuthorButton,
+  FullButton,
+  Grid,
+  KIND_COLUMNS,
+  KindChip,
+  PLAYER_COLUMNS,
+  SHEET,
+} from "./AttributionControls";
 import { SheetSurface } from "./SheetPanel";
-
-/** The sheet is always the light one of the prototype (PontoIndividual.dc.html), in both themes. */
-const SHEET = {
-  ground: palette.sand,
-  ink: palette.black,
-  muted: courtPalette.sun.muted,
-  refusal: courtPalette.sun.refusal,
-  onInk: palette.white,
-} as const;
-/** Three players a line, four kinds a line, as the canvas lays them out. */
-const PLAYER_COLUMNS = 3;
-const KIND_COLUMNS = 4;
 
 export interface AttributionSheetProps {
   readonly model: AttributionSheetModel;
@@ -32,144 +28,11 @@ export interface AttributionSheetProps {
   readonly onSkip: () => void;
 }
 
-export interface AuthorButtonProps {
-  readonly option: AuthorOption;
-  readonly onPress: (memberId: MemberId) => void;
+export interface StatusLineProps {
+  readonly title: string;
 }
 
-function AuthorButton({ option, onPress }: AuthorButtonProps) {
-  const { tokens } = useTheme();
-  const color = option.enabled ? SHEET.ink : SHEET.muted;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={option.accessibilityLabel}
-      accessibilityState={{ disabled: !option.enabled }}
-      disabled={!option.enabled}
-      onPress={() => {
-        onPress(option.memberId);
-      }}
-      style={{
-        height: tokens.sizes.playerCard,
-        alignItems: "center",
-        justifyContent: "center",
-        gap: tokens.spacing.xs / 2,
-        paddingHorizontal: tokens.spacing.xs,
-        borderRadius: tokens.radii.field,
-        borderWidth: tokens.borderWidths.thick,
-        borderColor: color,
-        borderStyle: option.enabled ? "solid" : "dashed",
-        backgroundColor: palette.white,
-      }}
-    >
-      <Text
-        numberOfLines={1}
-        style={{
-          color,
-          fontFamily: fontFamilies.body700,
-          fontSize: tokens.fontSizes.button,
-        }}
-      >
-        {option.name}
-      </Text>
-      {option.detail === null ? null : (
-        <Text variant="caption" numberOfLines={1} style={{ color: SHEET.muted }}>
-          {option.detail}
-        </Text>
-      )}
-      {option.badge === null ? null : (
-        <View
-          style={{
-            position: "absolute",
-            top: tokens.spacing.s6,
-            right: tokens.spacing.s6,
-            minWidth: tokens.sizes.authorBadge,
-            height: tokens.sizes.authorBadge,
-            borderRadius: tokens.sizes.authorBadge,
-            paddingHorizontal: tokens.spacing.xs,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: SHEET.ink,
-          }}
-        >
-          <Text
-            style={{
-              color: SHEET.onInk,
-              fontFamily: fontFamilies.body700,
-              fontSize: tokens.fontSizes.authorBadge,
-            }}
-          >
-            {option.badge}
-          </Text>
-        </View>
-      )}
-    </Pressable>
-  );
-}
-
-interface KindChipProps {
-  readonly label: string;
-  readonly selected: boolean;
-  readonly disabled: boolean;
-  readonly onPress: () => void;
-}
-
-function KindChip({ label, selected, disabled, onPress }: KindChipProps) {
-  const { tokens } = useTheme();
-  const color = disabled ? SHEET.muted : SHEET.ink;
-  return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected, disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={{
-        height: tokens.sizes.chip,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: tokens.radii.pill,
-        borderWidth: tokens.borderWidths.thick,
-        borderColor: color,
-        borderStyle: disabled ? "dashed" : "solid",
-        backgroundColor: selected ? SHEET.ink : palette.white,
-      }}
-    >
-      <Text
-        numberOfLines={1}
-        style={{
-          color: selected ? SHEET.onInk : color,
-          fontFamily: fontFamilies.body700,
-          fontSize: tokens.fontSizes.body,
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-/** Rows of equal columns: a short last row keeps the width of its cells. */
-function Grid({ columns, children }: { readonly columns: number; readonly children: ReactNode[] }) {
-  const { tokens } = useTheme();
-  const rows = Array.from({ length: Math.ceil(children.length / columns) }, (_, row) =>
-    Array.from({ length: columns }, (_cell, column) => children[row * columns + column] ?? null),
-  );
-  return (
-    <View style={{ gap: tokens.spacing.s }}>
-      {rows.map((cells, row) => (
-        <View key={row} style={{ flexDirection: "row", gap: tokens.spacing.s }}>
-          {cells.map((cell, column) => (
-            <View key={column} style={{ flex: 1 }}>
-              {cell}
-            </View>
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-function StatusLine({ title }: { readonly title: string }) {
+function StatusLine({ title }: StatusLineProps) {
   const { colors, tokens } = useTheme();
   const { onScore } = strings.courtPlayers.attribution;
   return (
@@ -217,8 +80,8 @@ function Question() {
       accessibilityRole="header"
       style={{
         color: SHEET.ink,
-        fontSize: tokens.fontSizes.sheetTitleLarge,
-        lineHeight: tokens.fontSizes.sheetTitleLarge,
+        fontSize: tokens.sheet.fontSizes.titleLarge,
+        lineHeight: tokens.sheet.fontSizes.titleLarge,
       }}
     >
       {question}
@@ -232,42 +95,6 @@ function Question() {
         {afterSpace(questionHint)}
       </Text>
     </Text>
-  );
-}
-
-interface FullButtonProps {
-  readonly label: string;
-  readonly filled: boolean;
-  readonly onPress: () => void;
-  readonly icon?: ReactNode;
-}
-
-/** The two 56 high buttons of the sheet: "Pular" black, "Erro do <time>" dashed. */
-function FullButton({ label, filled, onPress, icon }: FullButtonProps) {
-  const { tokens } = useTheme();
-  const color = filled ? SHEET.onInk : SHEET.ink;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={{
-        height: tokens.sizes.primaryButton,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: tokens.spacing.s,
-        borderRadius: tokens.radii.button,
-        borderWidth: filled ? 0 : tokens.borderWidths.thick,
-        borderStyle: "dashed",
-        borderColor: SHEET.ink,
-        backgroundColor: filled ? SHEET.ink : "transparent",
-      }}
-    >
-      {icon}
-      <Text style={{ color, fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.button }}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 

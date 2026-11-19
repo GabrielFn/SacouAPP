@@ -95,8 +95,8 @@ function PointLine({ row, onPress }: PointLineProps) {
           flexBasis: "22%",
           flexShrink: 0,
           fontFamily: fontFamilies.display800,
-          fontSize: tokens.fontSizes.rowScore,
-          lineHeight: tokens.fontSizes.rowScore,
+          fontSize: tokens.sheet.fontSizes.rowScore,
+          lineHeight: tokens.sheet.fontSizes.rowScore,
           textDecorationLine: row.willUndo ? "line-through" : "none",
           ...mutedColor,
         }}
@@ -105,9 +105,9 @@ function PointLine({ row, onPress }: PointLineProps) {
       </Text>
       <View
         style={{
-          width: tokens.sizes.teamMark,
-          height: tokens.sizes.teamMark,
-          borderRadius: tokens.radii.teamMark,
+          width: tokens.sheet.sizes.teamMark,
+          height: tokens.sheet.sizes.teamMark,
+          borderRadius: tokens.sheet.radii.teamMark,
           backgroundColor: palette.fill,
           alignItems: "center",
           justifyContent: "center",

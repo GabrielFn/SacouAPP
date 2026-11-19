@@ -16,7 +16,7 @@ export interface RevertSheetProps {
 /** Cancel and confirm share the line 1 to 1.55 (Corrigir.dc.html). */
 const REVERT_CONFIRM_FLEX = 1.55;
 
-interface RevertButtonProps {
+export interface RevertButtonProps {
   readonly label: string;
   readonly primary: boolean;
   readonly onPress: () => void;
@@ -29,7 +29,7 @@ function RevertButton({ label, primary, onPress }: RevertButtonProps) {
       accessibilityRole="button"
       onPress={onPress}
       style={{
-        height: tokens.sizes.revertButton,
+        height: tokens.sheet.sizes.revertButton,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: tokens.radii.button,
@@ -78,7 +78,10 @@ export function RevertSheet({ model, onConfirm, onCancel }: RevertSheetProps) {
       <Text
         variant="display"
         accessibilityRole="header"
-        style={{ fontSize: tokens.fontSizes.revertTitle, lineHeight: tokens.fontSizes.revertTitle }}
+        style={{
+          fontSize: tokens.sheet.fontSizes.revertTitle,
+          lineHeight: tokens.sheet.fontSizes.revertTitle,
+        }}
       >
         {model.title}
       </Text>
