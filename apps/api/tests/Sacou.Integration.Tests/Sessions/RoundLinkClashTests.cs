@@ -32,7 +32,7 @@ public sealed class RoundLinkClashTests(IntegrationDatabase database) : IAsyncLi
 
             Assert.NotNull(created["seriesId"]);
             Assert.NotEmpty(RoundLinkCalls.CodeOf(created));
-            Assert.Equal(1, await ScalarAsync($"SELECT count(*) FROM sessions.series WHERE group_id = '{world.GroupId}'"));
+            Assert.Equal(1, await ScalarAsync($"SELECT count(*) FROM sessions.round_series WHERE group_id = '{world.GroupId}'"));
             Assert.Equal(2, await ScalarAsync($"SELECT last_value FROM {clash}"));
         }
         finally
