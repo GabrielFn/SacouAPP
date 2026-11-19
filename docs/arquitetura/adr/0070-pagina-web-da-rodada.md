@@ -80,6 +80,6 @@ O admin publica a rodada no app e o texto do WhatsApp leva um link; quem toca v�
 - **Google no navegador embutido do WhatsApp** pode recusar o login, e o redirect pode falhar sem o `/__/auth` no mesmo host (o `authDomain` é `sacou-79493.firebaseapp.com`): aviso "abra no navegador" e o e-mail sempre disponível. O spike mede.
 - **A contagem da página não se atualiza depois do VOU:** a página mostra "Você vai" e o botão "NÃO VOU MAIS"; a lista e a contagem são as do carregamento (recarregar mostra o novo estado).
 - **Partida a frio** pode tirar a prévia (o robô do WhatsApp desiste antes de a API acordar), e a prévia fica velha no cache do WhatsApp. Aceitos.
-- **Estágio Node no `Dockerfile`:** imagem fixada por digest, `pnpm install --frozen-lockfile` só do filtro `@sacou/web`; o pnpm vem do `corepack` pela versão do `packageManager`.
+- **Estágio Node no `Dockerfile`:** imagem fixada por digest, `pnpm install --frozen-lockfile` só do filtro `@sacou/web`; o pnpm vem do npm, na versão do `packageManager` (o `corepack` do Node 22 não abre o pnpm 12).
 - **Rodada antiga sem código:** até um admin abrir o detalhe, o link dela não existe. Rodadas futuras do piloto nascem com código.
 - **Deploy:** a ação lê a URL do serviço antes de aplicar o YAML; um serviço novo (que ainda não existe) precisa da entrada `public-base-url` no primeiro deploy, porque o `describe` falha ([deploy.md](../../operacao/deploy.md)).

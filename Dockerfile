@@ -12,7 +12,8 @@ COPY apps/web/package.json apps/web/
 COPY apps/mobile/package.json apps/mobile/
 COPY packages/volley-rules/package.json packages/volley-rules/
 COPY packages/match-engine/package.json packages/match-engine/
-RUN corepack enable && pnpm install --frozen-lockfile --filter @sacou/web
+# The pnpm of packageManager, from npm: the corepack of Node 22 cannot start the pnpm 12 launcher.
+RUN npm install --global --no-audit --no-fund pnpm@12.16.1 && pnpm install --frozen-lockfile --filter @sacou/web
 COPY apps/web/ apps/web/
 RUN pnpm --filter @sacou/web build
 
