@@ -8,7 +8,7 @@ namespace Sacou.Modules.Sessions.Domain.Attendances;
 internal static partial class AttendanceRules
 {
     /// <summary>"Vou": already going or waiting changes nothing; otherwise a spot, the line or <c>round-full</c>, with a new sequence.</summary>
-    private static Result<RoundChange> Join(Round round, AttendanceSettings rules, MemberId member, AttendanceSource source, DateTimeOffset now)
+    private static Result<RoundChange> Join(Round round, AttendanceSettings rules, MemberId member, AnswerOrigin origin, DateTimeOffset now)
     {
         if (round.AttendanceOf(member) is { HoldsSpot: true } or { IsWaiting: true })
         {
@@ -21,11 +21,11 @@ internal static partial class AttendanceRules
             return Result.Failure<RoundChange>(RoundErrors.RoundFull);
         }
 
-        return Result.Success(Place(round, member, status.Value, source, now));
+        return Result.Success(Place(round, member, status.Value, origin, now));
     }
 
     /// <summary>"Não vou": whoever held a spot frees it, and the first in line is promoted by the caller's step.</summary>
-    private static Result<RoundChange> Leave(Round round, AttendanceSettings rules, MemberId member, AttendanceSource source, DateTimeOffset now)
+    private static Result<RoundChange> Leave(Round round, AttendanceSettings rules, MemberId member, AnswerOrigin origin, DateTimeOffset now)
     {
         var existing = round.AttendanceOf(member);
         if (existing is { Status: AttendanceStatus.NotGoing })
@@ -34,14 +34,14 @@ internal static partial class AttendanceRules
         }
 
         var declined = existing is null
-            ? Place(round, member, AttendanceStatus.NotGoing, source, now)
-            : Decline(round, existing, source, now);
+            ? Place(round, member, AttendanceStatus.NotGoing, origin, now)
+            : Decline(round, existing, origin.Channel, now);
         return Result.Success(declined.Then(next => RoundReconciliation.PromoteFromWaitlist(next, rules, now)));
     }
 
-    private static RoundChange Decline(Round round, Attendance existing, AttendanceSource source, DateTimeOffset now)
+    private static RoundChange Decline(Round round, Attendance existing, AttendanceChannel channel, DateTimeOffset now)
     {
-        var declined = existing.Decline(now);
+        var declined = existing.Decline(now) with { Channel = channel };
         return new RoundChange(round.With(declined), [declined], [new AttendanceChanged(round.Id, existing.Member, AttendanceStatus.NotGoing)]);
     }
 
@@ -57,17 +57,24 @@ internal static partial class AttendanceRules
     }
 
     /// <summary>A new row, or a returning one, with the next order number of the round.</summary>
-    internal static RoundChange Place(Round round, MemberId member, AttendanceStatus status, AttendanceSource source, DateTimeOffset now)
+    internal static RoundChange Place(Round round, MemberId member, AttendanceStatus status, AnswerOrigin origin, DateTimeOffset now)
     {
-        var change = NewAttendance(round, member, status, source, now);
+        var change = NewAttendance(round, member, status, origin, now);
         return change with { Events = [new AttendanceChanged(round.Id, member, status)] };
     }
 
-    private static RoundChange NewAttendance(Round round, MemberId member, AttendanceStatus status, AttendanceSource source, DateTimeOffset now)
+    private static RoundChange NewAttendance(Round round, MemberId member, AttendanceStatus status, AnswerOrigin origin, DateTimeOffset now)
     {
-        var attendance = new Attendance(member, status, round.NextSequence, source, now, PromotedAt: null);
+        var attendance = new Attendance(member, status, round.NextSequence, origin.Source, now, PromotedAt: null) { Channel = origin.Channel };
         var placed = round.With(attendance);
         // Only a row that enters the order spends a number; a first "não vou" holds the counter's value without taking it.
         return new RoundChange(status == AttendanceStatus.NotGoing ? placed : placed.WithNextSequenceTaken(), [attendance], []);
     }
+}
+
+/// <summary>Who wrote an answer's row (the member, an admin, the seeding) and through which channel.</summary>
+internal readonly record struct AnswerOrigin(AttendanceSource Source, AttendanceChannel Channel)
+{
+    /// <summary>The mensalistas' pre-confirmation, made by the API itself.</summary>
+    public static readonly AnswerOrigin Regular = new(AttendanceSource.Regular, AttendanceChannel.App);
 }

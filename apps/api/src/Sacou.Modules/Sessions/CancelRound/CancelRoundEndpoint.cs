@@ -7,6 +7,7 @@ using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.Domain.Rounds;
+using Sacou.Modules.Sessions.RoundLinks;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.CancelRound;
@@ -34,7 +35,7 @@ internal static class CancelRoundEndpoint
     }
 }
 
-internal sealed class CancelRoundHandler(RoundWriter writer)
+internal sealed class CancelRoundHandler(RoundWriter writer, RoundShareLinks links)
 {
     public async Task<Result<RoundResponse>> HandleAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
     {
@@ -43,6 +44,6 @@ internal sealed class CancelRoundHandler(RoundWriter writer)
             access, id, GroupCapability.ManageRounds, context => Result.Success(context.Round.Cancel()), cancellationToken).ConfigureAwait(false);
         return written.IsFailure
             ? Result.Failure<RoundResponse>(written.Error)
-            : Result.Success(written.Value.ToResponse(access.MemberId));
+            : Result.Success(links.Attach(written.Value.ToResponse(access.MemberId), written.Value.Change.Round, access.Role));
     }
 }

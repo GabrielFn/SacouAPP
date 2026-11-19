@@ -33,6 +33,8 @@ internal static class GroupRouteGuard
         "GET /v1/groups",
         "POST /v1/invites/preview",
         "POST /v1/invites/accept",
+        "POST /v1/round-links/resolve",
+        "POST /v1/round-links/attendance",
     };
 
     /// <summary>The OpenAPI document, mapped only in Development (ADR 0042, D2): in Production the list above is all.</summary>

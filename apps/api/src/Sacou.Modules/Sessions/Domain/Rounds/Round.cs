@@ -24,7 +24,16 @@ internal sealed partial record Round(
 {
     public const int FirstSequence = 1;
 
+    /// <summary>The code of the public link (ADR 0070, D1). Null only for a round made before the link existed, until an admin reads it.</summary>
+    public RoundLinkCode? LinkCode { get; init; }
+
     public bool IsCanceled => Status == RoundStatus.Canceled;
+
+    /// <summary>
+    /// Whether the round's link still lets someone in and answer: not cancelled, and not started. At the very instant
+    /// of the start it is already closed (ADR 0070, D2).
+    /// </summary>
+    public bool IsOpenForLinkAt(DateTimeOffset now) => !IsCanceled && now < Slot.StartsAt;
 
     /// <summary>A round with no attendance yet. The mensalistas come in with <c>AttendanceRules.SeedRegulars</c>.</summary>
     public static RoundChange Create(
@@ -58,6 +67,9 @@ internal sealed partial record Round(
         };
         return Result.Success(new RoundChange(edited, [], []) { RoundRowChanged = edited != this });
     }
+
+    /// <summary>The round with its link code: a new round before it is stored, or an older one that has none yet.</summary>
+    public Round WithLinkCode(RoundLinkCode code) => this with { LinkCode = code };
 
     /// <summary>Inserts or replaces one attendance.</summary>
     internal Round With(Attendance attendance) => this with

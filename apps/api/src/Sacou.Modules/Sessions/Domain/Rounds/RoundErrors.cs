@@ -29,5 +29,8 @@ internal static class RoundErrors
 
     public static readonly Error DropInWindowClosed = new("sessions.drop-in-window-closed", ErrorKind.Conflict);
 
+    /// <summary>A round link code that is malformed or found no round: the same answer for both (ADR 0070, D1).</summary>
+    public static readonly Error RoundLinkInvalid = new("sessions.round-link-invalid", ErrorKind.NotFound);
+
     public static readonly Error AttendanceDisabled = new("sessions.attendance-disabled", ErrorKind.Conflict);
 }

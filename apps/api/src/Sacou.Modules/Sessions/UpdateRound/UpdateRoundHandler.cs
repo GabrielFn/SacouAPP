@@ -5,6 +5,7 @@ using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.Domain;
 using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Modules.Sessions.Domain.Rounds;
+using Sacou.Modules.Sessions.RoundLinks;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.UpdateRound;
@@ -14,7 +15,7 @@ namespace Sacou.Modules.Sessions.UpdateRound;
 /// venue or layer locks nothing. Under the lock the round is edited, then reconciled with the new rules (more
 /// spots promote the waitlist; fewer spots take nobody out, question 26).
 /// </summary>
-internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter writer)
+internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter writer, RoundShareLinks links)
 {
     /// <summary>A field of the request that may be absent (keep the current value).</summary>
     private readonly record struct Option<T>(bool Present, T? Value);
@@ -35,7 +36,9 @@ internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter w
 
         var written = await writer.ExecuteAsync(access, id, GroupCapability.ManageRounds, context => Apply(context, edit.Value), cancellationToken)
             .ConfigureAwait(false);
-        return written.IsFailure ? Result.Failure<RoundResponse>(written.Error) : Result.Success(written.Value.ToResponse(access.MemberId));
+        return written.IsFailure
+            ? Result.Failure<RoundResponse>(written.Error)
+            : Result.Success(links.Attach(written.Value.ToResponse(access.MemberId), written.Value.Change.Round, access.Role));
     }
 
     private async Task<Result<Edit>> ParseAsync(RoundAccess access, UpdateRoundRequest request, CancellationToken cancellationToken)

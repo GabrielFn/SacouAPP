@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.AccountData;
@@ -15,6 +16,7 @@ using Sacou.Modules.Sessions.GetRound;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Modules.Sessions.ListRounds;
 using Sacou.Modules.Sessions.RespondAttendance;
+using Sacou.Modules.Sessions.RoundLinks;
 using Sacou.Modules.Sessions.SetMemberAttendance;
 using Sacou.Modules.Sessions.StopSeries;
 using Sacou.Modules.Sessions.UpdateRound;
@@ -34,6 +36,16 @@ public static class SessionsModule
         services.AddScoped<GroupRoundContext>();
         services.AddScoped<RoundWriter>();
         services.AddScoped<RoundMaterializer>();
+        // The round link (E3.12, ADR 0070): its code, the link to share, the way in as an avulso and the page's summary.
+        services.AddOptions<RoundPageOptions>().Bind(configuration.GetSection(RoundPageOptions.SectionName)).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<RoundPageOptions>, RoundPageOptionsValidator>();
+        services.AddSingleton<IRoundLinkCodeGenerator, RandomRoundLinkCodeGenerator>();
+        services.AddScoped<RoundLinkCodes>();
+        services.AddScoped<RoundShareLinks>();
+        services.AddScoped<RoundLinkReader>();
+        services.AddScoped<ResolveRoundLinkHandler>();
+        services.AddScoped<AnswerByRoundLinkHandler>();
+        services.AddScoped<IPublicRoundSummary, StorePublicRoundSummary>();
         services.AddScoped<CreateRoundHandler>();
         services.AddScoped<ListRoundsHandler>();
         services.AddScoped<GetRoundHandler>();
@@ -53,11 +65,12 @@ public static class SessionsModule
     }
 
     /// <summary>
-    /// Every route here has a group id, so all of them go through <see cref="RoundRouteExtensions.MapRoundRoutes"/>,
-    /// guarded by a test over the whole API.
+    /// Every route with a group id goes through <see cref="RoundRouteExtensions.MapRoundRoutes"/>, guarded by a test over
+    /// the whole API; the two round link routes have none (the code is the capability) and sit in its closed list.
     /// </summary>
     public static IEndpointRouteBuilder MapSessionsEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapResolveRoundLink().MapAnswerByRoundLink();
         endpoints.MapRoundRoutes()
             .MapCreateRound()
             .MapListRounds()

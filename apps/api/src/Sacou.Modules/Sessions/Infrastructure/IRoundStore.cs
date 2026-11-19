@@ -40,6 +40,18 @@ internal interface IRoundStore
     /// </summary>
     Task<Result<bool>> AddAsync(NewRound added, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The round whose public link has this code, with its attendances, without a lock; null when none has it. The
+    /// only read by something other than <c>(group_id, id)</c>: the code is the capability (ADR 0070, D1).
+    /// </summary>
+    Task<Round?> FindByLinkCodeAsync(RoundLinkCode code, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gives <paramref name="candidate"/> to a round that has no code yet, and answers the code the round has after
+    /// that (its earlier one, if it had). <c>sessions.round-link-code-taken</c> when the candidate is another round's.
+    /// </summary>
+    Task<Result<RoundLinkCode>> AssignLinkCodeAsync(GroupId group, RoundId round, RoundLinkCode candidate, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<RoundSeries>> ListActiveSeriesAsync(GroupId group, CancellationToken cancellationToken);
 
     /// <summary>The occurrences of each series from <paramref name="since"/> on, to decide the next one.</summary>

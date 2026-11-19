@@ -29,6 +29,10 @@ inputs:
   deployer:
     description: E-mail of the deployer service account of this environment
     required: true
+  public-base-url:
+    description: Origin of the round's public page (https, no path); empty uses the service's own run.app URL
+    required: false
+    default: ""
 
 outputs:
   url:
@@ -60,6 +64,7 @@ runs:
         DATABASE_SECRET: ${{ inputs.database-secret }}
         IMAGE: ${{ inputs.image }}
         PROJECT_ID: ${{ inputs.project-id }}
+        PUBLIC_BASE_URL: ${{ inputs.public-base-url }}
         REGION: us-east4
       run: |
         set -euo pipefail
@@ -67,10 +72,19 @@ runs:
           echo "The image is not pinned by digest: $IMAGE"
           exit 1
         fi
-        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET IMAGE
+        # The round page's origin (ADR 0070, D1): the input when given (a bought domain), else the service's own URL.
+        ROUND_PAGE_BASE_URL="$PUBLIC_BASE_URL"
+        if [[ -z "$ROUND_PAGE_BASE_URL" ]]; then
+          ROUND_PAGE_BASE_URL="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+        fi
+        if ! [[ "$ROUND_PAGE_BASE_URL" =~ ^https://[a-z0-9.-]+$ ]]; then
+          echo "The round page base URL is not an https origin: $ROUND_PAGE_BASE_URL"
+          exit 1
+        fi
+        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET IMAGE ROUND_PAGE_BASE_URL
         export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         manifest="$RUNNER_TEMP/service.yaml"
-        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${IMAGE}' \
+        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL}' \
           < deploy/cloud-run/service.yaml > "$manifest"
         gcloud run services replace "$manifest" --project="$PROJECT_ID" --region="$REGION" --quiet
         url="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
