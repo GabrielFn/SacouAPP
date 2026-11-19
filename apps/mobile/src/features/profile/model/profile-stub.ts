@@ -1,4 +1,7 @@
+import { apiErrorOf } from "../../../services/api/api-error";
 import type { MyProfile } from "../../../services/api/sacou-api";
+import { apiErrorKindTexts } from "../../../strings/api-errors.pt-BR";
+import { errorTextOf } from "../../../services/api/api-error-text";
 
 /**
  * On disk the profile keeps only its nickname (ADR 0057, D9), so a profile restored from there has no
@@ -37,4 +40,15 @@ export function editProfileView(query: EditProfileQueryView): EditProfileView {
     return query.fetchStatus === "fetching" ? "loading" : "error";
   }
   return "form";
+}
+
+export interface LoadFailureQuery {
+  readonly error: unknown;
+  readonly fetchStatus: "fetching" | "paused" | "idle";
+}
+
+/** The text under "could not open": the connection when it is the cause (a paused fetch has no network). */
+export function loadFailureText(query: LoadFailureQuery): string {
+  const offline = apiErrorOf(query.error)?.kind === "offline" || query.fetchStatus === "paused";
+  return offline ? apiErrorKindTexts.offline : errorTextOf(query.error);
 }

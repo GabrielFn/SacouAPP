@@ -1,14 +1,14 @@
 import { useRouter } from "expo-router";
 
-import { errorTextOf } from "../../../services/api/api-error-text";
 import type { AccountView } from "../../../services/auth/auth-session";
 import { strings } from "../../../strings/pt-BR";
-import { ErrorScreen } from "../../../ui/ErrorScreen";
+import { BackBar } from "../../../ui/BackBar";
+import { EmptyState } from "../../../ui/EmptyState";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { accountRoutes } from "../../account/navigation";
 import { useMyProfile } from "../hooks/use-profile";
-import { editProfileView, isProfileStub } from "../model/profile-stub";
+import { editProfileView, isProfileStub, loadFailureText } from "../model/profile-stub";
 import { initFromAccount, initFromProfile } from "../model/profile-form.reducer";
 import { QuickProfileScreen } from "./QuickProfileScreen";
 
@@ -38,18 +38,22 @@ export function EditProfileScreen({ account }: EditProfileScreenProps) {
   }
   if (view === "error" || profile.data === undefined) {
     return (
-      <ErrorScreen
-        title={texts.loadFailed}
-        body={errorTextOf(profile.error)}
-        actions={[
-          {
-            label: texts.retry,
-            onPress: () => {
-              void profile.refetch();
+      <Screen>
+        <BackBar title={texts.title} fallbackHref={accountRoutes.account} />
+        <EmptyState
+          alert
+          title={texts.loadFailed}
+          body={loadFailureText(profile)}
+          actions={[
+            {
+              label: texts.retry,
+              onPress: () => {
+                void profile.refetch();
+              },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+      </Screen>
     );
   }
   const initial =
