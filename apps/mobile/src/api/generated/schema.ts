@@ -896,10 +896,11 @@ export interface components {
       name: string;
     };
     ResolvedRoundLinkResponse: {
+      isOpen: boolean;
       /** Format: uuid */
-      groupId: string;
+      groupId: null | string;
       /** Format: uuid */
-      roundId: string;
+      roundId: null | string;
       isMember: boolean;
     };
     RoundLinkAnswerRequest: {

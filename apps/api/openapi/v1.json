@@ -6701,18 +6701,28 @@
       },
       "ResolvedRoundLinkResponse": {
         "required": [
+          "isOpen",
           "groupId",
           "roundId",
           "isMember"
         ],
         "type": "object",
         "properties": {
+          "isOpen": {
+            "type": "boolean"
+          },
           "groupId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "roundId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "isMember": {
