@@ -39,7 +39,10 @@ internal static partial class WebSetup
 
     public static IApplicationBuilder UseSacouWebFiles(this IApplicationBuilder app) => app.UseStaticFiles();
 
-    /// <summary>GET and HEAD only: any other method on the page is a 405 from the routing, never a page handler.</summary>
+    /// <summary>
+    /// GET and HEAD only: any other method on the page finds no anonymous endpoint and the fallback policy answers 401
+    /// before the routing's 405 (ADR 0070, D4); never a page handler.
+    /// </summary>
     public static PageActionEndpointConventionBuilder MapSacouWeb(this IEndpointRouteBuilder endpoints)
     {
         var pages = endpoints.MapRazorPages();

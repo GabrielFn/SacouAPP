@@ -4,8 +4,8 @@ namespace Sacou.Api.Web;
 
 /// <summary>
 /// The headers of the round page and of its files (ADR 0070, D5 and D7), only on those paths: the API routes keep theirs.
-/// The page: CSP, no referrer (the path carries the code), no index, no frame, the Google window allowed to answer, no
-/// cache along the way. The files: no sniffing; the hashed ones cached for a year.
+/// The page: CSP, no referrer (the path carries the code), no index, no frame, the Google window allowed to answer, never
+/// stored (it carries nicknames). The files: no sniffing; the hashed ones cached for a year, the others checked again.
 /// </summary>
 internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPolicy policy)
 {
@@ -13,7 +13,8 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     public const string AssetsPrefix = "/web";
     public const string BrandPrefix = "/brand";
     public const string HashedAssetsPrefix = "/web/assets/";
-    public const string PageCache = "no-cache, private";
+    public const string PageCache = "no-store";
+    public const string UnhashedFileCache = "no-cache, private";
     public const string ImmutableCache = "public, max-age=31536000, immutable";
     public const string BrandCache = "public, max-age=86400";
     public const string PermissionsPolicy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()";
@@ -51,7 +52,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
         headers[HeaderNames.XFrameOptions] = "DENY";
         headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
         headers["Permissions-Policy"] = PermissionsPolicy;
-        // A 429 of the limiter already says no-store; anything else of the page is checked again on every visit.
+        // A 429 of the limiter already says no-store; anything else of the page carries nicknames and is never stored.
         if (response.StatusCode != StatusCodes.Status429TooManyRequests)
         {
             headers[HeaderNames.CacheControl] = PageCache;
@@ -68,7 +69,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
         {
             response.Headers[HeaderNames.CacheControl] = path.StartsWithSegments(BrandPrefix, StringComparison.Ordinal)
                 ? BrandCache
-                : path.Value?.StartsWith(HashedAssetsPrefix, StringComparison.Ordinal) == true ? ImmutableCache : PageCache;
+                : path.Value?.StartsWith(HashedAssetsPrefix, StringComparison.Ordinal) == true ? ImmutableCache : UnhashedFileCache;
         }
 
         return Task.CompletedTask;
