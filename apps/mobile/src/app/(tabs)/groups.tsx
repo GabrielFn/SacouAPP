@@ -27,6 +27,8 @@ function actionHref(action: GroupCardAction, groupId: string, roundId: string | 
       return groupMembersHref(groupId);
     case "settings":
       return groupSettingsHref(groupId);
+    case "createRound":
+      return createRoundHref(groupId);
     case "editRound":
       return roundId === null ? createRoundHref(groupId) : editRoundHref(groupId, roundId);
   }

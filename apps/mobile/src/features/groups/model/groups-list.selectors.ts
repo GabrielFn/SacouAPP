@@ -56,7 +56,7 @@ export function groupCardModel(group: MyGroup): GroupCardModel {
   };
 }
 
-export type GroupCardAction = "members" | "settings" | "editRound";
+export type GroupCardAction = "members" | "settings" | "editRound" | "createRound";
 
 const ACTION_SCREEN: Readonly<Record<"members" | "settings", PendingGroupScreen>> = {
   members: "members",
@@ -65,7 +65,7 @@ const ACTION_SCREEN: Readonly<Record<"members" | "settings", PendingGroupScreen>
 
 /**
  * The footer links of a card: only for who organizes (the roles with ManageRounds), only when the
- * destination exists, and "Editar rodada" only when the group has a next round to edit.
+ * destination exists, "Editar rodada" when the group has a next round and "Criar rodada" when it has none.
  */
 export function groupCardActions(
   role: GroupRole,
@@ -76,5 +76,5 @@ export function groupCardActions(
   const screens = (["members", "settings"] as const).filter(
     (action) => !pending.includes(ACTION_SCREEN[action]),
   );
-  return hasNextRound ? [...screens, "editRound"] : screens;
+  return [...screens, hasNextRound ? "editRound" : "createRound"];
 }

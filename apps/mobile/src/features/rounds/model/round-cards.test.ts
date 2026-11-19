@@ -143,10 +143,11 @@ describe("card texts", () => {
 });
 
 describe("groupCardActions with a next round", () => {
-  it("offers Editar rodada only to the roles with ManageRounds and only with a round", () => {
+  it("offers Editar rodada with a round, Criar rodada without, only to the roles with ManageRounds", () => {
     expect(groupCardActions("admin", [], true)).toEqual(["members", "settings", "editRound"]);
     expect(groupCardActions("coAdmin", ["members", "settings"], true)).toEqual(["editRound"]);
-    expect(groupCardActions("admin", [], false)).toEqual(["members", "settings"]);
+    expect(groupCardActions("admin", [], false)).toEqual(["members", "settings", "createRound"]);
+    expect(groupCardActions("coAdmin", ["members", "settings"], false)).toEqual(["createRound"]);
     expect(groupCardActions("scorekeeper", [], true)).toEqual([]);
     expect(groupCardActions("player", [], true)).toEqual([]);
   });
