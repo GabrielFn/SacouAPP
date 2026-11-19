@@ -8,7 +8,11 @@ namespace Sacou.Modules.Sessions.Contracts;
 
 /// <summary>The round by its code, the group's name and settings through the Groups contracts, and nothing written.</summary>
 internal sealed class StorePublicRoundSummary(
-    RoundLinkReader reader, IGroupDirectory directory, IGroupSettingsReader settings, TimeProvider time) : IPublicRoundSummary
+    RoundLinkReader reader,
+    IGroupDirectory directory,
+    IGroupSettingsReader settings,
+    IRoundListNames listNames,
+    TimeProvider time) : IPublicRoundSummary
 {
     public async Task<PublicRoundSummary?> FindByCodeAsync(string? code, CancellationToken cancellationToken)
     {
@@ -32,10 +36,13 @@ internal sealed class StorePublicRoundSummary(
             throw new InvalidOperationException("A stored round layer is invalid.");
         }
 
-        return ToSummary(round, name, resolved.Value, time.GetUtcNow());
+        Guid[] occupants = [.. round.Occupants.Select(attendance => attendance.Member.Value)];
+        var names = await listNames.FindAsync(round.GroupId.Value, occupants, cancellationToken).ConfigureAwait(false);
+        return ToSummary(round, name, resolved.Value, time.GetUtcNow(), names);
     }
 
-    internal static PublicRoundSummary ToSummary(Round round, string groupName, RoundSettings resolved, DateTimeOffset now)
+    internal static PublicRoundSummary ToSummary(
+        Round round, string groupName, RoundSettings resolved, DateTimeOffset now, IReadOnlyDictionary<Guid, ListName> names)
     {
         var rules = RoundGroupState.ToDomain(resolved.Attendance);
         return new PublicRoundSummary(
@@ -52,8 +59,12 @@ internal sealed class StorePublicRoundSummary(
             rules.WaitlistEnabled,
             resolved.Draw.PlayersPerTeam,
             resolved.Format.ScoringEnabled ? resolved.Format.PointsPerSet : null,
-            resolved.Format.QueueEnabled);
+            resolved.Format.QueueEnabled,
+            [.. round.Occupants.Select(attendance => EntryOf(names.GetValueOrDefault(attendance.Member.Value)))]);
     }
+
+    /// <summary>A line without a name when the member left the group after answering: the spot still counts.</summary>
+    private static PublicListEntry EntryOf(ListName? name) => new(name?.Nickname, name?.Regular ?? false);
 
     internal static PublicRoundState StateOf(Round round, AttendanceSettings rules, DateTimeOffset now)
     {

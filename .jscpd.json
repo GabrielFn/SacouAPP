@@ -6,6 +6,7 @@
     "packages/match-engine/src",
     "packages/volley-rules/src",
     "apps/mobile/src",
+    "apps/web/src",
     "apps/api/src"
   ],
   "ignore": [

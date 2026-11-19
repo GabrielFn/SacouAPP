@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Sacou.Api.Configuration;
 using Sacou.Api.OpenApi;
+using Sacou.Api.Web;
 using Sacou.Http;
 using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
@@ -43,13 +44,19 @@ builder.Services
 // Per-user limits, and the concurrency of the two-connection routes (ADR 0062).
 builder.Services.AddSacouRateLimiting(builder.Configuration);
 builder.Services.AddSacouOpenApi();
+// The round's public page, its login and its files (E3.12, ADR 0070).
+builder.Services.AddSacouWeb(builder.Configuration);
 
 var app = builder.Build();
 
+// The headers of the round page and its files, on their paths only (ADR 0070, D5).
+app.UseSacouWebHeaders();
 // Cache-Control: no-store on the routes that ask for it, their errors too (ADR 0055).
 app.UseNoStore();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+// The page's script, styles, fonts and preview image: anonymous files, before the authentication (ADR 0070, D7).
+app.UseSacouWebFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 // After the authentication: a refused token is a 401 and never spends the quota (ADR 0062, D2).
@@ -60,6 +67,8 @@ app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
 app.MapSessionsEndpoints();
 app.MapMatchesEndpoints();
+// GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
+app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);
 // The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).
 if (app.Environment.IsDevelopment())
 {

@@ -46,6 +46,9 @@ internal sealed class FakeGroupStore : IGroupStore
 
     public int ActiveGroupsOfPerson { get; set; }
 
+    /// <summary>The active roster, as the member list and the round's public list read it.</summary>
+    public IReadOnlyList<RosterEntry> Roster { get; set; } = [];
+
     public void Add(GroupId group, GroupMember member) => members[(group, member.UserId!.Value)] = member;
 
     public Task<GroupMember?> FindActiveMemberAsync(GroupId group, UserId user, CancellationToken cancellationToken)
@@ -77,7 +80,7 @@ internal sealed class FakeGroupStore : IGroupStore
         throw new NotSupportedException();
 
     public Task<IReadOnlyList<RosterEntry>> ListActiveRosterAsync(GroupId group, CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+        Task.FromResult(Roster);
 
     public Task<bool> RenameAsync(GroupId group, UserId renamer, GroupName name, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
