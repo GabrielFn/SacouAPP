@@ -108,7 +108,7 @@ export const OPENSKILL_CASES: readonly OpenSkillCaseInput[] = [
   },
   {
     id: "o6-sigma-held-by-the-kappa-floor",
-    options: { ...PILOT, kappa: 0.99 },
+    options: { ...PILOT, kappa: 0.999999 },
     teams: [[LEVEL_3_UNCONFIRMED, LEVEL_3_ADMIN], [LEVEL_3_UNCONFIRMED]],
     ranks: [A_WINS],
   },

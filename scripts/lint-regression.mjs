@@ -17,6 +17,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 const PREFIX = "__lint-regression__";
 const VOLLEY_RULES = `packages/volley-rules/src/${PREFIX}`;
 const MATCH_ENGINE = `packages/match-engine/src/${PREFIX}`;
+const RATING = `packages/rating/src/${PREFIX}`;
 const MOBILE = `apps/mobile/src/${PREFIX}`;
 
 const NO_ANY = "@typescript-eslint/no-explicit-any";
@@ -93,6 +94,10 @@ const CASES = [
 
   [`${MATCH_ENGINE}date-now.ts`, "export const now = Date.now();\n", NO_RESTRICTED_GLOBALS],
   [`${MATCH_ENGINE}new-date.ts`, "export const now = new Date();\n", NO_RESTRICTED_GLOBALS],
+  [`${RATING}date-now.ts`, "export const now = Date.now();\n", NO_RESTRICTED_GLOBALS],
+  [`${RATING}random.ts`, "export const value = Math.random();\n", NO_RESTRICTED_PROPERTIES],
+  [`${RATING}node.ts`, 'import "node:fs";\n', NO_RESTRICTED_IMPORTS],
+  [`${RATING}magic.ts`, MAGIC_FUNCTION, NO_MAGIC_NUMBERS],
   [`${MATCH_ENGINE}random.ts`, "export const value = Math.random();\n", NO_RESTRICTED_PROPERTIES],
   [
     `${MATCH_ENGINE}random-destructured.ts`,
