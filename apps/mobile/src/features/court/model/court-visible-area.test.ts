@@ -17,8 +17,8 @@ const SCREENS = [
 ] as const;
 
 /*
- * The zone height is the share of the area the screen really got (the view is measured, not the
- * window), minus the insets, so the strip below is never part of it. 780 x 360 is the Samsung
+ * The zone height is the one the zone row really got (the row is measured, not derived from the flex
+ * weights), so the top bar and the strip below are never part of it. 780 x 360 is the Samsung
  * SM-S942B of the phone test of 18/11/2026.
  */
 describe("everything of a half court is inside the zone, above the queue strip", () => {
