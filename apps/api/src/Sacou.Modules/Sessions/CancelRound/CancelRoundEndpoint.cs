@@ -42,8 +42,6 @@ internal sealed class CancelRoundHandler(RoundWriter writer, RoundShareLinks lin
         ArgumentNullException.ThrowIfNull(access);
         var written = await writer.ExecuteAsync(
             access, id, GroupCapability.ManageRounds, context => Result.Success(context.Round.Cancel()), cancellationToken).ConfigureAwait(false);
-        return written.IsFailure
-            ? Result.Failure<RoundResponse>(written.Error)
-            : Result.Success(links.Attach(written.Value.ToResponse(access.MemberId), written.Value.Change.Round, access.Role));
+        return links.Respond(written, access);
     }
 }

@@ -1,10 +1,8 @@
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
-using Sacou.Http.RateLimiting;
 using Sacou.Modules.Sessions.Domain.Attendances;
 
 namespace Sacou.Modules.Sessions.RoundLinks;
@@ -26,13 +24,7 @@ internal static class AnswerByRoundLinkEndpoint
 
     public static IEndpointRouteBuilder MapAnswerByRoundLink(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name)
-            .RequireRateLimiting(RateLimitPolicies.RoundLink)
-            .WithMetadata(RoundLinkRoutes.SmallBody())
-            .WithNoStore()
-            .ProducesProblem(StatusCodes.Status403Forbidden)
-            .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+        endpoints.MapRoundLinkPost(Route, HandleAsync, Name).ProducesProblem(StatusCodes.Status409Conflict);
         return endpoints;
     }
 

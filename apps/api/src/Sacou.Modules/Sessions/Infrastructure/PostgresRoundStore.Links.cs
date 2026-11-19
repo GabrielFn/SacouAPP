@@ -14,13 +14,7 @@ internal sealed partial class PostgresRoundStore
         var row = await database.Rounds.AsNoTracking()
             .SingleOrDefaultAsync(candidate => candidate.LinkCode == code.Value, cancellationToken)
             .ConfigureAwait(false);
-        if (row is null)
-        {
-            return null;
-        }
-
-        var attendances = await AttendancesOfAsync([row.Id], cancellationToken).ConfigureAwait(false);
-        return RowMapping.ToRound(row, attendances[row.Id]);
+        return await WithAttendancesAsync(row, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Result<RoundLinkCode>> AssignLinkCodeAsync(

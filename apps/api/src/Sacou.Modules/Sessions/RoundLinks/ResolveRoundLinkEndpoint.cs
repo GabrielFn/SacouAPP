@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
-using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Shared.Results;
@@ -22,12 +20,7 @@ internal static class ResolveRoundLinkEndpoint
 
     public static IEndpointRouteBuilder MapResolveRoundLink(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost(Route, HandleAsync).WithName(Name)
-            .RequireRateLimiting(RateLimitPolicies.RoundLink)
-            .WithMetadata(RoundLinkRoutes.SmallBody())
-            .WithNoStore()
-            .ProducesProblem(StatusCodes.Status403Forbidden)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+        endpoints.MapRoundLinkPost(Route, HandleAsync, Name);
         return endpoints;
     }
 

@@ -36,9 +36,7 @@ internal sealed class UpdateRoundHandler(GroupRoundContext groups, RoundWriter w
 
         var written = await writer.ExecuteAsync(access, id, GroupCapability.ManageRounds, context => Apply(context, edit.Value), cancellationToken)
             .ConfigureAwait(false);
-        return written.IsFailure
-            ? Result.Failure<RoundResponse>(written.Error)
-            : Result.Success(links.Attach(written.Value.ToResponse(access.MemberId), written.Value.Change.Round, access.Role));
+        return links.Respond(written, access);
     }
 
     private async Task<Result<Edit>> ParseAsync(RoundAccess access, UpdateRoundRequest request, CancellationToken cancellationToken)

@@ -65,9 +65,7 @@ internal sealed class GetRoundHandler(
     private async Task<Result<RoundResponse>> RepairAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
     {
         var repaired = await writer.ExecuteAsync(access, id, required: null, Reconcile, cancellationToken).ConfigureAwait(false);
-        return repaired.IsFailure
-            ? Result.Failure<RoundResponse>(repaired.Error)
-            : Result.Success(links.Attach(repaired.Value.ToResponse(access.MemberId), repaired.Value.Change.Round, access.Role));
+        return links.Respond(repaired, access);
     }
 
     private static Result<RoundChange> Reconcile(RoundWriteContext context) =>

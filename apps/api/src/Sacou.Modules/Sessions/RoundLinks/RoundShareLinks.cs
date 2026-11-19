@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Options;
 using Sacou.Modules.Groups.Contracts;
+using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.Domain.Rounds;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.RoundLinks;
 
@@ -23,6 +25,16 @@ internal sealed class RoundShareLinks(IOptions<RoundPageOptions> options, IGroup
         return origin is null || round.LinkCode is not { } code || !MayShare(role)
             ? null
             : new Uri(origin, PagePath + code.Value).AbsoluteUri;
+    }
+
+    /// <summary>A written round as the screens read it, for the caller, with the link the caller may see.</summary>
+    public Result<RoundResponse> Respond(Result<RoundOutcome> written, RoundAccess access)
+    {
+        ArgumentNullException.ThrowIfNull(written);
+        ArgumentNullException.ThrowIfNull(access);
+        return written.IsFailure
+            ? Result.Failure<RoundResponse>(written.Error)
+            : Result.Success(Attach(written.Value.ToResponse(access.MemberId), written.Value.Change.Round, access.Role));
     }
 
     /// <summary>The response with the link <paramref name="role"/> may see.</summary>
