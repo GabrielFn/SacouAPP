@@ -131,6 +131,7 @@ export default function CorrectionsRoute() {
           onAuthor={attribution.onAuthor}
           onOpponentError={attribution.onOpponentError}
           onSkip={attribution.onSkip}
+          onClose={attribution.onClose}
         />
       )}
     </View>

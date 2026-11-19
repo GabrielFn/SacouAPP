@@ -6,7 +6,7 @@ import { useTheme, ThemeProvider } from "../../../theme/theme-context";
 import { sheetColors } from "../../../theme/sheet-tokens.data";
 import { palette } from "../../../theme/tokens.data";
 import { FLUSH } from "../court.data";
-import { bottomSheetMaxHeight, isShortWindow } from "./sheet-max-height";
+import { bottomSheetMaxHeight, isShortWindow, sheetGap } from "./sheet-max-height";
 
 const HANDLE_WIDTH = "10%";
 /** The 3 of the black top border of the point author sheet over the 2 of the other outlines. */
@@ -42,7 +42,8 @@ export function SheetSurface({
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const bottom = placement === "bottom";
-  const gap = bottom && isShortWindow(windowHeight) ? tokens.spacing.s : tokens.spacing.m;
+  const short = bottom && isShortWindow(windowHeight);
+  const gap = bottom ? sheetGap(tokens.spacing, windowHeight) : tokens.spacing.m;
   const sheetStyle = {
     backgroundColor: palette.sand,
     borderTopLeftRadius: tokens.radii.sheet,
@@ -66,17 +67,19 @@ export function SheetSurface({
         paddingBottom: insets.bottom + gap,
       }}
     >
-      <View
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={{
-          alignSelf: "center",
-          width: HANDLE_WIDTH,
-          height: tokens.sizes.sheetHandle,
-          borderRadius: tokens.sizes.sheetHandle,
-          backgroundColor: sheetColors.handle,
-        }}
-      />
+      {short ? null : (
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{
+            alignSelf: "center",
+            width: HANDLE_WIDTH,
+            height: tokens.sizes.sheetHandle,
+            borderRadius: tokens.sizes.sheetHandle,
+            backgroundColor: sheetColors.handle,
+          }}
+        />
+      )}
       {children}
     </View>
   );
@@ -101,6 +104,7 @@ export function SheetSurface({
             style={[StyleSheet.absoluteFill, { backgroundColor: sheetColors.scrim }]}
           />
           <View
+            accessibilityViewIsModal
             accessibilityLabel={accessibilityLabel}
             style={[sheetStyle, { maxHeight: bottomSheetMaxHeight(windowHeight, insets.top) }]}
           >

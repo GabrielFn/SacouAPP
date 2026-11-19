@@ -21,6 +21,8 @@ export interface AttributionSheetHandle {
   readonly onAuthor: (memberId: MemberId) => void;
   readonly onOpponentError: () => void;
   readonly onSkip: () => void;
+  /** Closes the sheet with no answer and no next question (a tap outside it, on screens 24 and 25). */
+  readonly onClose: () => void;
 }
 
 /**
@@ -74,6 +76,9 @@ export function useAttributionSheet(
     onOpponentError: useCallback(() => {
       record({ kind: "opponent-error", author: null });
     }, [record]),
+    onClose: useCallback(() => {
+      send({ type: "closed" });
+    }, []),
     onSkip: useCallback(() => {
       send({ type: "skipped" });
     }, []),

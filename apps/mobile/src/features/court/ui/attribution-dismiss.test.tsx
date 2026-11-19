@@ -31,6 +31,7 @@ interface Props {
   readonly onPress?: () => void;
   readonly onDismiss?: () => void;
   readonly pointerEvents?: string;
+  readonly accessibilityViewIsModal?: boolean;
 }
 
 function find(
@@ -50,6 +51,20 @@ describe("tap outside the point author sheet", () => {
     const root = AttributionSheet(props) as ReactElement<Props>;
     expect(root.type).toBe(SheetSurface);
     expect(root.props.onDismiss).toBe(onSkip);
+  });
+
+  test("on screens 24 and 25 the tap only closes, it does not go to the next point", () => {
+    const onSkip = vi.fn();
+    const onClose = vi.fn();
+    const props = { model: {}, onSkip, onClose } as unknown as AttributionSheetProps;
+    const root = AttributionSheet(props) as ReactElement<Props>;
+    expect(root.props.onDismiss).toBe(onClose);
+    expect(onSkip).not.toHaveBeenCalled();
+  });
+
+  test("the sheet is modal for the screen reader", () => {
+    const tree = SheetSurface({ placement: "bottom", children: null });
+    expect(find(tree, (el) => el.props.accessibilityViewIsModal === true)).toHaveLength(1);
   });
 
   test("the scrim catches the tap (it does not let it through to the point zones)", () => {

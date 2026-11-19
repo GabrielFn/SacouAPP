@@ -19,6 +19,7 @@ import {
   SHEET,
 } from "./AttributionControls";
 import { SheetSurface } from "./SheetPanel";
+import { sheetGap } from "./sheet-max-height";
 
 export interface AttributionSheetProps {
   readonly model: AttributionSheetModel;
@@ -26,6 +27,11 @@ export interface AttributionSheetProps {
   readonly onAuthor: (memberId: MemberId) => void;
   readonly onOpponentError: () => void;
   readonly onSkip: () => void;
+  /**
+   * A tap outside the sheet. Over the court (31) it is "Pular"; on screens 24 and 25 it only
+   * closes, because "Pular" there goes on to the next point of the queue.
+   */
+  readonly onClose?: () => void;
 }
 
 export interface StatusLineProps {
@@ -148,21 +154,26 @@ function OpponentErrorButton({ model, onOpponentError }: AttributionSheetProps) 
   );
 }
 
-function SkipBlock({ model, onSkip }: AttributionSheetProps) {
-  const { tokens } = useTheme();
-  const { skip, footnote } = strings.courtPlayers.attribution;
+function SkipBlock({ model, onSkip, gap }: AttributionSheetProps & { readonly gap: number }) {
+  const { skip } = strings.courtPlayers.attribution;
   return (
-    <View style={{ gap: tokens.spacing.m }}>
+    <View style={{ gap }}>
       <FullButton label={skip} filled onPress={onSkip} />
       {model.refusal === null ? null : (
         <Text accessibilityLiveRegion="polite" style={{ color: SHEET.refusal }}>
           {model.refusal}
         </Text>
       )}
-      <Text variant="caption" style={{ color: SHEET.muted, textAlign: "center" }}>
-        {footnote}
-      </Text>
     </View>
+  );
+}
+
+function Footnote() {
+  const { footnote } = strings.courtPlayers.attribution;
+  return (
+    <Text variant="caption" style={{ color: SHEET.muted, textAlign: "center" }}>
+      {footnote}
+    </Text>
   );
 }
 
@@ -176,17 +187,19 @@ export function AttributionSheet(props: AttributionSheetProps) {
   const { tokens } = useTheme();
   const { width, height } = useWindowDimensions();
   const columns = attributionLayoutFor(width, height) === "columns";
+  const gap = sheetGap(tokens.spacing, height);
   const question = (
-    <View style={{ gap: tokens.spacing.m }}>
+    <View style={{ gap }}>
       <StatusLine title={props.model.title} />
       <Question />
       <KindsBlock {...props} />
     </View>
   );
   const players = (
-    <View style={{ gap: tokens.spacing.m }}>
+    <View style={{ gap }}>
       <PlayersBlock {...props} />
       <OpponentErrorButton {...props} />
+      {columns ? <Footnote /> : null}
     </View>
   );
   return (
@@ -194,13 +207,13 @@ export function AttributionSheet(props: AttributionSheetProps) {
       placement="bottom"
       inkTopBorder
       accessibilityLabel={props.model.title}
-      onDismiss={props.onSkip}
+      onDismiss={props.onClose ?? props.onSkip}
     >
       {columns ? (
         <View style={{ flexDirection: "row", gap: tokens.spacing.xl }}>
-          <View style={{ flex: 1, gap: tokens.spacing.m }}>
+          <View style={{ flex: 1, gap }}>
             {question}
-            <SkipBlock {...props} />
+            <SkipBlock {...props} gap={gap} />
           </View>
           <View style={{ flex: 1 }}>{players}</View>
         </View>
@@ -208,7 +221,8 @@ export function AttributionSheet(props: AttributionSheetProps) {
         <>
           {question}
           {players}
-          <SkipBlock {...props} />
+          <SkipBlock {...props} gap={gap} />
+          <Footnote />
         </>
       )}
     </SheetSurface>

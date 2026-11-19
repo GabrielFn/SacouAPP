@@ -1,34 +1,43 @@
 import { describe, expect, it } from "vitest";
 
 import { createScaledTokens } from "../../../theme/scale";
-import { bottomSheetMaxHeight, isShortWindow } from "./sheet-max-height";
+import { bottomSheetMaxHeight, isShortWindow, sheetGap } from "./sheet-max-height";
 
 const LANDSCAPE = { width: 780, height: 360 } as const;
+/** The safe area of a phone on its side, at the top and at the bottom, in dp. */
+const SAFE_AREA = 24;
 /** Lines the footnote takes in the narrow column of the sheet (a generous count). */
 const FOOTNOTE_LINES = 3;
 const LINE_HEIGHT_RATIO = 1.4;
+/** The 3 of the black top border over the 2 of the other outlines (`SheetPanel`). */
+const TOP_BORDER_RATIO = 1.5;
+/** Four kinds, four a line (`KIND_COLUMNS`): one row of chips. */
+const KIND_ROWS = 1;
+const PLAYER_ROWS = 2;
 
-/** The tallest column of the point author sheet on its side, from the tokens (no safe area). */
-function tallestColumn(fontScale: number): number {
-  const { spacing, sizes, sheet, fontSizes } = createScaledTokens({
+/** The tallest column of the point author sheet on its side, with the gaps `AttributionSheet` uses. */
+function sheetContentHeight(fontScale: number): number {
+  const { spacing, sizes, sheet, fontSizes, borderWidths } = createScaledTokens({
     windowWidth: LANDSCAPE.height,
     fontScale,
   });
-  const gap = spacing.s;
-  const kindRows = 2 * sizes.chip + spacing.s;
-  const status = sizes.statusPill;
-  const question = sheet.fontSizes.titleLarge;
-  const footnote = FOOTNOTE_LINES * fontSizes.caption * LINE_HEIGHT_RATIO;
-  const left = status + question + kindRows + sizes.primaryButton + footnote + 4 * gap;
-  const chrome = spacing.s10 + sizes.sheetHandle + 2 * gap;
-  return chrome + left;
+  const gap = sheetGap(spacing, LANDSCAPE.height);
+  const kinds = KIND_ROWS * sizes.chip + (KIND_ROWS - 1) * spacing.s;
+  const left =
+    sizes.statusPill + gap + sheet.fontSizes.titleLarge + gap + kinds + gap + sizes.primaryButton;
+  const caption = fontSizes.caption * LINE_HEIGHT_RATIO;
+  const grid = PLAYER_ROWS * sheet.sizes.playerCard + (PLAYER_ROWS - 1) * spacing.s;
+  const footnote = FOOTNOTE_LINES * caption;
+  const right = caption + spacing.s6 + grid + gap + sizes.primaryButton + gap + footnote;
+  const inkBorder = borderWidths.thick * TOP_BORDER_RATIO;
+  return inkBorder + spacing.s10 + Math.max(left, right) + SAFE_AREA + gap;
 }
 
 describe("bottomSheetMaxHeight", () => {
-  it("fits the two columns of screen 31 still at 780 x 360, with the bottom safe area", () => {
-    const bottomInset = 24;
-    const sheet = bottomSheetMaxHeight(LANDSCAPE.height, 0);
-    expect(tallestColumn(1) + bottomInset).toBeLessThanOrEqual(sheet);
+  it("fits the two columns of screen 31 at 780 x 360 with a 24 dp safe area on both edges", () => {
+    expect(sheetContentHeight(1)).toBeLessThanOrEqual(
+      bottomSheetMaxHeight(LANDSCAPE.height, SAFE_AREA),
+    );
   });
 
   it("takes the height under the top safe area on its side", () => {
