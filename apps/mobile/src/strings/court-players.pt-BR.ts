@@ -40,7 +40,7 @@ export const courtPlayersStrings = {
     opponentError: (team: string) => `Erro do ${team}`,
     skip: "Pular",
     footnote:
-      "Fica aberto até o próximo ponto. Sem resposta, o ponto fica sem autor e dá pra preencher depois no Corrigir ou no fim do set.",
+      "Toque fora da folha para fechar. Sem resposta, o ponto fica sem autor e dá pra preencher depois no Corrigir ou no fim do set.",
     // Screen 24: who scored each line, and the button to answer or change it.
     rowAuthor: (kind: string, name: string) => `${kind} · ${name}`,
     noAuthor: "sem autor",

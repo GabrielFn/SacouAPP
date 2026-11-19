@@ -75,3 +75,13 @@ describe("tap outside the point author sheet", () => {
     expect(scrims[0]?.props.pointerEvents).not.toBe("none");
   });
 });
+
+describe("footnote of the point author sheet", () => {
+  test("tells that a tap outside closes the sheet, not that it stays open until the next point", async () => {
+    const { courtPlayersStrings } = await import("../../../strings/court-players.pt-BR");
+    const { footnote } = courtPlayersStrings.attribution;
+
+    expect(footnote).toMatch(/^Toque fora da folha para fechar\./);
+    expect(footnote).not.toMatch(/próximo ponto/);
+  });
+});
