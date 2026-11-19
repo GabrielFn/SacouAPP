@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json.Nodes;
 using Sacou.Integration.Tests.Groups;
 using Xunit;
 using A = Sacou.Integration.Tests.Groups.GroupActor;
@@ -10,6 +11,7 @@ namespace Sacou.Integration.Tests.Sessions;
 public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetime
 {
     private const int CodeLength = 22;
+    private const string TraceIdField = "traceId";
 
     private readonly ApiWithDatabase api = new(database);
 
@@ -73,12 +75,20 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
                 using var response = await world.SendAsync(A.NonMember, HttpMethod.Post, path, body);
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
                 Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
-                bodies.Add(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+                bodies.Add(await WithoutTraceIdAsync(response));
             }
         }
 
         Assert.Single(bodies.Distinct(StringComparer.Ordinal));
         Assert.Contains(RoundLinkCalls.LinkInvalid, bodies[0], StringComparison.Ordinal);
+    }
+
+    /// <summary>The body and its type, without the trace id every answer has its own of.</summary>
+    private static async Task<string> WithoutTraceIdAsync(HttpResponseMessage response)
+    {
+        var body = JsonNode.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))!.AsObject();
+        Assert.True(body.Remove(TraceIdField));
+        return $"{response.Content.Headers.ContentType}|{body.ToJsonString()}";
     }
 
     /// <summary>Case 4: a cancelled round lets nobody in.</summary>
@@ -164,9 +174,10 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1, waitlist: waitlist);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2, waitlist: waitlist);
         var (round, code) = await RoundLinkCalls.RoundAsync(world);
         _ = await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true);
+        _ = await RoundCalls.RespondAsync(world, world.Subjects[A.Scorekeeper], round, going: true);
 
         var (status, body) = await RoundLinkCalls.AnswerAsync(world, A.NonMember, code);
 
@@ -238,9 +249,10 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 2);
         var (round, code) = await RoundLinkCalls.RoundAsync(world);
         _ = await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true);
+        _ = await RoundCalls.RespondAsync(world, world.Subjects[A.Scorekeeper], round, going: true);
         _ = await RoundLinkCalls.AnswerAsync(world, A.Player, code);
         var before = await RoundLinkCalls.AttendanceOfAsync(api.ConnectionString, round, world.MemberIds[A.Player]);
         _ = await RoundLinkCalls.AnswerAsync(world, A.NonMember, code);
