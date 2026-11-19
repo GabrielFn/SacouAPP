@@ -8,6 +8,8 @@ import { ROSTER, startScenario } from "./screen-scenarios.test.fixture";
 import { layoutTeamMarkers, markerRadius, squareOrigin } from "./team-markers";
 
 const NO_INSETS = { insetTop: 0, insetBottom: 0, insetLeft: 0, insetRight: 0 };
+/** Bar plus queue strip: what the phone leaves out of the zone row (360 -> 236, uiautomator 18/11/2026). */
+const NON_ZONE_HEIGHT = 124;
 const SCREENS = [
   { width: 640, height: 360 },
   { width: 780, height: 360 },
@@ -28,6 +30,7 @@ describe("everything of a half court is inside the zone, above the queue strip",
       windowWidth: screen.width,
       windowHeight: screen.height,
       ...NO_INSETS,
+      measuredZoneHeight: screen.height - NON_ZONE_HEIGHT,
     });
     const tokens = createScaledTokens({
       windowWidth: shortSide(screen.width, screen.height),

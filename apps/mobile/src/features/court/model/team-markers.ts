@@ -2,7 +2,6 @@ import type { ScaledTokens } from "../../../theme/scale";
 import {
   COLUMN_LINE_HEIGHT_EM,
   HALF,
-  LANDSCAPE_SQUARE_TOP_SHARE,
   LABEL_CHAR_WIDTH_EM,
   LABEL_ELLIPSIS_WIDTH_EM,
   LABEL_LINE_HEIGHT_EM,
@@ -163,7 +162,7 @@ export function squareOrigin(layout: CourtLayout, end: CourtEnd): SquareOrigin {
   if (layout.kind === "landscape") {
     return {
       x: end === "left" ? zoneWidth - halfCourtSide : 0,
-      y: (zoneHeight - halfCourtSide) * LANDSCAPE_SQUARE_TOP_SHARE,
+      y: (zoneHeight - halfCourtSide) / HALF,
     };
   }
   return {

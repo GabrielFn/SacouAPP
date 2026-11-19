@@ -84,14 +84,8 @@ export const LANDSCAPE_ZONE_RATIOS = { edge: 4 / 382, side: 103 / 382 } as const
 
 /** The square is at most 280 of the 382 of the zone width (the column leaves it 275)... */
 export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 280 / 382;
-/**
- * ...and never more than 256 of the 294 of its height: the phone test of 17/11/2026 showed the end
- * line and the names of the bottom row under the queue, so the zone keeps 38 free for the names.
- */
-export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 256 / 294;
-
-/** Of the free height of the zone, the square leaves this share above it and the rest below, for the names (0.4 or less crosses names at 640 x 360). */
-export const LANDSCAPE_SQUARE_TOP_SHARE = 0.5;
+/** ...and never more than 280 of the 294 of its height, as drawn in design/mvp. */
+export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 280 / 294;
 
 /**
  * The score is 38% of the zone height in landscape (112 of the 294), a little less than the 45% of

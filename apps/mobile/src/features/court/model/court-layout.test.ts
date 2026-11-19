@@ -46,7 +46,7 @@ describe("the landscape layout", () => {
     expect(layout.zoneWidth).toBeCloseTo(382, 3);
     expect(layout.zoneHeight).toBeCloseTo(294, 3);
     expect(layout.sideWidth).toBeCloseTo(103, 3);
-    expect(layout.halfCourtSide).toBeCloseTo(256, 3);
+    expect(layout.halfCourtSide).toBeCloseTo(275, 3);
   });
 
   test.each(PHONES)("the weights add up to the usable area at $width x $height", (phone) => {
@@ -141,32 +141,6 @@ describe("the net column holds its two buttons", () => {
       const button = layout.netWidth - around;
       expect(button).toBeGreaterThanOrEqual(tokens.sizes.minTouchTarget);
       expect(layout.zoneWidth * 2 + layout.netWidth).toBeCloseTo(screen.width, 3);
-    },
-  );
-});
-
-describe("the court sits high enough for the names of its bottom row", () => {
-  const SCREENS = [
-    { width: 640, height: 360 },
-    { width: 844, height: 390 },
-    { width: 932, height: 430 },
-  ] as const;
-
-  test.each(SCREENS)(
-    "below the square there is room for half a chip, never less than above it, at $width x $height",
-    (screen) => {
-      const layout = computeCourtLayout(input(screen.width, screen.height));
-      const tokens = createScaledTokens({
-        windowWidth: shortSide(screen.width, screen.height),
-        fontScale: 1,
-      });
-      for (const end of ["left", "right"] as const) {
-        const origin = squareOrigin(layout, end);
-        const below = layout.zoneHeight - origin.y - layout.halfCourtSide;
-        expect(origin.y).toBeLessThanOrEqual(below + TOLERANCE);
-        expect(origin.y).toBeGreaterThanOrEqual(0);
-        expect(below).toBeGreaterThanOrEqual(tokens.court.sizes.chip / 2);
-      }
     },
   );
 });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
@@ -16,6 +16,12 @@ import { CourtHeader } from "./CourtHeader";
 import { CourtLandscape } from "./CourtLandscape";
 import { TeamZone } from "./TeamZone";
 
+interface MeasuredZone {
+  readonly width: number;
+  readonly height: number;
+  readonly zoneHeight: number;
+}
+
 export interface CourtScreenProps extends CourtHandlers, CourtExtras {
   readonly model: CourtScreenModel;
 }
@@ -25,34 +31,7 @@ export interface CourtScreenProps extends CourtHandlers, CourtExtras {
  * layout: on its side it is the landscape court (the court locks the phone that way); upright is
  * the fallback for a tablet that ignores the lock, a split screen or a lock that failed.
  */
-export function CourtScreen(props: CourtScreenProps) {
-  const window = useWindowDimensions();
-  // The area the screen really got, once measured. On Android the window can be taller than the
-  // view (system bars the insets do not report), and a layout worked out from the window would push
-  // the half courts under the queue (phone test of 18/11/2026).
-  const [area, setArea] = useState<CourtArea | null>(null);
-  const onLayout = (event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    setArea((current) =>
-      current !== null && current.width === width && current.height === height
-        ? current
-        : { width, height },
-    );
-  };
-  return (
-    <View style={{ flex: 1 }} onLayout={onLayout}>
-      <CourtScreenContent {...props} area={area ?? window} />
-    </View>
-  );
-}
-
-interface CourtArea {
-  readonly width: number;
-  readonly height: number;
-}
-
-function CourtScreenContent({
-  area,
+export function CourtScreen({
   model,
   onPoint,
   onUndo,
@@ -61,14 +40,19 @@ function CourtScreenContent({
   inverted = false,
   battery = null,
   notice = null,
-}: CourtScreenProps & { readonly area: CourtArea }) {
+}: CourtScreenProps) {
   const { colors } = useTheme();
-  const { width, height } = area;
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const sides = sidesOf(inverted);
-  const [zoneHeight, setZoneHeight] = useState<number | null>(null);
+  const [measured, setMeasured] = useState<MeasuredZone | null>(null);
+  // The measure belongs to the window it was taken in: after a rotation or a resize it is stale.
+  const zoneHeight =
+    measured !== null && measured.width === width && measured.height === height
+      ? measured.zoneHeight
+      : undefined;
   const layout = computeCourtLayout({
-    measuredZoneHeight: zoneHeight ?? undefined,
+    measuredZoneHeight: zoneHeight,
     windowWidth: width,
     windowHeight: height,
     insetTop: insets.top,
@@ -81,7 +65,9 @@ function CourtScreenContent({
       <CourtLandscape
         model={model}
         layout={layout}
-        onZoneHeight={setZoneHeight}
+        onZoneHeight={(zone) => {
+          setMeasured({ width, height, zoneHeight: zone });
+        }}
         onPoint={onPoint}
         onUndo={onUndo}
         onCorrect={onCorrect}

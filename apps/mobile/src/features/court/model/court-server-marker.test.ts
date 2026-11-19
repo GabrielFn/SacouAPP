@@ -57,3 +57,29 @@ describe("the server marker is whole inside the zone", () => {
     expect(servers).toBeGreaterThan(0);
   });
 });
+
+describe("the server marker at the ratio drawn in design/mvp", () => {
+  test("the square is 275 at 844 x 390 and the server is still whole inside the measured zone", async () => {
+    const scenario = await startScenario(SAMPLE_MATCH_LONG_NAMES);
+    const zone = 294;
+    const layout = computeCourtLayout({
+      windowWidth: 844,
+      windowHeight: 390,
+      insetTop: 0,
+      insetBottom: 0,
+      insetLeft: 0,
+      insetRight: 0,
+      measuredZoneHeight: zone,
+    });
+    expect(layout.halfCourtSide).toBeCloseTo(275, 3);
+    const tokens = createScaledTokens({ windowWidth: 390, fontScale: 1 });
+    const reach = markerRadius(tokens) + tokens.court.spacing.badgeOffsetX;
+    const model = selectCourtScreen(scenario.timeline(), ROSTER);
+    if (model === null) throw new Error("no court to show");
+    const origin = squareOrigin(layout, "left");
+    for (const m of layoutTeamMarkers({ panel: model.teams.a, layout, tokens, end: "left" })) {
+      expect(origin.y + m.placed.name.box.bottom).toBeLessThanOrEqual(zone);
+      if (m.chip.isServer) expect(origin.y + m.placed.y + reach).toBeLessThanOrEqual(zone);
+    }
+  });
+});
