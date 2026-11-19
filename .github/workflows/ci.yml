@@ -190,7 +190,7 @@ jobs:
             "" | 0 | 0:* | root | root:*) exit 1 ;;
           esac
           # The round page's origin is required outside Development (ADR 0070, D1); the deploy sets the real one.
-          docker run --detach --name sacou-api-ci --publish 127.0.0.1:18080:8080             --env RoundPage__PublicBaseUrl=https://sacou.test sacou-api:ci
+          docker run --detach --name sacou-api-ci --publish 127.0.0.1:18080:8080 \n            --env RoundPage__PublicBaseUrl=https://sacou.test sacou-api:ci
           curl --fail --silent --show-error --retry 10 --retry-delay 2 --retry-all-errors --max-time 5 \
             http://127.0.0.1:18080/health || { docker logs sacou-api-ci; exit 1; }
           echo

@@ -216,8 +216,10 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | S   | Código vazado (log do Cloud Run, link encaminhado) põe estranhos no grupo                                | Só até o início da rodada e com ela não cancelada; removido não volta (403); o admin vê quem entrou e remove (tela 19). Risco aceito no ADR 0070 |
 | E   | Usar o link para virar algo além de avulso, ou agir por outro membro                                     | Entra sempre como `Player` e `DropIn`; membro ativo não muda de papel nem de tipo; as rotas agem só sobre quem chama (`ResponseActor.Self`), e `memberId` ou `groupId` no corpo é 400 |
 | E   | Membro sem `ManageRounds` espalhar o link que põe gente no grupo                                         | `shareUrl` só para Admin e Co-admin (pergunta 130); os demais recebem `null` |
-| I   | Resolução do link revelando o grupo a quem não é membro                                                  | `resolve` devolve só `groupId`, `roundId` e `isMember`; nomes e listas só pelas rotas de grupo, com a autorização de sempre; o código nunca vai a log da API |
+| I   | Resolução do link revelando o grupo a quem não é membro                                                  | `resolve` devolve só `isOpen`, `groupId`, `roundId` e `isMember`, e sem os IDs quando a rodada já foi cancelada ou começou; nomes e listas só pelas rotas de grupo, com a autorização de sempre; o código nunca vai a log da API |
 | D   | Entrada pelo link esgotando o pool (duas conexões por pedido)                                            | `round-link` entra no portão de concorrência das rotas de duas conexões (ADR 0062, item 5) |
+| T   | Rodada fecha (cancelada ou começou) entre a conferência sem trava e a entrada no grupo (Parte 1) | Risco aceito ([ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md), D2): janela de milissegundos; a resposta sob a trava da rodada confere de novo e recusa, a pessoa fica no grupo como avulso e o admin remove pela tela 19 |
+| D   | Página anônima `/r/{code}` sem limite por usuário (robô e visitante sem login) | **Pendência da Parte 2:** política `round-page` por IP (com hash) antes de abrir a página; a Parte 1 só limita as rotas logadas |
 
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 

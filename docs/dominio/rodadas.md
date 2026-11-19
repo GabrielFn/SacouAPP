@@ -104,7 +104,7 @@ Rotas do link (E3.12), **sem** `{groupId}`, com o código no corpo e `Cache-Cont
 
 | Rota | Quem | Sucesso |
 |---|---|---|
-| `POST /v1/round-links/resolve` `{ code }` | logado e registrado | 200 `{ groupId, roundId, isMember }` |
+| `POST /v1/round-links/resolve` `{ code }` | logado e registrado | 200 `{ isOpen, groupId, roundId, isMember }`; IDs nulos com a rodada cancelada ou começada |
 | `POST /v1/round-links/attendance` `{ code, response }` | logado e registrado | 200 `{ groupId, roundId, memberId, joined, status, position }`; entra como avulso se preciso |
 
 Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.
