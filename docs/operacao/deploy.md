@@ -62,6 +62,10 @@ Resultados no PR da tarefa ou no diário da sessão.
 Esperado: US$ 0 (faixa grátis do Cloud Run na `us-east4`, 0,5 GB do Artifact Registry, Secret Manager e Logging dentro do grátis; Neon Free, 100 CU-hora por projeto e por mês). Onde olhar:
 
 - Google Cloud → Faturamento → Relatórios (filtro do projeto `sacou-api`). O teto de gasto do Cloud Run **pausa os serviços** quando atingido; o alerta avisa em 50, 90 e 100%.
+- **Como estão configurados (18/11/2026, pelo console, na conta de faturamento "Pagamento Firebase", em reais):**
+  - `sacou-api-cloud-run-cap`: orçamento do tipo **"Aplicação do limite de gastos"** (*spend cap enforcement*), projeto `sacou-api`, serviço **Cloud Run**, R$ 5 por mês (cerca de US$ 1, resposta 94), avisos em 50, 80 e 100%. Na lista de "Orçamentos e limites" aparece com o status **Configurado**. Quando atingido, pausa os dois serviços (teste e produção, no mesmo projeto: abuso no teste também pausa a produção, achado M4-M1 da revisão do M4) até o mês seguinte ou até o teto subir; os gastos máximos voltam no início de cada mês. A cobrança chega com algumas horas de atraso, então o gasto pode passar um pouco do valor.
+  - `sacou-api`: orçamento **só de alerta**, projeto `sacou-api`, todos os serviços, R$ 5 por mês, e-mail em 50, 90 e 100%.
+  - Conferir no roteiro (passo 9): Faturamento → Orçamentos e limites, as duas linhas acima, a do teto com "Configurado".
 - Neon → projeto → Billing / Usage: horas de compute. Se acabarem, a compute fica suspensa até o mês seguinte.
 
 ## Backup
