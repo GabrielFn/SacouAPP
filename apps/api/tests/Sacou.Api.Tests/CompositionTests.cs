@@ -149,4 +149,20 @@ public sealed class CompositionTests
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), Name)));
         }
     }
+
+    /// <summary>E3.12, case 21: outside Development the round page's origin is required, and only an https origin starts.</summary>
+    [Theory]
+    [InlineData("")]
+    [InlineData("http://sacou.app")]
+    [InlineData("https://sacou.app/r")]
+    [InlineData("https://sacou.app?x=1")]
+    public async Task RoundPageBase_OutOfShape_StopsTheStartInProduction(string url)
+    {
+        await using var production = new SacouApiFactory { Environment = "Production", PublicBaseUrl = url };
+
+        var failure = Assert.Throws<OptionsValidationException>(() => production.CreateClient());
+
+        Assert.Contains("RoundPage:PublicBaseUrl", failure.Message, StringComparison.Ordinal);
+        Assert.True(url.Length == 0 || !failure.Message.Contains(url, StringComparison.Ordinal));
+    }
 }

@@ -219,6 +219,9 @@ internal sealed class GroupWorld
     public Task<HttpResponseMessage> DeleteAccountAsync(GroupActor actor, TimeSpan signedInAgo = default) =>
         DeleteAccountAsync(subjects[actor], signedInAgo);
 
+    /// <summary>A valid token of one of the actors, for a test that builds its own request (a body that is not JSON).</summary>
+    public string TokenFor(GroupActor actor) => TokenFor(subjects[actor]);
+
     private string TokenFor(string subject) =>
         TestIdToken.Valid(api.Key, DateTimeOffset.FromUnixTimeSeconds(api.Clock.GetUtcNow().ToUnixTimeSeconds())).With("sub", subject).With("user_id", subject).Sign();
 

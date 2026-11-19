@@ -212,6 +212,12 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | I   | Prévia no WhatsApp ou página aberta mostrando demais: a prévia traz título e contagem (`produto.md:115`) | O que aparece sem login: a definir na E3.12. Nível nunca (`decisoes.md:16`)                                                                     |
 | D   | Abuso da página pública                                                                                  | Limite de requisições (`decisoes.md:31`)                                                                                                        |
 | E   | Ação de admin pela página                                                                                | Autorização por recurso (`decisoes.md:27`)                                                                                                      |
+| S   | Adivinhar o código do link de outra rodada (Parte 1, [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md), D1) | 128 bits de `RandomNumberGenerator`, sem relação com o `RoundId`; formato conferido antes da consulta; inexistente e malformado dão o mesmo 404 (`sessions.round-link-invalid`); limite `round-link` de 30 / 60 s por usuário |
+| S   | Código vazado (log do Cloud Run, link encaminhado) põe estranhos no grupo                                | Só até o início da rodada e com ela não cancelada; removido não volta (403); o admin vê quem entrou e remove (tela 19). Risco aceito no ADR 0070 |
+| E   | Usar o link para virar algo além de avulso, ou agir por outro membro                                     | Entra sempre como `Player` e `DropIn`; membro ativo não muda de papel nem de tipo; as rotas agem só sobre quem chama (`ResponseActor.Self`), e `memberId` ou `groupId` no corpo é 400 |
+| E   | Membro sem `ManageRounds` espalhar o link que põe gente no grupo                                         | `shareUrl` só para Admin e Co-admin (pergunta 130); os demais recebem `null` |
+| I   | Resolução do link revelando o grupo a quem não é membro                                                  | `resolve` devolve só `groupId`, `roundId` e `isMember`; nomes e listas só pelas rotas de grupo, com a autorização de sempre; o código nunca vai a log da API |
+| D   | Entrada pelo link esgotando o pool (duas conexões por pedido)                                            | `round-link` entra no portão de concorrência das rotas de duas conexões (ADR 0062, item 5) |
 
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 
