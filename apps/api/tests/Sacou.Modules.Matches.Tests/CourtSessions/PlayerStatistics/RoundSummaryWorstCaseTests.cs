@@ -13,9 +13,12 @@ namespace Sacou.Modules.Matches.Tests.CourtSessions.PlayerStatistics;
 /// <summary>
 /// The worst legal round of E3.9 part 1, condition 1: 200 finished matches of 24 against 24 with the
 /// rotation on and a side-out every rally, about 19,600 events. The TypeScript summary took about 1.8 s
-/// on the slow machine; the C# port shares the rallies and adds up in a local mutable map. The ceiling
-/// is loose on purpose (Debug, a shared CI runner): it catches a return of the copy per rally, which
-/// costs tens of seconds, not noise. The replay is measured apart and not asserted (ADR 0060, A10).
+/// on the slow machine; the C# port shares the rallies and adds up in local arrays. Measured alone in
+/// Debug on the local machine: replay 0.83 s, summary 1.17 s (ADR 0071, part 3). A wall-clock ceiling
+/// failed under the parallel test run (5.6 s with the other assemblies), so the ceiling is relative to
+/// the replay of the same log, in the same process and under the same load: the summary walks the same
+/// timeline, so anything above a few replays means a quadratic return, not noise. The replay cost
+/// itself is ADR 0060, A10.
 /// </summary>
 public sealed class RoundSummaryWorstCaseTests
 {
@@ -23,7 +26,8 @@ public sealed class RoundSummaryWorstCaseTests
     private const int PointsPerMatch = 96;
     private const int TeamMembers = 24;
     private const int LineupMembers = 6;
-    private const double SummaryCeilingSeconds = 5;
+    /// <summary>How many replays of the same log the summary may cost.</summary>
+    private const double SummaryCeilingInReplays = 4;
     private const string Court = "c0000000-0000-4000-8000-000000000001";
     private const string Device = "d0000000-0000-4000-8000-000000000001";
 
@@ -45,7 +49,9 @@ public sealed class RoundSummaryWorstCaseTests
             $"{log.Length} events: replay {replaySeconds:F2} s, summary {summarySeconds:F2} s");
         Assert.Equal(FinishedMatches, summary.FinishedMatches.Length);
         Assert.Equal(TeamMembers * 2, summary.Players.Length);
-        Assert.True(summarySeconds < SummaryCeilingSeconds, $"summary took {summarySeconds:F2} s");
+        Assert.True(
+            summarySeconds < SummaryCeilingInReplays * replaySeconds,
+            $"summary took {summarySeconds:F2} s, the replay {replaySeconds:F2} s");
     }
 
     private static ImmutableArray<EventEnvelope> Log()

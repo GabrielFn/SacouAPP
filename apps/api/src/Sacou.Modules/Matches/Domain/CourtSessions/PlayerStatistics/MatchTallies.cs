@@ -28,7 +28,7 @@ internal static class MatchTallies
     public static ImmutableDictionary<string, ImmutableDictionary<string, CourtBalance>> CourtBalancesByMatch(
         ImmutableArray<PlayedRally> rallies) =>
         GroupByMatch(rallies, rally => rally.MatchId)
-            .ToImmutableDictionary(group => group.Key, group => Tally<PlayedRally, CourtBalance>(group.Value, CreditsOf), StringComparer.Ordinal);
+            .ToImmutableDictionary(group => group.Key, group => BalancesOf(group.Value), StringComparer.Ordinal);
 
     /// <summary>The rallies of each match, in order, the open one too.</summary>
     public static ImmutableDictionary<string, ImmutableArray<PlayedRally>> RalliesByMatch(ImmutableArray<PlayedRally> rallies) =>
@@ -119,18 +119,38 @@ internal static class MatchTallies
         ];
     }
 
-    private static IEnumerable<KeyValuePair<string, CourtBalance>> CreditsOf(
-        PlayedRally rally,
-        IReadOnlyDictionary<string, CourtBalance> balances) =>
-        TeamSide.All.SelectMany(side => rally.OnCourt.Of(side).Select(memberId =>
-            KeyValuePair.Create(memberId, Credit(balances.GetValueOrDefault(memberId, CourtBalance.None), side == rally.Team))));
-
-    private static CourtBalance Credit(CourtBalance balance, bool won)
+    /// <summary>
+    /// The balance of each member over the rallies of one match. The hot loop of the worst case (E3.9, part 1,
+    /// condition 1): the counts live in local arrays, indexed by the order a member first stood on the court,
+    /// so a rally only reads the index map. A member is in one team of a match only (the parser refuses a
+    /// repeated one), so a rally credits each member once.
+    /// </summary>
+    private static ImmutableDictionary<string, CourtBalance> BalancesOf(ImmutableArray<PlayedRally> rallies)
     {
-        const int OnePoint = 1;
-        return won
-            ? balance with { PointsFor = balance.PointsFor + OnePoint }
-            : balance with { PointsAgainst = balance.PointsAgainst + OnePoint };
+        var indexes = ImmutableDictionary.CreateBuilder<string, int>(StringComparer.Ordinal);
+        var pointsFor = new List<int>();
+        var pointsAgainst = new List<int>();
+        foreach (var rally in rallies)
+        {
+            foreach (var side in TeamSide.All)
+            {
+                var counts = side == rally.Team ? pointsFor : pointsAgainst;
+                foreach (var memberId in rally.OnCourt.Of(side))
+                {
+                    if (!indexes.TryGetValue(memberId, out var index))
+                    {
+                        index = pointsFor.Count;
+                        indexes.Add(memberId, index);
+                        pointsFor.Add(0);
+                        pointsAgainst.Add(0);
+                    }
+
+                    counts[index]++;
+                }
+            }
+        }
+
+        return indexes.ToImmutableDictionary(entry => entry.Key, entry => new CourtBalance(pointsFor[entry.Value], pointsAgainst[entry.Value]), StringComparer.Ordinal);
     }
 
     private static IEnumerable<KeyValuePair<string, PointsByKind>> CreditAuthor(
