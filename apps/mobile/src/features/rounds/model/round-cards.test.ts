@@ -86,10 +86,21 @@ describe("roundCardsOf", () => {
     expect(cards.groups[2]?.round).toBeNull();
     expect(cards.weekText).toBe("2 rodadas essa semana.");
   });
-  it("treats a group whose rounds did not load as a group without a round", () => {
-    const cards = roundCardsOf([group("a", "A")], [], NOW);
+  it("marks a group whose rounds are loading or failed as unknown, not as without a round", () => {
+    const cards = roundCardsOf([group("a", "A")], [undefined], NOW);
     expect(cards.groups[0]?.round).toBeNull();
+    expect(cards.groups[0]?.hasNextRound).toBeNull();
     expect(cards.weekText).toBeNull();
+  });
+  it("knows a loaded group has no round (Criar) or has one (Editar)", () => {
+    const groups = [group("a", "Sem"), group("b", "Com")];
+    const cards = roundCardsOf(groups, [[], [WEDNESDAY]], NOW);
+    expect(cards.groups.map((entry) => entry.hasNextRound)).toEqual([true, false]);
+    const [withRound, without] = cards.groups.map((entry) =>
+      groupCardActions("admin", [], entry.hasNextRound),
+    );
+    expect(withRound).toEqual(["members", "settings", "editRound"]);
+    expect(without).toEqual(["members", "settings", "createRound"]);
   });
 });
 
@@ -143,10 +154,11 @@ describe("card texts", () => {
 });
 
 describe("groupCardActions with a next round", () => {
-  it("offers Editar rodada only to the roles with ManageRounds and only with a round", () => {
+  it("offers Editar rodada with a round, Criar rodada without, only to the roles with ManageRounds", () => {
     expect(groupCardActions("admin", [], true)).toEqual(["members", "settings", "editRound"]);
     expect(groupCardActions("coAdmin", ["members", "settings"], true)).toEqual(["editRound"]);
-    expect(groupCardActions("admin", [], false)).toEqual(["members", "settings"]);
+    expect(groupCardActions("admin", [], false)).toEqual(["members", "settings", "createRound"]);
+    expect(groupCardActions("coAdmin", ["members", "settings"], false)).toEqual(["createRound"]);
     expect(groupCardActions("scorekeeper", [], true)).toEqual([]);
     expect(groupCardActions("player", [], true)).toEqual([]);
   });

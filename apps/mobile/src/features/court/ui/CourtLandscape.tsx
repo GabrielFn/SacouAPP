@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, type LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
@@ -17,6 +17,8 @@ import { TeamZone } from "./TeamZone";
 export interface CourtLandscapeProps extends CourtHandlers, CourtExtras {
   readonly model: CourtScreenModel;
   readonly layout: LandscapeCourtLayout;
+  /** Told the height the row of the two zones really got, so the layout is worked out from it. */
+  readonly onZoneHeight: (height: number) => void;
 }
 
 /**
@@ -26,6 +28,7 @@ export interface CourtLandscapeProps extends CourtHandlers, CourtExtras {
 export function CourtLandscape({
   model,
   layout,
+  onZoneHeight,
   onPoint,
   onUndo,
   onCorrect,
@@ -56,7 +59,12 @@ export function CourtLandscape({
         hint={notice ?? hintText(model)}
         onOpenMenu={onOpenMenu}
       />
-      <View style={{ flex: LANDSCAPE_FLEX_WEIGHTS.middle, flexDirection: "row" }}>
+      <View
+        style={{ flex: LANDSCAPE_FLEX_WEIGHTS.middle, flexDirection: "row" }}
+        onLayout={(event: LayoutChangeEvent) => {
+          onZoneHeight(event.nativeEvent.layout.height);
+        }}
+      >
         <TeamZone
           panel={model.teams[sides.left]}
           end="left"

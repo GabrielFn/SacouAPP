@@ -227,6 +227,7 @@ export const roundsStrings = {
     withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
     next: (when: string) => `Próxima: ${when}`,
     editRound: "Editar rodada",
+    createRound: "Criar rodada",
     stripLabel: (day: string, hour: string) => `${day}, ${hour}`,
   },
   /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */

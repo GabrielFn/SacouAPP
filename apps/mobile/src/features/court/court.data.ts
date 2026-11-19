@@ -84,7 +84,7 @@ export const LANDSCAPE_ZONE_RATIOS = { edge: 4 / 382, side: 103 / 382 } as const
 
 /** The square is at most 280 of the 382 of the zone width (the column leaves it 275)... */
 export const LANDSCAPE_HALF_COURT_WIDTH_RATIO = 280 / 382;
-/** ...and never more than 280 of the 294 of its height, a little room left for the server. */
+/** ...and never more than 280 of the 294 of its height, as drawn in design/mvp. */
 export const LANDSCAPE_HALF_COURT_ZONE_RATIO = 280 / 294;
 
 /**

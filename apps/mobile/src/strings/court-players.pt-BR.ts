@@ -26,7 +26,6 @@ export const courtPlayersStrings = {
     onScore: "já está no placar",
     afterSpace: (hint: string) => ` ${hint}`,
     inParentheses: (hint: string) => ` (${hint})`,
-    nameWithBadge: (name: string, badge: string) => `${name} · ${badge}`,
     question: "De quem foi?",
     questionHint: "toque no jogador",
     kindsLabel: "Tipo do ponto",
