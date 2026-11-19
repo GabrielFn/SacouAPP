@@ -86,10 +86,21 @@ describe("roundCardsOf", () => {
     expect(cards.groups[2]?.round).toBeNull();
     expect(cards.weekText).toBe("2 rodadas essa semana.");
   });
-  it("treats a group whose rounds did not load as a group without a round", () => {
-    const cards = roundCardsOf([group("a", "A")], [], NOW);
+  it("marks a group whose rounds are loading or failed as unknown, not as without a round", () => {
+    const cards = roundCardsOf([group("a", "A")], [undefined], NOW);
     expect(cards.groups[0]?.round).toBeNull();
+    expect(cards.groups[0]?.hasNextRound).toBeNull();
     expect(cards.weekText).toBeNull();
+  });
+  it("knows a loaded group has no round (Criar) or has one (Editar)", () => {
+    const groups = [group("a", "Sem"), group("b", "Com")];
+    const cards = roundCardsOf(groups, [[], [WEDNESDAY]], NOW);
+    expect(cards.groups.map((entry) => entry.hasNextRound)).toEqual([true, false]);
+    const [withRound, without] = cards.groups.map((entry) =>
+      groupCardActions("admin", [], entry.hasNextRound),
+    );
+    expect(withRound).toEqual(["members", "settings", "editRound"]);
+    expect(without).toEqual(["members", "settings", "createRound"]);
   });
 });
 

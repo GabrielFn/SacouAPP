@@ -21,7 +21,7 @@ import { OfflineBanner } from "../../ui/OfflineBanner";
 import { Screen } from "../../ui/Screen";
 import { Text } from "../../ui/Text";
 
-function actionHref(action: GroupCardAction, groupId: string, roundId: string | null): Href {
+function actionHref(action: Exclude<GroupCardAction, "editRound">, groupId: string): Href {
   switch (action) {
     case "members":
       return groupMembersHref(groupId);
@@ -29,8 +29,6 @@ function actionHref(action: GroupCardAction, groupId: string, roundId: string | 
       return groupSettingsHref(groupId);
     case "createRound":
       return createRoundHref(groupId);
-    case "editRound":
-      return roundId === null ? createRoundHref(groupId) : editRoundHref(groupId, roundId);
   }
 }
 
@@ -60,8 +58,11 @@ export default function GroupsScreen() {
         renderList={(groups) => (
           <GroupCardList
             groups={groups}
-            onAction={(action, groupId, roundId) => {
-              router.push(actionHref(action, groupId, roundId));
+            onAction={(action, groupId) => {
+              router.push(actionHref(action, groupId));
+            }}
+            onEditRound={(groupId, roundId) => {
+              router.push(editRoundHref(groupId, roundId));
             }}
             onOpenRound={(groupId, roundId) => {
               router.push(roundHref(groupId, roundId));

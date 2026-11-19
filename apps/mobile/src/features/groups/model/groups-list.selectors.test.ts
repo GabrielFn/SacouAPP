@@ -57,7 +57,7 @@ describe("roles", () => {
 
 describe("groupCardActions", () => {
   it("shows only the round action while the screens are pending", () => {
-    expect(groupCardActions("admin", ["members", "settings"])).toEqual(["createRound"]);
+    expect(groupCardActions("admin", ["members", "settings"], false)).toEqual(["createRound"]);
     expect(groupCardActions("admin", ["members", "settings"], true)).toEqual(["editRound"]);
   });
   it("shows members and settings to who organizes once they exist", () => {
@@ -66,12 +66,16 @@ describe("groupCardActions", () => {
     expect(groupCardActions("admin", ["settings"], true)).toEqual(["members", "editRound"]);
   });
   it("offers Criar rodada to who organizes when there is no next round", () => {
-    expect(groupCardActions("admin", [])).toEqual(["members", "settings", "createRound"]);
-    expect(groupCardActions("coAdmin", [])).toEqual(["members", "settings", "createRound"]);
+    expect(groupCardActions("admin", [], false)).toEqual(["members", "settings", "createRound"]);
+    expect(groupCardActions("coAdmin", [], false)).toEqual(["members", "settings", "createRound"]);
+  });
+  it("shows no round action while the rounds are loading or failed (unknown)", () => {
+    expect(groupCardActions("admin", [], null)).toEqual(["members", "settings"]);
+    expect(groupCardActions("admin", ["members", "settings"], null)).toEqual([]);
   });
   it("never shows them to scorekeeper or player", () => {
-    expect(groupCardActions("scorekeeper", [])).toEqual([]);
-    expect(groupCardActions("player", [])).toEqual([]);
+    expect(groupCardActions("scorekeeper", [], false)).toEqual([]);
+    expect(groupCardActions("player", [], false)).toEqual([]);
     expect(groupCardActions("player", [], true)).toEqual([]);
   });
 });
