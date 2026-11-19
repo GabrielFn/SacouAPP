@@ -13,6 +13,7 @@ import {
   sizes,
   spacing,
 } from "./tokens.data";
+import { sheetFontSizes, sheetRadii, sheetSizes } from "./sheet-tokens.data";
 
 /**
  * `windowWidth` is the width of the window held upright, that is its shorter side (`shortSide`): the
@@ -33,6 +34,13 @@ export interface ScaledCourtTokens {
   readonly spacing: NumberMap<typeof courtSpacing>;
 }
 
+/** Measures of the three sheets of the court (see `sheet-tokens.data.ts`). */
+export interface ScaledSheetTokens {
+  readonly sizes: NumberMap<typeof sheetSizes>;
+  readonly fontSizes: NumberMap<typeof sheetFontSizes>;
+  readonly radii: NumberMap<typeof sheetRadii>;
+}
+
 export interface ScaledTokens {
   readonly factor: number;
   readonly spacing: NumberMap<typeof spacing>;
@@ -41,6 +49,7 @@ export interface ScaledTokens {
   readonly borderWidths: NumberMap<typeof borderWidths>;
   readonly sizes: NumberMap<typeof sizes>;
   readonly court: ScaledCourtTokens;
+  readonly sheet: ScaledSheetTokens;
 }
 
 function mapValues<T extends Readonly<Record<string, number>>>(
@@ -94,5 +103,10 @@ export function createScaledTokens({ windowWidth, fontScale }: ScaleInput): Scal
     borderWidths: mapValues(borderWidths, (value) => scaleBorder(value, factor)),
     sizes: mapValues(sizes, (value) => scaleSize(value, factor)),
     court: createCourtTokens(factor, fontFactor),
+    sheet: {
+      sizes: mapValues(sheetSizes, (value) => scaleSize(value, factor)),
+      fontSizes: mapValues(sheetFontSizes, (value) => Math.round(value * fontFactor)),
+      radii: mapValues(sheetRadii, (value) => Math.round(value * factor)),
+    },
   };
 }

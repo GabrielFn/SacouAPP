@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import type { RotationDirection, TeamSide } from "@sacou/match-engine";
-import { ScrollView, useWindowDimensions, View } from "react-native";
+import { Pressable, ScrollView, useWindowDimensions, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { Button } from "../../../ui/Button";
+import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
 import type {
   RevertSheetModel,
@@ -12,6 +13,7 @@ import type {
 } from "../corrections/corrections-selectors";
 import type { CorrectionsState } from "../corrections/corrections.reducer";
 import { CourtPage } from "./CourtPage";
+import { RotateTeamIcon, SwitchServerIcon } from "./MenuIcons";
 import { RevertSheet } from "./RevertSheet";
 import { ShiftRotationSheet } from "./ShiftRotationSheet";
 import { TimelineRow } from "./TimelineRow";
@@ -69,8 +71,50 @@ function ActionsColumn(props: CorrectionsScreenProps) {
   );
 }
 
+export interface QuickActionProps {
+  readonly label: string;
+  readonly disabled?: boolean;
+  readonly renderIcon: (color: string) => ReactNode;
+  readonly onPress: () => void;
+}
+
+/** One of the two outline buttons under the title (Corrigir.dc.html .qa): 44 high, icon and label. */
+function QuickAction({ label, disabled = false, renderIcon, onPress }: QuickActionProps) {
+  const { colors, tokens } = useTheme();
+  const color = disabled ? colors.textMuted : colors.text;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={{
+        flex: 1,
+        minHeight: tokens.sizes.chip,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: tokens.spacing.s6,
+        borderRadius: tokens.radii.field,
+        borderWidth: tokens.borderWidths.thin,
+        borderColor: color,
+        paddingHorizontal: tokens.spacing.s,
+      }}
+    >
+      {renderIcon(color)}
+      <Text
+        numberOfLines={1}
+        style={{ color, fontFamily: fontFamilies.body700, fontSize: tokens.fontSizes.small }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 function MainPanel(props: CorrectionsScreenProps) {
   const { corrections } = strings.court;
+  const { tokens } = useTheme();
   const { state, revert } = props;
   if (state.sheet === "shift") {
     return (
@@ -89,17 +133,21 @@ function MainPanel(props: CorrectionsScreenProps) {
     );
   }
   return (
-    <>
-      <Button
+    <View style={{ flexDirection: "row", gap: tokens.spacing.s }}>
+      <QuickAction
         label={corrections.switchServer}
-        variant="outline"
         disabled={!props.canSwitchServer}
+        renderIcon={(color) => <SwitchServerIcon color={color} />}
         onPress={props.onSwitchServer}
       />
       {props.canShift ? (
-        <Button label={corrections.shiftTeam} variant="outline" onPress={props.onOpenShift} />
+        <QuickAction
+          label={corrections.shiftTeam}
+          renderIcon={(color) => <RotateTeamIcon color={color} />}
+          onPress={props.onOpenShift}
+        />
       ) : null}
-    </>
+    </View>
   );
 }
 
@@ -111,6 +159,7 @@ export function CorrectionsScreen(props: CorrectionsScreenProps) {
   const { rows } = props;
   return (
     <CourtPage
+      sheet
       title={corrections.title}
       subtitle={props.subtitle}
       closeLabel={corrections.close}
@@ -124,7 +173,9 @@ export function CorrectionsScreen(props: CorrectionsScreenProps) {
         }}
       >
         <View style={{ flex: 1.2, gap: tokens.spacing.s }}>
-          <Text variant="muted">{corrections.listHint}</Text>
+          <Text variant="caption" style={{ fontFamily: fontFamilies.body600 }}>
+            {corrections.listHint}
+          </Text>
           <ScrollView
             accessibilityLabel={
               props.setNumber === null ? undefined : corrections.listLabel(props.setNumber)
