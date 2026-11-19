@@ -8,6 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 import { mobileFrontendBlocks } from "./scripts/lib/eslint-mobile-rules.mjs";
+import { webPageBlocks } from "./scripts/lib/eslint-web-rules.mjs";
 import { exceptedPaths, loadQualityExceptions } from "./scripts/lib/quality-exceptions.mjs";
 
 const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
@@ -19,8 +20,6 @@ const MATCH_ENGINE_FILES = [`packages/match-engine/src/**/*.${TS_EXTENSIONS}`];
 const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
 const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile,apps/web}/src/**/*.{js,jsx,cjs,mjs}"];
-const WEB_FILES = [`apps/web/src/**/*.${TS_EXTENSIONS}`];
-const WEB_ADAPTER_FILES = [`apps/web/src/adapters/**/*.${TS_EXTENSIONS}`, "apps/web/src/main.ts"];
 const TOOLING_FILES = ["eslint.config.mjs", "scripts/**/*.{js,cjs,mjs}"];
 const LONG_FILES = ["**/*.test.*", "**/*.test.fixture.ts"];
 
@@ -152,74 +151,8 @@ export default defineConfig([
     },
   },
 
-  // The round page (E3.12, ADR 0070, D5): text goes to the DOM through textContent only, so a nickname or a group's
-  // name can never become markup; the DOM nodes and the one store reference are the only things written to.
-  {
-    files: WEB_FILES,
-    rules: {
-      "functional/immutable-data": [
-        "error",
-        {
-          ignoreAccessorPattern: [
-            "**.current",
-            "**.hidden",
-            "**.textContent",
-            "**.disabled",
-            "**.value",
-          ],
-        },
-      ],
-      "no-restricted-properties": [
-        "error",
-        ...["innerHTML", "outerHTML", "insertAdjacentHTML", "srcdoc"].map((property) => ({
-          property,
-          message: "Write text with textContent; HTML from a string is an XSS (ADR 0070, D5).",
-        })),
-        ...["write", "writeln"].map((property) => ({
-          object: "document",
-          property,
-          message: "Write text with textContent; HTML from a string is an XSS (ADR 0070, D5).",
-        })),
-      ],
-    },
-  },
-  // The view writes the page's nodes it receives; nothing else in the web app writes to a parameter.
-  {
-    files: ["apps/web/src/dom/**/*.ts", "apps/web/src/main.ts"],
-    rules: {
-      "no-param-reassign": [
-        "error",
-        { props: true, ignorePropertyModificationsFor: ["slot", "elements", "nodes"] },
-      ],
-    },
-  },
-  {
-    files: WEB_FILES,
-    ignores: [...WEB_ADAPTER_FILES, ...TEST_FILES],
-    rules: {
-      "@typescript-eslint/no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              regex: "^firebase(/|$)",
-              message: "Firebase only in src/adapters (ports, frontend.md rule 3).",
-            },
-          ],
-        },
-      ],
-      "no-restricted-globals": [
-        "error",
-        ...["fetch", "sessionStorage", "localStorage", "document", "window", "navigator"].map(
-          (name) => ({
-            name,
-            message:
-              "Platform globals only in src/adapters and src/main.ts (ports, frontend.md rule 3).",
-          }),
-        ),
-      ],
-    },
-  },
+  // The round page (E3.12, ADR 0070, D5): textContent only, platform globals only in the adapters.
+  ...webPageBlocks({ testFiles: TEST_FILES }),
 
   {
     files: PURE_PACKAGE_FILES,
