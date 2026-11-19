@@ -44,10 +44,10 @@ export interface GroupWithNextRound {
 }
 
 /** Groups by their next round, the soonest first; groups without one keep their order at the end. */
-export function orderByNextRound(
-  entries: readonly GroupWithNextRound[],
-): readonly GroupWithNextRound[] {
-  const startOf = (entry: GroupWithNextRound) =>
+export function orderByNextRound<T extends GroupWithNextRound>(
+  entries: readonly T[],
+): readonly T[] {
+  const startOf = (entry: T) =>
     entry.next === null ? Number.POSITIVE_INFINITY : Date.parse(entry.next.startsAt);
   return entries
     .map((entry, index) => ({ entry, index }))
@@ -145,6 +145,8 @@ export function roundCardModel(groupId: string, round: RoundSummary): RoundCardM
 export interface GroupRoundCard {
   readonly group: MyGroup;
   readonly round: RoundCardModel | null;
+  /** Whether the group has a next round; `null` while its rounds are loading or failed (unknown). */
+  readonly hasNextRound: boolean | null;
 }
 
 export interface RoundCards {
@@ -153,21 +155,27 @@ export interface RoundCards {
   readonly weekText: string | null;
 }
 
-/** `lists[i]` holds the rounds of `groups[i]` (an empty list while they load). */
+/** `lists[i]` holds the rounds of `groups[i]`, or `undefined` while they load or after a failure. */
 export function roundCardsOf(
   groups: readonly MyGroup[],
-  lists: readonly (readonly RoundSummary[])[],
+  lists: readonly (readonly RoundSummary[] | undefined)[],
   now: number,
 ): RoundCards {
-  const entries = groups.map((group, index) => ({
-    group,
-    next: nextRoundOf(lists[index] ?? [], now),
-  }));
+  const entries = groups.map((group, index) => {
+    const list = lists[index];
+    return { group, next: nextRoundOf(list ?? [], now), known: list !== undefined };
+  });
   return {
-    groups: orderByNextRound(entries).map(({ group, next }) => ({
+    groups: orderByNextRound(entries).map(({ group, next, known }) => ({
       group,
       round: next === null ? null : roundCardModel(group.groupId, next),
+      hasNextRound: known ? next !== null : null,
     })),
-    weekText: weekSummaryText(roundsThisWeek(lists, now)),
+    weekText: weekSummaryText(
+      roundsThisWeek(
+        lists.map((list) => list ?? []),
+        now,
+      ),
+    ),
   };
 }

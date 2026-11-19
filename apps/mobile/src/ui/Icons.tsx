@@ -238,6 +238,17 @@ export function LockIcon({ color }: IconProps) {
   );
 }
 
+/** The "!" in a circle of the error of the opponent (PontoIndividual.dc.html). */
+export function AlertCircleIcon({ color }: IconProps) {
+  const { tokens } = useTheme();
+  return (
+    <StrokeIcon color={color} size={tokens.sizes.swapIcon} strokeWidth={HEADER_STROKE_WIDTH}>
+      <Circle cx="12" cy="12" r="9" />
+      <Path d="M12 7v6M12 16.5v.5" />
+    </StrokeIcon>
+  );
+}
+
 /** The warning of the "N notas para confirmar" strip (Membros.dc.html). */
 export function WarningIcon({ color }: IconProps) {
   const { tokens } = useTheme();

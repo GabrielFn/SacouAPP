@@ -1,16 +1,18 @@
-import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Children, useState, type ReactNode } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import { lineupStrings } from "../../../strings/lineup.pt-BR";
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { ChevronRightIcon } from "../../../ui/Icons";
+import { fontFamilies } from "../../../theme/tokens.data";
 import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
-import { isMenuScreenReady, type EndMatchSummary } from "../model/menu-selectors";
+import type { EndMatchSummary } from "../model/menu-selectors";
 import type { CourtThemeChoice } from "../ports/court-theme-preference";
 import { CourtPage } from "./CourtPage";
+import { EndMatchIcon, FlipSidesIcon, LeaveCourtIcon, ThemeIcon } from "./MenuIcons";
 import { EndMatchDialog } from "./EndMatchDialog";
+import { MenuRow } from "./MenuRow";
+import { screenRows } from "./MenuScreenRows";
 
 export interface MatchMenuSheetProps {
   readonly subtitle: string | null;
@@ -33,60 +35,6 @@ export interface MatchMenuSheetProps {
   readonly onEndMatch: () => void;
 }
 
-export interface MenuRowProps {
-  readonly label: string;
-  readonly hint?: string;
-  readonly accessibilityLabel?: string;
-  readonly chevron?: boolean;
-  readonly disabled?: boolean;
-  readonly onPress: () => void;
-}
-
-function MenuRow({
-  label,
-  hint,
-  accessibilityLabel,
-  chevron = false,
-  disabled = false,
-  onPress,
-}: MenuRowProps) {
-  const { colors, tokens } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      accessibilityLabel={
-        accessibilityLabel ??
-        (hint === undefined ? label : strings.court.menu.hintLabel(label, hint))
-      }
-      onPress={onPress}
-      style={{
-        minHeight: tokens.sizes.primaryButton,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.m,
-        paddingHorizontal: tokens.spacing.xs,
-      }}
-    >
-      <Text
-        variant="title"
-        style={{ flexShrink: 1, ...(disabled ? { color: colors.textMuted } : null) }}
-      >
-        {label}
-        {hint === undefined ? null : (
-          <Text variant="muted">{strings.court.menu.hintAfter(hint)}</Text>
-        )}
-      </Text>
-      {chevron ? (
-        <View style={{ marginLeft: "auto" }}>
-          <ChevronRightIcon color={colors.textMuted} />
-        </View>
-      ) : null}
-    </Pressable>
-  );
-}
-
 export interface GroupProps {
   readonly children: ReactNode;
 }
@@ -101,48 +49,21 @@ function Group({ children }: GroupProps) {
         borderColor: colors.borderCard,
         borderRadius: tokens.radii.tile,
         paddingHorizontal: tokens.spacing.m,
-        gap: tokens.borderWidths.thin,
       }}
     >
-      {children}
+      {Children.toArray(children).map((child, index) => (
+        <View
+          key={index}
+          style={
+            index === 0
+              ? null
+              : { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.borderDivider }
+          }
+        >
+          {child}
+        </View>
+      ))}
     </View>
-  );
-}
-
-export interface ScreenRowsProps {
-  readonly canSubstitute: boolean;
-  readonly onLineup: (() => void) | null;
-  readonly onSubstitution: () => void;
-  readonly onCorrections: () => void;
-}
-
-/** The rows that open another screen of the court, each only once its screen exists. */
-function ScreenRows({ canSubstitute, onLineup, onSubstitution, onCorrections }: ScreenRowsProps) {
-  const { menu } = strings.court;
-  const { courtPlayers } = strings;
-  return (
-    <>
-      {isMenuScreenReady("lineup") && onLineup !== null ? (
-        <MenuRow label={lineupStrings.menuItem} chevron onPress={onLineup} />
-      ) : null}
-      {isMenuScreenReady("substitution") ? (
-        <MenuRow
-          label={courtPlayers.substitution.menuItem}
-          {...(canSubstitute ? {} : { hint: courtPlayers.substitution.noBench })}
-          chevron={canSubstitute}
-          disabled={!canSubstitute}
-          onPress={onSubstitution}
-        />
-      ) : null}
-      {isMenuScreenReady("corrections") ? (
-        <MenuRow
-          label={menu.corrections}
-          hint={menu.correctionsHint}
-          chevron
-          onPress={onCorrections}
-        />
-      ) : null}
-    </>
   );
 }
 
@@ -174,34 +95,39 @@ export function MatchMenuSheet({
     }
   };
   return (
-    <CourtPage title={menu.title} subtitle={subtitle} closeLabel={menu.close} onClose={onClose}>
+    <CourtPage
+      sheet
+      titleSize="menu"
+      title={menu.title}
+      subtitle={subtitle}
+      closeLabel={menu.close}
+      onClose={onClose}
+    >
       <ScrollView
         contentContainerStyle={{ gap: tokens.spacing.m, paddingBottom: tokens.spacing.xl }}
       >
         <Group>
-          <ScreenRows
-            canSubstitute={canSubstitute}
-            onLineup={onLineup}
-            onSubstitution={onSubstitution}
-            onCorrections={onCorrections}
-          />
+          {screenRows({ canSubstitute, onLineup, onSubstitution, onCorrections })}
           <MenuRow
             label={menu.flipSides}
+            renderIcon={(color) => <FlipSidesIcon color={color} />}
             accessibilityLabel={menu.flipSidesLabel(inverted)}
             onPress={onFlipSides}
           />
           <View
             style={{
-              minHeight: tokens.sizes.primaryButton,
+              minHeight: tokens.sheet.sizes.menuRow,
               flexDirection: "row",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: tokens.spacing.m,
+              gap: tokens.spacing.s14,
               paddingHorizontal: tokens.spacing.xs,
             }}
           >
-            <Text variant="title">{menu.theme}</Text>
-            <View style={{ flex: 1, maxWidth: "50%" }}>
+            <ThemeIcon color={colors.text} />
+            <Text variant="title" style={{ fontFamily: fontFamilies.body600 }}>
+              {menu.theme}
+            </Text>
+            <View style={{ flex: 1, maxWidth: "50%", marginLeft: "auto" }}>
               <SegmentedControl
                 accessibilityLabel={menu.themeLabel}
                 selected={theme}
@@ -213,7 +139,11 @@ export function MatchMenuSheet({
               />
             </View>
           </View>
-          <MenuRow label={menu.leave} onPress={onLeave} />
+          <MenuRow
+            label={menu.leave}
+            renderIcon={(color) => <LeaveCourtIcon color={color} />}
+            onPress={onLeave}
+          />
         </Group>
         {refusal === null ? null : (
           <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
@@ -222,7 +152,12 @@ export function MatchMenuSheet({
         )}
         {endSummary === null ? null : (
           <Group>
-            <MenuRow label={menu.endMatch} chevron onPress={askToEnd} />
+            <MenuRow
+              label={menu.endMatch}
+              renderIcon={(color) => <EndMatchIcon color={color} />}
+              chevron
+              onPress={askToEnd}
+            />
           </Group>
         )}
       </ScrollView>

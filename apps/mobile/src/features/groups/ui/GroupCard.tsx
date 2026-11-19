@@ -27,6 +27,8 @@ function actionLabel(action: GroupCardAction): string {
       return strings.groups.card.settings;
     case "editRound":
       return strings.rounds.cards.editRound;
+    case "createRound":
+      return strings.rounds.cards.createRound;
   }
 }
 

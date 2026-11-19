@@ -66,7 +66,6 @@ export interface PointLineProps {
 
 function PointLine({ row, onPress }: PointLineProps) {
   const { colors, tokens } = useTheme();
-  const { sizes } = tokens.court;
   const palette = TEAM_PALETTES[row.color];
   // Lines that will be erased are muted by colour, never by opacity, which would break contrast AA.
   const mutedColor = row.willUndo ? { color: colors.textMuted } : null;
@@ -86,7 +85,7 @@ function PointLine({ row, onPress }: PointLineProps) {
         paddingHorizontal: tokens.spacing.s10,
         borderRadius: tokens.radii.field,
         backgroundColor: row.selected ? colors.surface : "transparent",
-        borderWidth: row.selected ? tokens.court.borderWidths.outline : undefined,
+        borderWidth: row.selected ? tokens.borderWidths.thick : undefined,
         borderColor: colors.text,
       }}
     >
@@ -96,7 +95,8 @@ function PointLine({ row, onPress }: PointLineProps) {
           flexBasis: "22%",
           flexShrink: 0,
           fontFamily: fontFamilies.display800,
-          fontSize: tokens.fontSizes.displayBrand,
+          fontSize: tokens.sheet.fontSizes.rowScore,
+          lineHeight: tokens.sheet.fontSizes.rowScore,
           textDecorationLine: row.willUndo ? "line-through" : "none",
           ...mutedColor,
         }}
@@ -105,9 +105,9 @@ function PointLine({ row, onPress }: PointLineProps) {
       </Text>
       <View
         style={{
-          width: sizes.badge + tokens.spacing.xs,
-          height: sizes.badge + tokens.spacing.xs,
-          borderRadius: tokens.radii.roleBadge,
+          width: tokens.sheet.sizes.teamMark,
+          height: tokens.sheet.sizes.teamMark,
+          borderRadius: tokens.sheet.radii.teamMark,
           backgroundColor: palette.fill,
           alignItems: "center",
           justifyContent: "center",
@@ -117,7 +117,7 @@ function PointLine({ row, onPress }: PointLineProps) {
           style={{
             color: palette.onFill,
             fontFamily: fontFamilies.display800,
-            fontSize: tokens.fontSizes.caption,
+            fontSize: tokens.sheet.fontSizes.teamLetter,
           }}
         >
           {strings.court.zone.teamLetter[row.team]}
@@ -136,8 +136,8 @@ function PointLine({ row, onPress }: PointLineProps) {
           style={{
             marginLeft: "auto",
             paddingHorizontal: tokens.spacing.s,
-            minHeight: sizes.badge + tokens.spacing.s,
-            borderRadius: tokens.radii.pill,
+            minHeight: tokens.sizes.roleBadge,
+            borderRadius: tokens.radii.roleBadge,
             borderWidth: tokens.borderWidths.thin,
             borderColor: palette.fill,
             backgroundColor: colors.surface,
