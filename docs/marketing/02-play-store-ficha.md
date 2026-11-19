@@ -77,7 +77,7 @@ O Sacou é um projeto independente e não tem ligação com federações, confed
 Dúvidas e sugestões: [E-MAIL DE SUPORTE]
 ```
 
-Cerca de 2.300 caracteres. `[E-MAIL DE SUPORTE]` é o único campo a preencher (ver decisão 3 no `README.md`).
+Cerca de 2.650 caracteres, dentro do limite de 4.000. `[E-MAIL DE SUPORTE]` é o único campo a preencher (ver decisão 3 no `README.md`).
 
 ### Conferir antes de colar (verdade sobre o produto)
 
