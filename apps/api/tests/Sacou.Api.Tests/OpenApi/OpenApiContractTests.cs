@@ -22,6 +22,8 @@ public sealed class OpenApiContractTests
         "get /v1/groups ListMyGroups",
         "post /v1/invites/preview PreviewInvite",
         "post /v1/invites/accept AcceptInvite",
+        "post /v1/round-links/resolve ResolveRoundLink",
+        "post /v1/round-links/attendance AnswerByRoundLink",
         "get /v1/groups/{groupId} GetGroup",
         "patch /v1/groups/{groupId} RenameGroup",
         "get /v1/groups/{groupId}/members ListGroupMembers",

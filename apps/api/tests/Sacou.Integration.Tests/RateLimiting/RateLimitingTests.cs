@@ -94,6 +94,22 @@ public sealed class RateLimitingTests(IntegrationDatabase database)
         await AssertRateLimitedAsync(accept);
     }
 
+    /// <summary>E3.12, case 22: the round link's resolution and answer share one window (ADR 0070, D3).</summary>
+    [Fact]
+    public async Task RoundLinkResolveAndAnswer_ShareTheWindow()
+    {
+        await using var api = await StartAsync(Limit("RoundLink", 1));
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var (_, code) = await RoundLinkCalls.RoundAsync(world);
+
+        using var resolve = await world.SendAsync(GroupActor.NonMember, HttpMethod.Post, RoundLinkCalls.ResolvePath, RoundLinkCalls.ResolveBody(code));
+        using var answer = await world.SendAsync(GroupActor.NonMember, HttpMethod.Post, RoundLinkCalls.AttendancePath, RoundLinkCalls.AnswerBody(code));
+
+        Assert.Equal(HttpStatusCode.OK, resolve.StatusCode);
+        await AssertRateLimitedAsync(answer);
+    }
+
     /// <summary>Case 11, the only test with a real wait: after Retry-After seconds the window has turned and the call passes.</summary>
     [Fact]
     public async Task AfterRetryAfter_TheCallPasses()

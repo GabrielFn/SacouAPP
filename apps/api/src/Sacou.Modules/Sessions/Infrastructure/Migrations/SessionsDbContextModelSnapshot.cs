@@ -33,6 +33,13 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("member_id");
 
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("app")
+                        .HasColumnName("channel");
+
                     b.Property<DateTimeOffset?>("PromotedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("promoted_at");
@@ -68,6 +75,8 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 
                     b.ToTable("attendances", "sessions", t =>
                         {
+                            t.HasCheckConstraint("ck_attendances_channel", "channel IN ('app', 'web')");
+
                             t.HasCheckConstraint("ck_attendances_promoted_at", "(status = 'promoted') = (promoted_at IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_attendances_sequence", "sequence >= 1");
@@ -91,6 +100,10 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid")
                         .HasColumnName("group_id");
+
+                    b.Property<string>("LinkCode")
+                        .HasColumnType("text")
+                        .HasColumnName("link_code");
 
                     b.Property<DateOnly>("LocalDate")
                         .HasColumnType("date")
@@ -134,6 +147,11 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_rounds");
 
+                    b.HasIndex("LinkCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_rounds_link_code")
+                        .HasFilter("link_code IS NOT NULL");
+
                     b.HasIndex("GroupId", "StartsAt")
                         .HasDatabaseName("ix_rounds_group_starts_at");
 
@@ -143,6 +161,8 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 
                     b.ToTable("rounds", "sessions", t =>
                         {
+                            t.HasCheckConstraint("ck_rounds_link_code", "link_code ~ '^[A-Za-z0-9_-]{22}$'");
+
                             t.HasCheckConstraint("ck_rounds_next_sequence", "next_sequence >= 1");
 
                             t.HasCheckConstraint("ck_rounds_settings_layer", "settings_layer IS NULL OR (jsonb_typeof(settings_layer) = 'object' AND octet_length(settings_layer::text) <= 4096)");

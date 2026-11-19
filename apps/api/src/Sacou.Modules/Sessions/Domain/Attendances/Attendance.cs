@@ -11,6 +11,16 @@ internal enum AttendanceSource
 }
 
 /// <summary>
+/// Where the answer that last changed the row came from: the app, or the round's web page (E3.12, ADR 0070, D3), for
+/// the E7.2 metric. Not personal data and never in an event.
+/// </summary>
+internal enum AttendanceChannel
+{
+    App,
+    Web,
+}
+
+/// <summary>
 /// Whether a member goes to one round. <see cref="Going"/> and <see cref="Promoted"/> hold a spot;
 /// <see cref="Promoted"/> exists so the app can say "Você entrou da espera" (ADR 0043).
 /// </summary>
@@ -35,6 +45,12 @@ internal sealed record Attendance(
     DateTimeOffset RespondedAt,
     DateTimeOffset? PromotedAt)
 {
+    /// <summary>
+    /// Changes only with an answer that changes the row, the same rule as <see cref="Sequence"/>: a repeated "vou" keeps it,
+    /// and a promotion or a drop by the reconcile keeps it too.
+    /// </summary>
+    public AttendanceChannel Channel { get; init; } = AttendanceChannel.App;
+
     public bool HoldsSpot => Status is AttendanceStatus.Going or AttendanceStatus.Promoted;
 
     public bool IsWaiting => Status == AttendanceStatus.Waitlisted;

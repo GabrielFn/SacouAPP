@@ -29,6 +29,9 @@ internal sealed record RoundResponse(
     IReadOnlyList<WaitlistEntry> Waitlist,
     MeResponse Me)
 {
+    /// <summary>The public link to share (ADR 0070, D1): only for Admin and Co-admin, null for everyone else.</summary>
+    public string? ShareUrl { get; init; }
+
     public static RoundResponse From(Round round, ResolvedRound resolved, RoundGroupState group, MemberId me)
     {
         ArgumentNullException.ThrowIfNull(round);

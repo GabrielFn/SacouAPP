@@ -6,6 +6,7 @@ using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Modules.Sessions.Domain.Series;
 using Sacou.Modules.Sessions.Infrastructure;
+using Sacou.Modules.Sessions.RoundLinks;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.CreateRound;
@@ -13,9 +14,10 @@ namespace Sacou.Modules.Sessions.CreateRound;
 /// <summary>
 /// Date, time, venue and layer are checked before anything is stored. The round is born with the
 /// mensalistas already confirmed (tela 20), by the same seeding the series uses; "repetir toda semana" starts the series
-/// in the same transaction, under the group's creation lock, so the ceilings of D10 are exact.
+/// in the same transaction, under the group's creation lock, so the ceilings of D10 are exact. It is born with its link
+/// code too (ADR 0070, D1), and the admin's response carries the link to share.
 /// </summary>
-internal sealed class CreateRoundHandler(IRoundStore store, GroupRoundContext groups, TimeProvider time)
+internal sealed class CreateRoundHandler(RoundLinkCodes codes, GroupRoundContext groups, RoundShareLinks links, TimeProvider time)
 {
     public async Task<Result<RoundResponse>> HandleAsync(RoundAccess access, CreateRoundRequest request, CancellationToken cancellationToken)
     {
@@ -69,10 +71,14 @@ internal sealed class CreateRoundHandler(IRoundStore store, GroupRoundContext gr
             : null;
         var created = Round.Create(RoundId.New(now), access.GroupId, series?.Id, placement.Slot, placement.Venue, resolved.Settings.LayerJson);
         var seeded = created.Then(round => RoundReconciliation.SeedRegulars(round, resolved.Rules, state.RegularsInJoinOrder(), now));
-        var added = await store.AddAsync(new NewRound(seeded, series, now, EnforceLimits: true), cancellationToken).ConfigureAwait(false);
-        return added.IsFailure
-            ? Result.Failure<RoundResponse>(added.Error)
-            : Result.Success(RoundResponse.From(seeded.Round, resolved, state, access.MemberId));
+        var added = await codes.AddAsync(new NewRound(seeded, series, now, EnforceLimits: true), cancellationToken).ConfigureAwait(false);
+        if (added.IsFailure)
+        {
+            return Result.Failure<RoundResponse>(added.Error);
+        }
+
+        var round = added.Value.Round;
+        return Result.Success(links.Attach(RoundResponse.From(round, resolved, state, access.MemberId), round, access.Role));
     }
 }
 

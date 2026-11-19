@@ -18,6 +18,9 @@ public sealed class SacouApiFactory : WebApplicationFactory<Program>
 
     public string Environment { get; init; } = "Development";
 
+    /// <summary>Required outside Development (ADR 0070, D1); a test of the start sets it empty or wrong.</summary>
+    public string PublicBaseUrl { get; init; } = "https://sacou.test";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -25,5 +28,6 @@ public sealed class SacouApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Firebase:ProjectId", ProjectId);
         builder.UseSetting("ConnectionStrings:Sacou", ClosedDatabase);
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("RoundPage:PublicBaseUrl", PublicBaseUrl);
     }
 }

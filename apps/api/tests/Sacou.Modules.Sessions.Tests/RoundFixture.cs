@@ -44,8 +44,9 @@ internal static class RoundFixture
         AttendanceResponse response,
         ResponseActor actor = ResponseActor.Self,
         MemberKind kind = MemberKind.DropIn,
-        DateTimeOffset? now = null) =>
-        AttendanceRules.Respond(round, rules, new Respondent(Member(member), kind), response, actor, now ?? Now);
+        DateTimeOffset? now = null,
+        AttendanceChannel channel = AttendanceChannel.App) =>
+        AttendanceRules.Respond(round, rules, new Respondent(Member(member), kind), response, actor, now ?? Now, channel);
 
     /// <summary>Members 1..count say "vou", in order.</summary>
     public static Round Going(Round round, AttendanceSettings rules, int count)

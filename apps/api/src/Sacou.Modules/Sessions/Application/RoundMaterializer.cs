@@ -13,7 +13,7 @@ namespace Sacou.Modules.Sessions.Application;
 /// mensalistas are seeded only by the call whose insert won. No timer and no job: the job of E3.11 will call this same code.
 /// </summary>
 internal sealed class RoundMaterializer(
-    IRoundStore store, GroupRoundContext groups, TimeProvider time, ILogger<RoundMaterializer> logger)
+    IRoundStore store, RoundLinkCodes codes, GroupRoundContext groups, TimeProvider time, ILogger<RoundMaterializer> logger)
 {
     /// <summary>Occurrences older than this cannot matter: the next one is always after today.</summary>
     private const int LookBackDays = 14;
@@ -51,8 +51,8 @@ internal sealed class RoundMaterializer(
         var seeded = resolved.IsSuccess
             ? created.Then(round => RoundReconciliation.SeedRegulars(round, resolved.Value.Rules, state.Value.RegularsInJoinOrder(), now))
             : created;
-        var added = await store.AddAsync(new NewRound(seeded, NewSeries: null, now, EnforceLimits: false), cancellationToken).ConfigureAwait(false);
-        if (added is { IsSuccess: true, Value: true })
+        var added = await codes.AddAsync(new NewRound(seeded, NewSeries: null, now, EnforceLimits: false), cancellationToken).ConfigureAwait(false);
+        if (added is { IsSuccess: true, Value.Inserted: true })
         {
             RoundLog.Materialized(logger, series.GroupId.Value, seeded.Round.Id.Value, series.Id.Value);
         }

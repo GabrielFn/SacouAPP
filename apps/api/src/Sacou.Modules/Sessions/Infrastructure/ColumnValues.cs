@@ -25,6 +25,10 @@ internal static class ColumnValues
         .Add(AttendanceSource.Admin, "admin")
         .Add(AttendanceSource.Regular, "regular");
 
+    public static readonly ImmutableDictionary<AttendanceChannel, string> AttendanceChannels = ImmutableDictionary<AttendanceChannel, string>.Empty
+        .Add(AttendanceChannel.App, "app")
+        .Add(AttendanceChannel.Web, "web");
+
     public static string Canceled => RoundStatuses[RoundStatus.Canceled];
 
     public static string NotGoingStatus => AttendanceStatuses[AttendanceStatus.NotGoing];

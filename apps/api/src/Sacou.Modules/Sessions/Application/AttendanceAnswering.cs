@@ -7,7 +7,7 @@ using SessionRules = Sacou.Modules.Sessions.Domain.Attendances.AttendanceRules;
 
 namespace Sacou.Modules.Sessions.Application;
 
-/// <summary>"Vou" or "não vou" under the round's lock, for the player (route 6) or for the admin (route 7).</summary>
+/// <summary>"Vou" or "não vou" under the round's lock, for the player (route 6, or the round link), or for the admin (route 7).</summary>
 internal static class AttendanceAnswering
 {
     /// <summary>
@@ -16,12 +16,12 @@ internal static class AttendanceAnswering
     /// Nothing is written when the answer is refused.
     /// </summary>
     public static Result<RoundChange> Answer(
-        RoundWriteContext context, Respondent respondent, AttendanceResponse response, ResponseActor actor)
+        RoundWriteContext context, Respondent respondent, AttendanceResponse response, ResponseActor actor, AttendanceChannel channel)
     {
         ArgumentNullException.ThrowIfNull(context);
         var rules = context.Group.ResolveStored(context.Round).Rules;
         var cleaned = RoundReconciliation.Reconcile(context.Round, rules, context.Group.ActiveIds, context.Now);
-        var answered = SessionRules.Respond(cleaned.Round, rules, respondent, response, actor, context.Now);
+        var answered = SessionRules.Respond(cleaned.Round, rules, respondent, response, actor, context.Now, channel);
         return answered.IsSuccess ? Result.Success(cleaned.Then(_ => answered.Value)) : answered;
     }
 

@@ -88,6 +88,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "sessions.round-invalid": "Confira a data, a hora e o local da rodada.",
   "sessions.round-limit":
     "O grupo já tem rodadas demais marcadas. Cancele uma antes de criar outra.",
+  "sessions.round-link-invalid": "Link inválido ou desativado.",
   "sessions.round-not-found": "Essa rodada não existe mais.",
   "sessions.series-limit":
     "O grupo já tem o máximo de rodadas que se repetem. Pare uma antes de criar outra.",
