@@ -14,8 +14,11 @@ const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
 const TYPESCRIPT_FILES = [`**/*.${TS_EXTENSIONS}`];
 const MOBILE_FILES = [`apps/mobile/**/*.${TS_EXTENSIONS}`];
 const TEST_FILES = [`**/*.test.${TS_EXTENSIONS}`];
-const PURE_PACKAGE_FILES = [`packages/{match-engine,volley-rules}/src/**/*.${TS_EXTENSIONS}`];
-const MATCH_ENGINE_FILES = [`packages/match-engine/src/**/*.${TS_EXTENSIONS}`];
+const PURE_PACKAGE_FILES = [
+  `packages/{match-engine,rating,volley-rules}/src/**/*.${TS_EXTENSIONS}`,
+];
+// The engine replays and the rating rebuilds from scratch: both must give the same result every time.
+const DETERMINISTIC_FILES = [`packages/{match-engine,rating}/src/**/*.${TS_EXTENSIONS}`];
 const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
 const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile}/src/**/*.{js,jsx,cjs,mjs}"];
@@ -65,7 +68,8 @@ const FORBIDDEN_GLOBALS = [
   "Buffer",
 ].map((name) => ({ name, message: "Pure packages cannot use platform globals." }));
 
-const NONDETERMINISTIC_MESSAGE = "The match engine must be deterministic: replay cannot vary.";
+const NONDETERMINISTIC_MESSAGE =
+  "The match engine and the rating must be deterministic: replay and rebuild cannot vary.";
 
 const NONDETERMINISTIC_GLOBALS = ["Date", "crypto", "performance", "Intl", "setTimeout"].map(
   (name) => ({ name, message: NONDETERMINISTIC_MESSAGE }),
@@ -179,7 +183,7 @@ export default defineConfig([
   },
 
   {
-    files: MATCH_ENGINE_FILES,
+    files: DETERMINISTIC_FILES,
     ignores: TEST_FILES,
     rules: {
       // A later block replaces the rule, so the list repeats the globals of the pure packages.

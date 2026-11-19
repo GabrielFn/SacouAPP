@@ -25,6 +25,8 @@ Regras do vôlei e do motor sempre têm testes golden: os mesmos casos em JSON, 
 
 O primeiro golden é `packages/volley-rules/golden/formations.json`, e o contrato de leitura pelo C# está no [ADR 0006](../arquitetura/adr/0006-formacoes-em-json.md). `golden/overlap.json` é escrito à mão e tem o contrato no [ADR 0021](../arquitetura/adr/0021-overlap-validator.md). Pacote com golden que lê arquivo declara `@types/node`, só para testes; ver ADR 0002.
 
+O rating (E3.9, [ADR 0071](../arquitetura/adr/0071-projecoes-de-estatisticas-mvp-e-rating.md)) tem dois golden em `packages/rating/golden/`, escritos por `packages/rating/scripts/generate-golden.ts` a partir de entradas à mão (`scripts/*.data.ts`), com a `openskill` como única fonte dos números: `openskill-plackett-luce.json` (a biblioteca, partida a partida) e `rating-pools.json` (as nossas regras: quem entra, pools, ordem e semente; cada caso diz à mão quais partidas avaliam e em que ordem, e o gerador nunca chama o `ratePool`). Os testes TS rodam a biblioteca e o `ratePool` de novo e exigem igualdade exata; subir a versão da `openskill` sem regenerar reprova. O porte C# (Parte 3) compara com tolerância relativa de 1e-9.
+
 No C#, os golden entram por `EmbeddedResource` só nos projetos de teste, por `apps/api/tests/Golden/GoldenFile.cs`, com leitura estrita ([ADR 0025](../arquitetura/adr/0025-json-compartilhado-no-csharp.md)). Testes de módulo em `tests/Sacou.Modules.<Module>.Tests/`: hoje `Matches` e `Stats`. Projeto de teste novo precisa de `packages.lock.json` no commit, porque o restore recria um lock ausente em vez de reprovar.
 
 **Regra dos IDs literais, em todo golden lido pelo C#:**

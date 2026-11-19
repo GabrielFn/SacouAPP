@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["src", "scripts"]
+}

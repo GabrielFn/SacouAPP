@@ -1,11 +1,11 @@
 # ADR 0071 · Projeções de estatísticas, MVP e rating OpenSkill
 
-**Status:** aceito em parte (19/11/2026): a Parte 1 da E3.9 (motor TS do resumo da rodada). As Partes 2 a 4 (rating, porte C#, projeções e rotas) completam este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
+**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada) e 2 (rating TS, `packages/rating`) da E3.9. As Partes 3 e 4 (porte C#, projeções e rotas) completam este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
 
 ## Padrões adotados (perguntas 97 a 99, respostas antes do merge da Parte 4)
 
 - **97, fórmula do MVP pelos dados:** opção 1 (saldo; aproveitamento; sequência; partidas; primeira aparição). Na areia, a dupla ou o quarteto em 1º do ranking do dia.
-- **98, semente do rating:** opção 1 (o rating é refeito com a nota atual). Entra na Parte 2.
+- **98, semente do rating:** opção 1, confirmada pelo Gabriel (o rating é refeito com a nota atual e guarda a semente usada). Feita na Parte 2.
 - **99, presença:** opção 1 (rodadas em que jogou ÷ rodadas jogadas do grupo desde que entrou). Entra na Parte 4.
 
 ## Decisões da Parte 1
@@ -26,8 +26,23 @@
 
 **Versão da fórmula.** `MVP_FORMULA_VERSION = 1` vai em todo resumo; trocar a fórmula sobe a versão e invalida as projeções.
 
+## Decisões da Parte 2 (rating TS)
+
+**Um pacote à parte, `@sacou/rating`.** TS puro e determinístico (as mesmas regras de lint do motor: sem módulos do Node, sem `Date`, `Math.random` nem `crypto`). Fica fora do app e do motor, para não pesar no bundle e porque nada no celular pode ver o rating: o teste `architecture.test.ts` reprova se `apps/mobile`, `match-engine` ou `volley-rules` citarem o pacote. Depende de `@sacou/volley-rules` só pelo `Result`. Os tipos de entrada são estruturais: o `FinishedMatchResult` do motor cabe no `RatedMatch` sem o pacote depender do motor (teste de tipo).
+
+**Dependência `openskill` 5.0.1**, fixada sem faixa (um teste confere o `package.json`), licença MIT. Ela traz `ramda`, `sort-unwind` e cerca de 150 pacotes pequenos do `@stdlib` (Apache-2.0; um Apache-2.0 e BSL-1.0); nenhum aviso novo no `pnpm audit` (o High listado é a exceção já registrada). Só o servidor usará o rating, pelo porte C# da Parte 3; o pacote TS serve de referência e de fonte do golden.
+
+**Parâmetros todos explícitos.** `rateTwoTeams` passa ao `rate()` o modelo (`plackettLuce`), `beta`, `tau`, `kappa`, `limitSigma`, `balance: false`, `mu`/`sigma` (só preencheriam um rating ausente, o que não acontece) e o γ escrito no pacote, `√σ²ᵢ / c`, igual ao padrão da biblioteca. Com `balance` desligado, `z`, `alpha` e `target` não são lidos. O C# implementa exatamente essas fórmulas. `rating-params.json` é lido com conferência de tipos (positivo, versão inteira) e falha na carga se estiver corrompido, como o catálogo de formações.
+
+**`ratePool(params, seeds, rounds)`** devolve `Result` com a lista `{ memberId, pool, seedTenths, seedSource, mu, sigma, matchesRated }` (regras 18 a 25 de [`estatisticas.md`](../../dominio/estatisticas.md)). Recebe as rodadas inteiras (`roundId`, `startsAt`, `canceled`, `modality`, `matches`) e faz ele mesmo o filtro das canceladas, a ordem e a separação dos pools, para o "do zero = incremental" ser uma função só. Fold imutável por partida (cópia do `Map`, pool de dezenas de membros); refeito do zero a cada chamada, nunca incrementado.
+
+**Semente guardada** (resposta 98 do Gabriel, opção 1): a saída leva `seedTenths` e `seedSource`, que a Parte 4 grava em `stats.member_ratings` para medir depois do piloto o quanto o rating corrigiu a nota.
+
+**Golden de fonte independente.** `scripts/generate-golden.ts` usa só a `openskill` e as entradas à mão: no `rating-pools.json`, cada caso diz à mão quais partidas avaliam, com quem de cada lado e em que ordem, e quem sai em cada pool; o gerador nunca chama o `ratePool`. Os testes TS exigem igualdade exata; o C# usa tolerância relativa de 1e-9 (risco 3 do plano). O caso do piso do σ usa `kappa` 0,999999, porque com o `kappa` do piloto o piso só age com σ muito maior que o resto do time.
+
 ## Consequências
 
 - Rodada sem partida terminada: `finishedMatches` e `players` vazios, destaques e MVP nulos; na areia, `ranking: []`.
 - Partida terminada à mão sem nenhum rali tem `onCourt` vazio nos dois lados: ninguém esteve num rali ativo. O rating (Parte 2) não a avalia.
 - O plano pedia "4 duplas, 9 partidas" para a tela 12b, mas 7-2, 5-4, 4-5 e 2-7 somam 18 vitórias: o caso do golden tem 18 partidas.
+- O rating da Parte 2 não tem rota, banco nem log: nada o expõe até a Parte 4, que o grava e prova que nenhuma rota o devolve.
