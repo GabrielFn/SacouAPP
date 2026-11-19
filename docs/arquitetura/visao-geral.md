@@ -136,6 +136,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | [0062](adr/0062-limite-de-requisicoes.md) | Limite de requisições por usuário (janela fixa, chave com hash do UID) e concorrência das rotas de duas conexões |
 | [0063](adr/0063-placar-assume-a-quadra.md) | Placar assume a quadra: lote seguinte sob a trava, confirmação otimista, desfazer sem restrição (resposta 74), teto de 40 lotes |
 | [0064](adr/0064-ci-api-e-app-em-jobs-paralelos.md) | CI com a API e o app em jobs paralelos, cada um pulado pela sua área |
+| [0071](adr/0071-projecoes-de-estatisticas-mvp-e-rating.md) | Projeções de estatísticas, MVP do dia e rating OpenSkill (Parte 1: resumo da rodada no motor TS) |
 
 ## Matriz: `decisoes.md` → ADR
 
@@ -149,7 +150,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 | 12 | Rotação e modo de regra | 0010, 0006, 0021, 0024, 0026, 0027, 0028, 0030 |
 | 13 | Banco no MVP | 0017, 0027 |
 | 14 | Ponto individual | 0018, 0031 |
-| 15 | MVP do dia | 0018, 0032 |
+| 15 | MVP do dia | 0018, 0032, 0071 |
 | 16 | Rating | 0018, 0047, 0051 |
 | 17 | Faixas da cartinha | 0018 |
 | 18 | Foto da cartinha | 0016 |

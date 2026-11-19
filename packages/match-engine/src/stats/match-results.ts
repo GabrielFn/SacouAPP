@@ -1,11 +1,17 @@
+import type { CourtSessionTimeline } from "../corrections/types.js";
 import { TEAM_SIDES } from "../score/constants.data.js";
 import type { FinishedMatch, MemberId, TeamSide } from "../score/types.js";
-import type { MatchResult, WinStreaks } from "./types.js";
+import { groupByMatch } from "./by-match.js";
+import { type PlayedRally, getPlayedRallies } from "./rally-balance.js";
+import type { BySide, FinishedMatchResult, MatchResult, WinStreaks } from "./types.js";
 
 const NO_STREAKS: WinStreaks = { longestWinStreak: 0, currentWinStreak: 0 };
 
 /** A match without a winner is neither a win nor a loss for anyone (ADR 0032, P2). */
-export function resultOfSide({ winner }: FinishedMatch, side: TeamSide): MatchResult {
+export function resultOfSide(
+  { winner }: Pick<FinishedMatch, "winner">,
+  side: TeamSide,
+): MatchResult {
   if (winner === null) {
     return "undecided";
   }
@@ -48,4 +54,42 @@ export function getMembersInOrder(finishedMatches: readonly FinishedMatch[]): re
       finishedMatches.flatMap(({ teams }) => [...teams.a.memberIds, ...teams.b.memberIds]),
     ),
   ];
+}
+
+/** The members of `team` who stood on the court in one of the rallies, in the order of the team. */
+function onCourtOf(
+  team: readonly MemberId[],
+  rallies: readonly PlayedRally[],
+  side: TeamSide,
+): readonly MemberId[] {
+  const rallied = new Set(rallies.flatMap(({ onCourt }) => onCourt[side]));
+  return team.filter((memberId) => rallied.has(memberId));
+}
+
+function pointsOf(rallies: readonly PlayedRally[], side: TeamSide): number {
+  return rallies.filter(({ team }) => team === side).length;
+}
+
+function bySide<T>(valueOf: (side: TeamSide) => T): BySide<T> {
+  return { a: valueOf("a"), b: valueOf("b") };
+}
+
+/**
+ * Each finished match of the court session, in the order of the `MatchEnded`: the winner, the teams
+ * as started, who of them played at least one active rally (rules 2 and 3 of the statistics; with
+ * the rotation off, the whole team) and the rallies each side won. The open match is not here.
+ */
+export function getMatchResults(timeline: CourtSessionTimeline): readonly FinishedMatchResult[] {
+  const finishedMatches = timeline.entries.at(-1)?.state.finishedMatches ?? [];
+  const ralliesByMatch = groupByMatch(getPlayedRallies(timeline));
+  return finishedMatches.map(({ matchId, winner, teams }) => {
+    const rallies = ralliesByMatch.get(matchId) ?? [];
+    return {
+      matchId,
+      winner,
+      teams: bySide((side) => teams[side].memberIds),
+      onCourt: bySide((side) => onCourtOf(teams[side].memberIds, rallies, side)),
+      points: bySide((side) => pointsOf(rallies, side)),
+    };
+  });
 }

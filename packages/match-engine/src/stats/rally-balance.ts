@@ -10,7 +10,7 @@ import type { CourtBalance } from "./types.js";
 type Entry = TimelineEntry<CourtSessionState>;
 
 /** Who stood on each side of the court in a rally, and the side that won it. */
-interface PlayedRally {
+export interface PlayedRally {
   readonly matchId: string;
   readonly team: TeamSide;
   readonly onCourt: Readonly<Record<TeamSide, readonly MemberId[]>>;
@@ -61,14 +61,21 @@ function creditsOf(
 }
 
 /**
- * Points for and against each member while on the court, by match: every match with a point, the
- * open one too, so the caller keeps only the finished ones. A reverted point is not on the timeline.
- * One pass over the entries.
+ * Every active rally of the timeline, in order, the open match too: a reverted point is not on the
+ * timeline. One pass over the entries.
  */
-export function getCourtBalancesByMatch({
-  entries,
-}: CourtSessionTimeline): ReadonlyMap<string, ReadonlyMap<MemberId, CourtBalance>> {
-  const rallies = entries.flatMap((entry, index) => playedRallyOf(entries[index - 1], entry));
+export function getPlayedRallies({ entries }: CourtSessionTimeline): readonly PlayedRally[] {
+  return entries.flatMap((entry, index) => playedRallyOf(entries[index - 1], entry));
+}
+
+/**
+ * Points for and against each member while on the court, by match: every match with a point, the
+ * open one too, so the caller keeps only the finished ones.
+ */
+export function getCourtBalancesByMatch(
+  timeline: CourtSessionTimeline,
+): ReadonlyMap<string, ReadonlyMap<MemberId, CourtBalance>> {
+  const rallies = getPlayedRallies(timeline);
   return new Map(
     [...groupByMatch(rallies)].map(([matchId, played]) => [matchId, tally(played, creditsOf)]),
   );
