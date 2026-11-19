@@ -11,5 +11,7 @@
     <ItemGroup>
         <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/player-card-level.json" LogicalName="golden/player-card-level.json" />
+        <EmbeddedResource Include="../../../../packages/rating/golden/openskill-plackett-luce.json" LogicalName="golden/openskill-plackett-luce.json" />
+        <EmbeddedResource Include="../../../../packages/rating/golden/rating-pools.json" LogicalName="golden/rating-pools.json" />
     </ItemGroup>
 </Project>

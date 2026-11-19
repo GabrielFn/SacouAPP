@@ -78,14 +78,14 @@ internal static class MatchTallies
 
     /// <summary>
     /// Adds up a match, each update replacing the value of its member, the later one winning. The
-    /// accumulator is local and mutable (E3.9, condition 1 of part 1): copying a map per rally made the
+    /// accumulator is a local mutable builder (E3.9, condition 1 of part 1; no hash-ordered collection, ADR 0033, D10): copying a map per rally made the
     /// TypeScript worst case slow. The updates of an item are read against the map before that item.
     /// </summary>
     private static ImmutableDictionary<string, TValue> Tally<TItem, TValue>(
         ImmutableArray<TItem> items,
         Func<TItem, IReadOnlyDictionary<string, TValue>, IEnumerable<KeyValuePair<string, TValue>>> updatesOf)
     {
-        var current = new Dictionary<string, TValue>(StringComparer.Ordinal);
+        var current = ImmutableDictionary.CreateBuilder<string, TValue>(StringComparer.Ordinal);
         foreach (var item in items)
         {
             foreach (var update in updatesOf(item, current).ToList())
@@ -94,7 +94,7 @@ internal static class MatchTallies
             }
         }
 
-        return current.ToImmutableDictionary(StringComparer.Ordinal);
+        return current.ToImmutableDictionary();
     }
 
     /// <summary>The rally of an active point, from the state right before it: the court and the serve of that moment.</summary>

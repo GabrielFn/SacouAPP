@@ -33,7 +33,7 @@ internal static class MatchResults
     /// <summary>The members of the team who stood on the court in one of the rallies, in the order of the team.</summary>
     private static ImmutableArray<string> OnCourtOf(ImmutableArray<string> team, ImmutableArray<PlayedRally> rallies, TeamSide side)
     {
-        var rallied = rallies.SelectMany(rally => rally.OnCourt.Of(side)).ToHashSet(StringComparer.Ordinal);
+        var rallied = rallies.SelectMany(rally => rally.OnCourt.Of(side)).ToImmutableHashSet(StringComparer.Ordinal);
         return [.. team.Where(rallied.Contains)];
     }
 
