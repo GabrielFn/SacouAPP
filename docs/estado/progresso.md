@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M3 fechado no código em 16/11/2026 ([relatório](relatorios/M3.md)); falta o teste no celular da E4.3. Próximo: M4 · A quadra, com o ok do Gabriel. M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M5 · Depois do jogo, iniciado em 19/11/2026. M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -59,6 +59,8 @@
 | E4.11 | Feita | PRs #147, #156 e #158, ADR 0067 (envio a cada ponto, assumir a quadra com importação do stream, pontos recusados, telas 09a a 09c). Parte 2: correção por desenvolvedor Opus novo (corpo nulo, `Err` com commit). Parte 3: revisão e segurança num Opus (C1: a 09c era pulada pela 06 e 08), correção por desenvolvedor Opus novo, verificador Opus aprovou, testador Sonnet passou (5 de 6; a sobrevivente, o `refresh` do `stream-changed` no hook, sem render de componente). |
 
 ## Em andamento
+
+- 19/11/2026, tarde: **M4 fechado** ([relatório](relatorios/M4.md)). #172 mergeado e conferido no celular. M5: E3.12 Parte 1 (#171) em correção dos achados do revisor e da segurança (desenvolvedor Opus novo); E3.9 Parte 1 (desenvolvedor Opus, `task/E3.9-stats-engine`, worktree `SacouAPP-E3.9`). Próximo passo no [diário de 18/11](sessoes/2026-11-18.md).
 
 - 19/11/2026, madrugada: rodada de celular pelo cabo feita (achados e destino no [diário de 18/11](sessoes/2026-11-18.md)); mergeados #161 (permissão do deploy), #162 (fuso na imagem da API), #163 (perfil offline), #164 ("Criar rodada" no cartão), #165 (folhas 31, menu e Corrigir como os protótipos) e #133 (quadra em paisagem pela altura medida). Teste no ar; produção esperando a aprovação do Gabriel. M5: analistas da E3.9, E3.11 e E3.12 lançados. Próximo passo no diário.
 - 18/11/2026, noite: **M4 com as 11 tarefas no código** (E3.8, E4.10, E4.11 e E5.1 mergeadas hoje). Revisão geral de segurança do M4 aprovada com condições ([parecer](../seguranca/revisoes/M4-2026-11-18.md)). Falta: corrigir a permissão do deploy, o teste no celular pelo cabo com a API de teste, a aprovação da produção e o relatório do M4. Próximo passo exato no [diário de 18/11](sessoes/2026-11-18.md).
