@@ -159,6 +159,7 @@ public sealed partial class SharedGoldenFilesTests
     [Theory]
     [InlineData(MatchesAssembly, RepositoryFiles.CatalogResourceName, RepositoryFiles.CatalogPath)]
     [InlineData(RepositoryFiles.SettingsCatalogAssembly, RepositoryFiles.SettingsCatalogResourceName, RepositoryFiles.SettingsCatalogPath)]
+    [InlineData(RepositoryFiles.RatingParamsAssembly, RepositoryFiles.RatingParamsResourceName, RepositoryFiles.RatingParamsPath)]
     public void CatalogResource_IsByteForByteTheSharedFile(string assemblyName, string resourceName, string path)
     {
         var assembly = Assemblies.RealModules.Value.Single(module => module.GetName().Name == assemblyName);
@@ -180,6 +181,7 @@ public sealed partial class SharedGoldenFilesTests
     [Theory]
     [InlineData("""<Project><ItemGroup><EmbeddedResource Include="copy/overlap.json" /></ItemGroup></Project>""")]
     [InlineData("""<Project><ItemGroup><EmbeddedResource Include="../../../../packages/volley-rules/src/formations/formations.json" /></ItemGroup></Project>""")]
+    [InlineData("""<Project><ItemGroup><EmbeddedResource Include="../../../../packages/rating/src/rating-params.json" /></ItemGroup></Project>""")]
     public void TestProject_EmbeddingAnotherPath_IsReported(string project)
     {
         Assert.Single(RepositoryFiles.TestResourceViolations(XDocument.Parse(project)));
@@ -188,6 +190,7 @@ public sealed partial class SharedGoldenFilesTests
     [Theory]
     [InlineData("../../../../packages/volley-rules/golden/overlap.json")]
     [InlineData("../../../../packages/match-engine/golden/event-log.json")]
+    [InlineData("../../../../packages/rating/golden/rating-pools.json")]
     public void TestProject_EmbeddingAGoldenFile_IsNotReported(string path)
     {
         var project = XDocument.Parse(
@@ -207,6 +210,8 @@ public sealed partial class SharedGoldenFilesTests
     [InlineData(MatchesAssembly, "golden/overlap.json", "")]
     [InlineData(MatchesAssembly, "", "")]
     [InlineData("Sacou.Modules.Stats", "golden/player-card-level.json", "")]
+    [InlineData(RepositoryFiles.RatingParamsAssembly, "", "")]
+    [InlineData(RepositoryFiles.RatingParamsAssembly, RepositoryFiles.RatingParamsResourceName, "golden/rating-pools.json")]
     [InlineData(RepositoryFiles.SettingsCatalogAssembly, "", "")]
     [InlineData(RepositoryFiles.SettingsCatalogAssembly, RepositoryFiles.SettingsCatalogResourceName, "golden/settings-resolver.json")]
     public void ProductionAssembly_WithOtherResources_IsReported(string assembly, string first, string second)

@@ -27,12 +27,16 @@ internal static partial class RepositoryFiles
     internal const string SettingsCatalogAssembly = "Sacou.Modules.Groups";
     internal const string SettingsCatalogResourceName = "Sacou.Modules.Groups.settings-catalog.json";
     internal const string SettingsCatalogPath = "packages/match-engine/src/settings/settings-catalog.json";
+    internal const string RatingParamsAssembly = "Sacou.Modules.Stats";
+    internal const string RatingParamsResourceName = "Sacou.Modules.Stats.rating-params.json";
+    internal const string RatingParamsPath = "packages/rating/src/rating-params.json";
 
     /// <summary>Written by hand: a file lost from the repository must fail, not vanish from the list.</summary>
     internal static readonly IReadOnlyList<string> SharedJsonFiles =
     [
         CatalogPath,
         SettingsCatalogPath,
+        RatingParamsPath,
         "packages/volley-rules/golden/formations.json",
         "packages/volley-rules/golden/overlap.json",
         "packages/volley-rules/golden/player-card-level.json",
@@ -58,6 +62,9 @@ internal static partial class RepositoryFiles
         "packages/match-engine/golden/stats-events.json",
         "packages/match-engine/golden/server-checks.json",
         "packages/match-engine/golden/settings-resolver.json",
+        "packages/match-engine/golden/round-summary.json",
+        "packages/rating/golden/openskill-plackett-luce.json",
+        "packages/rating/golden/rating-pools.json",
     ];
 
     /// <summary>The golden folders of the shared packages, as a test project path reaches them.</summary>
@@ -65,6 +72,7 @@ internal static partial class RepositoryFiles
     [
         "../../../../packages/volley-rules/golden/",
         "../../../../packages/match-engine/golden/",
+        "../../../../packages/rating/golden/",
     ];
 
     private static readonly HashSet<string> SharedJsonFileNames = [.. SharedJsonFiles.Select(path => path.Split('/')[^1])];
@@ -174,13 +182,17 @@ internal static partial class RepositoryFiles
             .Where(path => !GoldenFromTestProject.Any(folder => path.StartsWith(folder, StringComparison.Ordinal)))
             .Select(path => $"EmbeddedResource outside the golden folder: {path}")];
 
-    /// <summary>The formations catalog in Matches, the settings catalog in Groups and no other resource, in any production assembly: a golden file never ships.</summary>
+    /// <summary>
+    /// The formations catalog in Matches, the settings catalog in Groups, the rating parameters in Stats and no
+    /// other resource, in any production assembly: a golden file never ships.
+    /// </summary>
     internal static IReadOnlyList<string> ProductionResourceViolations(string assembly, IReadOnlyCollection<string> resources)
     {
         string[] expected = assembly switch
         {
             CatalogAssembly => [CatalogResourceName],
             SettingsCatalogAssembly => [SettingsCatalogResourceName],
+            RatingParamsAssembly => [RatingParamsResourceName],
             _ => [],
         };
         return
