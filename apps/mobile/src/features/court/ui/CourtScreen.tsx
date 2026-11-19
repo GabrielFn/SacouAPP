@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,6 +15,12 @@ import type { CourtExtras } from "./court-extras";
 import { CourtHeader } from "./CourtHeader";
 import { CourtLandscape } from "./CourtLandscape";
 import { TeamZone } from "./TeamZone";
+
+interface MeasuredZone {
+  readonly width: number;
+  readonly height: number;
+  readonly zoneHeight: number;
+}
 
 export interface CourtScreenProps extends CourtHandlers, CourtExtras {
   readonly model: CourtScreenModel;
@@ -38,7 +45,14 @@ export function CourtScreen({
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const sides = sidesOf(inverted);
+  const [measured, setMeasured] = useState<MeasuredZone | null>(null);
+  // The measure belongs to the window it was taken in: after a rotation or a resize it is stale.
+  const zoneHeight =
+    measured !== null && measured.width === width && measured.height === height
+      ? measured.zoneHeight
+      : undefined;
   const layout = computeCourtLayout({
+    measuredZoneHeight: zoneHeight,
     windowWidth: width,
     windowHeight: height,
     insetTop: insets.top,
@@ -51,6 +65,9 @@ export function CourtScreen({
       <CourtLandscape
         model={model}
         layout={layout}
+        onZoneHeight={(zone) => {
+          setMeasured({ width, height, zoneHeight: zone });
+        }}
         onPoint={onPoint}
         onUndo={onUndo}
         onCorrect={onCorrect}
