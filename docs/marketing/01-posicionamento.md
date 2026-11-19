@@ -77,7 +77,7 @@ O nome **Sacou** está decidido (`decisoes.md`). Duplo sentido que vale explorar
 
 **Arena e quadra**
 
-1. Racha organizado enche horário e não atrasa a próxima locação.
+1. Ajuda o organizador a fechar a lista e a começar o racha no horário.
 2. Não muda nada na operação da arena. É o organizador que usa.
 
 ## Objeções e respostas
