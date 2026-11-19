@@ -54,6 +54,19 @@ A rodada do plano, com os números conferidos à mão, está no teste `stats.acc
 16. **Ponto individual desligado** (`mvp.individualPoints`): o servidor não recusa o `PointAttributed` (a opção muda durante a rodada), mas o resumo zera `pointsByKind`; o saldo não muda.
 17. **Somas da cartinha e do perfil** (Parte 4 da E3.9): por membro e por usuário, só de rodadas não canceladas, no ano civil de `America/Sao_Paulo`: `matchesPlayed`, `wins`, `losses`, `plusMinus`, `longestWinStreak` (a maior entre rodadas, concatenando `results` na ordem das rodadas: a sequência atravessa rodadas), `mvpCount`, `rounds` e `presence` (pergunta 99: rodadas em que jogou ÷ rodadas jogadas do grupo desde que entrou). Só inteiros; a tela calcula o percentual.
 
+## Rating OpenSkill escondido (E3.9 Parte 2, ADR 0047 e 0071)
+
+Código em `packages/rating/` (`ratePool`, `seedOf`, `levelOf`); casos em `packages/rating/golden/`. **Ninguém vê o rating no piloto:** nem rota, nem evento, nem log, nem exportação (Parte 4). O sorteio continua usando a nota do admin.
+
+18. **Modelo:** Plackett-Luce da `openskill` (Weng-Lin), dois times por partida, `rank` 1 para o vencedor e 2 para o perdedor. Partida com `winner: null` **não avalia ninguém**.
+19. **Quem é avaliado:** quem esteve em quadra num rali ativo (`onCourt` de `getMatchResults`, regra 10), peso 1. O banco que não entrou não muda. Partida terminada à mão sem nenhum rali tem `onCourt` vazio e não avalia ninguém. Quem só aparece em `teams` sai na lista com a semente e `matchesRated: 0`.
+20. **Pools:** `indoor` (`indoor-6x6`) e `beach` (`beach-2x2` e `beach-4x4` juntos), por `MemberId` do grupo. O mesmo membro tem um rating em cada pool em que jogou.
+21. **Ordem:** só rodadas não canceladas, por `startsAt` e, no empate, por `roundId` em ordem ordinal; dentro da rodada, a ordem dos `MatchEnded`. A ordem em que os lotes chegaram não importa. `startsAt` vem sempre na forma `AAAA-MM-DDTHH:MM:SSZ` (UTC), para a ordem do texto ser a do tempo; outra forma é recusada (`invalid-starts-at`).
+22. **Semente** (pergunta 98, opção 1): o nível resolvido **atual** do membro. `μ = mu0 + (nível − 3,0) × levelStep` (1500 e 200 por nível); σ `sigmaAdmin` (100) com a nota do admin, `sigmaUnconfirmed` (200) com sugestão ou o padrão 3,0. Membro sem nível resolvido entra como o padrão. Mudar a nota refaz o pool inteiro do zero; cada linha guarda a semente usada (`seedTenths`, `seedSource`) para a calibração depois do piloto. Nível fora de 1,0 a 5,0 ou fora de décimos inteiros é recusado (`invalid-level`), e semente repetida também (`duplicate-seed`).
+23. **Volta para o nível** (`levelOf`, só depois do piloto): décimos arredondados meio para cima e limitados a 1,0 e 5,0; ida e volta exata nos níveis de 0,5 em 0,5.
+24. **Parâmetros** em `packages/rating/src/rating-params.json` (versão 1, a calibrar com o piloto): `beta` 100, `tau` 1, `kappa` 0,0001, `limitSigma` falso. Mudar qualquer valor sobe `ratingParamsVersion`, e o servidor refaz tudo.
+25. **Saída**, por pool (`indoor` primeiro) e na ordem da primeira aparição (`teams.a`, `teams.b`, `onCourt`, partida a partida): `{ memberId, pool, seedTenths, seedSource, mu, sigma, matchesRated }`, nessa ordem de chaves, que é contrato com o porte C#.
+
 ## Fora daqui
 
-Votação do MVP (E3.18); rating OpenSkill (E3.9, Partes 2 e 3, ADR 0047); projeções no servidor, somas e rotas (E3.9, Parte 4); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
+Votação do MVP (E3.18); porte C# do rating (E3.9, Parte 3); projeções no servidor, somas e rotas (E3.9, Parte 4); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
