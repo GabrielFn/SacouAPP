@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { ReactElement } from "react";
 import { describe, expect, test, vi } from "vitest";
 
@@ -42,23 +41,25 @@ function collect(node: unknown, out: ReactElement<Props>[] = []): ReactElement<P
   return out;
 }
 
-const SRC = resolve(__dirname, "../../..");
 const tokens = createScaledTokens({ windowWidth: 360, fontScale: 1 });
 
 describe("wiring of the outside tap (screens 24 and 25)", () => {
   test("corrections route passes onClose of the sheet to AttributionSheet", () => {
-    const source = readFileSync(resolve(SRC, "app/court/[courtSessionId]/corrections.tsx"), "utf8");
+    const source = readFileSync(
+      new URL("../../../app/court/[courtSessionId]/corrections.tsx", import.meta.url),
+      "utf8",
+    );
     expect(source).toMatch(/onClose=\{attribution\.onClose\}/);
   });
 
   test("SetEndAttribution passes onClose of the sheet to AttributionSheet", () => {
-    const source = readFileSync(resolve(SRC, "features/court/ui/SetEndAttribution.tsx"), "utf8");
+    const source = readFileSync(new URL("./SetEndAttribution.tsx", import.meta.url), "utf8");
     expect(source).toMatch(/onClose=\{sheet\.onClose\}/);
   });
 
   test("the hook answers onClose with the closed action, not skipped", () => {
     const source = readFileSync(
-      resolve(SRC, "features/court/hooks/use-attribution-sheet.ts"),
+      new URL("../hooks/use-attribution-sheet.ts", import.meta.url),
       "utf8",
     );
     expect(source).toMatch(/onClose: useCallback\(\(\) => \{\s*send\(\{ type: "closed" \}\);/);
