@@ -1,0 +1,31 @@
+{
+  "name": "@sacou/rating",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --dir src",
+    "lint": "eslint . --max-warnings 0",
+    "generate:golden": "node scripts/generate-golden.ts"
+  },
+  "devDependencies": {
+    "@sacou/match-engine": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@sacou/volley-rules": "workspace:*",
+    "openskill": "5.0.1"
+  }
+}
