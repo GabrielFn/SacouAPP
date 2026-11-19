@@ -27,8 +27,10 @@ const STARTS_AT_FORM = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u;
 /** A member nobody graded starts at 3.0 with a high σ, as `IMemberLevels` resolves it. */
 const DEFAULT_LEVEL: MemberLevel = { levelTenths: BASE_LEVEL_TENTHS, source: "default" };
 
-const A_WINS: TwoRanks = [1, 2];
-const B_WINS: TwoRanks = [2, 1];
+const WINNER_RANK = 1;
+const LOSER_RANK = 2;
+const A_WINS: TwoRanks = [WINNER_RANK, LOSER_RANK];
+const B_WINS: TwoRanks = [LOSER_RANK, WINNER_RANK];
 
 const POOL_OF_MODALITY: Readonly<Record<Modality, RatingPool>> = {
   "indoor-6x6": "indoor",
@@ -59,9 +61,7 @@ function compareText(x: string, y: string): number {
 export function orderRounds(rounds: readonly RatedRound[]): readonly RatedRound[] {
   return rounds
     .filter((round) => !round.canceled)
-    .sort(
-      (x, y) => compareText(x.startsAt, y.startsAt) || compareText(x.roundId, y.roundId),
-    );
+    .sort((x, y) => compareText(x.startsAt, y.startsAt) || compareText(x.roundId, y.roundId));
 }
 
 function readSeeds(seeds: readonly MemberSeed[]): Result<Seeds, RatingError> {
