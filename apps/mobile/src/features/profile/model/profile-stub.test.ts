@@ -59,7 +59,7 @@ describe("loadFailureText", () => {
     [offline, "idle", "Sem conexão."],
     [null, "paused", "Sem conexão."],
     [
-      new ApiFailure({ kind: "unavailable" }),
+      new ApiFailure({ kind: "unavailable", retryAfterMs: 0 }),
       "idle",
       "O Sacou está fora do ar por um instante. Tentando de novo.",
     ],
