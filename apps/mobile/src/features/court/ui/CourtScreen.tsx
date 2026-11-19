@@ -66,7 +66,9 @@ function CourtScreenContent({
   const { width, height } = area;
   const insets = useSafeAreaInsets();
   const sides = sidesOf(inverted);
+  const [zoneHeight, setZoneHeight] = useState<number | null>(null);
   const layout = computeCourtLayout({
+    measuredZoneHeight: zoneHeight ?? undefined,
     windowWidth: width,
     windowHeight: height,
     insetTop: insets.top,
@@ -79,6 +81,7 @@ function CourtScreenContent({
       <CourtLandscape
         model={model}
         layout={layout}
+        onZoneHeight={setZoneHeight}
         onPoint={onPoint}
         onUndo={onUndo}
         onCorrect={onCorrect}

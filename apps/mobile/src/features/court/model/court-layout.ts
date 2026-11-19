@@ -27,6 +27,12 @@ export interface CourtLayoutInput {
   /** The notch or the side navigation bar when the phone is on its side. */
   readonly insetLeft: number;
   readonly insetRight: number;
+  /**
+   * The height the row of the two zones really got, once measured (landscape only). The bar and
+   * the queue strip never get less than their content, so the zone can be shorter than its share
+   * of the weights (phone test of 18/11/2026); everything inside the zone is sized from this.
+   */
+  readonly measuredZoneHeight?: number;
 }
 
 /** What both layouts give the zone of a team, in pixels, all derived from the window. */
@@ -68,7 +74,9 @@ function usable(total: number, start: number, end: number): number {
 function computeLandscape(input: CourtLayoutInput): LandscapeCourtLayout {
   const width = usable(input.windowWidth, input.insetLeft, input.insetRight);
   const height = usable(input.windowHeight, input.insetTop, input.insetBottom);
-  const zoneHeight = (height * LANDSCAPE_FLEX_WEIGHTS.middle) / LANDSCAPE_TOTAL_HEIGHT_WEIGHT;
+  const zoneHeight =
+    input.measuredZoneHeight ??
+    (height * LANDSCAPE_FLEX_WEIGHTS.middle) / LANDSCAPE_TOTAL_HEIGHT_WEIGHT;
   const netWidth = Math.max(
     (width * LANDSCAPE_WIDTH_WEIGHTS.net) / LANDSCAPE_TOTAL_WIDTH_WEIGHT,
     NET_MIN_WIDTH,
