@@ -35,7 +35,7 @@ internal sealed class StorePublicRoundSummary(
         return ToSummary(round, name, resolved.Value, time.GetUtcNow());
     }
 
-    private static PublicRoundSummary ToSummary(Round round, string groupName, RoundSettings resolved, DateTimeOffset now)
+    internal static PublicRoundSummary ToSummary(Round round, string groupName, RoundSettings resolved, DateTimeOffset now)
     {
         var rules = RoundGroupState.ToDomain(resolved.Attendance);
         return new PublicRoundSummary(
@@ -50,10 +50,12 @@ internal sealed class StorePublicRoundSummary(
             round.SpotsHeld,
             round.Waitlist.Length,
             rules.WaitlistEnabled,
-            resolved.Draw.PlayersPerTeam);
+            resolved.Draw.PlayersPerTeam,
+            resolved.Format.ScoringEnabled ? resolved.Format.PointsPerSet : null,
+            resolved.Format.QueueEnabled);
     }
 
-    private static PublicRoundState StateOf(Round round, AttendanceSettings rules, DateTimeOffset now)
+    internal static PublicRoundState StateOf(Round round, AttendanceSettings rules, DateTimeOffset now)
     {
         if (round.IsCanceled)
         {

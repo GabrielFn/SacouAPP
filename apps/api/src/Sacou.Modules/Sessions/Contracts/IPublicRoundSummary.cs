@@ -12,7 +12,8 @@ public interface IPublicRoundSummary
 }
 
 /// <summary>
-/// The public line of a round. <see cref="Capacity"/> is null without a limit. The counts are those of the stored lists, as
+/// The public line of a round, as "6x6 · 25 pts · quem perde sai" and the counts. <see cref="Capacity"/> is null without a
+/// limit, and <see cref="PointsPerSet"/> without the score. The counts are those of the stored lists, as
 /// the page reads them without the reconcile of the signed-in read (ADR 0043, D7).
 /// </summary>
 public sealed record PublicRoundSummary(
@@ -27,7 +28,9 @@ public sealed record PublicRoundSummary(
     int GoingCount,
     int WaitlistCount,
     bool WaitlistEnabled,
-    int PlayersPerTeam);
+    int PlayersPerTeam,
+    int? PointsPerSet,
+    bool LoserLeaves);
 
 /// <summary>What the page says of the round now.</summary>
 public enum PublicRoundState

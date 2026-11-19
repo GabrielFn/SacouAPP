@@ -39,6 +39,8 @@ internal sealed partial class PostgresRoundStore
             catch (PostgresException exception) when (IsLinkCodeTaken(exception))
             {
                 // Another round has the same link code: nothing is committed, and the caller tries again with a new one.
+                // The series row saved in this rolled-back transaction is still tracked, and the next attempt adds it again.
+                database.ChangeTracker.Clear();
                 return Result.Failure<bool>(RoundLinkCodeClash.Taken);
             }
 

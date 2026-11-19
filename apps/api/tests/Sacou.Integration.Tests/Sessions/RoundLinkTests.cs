@@ -106,6 +106,8 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(RoundLinkCalls.RoundClosed, RoundLinkCalls.Code(body));
         Assert.Null(body["joined"]);
         Assert.Null(await RoundLinkCalls.MemberOfAsync(api.ConnectionString, world.GroupId, world.Users[A.NonMember]));
+        using var resolved = await world.SendAsync(A.NonMember, HttpMethod.Post, RoundLinkCalls.ResolvePath, RoundLinkCalls.ResolveBody(code));
+        AssertClosedResolution(await RoundCalls.JsonAsync(resolved));
     }
 
     /// <summary>Case 5: at the very instant of the start the link is closed, and nobody comes in.</summary>
@@ -125,6 +127,7 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(RoundLinkCalls.RoundClosed, RoundLinkCalls.Code(body));
         Assert.Null(await RoundLinkCalls.MemberOfAsync(api.ConnectionString, world.GroupId, world.Users[A.NonMember]));
         Assert.Equal(HttpStatusCode.OK, resolved.StatusCode);
+        AssertClosedResolution(await RoundCalls.JsonAsync(resolved));
     }
 
     /// <summary>Case 7: a stranger comes in as a player and an avulso, and goes, by the web.</summary>
@@ -327,10 +330,19 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
         using var member = await world.SendAsync(A.Player, HttpMethod.Post, RoundLinkCalls.ResolvePath, RoundLinkCalls.ResolveBody(code));
 
         var strangerBody = await RoundCalls.JsonAsync(stranger);
-        Assert.Equal(["groupId", "roundId", "isMember"], strangerBody.Select(property => property.Key));
+        Assert.Equal(["isOpen", "groupId", "roundId", "isMember"], strangerBody.Select(property => property.Key));
+        Assert.True(strangerBody["isOpen"]!.GetValue<bool>());
         Assert.Equal((world.GroupId, Guid.Parse(round), false), (strangerBody["groupId"]!.GetValue<Guid>(), strangerBody["roundId"]!.GetValue<Guid>(), strangerBody["isMember"]!.GetValue<bool>()));
         Assert.True((await RoundCalls.JsonAsync(member))["isMember"]!.GetValue<bool>());
         Assert.Null(await RoundLinkCalls.MemberOfAsync(api.ConnectionString, world.GroupId, world.Users[A.NonMember]));
         Assert.DoesNotContain(api.Logs.Entries, entry => entry.Contains(code, StringComparison.Ordinal) || entry.Contains("ZZGROUPMARK", StringComparison.Ordinal));
+    }
+
+    /// <summary>A closed round says only that: no way to the group or the round from a link that outlived it.</summary>
+    private static void AssertClosedResolution(JsonObject body)
+    {
+        Assert.False(body["isOpen"]!.GetValue<bool>());
+        Assert.Null(body["groupId"]);
+        Assert.Null(body["roundId"]);
     }
 }

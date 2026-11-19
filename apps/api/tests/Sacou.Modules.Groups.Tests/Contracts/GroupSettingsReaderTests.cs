@@ -88,6 +88,17 @@ public sealed class GroupSettingsReaderTests
     }
 
     [Fact]
+    public void FormatRules_ComeFromTheResolvedDocument()
+    {
+        var group = Snapshot(("scoring.enabled", true), ("queue.enabled", true));
+
+        var rules = Reader().ResolveRound(group, """{"schemaVersion":1,"scoring":{"pointsPerSet":21}}""").Value.Format;
+
+        Assert.Equal(new FormatRules(true, 21, true), rules);
+        Assert.Equal(new FormatRules(false, 25, false), Reader().ResolveRound(Snapshot(), null).Value.Format);
+    }
+
+    [Fact]
     public void G5_TheGroupIsReadAtEveryUse_SoARoundWithoutTheLeafSeesTheNewValue()
     {
         var layer = """{"schemaVersion":1,"scoring":{"pointsPerSet":15}}""";

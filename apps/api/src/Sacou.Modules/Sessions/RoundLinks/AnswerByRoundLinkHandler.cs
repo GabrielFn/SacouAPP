@@ -63,42 +63,45 @@ internal sealed partial class AnswerByRoundLinkHandler(
             return RoundLinkAttempt.Refused(RoundErrors.RoundClosed);
         }
 
-        var member = await MemberOfAsync(round.GroupId, userId, cancellationToken).ConfigureAwait(false);
+        var (member, joined) = await MemberOfAsync(round.GroupId, userId, cancellationToken).ConfigureAwait(false);
         if (member.IsFailure)
         {
-            return RoundLinkAttempt.Refused(member.Error);
+            return new RoundLinkAttempt(joined, Result.Failure<RoundLinkAnswerResponse>(member.Error));
         }
 
-        var (caller, joined) = member.Value;
+        var caller = member.Value;
         var access = new RoundAccess(round.GroupId, userId, new MemberId(caller.MemberId), caller.Role, caller.Type);
         var written = await writer.ExecuteAsync(access, round.Id, GroupCapability.RespondAttendance, Decide(response), cancellationToken)
             .ConfigureAwait(false);
         var answer = written.Match(
-            outcome => Result.Success(ToResponse(outcome.Change.Round, access.MemberId, joined)),
+            outcome => Result.Success(ToResponse(outcome.Change.Round, access.MemberId, joined ?? false)),
             Result.Failure<RoundLinkAnswerResponse>);
         return new RoundLinkAttempt(joined, answer);
     }
 
-    /// <summary>The caller's active membership, coming in as an avulso first when there is none.</summary>
-    private async Task<Result<(GroupMembership Member, bool Joined)>> MemberOfAsync(GroupId group, Guid userId, CancellationToken cancellationToken)
+    /// <summary>
+    /// The caller's active membership, coming in as an avulso first when there is none. <c>Joined</c> is null only when
+    /// the group step itself refused; it stays known when the person came in and is gone before the second read.
+    /// </summary>
+    private async Task<(Result<GroupMembership> Member, bool? Joined)> MemberOfAsync(GroupId group, Guid userId, CancellationToken cancellationToken)
     {
         var existing = await membership.FindActiveAsync(group.Value, userId, cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
-            return Result.Success((existing, false));
+            return (Result.Success(existing), false);
         }
 
         var joined = await joining.JoinAsDropInAsync(group.Value, userId, cancellationToken).ConfigureAwait(false);
         if (joined.IsFailure)
         {
-            return Result.Failure<(GroupMembership, bool)>(joined.Error);
+            return (Result.Failure<GroupMembership>(joined.Error), null);
         }
 
         // Removed or gone between the commit of the group step and this read: the non-member answer of every group route.
         var member = await membership.FindActiveAsync(group.Value, userId, cancellationToken).ConfigureAwait(false);
         return member is null
-            ? Result.Failure<(GroupMembership, bool)>(GroupAccessErrors.GroupNotFound)
-            : Result.Success((member, joined.Value.Joined));
+            ? (Result.Failure<GroupMembership>(GroupAccessErrors.GroupNotFound), joined.Value.Joined)
+            : (Result.Success(member), joined.Value.Joined);
     }
 
     /// <summary>Under the lock: the caller as the Groups says now, the round still open at the lock's clock, then the app's own rules.</summary>
