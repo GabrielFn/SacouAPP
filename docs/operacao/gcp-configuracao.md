@@ -17,7 +17,7 @@ Decisões: [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md). Feita p
 
 1. cria `sacou-builder`, `sacou-deployer-test` e `sacou-deployer-prod`;
 2. cria os serviços `sacou-api-test` e `sacou-api` com a imagem de exemplo `us-docker.pkg.dev/cloudrun/container/hello`, cada um com a sua conta de execução, e os deixa públicos (`allUsers` com `run.invoker`), o que substitui a caixa do console;
-3. dá ao builder só `artifactregistry.writer` no repositório `sacou`, e a cada deployer só `run.developer` no próprio serviço e `serviceAccountUser` na própria conta de execução;
+3. dá ao builder só `artifactregistry.writer` no repositório `sacou`, e a cada deployer só `run.developer` no próprio serviço, `artifactregistry.reader` no repositório `sacou` e `serviceAccountUser` na própria conta de execução;
 4. dá o `workloadIdentityUser` de cada conta só a um `principal`: `repo:GabrielFn@5855069/SacouAPP@1440184485:ref:refs/heads/main` (builder, job sem ambiente), `repo:GabrielFn@5855069/SacouAPP@1440184485:environment:test` e `repo:GabrielFn@5855069/SacouAPP@1440184485:environment:production`; O repositório usa o *subject* imutável do GitHub (dono e repositório com o ID numérico), conferido com `gh api repos/GabrielFn/SacouAPP/actions/oidc/customization/sub`; se esse ajuste mudar, os três `principal` precisam mudar junto. Logo depois de criar uma conta, a primeira concessão pode falhar por atraso de propagação: o script para antes de apagar a conta antiga, e basta rodá-lo de novo.
 5. muda a condição do provedor para aceitar só o `deploy-api.yml` da `main` (`assertion.workflow_ref`);
 6. tira os papéis da `sacou-deployer` e a apaga;

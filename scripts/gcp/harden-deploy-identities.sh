@@ -7,9 +7,9 @@
 # After:
 #   sacou-builder        -> jobs without an environment (build): artifactregistry.writer on the sacou repository only.
 #   sacou-deployer-test  -> jobs in the `test` environment: run.developer on sacou-api-test only,
-#                           serviceAccountUser on sacou-api-test-run only.
+#                           artifactregistry.reader on the sacou repository, serviceAccountUser on sacou-api-test-run only.
 #   sacou-deployer-prod  -> jobs in the `production` environment (owner's approval): run.developer on sacou-api only,
-#                           serviceAccountUser on sacou-api-run only.
+#                           artifactregistry.reader on the sacou repository, serviceAccountUser on sacou-api-run only.
 # The provider accepts only .github/workflows/deploy-api.yml on main, and each account trusts one OIDC subject.
 # The two services are created here, with a public placeholder image, so run.developer can be granted on each
 # service instead of the project (a role on a resource that does not exist yet cannot be granted).
@@ -71,6 +71,9 @@ grant_deployer() {
   local deployer="$1" service="$2" runner="$3" subject="$4"
   gcloud run services add-iam-policy-binding "$service" --region="$REGION" \
     --member="serviceAccount:$(sa_email "$deployer")" --role=roles/run.developer
+  # Cloud Run checks that whoever deploys can read the image; read only, on the sacou repository only.
+  gcloud artifacts repositories add-iam-policy-binding "$ARTIFACT_REPO" --location="$REGION" \
+    --member="serviceAccount:$(sa_email "$deployer")" --role=roles/artifactregistry.reader
   gcloud iam service-accounts add-iam-policy-binding "$(sa_email "$runner")" \
     --member="serviceAccount:$(sa_email "$deployer")" --role=roles/iam.serviceAccountUser
   gcloud iam service-accounts add-iam-policy-binding "$(sa_email "$deployer")" --role=roles/iam.workloadIdentityUser \
