@@ -42,6 +42,31 @@
 128. "Entrar com Apple" na página web (E3.12): pede conta de desenvolvedor da Apple (US$ 99/ano) e o domínio. (1) só Google e e-mail na web no piloto; (2) Apple também. **Recomendação e padrão adotado: 1** (resposta 58: piloto só Android; quem tem iPhone entra pela web com Google ou e-mail).
 129. Apelido de quem entra pela primeira vez pela web (E3.12): (1) um campo antes de confirmar, já preenchido com o primeiro nome do Google e editável (como a resposta 40 no app); (2) usar o primeiro nome sem perguntar; (3) sem apelido, aparece como "Jogador". **Recomendação e padrão adotado: 1.**
 130. Quem recebe o link da rodada para compartilhar (E3.12): o link põe gente no grupo (pergunta 127), e convidar é do Admin e do Co-admin. (1) só Admin e Co-admin; (2) qualquer membro. **Recomendação e padrão adotado: 1.**
+140. Quando a rodada "termina" para abrir a votação (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+141. Empate de votos e de saldo (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+142. Ninguém votou (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+143. Grupo com MVP pelos dados e votação ligados (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+144. O que aparece depois que fecha (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+145. Mudar o voto antes de fechar (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+146. Guardar quem votou em quem (E3.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E3.18.md`](tarefas/E3.18.md). Não trava a Parte 1.
+150. O que "Encerrar rodada · fecha a noite toda" faz (E4.12, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.12.md`](tarefas/E4.12.md). Não trava a Parte 1.
+151. "Encerrar rodada" pelo menu com partida em andamento (E4.12, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.12.md`](tarefas/E4.12.md). Não trava a Parte 1.
+152. Entrada pela tela da rodada (E4.12, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.12.md`](tarefas/E4.12.md). Não trava a Parte 1.
+153. Entrada pelo Início (E4.12, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.12.md`](tarefas/E4.12.md). Não trava a Parte 1.
+160. De quem é a cartinha que se abre no piloto (E4.13, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.13.md`](tarefas/E4.13.md). Não trava a Parte 1.
+161. Cor do avatar (E4.13, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.13.md`](tarefas/E4.13.md). Não trava a Parte 1.
+162. Glifo de posição na cartinha (E4.13, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.13.md`](tarefas/E4.13.md). Não trava a Parte 1.
+163. Nome no topo da tela 14 e estado vazio (E4.13, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.13.md`](tarefas/E4.13.md). Não trava a Parte 1.
+164. "WhatsApp" e "Salvar" da tela 15 (E4.13, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.13.md`](tarefas/E4.13.md). Não trava a Parte 1.
+170. Como a tela 12 leva à votação (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+171. Escolha inicial e confirmação na 12a (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+172. Votar sem internet (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+173. Linha do candidato na areia (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+174. MVP da votação na areia e o que o resultado mostra (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+175. Partida sem vencedor no ranking da areia (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+176. Arredondamento do prazo "fecha em N h" (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+177. Ordem dos candidatos na 12a (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
+178. Guardar a votação no aparelho para abrir offline (E4.18, 19/11/2026): opções e **padrão adotado** na seção de perguntas de [`docs/estado/tarefas/E4.18.md`](tarefas/E4.18.md). Não trava a Parte 1.
 
 ## Respondidas
 - **Posições na quadra (13/11/2026, no teste no celular):** cada jogador é um círculo na cor do time com o número da posição, no ponto exato da formação, e o nome pequeno ao lado: embaixo por padrão, e onde não atrapalhar quando os pontos estão perto (nunca sobre outro círculo ou nome). Substitui o chip com nome. Entra no PR #78, antes do merge. ADR 0052. Depois de três rodadas com o nome "no lugar livre mais próximo" (os nomes ficavam entre dois círculos), o Gabriel escolheu a regra fixa: nome sempre logo embaixo do próprio círculo, em cima só sem espaço; e os círculos nunca são afastados, mesmo quase sobrepostos ("se vc afastar os circulos a rotação vai ficar errada"). Aceitou o visual no celular em 13/11/2026.
