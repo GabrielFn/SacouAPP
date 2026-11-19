@@ -154,7 +154,12 @@
     "lockIcon": 13,
     "swapIcon": 18,
     "orderCell": 52,
-    "lineupBadge": 20
+    "lineupBadge": 20,
+    "playerCard": 64,
+    "menuRow": 52,
+    "teamMark": 24,
+    "revertButton": 52,
+    "authorBadge": 18
   },
   "radii": {
     "field": 12,
@@ -166,6 +171,7 @@
     "roleBadge": 13,
     "sheet": 24,
     "playerChip": 10,
+    "teamMark": 7,
     "reservesRow": 14
   },
   "borderWidths": {
@@ -195,7 +201,12 @@
     "displayLevelBadge": 20,
     "levelCaption": 11,
     "drawTitle": 29,
-    "teamTitle": 22
+    "teamTitle": 22,
+    "sheetTitleLarge": 30,
+    "sheetTitleMenu": 28,
+    "rowScore": 23,
+    "revertTitle": 26,
+    "authorBadge": 10
   },
   "iconStroke": {
     "plus": 2.2
