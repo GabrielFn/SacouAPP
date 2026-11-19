@@ -17,7 +17,10 @@ function compareCandidates(x: PlayerStats, y: PlayerStats): number {
 }
 
 /** The sides a member played, one per finished match, in order. */
-function sidesOf(memberId: MemberId, finishedMatches: readonly FinishedMatchResult[]): TeamSide[] {
+function sidesOf(
+  memberId: MemberId,
+  finishedMatches: readonly FinishedMatchResult[],
+): readonly TeamSide[] {
   return finishedMatches.flatMap(({ teams }) => {
     if (teams.a.includes(memberId)) {
       return ["a"];

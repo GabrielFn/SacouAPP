@@ -42,6 +42,7 @@ function countOf(results: readonly MatchResult[], wanted: MatchResult): number {
 function standingOf(matches: readonly TeamMatch[]): BeachTeamStanding {
   const results = matches.map(({ result }) => result);
   return {
+    // Every team key comes from at least one match, so the fallback never runs; it only satisfies the index type.
     memberIds: matches[0]?.memberIds ?? [],
     wins: countOf(results, "win"),
     losses: countOf(results, "loss"),

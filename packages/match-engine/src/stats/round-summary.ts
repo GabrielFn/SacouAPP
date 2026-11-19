@@ -18,7 +18,7 @@ import type {
 } from "./types.js";
 
 export function isBeachModality(modality: SettingsModality): boolean {
-  return (BEACH_MODALITIES as readonly SettingsModality[]).includes(modality);
+  return BEACH_MODALITIES.some((beach) => beach === modality);
 }
 
 /**
