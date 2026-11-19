@@ -2,7 +2,13 @@
  * The in-app browsers where Google refuses the sign-in (`disallowed_useragent`): WhatsApp, Instagram, Facebook and the
  * Android WebView (`; wv)`). The page offers "Abra no navegador" and the e-mail there (ADR 0070, D4).
  */
-const EMBEDDED_MARKERS: readonly RegExp[] = [/WhatsApp/i, /Instagram/i, /FBA[NV]\//, /FB_IAB/, /; wv\)/];
+const EMBEDDED_MARKERS: readonly RegExp[] = [
+  /WhatsApp/i,
+  /Instagram/i,
+  /FBA[NV]\//,
+  /FB_IAB/,
+  /; wv\)/,
+];
 
 export function isEmbeddedBrowser(userAgent: string): boolean {
   return EMBEDDED_MARKERS.some((marker) => marker.test(userAgent));

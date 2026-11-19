@@ -58,9 +58,14 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
       await dispatch({ type: "registrationFailed", failure: outcome.failure });
       return;
     }
-    const suggestion = firstNameOf(deps.auth.currentUser()?.displayName ?? null, deps.nicknameMaxCodePoints);
+    // Without an intent (a returning visitor), the page shows where a member already stands.
+    const returning = store.current.step === "registering" && store.current.intent === null;
+    const suggestion = firstNameOf(
+      deps.auth.currentUser()?.displayName ?? null,
+      deps.nicknameMaxCodePoints,
+    );
     await dispatch({ type: "registered", hasProfile: outcome.value.hasProfile, suggestion });
-    if (store.current.step === "idle") await loadStanding();
+    if (returning) await loadStanding();
   }
 
   async function loadStanding(): Promise<void> {
@@ -70,12 +75,20 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
 
   async function saveNickname(nickname: string): Promise<void> {
     const outcome = await deps.api.saveNickname(nickname);
-    await dispatch(outcome.ok ? { type: "nicknameSaved" } : { type: "nicknameRejected", failure: outcome.failure });
+    await dispatch(
+      outcome.ok
+        ? { type: "nicknameSaved" }
+        : { type: "nicknameRejected", failure: outcome.failure },
+    );
   }
 
   async function answer(intent: Intent): Promise<void> {
     const outcome = await deps.api.answer(deps.code, intent);
-    await dispatch(outcome.ok ? { type: "answered", standing: outcome.value } : { type: "answerFailed", failure: outcome.failure });
+    await dispatch(
+      outcome.ok
+        ? { type: "answered", standing: outcome.value }
+        : { type: "answerFailed", failure: outcome.failure },
+    );
   }
 
   async function settle(outcome: AuthOutcome): Promise<void> {
@@ -122,14 +135,19 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
     start: async () => {
       const user = await deps.auth.restore();
       const pending = deps.intents.take();
-      await dispatch({ type: "sessionChecked", signedIn: user !== null, pendingIntent: user === null ? null : pending });
+      await dispatch({
+        type: "sessionChecked",
+        signedIn: user !== null,
+        pendingIntent: user === null ? null : pending,
+      });
     },
     tapAnswer: (intent) => dispatch({ type: "answerTapped", intent }),
     closeSheet: () => void dispatch({ type: "sheetClosed" }),
     chooseForm: (form) => void dispatch({ type: "formChosen", form }),
     signInWithGoogle,
     submitEmail,
-    submitNickname: (nickname) => dispatch({ type: "nicknameSubmitted", nickname: nickname.trim() }),
+    submitNickname: (nickname) =>
+      dispatch({ type: "nicknameSubmitted", nickname: nickname.trim() }),
     signOut: async () => {
       await deps.auth.signOut();
       await dispatch({ type: "signedOut" });

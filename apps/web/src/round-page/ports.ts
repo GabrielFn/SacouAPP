@@ -33,8 +33,7 @@ export interface AuthPort {
 }
 
 export type ApiOutcome<T> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly failure: Failure };
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly failure: Failure };
 
 /** The Sacou API, same origin, always with the caller's ID token. */
 export interface ApiPort {

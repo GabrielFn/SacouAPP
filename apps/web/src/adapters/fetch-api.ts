@@ -41,9 +41,15 @@ function standingOf(body: unknown): Standing | null {
 }
 
 function resolvedOf(body: unknown): Resolved | null {
-  if (!isRecord(body) || typeof body.isOpen !== "boolean" || typeof body.isMember !== "boolean") return null;
+  if (!isRecord(body) || typeof body.isOpen !== "boolean" || typeof body.isMember !== "boolean")
+    return null;
   const id = (value: unknown) => (typeof value === "string" ? value : null);
-  return { isOpen: body.isOpen, groupId: id(body.groupId), roundId: id(body.roundId), isMember: body.isMember };
+  return {
+    isOpen: body.isOpen,
+    groupId: id(body.groupId),
+    roundId: id(body.roundId),
+    isMember: body.isMember,
+  };
 }
 
 const unexpected = { ok: false, failure: { kind: "unexpected" } } as const;
@@ -74,7 +80,11 @@ function lost(reason: NoResponse): ApiOutcome<never> {
 
 /** The Sacou API on the page's own origin: JSON bodies, the ID token in `Authorization`, never a cookie (ADR 0070, D4). */
 export function createFetchApi(options: FetchApiOptions): ApiPort {
-  async function call(method: string, path: string, body?: unknown): Promise<Response | NoResponse> {
+  async function call(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<Response | NoResponse> {
     const token = await options.idToken();
     if (token === null) return "signedOut";
     const auth = { Authorization: `Bearer ${token}`, Accept: "application/json" };
@@ -82,7 +92,11 @@ export function createFetchApi(options: FetchApiOptions): ApiPort {
     const request: RequestInit =
       body === undefined
         ? { ...init, headers: auth }
-        : { ...init, headers: { ...auth, "Content-Type": "application/json" }, body: JSON.stringify(body) };
+        : {
+            ...init,
+            headers: { ...auth, "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          };
     try {
       return await options.fetch(path, request);
     } catch {
@@ -90,7 +104,10 @@ export function createFetchApi(options: FetchApiOptions): ApiPort {
     }
   }
 
-  async function read<T>(response: Response | NoResponse, parse: (body: unknown) => T | null): Promise<ApiOutcome<T>> {
+  async function read<T>(
+    response: Response | NoResponse,
+    parse: (body: unknown) => T | null,
+  ): Promise<ApiOutcome<T>> {
     if (typeof response === "string") return lost(response);
     if (!response.ok) return refusal(response);
     const value = parse(await bodyOf(response));
@@ -98,12 +115,17 @@ export function createFetchApi(options: FetchApiOptions): ApiPort {
   }
 
   async function standing(code: string): Promise<ApiOutcome<Standing | null>> {
-    const resolved = await read(await call("POST", "/v1/round-links/resolve", { code }), resolvedOf);
+    const resolved = await read(
+      await call("POST", "/v1/round-links/resolve", { code }),
+      resolvedOf,
+    );
     if (!resolved.ok) return resolved;
     const { isOpen, isMember, groupId, roundId } = resolved.value;
-    if (!isOpen || !isMember || groupId === null || roundId === null) return { ok: true, value: null };
-    const round = await read(await call("GET", `/v1/groups/${groupId}/rounds/${roundId}`), (body) =>
-      isRecord(body) ? { me: standingOf(body.me) } : null,
+    if (!isOpen || !isMember || groupId === null || roundId === null)
+      return { ok: true, value: null };
+    const round = await read(
+      await call("GET", `/v1/groups/${groupId}/rounds/${roundId}`),
+      (body) => (isRecord(body) ? { me: standingOf(body.me) } : null),
     );
     return round.ok ? { ok: true, value: round.value.me } : round;
   }
@@ -129,7 +151,10 @@ export function createFetchApi(options: FetchApiOptions): ApiPort {
     register,
     saveNickname,
     answer: async (code: string, intent: Intent) =>
-      read(await call("POST", "/v1/round-links/attendance", { code, response: intent }), standingOf),
+      read(
+        await call("POST", "/v1/round-links/attendance", { code, response: intent }),
+        standingOf,
+      ),
     standing,
   };
 }

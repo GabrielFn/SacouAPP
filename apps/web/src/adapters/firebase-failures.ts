@@ -23,7 +23,11 @@ const FAILURES: Readonly<Record<string, Failure>> = {
   "auth/unauthorized-domain": { kind: "providerUnavailable" },
 };
 
-const CANCELLED = new Set(["auth/popup-closed-by-user", "auth/cancelled-popup-request", "auth/user-cancelled"]);
+const CANCELLED = new Set([
+  "auth/popup-closed-by-user",
+  "auth/cancelled-popup-request",
+  "auth/user-cancelled",
+]);
 const POPUP_BLOCKED = "auth/popup-blocked";
 const OFFLINE = "auth/network-request-failed";
 
@@ -37,10 +41,15 @@ export function outcomeOf(error: unknown): AuthOutcome {
   const code = codeOf(error);
   if (code === POPUP_BLOCKED) return { kind: "popupBlocked" };
   if (code !== null && CANCELLED.has(code)) return { kind: "cancelled" };
-  return { kind: "failed", failure: (code === null ? undefined : FAILURES[code]) ?? { kind: "unexpected" } };
+  return {
+    kind: "failed",
+    failure: (code === null ? undefined : FAILURES[code]) ?? { kind: "unexpected" },
+  };
 }
 
 /** The reset link: the same `done` for an unknown e-mail and for a real one; only no connection is said. */
 export function resetOutcomeOf(error: unknown): AuthOutcome {
-  return codeOf(error) === OFFLINE ? { kind: "failed", failure: { kind: "offline" } } : { kind: "done" };
+  return codeOf(error) === OFFLINE
+    ? { kind: "failed", failure: { kind: "offline" } }
+    : { kind: "done" };
 }

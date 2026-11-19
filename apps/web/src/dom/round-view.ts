@@ -49,8 +49,19 @@ export interface ViewEnvironment {
   readonly embedded: boolean;
 }
 
-const SHEET_STEPS = new Set<RoundPageState["step"]>(["signIn", "signingIn", "nickname", "savingNickname"]);
-const BUSY_STEPS = new Set<RoundPageState["step"]>(["starting", "signingIn", "registering", "savingNickname", "answering"]);
+const SHEET_STEPS = new Set<RoundPageState["step"]>([
+  "signIn",
+  "signingIn",
+  "nickname",
+  "savingNickname",
+]);
+const BUSY_STEPS = new Set<RoundPageState["step"]>([
+  "starting",
+  "signingIn",
+  "registering",
+  "savingNickname",
+  "answering",
+]);
 
 function holdsPlace(standing: Standing | null): boolean {
   return standing !== null && standing.status !== "notGoing";
@@ -111,11 +122,16 @@ function renderAnswers(elements: PageElements, state: RoundPageState): void {
   elements.signOut.hidden = !(state.step === "idle" && state.signedIn);
 }
 
-function renderSheet(elements: PageElements, state: RoundPageState, environment: ViewEnvironment): void {
+function renderSheet(
+  elements: PageElements,
+  state: RoundPageState,
+  environment: ViewEnvironment,
+): void {
   const form = formOf(state);
   const busy = BUSY_STEPS.has(state.step);
   elements.sheet.hidden = !SHEET_STEPS.has(state.step);
-  elements.sheetTitle.textContent = form === null ? webStrings.sheet.choice : webStrings.sheet[form];
+  elements.sheetTitle.textContent =
+    form === null ? webStrings.sheet.choice : webStrings.sheet[form];
   elements.choice.hidden = form !== "choice";
   elements.google.hidden = environment.embedded;
   elements.google.disabled = busy;
@@ -126,7 +142,8 @@ function renderSheet(elements: PageElements, state: RoundPageState, environment:
   elements.email.disabled = busy;
   elements.password.disabled = busy;
   elements.emailSubmit.disabled = busy;
-  elements.emailSubmit.textContent = webStrings.submit[form === "signUp" || form === "reset" ? form : "signIn"];
+  elements.emailSubmit.textContent =
+    webStrings.submit[form === "signUp" || form === "reset" ? form : "signIn"];
   elements.forgot.hidden = form !== "signIn";
   elements.nicknameForm.hidden = form !== "nickname";
   elements.nickname.disabled = busy;
@@ -135,7 +152,11 @@ function renderSheet(elements: PageElements, state: RoundPageState, environment:
 }
 
 /** The whole page from the state: the same state always draws the same page. */
-export function renderRoundPage(elements: PageElements, state: RoundPageState, environment: ViewEnvironment): void {
+export function renderRoundPage(
+  elements: PageElements,
+  state: RoundPageState,
+  environment: ViewEnvironment,
+): void {
   renderAnswers(elements, state);
   write(elements.status, statusText(state));
   renderSheet(elements, state, environment);

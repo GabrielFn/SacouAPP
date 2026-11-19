@@ -11,7 +11,11 @@ import { createRoundPage, type RoundPage } from "./round-page/round-page.control
 import type { RoundPageState } from "./round-page/round-page.types";
 
 /** On entering the nickname step, the field starts with the suggestion; afterwards it is the person's text. */
-function onStepChange(nodes: PageNodes, before: RoundPageState["step"], after: RoundPageState): void {
+function onStepChange(
+  nodes: PageNodes,
+  before: RoundPageState["step"],
+  after: RoundPageState,
+): void {
   if (after.step === before) return;
   if (after.step === "nickname") {
     nodes.nickname.value = after.suggestion;
@@ -66,7 +70,10 @@ function boot(): void {
   const page = createRoundPage({
     code: config.code,
     auth,
-    api: createFetchApi({ fetch: (input, init) => fetch(input, init), idToken: () => auth.idToken() }),
+    api: createFetchApi({
+      fetch: (input, init) => fetch(input, init),
+      idToken: () => auth.idToken(),
+    }),
     intents: createSessionIntentStore(sessionStorage),
     nicknameMaxCodePoints: config.nicknameMaxCodePoints,
     onChange: (state) => {

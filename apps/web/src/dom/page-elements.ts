@@ -36,7 +36,11 @@ export interface DocumentLike {
   getElementById(id: string): HTMLElement | null;
 }
 
-function required<T extends HTMLElement>(document: DocumentLike, key: ElementKey, type: new () => T): T {
+function required<T extends HTMLElement>(
+  document: DocumentLike,
+  key: ElementKey,
+  type: new () => T,
+): T {
   const element = document.getElementById(ELEMENT_IDS[key]);
   if (!(element instanceof type)) throw new Error(`The round page has no #${ELEMENT_IDS[key]}.`);
   return element;

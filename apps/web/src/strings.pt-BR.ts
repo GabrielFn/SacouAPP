@@ -39,7 +39,8 @@ export const webStrings = {
     dropInWindowClosed: "A lista dos avulsos ainda não abriu.",
     roundFull: "A rodada lotou e não tem espera.",
     invalidCredentials: "E-mail ou senha incorretos.",
-    emailUnavailable: "Não deu para criar a conta com esse e-mail. Tente entrar ou recuperar a senha.",
+    emailUnavailable:
+      "Não deu para criar a conta com esse e-mail. Tente entrar ou recuperar a senha.",
     weakPassword: "A senha precisa de pelo menos 6 caracteres.",
     tooManySignIns: "Muitas tentativas. Espere alguns minutos e tente de novo.",
     providerUnavailable: "Esse jeito de entrar não funciona aqui. Use o e-mail.",
@@ -52,7 +53,8 @@ export const webStrings = {
 export function failureText(failure: Failure): string {
   if (failure.kind === "rateLimited") return webStrings.retryIn(failure.retryAfterSeconds);
   const text = webStrings.failures[failure.kind];
-  const joined = (failure.kind === "dropInWindowClosed" || failure.kind === "roundFull") && failure.joined;
+  const joined =
+    (failure.kind === "dropInWindowClosed" || failure.kind === "roundFull") && failure.joined;
   return joined ? webStrings.joinedPrefix + text : text;
 }
 

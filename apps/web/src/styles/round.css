@@ -203,8 +203,16 @@ button:disabled {
   height: 0.625rem;
   background-color: var(--sand);
   background-image:
-    repeating-linear-gradient(45deg, rgba(15, 27, 45, 0.28) 0 0.0625rem, transparent 0.0625rem 0.4375rem),
-    repeating-linear-gradient(-45deg, rgba(15, 27, 45, 0.28) 0 0.0625rem, transparent 0.0625rem 0.4375rem);
+    repeating-linear-gradient(
+      45deg,
+      rgba(15, 27, 45, 0.28) 0 0.0625rem,
+      transparent 0.0625rem 0.4375rem
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(15, 27, 45, 0.28) 0 0.0625rem,
+      transparent 0.0625rem 0.4375rem
+    );
   border-bottom: 0.125rem solid var(--navy);
 }
 

@@ -62,8 +62,10 @@ export function createFirebaseAuth(config: FirebaseWebConfig): AuthPort {
     },
     signInWithGooglePopup: () => attempt(() => signInWithPopup(auth, google)),
     signInWithGoogleRedirect: () => attempt(() => signInWithRedirect(auth, google)),
-    signInWithEmail: (email, password) => attempt(() => signInWithEmailAndPassword(auth, email, password)),
-    signUpWithEmail: (email, password) => attempt(() => createUserWithEmailAndPassword(auth, email, password)),
+    signInWithEmail: (email, password) =>
+      attempt(() => signInWithEmailAndPassword(auth, email, password)),
+    signUpWithEmail: (email, password) =>
+      attempt(() => createUserWithEmailAndPassword(auth, email, password)),
     sendPasswordReset: async (email) => {
       try {
         await sendPasswordResetEmail(auth, email);

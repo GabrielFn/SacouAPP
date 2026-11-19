@@ -159,7 +159,15 @@ export default defineConfig([
     rules: {
       "functional/immutable-data": [
         "error",
-        { ignoreAccessorPattern: ["**.current", "**.hidden", "**.textContent", "**.disabled", "**.value"] },
+        {
+          ignoreAccessorPattern: [
+            "**.current",
+            "**.hidden",
+            "**.textContent",
+            "**.disabled",
+            "**.value",
+          ],
+        },
       ],
       "no-restricted-properties": [
         "error",
@@ -175,20 +183,40 @@ export default defineConfig([
       ],
     },
   },
+  // The view writes the page's nodes it receives; nothing else in the web app writes to a parameter.
+  {
+    files: ["apps/web/src/dom/**/*.ts", "apps/web/src/main.ts"],
+    rules: {
+      "no-param-reassign": [
+        "error",
+        { props: true, ignorePropertyModificationsFor: ["slot", "elements", "nodes"] },
+      ],
+    },
+  },
   {
     files: WEB_FILES,
     ignores: [...WEB_ADAPTER_FILES, ...TEST_FILES],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
         "error",
-        { patterns: [{ regex: "^firebase(/|$)", message: "Firebase only in src/adapters (ports, frontend.md rule 3)." }] },
+        {
+          patterns: [
+            {
+              regex: "^firebase(/|$)",
+              message: "Firebase only in src/adapters (ports, frontend.md rule 3).",
+            },
+          ],
+        },
       ],
       "no-restricted-globals": [
         "error",
-        ...["fetch", "sessionStorage", "localStorage", "document", "window", "navigator"].map((name) => ({
-          name,
-          message: "Platform globals only in src/adapters and src/main.ts (ports, frontend.md rule 3).",
-        })),
+        ...["fetch", "sessionStorage", "localStorage", "document", "window", "navigator"].map(
+          (name) => ({
+            name,
+            message:
+              "Platform globals only in src/adapters and src/main.ts (ports, frontend.md rule 3).",
+          }),
+        ),
       ],
     },
   },

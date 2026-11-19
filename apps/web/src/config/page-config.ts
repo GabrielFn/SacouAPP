@@ -30,7 +30,17 @@ export function readPageConfig(dataset: DatasetLike): PageConfig | null {
   const projectId = text(dataset, "firebaseProjectId");
   const appId = text(dataset, "firebaseAppId");
   const nicknameMax = Number.parseInt(dataset.nicknameMax ?? "", 10);
-  if (code === null || !CODE_PATTERN.test(code) || !Number.isInteger(nicknameMax) || nicknameMax <= 0) return null;
+  if (
+    code === null ||
+    !CODE_PATTERN.test(code) ||
+    !Number.isInteger(nicknameMax) ||
+    nicknameMax <= 0
+  )
+    return null;
   if (apiKey === null || authDomain === null || projectId === null || appId === null) return null;
-  return { code, firebase: { apiKey, authDomain, projectId, appId }, nicknameMaxCodePoints: nicknameMax };
+  return {
+    code,
+    firebase: { apiKey, authDomain, projectId, appId },
+    nicknameMaxCodePoints: nicknameMax,
+  };
 }
