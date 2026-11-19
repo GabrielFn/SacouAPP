@@ -31,15 +31,29 @@ Tudo é **calculado** da linha do tempo de uma `CourtSession` (`replayTimeline`)
 | Tela | Texto | Campo |
 |---|---|---|
 | 11 (Fim da partida) | "3ª seguida" | `getSideStats(...)[lado].currentWinStreak` |
-| 12 e 13 (Story, via E3.9) | "+34 de saldo · 4 vitórias em 5" | `plusMinus`, `wins` / `matchesPlayed` |
+| 12 (Resumo), MVP do dia | "Laranja · +34 de saldo · 4 vitórias em 5" | `getRoundSummary(...).mvp`: `side`, `plusMinus`, `wins` / `matchesPlayed` |
 | 12 e 13 | "3 seguidas" | `longestWinStreak` |
-| 14 e 15 (Perfil e cartinha) | "48 partidas", "maior seq. 7" | a E3.9 soma rodadas a partir de `results` |
-| 16 (Resumo) | "Time que mais venceu", "Maior sequência" | `getSideStats` |
+| 12, cartões | "Time que mais venceu", "Maior sequência" | `sides.mostWins`, `sides.longestStreak` (`null` esconde o cartão) |
+| 12b (Resumo da areia) | "Ranking do dia", "Bia e Gabi · 7 vitórias · ficaram 4 seguidas na quadra" | `ranking`, `mvp` com `kind: "team"` |
+| 14 e 15 (Perfil e cartinha) | "48 partidas", "maior seq. 7" | a E3.9 (Parte 4) soma rodadas a partir de `players[].results` |
 
 ## Rodada simulada (critério de aceite)
 
 A rodada do plano, com os números conferidos à mão, está no teste `stats.acceptance.test.ts` e no caso `s1` do golden. Conta de soma zero: 5×2 + 2 + 0 + 6×0 + 6×(−2) = 0. A soma zero é propriedade desta rodada, com 6 contra 6 em quadra em todo ponto, e não regra geral: com rotação desligada e times de tamanhos diferentes, a soma dos saldos não fecha em zero, e o motor está certo. Não usar como checagem na E2.10 nem na E3.9.
 
+## Resumo da rodada (E3.9, ADR 0071)
+
+`getRoundSummary(timeline, options)` junta tudo o que o pós-jogo mostra, com as opções da rodada resolvida (`format.modality`, `mvp.enabled`, `mvp.byStats`, `mvp.individualPoints`). Código em `packages/match-engine/src/stats/round-summary.ts`; casos em `packages/match-engine/golden/round-summary.json`.
+
+10. **Resultado das partidas** (`getMatchResults`): por partida terminada, na ordem dos `MatchEnded`, o vencedor, `teams` como no `MatchStarted`, `onCourt` (quem de `teams` esteve em quadra em pelo menos um rali ativo, pelas regras 2 e 3, na ordem de `teams`; o banco que não entrou fica só em `teams`) e `points` (ralis ganhos por lado). Partida aberta não entra. Partida terminada à mão sem nenhum rali tem `onCourt` vazio.
+11. **MVP do dia pelos dados, fórmula 1** (pergunta 97): entre quem jogou uma partida terminada, o maior `plusMinus`; empate, o maior aproveitamento `wins / matchesPlayed`, comparado em inteiros (`w1 × m2` contra `w2 × m1`: 2 de 3 empata com 4 de 6); depois a maior `longestWinStreak`; depois mais `matchesPlayed`; por fim a primeira aparição (regra 9), nunca o UUID. `winner: null` não é vitória. Sem partida terminada, ou com `mvp.enabled` ou `mvp.byStats` desligado, `mvp: null`. A versão da fórmula (`mvpFormulaVersion`, hoje 1) vai em todo resumo.
+12. **Lado do MVP** (o "Laranja" da tela 12): o lado em que ele jogou mais partidas; empate, o da última partida dele.
+13. **Forma do MVP:** `{ kind, memberIds, side, matchesPlayed, wins, plusMinus, longestWinStreak }`. Na quadra, `kind: "player"`, um membro e o `side`. Na areia, `kind: "team"`, a dupla ou o quarteto em 1º do ranking, `side: null` e `plusMinus` = saldo de pontos do time.
+14. **Destaques por lado:** "Time que mais venceu" é o lado com mais `wins` (`sides.mostWins: { side, wins }`) e "Maior sequência" o lado com a maior `longestWinStreak` (`sides.longestStreak: { side, longestWinStreak }`), de `getSideStats`. Empate → `null`, e a tela esconde o cartão.
+15. **Ranking do dia da areia** (`beach-2x2` e `beach-4x4`, ADR 0048): um time é o conjunto de `teams.<lado>` da partida, sem ordem; composição diferente é outro time (dupla remontada pela fila conta à parte). Por time: `wins`, `losses`, `undecided`, `longestWinStreak` (vitórias seguidas do time nas partidas que ele jogou; derrota e sem vencedor quebram), `pointsFor` e `pointsAgainst` (ralis). Ordem: mais `wins`; menos `losses`; maior `longestWinStreak`; maior saldo de pontos; primeira partida do time. Os membros saem na ordem da primeira partida do time. Na quadra, `ranking: null`.
+16. **Ponto individual desligado** (`mvp.individualPoints`): o servidor não recusa o `PointAttributed` (a opção muda durante a rodada), mas o resumo zera `pointsByKind`; o saldo não muda.
+17. **Somas da cartinha e do perfil** (Parte 4 da E3.9): por membro e por usuário, só de rodadas não canceladas, no ano civil de `America/Sao_Paulo`: `matchesPlayed`, `wins`, `losses`, `plusMinus`, `longestWinStreak` (a maior entre rodadas, concatenando `results` na ordem das rodadas: a sequência atravessa rodadas), `mvpCount`, `rounds` e `presence` (pergunta 99: rodadas em que jogou ÷ rodadas jogadas do grupo desde que entrou). Só inteiros; a tela calcula o percentual.
+
 ## Fora daqui
 
-Somar rodadas, quadras e grupos; MVP do dia e votação (E3.18); ranking do dia da areia (E3.9, ADR 0048); rating OpenSkill (E3.9, ADR 0047); aproveitamento em %; presença; projeções no servidor (E3.9); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
+Votação do MVP (E3.18); rating OpenSkill (E3.9, Partes 2 e 3, ADR 0047); projeções no servidor, somas e rotas (E3.9, Parte 4); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
