@@ -39,7 +39,7 @@ internal sealed partial class PostgresRoundStore
             catch (PostgresException exception) when (IsLinkCodeTaken(exception))
             {
                 // Another round has the same link code: nothing is committed, and the caller tries again with a new one.
-                return Result.Failure<bool>(RoundLinkCodeErrors.Taken);
+                return Result.Failure<bool>(RoundLinkCodeClash.Taken);
             }
 
             if (inserted)

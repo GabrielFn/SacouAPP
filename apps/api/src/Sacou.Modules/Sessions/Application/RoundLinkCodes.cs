@@ -23,7 +23,7 @@ internal sealed class RoundLinkCodes(IRoundStore store, IRoundLinkCodeGenerator 
         {
             var coded = added with { Change = added.Change with { Round = added.Change.Round.WithLinkCode(generator.NewCode()) } };
             var stored = await store.AddAsync(coded, cancellationToken).ConfigureAwait(false);
-            if (stored.IsFailure && stored.Error == RoundLinkCodeErrors.Taken)
+            if (stored.IsFailure && stored.Error == RoundLinkCodeClash.Taken)
             {
                 continue;
             }
@@ -48,7 +48,7 @@ internal sealed class RoundLinkCodes(IRoundStore store, IRoundLinkCodeGenerator 
         for (var attempt = 0; attempt < Attempts; attempt++)
         {
             var assigned = await store.AssignLinkCodeAsync(round.GroupId, round.Id, generator.NewCode(), cancellationToken).ConfigureAwait(false);
-            if (assigned.IsFailure && assigned.Error == RoundLinkCodeErrors.Taken)
+            if (assigned.IsFailure && assigned.Error == RoundLinkCodeClash.Taken)
             {
                 continue;
             }

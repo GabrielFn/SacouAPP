@@ -83,7 +83,8 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
         builder.Property(round => round.Status).HasColumnName("status").HasColumnType("text");
         builder.Property(round => round.NextSequence).HasColumnName("next_sequence");
         builder.Property(round => round.CreatedAt).HasColumnName("created_at").HasColumnType(TimestampType);
-        builder.Property(round => round.LinkCode).HasColumnName("link_code").HasColumnType($"character({RoundLinkCode.Length})");
+        // text with the CHECK, not character(22): a text parameter against a bpchar column would skip the unique index.
+        builder.Property(round => round.LinkCode).HasColumnName("link_code").HasColumnType("text");
 
         builder.HasOne<SeriesRow>().WithMany().HasForeignKey(round => round.SeriesId)
             .HasConstraintName("fk_rounds_round_series").OnDelete(DeleteBehavior.Restrict);

@@ -980,6 +980,242 @@
         }
       }
     },
+    "/v1/round-links/resolve": {
+      "post": {
+        "tags": [
+          "ResolveRoundLinkEndpoint"
+        ],
+        "operationId": "ResolveRoundLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoundLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolvedRoundLinkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
+    "/v1/round-links/attendance": {
+      "post": {
+        "tags": [
+          "AnswerByRoundLinkEndpoint"
+        ],
+        "operationId": "AnswerByRoundLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoundLinkAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundLinkAnswerResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
     "/v1/groups/{groupId}": {
       "get": {
         "tags": [
@@ -6463,6 +6699,101 @@
         },
         "additionalProperties": false
       },
+      "ResolvedRoundLinkResponse": {
+        "required": [
+          "groupId",
+          "roundId",
+          "isMember"
+        ],
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roundId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isMember": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoundLinkAnswerRequest": {
+        "required": [
+          "code",
+          "response"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "response": {
+            "$ref": "#/components/schemas/AttendanceResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoundLinkAnswerResponse": {
+        "required": [
+          "groupId",
+          "roundId",
+          "memberId",
+          "joined",
+          "status",
+          "position"
+        ],
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roundId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "joined": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttendanceStatus"
+          },
+          "position": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoundLinkRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "RoundResponse": {
         "required": [
           "roundId",
@@ -6553,6 +6884,12 @@
           },
           "me": {
             "$ref": "#/components/schemas/MeResponse"
+          },
+          "shareUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
         "additionalProperties": false
@@ -7049,6 +7386,7 @@
     "sessions.round-full",
     "sessions.round-invalid",
     "sessions.round-limit",
+    "sessions.round-link-invalid",
     "sessions.round-not-found",
     "sessions.series-limit",
     "sessions.series-not-found"

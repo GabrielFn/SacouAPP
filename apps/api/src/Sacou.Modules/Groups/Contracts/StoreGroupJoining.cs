@@ -29,7 +29,8 @@ internal sealed partial class StoreGroupJoining(
             cancellationToken)
             .ConfigureAwait(false);
         var joined = changed.Match(change => Result.Success(ToJoined(change, person)), Result.Failure<JoinedMember>);
-        LogJoin(logger, joined.Match(value => value.Joined ? Joined : AlreadyMember, error => error.Code));
+        var outcome = joined.Match(value => value.Joined ? Joined : AlreadyMember, error => error.Code);
+        LogJoin(logger, outcome);
         return joined;
     }
 

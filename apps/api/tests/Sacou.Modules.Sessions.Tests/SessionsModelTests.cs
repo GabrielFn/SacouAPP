@@ -25,8 +25,8 @@ public sealed class SessionsModelTests : IDisposable
     /// </summary>
     [Theory]
     [InlineData(typeof(SeriesRow), "round_series", "created_at,group_id,id,local_time,stopped_at,time_zone,venue,weekday")]
-    [InlineData(typeof(RoundRow), "rounds", "created_at,group_id,id,local_date,local_time,next_sequence,series_id,settings_layer,starts_at,status,time_zone,venue")]
-    [InlineData(typeof(AttendanceRow), "attendances", "member_id,promoted_at,responded_at,round_id,sequence,source,status")]
+    [InlineData(typeof(RoundRow), "rounds", "created_at,group_id,id,link_code,local_date,local_time,next_sequence,series_id,settings_layer,starts_at,status,time_zone,venue")]
+    [InlineData(typeof(AttendanceRow), "attendances", "channel,member_id,promoted_at,responded_at,round_id,sequence,source,status")]
     public void Tables_KeepExactlyTheirColumns(Type row, string table, string columns)
     {
         var entity = Entity(row);

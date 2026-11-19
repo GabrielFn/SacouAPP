@@ -51,7 +51,8 @@ internal sealed partial class AnswerByRoundLinkHandler(
         }
 
         var attempt = await AnswerOpenRoundAsync(round.Value, user.Value.UserId, response, cancellationToken).ConfigureAwait(false);
-        LogAnswer(logger, attempt.Answer.Match(_ => Answered, error => error.Code), round.Value.Id.Value);
+        var outcome = attempt.Answer.Match(_ => Answered, error => error.Code);
+        LogAnswer(logger, outcome, round.Value.Id.Value);
         return attempt;
     }
 

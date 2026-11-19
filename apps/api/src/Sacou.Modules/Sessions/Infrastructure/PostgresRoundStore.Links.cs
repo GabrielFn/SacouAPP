@@ -38,7 +38,7 @@ internal sealed partial class PostgresRoundStore
         }
         catch (PostgresException exception) when (IsLinkCodeTaken(exception))
         {
-            return Result.Failure<RoundLinkCode>(RoundLinkCodeErrors.Taken);
+            return Result.Failure<RoundLinkCode>(RoundLinkCodeClash.Taken);
         }
 
         var stored = await database.Rounds.AsNoTracking()
