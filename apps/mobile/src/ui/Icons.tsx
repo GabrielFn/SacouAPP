@@ -238,7 +238,7 @@ export function LockIcon({ color }: IconProps) {
   );
 }
 
-/** The "!" in a circle of "Erro do <time>" (PontoIndividual.dc.html). */
+/** The "!" in a circle of the error of the opponent (PontoIndividual.dc.html). */
 export function AlertCircleIcon({ color }: IconProps) {
   const { tokens } = useTheme();
   return (

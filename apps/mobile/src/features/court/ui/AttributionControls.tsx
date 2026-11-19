@@ -168,7 +168,7 @@ export interface FullButtonProps {
   readonly icon?: ReactNode;
 }
 
-/** The two 56 high buttons of the sheet: "Pular" black, "Erro do <time>" dashed. */
+/** The two 56 high buttons of the sheet: "Pular" black, the error of the opponent dashed. */
 export function FullButton({ label, filled, onPress, icon }: FullButtonProps) {
   const { tokens } = useTheme();
   const color = filled ? SHEET.onInk : SHEET.ink;
