@@ -8,9 +8,10 @@ WORKDIR /source
 # Only what the API build reads. --locked-mode fails when a packages.lock.json is out of date.
 COPY global.json nuget.config Directory.Build.props Directory.Build.targets Directory.Packages.props CodeMetricsConfig.txt .editorconfig ./
 COPY apps/api/src/ apps/api/src/
-# The modules embed the formations and settings catalogs at build time (ADR 0025).
+# The modules embed the formations and settings catalogs and the rating parameters at build time (ADR 0025, ADR 0071).
 COPY packages/volley-rules/src/formations/formations.json packages/volley-rules/src/formations/
 COPY packages/match-engine/src/settings/settings-catalog.json packages/match-engine/src/settings/
+COPY packages/rating/src/rating-params.json packages/rating/src/
 ENV CI=true
 RUN dotnet restore apps/api/src/Sacou.Api/Sacou.Api.csproj --locked-mode
 RUN dotnet publish apps/api/src/Sacou.Api/Sacou.Api.csproj --configuration Release --no-restore --output /app

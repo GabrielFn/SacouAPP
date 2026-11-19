@@ -11,6 +11,7 @@
 !apps/api/src/
 !packages/volley-rules/src/formations/formations.json
 !packages/match-engine/src/settings/settings-catalog.json
+!packages/rating/src/rating-params.json
 
 # Closed again after every opening, so nothing inside the opened folders slips in.
 **/bin/
