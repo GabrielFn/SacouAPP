@@ -37,6 +37,28 @@ public sealed class ClientAddressKeyTests
     }
 
     [Fact]
+    public void Ipv6_InTheSame64_IsOnePartition()
+    {
+        Assert.Equal(Key("2001:db8:1:2::1"), Key("2001:db8:1:2:ffff:ffff:ffff:ffff"));
+        Assert.Equal(Key("2001:db8:1:2::1"), Key("2001:db8:1:2:abcd::7"));
+        Assert.Equal(IPAddress.Parse("2001:db8:1:2::"), ClientAddressKey.PartitionOf(IPAddress.Parse("2001:db8:1:2:dead:beef::1")));
+    }
+
+    [Fact]
+    public void Ipv6_InAnother64_IsAnotherPartition()
+    {
+        Assert.NotEqual(Key("2001:db8:1:2::1"), Key("2001:db8:1:3::1"));
+        Assert.NotEqual(Key("2001:db8:1:2::1"), Key("2001:db9:1:2::1"));
+    }
+
+    [Fact]
+    public void Ipv4MappedToIpv6_CountsAsItsIpv4()
+    {
+        Assert.Equal(Key("203.0.113.7"), Key("::ffff:203.0.113.7"));
+        Assert.NotEqual(Key("::ffff:203.0.113.7"), Key("::ffff:203.0.113.8"));
+    }
+
+    [Fact]
     public void WithoutTheHeader_TheConnectionCounts()
     {
         var context = new DefaultHttpContext();
