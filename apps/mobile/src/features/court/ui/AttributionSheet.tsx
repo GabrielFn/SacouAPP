@@ -169,8 +169,8 @@ function SkipBlock({ model, onSkip }: AttributionSheetProps) {
 /**
  * Screen 31 over the court (PontoIndividual.dc.html), after a point or from "Autor" (24) and
  * "Preencher" (25). Upright it stacks as the prototype; on its side it has two columns: the
- * question on the left, the six of the rally and the error of the opponent on the right. The scrim
- * darkens the court but lets the taps through: a new point asks about that one instead.
+ * question on the left, the six of the rally and the error of the opponent on the right. A tap on the
+ * scrim, outside the sheet, does what "Pular" does (decision of Gabriel, 19/11/2026).
  */
 export function AttributionSheet(props: AttributionSheetProps) {
   const { tokens } = useTheme();
@@ -190,7 +190,12 @@ export function AttributionSheet(props: AttributionSheetProps) {
     </View>
   );
   return (
-    <SheetSurface placement="bottom" inkTopBorder accessibilityLabel={props.model.title}>
+    <SheetSurface
+      placement="bottom"
+      inkTopBorder
+      accessibilityLabel={props.model.title}
+      onDismiss={props.onSkip}
+    >
       {columns ? (
         <View style={{ flexDirection: "row", gap: tokens.spacing.xl }}>
           <View style={{ flex: 1, gap: tokens.spacing.m }}>

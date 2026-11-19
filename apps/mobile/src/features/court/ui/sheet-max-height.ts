@@ -1,16 +1,20 @@
 /** The share of the window the point author sheet may take (the 66% of PontoIndividual.dc.html). */
 export const BOTTOM_SHEET_HEIGHT_SHARE = 0.66;
 
-/** The least height of the point zones that stays tappable above the sheet, in dp (touch floor). */
-export const MIN_VISIBLE_ZONE_HEIGHT = 44;
-
 /**
- * The tallest the bottom sheet may be. The share of the window, never so tall that less than
- * `MIN_VISIBLE_ZONE_HEIGHT` of the point zones is left under the top bar: the next point can be
- * scored with the sheet open. The scroll view of the sheet absorbs what does not fit.
+ * The tallest the bottom sheet may be. Upright, the share of the window. On its side (a short
+ * window) the sheet may take all the height under the top safe area, so the two columns fit still
+ * (decision of Gabriel, 19/11/2026): a tap outside the sheet closes it, there is no zone to keep.
  */
-export function bottomSheetMaxHeight(windowHeight: number, topBarHeight: number): number {
-  const byShare = windowHeight * BOTTOM_SHEET_HEIGHT_SHARE;
-  const byZones = windowHeight - topBarHeight - MIN_VISIBLE_ZONE_HEIGHT;
-  return Math.max(0, Math.min(byShare, byZones));
+export function bottomSheetMaxHeight(windowHeight: number, safeTop: number): number {
+  const available = Math.max(0, windowHeight - safeTop);
+  return isShortWindow(windowHeight) ? available : Math.min(available, windowHeight * BOTTOM_SHEET_HEIGHT_SHARE);
+}
+
+/** Windows shorter than this, in dp, are the court on its side: the sheet tightens its spacing. */
+export const SHORT_WINDOW_HEIGHT = 480;
+
+/** True for a window as short as a phone on its side (780 x 360 dp), where every dp of the sheet counts. */
+export function isShortWindow(windowHeight: number): boolean {
+  return windowHeight < SHORT_WINDOW_HEIGHT;
 }
