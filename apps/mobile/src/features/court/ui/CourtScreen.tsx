@@ -1,4 +1,5 @@
-import { useWindowDimensions, View } from "react-native";
+import { useState } from "react";
+import { useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../../../theme/theme-context";
@@ -24,7 +25,34 @@ export interface CourtScreenProps extends CourtHandlers, CourtExtras {
  * layout: on its side it is the landscape court (the court locks the phone that way); upright is
  * the fallback for a tablet that ignores the lock, a split screen or a lock that failed.
  */
-export function CourtScreen({
+export function CourtScreen(props: CourtScreenProps) {
+  const window = useWindowDimensions();
+  // The area the screen really got, once measured. On Android the window can be taller than the
+  // view (system bars the insets do not report), and a layout worked out from the window would push
+  // the half courts under the queue (phone test of 18/11/2026).
+  const [area, setArea] = useState<CourtArea | null>(null);
+  const onLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setArea((current) =>
+      current !== null && current.width === width && current.height === height
+        ? current
+        : { width, height },
+    );
+  };
+  return (
+    <View style={{ flex: 1 }} onLayout={onLayout}>
+      <CourtScreenContent {...props} area={area ?? window} />
+    </View>
+  );
+}
+
+interface CourtArea {
+  readonly width: number;
+  readonly height: number;
+}
+
+function CourtScreenContent({
+  area,
   model,
   onPoint,
   onUndo,
@@ -33,9 +61,9 @@ export function CourtScreen({
   inverted = false,
   battery = null,
   notice = null,
-}: CourtScreenProps) {
+}: CourtScreenProps & { readonly area: CourtArea }) {
   const { colors } = useTheme();
-  const { width, height } = useWindowDimensions();
+  const { width, height } = area;
   const insets = useSafeAreaInsets();
   const sides = sidesOf(inverted);
   const layout = computeCourtLayout({
