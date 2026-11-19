@@ -201,7 +201,7 @@ E se tem algo atrapalhando, me fala aqui antes que eu corrijo.
 
 ```text
 Olá! Sou o [NOME], jogo vôlei aí na [ARENA].
-Fiz um app gratuito pra quem organiza racha de vôlei: lista de presença, sorteio de times, placar e fila de quem perde sai.
+Fiz um app pra quem organiza racha de vôlei, sem custo pra arena: lista de presença, sorteio de times, placar e fila de quem perde sai.
 Posso deixar um cartaz pequeno com QR na recepção? Não muda nada na operação de vocês: é o organizador do racha que usa.
 Se fizer sentido, passo aí pra mostrar em 5 minutos.
 ```
