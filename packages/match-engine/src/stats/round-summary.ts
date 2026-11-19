@@ -25,9 +25,14 @@ export function isBeachModality(modality: SettingsModality): boolean {
  * With "pontos individuais" off the attributions still arrive (the server never refuses them, the
  * option may change during the round), but they credit nobody (E3.9, 3.5).
  */
-function playersOf(timeline: CourtSessionTimeline, individualPoints: boolean): readonly PlayerStats[] {
+function playersOf(
+  timeline: CourtSessionTimeline,
+  individualPoints: boolean,
+): readonly PlayerStats[] {
   const players = getPlayerStats(timeline);
-  return individualPoints ? players : players.map((player) => ({ ...player, pointsByKind: NO_POINTS }));
+  return individualPoints
+    ? players
+    : players.map((player) => ({ ...player, pointsByKind: NO_POINTS }));
 }
 
 function mvpOf(

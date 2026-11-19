@@ -24,8 +24,8 @@ export const MVP_FORMULA_VERSION = 1;
 
 /** The modalities played on the sand: the day ranks the pairs or the fours (ADR 0048). */
 export const BEACH_MODALITIES = [
-  "beach-2x2",
   "beach-4x4",
+  "beach-2x2",
 ] as const satisfies readonly SettingsModality[];
 
 /** Who the MVP of the day is: one or more members, or a pair or four of the sand (E3.18, L1). */
