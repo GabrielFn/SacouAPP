@@ -2,7 +2,7 @@ namespace Sacou.Modules.Groups.Contracts;
 
 /// <summary>
 /// The names on a round's public list (E3.12, question 126, option 2: the first names for everyone holding the link,
-/// as on screen 01; ADR 0070, D5). Only the nickname (or a guest's name) and whether the member is a mensalista:
+/// as on screen 01; ADR 0070, D5). Only the nickname (or a guest's first name) and whether the member is a mensalista:
 /// never the member id, the user, a position or a level.
 /// </summary>
 public interface IRoundListNames

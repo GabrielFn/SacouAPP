@@ -28,8 +28,18 @@ internal sealed class StoreRoundListNames(IGroupStore store, IPlayerProfiles pro
     private static ListName NameOf(RosterEntry entry, Dictionary<Guid, PlayerProfileView> byUser)
     {
         var nickname = entry is { Member.UserId: null, Guest: { } guest }
-            ? guest.Name.Value
+            ? FirstName(guest.Name.Value)
             : entry.Member.UserId is { } user ? byUser.GetValueOrDefault(user.Value)?.Nickname : null;
         return new ListName(nickname, entry.Member.Type == DomainMemberType.Regular);
+    }
+
+    /// <summary>
+    /// A guest is someone without an account, named by the admin, and the page is open to anyone holding the link: only
+    /// the first word of the name, trimmed (question 126, "first names for everyone"; ADR 0070, D5). Null when blank.
+    /// </summary>
+    internal static string? FirstName(string name)
+    {
+        var words = name.Split((char[]?)null, 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return words.Length == 0 ? null : words[0];
     }
 }

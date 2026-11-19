@@ -10,7 +10,7 @@ using DomainMemberType = Sacou.Modules.Groups.Domain.Members.MemberType;
 namespace Sacou.Modules.Groups.Tests.Contracts;
 
 /// <summary>
-/// The names of a round's public list (question 126, option 2): the nickname of the profile or the guest's name, the
+/// The names of a round's public list (question 126, option 2): the nickname of the profile or the guest's first name, the
 /// mensalista mark, only for the asked members who are active; never a position or a level.
 /// </summary>
 public sealed class RoundListNamesTests
@@ -43,9 +43,26 @@ public sealed class RoundListNamesTests
 
         Assert.Equal(new ListName("Ana", Regular: true), names[regular.Id.Value]);
         Assert.Equal(new ListName(null, Regular: false), names[withoutProfile.Id.Value]);
-        Assert.Equal(new ListName("Tio Zé", Regular: false), names[guest.Id.Value]);
+        Assert.Equal(new ListName("Tio", Regular: false), names[guest.Id.Value]);
         Assert.False(names.ContainsKey(stranger));
         Assert.False(names.ContainsKey(notAsked.Id.Value));
+    }
+
+    [Theory]
+    [InlineData("Maria das Graças Souza", "Maria")]
+    [InlineData("   Léo   Lima  ", "Léo")]
+    [InlineData("Léo", "Léo")]
+    [InlineData("Léo	Lima", "Léo")]
+    [InlineData("", null)]
+    [InlineData("   ", null)]
+    public async Task AGuest_ShowsOnlyTheFirstName(string stored, string? shown)
+    {
+        var guest = GroupMember.Guest(Now);
+        var store = new FakeGroupStore { Roster = [new RosterEntry(guest, new GuestProfile(GuestName.FromStored(stored), Position: null))] };
+
+        var names = await new StoreRoundListNames(store, new Profiles()).FindAsync(Group, [guest.Id.Value], TestContext.Current.CancellationToken);
+
+        Assert.Equal(new ListName(shown, Regular: false), names[guest.Id.Value]);
     }
 
     [Fact]
