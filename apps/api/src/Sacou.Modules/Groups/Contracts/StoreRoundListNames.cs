@@ -2,7 +2,6 @@ using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Infrastructure;
 using Sacou.Modules.Identity.Contracts;
 using DomainMemberType = Sacou.Modules.Groups.Domain.Members.MemberType;
-using UserId = Sacou.Modules.Groups.Domain.Members.UserId;
 
 namespace Sacou.Modules.Groups.Contracts;
 
@@ -22,17 +21,15 @@ internal sealed class StoreRoundListNames(IGroupStore store, IPlayerProfiles pro
         var roster = (await store.ListActiveRosterAsync(new GroupId(groupId), cancellationToken).ConfigureAwait(false))
             .Where(entry => wanted.Contains(entry.Member.Id.Value))
             .ToList();
-        Guid[] users = [.. roster.Select(entry => entry.Member.UserId).OfType<UserId>().Select(user => user.Value)];
-        var byUser = (await profiles.FindManyAsync(users, cancellationToken).ConfigureAwait(false))
-            .ToDictionary(profile => profile.UserId, profile => profile.Nickname);
+        var byUser = await RosterProfiles.FindAsync(profiles, roster, cancellationToken).ConfigureAwait(false);
         return roster.ToDictionary(entry => entry.Member.Id.Value, entry => NameOf(entry, byUser));
     }
 
-    private static ListName NameOf(RosterEntry entry, Dictionary<Guid, string> byUser)
+    private static ListName NameOf(RosterEntry entry, Dictionary<Guid, PlayerProfileView> byUser)
     {
         var nickname = entry is { Member.UserId: null, Guest: { } guest }
             ? guest.Name.Value
-            : entry.Member.UserId is { } user ? byUser.GetValueOrDefault(user.Value) : null;
+            : entry.Member.UserId is { } user ? byUser.GetValueOrDefault(user.Value)?.Nickname : null;
         return new ListName(nickname, entry.Member.Type == DomainMemberType.Regular);
     }
 }

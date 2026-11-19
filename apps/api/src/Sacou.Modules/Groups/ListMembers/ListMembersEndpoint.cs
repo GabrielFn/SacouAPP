@@ -42,8 +42,7 @@ internal static class ListMembersEndpoint
         context.Response.Headers[HeaderNames.CacheControl] = NoStore;
         var access = context.GroupAccess();
         var roster = await store.ListActiveRosterAsync(access.GroupId, cancellationToken).ConfigureAwait(false);
-        Guid[] users = [.. roster.Select(entry => entry.Member.UserId).OfType<UserId>().Select(user => user.Value)];
-        var byUser = (await profiles.FindManyAsync(users, cancellationToken).ConfigureAwait(false)).ToDictionary(profile => profile.UserId);
+        var byUser = await RosterProfiles.FindAsync(profiles, roster, cancellationToken).ConfigureAwait(false);
         IReadOnlyList<MemberResponse> body = [.. roster.Select(entry => ToResponse(entry, access.Member.Id, byUser))];
         return TypedResults.Ok(body);
     }

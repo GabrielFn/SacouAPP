@@ -12,7 +12,8 @@ namespace Sacou.Api.Tests;
 
 /// <summary>
 /// Case 3 of the plan: each route of ADR 0062, D3, has its own policy, written here by hand; every other signed-in
-/// route has only the global limit, and an anonymous route has none. The start fails on a pool too small (D4).
+/// route has only the global limit, and an anonymous route has none but the round page (round-page, per client address,
+/// ADR 0070, D6). The start fails on a pool too small (D4).
 /// </summary>
 public sealed class RateLimitedRoutesTests(SacouApiFactory factory) : IClassFixture<SacouApiFactory>
 {
