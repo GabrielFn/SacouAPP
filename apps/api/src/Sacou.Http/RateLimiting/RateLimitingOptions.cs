@@ -41,6 +41,8 @@ public sealed class RateLimitingOptions
 
     public WindowLimitOptions? CourtSync { get; init; }
 
+    public WindowLimitOptions? RoundLink { get; init; }
+
     /// <summary>How many requests of the two-connection routes run at once, for everyone together.</summary>
     public int DualConnectionConcurrency { get; init; }
 
@@ -75,5 +77,6 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.AccountExport] = AccountExport,
         [RateLimitPolicies.AccountDelete] = AccountDelete,
         [RateLimitPolicies.CourtSync] = CourtSync,
+        [RateLimitPolicies.RoundLink] = RoundLink,
     };
 }

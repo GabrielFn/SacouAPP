@@ -18,7 +18,8 @@ internal static partial class AttendanceRules
         Respondent respondent,
         AttendanceResponse response,
         ResponseActor actor,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        AttendanceChannel channel)
     {
         if (Refusal(round, rules, respondent, response, actor, now) is { } refusal)
         {
@@ -26,9 +27,10 @@ internal static partial class AttendanceRules
         }
 
         var repaired = RoundReconciliation.PromoteFromWaitlist(round, rules, now);
+        var origin = new AnswerOrigin(SourceOf(actor), channel);
         var answered = response == AttendanceResponse.Going
-            ? Join(repaired.Round, rules, respondent.Id, SourceOf(actor), now)
-            : Leave(repaired.Round, rules, respondent.Id, SourceOf(actor), now);
+            ? Join(repaired.Round, rules, respondent.Id, origin, now)
+            : Leave(repaired.Round, rules, respondent.Id, origin, now);
         return answered.IsSuccess ? Result.Success(repaired.Then(_ => answered.Value)) : answered;
     }
 

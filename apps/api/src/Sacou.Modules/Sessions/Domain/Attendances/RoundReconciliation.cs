@@ -64,7 +64,7 @@ internal static class RoundReconciliation
 
     private static RoundChange SeedOne(Round round, AttendanceSettings rules, MemberId regular, DateTimeOffset now) =>
         AttendanceRules.StatusForNewcomer(round, rules) is { } status
-            ? AttendanceRules.Place(round, regular, status, AttendanceSource.Regular, now)
+            ? AttendanceRules.Place(round, regular, status, AnswerOrigin.Regular, now)
             : RoundChange.Unchanged(round);
 
     private static RoundChange DropDeparted(Round round, IReadOnlySet<MemberId> activeMembers, DateTimeOffset now)

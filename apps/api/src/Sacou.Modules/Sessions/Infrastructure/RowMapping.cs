@@ -22,7 +22,10 @@ internal static class RowMapping
         row.SettingsLayer,
         EnumColumns.Parse(ColumnValues.RoundStatuses, row.Status),
         row.NextSequence,
-        [.. attendances.Select(ToAttendance)]);
+        [.. attendances.Select(ToAttendance)])
+    {
+        LinkCode = row.LinkCode is { } code ? RoundLinkCode.FromStored(code) : null,
+    };
 
     public static RoundRow ToRow(Round round, DateTimeOffset createdAt) => new()
     {
@@ -38,6 +41,7 @@ internal static class RowMapping
         Status = ColumnValues.RoundStatuses[round.Status],
         NextSequence = round.NextSequence,
         CreatedAt = createdAt,
+        LinkCode = round.LinkCode?.Value,
     };
 
     public static Attendance ToAttendance(AttendanceRow row) => new(
@@ -46,7 +50,10 @@ internal static class RowMapping
         row.Sequence,
         EnumColumns.Parse(ColumnValues.AttendanceSources, row.Source),
         row.RespondedAt,
-        row.PromotedAt);
+        row.PromotedAt)
+    {
+        Channel = EnumColumns.Parse(ColumnValues.AttendanceChannels, row.Channel),
+    };
 
     public static AttendanceRow ToRow(RoundId round, Attendance attendance) => new()
     {
@@ -57,6 +64,7 @@ internal static class RowMapping
         Source = ColumnValues.AttendanceSources[attendance.Source],
         RespondedAt = attendance.RespondedAt.ToUniversalTime(),
         PromotedAt = attendance.PromotedAt?.ToUniversalTime(),
+        Channel = ColumnValues.AttendanceChannels[attendance.Channel],
     };
 
     public static RoundSeries ToSeries(SeriesRow row) => new(

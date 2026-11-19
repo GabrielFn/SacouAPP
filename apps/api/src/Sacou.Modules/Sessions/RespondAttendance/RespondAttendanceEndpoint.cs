@@ -49,7 +49,7 @@ internal sealed class RespondAttendanceHandler(RoundWriter writer)
     {
         ArgumentNullException.ThrowIfNull(access);
         var written = await writer.ExecuteAsync(access, id, GroupCapability.RespondAttendance, context => context.Caller is { } caller
-            ? AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(caller), response, ResponseActor.Self)
+            ? AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(caller), response, ResponseActor.Self, AttendanceChannel.App)
             : Result.Failure<RoundChange>(GroupAccessErrors.GroupNotFound), cancellationToken)
             .ConfigureAwait(false);
         return written.IsFailure

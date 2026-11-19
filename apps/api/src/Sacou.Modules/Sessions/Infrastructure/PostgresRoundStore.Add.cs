@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Sacou.Modules.Sessions.Domain;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Shared.Results;
@@ -30,7 +31,19 @@ internal sealed partial class PostgresRoundStore
                 await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var inserted = await InsertIfAbsentAsync(RowMapping.ToRow(round, added.Now), cancellationToken).ConfigureAwait(false);
+            bool inserted;
+            try
+            {
+                inserted = await InsertIfAbsentAsync(RowMapping.ToRow(round, added.Now), cancellationToken).ConfigureAwait(false);
+            }
+            catch (PostgresException exception) when (IsLinkCodeTaken(exception))
+            {
+                // Another round has the same link code: nothing is committed, and the caller tries again with a new one.
+                // The series row saved in this rolled-back transaction is still tracked, and the next attempt adds it again.
+                database.ChangeTracker.Clear();
+                return Result.Failure<bool>(RoundLinkCodeClash.Taken);
+            }
+
             if (inserted)
             {
                 database.Attendances.AddRange(added.Change.ChangedAttendances.Select(attendance => RowMapping.ToRow(round.Id, attendance)));
@@ -94,10 +107,12 @@ internal sealed partial class PostgresRoundStore
         var inserted = await database.Database.SqlQuery<Guid>(
             $"""
             INSERT INTO sessions.rounds
-                (id, group_id, series_id, local_date, local_time, time_zone, starts_at, venue, settings_layer, status, next_sequence, created_at)
+                (id, group_id, series_id, local_date, local_time, time_zone, starts_at, venue, settings_layer, status, next_sequence, created_at,
+                 link_code)
             VALUES
                 ({row.Id}, {row.GroupId}, CAST({row.SeriesId} AS uuid), {row.LocalDate}, {row.LocalTime}, {row.TimeZone}, {row.StartsAt},
-                 {row.Venue}, CAST({row.SettingsLayer} AS jsonb), {row.Status}, {row.NextSequence}, {row.CreatedAt})
+                 {row.Venue}, CAST({row.SettingsLayer} AS jsonb), {row.Status}, {row.NextSequence}, {row.CreatedAt},
+                 CAST({row.LinkCode} AS text))
             ON CONFLICT (series_id, local_date) DO NOTHING
             RETURNING id AS "Value"
             """).ToListAsync(cancellationToken).ConfigureAwait(false);

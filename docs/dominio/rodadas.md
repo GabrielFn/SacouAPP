@@ -51,6 +51,17 @@ Uma por membro por rodada.
 - **Semanal é a mesma hora local**, não sete dias de instante.
 - **Parar a série** não apaga a ocorrência já criada; parar de novo não muda nada.
 
+## Link da rodada (E3.12)
+
+Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
+
+- **Código:** cada rodada tem um código de 22 caracteres (Base64url, 128 bits aleatórios) para o link público `{base}/r/{código}`. Nasce com a rodada (criada pelo admin ou pela série); rodada antiga ganha o seu na primeira vez que um Admin ou Co-admin abre o detalhe. Não muda e morre com a rodada.
+- **Quem vê o link:** só Admin e Co-admin (`shareUrl` na resposta da rodada), porque o link põe gente no grupo (pergunta 130).
+- **Entrar pelo link:** quem não é membro entra no grupo como Jogador e avulso, com as regras do convite: removido não volta (403), quem saiu volta com o mesmo `MemberId` como Jogador e avulso, tetos de 300 membros e 100 grupos por pessoa. Membro ativo fica como está.
+- **Quando:** só com a rodada não cancelada e antes do início; no instante do início já fechou (`sessions.round-closed`), e ninguém entra no grupo.
+- **Responder pelo link:** as mesmas regras do VOU do app (janela dos avulsos, vagas, espera). Se a resposta for recusada depois da entrada, a pessoa fica no grupo e a recusa diz `joined`.
+- **Canal:** cada presença guarda de onde veio a resposta que a mudou por último (`app` ou `web`), para a métrica da E7.2. VOU repetido não muda o canal; promoção da espera também não; a pré-confirmação dos mensalistas é `app`.
+
 ## Eventos
 
 `RoundCreated`, `RoundCanceled`, `AttendanceChanged`, `WaitlistPromoted`: só IDs (rodada, grupo, membro), estado e instante.
@@ -67,6 +78,7 @@ Uma por membro por rodada.
 | `sessions.drop-in-window-closed` (409) | Avulso antes da janela |
 | `sessions.attendance-disabled` (409) | Presença desligada na rodada |
 | `sessions.round-limit`, `sessions.series-limit` (409) | Tetos de 20 rodadas futuras e 7 séries ativas por grupo |
+| `sessions.round-link-invalid` (404) | Código do link fora do formato ou de nenhuma rodada (mesma resposta) |
 
 ## Permissões
 
@@ -87,5 +99,12 @@ Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do 
 | `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |
 | `POST /series/{seriesId}/stop` | `ManageRounds` | 204 (de novo, 204) |
 | `POST /rounds/{roundId}/draw` | `DrawTeams` | 200 com os times e as notas, `Cache-Control: no-store` ([sorteio.md](sorteio.md)) |
+
+Rotas do link (E3.12), **sem** `{groupId}`, com o código no corpo e `Cache-Control: no-store`:
+
+| Rota | Quem | Sucesso |
+|---|---|---|
+| `POST /v1/round-links/resolve` `{ code }` | logado e registrado | 200 `{ isOpen, groupId, roundId, isMember }`; IDs nulos com a rodada cancelada ou começada |
+| `POST /v1/round-links/attendance` `{ code, response }` | logado e registrado | 200 `{ groupId, roundId, memberId, joined, status, position }`; entra como avulso se preciso |
 
 Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.

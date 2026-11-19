@@ -47,6 +47,9 @@ internal sealed class RoundRow
     public required int NextSequence { get; init; }
 
     public required DateTimeOffset CreatedAt { get; init; }
+
+    /// <summary>The public link's code, in clear (ADR 0070, D1); null only for a round made before the link existed.</summary>
+    public string? LinkCode { get; init; }
 }
 
 /// <summary>A row of <c>sessions.attendances</c>: by <c>MemberId</c> only, no name, e-mail or user.</summary>
@@ -65,4 +68,7 @@ internal sealed class AttendanceRow
     public required DateTimeOffset RespondedAt { get; init; }
 
     public DateTimeOffset? PromotedAt { get; init; }
+
+    /// <summary><c>app</c> or <c>web</c>: where the answer that last changed the row came from (ADR 0070, D3).</summary>
+    public required string Channel { get; init; }
 }

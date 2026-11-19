@@ -57,6 +57,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     internal string ConnectionString => database.ConnectionString;
 
+    /// <summary>The round page's origin the share links start with (ADR 0070, D1).</summary>
+    internal const string PublicBaseUrl = "https://sacou.test";
+
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
 
@@ -104,6 +107,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting("Firebase:ProjectId", TestIdToken.ProjectId);
         builder.UseSetting("ConnectionStrings:Sacou", database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("RoundPage:PublicBaseUrl", PublicBaseUrl);
         foreach (var (key, value) in RoomyRateLimits.Concat(settings))
         {
             builder.UseSetting(key, value);
@@ -148,7 +152,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     {
         const string Section = "RateLimiting";
         const string Roomy = "1000000";
-        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync"];
+        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
         limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;

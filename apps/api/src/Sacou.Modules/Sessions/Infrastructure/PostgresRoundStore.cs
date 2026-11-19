@@ -18,6 +18,12 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         var row = await database.Rounds.AsNoTracking()
             .SingleOrDefaultAsync(candidate => candidate.GroupId == group.Value && candidate.Id == round.Value, cancellationToken)
             .ConfigureAwait(false);
+        return await WithAttendancesAsync(row, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>The round of a row read without a lock, with its attendances; null for no row.</summary>
+    private async Task<Round?> WithAttendancesAsync(RoundRow? row, CancellationToken cancellationToken)
+    {
         if (row is null)
         {
             return null;

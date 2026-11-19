@@ -109,6 +109,25 @@ internal sealed class FakeGroupStore : IGroupStore
             : new InviteAttempt(invite.Id, Apply(accept(Locked!, invite.Id, ActiveGroupsOfPerson)));
     }
 
+    public async Task<Result<GroupChange>> JoinAsync(
+        GroupId group,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, int, Result<GroupChange>> join,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(stillRegistered);
+        ArgumentNullException.ThrowIfNull(join);
+        InviteCalls++;
+        if (Locked is null || Locked.Id != group)
+        {
+            return Result.Failure<GroupChange>(GroupErrors.GroupNotFound);
+        }
+
+        var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
+        return registered.IsFailure ? Result.Failure<GroupChange>(registered.Error) : Apply(join(Locked, ActiveGroupsOfPerson));
+    }
+
     public Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 

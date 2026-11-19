@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Sacou.Shared.Persistence;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sacou.Modules.Sessions.Domain;
+using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Modules.Sessions.Domain.Time;
 
 namespace Sacou.Modules.Sessions.Infrastructure;
@@ -52,6 +53,7 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
 {
     public const string Table = "rounds";
     public const string SeriesDateIndex = "ux_rounds_series_date";
+    public const string LinkCodeIndex = "ux_rounds_link_code";
 
     private const string TimestampType = "timestamp with time zone";
 
@@ -66,6 +68,7 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
             table.HasCheckConstraint(
                 "ck_rounds_settings_layer",
                 $"settings_layer IS NULL OR (jsonb_typeof(settings_layer) = 'object' AND octet_length(settings_layer::text) <= {SessionLimits.MaxSettingsLayerBytes})");
+            table.HasCheckConstraint("ck_rounds_link_code", $"link_code ~ '^[A-Za-z0-9_-]{{{RoundLinkCode.Length}}}$'");
         });
         builder.HasKey(round => round.Id).HasName("pk_rounds");
         builder.Property(round => round.Id).HasColumnName("id").ValueGeneratedNever();
@@ -80,11 +83,15 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
         builder.Property(round => round.Status).HasColumnName("status").HasColumnType("text");
         builder.Property(round => round.NextSequence).HasColumnName("next_sequence");
         builder.Property(round => round.CreatedAt).HasColumnName("created_at").HasColumnType(TimestampType);
+        // text with the CHECK, not character(22): a text parameter against a bpchar column would skip the unique index.
+        builder.Property(round => round.LinkCode).HasColumnName("link_code").HasColumnType("text");
 
         builder.HasOne<SeriesRow>().WithMany().HasForeignKey(round => round.SeriesId)
             .HasConstraintName("fk_rounds_round_series").OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(round => new { round.SeriesId, round.LocalDate }).IsUnique().HasDatabaseName(SeriesDateIndex);
         builder.HasIndex(round => new { round.GroupId, round.StartsAt }).HasDatabaseName("ix_rounds_group_starts_at");
+        // The page and the link routes find the round by its code alone (ADR 0070, D1).
+        builder.HasIndex(round => round.LinkCode).IsUnique().HasDatabaseName(LinkCodeIndex).HasFilter("link_code IS NOT NULL");
     }
 }
 
@@ -109,6 +116,7 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
             table.HasCheckConstraint("ck_attendances_source", $"source IN ({EnumColumns.SqlList(ColumnValues.AttendanceSources)})");
             table.HasCheckConstraint("ck_attendances_sequence", "sequence >= 1");
             table.HasCheckConstraint("ck_attendances_promoted_at", $"(status = '{ColumnValues.PromotedStatus}') = (promoted_at IS NOT NULL)");
+            table.HasCheckConstraint("ck_attendances_channel", $"channel IN ({EnumColumns.SqlList(ColumnValues.AttendanceChannels)})");
         });
         builder.HasKey(attendance => new { attendance.RoundId, attendance.MemberId }).HasName("pk_attendances");
         builder.Property(attendance => attendance.RoundId).HasColumnName("round_id");
@@ -118,6 +126,8 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
         builder.Property(attendance => attendance.Source).HasColumnName("source").HasColumnType("text");
         builder.Property(attendance => attendance.RespondedAt).HasColumnName("responded_at").HasColumnType(TimestampType);
         builder.Property(attendance => attendance.PromotedAt).HasColumnName("promoted_at").HasColumnType(TimestampType);
+        builder.Property(attendance => attendance.Channel).HasColumnName("channel").HasColumnType("text")
+            .HasDefaultValue(ColumnValues.AttendanceChannels[Domain.Attendances.AttendanceChannel.App]);
 
         builder.HasOne<RoundRow>().WithMany().HasForeignKey(attendance => attendance.RoundId)
             .HasConstraintName("fk_attendances_rounds").OnDelete(DeleteBehavior.Restrict);

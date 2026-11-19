@@ -11,7 +11,7 @@ Decisões: [ADR 0068](../arquitetura/adr/0068-deploy-cloud-run-neon.md). Configu
 
 Os dois na `us-east4`, projeto `sacou-api`, com a configuração de `deploy/cloud-run/service.yaml`: 1 vCPU, 512 MiB, de 0 a 1 instância, cobrança por requisição, tempo limite de 60 s, sonda de partida em `/health`. As URLs são as `*.run.app` mostradas no run do GitHub (ambiente `test` e `production`) e no console; não há domínio próprio agora (resposta 89: a E5.4 usa EAS Update para poder trocar o endereço pelo ar, e o domínio entra quando a E3.12 for aos jogadores).
 
-Variáveis (só nomes): `SACOU_DATABASE_URL` (do Secret Manager, por referência), `ASPNETCORE_ENVIRONMENT`, `Database__MigrateOnStartup=true`. Lista completa em [`segredos.md`](../seguranca/segredos.md).
+Variáveis (só nomes): `SACOU_DATABASE_URL` (do Secret Manager, por referência), `ASPNETCORE_ENVIRONMENT`, `Database__MigrateOnStartup=true` e `RoundPage__PublicBaseUrl` (origem da página da rodada, [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md): a ação de deploy lê a URL `*.run.app` do próprio serviço; a entrada `public-base-url` troca pelo domínio quando ele existir; sem ela fora de `Development`, a API não sobe). **Primeiro deploy de um serviço novo:** o `gcloud run services describe` falha porque o serviço ainda não existe, então a entrada `public-base-url` é obrigatória nesse deploy. Lista completa em [`segredos.md`](../seguranca/segredos.md).
 
 ## Fluxo
 
@@ -62,6 +62,10 @@ Resultados no PR da tarefa ou no diário da sessão.
 Esperado: US$ 0 (faixa grátis do Cloud Run na `us-east4`, 0,5 GB do Artifact Registry, Secret Manager e Logging dentro do grátis; Neon Free, 100 CU-hora por projeto e por mês). Onde olhar:
 
 - Google Cloud → Faturamento → Relatórios (filtro do projeto `sacou-api`). O teto de gasto do Cloud Run **pausa os serviços** quando atingido; o alerta avisa em 50, 90 e 100%.
+- **Como estão configurados (18/11/2026, pelo console, na conta de faturamento "Pagamento Firebase", em reais):**
+  - `sacou-api-cloud-run-cap`: orçamento do tipo **"Aplicação do limite de gastos"** (*spend cap enforcement*), projeto `sacou-api`, serviço **Cloud Run**, R$ 5 por mês (cerca de US$ 1, resposta 94), avisos em 50, 80 e 100%. Na lista de "Orçamentos e limites" aparece com o status **Configurado**. Quando atingido, pausa os dois serviços (teste e produção, no mesmo projeto: abuso no teste também pausa a produção, achado M4-M1 da revisão do M4) até o mês seguinte ou até o teto subir; os gastos máximos voltam no início de cada mês. A cobrança chega com algumas horas de atraso, então o gasto pode passar um pouco do valor.
+  - `sacou-api`: orçamento **só de alerta**, projeto `sacou-api`, todos os serviços, R$ 5 por mês, e-mail em 50, 90 e 100%.
+  - Conferir no roteiro (passo 9): Faturamento → Orçamentos e limites, as duas linhas acima, a do teto com "Configurado".
 - Neon → projeto → Billing / Usage: horas de compute. Se acabarem, a compute fica suspensa até o mês seguinte.
 
 ## Backup

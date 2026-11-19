@@ -68,6 +68,7 @@ export const apiErrorCodes = [
   "sessions.round-full",
   "sessions.round-invalid",
   "sessions.round-limit",
+  "sessions.round-link-invalid",
   "sessions.round-not-found",
   "sessions.series-limit",
   "sessions.series-not-found",

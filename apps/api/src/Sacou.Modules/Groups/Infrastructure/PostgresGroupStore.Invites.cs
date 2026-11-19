@@ -6,7 +6,7 @@ using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.Infrastructure;
 
-/// <summary>The invite reads and the acceptance. Every lookup by token goes by its hash, never by the token.</summary>
+/// <summary>The invite reads, the acceptance and the way in by a round link (E3.12). Every lookup by token goes by its hash, never by the token.</summary>
 internal sealed partial class PostgresGroupStore
 {
     public async Task<InviteAttempt> AcceptInviteAsync(
@@ -29,21 +29,9 @@ internal sealed partial class PostgresGroupStore
             }
 
             var (invite, group) = found.Value;
-            var changed = await ChangeUnderLockAsync(
-                group,
-                async locked =>
-                {
-                    await LockPersonAsync(person, cancellationToken).ConfigureAwait(false);
-                    var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
-                    if (registered.IsFailure)
-                    {
-                        return Result.Failure<GroupChange>(registered.Error);
-                    }
-
-                    var activeGroups = await CountActiveGroupsAsync(person, cancellationToken).ConfigureAwait(false);
-                    return accept(locked, invite, activeGroups);
-                },
-                cancellationToken).ConfigureAwait(false);
+            var changed = await JoinUnderLockAsync(
+                group, person, stillRegistered, (locked, activeGroups) => accept(locked, invite, activeGroups), cancellationToken)
+                .ConfigureAwait(false);
             if (changed.IsSuccess)
             {
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -52,6 +40,51 @@ internal sealed partial class PostgresGroupStore
             return new InviteAttempt(invite, changed);
         }
     }
+
+    public async Task<Result<GroupChange>> JoinAsync(
+        GroupId group,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, int, Result<GroupChange>> join,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(stillRegistered);
+        ArgumentNullException.ThrowIfNull(join);
+        var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        await using (transaction.ConfigureAwait(false))
+        {
+            var changed = await JoinUnderLockAsync(group, person, stillRegistered, join, cancellationToken).ConfigureAwait(false);
+            if (changed.IsSuccess)
+            {
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return changed;
+        }
+    }
+
+    /// <summary>Inside the caller's transaction: the group lock, the person lock, the account check, the person's groups, the rule.</summary>
+    private Task<Result<GroupChange>> JoinUnderLockAsync(
+        GroupId group,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, int, Result<GroupChange>> join,
+        CancellationToken cancellationToken) =>
+        ChangeUnderLockAsync(
+            group,
+            async locked =>
+            {
+                await LockPersonAsync(person, cancellationToken).ConfigureAwait(false);
+                var registered = await stillRegistered(cancellationToken).ConfigureAwait(false);
+                if (registered.IsFailure)
+                {
+                    return Result.Failure<GroupChange>(registered.Error);
+                }
+
+                var activeGroups = await CountActiveGroupsAsync(person, cancellationToken).ConfigureAwait(false);
+                return join(locked, activeGroups);
+            },
+            cancellationToken);
 
     public async Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken)
     {

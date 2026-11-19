@@ -60,6 +60,6 @@ internal sealed class SetMemberAttendanceHandler(RoundWriter writer)
         var member = context.Group.Members.FirstOrDefault(candidate => candidate.MemberId == target.Value);
         return member is null
             ? Result.Failure<RoundChange>(RoundErrors.MemberNotFound)
-            : AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(member), response, ResponseActor.Admin);
+            : AttendanceAnswering.Answer(context, AttendanceAnswering.Respondent(member), response, ResponseActor.Admin, AttendanceChannel.App);
     }
 }

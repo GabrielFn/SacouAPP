@@ -61,6 +61,23 @@ internal sealed partial record Group
             return Result.Failure<GroupChange>(GroupErrors.InviteInvalid);
         }
 
+        var joined = Join(person, personActiveGroups, now);
+        return joined.IsFailure || joined.Value.ChangedMembers.IsEmpty
+            ? joined
+            : Result.Success(joined.Value.Group.WithInvites([invite.CountUse()], joined.Value.ChangedMembers));
+    }
+
+    /// <summary>
+    /// The link of a round (E3.12, ADR 0070, D2): the same person rules as <see cref="Accept"/>, without an invite to
+    /// check or to count. Already active: a success without effect. Removed: refused. Left or new: the ceilings, then
+    /// in as a player and an avulso.
+    /// </summary>
+    public Result<GroupChange> JoinAsDropIn(UserId person, int personActiveGroups, DateTimeOffset now) =>
+        Join(person, personActiveGroups, now);
+
+    /// <summary>The person part of a way in: already in, removed, the ceilings, then in as a player and an avulso.</summary>
+    private Result<GroupChange> Join(UserId person, int personActiveGroups, DateTimeOffset now)
+    {
         var existing = Members.SingleOrDefault(member => member.UserId == person);
         if (existing is { IsActive: true })
         {
@@ -80,7 +97,7 @@ internal sealed partial record Group
 
         var joined = existing is null ? GroupMember.Joining(person, now) : existing.Return(now);
         var members = existing is null ? Members.Add(joined) : Members.Replace(existing, joined);
-        return Result.Success((this with { Members = members }).WithInvites([invite.CountUse()], [joined]));
+        return Result.Success(new GroupChange(this with { Members = members }, [joined]));
     }
 
     private Result Admit(int personActiveGroups)

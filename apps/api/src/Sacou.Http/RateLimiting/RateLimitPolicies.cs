@@ -17,10 +17,11 @@ public static class RateLimitPolicies
     public const string AccountExport = "account-export";
     public const string AccountDelete = "account-delete";
     public const string CourtSync = "court-sync";
+    public const string RoundLink = "round-link";
 
     /// <summary>
     /// The routes whose request holds two connections of the pool at once (ADR 0056, D7a): they also share one
     /// concurrency limit, so they never take the whole pool (ADR 0062, D4).
     /// </summary>
-    public static readonly FrozenSet<string> DualConnection = FrozenSet.Create(StringComparer.Ordinal, Invite, GroupCreate);
+    public static readonly FrozenSet<string> DualConnection = FrozenSet.Create(StringComparer.Ordinal, Invite, GroupCreate, RoundLink);
 }

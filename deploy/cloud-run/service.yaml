@@ -36,6 +36,9 @@ spec:
               value: ${ASPNETCORE_ENVIRONMENT}
             - name: Database__MigrateOnStartup
               value: "true"
+            # The origin of the round's public page and its share link (ADR 0070, D1): not a secret.
+            - name: RoundPage__PublicBaseUrl
+              value: ${ROUND_PAGE_BASE_URL}
             # Read from Secret Manager by the runtime account; never a plain value.
             - name: SACOU_DATABASE_URL
               valueFrom:

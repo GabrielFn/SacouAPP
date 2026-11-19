@@ -24,6 +24,8 @@ public sealed class RateLimitedRoutesTests(SacouApiFactory factory) : IClassFixt
         { "POST", "/v1/me", RateLimitPolicies.SignIn },
         { "POST", "/v1/invites/preview", RateLimitPolicies.Invite },
         { "POST", "/v1/invites/accept", RateLimitPolicies.Invite },
+        { "POST", "/v1/round-links/resolve", RateLimitPolicies.RoundLink },
+        { "POST", "/v1/round-links/attendance", RateLimitPolicies.RoundLink },
         { "POST", "/v1/groups", RateLimitPolicies.GroupCreate },
         { "POST", GroupRoute + "/invites", RateLimitPolicies.InviteCreate },
         { "POST", GroupRoute + "/rounds/{roundId:guid}/draw", RateLimitPolicies.Draw },

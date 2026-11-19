@@ -7,7 +7,7 @@ namespace Sacou.Http.Tests.RateLimiting;
 internal static class RateLimitSettings
 {
     public static readonly IReadOnlyList<string> Sections =
-        ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync"];
+        ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink"];
 
     public static Dictionary<string, string?> Complete(int permitLimit = 3, int windowSeconds = 60)
     {

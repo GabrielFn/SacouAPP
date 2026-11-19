@@ -111,6 +111,19 @@ internal interface IGroupStore
         Func<Group, InviteId, int, Result<GroupChange>> accept,
         CancellationToken cancellationToken);
 
+    /// <summary>
+    /// The way in by a round link (E3.12, ADR 0070, D2), with the transaction and the locks of
+    /// <see cref="AcceptInviteAsync"/> and no invite: the group lock, the per-person lock, <paramref name="stillRegistered"/>,
+    /// the person's active groups and <paramref name="join"/> on the locked aggregate. A missing group is
+    /// <c>groups.group-not-found</c>.
+    /// </summary>
+    Task<Result<GroupChange>> JoinAsync(
+        GroupId group,
+        UserId person,
+        Func<CancellationToken, Task<Result>> stillRegistered,
+        Func<Group, int, Result<GroupChange>> join,
+        CancellationToken cancellationToken);
+
     /// <summary>The invites still valid at <paramref name="now"/>, oldest first.</summary>
     Task<IReadOnlyList<GroupInvite>> ListValidInvitesAsync(GroupId group, DateTimeOffset now, CancellationToken cancellationToken);
 
