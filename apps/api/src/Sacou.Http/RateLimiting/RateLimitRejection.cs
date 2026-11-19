@@ -11,6 +11,7 @@ namespace Sacou.Http.RateLimiting;
 /// <summary>
 /// The 429 (ADR 0062, D5): a <c>ProblemDetails</c> with the fixed title and the <c>code</c>, <c>Retry-After</c> in whole
 /// seconds and <c>no-store</c>. Never a detail, the policy's name or the partition key. The log line names the policy only.
+/// A page for a person (the round page, ADR 0070, D6) answers with its own short HTML, written by <see cref="IRateLimitedPage"/>.
 /// </summary>
 internal static partial class RateLimitRejection
 {
@@ -31,6 +32,13 @@ internal static partial class RateLimitRejection
         LogRefused(logger, policy);
         http.Response.Headers[HeaderNames.RetryAfter] = RetryAfterSeconds(context.Lease).ToString(CultureInfo.InvariantCulture);
         http.Response.Headers[HeaderNames.CacheControl] = NoStore.Value;
+        if (RateLimitPolicies.PerClientAddress.Contains(policy) && http.RequestServices.GetService<IRateLimitedPage>() is { } page)
+        {
+            http.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            await page.WriteAsync(http, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         var problem = TypedResults.Problem(
             statusCode: StatusCodes.Status429TooManyRequests,
             title: Title,
@@ -53,4 +61,10 @@ internal static partial class RateLimitRejection
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Request refused by the rate limit of {Policy}.")]
     private static partial void LogRefused(ILogger logger, string policy);
+}
+
+/// <summary>The body of a 429 on a page a person reads in the browser: short, in pt-BR, with nothing about the limit.</summary>
+public interface IRateLimitedPage
+{
+    Task WriteAsync(HttpContext context, CancellationToken cancellationToken);
 }

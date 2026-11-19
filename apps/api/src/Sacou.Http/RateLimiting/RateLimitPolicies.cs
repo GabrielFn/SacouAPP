@@ -19,6 +19,12 @@ public static class RateLimitPolicies
     public const string CourtSync = "court-sync";
     public const string RoundLink = "round-link";
 
+    /// <summary>The anonymous round page (ADR 0070, D6): per client address, never per user.</summary>
+    public const string RoundPage = "round-page";
+
+    /// <summary>The policies whose partition is the client's address (hashed), because their visitor is anonymous.</summary>
+    public static readonly FrozenSet<string> PerClientAddress = FrozenSet.Create(StringComparer.Ordinal, RoundPage);
+
     /// <summary>
     /// The routes whose request holds two connections of the pool at once (ADR 0056, D7a): they also share one
     /// concurrency limit, so they never take the whole pool (ADR 0062, D4).

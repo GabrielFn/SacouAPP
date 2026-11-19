@@ -12,9 +12,19 @@
 !packages/volley-rules/src/formations/formations.json
 !packages/match-engine/src/settings/settings-catalog.json
 !packages/rating/src/rating-params.json
+# The Node stage of the round page (ADR 0070, D7): the lockfile, the workspace manifests and apps/web only.
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!apps/web/
+!apps/mobile/package.json
+!packages/volley-rules/package.json
+!packages/match-engine/package.json
 
 # Closed again after every opening, so nothing inside the opened folders slips in.
 **/bin/
 **/obj/
 **/node_modules/
+apps/api/src/Sacou.Api/wwwroot/web/
 **/.env*

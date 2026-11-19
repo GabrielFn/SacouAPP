@@ -8,6 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 import { mobileFrontendBlocks } from "./scripts/lib/eslint-mobile-rules.mjs";
+import { webPageBlocks } from "./scripts/lib/eslint-web-rules.mjs";
 import { exceptedPaths, loadQualityExceptions } from "./scripts/lib/quality-exceptions.mjs";
 
 const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
@@ -21,7 +22,7 @@ const PURE_PACKAGE_FILES = [
 const DETERMINISTIC_FILES = [`packages/{match-engine,rating}/src/**/*.${TS_EXTENSIONS}`];
 const VOLLEY_RULES_FILES = [`packages/volley-rules/src/**/*.${TS_EXTENSIONS}`];
 const DATA_FILES = ["**/*.data.{ts,mts,cts}"];
-const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile}/src/**/*.{js,jsx,cjs,mjs}"];
+const FORBIDDEN_JAVASCRIPT_FILES = ["{packages/*,apps/mobile,apps/web}/src/**/*.{js,jsx,cjs,mjs}"];
 const TOOLING_FILES = ["eslint.config.mjs", "scripts/**/*.{js,cjs,mjs}"];
 const LONG_FILES = ["**/*.test.*", "**/*.test.fixture.ts"];
 
@@ -153,6 +154,9 @@ export default defineConfig([
       "functional/immutable-data": ["error", { ignoreAccessorPattern: ["**.current", "**.value"] }],
     },
   },
+
+  // The round page (E3.12, ADR 0070, D5): textContent only, platform globals only in the adapters.
+  ...webPageBlocks({ testFiles: TEST_FILES }),
 
   {
     files: PURE_PACKAGE_FILES,

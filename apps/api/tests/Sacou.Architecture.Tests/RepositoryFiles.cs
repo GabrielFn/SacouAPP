@@ -99,6 +99,8 @@ internal static partial class RepositoryFiles
 
     internal static string ApiDirectory => Path.Combine(Root.Value, "apps", "api");
 
+    internal static string RepositoryRoot => Root.Value;
+
     internal static string ReadRepositoryFile(params string[] segments) =>
         File.ReadAllText(Path.Combine([Root.Value, .. segments]));
 
