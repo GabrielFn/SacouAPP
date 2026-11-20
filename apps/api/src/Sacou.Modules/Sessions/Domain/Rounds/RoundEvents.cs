@@ -10,8 +10,8 @@ internal sealed record RoundCreated(RoundId RoundId, GroupId GroupId) : RoundEve
 
 internal sealed record RoundCanceled(RoundId RoundId, GroupId GroupId) : RoundEvent(RoundId);
 
-/// <summary>Someone tapped "Encerrar rodada": the MVP vote opens (E3.11 pushes it; only ids).</summary>
-internal sealed record RoundClosed(RoundId RoundId, GroupId GroupId) : RoundEvent(RoundId);
+/// <summary>Someone tapped "Encerrar rodada" (named apart from the error <c>sessions.round-closed</c>): the MVP vote opens (E3.11 pushes it; only ids).</summary>
+internal sealed record RoundEnded(RoundId RoundId, GroupId GroupId) : RoundEvent(RoundId);
 
 internal sealed record AttendanceChanged(RoundId RoundId, MemberId MemberId, AttendanceStatus Status) : RoundEvent(RoundId);
 

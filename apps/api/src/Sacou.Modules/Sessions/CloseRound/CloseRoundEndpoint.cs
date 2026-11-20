@@ -16,7 +16,8 @@ internal sealed record CloseRoundResponse(DateTimeOffset ClosedAt, DateTimeOffse
 
 /// <summary>
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/close</c> (<c>WriteCourt</c>): "Encerrar rodada", which opens the MVP
-/// vote (ADR 0072, D1). Closing again answers the same <c>closedAt</c>; a cancelled round is 409
+/// vote (ADR 0072, D1). Closing again answers the same <c>closedAt</c>; before the start it is 409
+/// <c>sessions.round-not-started</c>; a cancelled round is 409
 /// <c>sessions.round-canceled</c>. Court events that arrive later still count. <c>no-store</c>.
 /// </summary>
 internal static class CloseRoundEndpoint

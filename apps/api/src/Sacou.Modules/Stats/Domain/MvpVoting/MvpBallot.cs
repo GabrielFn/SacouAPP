@@ -1,4 +1,5 @@
 using Sacou.Shared.Members;
+using Sacou.Shared.Persistence;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Stats.Domain.MvpVoting;
@@ -68,12 +69,8 @@ internal sealed record MvpBallot
             return Result.Failure<MvpVote>(MvpVotingErrors.CandidateInvalid);
         }
 
-        return alreadyVoted ? Result.Failure<MvpVote>(MvpVotingErrors.AlreadyVoted) : Result.Success(new MvpVote(voter, candidate, ToStoredPrecision(now)));
+        return alreadyVoted ? Result.Failure<MvpVote>(MvpVotingErrors.AlreadyVoted) : Result.Success(new MvpVote(voter, candidate, StoredInstant.Of(now)));
     }
-
-    /// <summary>The instant as the database keeps it (whole microseconds), so the answer equals the later <c>myVote</c>.</summary>
-    private static DateTimeOffset ToStoredPrecision(DateTimeOffset instant) =>
-        instant.AddTicks(-(instant.Ticks % TimeSpan.TicksPerMicrosecond));
 
     /// <summary>The ballot as <paramref name="voter"/> sees it: everyone who played but themselves.</summary>
     public IReadOnlyList<MvpCandidate> CandidatesFor(MemberId voter) => [.. Players.Where(player => player.MemberId != voter)];

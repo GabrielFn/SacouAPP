@@ -21,7 +21,7 @@ public sealed class RoundCloseTests
         Assert.Equal(tap, closed.Round.ClosedAt);
         Assert.Equal(tap, closed.Round.EndsAt);
         Assert.True(closed.RoundRowChanged);
-        Assert.Equal(new RoundClosed(round.Id, round.GroupId), Assert.Single(closed.Events));
+        Assert.Equal(new RoundEnded(round.Id, round.GroupId), Assert.Single(closed.Events));
     }
 
     /// <summary>J5: nobody closed it, so it ends on its own six hours after the start (20:30 to 02:30).</summary>

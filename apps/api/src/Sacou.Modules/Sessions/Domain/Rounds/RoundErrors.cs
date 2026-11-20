@@ -28,6 +28,9 @@ internal static class RoundErrors
     /// <summary>A cancelled round neither closes nor has an MVP vote (ADR 0072, D1).</summary>
     public static readonly Error RoundCanceled = new("sessions.round-canceled", ErrorKind.Conflict);
 
+    /// <summary>"Encerrar rodada" before the start: a round that has not begun cannot end (ADR 0072, D1).</summary>
+    public static readonly Error RoundNotStarted = new("sessions.round-not-started", ErrorKind.Conflict);
+
     public static readonly Error RoundFull = new("sessions.round-full", ErrorKind.Conflict);
 
     public static readonly Error DropInWindowClosed = new("sessions.drop-in-window-closed", ErrorKind.Conflict);

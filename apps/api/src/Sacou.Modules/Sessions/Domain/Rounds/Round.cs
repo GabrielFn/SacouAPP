@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Shared.Members;
+using Sacou.Shared.Persistence;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.Domain.Rounds;
@@ -55,8 +56,8 @@ internal sealed partial record Round(
         : new RoundChange(this with { Status = RoundStatus.Canceled }, [], [new RoundCanceled(Id, GroupId)]) { RoundRowChanged = true };
 
     /// <summary>
-    /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled; closing again keeps the first instant. A tap after the
-    /// automatic end is stored but does not move the end (the earlier one wins).
+    /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled or before the start; closing again keeps the first
+    /// instant. A tap after the automatic end is stored but does not move the end (the earlier one wins).
     /// </summary>
     public Result<RoundChange> Close(DateTimeOffset now)
     {
@@ -65,14 +66,15 @@ internal sealed partial record Round(
             return Result.Failure<RoundChange>(RoundErrors.RoundCanceled);
         }
 
+        if (now < Slot.StartsAt)
+        {
+            return Result.Failure<RoundChange>(RoundErrors.RoundNotStarted);
+        }
+
         return Result.Success(ClosedAt is not null
             ? RoundChange.Unchanged(this)
-            : new RoundChange(this with { ClosedAt = ToStoredPrecision(now) }, [], [new RoundClosed(Id, GroupId)]) { RoundRowChanged = true });
+            : new RoundChange(this with { ClosedAt = StoredInstant.Of(now) }, [], [new RoundEnded(Id, GroupId)]) { RoundRowChanged = true });
     }
-
-    /// <summary>The instant as the database keeps it (whole microseconds), so the first answer equals every later read.</summary>
-    private static DateTimeOffset ToStoredPrecision(DateTimeOffset instant) =>
-        instant.AddTicks(-(instant.Ticks % TimeSpan.TicksPerMicrosecond));
 
     /// <summary>
     /// The admin's edit (date, time, venue, layer): refused once cancelled or started. A new date or time
