@@ -13,7 +13,12 @@ import {
   sizes,
   spacing,
 } from "./tokens.data";
-import { CARD_COMPACT_RATIO, cardFontScaleCap, cardMeasures, statTileValueFont } from "./card-tokens.data";
+import {
+  CARD_COMPACT_RATIO,
+  cardFontScaleCap,
+  cardMeasures,
+  statTileValueFont,
+} from "./card-tokens.data";
 import { sheetFontSizes, sheetRadii, sheetSizes } from "./sheet-tokens.data";
 
 /**

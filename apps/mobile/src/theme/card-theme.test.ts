@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 
-import { CARD_COMPACT_RATIO, cardAvatarColor, cardFontScaleCap, cardMeasures } from "./card-tokens.data";
+import {
+  CARD_COMPACT_RATIO,
+  cardAvatarColor,
+  cardFontScaleCap,
+  cardMeasures,
+} from "./card-tokens.data";
 import { contrastRatio } from "./contrast";
 import { createScaledTokens } from "./scale";
 import { NAME_MIN_FONT_SCALE } from "../features/profile/ui/PlayerCardView";
@@ -71,12 +76,15 @@ describe("the card colors reach AA", () => {
 describe("the system font scale on the card", () => {
   const NICKNAME_FONT_SCALES = [1.3, 2] as const;
 
-  test.each(NICKNAME_FONT_SCALES)("at font scale %s the text stops at the card cap", (fontScale) => {
-    const normal = createScaledTokens({ windowWidth: 390, fontScale: 1 }).card.full;
-    const large = createScaledTokens({ windowWidth: 390, fontScale }).card.full;
-    expect(large.nameFont).toBe(Math.round(normal.nameFont * cardFontScaleCap));
-    expect(large.avatarRadius).toBe(normal.avatarRadius);
-  });
+  test.each(NICKNAME_FONT_SCALES)(
+    "at font scale %s the text stops at the card cap",
+    (fontScale) => {
+      const normal = createScaledTokens({ windowWidth: 390, fontScale: 1 }).card.full;
+      const large = createScaledTokens({ windowWidth: 390, fontScale }).card.full;
+      expect(large.nameFont).toBe(Math.round(normal.nameFont * cardFontScaleCap));
+      expect(large.avatarRadius).toBe(normal.avatarRadius);
+    },
+  );
 
   test("the nickname of 20 letters fits the band at the capped size", () => {
     const NICKNAME_LETTERS = 20;

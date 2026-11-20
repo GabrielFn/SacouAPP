@@ -26,12 +26,7 @@ export function StatTile({ tile }: StatTileProps) {
         paddingHorizontal: tokens.spacing.m,
       }}
     >
-      <Text
-        variant="display"
-        tabular
-        numberOfLines={1}
-        style={{ fontSize: tokens.statTileValue }}
-      >
+      <Text variant="display" tabular numberOfLines={1} style={{ fontSize: tokens.statTileValue }}>
         {tile.value}
       </Text>
       <Text variant="caption" numberOfLines={1}>

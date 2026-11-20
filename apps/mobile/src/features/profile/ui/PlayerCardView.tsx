@@ -74,7 +74,11 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
 
       {card.positionLabel === null ? null : (
         <View
-          style={{ position: "absolute", left: cardLayout.position.left, top: cardLayout.position.top }}
+          style={{
+            position: "absolute",
+            left: cardLayout.position.left,
+            top: cardLayout.position.top,
+          }}
         >
           <Text
             numberOfLines={1}
