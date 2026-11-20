@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sacou.Modules.Sessions.Infrastructure.Outbox;
 
 namespace Sacou.Modules.Sessions.Infrastructure;
 
@@ -14,11 +15,14 @@ internal sealed class SessionsDbContext(DbContextOptions<SessionsDbContext> opti
 
     public DbSet<AttendanceRow> Attendances => Set<AttendanceRow>();
 
+    public DbSet<OutboxMessageRow> OutboxMessages => Set<OutboxMessageRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfiguration(new SeriesConfiguration());
         modelBuilder.ApplyConfiguration(new RoundConfiguration());
         modelBuilder.ApplyConfiguration(new AttendanceConfiguration());
+        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
     }
 }

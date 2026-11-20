@@ -6,7 +6,9 @@ using Microsoft.Extensions.Options;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.AccountData;
+using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Sessions.Application;
+using Sacou.Modules.Sessions.Application.Outbox;
 using Sacou.Modules.Sessions.CancelRound;
 using Sacou.Modules.Sessions.CloseRound;
 using Sacou.Modules.Sessions.Contracts;
@@ -36,6 +38,10 @@ public static class SessionsModule
         services.AddSessionsDatabase(configuration);
         services.AddScoped<GroupRoundContext>();
         services.AddScoped<RoundWriter>();
+        // The outbox of the promotions and its drain after the commit; the rounds the notification list shows (E3.11, ADR 0069).
+        services.AddScoped<SessionsOutboxRelay>();
+        services.AddScoped<OutboxDrain>();
+        services.AddScoped<INotificationRounds, StoreNotificationRounds>();
         services.AddScoped<RoundMaterializer>();
         // The round link (E3.12, ADR 0070): its code, the link to share, the way in as an avulso and the page's summary.
         services.AddOptions<RoundPageOptions>().Bind(configuration.GetSection(RoundPageOptions.SectionName)).ValidateOnStart();

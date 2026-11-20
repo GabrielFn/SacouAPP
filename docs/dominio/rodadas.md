@@ -8,7 +8,7 @@ Uma ocorrência do racha (`Round`; no glossário, "Rodada"): grupo, série (opci
 
 - **Data e hora:** `YYYY-MM-DD` e `HH:mm`, só esses formatos. O admin só cria no futuro e até 365 dias adiante.
 - **Editar:** recusado (`sessions.round-closed`) com a rodada cancelada ou já começada.
-- **Fim da rodada (E3.18, [ADR 0072](../arquitetura/adr/0072-votacao-do-mvp.md), D1):** "Encerrar rodada" grava `closedAt`; sem toque, a rodada termina sozinha 6 h depois do início. `endsAt` é o menor dos dois (um toque depois do fim automático não adia). Fechar de novo devolve o mesmo `closedAt`; cancelada não fecha (`sessions.round-canceled`). Eventos da quadra que chegam depois ainda contam. É a âncora da votação do MVP ([mvp.md](mvp.md)).
+- **Fim da rodada (E3.18, [ADR 0072](../arquitetura/adr/0072-votacao-do-mvp.md), D1):** "Encerrar rodada" grava `closedAt`; sem toque, a rodada termina sozinha 6 h depois do início. `endsAt` é o menor dos dois (um toque depois do fim automático não adia). Fechar de novo devolve o mesmo `closedAt`; cancelada não fecha (`sessions.round-canceled`); antes do início também não (`sessions.round-not-started`). Eventos da quadra que chegam depois ainda contam. É a âncora da votação do MVP ([mvp.md](mvp.md)).
 - **Horário de verão:** hora que não existe avança pelo tamanho do pulo (00h30 de 04/11/2018 vira 01h30); hora repetida fica com a primeira (23h30 de 16/02/2019 é a do horário de verão).
 
 ## Presença
@@ -65,7 +65,7 @@ Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
 
 ## Eventos
 
-`RoundCreated`, `RoundCanceled`, `RoundClosed`, `AttendanceChanged`, `WaitlistPromoted`: só IDs (rodada, grupo, membro), estado e instante.
+`RoundCreated`, `RoundCanceled`, `RoundEnded`, `AttendanceChanged`, `WaitlistPromoted`: só IDs (rodada, grupo, membro), estado e instante.
 
 ## Códigos de erro
 
@@ -77,6 +77,7 @@ Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
 | `sessions.round-closed` (409) | Cancelada, ou jogador depois do início, ou edição de rodada cancelada ou começada |
 | `sessions.round-full` (409) | Cheia e sem espera |
 | `sessions.round-canceled` (409) | "Encerrar rodada" numa rodada cancelada |
+| `sessions.round-not-started` (409) | "Encerrar rodada" antes do início da rodada |
 | `sessions.drop-in-window-closed` (409) | Avulso antes da janela |
 | `sessions.attendance-disabled` (409) | Presença desligada na rodada |
 | `sessions.round-limit`, `sessions.series-limit` (409) | Tetos de 20 rodadas futuras e 7 séries ativas por grupo |

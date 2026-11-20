@@ -12,6 +12,7 @@
         <ProjectReference Include="../Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
         <ProjectReference Include="../Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />
         <ProjectReference Include="../Sacou.Modules/Matches/Sacou.Modules.Matches.csproj" />
+        <ProjectReference Include="../Sacou.Modules/Notifications/Sacou.Modules.Notifications.csproj" />
         <ProjectReference Include="../Sacou.Modules/Payments/Sacou.Modules.Payments.csproj" />
         <ProjectReference Include="../Sacou.Modules/Summaries/Sacou.Modules.Summaries.csproj" />
         <ProjectReference Include="../Sacou.Modules/Stats/Sacou.Modules.Stats.csproj" />

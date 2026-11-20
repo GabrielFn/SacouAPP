@@ -2,6 +2,8 @@
 
 Roteiro do modo quadra (E4.9, parte 3) e passo a passo do APK de teste. O APK usa o perfil `preview` do EAS: modo de produção (Hermes), com as telas de desenvolvimento ligadas (`EXPO_PUBLIC_DEV_TOOLS=1`). Não tem segredo nenhum no repositório.
 
+Roteiro do fim do M5 (página da rodada, resumo, cartinha, votação e notificações): [`roteiro-celular-M5.md`](roteiro-celular-M5.md).
+
 ## Gerar o APK (uma vez, no computador)
 
 Pré-requisito: conta grátis em https://expo.dev (perguntas.md, pergunta 15). No Git Bash, na raiz do repositório:

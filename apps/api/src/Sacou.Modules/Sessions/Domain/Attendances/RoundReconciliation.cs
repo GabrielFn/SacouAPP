@@ -36,7 +36,7 @@ internal static class RoundReconciliation
         return new RoundChange(
             promoted.Aggregate(round, (current, attendance) => current.With(attendance)),
             promoted,
-            [.. promoted.Select(attendance => (RoundEvent)new WaitlistPromoted(round.Id, attendance.Member, now))]);
+            [.. promoted.Select(attendance => (RoundEvent)new WaitlistPromoted(round.Id, attendance.Member, attendance.Sequence, now))]);
     }
 
     /// <summary>

@@ -236,6 +236,26 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | D   | Excesso de conexões                     | Pós-piloto, fora da E3.7                                                              |
 | E   | Entrar no canal de outra quadra         | Pós-piloto, fora da E3.7                                                              |
 
+## 9a. Notificações e aparelhos do push (E3.11, ADR 0069)
+
+| Ameaça | Mitigação |
+|---|---|
+| S: alguém registra um aparelho em nome de outra conta | O `PUT /v1/me/push-devices/{installationId}` só existe com o ID token do Firebase; o aparelho fica na conta do token, nunca numa conta escolhida no corpo (corpo fechado: `userId` dá 400) |
+| T: corpo grande ou fora do formato no registro | Corpo de até 1 KB, campos fechados, token validado (`ExponentPushToken[...]`/`ExpoPushToken[...]`, ASCII visível, até 200), plataforma em lista fechada |
+| T: notificação duplicada (requisição repetida, queda entre passos, duas drenagens) | Outbox na transação da trava; `UNIQUE (dedupe_key)` no outbox e na notificação; `UNIQUE (notification_id, device_id)`; relay e pump com `FOR UPDATE SKIP LOCKED`; reivindicação confirmada antes do envio; resposta ambígua nunca repete |
+| R: o que aconteceu com um push | Cada entrega guarda estado, tentativas e o código do Expo, sem token |
+| I: o token ou o `installation_id` vazam | Nunca em log, resposta, erro, evento ou exportação; `ToString` mascarado; testes L1 e I14 |
+| I: ler a notificação de outra pessoa | Lista e "marcar como lida" só pelos `MemberId` da própria conta; id de outra pessoa é o mesmo 404 do inexistente; `DELETE` de instalação de outra conta responde 204 sem efeito |
+| I: o push passa por Expo, Google FCM e Apple APNs (EUA) e aparece na tela de bloqueio | Só o nome do grupo, o dia e a hora; **sem o local** (texto livre) e sem nomes (pergunta 112); `data` só com o tipo e três UUIDs. Lista com `no-store` |
+| I: o token de uma conta fica num celular emprestado | Registrar o mesmo token em outra conta apaga a linha anterior e as entregas pendentes dela (teste I11); a saída da conta apaga o aparelho (Parte 3) |
+| I: ex-membro vê onde o grupo joga agora | A lista lê a rodada na hora (D7); para a notificação de um `MemberId` que não é mais membro ativo do grupo, o subtítulo sai **sem o local**, só o dia e a hora (`NotificationItems.Render`, teste de unidade e de integração) |
+| D: registro em massa ou drenagem lenta | Política `push-device` (10 por minuto), teto de 5 aparelhos ativos por conta, drenagem com orçamento de 3 s depois do commit, que nunca falha a escrita |
+| D: uma falha depois do commit vira 500, ou uma mensagem venenosa trava a fila | O `OutboxDrain` pega qualquer exceção (a escrita já foi confirmada, ADR 0069, D10) e registra só o tipo; o relay pede cada mensagem à parte, conta a tentativa de quem falhou e, depois de 5 falhas (`SessionsOutboxRelay.MaxAttempts`), põe a mensagem de lado com log só do id. Testes em `OutboxRelayTests` |
+| E: token roubado manda push pelo Expo | Fica para a Parte 2: o token de acesso do Expo com a segurança reforçada (pergunta 111) |
+| Risco aceito | Exclusão bloqueada pelo Groups numa corrida rara pode apagar antes os aparelhos e as notificações (o app registra de novo); saída da conta sem rede deixa a linha do aparelho até o próximo login nele; quem conhece o token de push de outra pessoa consegue registrá-lo na própria conta e assim tirá-lo da conta dela (D8), mas o token é segredo do aparelho, nunca sai da API e não serve para ler nada da vítima; o pior efeito é ela deixar de receber push até o app registrar de novo; o `installation_id` vai no caminho da rota (D8), então aparece no escopo de requisição do host (desligado em produção) e no log de requisições do Cloud Run, que guarda a URL: é um UUID aleatório sem ligação com a quadra nem com o token, e a mudança para o corpo fica em `pendencias.md` |
+
+A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do Google) entra na Parte 2 e completa esta seção.
+
 ## 10. Outras superfícies em aberto
 
 | Superfície                               | Ameaça                                     | Mitigação                                                                                                         |
@@ -446,12 +466,13 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 | S/E: quem não jogou vota, ou vota em si | Conferido no servidor, no domínio (`MvpBallot`): quem vota e o candidato com partida terminada na projeção fresca da rodada; auto-voto recusado no domínio e por `CHECK` na tabela | Feito (Parte 1) |
 | T: voto duplicado, inclusive em corrida | PK `(round_id, voter_member_id)` e `INSERT ... ON CONFLICT DO NOTHING`: o segundo é `409`; voto final, sem rota de troca | Feito (Parte 1); teste de corrida I2 na integração |
 | T: voto fora do prazo | Janela calculada a cada pedido com o relógio do servidor (`TimeProvider`), intervalo semiaberto; nada depende de job | Feito (Parte 1) |
-| T: abrir a votação cedo ou adiar o fim | Só `WriteCourt` encerra a rodada (Admin, Co-admin, Placar), sob a trava; fechar de novo não muda o instante; um toque depois do fim automático não adia | Feito (Parte 1). Risco aceito: quem tem `WriteCourt` pode encerrar antes de jogar e abrir a votação cedo (ninguém jogou ainda, então ninguém vota; o grupo vê pelo prazo) |
+| T: abrir a votação cedo ou adiar o fim | Só `WriteCourt` encerra a rodada (Admin, Co-admin, Placar), sob a trava; antes do início o `close` é recusado (`409 sessions.round-not-started`); fechar de novo não muda o instante; um toque depois do fim automático não adia | Feito (Parte 1). Risco aceito: quem tem `WriteCourt` pode encerrar logo depois do início e abrir a votação cedo (o grupo vê pelo prazo) |
 | I: ver em quem cada um votou | Nenhuma rota devolve voto de outro, nem ao admin; a cédula só traz o próprio voto, sem contagem nem lista de votantes; erros não ecoam o candidato | Feito (Parte 1); resultado só com vencedores e votantes na Parte 2 |
 | I: voto no log | `MvpVotingLog` só com `roundId` e o resultado; `MvpVote` e `MvpVoteRow` não se imprimem; teste de captura do log | Feito (Parte 1) |
 | I: inferir o voto pelo resultado | Num grupo de dois votantes com vencedor único dá para deduzir; o Resumo não traz `voters` | Aceito |
-| IDOR: votar ou ler a cédula de outro grupo | Filtro do Stats (membro ativo, 404 igual a inexistente); rodada e votos lidos sempre por `(groupId, roundId)`; rodada cancelada igual a inexistente | Feito (Parte 1) |
-| D: cédula refaz o replay | `court-sync` na cédula, como nas rotas de estatística; voto e `close` no limite global | Feito (Parte 1); revisar na E5.3 |
+| IDOR: votar ou ler a cédula de outro grupo | Filtro do Stats (membro ativo, 404 igual a inexistente); rodada e votos lidos sempre por `(groupId, roundId)`; rodada cancelada igual a inexistente | Feito (Parte 1); matriz ator × rota no voto, na cédula e no `close` (de fora, removido e ex-membro com o mesmo 404; Jogador 403 no `close`) |
+| D: cédula e voto refazem o replay | `court-sync` na cédula e no voto (os dois leem a projeção fresca), como nas rotas de estatística; `close` no limite global | Feito (Parte 1); revisar na E5.3 |
+| T: correção do placar depois do fechamento muda o vencedor | O resultado é apurado na leitura sobre a projeção fresca, então uma correção depois do fim da janela muda candidatos e vencedor | Aberto: a Parte 2 congela o resultado no fechamento ou registra o risco como aceito (`pendencias.md`) |
 
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 

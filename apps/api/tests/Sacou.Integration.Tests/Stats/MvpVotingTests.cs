@@ -11,7 +11,7 @@ namespace Sacou.Integration.Tests.Stats;
 
 /// <summary>
 /// I1 to I7 of E3.18 (ADR 0072) on the real API and a real Postgres: the vote stored and read back as one's own, the
-/// race of one member and of two, the CHECK of the table, the close under the lock, a late match that makes a member
+/// race of one member and of two, the CHECK of the table, the close under the lock (and refused before the start), the actor matrix, a guest as candidate, a late match that makes a member
 /// eligible, and the secret of the ballot. The Admin plays the Player in one finished match; the Co-admin never plays.
 /// </summary>
 public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetime
@@ -108,14 +108,25 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(round["startsAt"]!.GetValue<DateTimeOffset>().AddHours(6), round["endsAt"]!.GetValue<DateTimeOffset>());
     }
 
-    /// <summary>I6 and J6: two closes at once store one instant; closing again answers it; a cancelled round does not close.</summary>
+    /// <summary>
+    /// I6 and J6: before the start the close is refused; two closes at once store one instant; closing again answers it;
+    /// a cancelled round does not close.
+    /// </summary>
     [Fact]
     public async Task I6_ConcurrentCloses_StoreOneInstant()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        var round = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn)))["roundId"]!.GetValue<string>();
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
+        var cancelled = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(RoundCalls.FutureDate(4), settings: VotingOn)))["roundId"]!.GetValue<string>();
+        using var cancel = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, cancelled) + "/cancel");
+        Assert.Equal(HttpStatusCode.OK, cancel.StatusCode);
 
+        using var early = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close");
+        Assert.Equal(HttpStatusCode.Conflict, early.StatusCode);
+        Assert.Equal("sessions.round-not-started", await RoundCalls.CodeAsync(early));
+        StartRound(created);
         var closes = await Task.WhenAll(CloseAsync(world, A.Scorekeeper, round), CloseAsync(world, A.Admin, round));
         var again = await CloseAsync(world, A.CoAdmin, round);
 
@@ -123,10 +134,70 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(closes[0]["closedAt"]!.GetValue<DateTimeOffset>(), again["closedAt"]!.GetValue<DateTimeOffset>());
         using var byPlayer = await world.SendAsync(A.Player, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close");
         Assert.Equal(HttpStatusCode.Forbidden, byPlayer.StatusCode);
-        using var cancel = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/cancel");
-        Assert.Equal(HttpStatusCode.OK, cancel.StatusCode);
-        using var closedCancelled = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close");
+        using var closedCancelled = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, cancelled) + "/close");
         Assert.Equal("sessions.round-canceled", await RoundCalls.CodeAsync(closedCancelled));
+    }
+
+    /// <summary>
+    /// The actor matrix of the three routes (vote, ballot, close): someone from outside, a removed member and a former
+    /// member get the very same 404 on each; the Player gets 403 on the close; the Scorekeeper closes.
+    /// </summary>
+    [Fact]
+    public async Task TheActorMatrix_OfTheVote_TheBallot_AndTheClose()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
+        _ = await PlayAsync(world, round);
+        StartRound(created);
+        var vote = $$"""{"candidateMemberId":"{{world.MemberIds[A.Player]}}"}""";
+        var routes = new (HttpMethod Method, string Path, string? Body)[]
+        {
+            (HttpMethod.Post, VotePath(world, round), vote),
+            (HttpMethod.Get, BallotPath(world, round), null),
+            (HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close", null),
+        };
+
+        foreach (var (method, path, body) in routes)
+        {
+            var problems = new List<string>();
+            foreach (var outsider in new[] { A.NonMember, A.RemovedMember, A.LeftMember })
+            {
+                using var refused = await world.SendAsync(outsider, method, path, body);
+                Assert.Equal(HttpStatusCode.NotFound, refused.StatusCode);
+                problems.Add(await CourtCalls.ProblemWithoutTraceAsync(refused));
+            }
+
+            Assert.Single(problems.Distinct(StringComparer.Ordinal));
+        }
+
+        using var byPlayer = await world.SendAsync(A.Player, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close");
+        Assert.Equal(HttpStatusCode.Forbidden, byPlayer.StatusCode);
+        var closed = await CloseAsync(world, A.Scorekeeper, round);
+        Assert.NotNull(closed["closedAt"]);
+        Assert.Equal(0, await VotesAsync(round));
+    }
+
+    /// <summary>E6: a guest who played is on the ballot and takes a vote (a guest has no login, so never votes).</summary>
+    [Fact]
+    public async Task E6_AGuestWhoPlayed_TakesAVote()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
+        var guest = await GuestCalls.CreateAsync(world);
+        var phone = CourtPhone.New();
+        _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone,
+            [phone.MatchStarted(world.MemberIds[A.Admin], guest), phone.Point("a"), phone.ManualEnd("a")]);
+        StartRound(created);
+        _ = await CloseAsync(world, A.Scorekeeper, round);
+
+        using var cast = await VoteAsync(world, A.Admin, round, guest);
+
+        Assert.Equal(HttpStatusCode.Created, cast.StatusCode);
+        Assert.Equal(1, await VotesAsync(round));
     }
 
     /// <summary>I7: a match synced after the close makes its players eligible; before it, the Co-admin had not played.</summary>
@@ -135,8 +206,10 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        var round = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn)))["roundId"]!.GetValue<string>();
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
         var phone = await PlayAsync(world, round);
+        StartRound(created);
         _ = await CloseAsync(world, A.Scorekeeper, round);
         using var before = await VoteAsync(world, A.CoAdmin, round, world.MemberIds[A.Player]);
         Assert.Equal("stats.mvp-voter-not-eligible", await RoundCalls.CodeAsync(before));
@@ -216,17 +289,23 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal("closed", ballot["reason"]!.GetValue<string>());
     }
 
-    /// <summary>A round with the vote on, one finished match of the Admin against the Player, and the close now: the vote is open.</summary>
+    /// <summary>A round with the vote on, one finished match of the Admin against the Player, and the close an hour after the start: the vote is open.</summary>
     private async Task<(GroupWorld World, string Round)> OpenRoundAsync(HttpClient client)
     {
         var world = await GroupWorld.CreateAsync(api, client);
-        var round = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn)))["roundId"]!.GetValue<string>();
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
         _ = await PlayAsync(world, round);
+        StartRound(created);
         _ = await CloseAsync(world, A.Scorekeeper, round);
         var ballot = await BallotAsync(world, A.Admin, round);
         Assert.Equal("open", ballot["state"]!.GetValue<string>());
         return (world, round);
     }
+
+    /// <summary>The API's clock an hour past the round's start: a round closes only once it began (ADR 0072, D1).</summary>
+    private void StartRound(JsonObject created) =>
+        api.Clock.SetNow(created["startsAt"]!.GetValue<DateTimeOffset>().AddHours(1));
 
     /// <summary>One finished match of the Admin against the Player; the phone goes on writing the round's only stream.</summary>
     private static async Task<CourtPhone> PlayAsync(GroupWorld world, string round)

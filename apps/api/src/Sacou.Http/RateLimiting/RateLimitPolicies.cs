@@ -19,6 +19,9 @@ public static class RateLimitPolicies
     public const string CourtSync = "court-sync";
     public const string RoundLink = "round-link";
 
+    /// <summary>The phone registration of the push (E3.11, ADR 0069, D8).</summary>
+    public const string PushDevice = "push-device";
+
     /// <summary>The anonymous round page (ADR 0070, D6): per client address, never per user.</summary>
     public const string RoundPage = "round-page";
 

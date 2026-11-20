@@ -14,6 +14,7 @@ internal static class Assemblies
         "Sacou.Modules.Groups",
         "Sacou.Modules.Identity",
         "Sacou.Modules.Matches",
+        "Sacou.Modules.Notifications",
         "Sacou.Modules.Payments",
         "Sacou.Modules.Sessions",
         "Sacou.Modules.Stats",

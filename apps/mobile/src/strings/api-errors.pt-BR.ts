@@ -67,6 +67,10 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "matches.takeover-invalid": "Não deu para assumir a quadra. Tente de novo.",
   "matches.unknown-event-type": "Este app enviou algo que o servidor não conhece. Atualize o app.",
   "matches.unsupported-schema-version": "Atualize o app para enviar os pontos.",
+  "notifications.cursor-invalid": "Não deu para carregar mais avisos. Tente de novo.",
+  "notifications.installation-invalid": "Não deu para ligar os avisos neste celular.",
+  "notifications.notification-not-found": "Esse aviso não existe mais.",
+  "notifications.token-invalid": "Não deu para ligar os avisos neste celular.",
   "sessions.attendance-disabled": "A presença está desligada nesta rodada.",
   "sessions.draw-disabled": "O sorteio está desligado nesta rodada.",
   // "24" is DrawLimits.MaxLocks in apps/api/src/Sacou.Modules/Sessions/Domain/Draw/DrawLimits.cs.
@@ -83,6 +87,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
     "A lista ainda não abriu para avulsos. Tente de novo mais perto da rodada.",
   "sessions.member-not-found": "Essa pessoa não faz parte deste grupo.",
   "sessions.round-canceled": "Esta rodada foi cancelada e não pode ser encerrada.",
+  "sessions.round-not-started": "A rodada ainda não começou e não pode ser encerrada.",
   "sessions.round-closed": "Esta rodada não aceita mais mudanças.",
   "sessions.round-date-taken": "Essa repetição já tem uma rodada nesse dia. Escolha outra data.",
   "sessions.round-full": "A rodada está cheia e a lista de espera está desligada.",
