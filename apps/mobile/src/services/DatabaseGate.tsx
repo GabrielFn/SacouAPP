@@ -12,8 +12,8 @@ import { findResumableCourtSession } from "../features/court/session/resume-cour
 import { createResumeOnce, type ResumeOnce } from "../features/court/session/resume-once";
 import { strings } from "../strings/pt-BR";
 import { ErrorScreen } from "../ui/ErrorScreen";
-import { queryKeys } from "./query/query-keys";
 import { useServices, type Services } from "./services-context";
+import { invalidateSummaryOfRound } from "./summary-invalidation";
 
 type GateState =
   | { readonly status: "opening" }
@@ -56,8 +56,8 @@ function createSync(
     scheduler: services.scheduler,
     random: services.randomSource,
     // The server has new points of the round: its summary is read again (E4.12).
-    onAcknowledged: ({ groupId, roundId }) => {
-      void client.invalidateQueries({ queryKey: queryKeys.roundSummary(groupId, roundId) });
+    onAcknowledged: (round) => {
+      invalidateSummaryOfRound(client, round);
     },
   });
 }

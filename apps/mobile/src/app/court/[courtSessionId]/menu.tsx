@@ -6,7 +6,11 @@ import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtTheme } from "../../../features/court/hooks/use-court-theme";
 import { endRoundView } from "../../../features/court/end-round/end-round-view";
 import { useEndRound } from "../../../features/court/end-round/use-end-round";
-import { endMatchSummary, menuSubtitle, openMatchScore } from "../../../features/court/model/menu-selectors";
+import {
+  endMatchSummary,
+  menuSubtitle,
+  openMatchScore,
+} from "../../../features/court/model/menu-selectors";
 import { refusalText } from "../../../features/court/model/refusal-text";
 import { canSubstitute } from "../../../features/court/substitution/substitution-selectors";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";

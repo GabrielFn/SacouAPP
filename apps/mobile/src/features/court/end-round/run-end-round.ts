@@ -45,4 +45,3 @@ export async function runEndRound(
   sync.notifyAppended();
   return ok({ serverClosed: closed.ok });
 }
-

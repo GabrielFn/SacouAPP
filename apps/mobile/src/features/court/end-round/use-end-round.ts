@@ -6,11 +6,7 @@ import { useServices } from "../../../services/services-context";
 import { queryKeys } from "../../../services/query/query-keys";
 import { summaryHref } from "../../rounds/navigation";
 import { useCourtRuntime } from "../hooks/court-runtime-context";
-import {
-  endRoundReducer,
-  INITIAL_END_ROUND,
-  type EndRoundState,
-} from "./end-round.reducer";
+import { endRoundReducer, INITIAL_END_ROUND, type EndRoundState } from "./end-round.reducer";
 import { runEndRound } from "./run-end-round";
 
 export interface EndRoundFlow {

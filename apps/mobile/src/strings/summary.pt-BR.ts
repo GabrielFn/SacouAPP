@@ -42,4 +42,13 @@ export const summaryStrings = {
       ? "Ainda falta 1 ponto para enviar. O resumo pode mudar."
       : `Ainda faltam ${String(points)} pontos para enviar. O resumo pode mudar.`,
   entry: "Resumo da rodada",
+  share: {
+    title: "Mandar pro grupo",
+    whatsapp: "WhatsApp",
+    /** "Resumo do Racha de terça · 4 partidas." */
+    intro: (header: string) => `Resumo do ${header}.`,
+    mvp: (name: string, detail: string) => `MVP do dia: ${name} (${detail}).`,
+    mostWins: (label: string, figure: string) => `Time que mais venceu: ${label}, ${figure}.`,
+    longestStreak: (label: string, figure: string) => `Maior sequência: ${label}, ${figure}.`,
+  },
 } as const;

@@ -60,6 +60,7 @@ describe("the simulated round of the E2.9 (G1 to G5)", () => {
     expect(view.mvp).toEqual({
       name: "Bia",
       line: "Laranja · +2 de saldo · 2 vitórias em 3",
+      detail: "+2 de saldo, 2 vitórias em 3",
       byStats: true,
     });
     expect(view.highlights.mostWins).toMatchObject({
@@ -185,9 +186,18 @@ describe("states (T4, T6, T7)", () => {
   const failed = (error: ApiError, data?: RoundSummaryReport): SummaryViewInput =>
     input(data, { query: { status: "error", data, error: new ApiFailure(error) } });
 
+  test("T7b: the empty state also warns of the points still on the phone", () => {
+    const view = summaryView(input({ ...E2_9_ROUND, finishedMatches: 0 }, { unsentPoints: 3 }));
+    expect(view).toMatchObject({ kind: "empty", unsentNote: summaryStrings.unsent(3) });
+  });
+
   test("T4: no match finished is the empty state", () => {
     const view = summaryView(input({ ...E2_9_ROUND, finishedMatches: 0 }));
-    expect(view).toEqual({ kind: "empty", header: "Racha de terça · 0 partidas" });
+    expect(view).toEqual({
+      kind: "empty",
+      header: "Racha de terça · 0 partidas",
+      unsentNote: null,
+    });
   });
 
   test("T6: loading, offline without cache, and the errors with their texts", () => {

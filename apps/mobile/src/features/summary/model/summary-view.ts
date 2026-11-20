@@ -3,7 +3,14 @@ import { apiErrorOf } from "../../../services/api/api-error";
 import type { Member, RoundSummaryReport } from "../../../services/api/sacou-api";
 import { summaryStrings } from "../../../strings/summary.pt-BR";
 import type { TeamColor } from "../../draw/model/team-identity";
-import { headerLine, mvpIsFromVotes, mvpLine, sideLook, type SummarySide } from "./summary-texts";
+import {
+  headerLine,
+  mvpDetail,
+  mvpIsFromVotes,
+  mvpLine,
+  sideLook,
+  type SummarySide,
+} from "./summary-texts";
 
 /** What the query says, as the screen needs it (only the part that decides the state). */
 export interface SummaryQueryState {
@@ -24,6 +31,8 @@ export interface SummaryViewInput {
 export interface MvpView {
   readonly name: string;
   readonly line: string;
+  /** "+2 de saldo, 2 vitórias em 3": the shared text uses it, without the side. */
+  readonly detail: string;
   /** Shows "Calculado pelo placar". */
   readonly byStats: boolean;
 }
@@ -56,7 +65,8 @@ export type SummaryView =
   | { readonly kind: "loading" }
   | { readonly kind: "offline-empty" }
   | { readonly kind: "error"; readonly text: string }
-  | { readonly kind: "empty"; readonly header: string }
+  /** The server has no finished match; with points still on this phone, the note says why (E4.12). */
+  | { readonly kind: "empty"; readonly header: string; readonly unsentNote: string | null }
   | ReadySummary;
 
 function nameOf(memberId: string, members: readonly Member[] | undefined): string {
@@ -74,6 +84,7 @@ function mvpViewOf(
   return {
     name: summaryStrings.names(mvp.memberIds.map((memberId) => nameOf(memberId, members))),
     line: mvpLine(mvp),
+    detail: mvpDetail(mvp),
     byStats: !mvpIsFromVotes(mvp),
   };
 }
@@ -121,13 +132,14 @@ export function summaryView(input: SummaryViewInput): SummaryView {
   const report = query.data;
   if (report === undefined) return withoutData(input);
   const header = headerLine(groupName, report.finishedMatches);
-  if (report.finishedMatches === 0) return { kind: "empty", header };
+  const unsentNote = unsentPoints > 0 ? summaryStrings.unsent(unsentPoints) : null;
+  if (report.finishedMatches === 0) return { kind: "empty", header, unsentNote };
   return {
     kind: "ready",
     header,
     mvp: mvpViewOf(report, members),
     highlights: highlightsOf(report),
     stale: query.status === "error" || !input.online,
-    unsentNote: unsentPoints > 0 ? summaryStrings.unsent(unsentPoints) : null,
+    unsentNote,
   };
 }
