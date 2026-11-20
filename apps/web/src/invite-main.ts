@@ -5,6 +5,7 @@ import { createInviteFetchApi } from "./adapters/invite-fetch-api";
 import { readFirebaseConfig } from "./config/page-config";
 import { findInviteElements, INVITE_IDS, type InviteNodes } from "./dom/invite-elements";
 import { renderInvitePage } from "./dom/invite-view";
+import { listenToSheet } from "./dom/sheet-listeners";
 import type { ViewEnvironment } from "./dom/sign-in-sheet";
 import { createInvitePage, type InvitePage } from "./invite-page/invite-page.controller";
 import { takeInviteToken } from "./invite-page/invite-token";
@@ -13,29 +14,7 @@ import { isEmbeddedBrowser } from "./round-page/browser";
 function listen(nodes: InviteNodes, page: InvitePage): void {
   nodes.signIn.addEventListener("click", () => void page.tapSignIn());
   nodes.join.addEventListener("click", () => void page.join());
-  nodes.sheetClose.addEventListener("click", () => {
-    page.closeSheet();
-  });
-  nodes.google.addEventListener("click", () => void page.signInWithGoogle());
-  nodes.emailChoice.addEventListener("click", () => {
-    page.chooseForm("signIn");
-  });
-  nodes.signInTab.addEventListener("click", () => {
-    page.chooseForm("signIn");
-  });
-  nodes.signUpTab.addEventListener("click", () => {
-    page.chooseForm("signUp");
-  });
-  nodes.forgot.addEventListener("click", () => {
-    page.chooseForm("reset");
-  });
-  nodes.emailBack.addEventListener("click", () => {
-    page.chooseForm("choice");
-  });
-  nodes.emailForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    void page.submitEmail(nodes.email.value.trim(), nodes.password.value);
-  });
+  listenToSheet(nodes, page);
   nodes.signOut.addEventListener("click", () => void page.signOut());
 }
 

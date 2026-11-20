@@ -1,4 +1,5 @@
-import type { Failure, SheetForm, SignInAttempt } from "../round-page/round-page.types";
+import type { Failure } from "../round-page/round-page.types";
+import type { SignInSheetAction } from "../round-page/sign-in-flow";
 
 import type { InvitePreview } from "./invite-page.types";
 
@@ -12,14 +13,7 @@ export type InviteSessionAction =
 /** The sheet of screen 02, the same ways in as the round page. */
 export type InviteSheetAction =
   /** The main button: the sheet when signed out, the preview again when signed in. */
-  | { readonly type: "signInTapped" }
-  | { readonly type: "sheetClosed" }
-  | { readonly type: "formChosen"; readonly form: SheetForm }
-  | { readonly type: "signInStarted"; readonly attempt: SignInAttempt }
-  | { readonly type: "signInFailed"; readonly failure: Failure }
-  | { readonly type: "signInCancelled" }
-  | { readonly type: "resetSent" }
-  | { readonly type: "signedIn" };
+  { readonly type: "signInTapped" } | SignInSheetAction;
 
 /** The preview and the join. */
 export type InviteJoinAction =

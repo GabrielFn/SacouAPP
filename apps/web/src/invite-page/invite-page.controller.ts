@@ -1,5 +1,6 @@
 import type { AuthOutcome, AuthPort } from "../round-page/ports";
-import type { EmailMode, SheetForm } from "../round-page/round-page.types";
+import type { Failure, SheetForm } from "../round-page/round-page.types";
+import { emailModeOf, settleSignIn, submitEmailForm } from "../round-page/sign-in-flow";
 
 import type { InvitePageAction } from "./invite-page.actions";
 import { initialInvitePageState, invitePageReducer } from "./invite-page.reducer";
@@ -27,9 +28,8 @@ export interface InvitePage {
   signOut(): Promise<void>;
 }
 
-function emailModeOf(state: InvitePageState): EmailMode | null {
-  return state.step === "signIn" && state.form !== "choice" ? state.form : null;
-}
+/** A blocked Google window: the e-mail is the way in (no redirect on this page). */
+const POPUP_BLOCKED: Failure = { kind: "providerUnavailable" };
 
 /** The invite page's flow: the reducer holds the state, and each step that talks to Firebase or the API runs here. */
 export function createInvitePage(deps: InvitePageDependencies): InvitePage {
@@ -68,34 +68,18 @@ export function createInvitePage(deps: InvitePageDependencies): InvitePage {
     );
   }
 
-  async function settle(outcome: AuthOutcome): Promise<void> {
-    switch (outcome.kind) {
-      case "done":
-        return dispatch({ type: "signedIn" });
-      case "cancelled":
-        return dispatch({ type: "signInCancelled" });
-      case "failed":
-        return dispatch({ type: "signInFailed", failure: outcome.failure });
-      case "popupBlocked":
-        // No redirect here: the page would come back without the token, which lives only in memory (ADR 0070, D8).
-        return dispatch({ type: "signInFailed", failure: { kind: "providerUnavailable" } });
-    }
-  }
+  // No redirect here: the page would come back without the token, which lives only in memory (ADR 0070, D8).
+  const settle = (outcome: AuthOutcome) => settleSignIn(outcome, dispatch, POPUP_BLOCKED);
 
-  async function submitEmail(email: string, password: string): Promise<void> {
-    const mode = emailModeOf(store.current);
-    if (mode === null) return;
-    await dispatch({ type: "signInStarted", attempt: mode });
-    if (mode === "reset") {
-      const sent = await deps.auth.sendPasswordReset(email);
-      return sent.kind === "done" ? dispatch({ type: "resetSent" }) : settle(sent);
-    }
-    const outcome =
-      mode === "signIn"
-        ? await deps.auth.signInWithEmail(email, password)
-        : await deps.auth.signUpWithEmail(email, password);
-    return settle(outcome);
-  }
+  const submitEmail = (email: string, password: string) =>
+    submitEmailForm(
+      deps.auth,
+      emailModeOf(store.current),
+      email,
+      password,
+      dispatch,
+      POPUP_BLOCKED,
+    );
 
   return {
     state: () => store.current,

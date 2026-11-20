@@ -49,6 +49,14 @@ internal static class RoundPageFixture
                 builder.UseSetting("Firebase:Web:ProjectId", "sacou-test");
                 builder.UseSetting("Firebase:Web:AppId", "1:2:web:3");
             }
+            else
+            {
+                // appsettings.json carries the real public config (19/11/2026): a machine without it is emptied here.
+                builder.UseSetting("Firebase:Web:ApiKey", string.Empty);
+                builder.UseSetting("Firebase:Web:AuthDomain", string.Empty);
+                builder.UseSetting("Firebase:Web:ProjectId", string.Empty);
+                builder.UseSetting("Firebase:Web:AppId", string.Empty);
+            }
 
             builder.ConfigureTestServices(services =>
             {

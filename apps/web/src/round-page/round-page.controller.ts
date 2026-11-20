@@ -2,7 +2,8 @@ import { firstNameOf } from "./browser";
 import type { ApiPort, AuthOutcome, AuthPort, PendingIntentStore } from "./ports";
 import type { RoundPageAction } from "./round-page.actions";
 import { initialRoundPageState, roundPageReducer } from "./round-page.reducer";
-import type { EmailMode, Intent, RoundPageState, SheetForm } from "./round-page.types";
+import type { Failure, Intent, RoundPageState, SheetForm } from "./round-page.types";
+import { emailModeOf, settleSignIn, submitEmailForm } from "./sign-in-flow";
 
 export interface RoundPageDependencies {
   /** The round link's code, read from the page; it only goes in request bodies (ADR 0070, D3). */
@@ -27,9 +28,8 @@ export interface RoundPage {
   signOut(): Promise<void>;
 }
 
-function emailModeOf(state: RoundPageState): EmailMode | null {
-  return state.step === "signIn" && state.form !== "choice" ? state.form : null;
-}
+/** A blocked window that the redirect could not get past either. */
+const UNEXPECTED: Failure = { kind: "unexpected" };
 
 /** The page's flow: the reducer holds the state, and each step that talks to Firebase or the API runs here. */
 export function createRoundPage(deps: RoundPageDependencies): RoundPage {
@@ -91,18 +91,7 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
     );
   }
 
-  async function settle(outcome: AuthOutcome): Promise<void> {
-    switch (outcome.kind) {
-      case "done":
-        return dispatch({ type: "signedIn" });
-      case "cancelled":
-        return dispatch({ type: "signInCancelled" });
-      case "failed":
-        return dispatch({ type: "signInFailed", failure: outcome.failure });
-      case "popupBlocked":
-        return dispatch({ type: "signInFailed", failure: { kind: "unexpected" } });
-    }
-  }
+  const settle = (outcome: AuthOutcome) => settleSignIn(outcome, dispatch, UNEXPECTED);
 
   async function signInWithGoogle(): Promise<void> {
     const open = store.current;
@@ -115,20 +104,8 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
     return settle(await deps.auth.signInWithGoogleRedirect());
   }
 
-  async function submitEmail(email: string, password: string): Promise<void> {
-    const mode = emailModeOf(store.current);
-    if (mode === null) return;
-    await dispatch({ type: "signInStarted", attempt: mode });
-    if (mode === "reset") {
-      const sent = await deps.auth.sendPasswordReset(email);
-      return sent.kind === "done" ? dispatch({ type: "resetSent" }) : settle(sent);
-    }
-    const outcome =
-      mode === "signIn"
-        ? await deps.auth.signInWithEmail(email, password)
-        : await deps.auth.signUpWithEmail(email, password);
-    return settle(outcome);
-  }
+  const submitEmail = (email: string, password: string) =>
+    submitEmailForm(deps.auth, emailModeOf(store.current), email, password, dispatch, UNEXPECTED);
 
   return {
     state: () => store.current,
