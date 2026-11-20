@@ -60,6 +60,16 @@ public sealed class RoundCloseTests
         Assert.Equal(first.ClosedAt, again.Round.ClosedAt);
     }
 
+    /// <summary>I6: the instant is kept in whole microseconds, as the database does, so the answer equals a later read.</summary>
+    [Fact]
+    public void TheCloseInstant_HasTheDatabasePrecision()
+    {
+        var round = NewRound();
+        var tap = round.Slot.StartsAt.AddHours(1).AddTicks(7);
+
+        Assert.Equal(round.Slot.StartsAt.AddHours(1), round.Close(tap).Value.Round.ClosedAt);
+    }
+
     [Fact]
     public void ACancelledRound_DoesNotClose()
     {

@@ -67,8 +67,12 @@ internal sealed partial record Round(
 
         return Result.Success(ClosedAt is not null
             ? RoundChange.Unchanged(this)
-            : new RoundChange(this with { ClosedAt = now }, [], [new RoundClosed(Id, GroupId)]) { RoundRowChanged = true });
+            : new RoundChange(this with { ClosedAt = ToStoredPrecision(now) }, [], [new RoundClosed(Id, GroupId)]) { RoundRowChanged = true });
     }
+
+    /// <summary>The instant as the database keeps it (whole microseconds), so the first answer equals every later read.</summary>
+    private static DateTimeOffset ToStoredPrecision(DateTimeOffset instant) =>
+        instant.AddTicks(-(instant.Ticks % TimeSpan.TicksPerMicrosecond));
 
     /// <summary>
     /// The admin's edit (date, time, venue, layer): refused once cancelled or started. A new date or time
