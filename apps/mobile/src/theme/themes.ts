@@ -1,3 +1,4 @@
+import { cardLabelColor, cardMeshColor } from "./card-tokens.data";
 import { courtPalette, nightAlpha, nightRgb, palette } from "./tokens.data";
 
 export const THEME_ROLES = [
@@ -40,6 +41,9 @@ export const THEME_ROLES = [
   "selectFill",
   "selectOutline",
   "meterBand",
+  "cardAvatarSurface",
+  "cardLabel",
+  "cardMesh",
 ] as const;
 
 export type ThemeRole = (typeof THEME_ROLES)[number];
@@ -70,6 +74,10 @@ const memberColors = {
   selectFill: palette.selectFill,
   selectOutline: palette.netBlue,
   meterBand: palette.meterBand,
+  // The player card (Perfil.dc.html .kc): the avatar blue, the labels and the mesh over the night.
+  cardAvatarSurface: palette.cardAvatar,
+  cardLabel: cardLabelColor,
+  cardMesh: cardMeshColor,
 } as const;
 
 /** One ground and its text for the day strip of a round card (Grupos.dc.html .day). */

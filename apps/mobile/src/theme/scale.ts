@@ -13,6 +13,7 @@ import {
   sizes,
   spacing,
 } from "./tokens.data";
+import { CARD_COMPACT_RATIO, cardMeasures } from "./card-tokens.data";
 import { sheetFontSizes, sheetRadii, sheetSizes } from "./sheet-tokens.data";
 
 /**
@@ -41,6 +42,12 @@ export interface ScaledSheetTokens {
   readonly radii: NumberMap<typeof sheetRadii>;
 }
 
+/** Measures of the player card: the full one, and the compact one of screen 14 (the full one times the ratio). */
+export interface ScaledCardTokens {
+  readonly full: NumberMap<typeof cardMeasures>;
+  readonly compact: NumberMap<typeof cardMeasures>;
+}
+
 export interface ScaledTokens {
   readonly factor: number;
   readonly spacing: NumberMap<typeof spacing>;
@@ -50,6 +57,7 @@ export interface ScaledTokens {
   readonly sizes: NumberMap<typeof sizes>;
   readonly court: ScaledCourtTokens;
   readonly sheet: ScaledSheetTokens;
+  readonly card: ScaledCardTokens;
 }
 
 function mapValues<T extends Readonly<Record<string, number>>>(
@@ -91,6 +99,14 @@ function createCourtTokens(factor: number, fontFactor: number): ScaledCourtToken
   };
 }
 
+function createCardTokens(factor: number): ScaledCardTokens {
+  const at = (ratio: number) =>
+    mapValues(cardMeasures, (value) =>
+      Math.max(accessibilityFloors.hairline, Math.round(value * factor * ratio)),
+    );
+  return { full: at(1), compact: at(CARD_COMPACT_RATIO) };
+}
+
 export function createScaledTokens({ windowWidth, fontScale }: ScaleInput): ScaledTokens {
   const factor = scaleFactor(windowWidth);
   const scaled = (value: number) => Math.round(value * factor);
@@ -103,6 +119,7 @@ export function createScaledTokens({ windowWidth, fontScale }: ScaleInput): Scal
     borderWidths: mapValues(borderWidths, (value) => scaleBorder(value, factor)),
     sizes: mapValues(sizes, (value) => scaleSize(value, factor)),
     court: createCourtTokens(factor, fontFactor),
+    card: createCardTokens(factor),
     sheet: {
       sizes: mapValues(sheetSizes, (value) => scaleSize(value, factor)),
       fontSizes: mapValues(sheetFontSizes, (value) => Math.round(value * fontFactor)),

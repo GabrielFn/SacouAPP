@@ -19,6 +19,7 @@ import { createLevelOperations } from "./http-level-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
 import { createRoundOperations } from "./http-round-operations";
+import { createStatsOperations } from "./http-stats-operations";
 import { apiErr, apiOk, type ApiResult } from "../services/api/api-result";
 import type { HttpTransport } from "../services/api/http-transport";
 import type { IdTokenProvider } from "../services/api/id-token-provider";
@@ -281,6 +282,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
     ...createProfileOperations(client, execute),
+    ...createStatsOperations(client, execute),
     ...createAccountOperations(client, execute),
     ...createCourtOperations(client, executeAs),
   };

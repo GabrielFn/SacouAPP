@@ -35,6 +35,11 @@ export type MyDataExport = Schemas["JsonObject"];
 /** A group where the person is the only admin, with someone else in it (ADR 0056, D3 and D10). */
 export type DeletionBlocker = Schemas["DeletionBlockerResponse"];
 
+/** The person's own numbers of the season, total and per group: whole numbers only, never a rating (ADR 0047). */
+export type MyStats = Schemas["MyStatsReport"];
+export type MyStatsTotals = Schemas["MyStatsTotalsReport"];
+export type MyStatsGroup = Schemas["MyStatsGroupReport"];
+
 export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
@@ -146,6 +151,8 @@ export interface SacouApi {
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */
   saveMyProfile(body: SaveMyProfileBody): Promise<ApiResult<MyProfile>>;
+  /** Screen 14: the season of the server (`America/Sao_Paulo`), only of the person who is signed in. */
+  getMyStats(): Promise<ApiResult<MyStats>>;
   /** Screen 30a: built on the spot, `no-store`; the answer lives only in the export, never in the cache. */
   exportMyData(): Promise<ApiResult<MyDataExport>>;
   /** Screen 30b: a preview only; the `DELETE` judges again under the locks of the groups. */

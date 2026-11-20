@@ -49,3 +49,10 @@ export function SignOutIcon({ color }: IconProps) {
 export function GearIcon({ color }: IconProps) {
   return <MenuIcon color={color} paths={GEAR} />;
 }
+
+const SHARE = ["M12 3v12", "M7 8l5-5 5 5", "M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"];
+
+/** "Compartilhar" of screen 14 (Perfil.dc.html). */
+export function ShareIcon({ color }: IconProps) {
+  return <MenuIcon color={color} paths={SHARE} />;
+}

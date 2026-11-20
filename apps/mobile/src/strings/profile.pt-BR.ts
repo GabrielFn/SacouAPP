@@ -28,4 +28,61 @@ export const profileStrings = {
   loading: "Carregando seu perfil",
   loadFailed: "Não deu para abrir seu perfil",
   retry: "Tentar de novo",
+  /** Screen 14, "Eu" (Perfil.dc.html). */
+  me: {
+    title: "Eu",
+    settings: "Configurações",
+    numbersFromScore: "Os números vêm do placar.",
+    share: "Compartilhar",
+    editProfile: "Editar perfil",
+    statsTitle: "Estatísticas",
+    allGroups: (year: number) => `Todos os grupos · ${String(year)}`,
+    byGroupTitle: "Por grupo",
+    shareSoonTitle: "A tela de compartilhar chega em breve.",
+    emptyStats: "Seus números aparecem depois da primeira partida.",
+    loading: "Carregando seus números",
+    loadFailed: "Não deu para abrir seus números",
+    offlineTitle: "Sem conexão.",
+    offlineBody: "Seus números aparecem quando a internet voltar.",
+    retry: "Tentar de novo",
+    formerGroup: "Ex-jogador",
+  },
+  /** The player card (`.kc`): the labels of the six numbers and the season seal. No level, no tier. */
+  card: {
+    matches: "partidas",
+    winRate: "vitórias",
+    plusMinus: "saldo",
+    longestStreak: "maior seq.",
+    mvpCount: "vezes MVP",
+    presence: "presença",
+    season: (year: number) => `Temporada ${String(year)}`,
+    brand: "Sacou",
+    alsoPlays: (others: string) => `também ${others}`,
+    noValue: "—",
+    avatarLabel: (nickname: string) => `Avatar de ${nickname}`,
+    /** "Sua cartinha: ponteiro, 48 partidas, ..."; without numbers when the card hides them. */
+    label: (position: string | null, numbers: readonly string[]) =>
+      [position === null ? "Sua cartinha" : `Sua cartinha: ${position.toLocaleLowerCase("pt-BR")}`, ...numbers].join(", "),
+    summary: {
+      matches: (value: string) => `${value} partidas`,
+      winRate: (value: string) => `${value} de vitórias`,
+      plusMinus: (value: string) => `saldo ${value}`,
+      longestStreak: (value: string) => `maior sequência ${value}`,
+      mvpCount: (value: string) => `${value} vezes MVP`,
+      presence: (value: string) => `${value} de presença`,
+    },
+  },
+  /** The tiles of screen 14 (`.st`). */
+  stats: {
+    matches: "partidas",
+    wins: (winRate: string) => `vitórias · ${winRate}`,
+    plusMinus: "saldo",
+    longestStreak: "maior seq.",
+    mvpCount: "vezes MVP",
+    rounds: "rodadas",
+  },
+  groupRow: {
+    summary: (matches: number, winRate: string, wins: number) =>
+      `${String(matches)} partidas · ${winRate} (${String(wins)} vitórias)`,
+  },
 } as const;
