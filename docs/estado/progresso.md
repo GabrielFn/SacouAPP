@@ -60,6 +60,8 @@
 
 ## Em andamento
 
+- 20/11/2026: **E3.9 feita** (#173, #176, #178, #180, #183). **Pausa pedida pelo Gabriel**; em andamento e salvos em `wip`: E3.11 Parte 1 (#182, aprovada, falta regerar o contrato depois da junção com a `main`), E3.18 Parte 1, E4.12 Parte 1 e E4.13 Parte 1. Próximo passo exato no [diário de 18/11](sessoes/2026-11-18.md), seção "depois da pausa de 20/11".
+
 - 20/11/2026, madrugada: **E3.12 feita no código** (#171, #177, #179; ADR 0070): link da rodada, página `/r` com login web e VOU, convite `/c`, link no texto do WhatsApp. App Web registrado no Firebase com o Gabriel (domínio `run.app` do teste autorizado; chave restrita por referenciador; `Referrer-Policy: strict-origin` para a chave funcionar). Falta o teste no celular com uma segunda conta e a variável `EXPO_PUBLIC_INVITE_BASE_URL` no EAS. **E3.9:** Partes 1 (#173), 2 (#176), 3 (#178) e 4a (#180) mergeadas; **4b** em andamento (desenvolvedor Opus, `task/E3.9-stats-routes`, worktree `SacouAPP-E3.9`, com as condições da 4a). **E3.11 Parte 1** em andamento (desenvolvedor Opus, `task/E3.11-outbox-devices`, worktree `SacouAPP-E3.12`). Próximo passo no [diário de 18/11](sessoes/2026-11-18.md).
 
 - 19/11/2026, noite: **E3.12 Parte 3** no código (desenvolvedor Opus, `task/E3.12-share-invite`): texto do compartilhar com o link da rodada (tela 20) e página de convite `/c` (ADR 0070, D8 e D9). Fecha a pendência do destino do link do convite. Falta revisão, segurança e testes; o Gabriel põe `EXPO_PUBLIC_INVITE_BASE_URL` (origem `run.app`) no EAS.
