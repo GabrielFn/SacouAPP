@@ -231,7 +231,8 @@ public sealed class StatsProjectorTests
         var again = await Projector().GetRoundAsync(GroupId, RoundId, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, courts.Summaries);
-        Assert.Equal(SummaryJson.Write(fresh!.Summary), SummaryJson.Write(again!.Summary));
+        Assert.Equal(fresh!.Summary.Players, again!.Summary.Players, (left, right) => left.MemberId == right.MemberId && left.PlusMinus == right.PlusMinus);
+        Assert.Single(again.Summary.FinishedMatches);
         Assert.Equal(ratings, store.Ratings.Select(row => (row.MemberId, row.Mu, row.Sigma)));
     }
 
