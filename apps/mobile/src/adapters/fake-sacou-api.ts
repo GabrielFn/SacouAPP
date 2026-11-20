@@ -52,6 +52,7 @@ function defaults(): Answers {
     getRoundSummary: none,
     createRound: none,
     updateRound: none,
+    closeRound: none,
     respondAttendance: none,
     setMemberAttendance: none,
     getMyProfile: none,
@@ -114,6 +115,7 @@ export function createFakeSacouApi(): FakeSacouApi {
     getRoundSummary: (groupId, roundId) => answer("getRoundSummary", [groupId, roundId]),
     createRound: (groupId, body) => answer("createRound", [groupId, body]),
     updateRound: (groupId, roundId, body) => answer("updateRound", [groupId, roundId, body]),
+    closeRound: (groupId, roundId) => answer("closeRound", [groupId, roundId]),
     respondAttendance: (groupId, roundId, response) =>
       answer("respondAttendance", [groupId, roundId, response]),
     setMemberAttendance: (member, response) => answer("setMemberAttendance", [member, response]),

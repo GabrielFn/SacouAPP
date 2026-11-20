@@ -114,6 +114,8 @@ export const courtStrings = {
     themeNight: "Noite",
     leave: "Sair do modo quadra",
     endMatch: "Encerrar partida",
+    endRound: "Encerrar rodada",
+    endRoundHint: "fecha a noite toda",
   },
   endMatchDialog: {
     title: "Encerrar a partida agora?",

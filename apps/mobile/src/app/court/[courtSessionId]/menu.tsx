@@ -4,7 +4,9 @@ import { useCourtSides } from "../../../features/court/hooks/court-sides-context
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtTheme } from "../../../features/court/hooks/use-court-theme";
-import { endMatchSummary, menuSubtitle } from "../../../features/court/model/menu-selectors";
+import { endRoundView } from "../../../features/court/end-round/end-round-view";
+import { useEndRound } from "../../../features/court/end-round/use-end-round";
+import { endMatchSummary, menuSubtitle, openMatchScore } from "../../../features/court/model/menu-selectors";
 import { refusalText } from "../../../features/court/model/refusal-text";
 import { canSubstitute } from "../../../features/court/substitution/substitution-selectors";
 import { CourtFailedView } from "../../../features/court/ui/CourtFailedView";
@@ -24,6 +26,7 @@ export default function MenuRoute() {
   const theme = useCourtTheme();
   const { view, dispatch, retry } = useCourtSession();
   const [refusal, setRefusal] = useState<string | null>(null);
+  const endRound = useEndRound(route.params.courtSessionId);
   const timeline = view.status === "ready" ? view.timeline : null;
   const subtitle = useMemo(
     () => (timeline === null ? null : menuSubtitle(timeline, courtRoster)),
@@ -82,6 +85,14 @@ export default function MenuRoute() {
       onChooseTheme={theme.choose}
       onLeave={route.leave}
       onEndMatch={endMatch}
+      endRound={{
+        view: endRoundView(endRound.state),
+        onAsk: () => {
+          endRound.request(timeline === null ? null : openMatchScore(timeline));
+        },
+        onConfirm: endRound.confirm,
+        onCancel: endRound.cancel,
+      }}
     />
   );
 }

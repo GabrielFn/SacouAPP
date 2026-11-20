@@ -15,6 +15,8 @@ export interface MenuRowProps {
   readonly accessibilityLabel?: string;
   readonly chevron?: boolean;
   readonly disabled?: boolean;
+  /** The color of a refusal, for what closes the whole night (screen 23, "Encerrar rodada"). */
+  readonly danger?: boolean;
   readonly onPress: () => void;
 }
 
@@ -25,9 +27,11 @@ export function MenuRow({
   accessibilityLabel,
   chevron = false,
   disabled = false,
+  danger = false,
   onPress,
 }: MenuRowProps) {
   const { colors, tokens } = useTheme();
+  const tint = danger ? colors.refusal : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -46,18 +50,20 @@ export function MenuRow({
         paddingHorizontal: tokens.spacing.xs,
       }}
     >
-      {renderIcon(disabled ? colors.textMuted : colors.text)}
+      {renderIcon(disabled ? colors.textMuted : tint)}
       <Text
         variant="title"
         style={{
           flexShrink: 1,
           fontFamily: fontFamilies.body600,
-          ...(disabled ? { color: colors.textMuted } : null),
+          color: disabled ? colors.textMuted : tint,
         }}
       >
         {label}
         {hint === undefined ? null : (
-          <Text variant="muted">{strings.court.menu.hintAfter(hint)}</Text>
+          <Text variant="muted" style={danger ? { color: tint } : undefined}>
+            {strings.court.menu.hintAfter(hint)}
+          </Text>
         )}
       </Text>
       {chevron ? (
