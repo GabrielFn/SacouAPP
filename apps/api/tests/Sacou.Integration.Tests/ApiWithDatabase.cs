@@ -10,6 +10,7 @@ using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
 using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Notifications;
+using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;

@@ -1,5 +1,6 @@
 using System.Net;
 using Sacou.Integration.Tests.Sessions;
+using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
 using Xunit;
 using N = Sacou.Integration.Tests.Notifications.NotificationCalls;

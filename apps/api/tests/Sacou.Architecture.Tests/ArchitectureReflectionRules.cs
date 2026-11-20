@@ -22,6 +22,15 @@ internal static partial class ArchitectureReflectionRules
         "System.Threading",
     ];
 
+    /// <summary>
+    /// Closed list of friends besides the own tests: the Notifications lets the integration tests swap its internal push
+    /// port, which carries the token, for a fake (ADR 0069, D5), so the port never has to be public.
+    /// </summary>
+    private static readonly HashSet<(string Assembly, string Friend)> AllowedFriends =
+    [
+        ("Sacou.Modules.Notifications", "Sacou.Integration.Tests"),
+    ];
+
     private const string UserIdSuffix = "UserId";
     private const string ModuleAssemblyPrefix = "Sacou.Modules.";
     private const string ApiAssemblyName = "Sacou.Api";
@@ -80,14 +89,15 @@ internal static partial class ArchitectureReflectionRules
             .Where(type => !IsAllowedPublicType(type))
             .Select(type => type.FullName ?? type.Name)];
 
-    /// <summary>Friend assemblies other than the assembly's own test project.</summary>
+    /// <summary>Friend assemblies other than the assembly's own test project and the closed list of <see cref="AllowedFriends"/>.</summary>
     internal static IReadOnlyList<string> InternalsVisibleToViolations(Assembly assembly)
     {
-        var ownTests = assembly.GetName().Name + TestAssemblySuffix;
+        var name = assembly.GetName().Name ?? string.Empty;
+        var ownTests = name + TestAssemblySuffix;
         return
         [.. assembly.GetCustomAttributes<InternalsVisibleToAttribute>()
             .Select(attribute => attribute.AssemblyName)
-            .Where(friend => friend != ownTests)];
+            .Where(friend => friend != ownTests && !AllowedFriends.Contains((name, friend)))];
     }
 
     /// <summary>Source types whose namespace does not start with the assembly name.</summary>

@@ -1,12 +1,10 @@
-using System.Data.Common;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Notifications.Contracts;
 
 namespace Sacou.Modules.Sessions.Application.Outbox;
 
 /// <summary>
-/// What a write that promoted someone runs after its commit and before answering (ADR 0069, D8): the relay, then the push
+/// What a write that promoted someone runs after its commit and before answering (ADR 0069, D10): the relay, then the push
 /// pump, within <see cref="Budget"/> of their own. The request is never failed nor cancelled by them: what does not fit,
 /// or fails, stays in the outbox or pending for the next run. Nothing runs outside a request (ADR 0068).
 /// </summary>
@@ -19,12 +17,12 @@ internal sealed partial class OutboxDrain(SessionsOutboxRelay relay, INotificati
         using var budget = new CancellationTokenSource(Budget);
         try
         {
-            int relayed;
+            RelayRun run;
             do
             {
-                relayed = await relay.RunAsync(budget.Token).ConfigureAwait(false);
+                run = await relay.RunAsync(budget.Token).ConfigureAwait(false);
             }
-            while (relayed == SessionsOutboxRelay.BatchSize);
+            while (run.Taken == SessionsOutboxRelay.BatchSize && run.Failed == 0);
 
             await pump.RunAsync(budget.Token).ConfigureAwait(false);
         }
@@ -32,11 +30,9 @@ internal sealed partial class OutboxDrain(SessionsOutboxRelay relay, INotificati
         {
             Stopped(logger, "budget-spent");
         }
-        catch (DbException exception)
-        {
-            Stopped(logger, exception.GetType().Name);
-        }
-        catch (DbUpdateException exception)
+#pragma warning disable CA1031 // The write is already committed (ADR 0069, D10): no failure here may turn its answer into a 500.
+        catch (Exception exception)
+#pragma warning restore CA1031
         {
             Stopped(logger, exception.GetType().Name);
         }

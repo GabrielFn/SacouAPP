@@ -17,5 +17,7 @@
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Sacou.Modules.Notifications.Tests" />
+        <!-- Only to swap the internal push port (it carries the token) for a fake: ADR 0069, D5; allowed by name in Sacou.Architecture.Tests. -->
+        <InternalsVisibleTo Include="Sacou.Integration.Tests" />
     </ItemGroup>
 </Project>

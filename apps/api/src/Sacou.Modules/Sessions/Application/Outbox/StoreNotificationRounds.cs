@@ -5,7 +5,7 @@ using Sacou.Modules.Sessions.Infrastructure;
 namespace Sacou.Modules.Sessions.Application.Outbox;
 
 /// <summary>
-/// The Sessions' side of <see cref="INotificationRounds"/> (ADR 0069, D7): one read without a lock, by the pairs asked,
+/// The Sessions' side of <see cref="INotificationRounds"/> (ADR 0069, D3): one read without a lock, by the pairs asked,
 /// the local date and time as stored. A pair whose round belongs to another group is not found.
 /// </summary>
 internal sealed class StoreNotificationRounds(SessionsDbContext database) : INotificationRounds

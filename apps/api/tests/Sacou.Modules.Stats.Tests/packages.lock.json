@@ -281,6 +281,17 @@
           "Sacou.Shared": "[1.0.0, )"
         }
       },
+      "sacou.modules.notifications": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.14, 10.0.14]",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, 10.0.3]",
+          "Sacou.Http": "[1.0.0, )",
+          "Sacou.Modules.Groups": "[1.0.0, )",
+          "Sacou.Modules.Identity": "[1.0.0, )",
+          "Sacou.Shared": "[1.0.0, )"
+        }
+      },
       "sacou.modules.sessions": {
         "type": "Project",
         "dependencies": {
@@ -289,6 +300,7 @@
           "Sacou.Http": "[1.0.0, )",
           "Sacou.Modules.Groups": "[1.0.0, )",
           "Sacou.Modules.Identity": "[1.0.0, )",
+          "Sacou.Modules.Notifications": "[1.0.0, )",
           "Sacou.Shared": "[1.0.0, )"
         }
       },

@@ -26,7 +26,7 @@ internal sealed record RoundOutcome(RoundChange Change, RoundGroupState Group)
 /// only read, never locked, so the lock order has no cycle.
 /// </summary>
 /// <remarks>
-/// A write that promoted someone drains the outbox after its commit, before answering (ADR 0069, D8): the promoted
+/// A write that promoted someone drains the outbox after its commit, before answering (ADR 0069, D10): the promoted
 /// person's push leaves now, not at the next write. The drain never fails the write.
 /// </remarks>
 internal sealed class RoundWriter(IRoundStore store, GroupRoundContext groups, OutboxDrain drain, TimeProvider time, ILogger<RoundWriter> logger)

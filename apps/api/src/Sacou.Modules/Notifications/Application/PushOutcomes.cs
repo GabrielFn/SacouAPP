@@ -1,4 +1,3 @@
-using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Notifications.Domain;
 using Sacou.Modules.Notifications.Infrastructure;
 

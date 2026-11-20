@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Sacou.Integration.Tests.Groups;
 using Sacou.Integration.Tests.Sessions;
+using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
 using Xunit;
 
