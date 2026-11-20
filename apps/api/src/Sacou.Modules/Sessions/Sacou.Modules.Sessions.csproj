@@ -11,9 +11,10 @@
     <ItemGroup>
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
         <ProjectReference Include="../../Sacou.Http/Sacou.Http.csproj" />
-        <!-- Only Identity.Contracts and Groups.Contracts are used: Sacou.Architecture.Tests checks it. -->
+        <!-- Only Identity.Contracts, Groups.Contracts and Notifications.Contracts are used: Sacou.Architecture.Tests checks it. -->
         <ProjectReference Include="../Identity/Sacou.Modules.Identity.csproj" />
         <ProjectReference Include="../Groups/Sacou.Modules.Groups.csproj" />
+        <ProjectReference Include="../Notifications/Sacou.Modules.Notifications.csproj" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="Sacou.Modules.Sessions.Tests" />

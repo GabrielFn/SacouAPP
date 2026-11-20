@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Access;
+using Sacou.Modules.Sessions.Application.Outbox;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Shared.Members;
@@ -24,7 +25,11 @@ internal sealed record RoundOutcome(RoundChange Change, RoundGroupState Group)
 /// the filter and the lock wins (403), and a member who left meanwhile gets the non-member 404. The Groups are
 /// only read, never locked, so the lock order has no cycle.
 /// </summary>
-internal sealed class RoundWriter(IRoundStore store, GroupRoundContext groups, TimeProvider time, ILogger<RoundWriter> logger)
+/// <remarks>
+/// A write that promoted someone drains the outbox after its commit, before answering (ADR 0069, D10): the promoted
+/// person's push leaves now, not at the next write. The drain never fails the write.
+/// </remarks>
+internal sealed class RoundWriter(IRoundStore store, GroupRoundContext groups, OutboxDrain drain, TimeProvider time, ILogger<RoundWriter> logger)
 {
     /// <summary>With <paramref name="required"/> null the write is a repair on a read (D7): nobody's rights are being used.</summary>
     public async Task<Result<RoundOutcome>> ExecuteAsync(
@@ -44,6 +49,11 @@ internal sealed class RoundWriter(IRoundStore store, GroupRoundContext groups, T
             return decided.IsSuccess ? Result.Success(decided.Value.Change) : Result.Failure<RoundChange>(decided.Error);
         }, cancellationToken).ConfigureAwait(false);
         RoundLog.LogChange(logger, round, written.Match(_ => "ok", error => error.Code), written.IsSuccess ? written.Value : null);
+        if (written.IsSuccess && written.Value.Events.OfType<WaitlistPromoted>().Any())
+        {
+            await drain.RunAsync().ConfigureAwait(false);
+        }
+
         return written.IsFailure
             ? Result.Failure<RoundOutcome>(written.Error)
             : Result.Success(outcome ?? throw new InvalidOperationException("A written round always has its outcome."));

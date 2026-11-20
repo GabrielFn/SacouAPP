@@ -3,6 +3,7 @@ using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Matches;
+using Sacou.Modules.Notifications;
 using Sacou.Modules.Payments;
 using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;
@@ -29,6 +30,7 @@ internal static class ErrorCodeCatalog
         typeof(GroupsModule).Assembly,
         typeof(SessionsModule).Assembly,
         typeof(MatchesModule).Assembly,
+        typeof(NotificationsModule).Assembly,
         typeof(PaymentsModule).Assembly,
         typeof(SummariesModule).Assembly,
         typeof(StatsModule).Assembly,

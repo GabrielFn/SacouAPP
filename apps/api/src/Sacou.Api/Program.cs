@@ -7,6 +7,7 @@ using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Matches;
+using Sacou.Modules.Notifications;
 using Sacou.Modules.Payments;
 using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;
@@ -35,6 +36,8 @@ builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services
     .AddIdentityModule(builder.Configuration)
+    // Before the Groups: its account erasure runs before the Groups' one, which unlinks the member ids (ADR 0069, D9).
+    .AddNotificationsModule(builder.Configuration)
     .AddGroupsModule(builder.Configuration)
     .AddSessionsModule(builder.Configuration)
     .AddMatchesModule(builder.Configuration)
@@ -68,6 +71,7 @@ app.MapGroupsEndpoints();
 app.MapSessionsEndpoints();
 app.MapMatchesEndpoints();
 app.MapStatsEndpoints();
+app.MapNotificationsEndpoints();
 // GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
 app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);
 // The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).
@@ -87,6 +91,7 @@ if (app.Configuration.GetValue<bool>(DatabaseConnectionSetup.MigrateOnStartupKey
     await SessionsModule.MigrateAsync(app.Services);
     await MatchesModule.MigrateAsync(app.Services);
     await StatsModule.MigrateAsync(app.Services);
+    await NotificationsModule.MigrateAsync(app.Services);
 }
 
 await app.RunAsync();

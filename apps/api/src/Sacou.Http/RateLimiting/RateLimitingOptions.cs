@@ -43,6 +43,8 @@ public sealed class RateLimitingOptions
 
     public WindowLimitOptions? RoundLink { get; init; }
 
+    public WindowLimitOptions? PushDevice { get; init; }
+
     /// <summary>Per client address, not per user: the round page is anonymous (ADR 0070, D6).</summary>
     public WindowLimitOptions? RoundPage { get; init; }
 
@@ -81,6 +83,7 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.AccountDelete] = AccountDelete,
         [RateLimitPolicies.CourtSync] = CourtSync,
         [RateLimitPolicies.RoundLink] = RoundLink,
+        [RateLimitPolicies.PushDevice] = PushDevice,
         [RateLimitPolicies.RoundPage] = RoundPage,
     };
 }
