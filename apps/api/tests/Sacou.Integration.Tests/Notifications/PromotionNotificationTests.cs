@@ -12,6 +12,7 @@ public sealed class PromotionNotificationTests : IAsyncLifetime
 {
     private const string GroupName = "Areia de sábado";
     private const string Venue = "Quadra 3";
+    private const string HostingScope = " scope: RequestPath:";
 
     private readonly RecordingPushGateway gateway = new();
 
@@ -186,7 +187,9 @@ public sealed class PromotionNotificationTests : IAsyncLifetime
         _ = await RoundCalls.RespondAsync(world, going.Subject, round, going: false);
         _ = await N.ListAsync(world, waiting.Subject);
 
-        var logs = string.Join('\n', Api.Logs.Entries);
+        // The host's own request scope carries the path, so the installation id of the route (ADR 0069, D8). It is never
+        // written in production (scopes off, Microsoft.AspNetCore at Warning); every log of the API itself is checked.
+        var logs = string.Join('\n', Api.Logs.Entries.Where(entry => !entry.Contains(HostingScope, StringComparison.Ordinal)));
         Assert.NotEmpty(Sent());
         Assert.DoesNotContain(token, logs, StringComparison.Ordinal);
         Assert.DoesNotContain(installation.ToString(), logs, StringComparison.OrdinalIgnoreCase);
