@@ -1,6 +1,6 @@
 # ADR 0070 · Página web da rodada: código do link, entrada como avulso, canal, página e login web
 
-**Status:** aceito (19/11/2026), E3.12 Partes 1 (API) e 2 (página `/r/{code}`, login web, cabeçalhos, limite por endereço). **Decidido por:** desenvolvedor, dentro da arquitetura aprovada, com as respostas do Gabriel de 19/11 às perguntas 125 a 130 ([perguntas](../../estado/perguntas.md); [plano](../../estado/tarefas/E3.12.md)). A Parte 3 (texto do compartilhar no app, `/c`) completa este ADR. **O spike no celular (passo 1 da Parte 2) ainda não foi feito:** fica para o fim, com o Gabriel, depois de ele registrar o app Web no Firebase e autorizar o domínio `run.app`; ele confirma a CSP de D5.
+**Status:** aceito (19/11/2026), E3.12 Partes 1 (API), 2 (página `/r/{code}`, login web, cabeçalhos, limite por endereço) e 3 (texto do compartilhar no app e convite `/c`, D8 e D9). **Decidido por:** desenvolvedor, dentro da arquitetura aprovada, com as respostas do Gabriel de 19/11 às perguntas 125 a 130 ([perguntas](../../estado/perguntas.md); [plano](../../estado/tarefas/E3.12.md)). **O spike no celular (passo 1 da Parte 2) ainda não foi feito:** fica para o fim, com o Gabriel, depois de ele registrar o app Web no Firebase e autorizar o domínio `run.app`; ele confirma a CSP de D5.
 
 ## Contexto
 
@@ -61,6 +61,16 @@ O admin publica a rodada no app e o texto do WhatsApp leva um link; quem toca v�
 
 **D7 · Arquivos e cache (Parte 2).** O Vite gera `wwwroot/web/assets/*` com hash no nome e um `manifest.json` (fora do Git), que a página lê na partida (`ManifestWebAssets`); o manifesto nunca é servido (404). O `Dockerfile` ganhou um estágio Node fixado por digest (`node:22.20.0-bookworm-slim`, como o `.nvmrc`) que instala só o filtro `@sacou/web` do lockfile e faz o build; o estágio .NET copia a saída antes do `dotnet publish` (teste de arquitetura sobre o `Dockerfile`). Sem o build (máquina de desenvolvimento), a página sai sem script, só leitura. Cache: página `no-store` (leva apelidos, nada a guarda no caminho nem no navegador); arquivos sem hash `no-cache, private`; arquivos com hash `public, max-age=31536000, immutable`; a imagem da prévia (`/brand/og-image.png`, 1200 × 630, 22 KB, fixa) `public, max-age=86400`; as rotas da API seguem `no-store`.
 
+**D8 · Convite `/c#token` (Parte 3; fecha o destino do link do ADR 0040, D10, e do ADR 0049).** `GET /c` é uma Razor Page (`Pages/Invite.cshtml`, na lista fechada do teste de arquitetura e na tabela método + rota → política, com o mesmo `round-page` por endereço) e é **uma casca sem dado do servidor**: o servidor nunca vê o token (o navegador não envia o fragmento), e a página traz só os textos fixos do Sacou, a configuração Web do Firebase em `data-` e os arquivos com hash. Os mesmos cabeçalhos e a mesma CSP da `/r` (o middleware cobre `/c`), com `no-store`; a query nunca é refletida. A prévia do WhatsApp é a genérica do Sacou ("Convite para um grupo no Sacou"), porque o robô não vê o fragmento.
+
+- **Token:** o script (`src/invite-main.ts`, entrada própria no Vite) lê `location.hash` e chama `history.replaceState` **antes de iniciar o Firebase e antes de qualquer requisição** (`takeInviteToken`), então o token não fica no histórico nem num print da barra. Fora do formato (43 caracteres Base64url) não é token: nenhuma requisição, e a página diz "Link inválido ou desativado." O token fica só na memória do controlador, nunca no estado do reducer, no `sessionStorage` ou na URL; vai só no corpo de `POST /v1/invites/preview` e `/accept` (teste com espião no `fetch`).
+- **Fluxo:** reducer `starting → idle → signIn → signingIn → previewing → preview → joining → joined | failed`, com o controlador por portas (`AuthPort`, `InviteApiPort`). Login com Google e e-mail pela mesma folha da tela 02 (parcial `Shared/_SignInSheet.cshtml`, agora das duas páginas, e o mesmo desenho em `dom/sign-in-sheet.ts`), `POST /v1/me`, a prévia "Grupo · N membros · ENTRAR NO GRUPO" e o aceite. Depois: "Você entrou. Baixe o app para ver as rodadas."; quem já é membro vê "Você já está nesse grupo" sem chamar o aceite. Revogado, expirado, inexistente e malformado: o mesmo "Link inválido ou desativado." (código `groups.invite-invalid`); removido e grupo cheio encerram o fluxo; sem conexão e 429 deixam tentar de novo. Sem apelido no convite (o app pede o perfil na primeira abertura).
+- **Sem `signInWithRedirect` no convite:** a volta do redirect chega sem o fragmento, já apagado, e guardar o token no `sessionStorage` para sobreviver ao redirect o deixaria legível a qualquer script da origem por mais tempo. Com o popup bloqueado, a folha diz "Esse jeito de entrar não funciona aqui. Use o e-mail." e o e-mail continua disponível.
+- **App:** `EXPO_PUBLIC_INVITE_BASE_URL` é a mesma origem de `RoundPage:PublicBaseUrl` (no piloto, o `*.run.app` de cada ambiente); o app já monta `{base}/c#{token}` (ADR 0049).
+- **Arquivos:** as duas entradas dividem os estilos e o código do Firebase num pedaço comum do Vite; a leitura do manifesto segue os `imports` de cada entrada para juntar os estilos.
+
+**D9 · Texto do compartilhar (Parte 3).** `shareTextOf(..., shareUrl)` da tela 20: com o `RoundResponse.shareUrl` da resposta da criação (TanStack Query; só Admin e Co-admin o recebem, D1), o texto termina em "Confirma aqui: <url>"; sem ele, "Confirma no app Sacou." como antes. O app nunca monta a URL da rodada.
+
 ## Alternativas descartadas
 
 - **Código no fragmento, como o convite:** o robô do WhatsApp não vê o fragmento, e a prévia (critério de aceite) some.
@@ -71,6 +81,7 @@ O admin publica a rodada no app e o texto do WhatsApp leva um link; quem toca v�
 - **`ForwardedHeaders` global:** trocaria o endereço de toda a API por um valor do cabeçalho; a leitura fica só na partição da página.
 - **Partida falhar sem o manifesto fora de `Development`:** os testes de produção e a CI do .NET não fazem o build do pacote web; o teste de arquitetura sobre o `Dockerfile` garante que a imagem leva o manifesto.
 - **201 quando entra no grupo, como o aceite:** dois formatos de sucesso para a página tratar, sem ganho.
+- **Guardar o token do convite no `sessionStorage` para o redirect do Google:** o popup cobre o caso comum e o e-mail cobre o resto; o token ficaria guardado sem necessidade.
 - **Recusar a resposta e desfazer a entrada no grupo:** pediria as duas travas juntas ou uma compensação; a pessoa ficar no grupo é o que o produto quer (pergunta 127).
 
 ## Consequências e riscos
