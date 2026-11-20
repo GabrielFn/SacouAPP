@@ -7,6 +7,7 @@ using Sacou.Http;
 using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
+using Sacou.Modules.Stats.MvpVoting;
 using Sacou.Modules.Stats.Projections;
 using Sacou.Shared.Results;
 
@@ -32,6 +33,9 @@ internal static class Seasons
         : null;
 }
 
+/// <summary>The reads of a season: the fresh rounds of a group, then the MVP vote of each (ADR 0072, D11).</summary>
+internal sealed record SeasonReads(StatsProjector Projector, MvpOutcomes Outcomes);
+
 /// <summary>
 /// <c>GET /v1/me/stats?year=2026</c> (<c>GetMyStats</c>): the person's own season, in total and by group (rule 3.7),
 /// resolved from the token; there is no route for the stats of someone else. Every group of the person is freshened,
@@ -56,10 +60,12 @@ internal static class GetMyStatsEndpoint
         ICurrentUser currentUser,
         IUserMemberships memberships,
         StatsProjector projector,
+        MvpOutcomes outcomes,
         TimeProvider time,
         CancellationToken cancellationToken)
     {
-        var report = await ReportAsync(year, currentUser, memberships, projector, time, cancellationToken).ConfigureAwait(false);
+        var report = await ReportAsync(year, currentUser, memberships, new SeasonReads(projector, outcomes), time, cancellationToken)
+            .ConfigureAwait(false);
         return report.ToHttpResult(TypedResults.Ok);
     }
 
@@ -67,7 +73,7 @@ internal static class GetMyStatsEndpoint
         string? year,
         ICurrentUser currentUser,
         IUserMemberships memberships,
-        StatsProjector projector,
+        SeasonReads reads,
         TimeProvider time,
         CancellationToken cancellationToken)
     {
@@ -86,7 +92,9 @@ internal static class GetMyStatsEndpoint
         var rounds = new List<MembershipRounds>(found.Count);
         foreach (var membership in found)
         {
-            rounds.Add(new MembershipRounds(membership, await projector.GetGroupAsync(membership.GroupId, cancellationToken).ConfigureAwait(false)));
+            var groupRounds = await reads.Projector.GetGroupAsync(membership.GroupId, cancellationToken).ConfigureAwait(false);
+            var votes = await reads.Outcomes.OfRoundsAsync(membership.GroupId, groupRounds, cancellationToken).ConfigureAwait(false);
+            rounds.Add(new MembershipRounds(membership, groupRounds, votes));
         }
 
         return Result.Success(Report(season, rounds));

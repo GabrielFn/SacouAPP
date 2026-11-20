@@ -58,6 +58,15 @@ internal interface IMvpVoteStore
 
     /// <summary>Every vote of the round, only for the count inside the Stats: no route returns them.</summary>
     Task<IReadOnlyList<MvpVote>> ListForRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken);
+
+    /// <summary>The votes <paramref name="voter"/> gave in the group, oldest first: only the export reads them (D7).</summary>
+    Task<IReadOnlyList<GivenMvpVote>> ListGivenAsync(Guid groupId, MemberId voter, CancellationToken cancellationToken);
+}
+
+/// <summary>A vote the person gave, with its round: never a vote someone else gave.</summary>
+internal sealed record GivenMvpVote(Guid RoundId, MemberId Candidate, DateTimeOffset CastAt)
+{
+    public override string ToString() => nameof(GivenMvpVote);
 }
 
 /// <summary>SQL is always parameterized: EF turns the interpolated values into parameters (ADR 0037).</summary>
@@ -90,6 +99,15 @@ internal sealed class PostgresMvpVoteStore(StatsDbContext database) : IMvpVoteSt
             .Where(row => row.GroupId == groupId && row.RoundId == roundId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         return [.. rows.Select(ToVote)];
+    }
+
+    public async Task<IReadOnlyList<GivenMvpVote>> ListGivenAsync(Guid groupId, MemberId voter, CancellationToken cancellationToken)
+    {
+        var rows = await database.MvpVotes.AsNoTracking()
+            .Where(row => row.GroupId == groupId && row.VoterMemberId == voter.Value)
+            .OrderBy(row => row.CastAt).ThenBy(row => row.RoundId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(row => new GivenMvpVote(row.RoundId, new MemberId(row.CandidateMemberId), row.CastAt))];
     }
 
     private static MvpVote ToVote(MvpVoteRow row) =>

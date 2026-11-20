@@ -1,8 +1,11 @@
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Sessions.Contracts;
+using Sacou.Modules.Stats.Domain.MvpVoting;
 using Sacou.Modules.Stats.GetMyStats;
+using Sacou.Modules.Stats.MvpVoting;
 using Sacou.Modules.Stats.Projections;
+using Sacou.Shared.Members;
 using Xunit;
 
 namespace Sacou.Modules.Stats.Tests.GetMyStats;
@@ -91,8 +94,45 @@ public sealed class PlayerTotalsTests
         Assert.Equal(new SeasonTotals(MatchesPlayed: 5, Wins: 4, Losses: 1, PlusMinus: 3, LongestWinStreak: 3, MvpCount: 1, Rounds: 3, RoundsHeld: 3), totals);
     }
 
-    private static MembershipRounds Of(Guid memberId, IReadOnlyList<RoundProjection> rounds) =>
-        new(new UserMembership(Guid.NewGuid(), "Racha", memberId, Active: true, Joined, LeftAt: null, GameModality.Indoor6x6), rounds);
+    /// <summary>R8: the vote's winner gets the MVP of the round, not the MVP by the stats of the same round.</summary>
+    [Fact]
+    public void R8_AClosedVote_GivesTheMvpToItsWinner_NotToTheStatsOne()
+    {
+        var round = Played(day: 10, [W, W], plusMinus: 5, mvp: true);
+        var vote = Closed(round, [Bia]);
+
+        Assert.Equal(0, PlayerTotals.Of(Of(Ana, [round], vote), Season).MvpCount);
+        Assert.Equal(1, PlayerTotals.Of(Of(Ana, [round]), Season).MvpCount);
+    }
+
+    [Fact]
+    public void R8_ASharedMvp_CountsForEachWinner()
+    {
+        var round = Played(day: 10, [W], plusMinus: 1);
+
+        Assert.Equal(1, PlayerTotals.Of(Of(Ana, [round], Closed(round, [Ana, Bia])), Season).MvpCount);
+    }
+
+    /// <summary>Question 142: a vote closed without a valid vote leaves the MVP by the stats.</summary>
+    [Fact]
+    public void AVoteClosedWithoutAValidVote_KeepsTheStatsMvp()
+    {
+        var round = Played(day: 10, [W], plusMinus: 1, mvp: true);
+
+        Assert.Equal(1, PlayerTotals.Of(Of(Ana, [round], Closed(round, [])), Season).MvpCount);
+    }
+
+    private static Dictionary<Guid, RoundMvpVote> Closed(RoundProjection round, Guid[] winners) => new()
+    {
+        [round.Facts.RoundId] = new RoundMvpVote(
+            MvpVotingWindow.From(round.Facts.EndsAt),
+            MvpVotingState.Closed,
+            new MvpTallyResult([.. winners.Select(winner => new MemberId(winner))], Voters: 3)),
+    };
+
+    private static MembershipRounds Of(Guid memberId, IReadOnlyList<RoundProjection> rounds, IReadOnlyDictionary<Guid, RoundMvpVote>? votes = null) =>
+        new(new UserMembership(Guid.NewGuid(), "Racha", memberId, Active: true, Joined, LeftAt: null, GameModality.Indoor6x6), rounds,
+            votes ?? new Dictionary<Guid, RoundMvpVote>());
 
     private RoundProjection Played(int day, MatchOutcome[] results, int plusMinus, Guid? member = null, bool mvp = false, int year = Season)
     {

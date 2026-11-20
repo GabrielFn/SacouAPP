@@ -1,5 +1,6 @@
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Contracts;
+using Sacou.Modules.Stats.MvpVoting;
 using Sacou.Modules.Stats.Projections;
 
 namespace Sacou.Modules.Stats.GetMyStats;
@@ -11,8 +12,20 @@ internal sealed record SeasonTotals(
     public static readonly SeasonTotals None = new(0, 0, 0, 0, 0, 0, 0, 0);
 }
 
-/// <summary>One membership of the person with the fresh rounds of its group, earliest first.</summary>
-internal sealed record MembershipRounds(UserMembership Membership, IReadOnlyList<RoundProjection> Rounds);
+/// <summary>
+/// One membership of the person with the fresh rounds of its group, earliest first, and the MVP vote of the rounds
+/// that have one, by round id (ADR 0072, D11): a round missing from <see cref="MvpVotes"/> has no vote.
+/// </summary>
+internal sealed record MembershipRounds(
+    UserMembership Membership, IReadOnlyList<RoundProjection> Rounds, IReadOnlyDictionary<Guid, RoundMvpVote> MvpVotes)
+{
+    /// <summary>The MVP of the round after its vote has <paramref name="memberId"/>: a shared MVP counts for each winner.</summary>
+    public bool WasMvp(RoundProjection round, Guid memberId)
+    {
+        ArgumentNullException.ThrowIfNull(round);
+        return FinalMvps.Of(round, MvpVotes.GetValueOrDefault(round.Facts.RoundId))?.Has(memberId) == true;
+    }
+}
 
 /// <summary>
 /// The card and the profile (screens 14 and 15, rule 3.7 of ADR 0071), a pure function of the fresh projections:
@@ -26,7 +39,7 @@ internal static class PlayerTotals
     public static SeasonTotals Of(MembershipRounds membership, int year)
     {
         ArgumentNullException.ThrowIfNull(membership);
-        return Sum(membership.Membership.MemberId, Played(membership, year), Held(membership, year));
+        return Sum(membership, Played(membership, year), Held(membership, year));
     }
 
     /// <summary>The person over every group: the sums added, and the streak over all their rounds in play order.</summary>
@@ -50,8 +63,9 @@ internal static class PlayerTotals
             groups.Sum(total => total.RoundsHeld));
     }
 
-    private static SeasonTotals Sum(Guid memberId, List<RoundProjection> played, int held)
+    private static SeasonTotals Sum(MembershipRounds membership, List<RoundProjection> played, int held)
     {
+        var memberId = membership.Membership.MemberId;
         var players = played.Select(round => round.Summary.Players.First(player => player.MemberId == memberId)).ToList();
         return new SeasonTotals(
             players.Sum(player => player.MatchesPlayed),
@@ -59,7 +73,7 @@ internal static class PlayerTotals
             players.Sum(player => player.Losses),
             players.Sum(player => player.PlusMinus),
             LongestStreak(played.SelectMany(round => ResultsOf(round, memberId))),
-            played.Count(round => round.Summary.Mvp?.MemberIds.Contains(memberId) == true),
+            played.Count(round => membership.WasMvp(round, memberId)),
             played.Count,
             held);
     }
