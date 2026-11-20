@@ -41,6 +41,7 @@ export function createFakeCourtSync(ownerKey: string | null = null): FakeCourtSy
     onSessionChanged: () => () => undefined,
     onAccountChanged: () => () => undefined,
     countUnsent: () => Promise.resolve({ events: 0, points: 0 }),
+    countUnsentOfRound: () => Promise.resolve({ events: 0, points: 0 }),
     appendedCount: () => appended.value,
   };
 }

@@ -36,6 +36,7 @@ import { ConfirmedSheet } from "./ConfirmedSheet";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 import { RoundStatsPanel } from "./RoundStatsPanel";
+import { SummaryLink } from "./SummaryLink";
 
 const { detail, confirmed } = strings.rounds;
 
@@ -238,6 +239,7 @@ export function AdminRoundScreen({
         }}
       />
       <RoundHeading groupName={group.name} round={round} />
+      <SummaryLink groupId={groupId} round={round} now={model.now} />
       {settings === null ? (
         <ErrorStrip text={detail.loadError} />
       ) : (

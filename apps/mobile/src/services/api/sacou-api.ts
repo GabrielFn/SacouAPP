@@ -37,6 +37,8 @@ export type DeletionBlocker = Schemas["DeletionBlockerResponse"];
 
 export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
+/** The numbers of a finished round, computed by the server (E3.9); the app only formats them (screen 12). */
+export type RoundSummaryReport = Schemas["RoundSummaryReport"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
 export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
 export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
@@ -142,6 +144,8 @@ export interface SacouApi {
     member: MemberRef & { readonly roundId: string },
     response: AttendanceResponse,
   ): Promise<ApiResult<AttendanceAnswer>>;
+  /** Any member of the group. `finishedMatches: 0` for a round with no match finished (E4.12). */
+  getRoundSummary(groupId: string, roundId: string): Promise<ApiResult<RoundSummaryReport>>;
   /** 404 `identity.profile-not-found` before the quick profile (screen 27) is ever saved. */
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */

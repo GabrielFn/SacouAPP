@@ -16,6 +16,7 @@ import { PresenceCard } from "./PresenceCard";
 import { PresenceFooter } from "./PresenceFooter";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
+import { SummaryLink } from "./SummaryLink";
 
 const { presence, detail } = strings.rounds;
 
@@ -94,6 +95,7 @@ export function PlayerRoundScreen({
     >
       <BackBar title={roleHeader(group.role)} fallbackHref={groupsHref} />
       <RoundHeading groupName={group.name} round={round} />
+      <SummaryLink groupId={group.groupId} round={round} now={model.now} />
       <PlayerBody
         round={round}
         settings={settings}

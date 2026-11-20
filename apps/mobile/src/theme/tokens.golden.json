@@ -195,7 +195,9 @@
     "displayLevelBadge": 20,
     "levelCaption": 11,
     "drawTitle": 29,
-    "teamTitle": 22
+    "teamTitle": 22,
+    "summaryTitle": 38,
+    "displayMvp": 84
   },
   "iconStroke": {
     "plus": 2.2
