@@ -21,6 +21,11 @@ export const queryKeys = {
   /** Who marks the court of a round and its score (screen 09a): outside the persisted allow list. */
   courtSummary: (groupId: string, roundId: string) =>
     ["groups", groupId, "rounds", roundId, "court-session"] as const,
+  /** The numbers of a round (screen 12): persisted, so the last summary seen opens offline (E4.12). */
+  roundSummary: (groupId: string, roundId: string) =>
+    ["groups", groupId, "rounds", roundId, "summary"] as const,
+  /** Points of a round this phone has not sent yet, counted from the court log: never persisted. */
+  courtUnsent: (roundId: string) => ["court-unsent", roundId] as const,
   /** Where a court session came from, read from the court log: outside the persisted allow list. */
   courtSessionOrigin: (courtSessionId: string) => ["court-session-origin", courtSessionId] as const,
 };

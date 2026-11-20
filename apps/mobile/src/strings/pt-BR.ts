@@ -12,6 +12,7 @@ import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
 import { settingsStrings } from "./settings.pt-BR";
+import { summaryStrings } from "./summary.pt-BR";
 
 export const strings = {
   auth: authStrings,
@@ -23,6 +24,7 @@ export const strings = {
   createGroup: createGroupStrings,
   settings: settingsStrings,
   rounds: roundsStrings,
+  summary: summaryStrings,
   draw: drawStrings,
   lineup: lineupStrings,
   members: membersStrings,

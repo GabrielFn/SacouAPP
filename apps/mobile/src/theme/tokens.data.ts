@@ -97,6 +97,9 @@ export const fontSizes = {
   // The draw (Sorteio.dc.html): the title, the name of a team card.
   drawTitle: 29,
   teamTitle: 22,
+  // The summary of the round (Resumo.dc.html): the title and the name of the MVP of the day.
+  summaryTitle: 38,
+  displayMvp: 84,
 } as const;
 
 export const spacing = {

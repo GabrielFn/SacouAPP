@@ -12,12 +12,13 @@ export const PERSISTED_CACHE_MAX_AGE_MS = DAYS_KEPT * MS_PER_DAY;
 const GROUP_KEY_LENGTH = 2;
 const CHILD_KEY_LENGTH = 3;
 const ROUND_KEY_LENGTH = 4;
+const ROUND_CHILD_KEY_LENGTH = 5;
 
 /** What is kept under a group: the members, the settings and the rounds (the venue is free text, ADR 0049 and 0054). */
 const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings", "rounds"]);
 
 /**
- * The allow list of the persisted cache (D6): the groups, a group, its members, its settings, its rounds and one round (the screen opens without a network on the court, ADR 0054). The
+ * The allow list of the persisted cache (D6): the groups, a group, its members, its settings, its rounds and one round and its summary (the screen opens without a network on the court, ADR 0054). The
  * default is not to persist: `["me"]` (the internal user ID; of `["me", "profile"]` only the nickname is written, never the level nor the positions: see `cache-persister.ts`), the invites and the saved templates (admin
  * only) and anything unknown stay out.
  */
@@ -28,6 +29,9 @@ export function isPersistedKey(key: SacouQueryKey): boolean {
   if (key.length === 1) return true;
   if (typeof groupId !== "string") return false;
   if (key.length === ROUND_KEY_LENGTH) return child === "rounds" && typeof key[3] === "string";
+  if (key.length === ROUND_CHILD_KEY_LENGTH) {
+    return child === "rounds" && typeof key[3] === "string" && key[4] === "summary";
+  }
   return (
     key.length === GROUP_KEY_LENGTH ||
     (key.length === CHILD_KEY_LENGTH && PERSISTED_CHILDREN.has(child))
