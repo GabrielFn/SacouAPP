@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
+using Sacou.Modules.Groups.Contracts;
+using Sacou.Modules.Stats.Projections;
 using Sacou.Modules.Stats.Domain.Ratings;
 using Sacou.Shared.Members;
 using Sacou.Tests.Golden;
@@ -107,7 +109,7 @@ public sealed class RatingPoolGoldenTests
             Guid.Parse(GoldenFile.Text(round, "roundId")),
             DateTimeOffset.Parse(GoldenFile.Text(round, "startsAt"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
             round.GetProperty("canceled").GetBoolean(),
-            RatingPoolKind.OfModality(GoldenFile.Text(round, "modality")) ?? throw new InvalidOperationException("Unknown modality."),
+            RatingPoolMapping.Of(GameModalities.FromCode(GoldenFile.Text(round, "modality")) ?? throw new InvalidOperationException("Unknown modality.")),
             [.. round.GetProperty("matches").EnumerateArray().Select(MatchOf)]))];
 
     private static RatedMatch MatchOf(JsonElement match)

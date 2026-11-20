@@ -6,6 +6,7 @@ using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches.Access;
 using Sacou.Modules.Matches.AccountData;
 using Sacou.Modules.Matches.AppendCourtEvents;
+using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Matches.FormationCatalogs;
 using Sacou.Modules.Matches.GetCourtSession;
 using Sacou.Modules.Matches.Infrastructure;
@@ -26,6 +27,8 @@ public static class MatchesModule
         services.AddMatchesDatabase(configuration);
         services.AddScoped<AppendCourtEventsHandler>();
         services.AddScoped<TakeOverCourtHandler>();
+        // The after-game of the streams, for the projections of the Stats (E3.9, ADR 0071).
+        services.AddScoped<ICourtSessionResults, StoreCourtSessionResults>();
         // The court batches the person wrote, for the export of the Identity (ADR 0060, D16).
         services.AddScoped<IAccountExportSection, MatchesExportSection>();
         return services;

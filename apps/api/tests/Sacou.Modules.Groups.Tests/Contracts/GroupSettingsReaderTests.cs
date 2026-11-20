@@ -88,6 +88,29 @@ public sealed class GroupSettingsReaderTests
     }
 
     [Fact]
+    public void SummaryRules_ComeFromTheResolvedDocument()
+    {
+        var group = Snapshot(("mvp.enabled", true), ("mvp.individualPoints", true));
+
+        var rules = Reader().ResolveRound(group, """{"schemaVersion":1,"format":{"modality":"beach-4x4"},"mvp":{"byStats":false}}""").Value.Summary;
+
+        Assert.Equal(new SummaryRules(GameModality.Beach4x4, MvpEnabled: true, MvpByStats: false, IndividualPoints: true), rules);
+        Assert.Equal(new SummaryRules(GameModality.Indoor6x6, false, true, false), Reader().ResolveRound(Snapshot(), null).Value.Summary);
+    }
+
+    /// <summary>Parity of the codes (E3.9 part 3, condition 2): every modality of the catalog has one typed value, and back.</summary>
+    [Fact]
+    public void EveryModalityOfTheCatalog_HasOneTypedValue_AndItsCodeBack()
+    {
+        var codes = Catalog.Fields.Single(field => field.Path == "format.modality").Values.Select(value => value.Text).ToList();
+
+        Assert.Equal(Enum.GetValues<GameModality>().Length, codes.Count);
+        Assert.All(codes, code => Assert.Equal(code, GameModalities.CodeOf(GameModalities.FromCode(code)!.Value)));
+        Assert.Null(GameModalities.FromCode("indoor-4x4"));
+        Assert.Equal([GameModality.Beach2x2, GameModality.Beach4x4], Enum.GetValues<GameModality>().Where(GameModalities.IsBeach));
+    }
+
+    [Fact]
     public void FormatRules_ComeFromTheResolvedDocument()
     {
         var group = Snapshot(("scoring.enabled", true), ("queue.enabled", true));

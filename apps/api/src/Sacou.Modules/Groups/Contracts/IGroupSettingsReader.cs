@@ -23,8 +23,8 @@ public interface IGroupSettingsReader
 /// <see cref="LayerJson"/> is what the round stores (null when it inherits everything); <see cref="ResolvedJson"/>
 /// is the complete document for the screen; <see cref="Sources"/> says, by leaf path, whether it came from the
 /// <c>group</c> or the <c>round</c>. <see cref="Attendance"/>, <see cref="Draw"/> and <see cref="Format"/> are the typed
-/// leaves the Sessions uses.
+/// leaves the Sessions uses; <see cref="Summary"/> the ones of the after-game (E3.9).
 /// </summary>
 public sealed record RoundSettings(
     string? LayerJson, string ResolvedJson, IReadOnlyDictionary<string, string> Sources, AttendanceRules Attendance, DrawRules Draw,
-    FormatRules Format);
+    FormatRules Format, SummaryRules Summary);

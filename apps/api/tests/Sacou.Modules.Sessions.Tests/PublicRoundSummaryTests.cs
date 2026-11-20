@@ -185,7 +185,8 @@ public sealed class PublicRoundSummaryTests
         ImmutableDictionary<string, string>.Empty,
         attendance,
         new DrawRules(Enabled: false, BalanceByLevel: false, IndoorPlayers),
-        format ?? new FormatRules(ScoringEnabled: true, PointsPerSet, QueueEnabled: true));
+        format ?? new FormatRules(ScoringEnabled: true, PointsPerSet, QueueEnabled: true),
+        new SummaryRules(GameModality.Indoor6x6, MvpEnabled: false, MvpByStats: true, IndividualPoints: false));
 
     private sealed class OneRoundStore(Round? round) : UnsupportedRoundStore
     {

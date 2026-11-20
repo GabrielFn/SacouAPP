@@ -9,6 +9,10 @@ internal static partial class CourtLog
         Message = "Court events stored. Stream {CourtSessionId}: {Stored} stored, {Duplicates} duplicates, {ElapsedMs} ms.")]
     public static partial void Stored(ILogger logger, Guid courtSessionId, int stored, int duplicates, long elapsedMs);
 
+    /// <summary>The type of the exception only: its message may carry a value of the database.</summary>
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Court projections not refreshed after a write. Stream {CourtSessionId}: {ExceptionType}.")]
+    public static partial void ListenerFailed(ILogger logger, Guid courtSessionId, string exceptionType);
+
     [LoggerMessage(Level = LogLevel.Information, Message = "Court events refused: {Code} {Reason}, {ElapsedMs} ms.")]
     public static partial void Refused(ILogger logger, string code, string reason, long elapsedMs);
 

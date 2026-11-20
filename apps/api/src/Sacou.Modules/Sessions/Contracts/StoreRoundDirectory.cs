@@ -17,7 +17,7 @@ internal sealed class StoreRoundDirectory(SessionsDbContext database) : IRoundDi
         return status is null ? null : new RoundSummary(ToContract(EnumColumns.Parse(ColumnValues.RoundStatuses, status)));
     }
 
-    private static RoundState ToContract(RoundStatus status) => status switch
+    internal static RoundState ToContract(RoundStatus status) => status switch
     {
         RoundStatus.Scheduled => RoundState.Scheduled,
         RoundStatus.Canceled => RoundState.Canceled,
