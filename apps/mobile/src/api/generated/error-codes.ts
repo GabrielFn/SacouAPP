@@ -63,6 +63,7 @@ export const apiErrorCodes = [
   "sessions.draw-reserves-invalid",
   "sessions.drop-in-window-closed",
   "sessions.member-not-found",
+  "sessions.round-canceled",
   "sessions.round-closed",
   "sessions.round-date-taken",
   "sessions.round-full",
@@ -72,6 +73,14 @@ export const apiErrorCodes = [
   "sessions.round-not-found",
   "sessions.series-limit",
   "sessions.series-not-found",
+  "stats.mvp-already-voted",
+  "stats.mvp-candidate-invalid",
+  "stats.mvp-self-vote",
+  "stats.mvp-vote-invalid",
+  "stats.mvp-voter-not-eligible",
+  "stats.mvp-voting-closed",
+  "stats.mvp-voting-not-open",
+  "stats.mvp-voting-off",
 ] as const;
 
 export type ApiErrorCode = (typeof apiErrorCodes)[number];

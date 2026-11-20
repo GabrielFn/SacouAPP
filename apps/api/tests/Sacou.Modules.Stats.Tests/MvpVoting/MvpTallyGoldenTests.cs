@@ -25,7 +25,8 @@ public sealed class MvpTallyGoldenTests
         "G8-negative-balance",
     ];
 
-    private static readonly IReadOnlyList<JsonElement> Cases = GoldenFile.ReadEmbeddedCases("mvp-tally-cases.json");
+    private static readonly IReadOnlyList<JsonElement> Cases =
+        [.. GoldenFile.ParseStrict(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "MvpVoting", "mvp-tally-cases.json"))).EnumerateArray()];
 
     private static readonly DateTimeOffset CastAt = new(2026, 11, 21, 2, 0, 0, TimeSpan.Zero);
 
