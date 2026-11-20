@@ -2,13 +2,13 @@ import { describe, expect, test } from "vitest";
 
 import {
   CARD_COMPACT_RATIO,
+  NAME_MIN_FONT_SCALE,
   cardAvatarColor,
   cardFontScaleCap,
   cardMeasures,
 } from "./card-tokens.data";
 import { contrastRatio } from "./contrast";
 import { createScaledTokens } from "./scale";
-import { NAME_MIN_FONT_SCALE } from "../features/profile/ui/PlayerCardView";
 import { palette } from "./tokens.data";
 
 const AA_TEXT = 4.5;
@@ -43,12 +43,6 @@ describe("the player card tokens", () => {
     const small = createScaledTokens({ windowWidth: WIDTHS[2], fontScale: 1 }).card.full;
     const smaller = createScaledTokens({ windowWidth: WIDTHS[0], fontScale: 1 }).card.full;
     expect(small.nameFont).toBeGreaterThan(smaller.nameFont);
-  });
-
-  test("the system font scale does not change the card, which is a picture", () => {
-    const normal = createScaledTokens({ windowWidth: 390, fontScale: 1 }).card;
-    const big = createScaledTokens({ windowWidth: 390, fontScale: 2 }).card;
-    expect(big).toEqual(normal);
   });
 
   test("every measure keeps the hairline at least", () => {

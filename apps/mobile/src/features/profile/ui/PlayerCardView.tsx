@@ -2,7 +2,11 @@ import { View } from "react-native";
 import Svg, { G, Path, Rect } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
-import { CARD_ASPECT_RATIO, cardMeasures } from "../../../theme/card-tokens.data";
+import {
+  CARD_ASPECT_RATIO,
+  NAME_MIN_FONT_SCALE,
+  cardMeasures,
+} from "../../../theme/card-tokens.data";
 import type { ScaledCardTokens } from "../../../theme/scale";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
@@ -31,7 +35,6 @@ export interface PlayerCardViewProps {
 }
 
 /** The nickname shrinks, to this fraction at most, before it is cut (20 letters in the band). */
-export const NAME_MIN_FONT_SCALE = 0.4;
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
 /** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */

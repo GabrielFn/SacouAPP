@@ -38,6 +38,9 @@ export const cardMeasures = {
 /** The most the system font scale grows the text of the card (lower than the app cap: the bands are fixed). */
 export const cardFontScaleCap = 1.15;
 
+/** How far the nickname may shrink to fit its band (adjustsFontSizeToFit). */
+export const NAME_MIN_FONT_SCALE = 0.4;
+
 /** The number of a stat tile of screen 14 (`.st`), in canvas pixels; grows with the system font scale. */
 export const statTileValueFont = 30;
 
