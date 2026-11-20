@@ -1,7 +1,7 @@
 import type { Failure, FailureKind, Standing } from "./round-page/round-page.types";
 
 /**
- * The texts the script writes on the round page. The texts the server renders (screen 01 and the sheet of
+ * The texts the script writes on the round page and on the invite page. The texts the server renders (screen 01 and the sheet of
  * screen 02) live in `Sacou.Api/Web/WebTexts.cs`; both are pt-BR and centralized.
  */
 export const webStrings = {
@@ -31,6 +31,7 @@ export const webStrings = {
     offline: "Sem conexão com o Sacou agora. Tente de novo.",
     rateLimited: "Muitas tentativas. Tente de novo em alguns segundos.",
     linkInvalid: "Link inválido. Peça um novo para quem organiza.",
+    inviteInvalid: "Link inválido ou desativado.",
     roundClosed: "Essa rodada já fechou.",
     removed: "Você não pode mais entrar nesse grupo pelo link.",
     groupFull: "Não deu para entrar: o grupo ou a sua conta chegou ao limite.",
@@ -46,6 +47,17 @@ export const webStrings = {
     providerUnavailable: "Esse jeito de entrar não funciona aqui. Use o e-mail.",
     unexpected: "Não deu certo agora. Tente de novo.",
   } satisfies Record<FailureKind, string>,
+  /** The invite page (`/c`, ADR 0070, D8); the server renders only its first words (`WebTexts.cs`). */
+  invite: {
+    title: "Convite para um grupo no Sacou",
+    signInHint: "Entre para ver o grupo do convite.",
+    signIn: "ENTRAR PRA VER O CONVITE",
+    retry: "VER O CONVITE",
+    sheetTitle: "Entrar pra ver o convite",
+    members: (count: number) => (count === 1 ? "1 membro" : `${String(count)} membros`),
+    joined: "Você entrou. Baixe o app para ver as rodadas.",
+    alreadyMember: "Você já está nesse grupo. Abra o app para ver as rodadas.",
+  },
   retryIn: (seconds: number) => `Muitas tentativas. Tente de novo em ${String(seconds)} s.`,
 } as const;
 

@@ -6,6 +6,7 @@ import { createSessionIntentStore } from "./adapters/session-intent-store";
 import { readPageConfig } from "./config/page-config";
 import { ELEMENT_IDS, findPageElements, type PageNodes } from "./dom/page-elements";
 import { renderRoundPage, type ViewEnvironment } from "./dom/round-view";
+import { listenToSheet } from "./dom/sheet-listeners";
 import { isEmbeddedBrowser } from "./round-page/browser";
 import { createRoundPage, type RoundPage } from "./round-page/round-page.controller";
 import type { RoundPageState } from "./round-page/round-page.types";
@@ -28,29 +29,7 @@ function onStepChange(
 function listen(nodes: PageNodes, page: RoundPage): void {
   nodes.going?.addEventListener("click", () => void page.tapAnswer("going"));
   nodes.notGoing?.addEventListener("click", () => void page.tapAnswer("notGoing"));
-  nodes.sheetClose.addEventListener("click", () => {
-    page.closeSheet();
-  });
-  nodes.google.addEventListener("click", () => void page.signInWithGoogle());
-  nodes.emailChoice.addEventListener("click", () => {
-    page.chooseForm("signIn");
-  });
-  nodes.signInTab.addEventListener("click", () => {
-    page.chooseForm("signIn");
-  });
-  nodes.signUpTab.addEventListener("click", () => {
-    page.chooseForm("signUp");
-  });
-  nodes.forgot.addEventListener("click", () => {
-    page.chooseForm("reset");
-  });
-  nodes.emailBack.addEventListener("click", () => {
-    page.chooseForm("choice");
-  });
-  nodes.emailForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    void page.submitEmail(nodes.email.value.trim(), nodes.password.value);
-  });
+  listenToSheet(nodes, page);
   nodes.nicknameForm.addEventListener("submit", (event) => {
     event.preventDefault();
     void page.submitNickname(nodes.nickname.value);

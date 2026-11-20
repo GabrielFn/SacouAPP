@@ -1,52 +1,23 @@
 import { failureText, standingText, webStrings } from "../strings.pt-BR";
 import type { RoundPageState, SheetForm, Standing } from "../round-page/round-page.types";
 
-/** What the view writes on a node: text through `textContent` only, never HTML (lint forbids `innerHTML` and the like). */
-export interface Shown {
-  /** `boolean | "until-found"` in the DOM; the view writes booleans only. */
-  hidden: boolean | string;
-}
+import {
+  renderSignInSheet,
+  write,
+  type Control,
+  type SheetElements,
+  type TextSlot,
+  type ViewEnvironment,
+} from "./sign-in-sheet";
 
-export interface TextSlot extends Shown {
-  textContent: string | null;
-}
-
-export interface Control extends TextSlot {
-  disabled: boolean;
-}
-
-export interface Field {
-  value: string;
-  disabled: boolean;
-}
+export type { Control, Field, Shown, TextSlot, ViewEnvironment } from "./sign-in-sheet";
 
 /** The nodes of the page the script drives; the server renders them, with their first texts (screen 01, screen 02). */
-export interface PageElements {
+export interface PageElements extends SheetElements {
   readonly going: Control | null;
   readonly notGoing: Control | null;
   readonly status: TextSlot;
   readonly signOut: Control;
-  readonly sheet: Shown;
-  readonly sheetTitle: TextSlot;
-  readonly choice: Shown;
-  readonly google: Control;
-  readonly embeddedWarning: Shown;
-  readonly emailForm: Shown;
-  readonly emailTabs: Shown;
-  readonly email: Field;
-  readonly passwordField: Shown;
-  readonly password: Field;
-  readonly emailSubmit: Control;
-  readonly forgot: Control;
-  readonly nicknameForm: Shown;
-  readonly nickname: Field;
-  readonly nicknameSubmit: Control;
-  readonly sheetMessage: TextSlot;
-}
-
-export interface ViewEnvironment {
-  /** An in-app browser where Google refuses the sign-in: the Google button gives way to "Abra no navegador". */
-  readonly embedded: boolean;
 }
 
 const SHEET_STEPS = new Set<RoundPageState["step"]>([
@@ -101,11 +72,6 @@ function sheetMessage(state: RoundPageState): string | null {
   return BUSY_STEPS.has(state.step) && SHEET_STEPS.has(state.step) ? webStrings.working : null;
 }
 
-function write(slot: TextSlot, text: string | null): void {
-  slot.hidden = text === null;
-  slot.textContent = text ?? "";
-}
-
 function renderAnswers(elements: PageElements, state: RoundPageState): void {
   const busy = BUSY_STEPS.has(state.step);
   const standing = state.step === "idle" || state.step === "answering" ? state.standing : null;
@@ -128,27 +94,16 @@ function renderSheet(
   environment: ViewEnvironment,
 ): void {
   const form = formOf(state);
-  const busy = BUSY_STEPS.has(state.step);
-  elements.sheet.hidden = !SHEET_STEPS.has(state.step);
-  elements.sheetTitle.textContent =
-    form === null ? webStrings.sheet.choice : webStrings.sheet[form];
-  elements.choice.hidden = form !== "choice";
-  elements.google.hidden = environment.embedded;
-  elements.google.disabled = busy;
-  elements.embeddedWarning.hidden = !environment.embedded;
-  elements.emailForm.hidden = form !== "signIn" && form !== "signUp" && form !== "reset";
-  elements.emailTabs.hidden = form === "reset";
-  elements.passwordField.hidden = form === "reset";
-  elements.email.disabled = busy;
-  elements.password.disabled = busy;
-  elements.emailSubmit.disabled = busy;
-  elements.emailSubmit.textContent =
-    webStrings.submit[form === "signUp" || form === "reset" ? form : "signIn"];
-  elements.forgot.hidden = form !== "signIn";
-  elements.nicknameForm.hidden = form !== "nickname";
-  elements.nickname.disabled = busy;
-  elements.nicknameSubmit.disabled = busy;
-  write(elements.sheetMessage, sheetMessage(state));
+  renderSignInSheet(
+    elements,
+    {
+      form,
+      title: form === null ? webStrings.sheet.choice : webStrings.sheet[form],
+      busy: BUSY_STEPS.has(state.step),
+      message: sheetMessage(state),
+    },
+    environment,
+  );
 }
 
 /** The whole page from the state: the same state always draws the same page. */

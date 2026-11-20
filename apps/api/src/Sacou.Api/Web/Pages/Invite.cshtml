@@ -1,0 +1,70 @@
+@page "/c"
+@model InviteModel
+@{
+    Layout = null;
+    var firebase = Model.Firebase;
+}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="strict-origin">
+    <title>@WebTexts.InviteTitle</title>
+    @* The Sacou's own preview: the WhatsApp robot never sees the token, so nothing of a group (ADR 0070, D8). *@
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="@WebTexts.Brand">
+    <meta property="og:title" content="@WebTexts.InviteTitle">
+    <meta property="og:description" content="@WebTexts.InvitePreview">
+    <meta property="og:url" content="@Model.PageUrl">
+    <meta property="og:image" content="@Model.PreviewImageUrl">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="description" content="@WebTexts.InvitePreview">
+    @if (Model.Assets is { } assets)
+    {
+        @foreach (var style in assets.Styles)
+        {
+            <link rel="stylesheet" href="@style">
+        }
+        @if (firebase is not null)
+        {
+            <script type="module" src="@assets.Script"></script>
+        }
+    }
+</head>
+<body>
+<main id="invite-page" class="page"
+      data-firebase-api-key="@firebase?.ApiKey"
+      data-firebase-auth-domain="@firebase?.AuthDomain"
+      data-firebase-project-id="@firebase?.ProjectId"
+      data-firebase-app-id="@firebase?.AppId">
+    <header class="hero">
+        <div class="brand">
+            <svg class="logo" aria-hidden="true" viewBox="0 0 26 18"><rect x="0" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="0" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="10" width="7" height="7" rx="1.5" fill="#FFC83D"/></svg>
+            <span class="brand-name">@WebTexts.Brand</span>
+            <span class="brand-tag">@WebTexts.BrandTag</span>
+        </div>
+        @* Only the server's fixed words: the group's name and its count come from the API, written with textContent. *@
+        <h1 id="invite-title" class="title">@WebTexts.InviteTitle</h1>
+        <p id="invite-detail" class="when">@(firebase is null ? WebTexts.InviteUnavailable : WebTexts.InviteSignInHint)</p>
+    </header>
+    <div class="net" aria-hidden="true"></div>
+    <footer class="actions">
+        <p id="page-status" class="status" role="status" aria-live="polite" hidden></p>
+        @if (firebase is not null)
+        {
+            <button type="button" id="invite-sign-in" class="answer answer-going" disabled>@WebTexts.InviteSignIn</button>
+            <button type="button" id="invite-join" class="answer answer-going" hidden disabled>@WebTexts.InviteJoin</button>
+            <noscript><p class="notice">@WebTexts.InviteNoScript</p></noscript>
+        }
+        <button type="button" id="sign-out" class="link" hidden>@WebTexts.SignOut</button>
+    </footer>
+    @await Html.PartialAsync("Shared/_SignInSheet", Model.SignInSheet)
+</main>
+</body>
+</html>

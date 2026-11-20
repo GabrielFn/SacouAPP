@@ -3,3 +3,5 @@
 apps/mobile/src/api/generated/contract-hash.ts:generic-api-key:5
 # A test marker for a JSON property name the court route must never log (E3.7, L1), not a key.
 apps/api/tests/Sacou.Integration.Tests/Matches/CourtStreamTests.cs:generic-api-key:248
+# The public Web config of the Firebase project (ADR 0070, D4): identifies the project to the browser, restricted by HTTP referrer; not a secret.
+apps/api/src/Sacou.Api/appsettings.json:gcp-api-key:12

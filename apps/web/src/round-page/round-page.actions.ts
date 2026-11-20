@@ -1,4 +1,5 @@
-import type { Failure, Intent, SheetForm, SignInAttempt, Standing } from "./round-page.types";
+import type { Failure, Intent, Standing } from "./round-page.types";
+import type { SignInSheetAction } from "./sign-in-flow";
 
 /** Firebase and `POST /v1/me`: who is signed in, and what the API knows of them. */
 export type SessionAction =
@@ -16,15 +17,7 @@ export type SessionAction =
 
 /** The sheet of screen 02: the two ways in, the e-mail form and the Google window. */
 export type SheetAction =
-  | { readonly type: "answerTapped"; readonly intent: Intent }
-  | { readonly type: "sheetClosed" }
-  | { readonly type: "formChosen"; readonly form: SheetForm }
-  | { readonly type: "signInStarted"; readonly attempt: SignInAttempt }
-  | { readonly type: "signInFailed"; readonly failure: Failure }
-  /** The person closed the Google window: back to the sheet, with nothing to explain. */
-  | { readonly type: "signInCancelled" }
-  | { readonly type: "resetSent" }
-  | { readonly type: "signedIn" };
+  { readonly type: "answerTapped"; readonly intent: Intent } | SignInSheetAction;
 
 /** The nickname (question 129) and the answer itself. */
 export type AnswerAction =

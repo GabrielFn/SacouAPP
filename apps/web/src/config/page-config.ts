@@ -22,13 +22,19 @@ function text(dataset: DatasetLike, key: string): string | null {
   return value === "" ? null : value;
 }
 
-/** The config, or null when a piece is missing (a machine without the Firebase Web config): the page stays read-only. */
-export function readPageConfig(dataset: DatasetLike): PageConfig | null {
-  const code = text(dataset, "code");
+/** The Firebase Web config, or null when a piece is missing (a machine without it registered). */
+export function readFirebaseConfig(dataset: DatasetLike): FirebaseWebConfig | null {
   const apiKey = text(dataset, "firebaseApiKey");
   const authDomain = text(dataset, "firebaseAuthDomain");
   const projectId = text(dataset, "firebaseProjectId");
   const appId = text(dataset, "firebaseAppId");
+  if (apiKey === null || authDomain === null || projectId === null || appId === null) return null;
+  return { apiKey, authDomain, projectId, appId };
+}
+
+/** The config, or null when a piece is missing (a machine without the Firebase Web config): the page stays read-only. */
+export function readPageConfig(dataset: DatasetLike): PageConfig | null {
+  const code = text(dataset, "code");
   const nicknameMax = Number.parseInt(dataset.nicknameMax ?? "", 10);
   if (
     code === null ||
@@ -37,10 +43,6 @@ export function readPageConfig(dataset: DatasetLike): PageConfig | null {
     nicknameMax <= 0
   )
     return null;
-  if (apiKey === null || authDomain === null || projectId === null || appId === null) return null;
-  return {
-    code,
-    firebase: { apiKey, authDomain, projectId, appId },
-    nicknameMaxCodePoints: nicknameMax,
-  };
+  const firebase = readFirebaseConfig(dataset);
+  return firebase === null ? null : { code, firebase, nicknameMaxCodePoints: nicknameMax };
 }

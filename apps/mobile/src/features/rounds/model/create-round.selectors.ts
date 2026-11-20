@@ -224,20 +224,24 @@ export function visiblePersonalizePaths(group: GroupSettings): readonly Personal
   ];
 }
 
-/** The message the WhatsApp share carries (question 45); the page link joins it with E3.12. */
+/**
+ * The message the WhatsApp share carries (question 45). With the round page's link (`RoundResponse.shareUrl`, only
+ * for Admin and Co-admin, ADR 0070, D1) it ends in "Confirma aqui: <url>"; without it, in "Confirma no app Sacou.".
+ */
 export function shareTextOf(
   groupName: string,
   dateText: string,
   timeText: string,
   venue: string,
   capacity: number | null,
+  shareUrl: string | null,
 ): string {
-  return roundsStrings.share.text(
-    groupName,
-    `${dateText} · ${timeText}`,
-    normalizeVenue(venue),
-    capacity === null ? "" : roundsStrings.share.spots(capacity),
-  );
+  const when = `${dateText} · ${timeText}`;
+  const place = normalizeVenue(venue);
+  const spots = capacity === null ? "" : roundsStrings.share.spots(capacity);
+  return shareUrl === null
+    ? roundsStrings.share.text(groupName, when, place, spots)
+    : roundsStrings.share.textWithLink(groupName, when, place, spots, shareUrl);
 }
 
 /** The value of a personalize leaf as text, for the row and for "padrão do grupo: 1 set". */
