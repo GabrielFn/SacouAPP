@@ -169,6 +169,8 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [queryKeys.myProfile(), true],
+    [queryKeys.myStats(), true],
+    [["me", "stats", "x"], false],
     [queryKeys.deletionBlockers(), false],
     [["me", "profile", "x"], false],
     [["me", "nickname"], false],
