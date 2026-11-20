@@ -25,14 +25,14 @@ internal sealed class RoundProjectionConfiguration : IEntityTypeConfiguration<Ro
         builder.Property(row => row.CourtSessionId).HasColumnName("court_session_id");
         builder.Property(row => row.EventCount).HasColumnName("event_count");
         builder.Property(row => row.ProjectionVersion).HasColumnName("projection_version");
-        builder.Property(row => row.FactsHash).HasColumnName("facts_hash").HasMaxLength(StatsColumns.HashLength).IsFixedLength();
-        builder.Property(row => row.StartsAt).HasColumnName("starts_at").HasColumnType(StatsColumns.Timestamp);
+        builder.Property(row => row.FactsHash).HashColumn("facts_hash");
+        builder.Property(row => row.StartsAt).TimestampColumn("starts_at");
         builder.Property(row => row.LocalDate).HasColumnName("local_date");
         builder.Property(row => row.Counts).HasColumnName("counts");
-        builder.Property(row => row.Modality).HasColumnName("modality").HasMaxLength(StatsColumns.CodeLength);
+        builder.Property(row => row.Modality).CodeColumn("modality");
         builder.Property(row => row.FinishedMatches).HasColumnName("finished_matches");
         builder.Property(row => row.Summary).HasColumnName("summary").HasColumnType("jsonb");
-        builder.Property(row => row.RebuiltAt).HasColumnName("rebuilt_at").HasColumnType(StatsColumns.Timestamp);
+        builder.Property(row => row.RebuiltAt).TimestampColumn("rebuilt_at");
 
         builder.HasIndex(row => row.GroupId).HasDatabaseName("ix_round_projections_group");
     }
@@ -54,7 +54,7 @@ internal sealed class RoundMemberStatsConfiguration : IEntityTypeConfiguration<R
         builder.Property(row => row.RoundId).HasColumnName("round_id");
         builder.Property(row => row.MemberId).HasColumnName("member_id");
         builder.Property(row => row.GroupId).HasColumnName("group_id");
-        builder.Property(row => row.StartsAt).HasColumnName("starts_at").HasColumnType(StatsColumns.Timestamp);
+        builder.Property(row => row.StartsAt).TimestampColumn("starts_at");
         builder.Property(row => row.LocalDate).HasColumnName("local_date");
         builder.Property(row => row.MatchesPlayed).HasColumnName("matches_played");
         builder.Property(row => row.Wins).HasColumnName("wins");
@@ -82,10 +82,10 @@ internal sealed class RatingPoolConfiguration : IEntityTypeConfiguration<RatingP
         builder.ToTable(Table, table => table.HasCheckConstraint("ck_rating_pools_pool", StatsColumns.PoolCheck));
         builder.HasKey(row => new { row.GroupId, row.Pool }).HasName("pk_rating_pools");
         builder.Property(row => row.GroupId).HasColumnName("group_id");
-        builder.Property(row => row.Pool).HasColumnName("pool").HasMaxLength(StatsColumns.CodeLength);
-        builder.Property(row => row.InputsHash).HasColumnName("inputs_hash").HasMaxLength(StatsColumns.HashLength).IsFixedLength();
+        builder.Property(row => row.Pool).CodeColumn("pool");
+        builder.Property(row => row.InputsHash).HashColumn("inputs_hash");
         builder.Property(row => row.ParamsVersion).HasColumnName("params_version");
-        builder.Property(row => row.RebuiltAt).HasColumnName("rebuilt_at").HasColumnType(StatsColumns.Timestamp);
+        builder.Property(row => row.RebuiltAt).TimestampColumn("rebuilt_at");
     }
 }
 
@@ -105,12 +105,12 @@ internal sealed class MemberRatingConfiguration : IEntityTypeConfiguration<Membe
         });
         builder.HasKey(row => new { row.GroupId, row.Pool, row.MemberId }).HasName("pk_member_ratings");
         builder.Property(row => row.GroupId).HasColumnName("group_id");
-        builder.Property(row => row.Pool).HasColumnName("pool").HasMaxLength(StatsColumns.CodeLength);
+        builder.Property(row => row.Pool).CodeColumn("pool");
         builder.Property(row => row.MemberId).HasColumnName("member_id");
         builder.Property(row => row.Mu).HasColumnName("mu");
         builder.Property(row => row.Sigma).HasColumnName("sigma");
         builder.Property(row => row.SeedTenths).HasColumnName("seed_tenths");
-        builder.Property(row => row.SeedSource).HasColumnName("seed_source").HasMaxLength(StatsColumns.CodeLength);
+        builder.Property(row => row.SeedSource).CodeColumn("seed_source");
         builder.Property(row => row.MatchesRated).HasColumnName("matches_rated");
 
         builder.HasOne<RatingPoolRow>().WithMany().HasForeignKey(row => new { row.GroupId, row.Pool })
@@ -118,14 +118,24 @@ internal sealed class MemberRatingConfiguration : IEntityTypeConfiguration<Membe
     }
 }
 
+/// <summary>The column shapes the Stats tables repeat.</summary>
 internal static class StatsColumns
 {
-    public const string Timestamp = "timestamp with time zone";
+    public const string PoolCheck = "pool IN ('indoor', 'beach')";
+
+    private const string Timestamp = "timestamp with time zone";
 
     /// <summary>A SHA-256 in hex.</summary>
-    public const int HashLength = 64;
+    private const int HashLength = 64;
 
-    public const int CodeLength = 16;
+    private const int CodeLength = 16;
 
-    public const string PoolCheck = "pool IN ('indoor', 'beach')";
+    public static PropertyBuilder<DateTimeOffset> TimestampColumn(this PropertyBuilder<DateTimeOffset> property, string name) =>
+        property.HasColumnName(name).HasColumnType(Timestamp);
+
+    public static PropertyBuilder<string> HashColumn(this PropertyBuilder<string> property, string name) =>
+        property.HasColumnName(name).HasMaxLength(HashLength).IsFixedLength();
+
+    public static PropertyBuilder<string> CodeColumn(this PropertyBuilder<string> property, string name) =>
+        property.HasColumnName(name).HasMaxLength(CodeLength);
 }
