@@ -1,6 +1,6 @@
 # ADR 0071 · Projeções de estatísticas, MVP e rating OpenSkill
 
-**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada) e 2 (rating TS, `packages/rating`) da E3.9. As Partes 3 e 4 (porte C#, projeções e rotas) completam este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
+**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada), 2 (rating TS, `packages/rating`) e 3 (porte C# dos dois) da E3.9. A Parte 4 (projeções e rotas) completa este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
 
 ## Padrões adotados (perguntas 97 a 99, respostas antes do merge da Parte 4)
 
@@ -39,6 +39,22 @@
 **Semente guardada** (resposta 98 do Gabriel, opção 1): a saída leva `seedTenths` e `seedSource`, que a Parte 4 grava em `stats.member_ratings` para medir depois do piloto o quanto o rating corrigiu a nota.
 
 **Golden de fonte independente.** `scripts/generate-golden.ts` usa só a `openskill` e as entradas à mão: no `rating-pools.json`, cada caso diz à mão quais partidas avaliam, com quem de cada lado e em que ordem, e quem sai em cada pool; o gerador nunca chama o `ratePool`. Os testes TS exigem igualdade exata; o C# usa tolerância relativa de 1e-9 (risco 3 do plano). O caso do piso do σ usa `kappa` 0,999999, porque com o `kappa` do piloto o piso só age com σ muito maior que o resto do time.
+
+## Decisões da Parte 3 (porte C#)
+
+**Resumo da rodada no Matches.** `RoundSummaryRules.GetRoundSummary(timeline, options)` em `Matches/Domain/CourtSessions/PlayerStatistics/`, com `MatchResults`, `MvpByStats`, `BeachRanking` e `Comparisons`, os mesmos campos e a mesma ordem do TS; o golden `round-summary.json` é igual exato no C#, inclusive na ordem das chaves. Tudo `internal`; a Parte 4 expõe o resultado pelo contrato `ICourtSessionResults`.
+
+**Custo** (condição 1 da Parte 1). Os ralis saem uma vez (`MatchTallies.PlayedRallies`) e são divididos entre as estatísticas e o resultado das partidas; o saldo por partida soma em listas locais, indexadas por um `ImmutableDictionary.Builder` (o domínio da quadra não usa `Dictionary` nem `HashSet`, ADR 0033, D10). Pior caso legal medido por `RoundSummaryWorstCaseTests` (200 partidas de 24 contra 24, rotação ligada, troca de saque em todo rali, 19.600 eventos), em Debug na máquina local, sozinho: replay 0,83 s e resumo 1,17 s (contra 1,8 s do TS). Um teto em segundos reprovou na bateria com os outros assemblies em paralelo (5,6 s), então o teto é relativo: o resumo pode custar até 4 replays do mesmo log, no mesmo processo e sob a mesma carga, o que pega uma volta quadrática e não o ruído. A chave do time da areia ordena os IDs com `StringComparer.Ordinal`, a mesma ordem UTF-16 do `sort()` do TS (condição 2).
+
+**Rating no Stats.** `Stats/Domain/Ratings/`: `RatingParams` (com `SupportedVersion = 1`, conferida contra o JSON por teste), `Skill` (`readonly record struct`), `SeedRules`, `PlackettLuce` e `RatingPool`. Os parâmetros vêm do mesmo `packages/rating/src/rating-params.json`, embutido no assembly (`Stats/RatingParameters/EmbeddedRatingParams`, leitura estrita fora do domínio, como o catálogo de formações). O `PlackettLuce` porta só o caso de dois times com vencedor (sem empate, regra 18), com as operações na ordem da biblioteca; inclui o `limitSigma`, que o golden `o9` cobre. Nada tem rota, banco nem log nesta parte.
+
+**Três diferenças do TS, de propósito.**
+
+1. **Membro repetido no `onCourt`** (condição 1 da Parte 2): o motor nunca põe o mesmo membro duas vezes numa partida (um membro está num time só), mas o fold do TS deixaria a última atualização ganhar. O C# recusa com `stats.rating-duplicate-member`, num lado ou nos dois, mesmo em partida sem vencedor.
+2. **Tipos no lugar de texto.** `MemberId` (Guid) para os membros, `Guid` para a rodada e `DateTimeOffset` para `startsAt`, ordenado pelo instante em UTC; o desempate é o `roundId` em texto (`"D"`, minúsculo) com ordem ordinal, a mesma do TS. Por isso o `invalid-starts-at` não existe no C#: um instante tipado não tem forma errada. A condição 2 da Parte 2 (forma fixa do `startsAt`) deixa de valer para o servidor, que usa o C# e passa o instante tipado.
+3. **Leitura dos parâmetros mais estrita:** chave repetida ou desconhecida reprova a carga (o TS não vê chave repetida).
+
+Os códigos de erro do C# são `stats.rating-invalid-level`, `stats.rating-duplicate-seed` e `stats.rating-duplicate-member`, sem o `memberId` (nada de dado no erro de um dado escondido).
 
 ## Consequências
 

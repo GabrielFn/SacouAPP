@@ -19,6 +19,7 @@
         <EmbeddedResource Include="../../../../packages/match-engine/golden/libero-alignment.json" LogicalName="golden/libero-alignment.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/score-payloads.json" LogicalName="golden/score-payloads.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/stats-events.json" LogicalName="golden/stats-events.json" />
+        <EmbeddedResource Include="../../../../packages/match-engine/golden/round-summary.json" LogicalName="golden/round-summary.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/attributions-events.json" LogicalName="golden/attributions-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/corrections-events.json" LogicalName="golden/corrections-events.json" />
         <EmbeddedResource Include="../../../../packages/match-engine/golden/queue-events.json" LogicalName="golden/queue-events.json" />

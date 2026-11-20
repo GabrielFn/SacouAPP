@@ -6,6 +6,9 @@
         <ProjectReference Include="../../Sacou.Shared/Sacou.Shared.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <!-- The single source of the rating parameters, shared with TypeScript. A missing file fails the build. -->
+        <EmbeddedResource Include="../../../../../packages/rating/src/rating-params.json"
+                          LogicalName="Sacou.Modules.Stats.rating-params.json" />
         <InternalsVisibleTo Include="Sacou.Modules.Stats.Tests" />
     </ItemGroup>
 </Project>

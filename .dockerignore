@@ -11,6 +11,7 @@
 !apps/api/src/
 !packages/volley-rules/src/formations/formations.json
 !packages/match-engine/src/settings/settings-catalog.json
+!packages/rating/src/rating-params.json
 # The Node stage of the round page (ADR 0070, D7): the lockfile, the workspace manifests and apps/web only.
 !package.json
 !pnpm-lock.yaml

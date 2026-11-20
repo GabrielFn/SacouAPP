@@ -43,7 +43,7 @@ A rodada do plano, com os números conferidos à mão, está no teste `stats.acc
 
 ## Resumo da rodada (E3.9, ADR 0071)
 
-`getRoundSummary(timeline, options)` junta tudo o que o pós-jogo mostra, com as opções da rodada resolvida (`format.modality`, `mvp.enabled`, `mvp.byStats`, `mvp.individualPoints`). Código em `packages/match-engine/src/stats/round-summary.ts`; casos em `packages/match-engine/golden/round-summary.json`.
+`getRoundSummary(timeline, options)` junta tudo o que o pós-jogo mostra, com as opções da rodada resolvida (`format.modality`, `mvp.enabled`, `mvp.byStats`, `mvp.individualPoints`). Código em `packages/match-engine/src/stats/round-summary.ts` e, no servidor, `RoundSummaryRules` (`Matches/Domain/CourtSessions/PlayerStatistics/`); casos em `packages/match-engine/golden/round-summary.json`, lidos pelos dois.
 
 10. **Resultado das partidas** (`getMatchResults`): por partida terminada, na ordem dos `MatchEnded`, o vencedor, `teams` como no `MatchStarted`, `onCourt` (quem de `teams` esteve em quadra em pelo menos um rali ativo, pelas regras 2 e 3, na ordem de `teams`; o banco que não entrou fica só em `teams`) e `points` (ralis ganhos por lado). Partida aberta não entra. Partida terminada à mão sem nenhum rali tem `onCourt` vazio.
 11. **MVP do dia pelos dados, fórmula 1** (pergunta 97): entre quem jogou uma partida terminada, o maior `plusMinus`; empate, o maior aproveitamento `wins / matchesPlayed`, comparado em inteiros (`w1 × m2` contra `w2 × m1`: 2 de 3 empata com 4 de 6); depois a maior `longestWinStreak`; depois mais `matchesPlayed`; por fim a primeira aparição (regra 9), nunca o UUID. `winner: null` não é vitória. Sem partida terminada, ou com `mvp.enabled` ou `mvp.byStats` desligado, `mvp: null`. A versão da fórmula (`mvpFormulaVersion`, hoje 1) vai em todo resumo.
@@ -56,7 +56,7 @@ A rodada do plano, com os números conferidos à mão, está no teste `stats.acc
 
 ## Rating OpenSkill escondido (E3.9 Parte 2, ADR 0047 e 0071)
 
-Código em `packages/rating/` (`ratePool`, `seedOf`, `levelOf`); casos em `packages/rating/golden/`. **Ninguém vê o rating no piloto:** nem rota, nem evento, nem log, nem exportação (Parte 4). O sorteio continua usando a nota do admin.
+Código em `packages/rating/` (`ratePool`, `seedOf`, `levelOf`) e, no servidor, `Stats/Domain/Ratings/` (`RatingPool`, `SeedRules`, `PlackettLuce`); casos em `packages/rating/golden/`, lidos pelos dois. O C# recusa o mesmo membro duas vezes no `onCourt` de uma partida (`stats.rating-duplicate-member`) e recebe `startsAt` como instante tipado (ADR 0071, Parte 3). **Ninguém vê o rating no piloto:** nem rota, nem evento, nem log, nem exportação (Parte 4). O sorteio continua usando a nota do admin.
 
 18. **Modelo:** Plackett-Luce da `openskill` (Weng-Lin), dois times por partida, `rank` 1 para o vencedor e 2 para o perdedor. Partida com `winner: null` **não avalia ninguém**.
 19. **Quem é avaliado:** quem esteve em quadra num rali ativo (`onCourt` de `getMatchResults`, regra 10), peso 1. O banco que não entrou não muda. Partida terminada à mão sem nenhum rali tem `onCourt` vazio e não avalia ninguém. Quem só aparece em `teams` sai na lista com a semente e `matchesRated: 0`.

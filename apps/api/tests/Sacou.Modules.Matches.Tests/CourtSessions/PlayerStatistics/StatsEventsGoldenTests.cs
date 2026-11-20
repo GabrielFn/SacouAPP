@@ -87,7 +87,7 @@ public sealed class StatsEventsGoldenTests
         }, id);
     }
 
-    private static void WritePlayer(Utf8JsonWriter writer, PlayerStats stats)
+    internal static void WritePlayer(Utf8JsonWriter writer, PlayerStats stats)
     {
         writer.WriteStartObject();
         writer.WriteString("memberId", stats.MemberId);
