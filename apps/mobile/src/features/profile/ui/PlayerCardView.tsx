@@ -34,7 +34,6 @@ export interface PlayerCardViewProps {
   readonly showStats: boolean;
 }
 
-/** The nickname shrinks, to this fraction at most, before it is cut (20 letters in the band). */
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
 /** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */
