@@ -61,9 +61,12 @@ internal static class NotificationCalls
         return await RoundCalls.JsonAsync(response);
     }
 
+    /// <summary>The smallest limit of spots the settings catalog takes (<c>attendance.capacity</c>).</summary>
+    public const int SmallestCapacity = 2;
+
     /// <summary>
-    /// A round with room for one and a waitlist, the first person going and the second waiting: the first one's "não vou"
-    /// promotes the second.
+    /// A round with room for two and a waitlist: a filler and the first person going, the second waiting. The first one's
+    /// "não vou" promotes the second.
     /// </summary>
     public static async Task<(string Round, (string Subject, Guid MemberId) Going, (string Subject, Guid MemberId) Waiting)> RoundWithAWaitlistAsync(GroupWorld world)
     {
@@ -75,9 +78,11 @@ internal static class NotificationCalls
     public static async Task<(JsonObject Created, (string Subject, Guid MemberId) Going, (string Subject, Guid MemberId) Waiting)> WaitlistRoundAsync(
         GroupWorld world, string? body = null)
     {
-        await RoundCalls.ConfigureAttendanceAsync(world, capacity: 1);
+        await RoundCalls.ConfigureAttendanceAsync(world, capacity: SmallestCapacity);
         var created = await RoundCalls.CreateAsync(world, body);
         var round = created["roundId"]!.GetValue<string>();
+        var filler = await world.AddPersonAsync();
+        Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, filler.MemberId, going: true));
         var going = await world.AddPersonAsync();
         var waiting = await world.AddPersonAsync();
         Assert.Equal("going", (await RoundCalls.RespondAsync(world, going.Subject, round, going: true)).Body!["status"]!.GetValue<string>());

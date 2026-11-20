@@ -17,7 +17,7 @@ public sealed class PromotionPathsTests(IntegrationDatabase database) : IAsyncLi
     private const int DaysInWeek = 7;
     private const int Capacity = 12;
     private const int Racers = 16;
-    private const string RaiseToTwo = """{"settings":{"schemaVersion":1,"attendance":{"capacity":2}}}""";
+    private const string RaiseToThree = """{"settings":{"schemaVersion":1,"attendance":{"capacity":3}}}""";
 
     private readonly ApiWithDatabase api = new(database);
 
@@ -38,10 +38,10 @@ public sealed class PromotionPathsTests(IntegrationDatabase database) : IAsyncLi
             $"SELECT gen_random_uuid(), group_id, series_id, local_date + {DaysInWeek}, local_time, time_zone, starts_at + interval '{DaysInWeek} days', venue, status, next_sequence, created_at " +
             "FROM sessions.rounds WHERE id = @round",
             ("round", Guid.Parse(round)));
-        var moveAndRaise = "{\"localDate\":\"" + WeekLater(created) + "\"," + RaiseToTwo[1..];
+        var moveAndRaise = "{\"localDate\":\"" + WeekLater(created) + "\"," + RaiseToThree[1..];
 
         using var undone = await world.SendAsync(GroupActor.Admin, HttpMethod.Patch, RoundCalls.RoundPath(world, round), moveAndRaise);
-        using var refused = await world.SendAsync(GroupActor.Player, HttpMethod.Patch, RoundCalls.RoundPath(world, round), RaiseToTwo);
+        using var refused = await world.SendAsync(GroupActor.Player, HttpMethod.Patch, RoundCalls.RoundPath(world, round), RaiseToThree);
 
         Assert.Equal(HttpStatusCode.Conflict, undone.StatusCode);
         Assert.Equal("sessions.round-date-taken", await RoundCalls.CodeAsync(undone));
@@ -95,7 +95,7 @@ public sealed class PromotionPathsTests(IntegrationDatabase database) : IAsyncLi
         using (client)
         {
             using var response = await world.SendAsync(
-                GroupActor.Admin, HttpMethod.Patch, RoundCalls.RoundPath(world, round), RaiseToTwo);
+                GroupActor.Admin, HttpMethod.Patch, RoundCalls.RoundPath(world, round), RaiseToThree);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             await AssertToldOnceAsync(round, waiting);
@@ -152,15 +152,14 @@ public sealed class PromotionPathsTests(IntegrationDatabase database) : IAsyncLi
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
-        var (round, going, _) = await N.RoundWithAWaitlistAsync(world);
+        var (round, going, waiting) = await N.RoundWithAWaitlistAsync(world);
         var guest = await GuestCalls.CreateAsync(world);
         Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, guest, going: true));
         var former = world.MemberIds[GroupActor.LeftMember];
 
         // The one waiting goes first, then the guest: two "não vou" promote both.
         _ = await RoundCalls.RespondAsync(world, going.Subject, round, going: false);
-        var first = (await RoundCalls.RowsAsync(api.ConnectionString, round)).Single(row => row.Status is "going" or "promoted" && row.MemberId != guest).MemberId;
-        Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, first, going: false));
+        Assert.Equal(HttpStatusCode.OK, await RoundCalls.SetAsync(world, round, waiting.MemberId, going: false));
         await N.RequestAsync(api, new NotificationRequest(
             $"test:{Guid.NewGuid():N}", NotificationRequestKind.WaitlistPromoted, former, world.GroupId, Guid.Parse(round), DateTimeOffset.UtcNow.AddDays(2)));
 
