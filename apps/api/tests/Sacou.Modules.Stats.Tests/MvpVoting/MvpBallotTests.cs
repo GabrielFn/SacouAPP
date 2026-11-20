@@ -118,3 +118,20 @@ public sealed class MvpBallotTests
         new MvpCandidate(Caio, MatchesPlayed: 0, Wins: 0, PlusMinus: 0),
     ]);
 }
+
+/// <summary>Literal edges of the window, so a changed constant or a closed interval is caught.</summary>
+public sealed class MvpWindowLiteralTests
+{
+    private static readonly DateTimeOffset EndsAt = new(2026, 11, 21, 1, 0, 0, TimeSpan.Zero);
+
+    [Fact]
+    public void TheWindow_IsOpenForLiteralTwentyFourHours()
+    {
+        var window = MvpVotingWindow.From(EndsAt);
+
+        Assert.Equal(new DateTimeOffset(2026, 11, 22, 1, 0, 0, TimeSpan.Zero), window.ClosesAt);
+        Assert.Equal(MvpVotingState.Open, window.StateAt(new DateTimeOffset(2026, 11, 22, 0, 59, 59, TimeSpan.Zero)));
+        Assert.Equal(MvpVotingState.Closed, window.StateAt(new DateTimeOffset(2026, 11, 22, 1, 0, 0, TimeSpan.Zero)));
+        Assert.Equal(MvpVotingState.NotOpen, window.StateAt(new DateTimeOffset(2026, 11, 21, 0, 59, 59, TimeSpan.Zero)));
+    }
+}
