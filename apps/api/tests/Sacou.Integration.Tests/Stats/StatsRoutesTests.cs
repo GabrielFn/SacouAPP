@@ -199,6 +199,39 @@ public sealed partial class StatsRoutesTests(IntegrationDatabase database) : IAs
         Assert.Equal(1, scorekeeperSeason["total"]!["roundsHeld"]!.GetValue<int>());
     }
 
+    /// <summary>
+    /// L6 for someone who left: the group where they have a match in the season shows without its name and its modality
+    /// ("Ex-jogador"); the group they left with no match is not in the list.
+    /// </summary>
+    [Fact]
+    public async Task ALeftMember_SeesTheGroupWithAMatchWithoutNameNorModality_AndNotTheOneWithout()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        await world.InsertMemberAsync(A.LeftMember, "player", "left", world.OtherGroupId);
+        var (round, year) = await RoundAsync(world);
+        var phone = CourtPhone.New();
+        string[] envelopes =
+        [
+            phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.LeftMember]),
+            phone.Point("a"),
+            phone.ManualEnd("a"),
+        ];
+        _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone, envelopes);
+
+        var season = await StatsCalls.MyStatsAsync(world, A.LeftMember, year);
+
+        var groups = season["groups"]!.AsArray();
+        var only = Assert.Single(groups)!.AsObject();
+        Assert.Equal(world.GroupId, only["groupId"]!.GetValue<Guid>());
+        Assert.Null(only["groupName"]);
+        Assert.Null(only["modality"]);
+        Assert.Equal(1, only["matchesPlayed"]!.GetValue<int>());
+        Assert.Equal(1, only["losses"]!.GetValue<int>());
+        Assert.Equal(1, season["total"]!["matchesPlayed"]!.GetValue<int>());
+        Assert.DoesNotContain(groups, item => item!["groupId"]!.GetValue<Guid>() == world.OtherGroupId);
+    }
+
     /// <summary>5.4.11: both routes are under <c>court-sync</c>: the second call in a window of one is a 429.</summary>
     [Fact]
     public async Task BothRoutes_PastTheCourtSyncWindow_Are429()
