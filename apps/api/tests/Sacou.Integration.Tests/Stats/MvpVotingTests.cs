@@ -17,6 +17,7 @@ namespace Sacou.Integration.Tests.Stats;
 public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetime
 {
     private const int RacingVotes = 20;
+    private const int RoundAfterTheOpenOne = 6;
     private const string VotingOn = """{"schemaVersion":1,"mvp":{"enabled":true,"voting":true}}""";
 
     private readonly ApiWithDatabase api = new(database);
@@ -255,7 +256,8 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
     {
         using var client = api.CreateClient();
         var (world, round) = await OpenRoundAsync(client);
-        var off = (await RoundCalls.CreateAsync(world))["roundId"]!.GetValue<string>();
+        // The clock already stands past the first round's start, so this one goes further ahead.
+        var off = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(RoundCalls.FutureDate(RoundAfterTheOpenOne))))["roundId"]!.GetValue<string>();
         using var cancel = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/cancel");
 
         using var canceled = await world.SendAsync(A.Admin, HttpMethod.Get, BallotPath(world, round));
