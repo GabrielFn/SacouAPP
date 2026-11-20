@@ -38,6 +38,9 @@ internal static class GroupRouteGuard
 
         // The round's public page (E3.12 Part 2, ADR 0070, D5): anonymous, GET and HEAD only, a Razor page.
         "GET,HEAD r/{code}",
+
+        // The invite page (E3.12 Part 3, ADR 0070, D8): a shell without data of the server, GET and HEAD only.
+        "GET,HEAD c",
     };
 
     /// <summary>The OpenAPI document, mapped only in Development (ADR 0042, D2): in Production the list above is all.</summary>
