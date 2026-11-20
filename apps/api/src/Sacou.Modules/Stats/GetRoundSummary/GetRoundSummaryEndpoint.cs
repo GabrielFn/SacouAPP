@@ -1,0 +1,40 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Routing;
+using Sacou.Http;
+using Sacou.Http.RateLimiting;
+using Sacou.Modules.Groups.Contracts;
+using Sacou.Modules.Sessions.Contracts;
+using Sacou.Modules.Stats.Access;
+using Sacou.Modules.Stats.Projections;
+
+namespace Sacou.Modules.Stats.GetRoundSummary;
+
+/// <summary>
+/// <c>GET /v1/groups/{groupId}/rounds/{roundId}/summary</c> (<c>GetRoundSummary</c>): the after-game of the round to
+/// any member of the group, the Jogador included (<c>ViewGroup</c>). A round of another group is the same 404
+/// <c>sessions.round-not-found</c> as none; a round without a stream is 200 with no finished match. The read may
+/// replay the stream once (a stale projection), so it is limited by <c>court-sync</c> (ADR 0062). <c>no-store</c>.
+/// </summary>
+internal static class GetRoundSummaryEndpoint
+{
+    public const string Name = "GetRoundSummary";
+    public const string Route = "/rounds/{roundId:guid}/summary";
+
+    public static RouteGroupBuilder MapGetRoundSummary(this RouteGroupBuilder group)
+    {
+        group.MapGet(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.CourtSync)
+            .RequireCapability(GroupCapability.ViewGroup)
+            .WithNoStore();
+        return group;
+    }
+
+    private static async Task<Results<Ok<RoundSummaryReport>, ProblemHttpResult>> HandleAsync(
+        Guid roundId, HttpContext context, StatsProjector projector, CancellationToken cancellationToken)
+    {
+        var access = context.StatsAccess();
+        var round = await projector.GetRoundAsync(access.GroupId, roundId, cancellationToken).ConfigureAwait(false);
+        return round is null ? ProblemResults.From(RoundDirectoryErrors.RoundNotFound) : TypedResults.Ok(RoundSummaryReport.From(round));
+    }
+}

@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sacou.Modules.Matches.Contracts;
+using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Stats.Access;
+using Sacou.Modules.Stats.AccountData;
 using Sacou.Modules.Stats.CastMvpVote;
 using Sacou.Modules.Stats.GetMvpVoting;
+using Sacou.Modules.Stats.GetMyStats;
+using Sacou.Modules.Stats.GetRoundSummary;
 using Sacou.Modules.Stats.Infrastructure;
 using Sacou.Modules.Stats.MvpVoting;
 using Sacou.Modules.Stats.Projections;
@@ -25,17 +28,23 @@ public static class StatsModule
         services.AddStatsDatabase(configuration);
         services.AddScoped<StatsProjector>();
         services.AddScoped<RatingProjector>();
-        services.AddScoped<ICourtStreamChanged, StatsStreamChanged>();
         services.AddScoped<IMvpVotingRounds, ProjectedMvpVotingRounds>();
         services.AddScoped<GetMvpVotingHandler>();
         services.AddScoped<CastMvpVoteHandler>();
+        // The person's after-game in the export, never the rating (ADR 0071).
+        services.AddScoped<IAccountExportSection, StatsExportSection>();
         return services;
     }
 
-    /// <summary>The ballot and the vote of the MVP (ADR 0072), behind the Stats' group filter.</summary>
+    /// <summary>
+    /// The summary of a round, the ballot and the vote of the MVP (ADR 0072) behind the Stats' group filter, and the
+    /// person's own season outside it (on the closed list of the route guard). The summary and the season may replay a
+    /// stale stream, so both are under <c>court-sync</c>.
+    /// </summary>
     public static IEndpointRouteBuilder MapStatsEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapStatsRoutes().MapGetMvpVoting().MapCastMvpVote();
+        endpoints.MapStatsRoutes().MapGetRoundSummary().MapGetMvpVoting().MapCastMvpVote();
+        endpoints.MapGetMyStats();
         return endpoints;
     }
 

@@ -46,4 +46,8 @@ public static class AccountExportSections
     /// <summary>The court batches the person wrote (E3.7, ADR 0060, D16).</summary>
     public const string CourtWrites = "courtWrites";
     public const int CourtWritesOrder = 500;
+
+    /// <summary>The person's after-game of each round they played, without the rating nor the grade (E3.9, ADR 0071).</summary>
+    public const string Stats = "stats";
+    public const int StatsOrder = 600;
 }

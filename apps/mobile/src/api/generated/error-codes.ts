@@ -81,6 +81,7 @@ export const apiErrorCodes = [
   "stats.mvp-voting-closed",
   "stats.mvp-voting-not-open",
   "stats.mvp-voting-off",
+  "stats.year-invalid",
 ] as const;
 
 export type ApiErrorCode = (typeof apiErrorCodes)[number];

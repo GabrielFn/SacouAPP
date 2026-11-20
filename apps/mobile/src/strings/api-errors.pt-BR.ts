@@ -102,6 +102,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "stats.mvp-voting-closed": "A votação do MVP já fechou.",
   "stats.mvp-voting-not-open": "A votação do MVP abre quando a rodada termina.",
   "stats.mvp-voting-off": "A votação do MVP está desligada nesta rodada.",
+  "stats.year-invalid": "Esse ano não tem estatísticas.",
 };
 
 /** What the person reads for the other kinds of `ApiError` (E4.2, D5). */

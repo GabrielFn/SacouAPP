@@ -153,6 +153,9 @@ namespace Sacou.Modules.Matches.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_court_sessions");
 
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_court_sessions_group");
+
                     b.HasIndex("RoundId")
                         .IsUnique()
                         .HasDatabaseName("ux_court_sessions_round");

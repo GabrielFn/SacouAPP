@@ -70,10 +70,19 @@ Código em `packages/rating/` (`ratePool`, `seedOf`, `levelOf`) e, no servidor, 
 ## Projeções no servidor (E3.9 Parte 4a, ADR 0071)
 
 26. **Cache, nunca soma.** O servidor guarda o resumo de cada rodada e o rating de cada pool como cache de funções puras, no schema `stats`; nada é incrementado em cima do valor anterior. Apagar tudo e ler de novo dá o mesmo resultado.
-27. **Quando reconstrói:** depois do commit de um lote que gravou um `MatchEnded` ou um `RevertedTo` (lote só com pontos da partida aberta não muda nada terminado), e na leitura quando a chave mudou: outro número de eventos no stream, outra versão da projeção, ou outro estado, início, modalidade ou opção `mvp.*` da rodada. Uma falha depois do commit não desfaz a escrita; a próxima leitura refaz.
+27. **Quando reconstrói:** só na leitura (desde a Parte 4b; a escrita da quadra não refaz nada), quando a chave mudou: outro número de eventos no stream, outra versão da projeção, ou outro estado, início, modalidade ou opção `mvp.*` da rodada. O resumo de uma rodada refaz no máximo ela; o pool do grupo só é refeito quando nenhuma outra rodada contada está velha (a leitura nunca paga mais de um replay). A temporada da pessoa refaz as rodadas velhas dos grupos dela.
 28. **Pool refeito do zero** quando muda qualquer entrada: as rodadas do pool e suas chaves, a nota atual de um membro (pergunta 98) ou a versão dos parâmetros. Cancelar uma rodada a tira das somas e do rating; descancelar devolve.
 29. **Rodada cancelada** continua legível no resumo, mas não entra nas somas (sem linhas por membro) nem no rating.
 
+## Leitura, somas e exportação (E3.9 Parte 4b, ADR 0071)
+
+30. **Resumo da rodada** (`GET /v1/groups/{groupId}/rounds/{roundId}/summary`, telas 12, 12a e 12b): qualquer membro do grupo, o Jogador inclusive. Rodada de outro grupo é o mesmo 404 da inexistente; rodada sem stream responde 200 com `finishedMatches: 0`. Campos: `roundId`, `modality`, `mvpFormulaVersion`, `finishedMatches`, `mvp` (`kind`, `memberIds` sempre lista, `side`), `sides` (`mostWins: {side, wins}`, `longestStreak: {side, longestWinStreak}`, cada um nulo no empate), `players` e `ranking` (só na areia, com `undecided`).
+31. **Temporada da pessoa** (`GET /v1/me/stats?year=2026`, telas 14 e 15): só da própria pessoa, resolvida pelo token. `year` opcional (sem ele, o ano corrente em `America/Sao_Paulo`), de 2000 a 2100, e devolvido na resposta; outro valor é 400. A temporada é o ano civil da data local da rodada. Conta só rodada não cancelada, com stream.
+32. **Somas:** partidas, vitórias, derrotas, saldo e quantas vezes foi MVP somam as rodadas; a maior sequência atravessa as rodadas, na ordem de jogo (início da rodada, depois o ID), e uma partida sem vencedor a quebra.
+33. **Presença** (pergunta 99, opção 1): `rounds` (rodadas da temporada em que jogou pelo menos uma partida terminada) sobre `roundsHeld` (rodadas da temporada com pelo menos uma partida terminada enquanto a pessoa estava no grupo, da entrada à saída, mais as que ela jogou). A tela calcula a porcentagem; sem rodada realizada mostra "—".
+34. **Grupos:** `groups[]` com `groupId`, `groupName` e `modality` do grupo (nulos para grupo de que a pessoa saiu), na ordem de mais partidas e, no empate, da entrada da pessoa. Grupo que a pessoa deixou só aparece com partida na temporada. O total soma os grupos mostrados.
+35. **Exportação** (`GET /v1/me/export`, seção `stats`): por rodada em que a pessoa jogou, em qualquer grupo que tem ou teve, as estatísticas do membro e se foi MVP; rodada cancelada aparece com `counts: false` (fora das somas). **Nunca o rating nem a semente**, como a nota do admin (pergunta 42). Exclusão de conta: nada a apagar no `stats` (tudo por `MemberId`); o ex-membro continua no cálculo dos outros.
+
 ## Fora daqui
 
-Votação do MVP (E3.18); somas, rotas e exportação (E3.9, Parte 4b); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
+Votação do MVP (E3.18); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).

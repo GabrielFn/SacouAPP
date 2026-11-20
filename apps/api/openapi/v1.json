@@ -1216,6 +1216,105 @@
         }
       }
     },
+    "/v1/me/stats": {
+      "get": {
+        "tags": [
+          "GetMyStatsEndpoint"
+        ],
+        "operationId": "GetMyStats",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyStatsReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/groups/{groupId}": {
       "get": {
         "tags": [
@@ -5557,6 +5656,119 @@
         }
       }
     },
+    "/v1/groups/{groupId}/rounds/{roundId}/summary": {
+      "get": {
+        "tags": [
+          "GetRoundSummaryEndpoint"
+        ],
+        "operationId": "GetRoundSummary",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundSummaryReport"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
     "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting": {
       "get": {
         "tags": [
@@ -7139,6 +7351,145 @@
         },
         "additionalProperties": false
       },
+      "MyStatsGroupReport": {
+        "required": [
+          "groupId",
+          "groupName",
+          "modality",
+          "matchesPlayed",
+          "wins",
+          "losses",
+          "plusMinus",
+          "longestWinStreak",
+          "mvpCount",
+          "rounds",
+          "roundsHeld"
+        ],
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "modality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plusMinus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mvpCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roundsHeld": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MyStatsReport": {
+        "required": [
+          "year",
+          "total",
+          "groups"
+        ],
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "$ref": "#/components/schemas/MyStatsTotalsReport"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyStatsGroupReport"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MyStatsTotalsReport": {
+        "required": [
+          "matchesPlayed",
+          "wins",
+          "losses",
+          "plusMinus",
+          "longestWinStreak",
+          "mvpCount",
+          "rounds",
+          "roundsHeld"
+        ],
+        "type": "object",
+        "properties": {
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plusMinus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mvpCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roundsHeld": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "PlayingPosition": {
         "enum": [
           "setter",
@@ -7520,6 +7871,65 @@
         ],
         "type": "string"
       },
+      "RoundSummaryReport": {
+        "required": [
+          "roundId",
+          "modality",
+          "mvpFormulaVersion",
+          "finishedMatches",
+          "mvp",
+          "sides",
+          "players",
+          "ranking"
+        ],
+        "type": "object",
+        "properties": {
+          "roundId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "modality": {
+            "type": "string"
+          },
+          "mvpFormulaVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "finishedMatches": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mvp": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummaryMvpReport"
+              }
+            ]
+          },
+          "sides": {
+            "$ref": "#/components/schemas/SummarySidesReport"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SummaryPlayerReport"
+            }
+          },
+          "ranking": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SummaryStandingReport"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "RoundSummaryResponse": {
         "required": [
           "roundId",
@@ -7740,6 +8150,23 @@
         },
         "additionalProperties": false
       },
+      "SummaryLongestStreakReport": {
+        "required": [
+          "side",
+          "longestWinStreak"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "$ref": "#/components/schemas/SummarySide"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SummaryMe": {
         "required": [
           "status",
@@ -7762,6 +8189,250 @@
               "null",
               "integer"
             ],
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryMostWinsReport": {
+        "required": [
+          "side",
+          "wins"
+        ],
+        "type": "object",
+        "properties": {
+          "side": {
+            "$ref": "#/components/schemas/SummarySide"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryMvpKind": {
+        "enum": [
+          "player",
+          "team"
+        ],
+        "type": "string"
+      },
+      "SummaryMvpReport": {
+        "required": [
+          "kind",
+          "memberIds",
+          "side",
+          "plusMinus",
+          "wins",
+          "matchesPlayed",
+          "longestWinStreak"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/SummaryMvpKind"
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "side": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummarySide"
+              }
+            ]
+          },
+          "plusMinus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryPlayerReport": {
+        "required": [
+          "memberId",
+          "matchesPlayed",
+          "wins",
+          "losses",
+          "undecided",
+          "plusMinus",
+          "longestWinStreak",
+          "pointsByKind",
+          "mainSide"
+        ],
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undecided": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plusMinus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pointsByKind": {
+            "$ref": "#/components/schemas/SummaryPointsByKindReport"
+          },
+          "mainSide": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummarySide"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryPointsByKindReport": {
+        "required": [
+          "attack",
+          "block",
+          "ace",
+          "other"
+        ],
+        "type": "object",
+        "properties": {
+          "attack": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ace": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "other": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummarySide": {
+        "enum": [
+          "a",
+          "b"
+        ],
+        "type": "string"
+      },
+      "SummarySidesReport": {
+        "required": [
+          "mostWins",
+          "longestStreak"
+        ],
+        "type": "object",
+        "properties": {
+          "mostWins": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummaryMostWinsReport"
+              }
+            ]
+          },
+          "longestStreak": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummaryLongestStreakReport"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryStandingReport": {
+        "required": [
+          "memberIds",
+          "wins",
+          "losses",
+          "undecided",
+          "longestWinStreak",
+          "pointsFor",
+          "pointsAgainst"
+        ],
+        "type": "object",
+        "properties": {
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undecided": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pointsFor": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pointsAgainst": {
+            "type": "integer",
             "format": "int32"
           }
         },
@@ -7975,6 +8646,7 @@
     "stats.mvp-voter-not-eligible",
     "stats.mvp-voting-closed",
     "stats.mvp-voting-not-open",
-    "stats.mvp-voting-off"
+    "stats.mvp-voting-off",
+    "stats.year-invalid"
   ]
 }

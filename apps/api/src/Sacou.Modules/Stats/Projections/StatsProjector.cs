@@ -21,8 +21,14 @@ internal sealed record RoundProjection(RoundFacts Facts, CourtStreamHead? Stream
 /// <summary>
 /// "Correção recalcula tudo" (ADR 0071, 3.9): every projection is a cache of a pure function of the stream and the
 /// facts of its round, rebuilt whole when its key changes, never incremented. Then the pools of the group are folded
-/// again when their inputs changed. No background work: a write after its commit, or a read, rebuilds.
+/// again when their inputs changed. No background work and nothing on the write of the court (E3.9 part 4b,
+/// condition 1): only a read rebuilds, under <c>court-sync</c>.
 /// </summary>
+/// <remarks>
+/// The one way to read the Stats (condition 2 of part 4a): no consumer trusts a stored row or pool without comparing
+/// its key with the inputs read now. A rebuild that lost a race and wrote an older value after a newer one is thus at
+/// worst redone by the next read, never served as fresh.
+/// </remarks>
 internal sealed class StatsProjector(
     IRoundFacts rounds,
     ICourtSessionResults courts,
@@ -32,39 +38,90 @@ internal sealed class StatsProjector(
     ILogger<StatsProjector> logger)
 {
     /// <summary>
-    /// The fresh after-game of one round of the group (E3.18 reads it for the ballot, L2), or null when the group has
-    /// no such round. Refreshes the group on the way, so the rating follows any correction.
+    /// The fresh after-game of one round of the group (the summary route, and the ballot of E3.18, L2), or null when
+    /// the group has no such round. Replays at most this round; the other rounds are read from their rows. The pools
+    /// are folded again only when every other counted round is fresh, so the read never pays more than one replay;
+    /// a pool waits for the read that freshens the last stale round of the group.
     /// </summary>
     public async Task<RoundProjection?> GetRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken)
     {
-        var group = await GetGroupAsync(groupId, cancellationToken).ConfigureAwait(false);
-        return group.FirstOrDefault(projection => projection.Facts.RoundId == roundId);
+        var group = await LoadAsync(groupId, facts => facts.RoundId == roundId, cancellationToken).ConfigureAwait(false);
+        var round = group.Fresh.FirstOrDefault(projection => projection.Facts.RoundId == roundId);
+        if (round is null)
+        {
+            return null;
+        }
+
+        if (group.StaleCounted > 0)
+        {
+            StatsLog.PoolDeferred(logger, groupId, group.StaleCounted);
+            return round;
+        }
+
+        await ratings.RefreshAsync(groupId, group.Fresh, cancellationToken).ConfigureAwait(false);
+        return round;
     }
 
     /// <summary>Every round of the group, earliest first, each fresh; the stale ones are rebuilt, then the pools.</summary>
     public async Task<IReadOnlyList<RoundProjection>> GetGroupAsync(Guid groupId, CancellationToken cancellationToken)
     {
+        var group = await LoadAsync(groupId, _ => true, cancellationToken).ConfigureAwait(false);
+        if (group.Fresh.Count > 0)
+        {
+            await ratings.RefreshAsync(groupId, group.Fresh, cancellationToken).ConfigureAwait(false);
+        }
+
+        return group.Fresh;
+    }
+
+    /// <summary>
+    /// Every round of the group, earliest first, each fresh, without folding the pools: the export reads the person's
+    /// rounds only, and leaves the hidden rating (and its log line, which names the group) to the reads that use it.
+    /// </summary>
+    public async Task<IReadOnlyList<RoundProjection>> ListRoundsAsync(Guid groupId, CancellationToken cancellationToken) =>
+        (await LoadAsync(groupId, _ => true, cancellationToken).ConfigureAwait(false)).Fresh;
+
+    /// <summary>
+    /// The rounds of the group that are fresh after rebuilding the stale ones <paramref name="rebuild"/> allows, and how
+    /// many stale ones that would count were left as they are.
+    /// </summary>
+    private async Task<GroupProjections> LoadAsync(Guid groupId, Func<RoundFacts, bool> rebuild, CancellationToken cancellationToken)
+    {
         var facts = await rounds.ListAsync(groupId, cancellationToken).ConfigureAwait(false);
         if (facts.Count == 0)
         {
-            return [];
+            return new GroupProjections([], StaleCounted: 0);
         }
 
         var heads = (await courts.ListOfGroupAsync(groupId, cancellationToken).ConfigureAwait(false)).ToDictionary(head => head.RoundId);
         var stored = (await store.ListProjectionsAsync(groupId, cancellationToken).ConfigureAwait(false)).ToDictionary(row => row.RoundId);
-        var projections = new List<RoundProjection>(facts.Count);
+        var fresh = new List<RoundProjection>(facts.Count);
+        var staleCounted = 0;
         foreach (var round in facts)
         {
-            projections.Add(await FreshAsync(groupId, round, heads.GetValueOrDefault(round.RoundId), stored.GetValueOrDefault(round.RoundId), cancellationToken)
-                .ConfigureAwait(false));
+            var head = heads.GetValueOrDefault(round.RoundId);
+            var row = stored.GetValueOrDefault(round.RoundId);
+            var projection = Stored(round, head, row);
+            if (projection is null && head is not null && rebuild(round))
+            {
+                projection = await RebuildAsync(groupId, round, head, cancellationToken).ConfigureAwait(false);
+            }
+
+            if (projection is not null)
+            {
+                fresh.Add(projection);
+            }
+            else if (round.State == RoundState.Scheduled)
+            {
+                staleCounted++;
+            }
         }
 
-        await ratings.RefreshAsync(groupId, projections, cancellationToken).ConfigureAwait(false);
-        return projections;
+        return new GroupProjections(fresh, staleCounted);
     }
 
-    private async Task<RoundProjection> FreshAsync(
-        Guid groupId, RoundFacts facts, CourtStreamHead? head, RoundProjectionRow? row, CancellationToken cancellationToken)
+    /// <summary>The round as its row holds it, when the row is fresh; empty with no stream; null when it needs a replay.</summary>
+    private static RoundProjection? Stored(RoundFacts facts, CourtStreamHead? head, RoundProjectionRow? row)
     {
         var factsHash = ProjectionKeys.FactsHashOf(facts);
         if (head is null)
@@ -72,12 +129,9 @@ internal sealed class StatsProjector(
             return new RoundProjection(facts, Stream: null, EventCount: 0, factsHash, SessionSummary.Empty);
         }
 
-        if (row is not null && IsFresh(row, head, factsHash) && SummaryJson.Read(row.Summary) is { } summary)
-        {
-            return new RoundProjection(facts, head, row.EventCount, factsHash, summary);
-        }
-
-        return await RebuildAsync(groupId, facts, head, factsHash, cancellationToken).ConfigureAwait(false);
+        return row is not null && IsFresh(row, head, factsHash) && SummaryJson.Read(row.Summary) is { } summary
+            ? new RoundProjection(facts, head, row.EventCount, factsHash, summary)
+            : null;
     }
 
     /// <summary>A row built from more events than the head read is fresh too: the stream grew between the two reads.</summary>
@@ -87,10 +141,10 @@ internal sealed class StatsProjector(
         && row.ProjectionVersion == ProjectionKeys.ProjectionVersion
         && string.Equals(row.FactsHash, factsHash, StringComparison.Ordinal);
 
-    private async Task<RoundProjection> RebuildAsync(
-        Guid groupId, RoundFacts facts, CourtStreamHead head, string factsHash, CancellationToken cancellationToken)
+    private async Task<RoundProjection> RebuildAsync(Guid groupId, RoundFacts facts, CourtStreamHead head, CancellationToken cancellationToken)
     {
         var started = time.GetTimestamp();
+        var factsHash = ProjectionKeys.FactsHashOf(facts);
         var results = await courts.SummarizeAsync(head, facts.Summary, cancellationToken).ConfigureAwait(false);
         var projection = new RoundProjection(facts, head, results.EventCount, factsHash, results.Summary);
         var stored = await store.SaveProjectionAsync(RowOf(groupId, projection), MemberRowsOf(groupId, projection), cancellationToken)
@@ -144,6 +198,9 @@ internal sealed class StatsProjector(
         })];
     }
 }
+
+/// <summary>The fresh rounds of a group, earliest first, and how many stale ones that would count were not rebuilt.</summary>
+internal sealed record GroupProjections(IReadOnlyList<RoundProjection> Fresh, int StaleCounted);
 
 /// <summary>The results of a member as one letter each, the stored form of <c>round_member_stats.results</c>.</summary>
 internal static class ResultLetters

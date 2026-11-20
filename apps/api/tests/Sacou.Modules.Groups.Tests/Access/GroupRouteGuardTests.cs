@@ -29,8 +29,8 @@ public sealed class GroupRouteGuardTests
     /// <summary>The court stream's write (E3.7, ADR 0060), its takeover, summary and read (E3.8, ADR 0063), behind the Matches' filter.</summary>
     private const int CourtRoutes = 4;
 
-    /// <summary>The ballot and the vote of the MVP (E3.18, ADR 0072), behind the Stats' filter.</summary>
-    private const int StatsRoutes = 2;
+    /// <summary>The summary of a round (E3.9 part 4b, ADR 0071), the ballot and the vote of the MVP (E3.18, ADR 0072), behind the Stats' filter.</summary>
+    private const int StatsRoutes = 3;
 
     private const string Development = "Development";
     private const string Production = "Production";

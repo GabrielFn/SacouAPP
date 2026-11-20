@@ -32,6 +32,8 @@ internal static class GroupRouteGuard
         "GET /v1/me/export",
         "GET /v1/me/deletion-blockers",
 
+        // The person's own season (E3.9 part 4b, ADR 0071): resolved from the token, no group id.
+        "GET /v1/me/stats",
         "POST /v1/groups",
         "GET /v1/groups",
         "POST /v1/invites/preview",

@@ -1,6 +1,6 @@
 # ADR 0071 · Projeções de estatísticas, MVP e rating OpenSkill
 
-**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada), 2 (rating TS, `packages/rating`), 3 (porte C# dos dois) e 4a (contratos, schema `stats` e reconstrução) da E3.9. A Parte 4b (rotas, exportação e documentos de segurança) completa este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
+**Status:** aceito (20/11/2026): Partes 1 (motor TS do resumo da rodada), 2 (rating TS, `packages/rating`), 3 (porte C# dos dois), 4a (contratos, schema `stats` e reconstrução) e 4b (rotas, exportação e documentos de segurança) da E3.9. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
 
 ## Padrões adotados (perguntas 97 a 99, respostas antes do merge da Parte 4)
 
@@ -82,9 +82,31 @@ Os códigos de erro do C# são `stats.rating-invalid-level`, `stats.rating-dupli
 
 **Desempenho do pior caso** (condição 1 da Parte 3). `RoundSummaryWorstCaseTests` descarta uma rodada de aquecimento (JIT) e compara a mediana de 3: o resumo pode custar até 4 replays do mesmo log.
 
+## Decisões da Parte 4b (rotas, exportação e segurança)
+
+**Nada na escrita da quadra** (condição 1 da revisão da 4a). O Stats deixou de registrar o `ICourtStreamChanged`: o lote que fecha uma partida não paga replay, resumo nem fold. O gancho continua no Matches (`CourtStreamNotifier`, com teste unitário do aviso: ID do stream e tipo da exceção, nunca a mensagem) para ouvintes futuros. A chave de frescor (`event_count`, `projection_version`, `facts_hash`) já detecta a projeção velha, então a reconstrução fica só na leitura.
+
+**Leitura por rodada.** `GetRoundAsync(groupId, roundId)` refaz no máximo a rodada pedida; as outras saem das linhas. O fold dos pools só roda quando nenhuma outra rodada contada do grupo está velha (senão `PoolDeferred` no log e o pool espera a leitura que refrescar a última). `GetGroupAsync` (temporada; a exportação usa `ListRoundsAsync`, que não refaz o pool) refaz as rodadas velhas do grupo, uma vez cada, e depois o pool. As duas rotas usam `court-sync` (ADR 0062, pendência 94).
+
+**Fold velho não serve como novo** (condição 2 da 4a), pela opção de documentar: todo consumidor lê pelo `StatsProjector`, que compara a chave guardada com as entradas lidas agora; uma linha ou um pool velho gravado depois de um novo é refeito na leitura seguinte. Nada lê `member_ratings` fora do `RatingProjector`. Testes de integração: duas leituras simultâneas de uma rodada velha (uma linha, sem erro de chave) e uma gravação velha depois de uma nova.
+
+**Índice `(group_id)` em `matches.court_sessions`** (condição 3 da 4a), migração `AddCourtSessionsGroupIndex`: o `ListOfGroupAsync` deixa de varrer a tabela.
+
+**Rotas.**
+
+1. `GET /v1/groups/{groupId}/rounds/{roundId}/summary` (`GetRoundSummary`), atrás do filtro de grupo próprio do Stats (`StatsAccessFilter`, `ViewGroup`, corpo até 1 KiB, `no-store`). Resposta `RoundSummaryReport`: `roundId`, `modality` (código do catálogo), `mvpFormulaVersion`, `finishedMatches` (contagem), `mvp` (`kind` `player` ou `team`, `memberIds` sempre lista, `side` nulo no time; L1), `sides` com `mostWins: {side, wins}` e `longestStreak: {side, longestWinStreak}` (L3), `players` (com `undecided` e `mainSide`) e `ranking` (só na areia, com `undecided`, L7). Lados `a` e `b`.
+2. `GET /v1/me/stats?year=2026` (`GetMyStats`), só da pessoa do token (na lista fechada do guarda de rotas). `year` opcional, devolvido na resposta (L4); fora de 2000 a 2100 ou com outro caractere, 400 `stats.year-invalid`. `total` e `groups[]` com `groupName` e `modality` (L6), nulos para grupo deixado, na ordem de mais partidas e depois da entrada. Presença com `rounds` e `roundsHeld` (pergunta 99, L5). O Groups ganhou `IUserMemberships` (membros ativos e antigos da pessoa, com entrada e saída), só IDs, nome do grupo e modalidade.
+
+**Exportação** (pendência 95): seção `stats` (`StatsExportSection`), por rodada em que a pessoa jogou, inclusive cancelada (`counts: false`): estatísticas do membro e `wasMvp`. Sem rating, semente nem nota do admin. A seção lê as rodadas pelo `ListRoundsAsync`, que refaz as velhas mas não refaz os pools: a exportação não toca no rating, e o aviso do fold (que leva o ID do grupo) não entra no log da exportação (L1 da E3.16).
+
+**Sigilo do rating, testes** (plano 4.6 e 5.4.13): (a) nenhum tipo público do Stats e nenhum tipo de resposta tem propriedade `Mu`, `Sigma`, `Rating` ou `Ordinal`, e os tipos do rating são `internal`; (b) o OpenAPI gerado não tem **chave inteira** `mu`, `sigma`, `rating` nem `ordinal` (sem diferenciar maiúsculas; como substring, `mvpFormulaVersion` reprovaria); (d) nenhum método do `StatsLog` recebe valor do rating e o Stats só loga por ele; varredura: todas as rotas `GET` com um cenário cheio respondem sem os μ e σ guardados nem as chaves. Cada regra tem um caso plantado que ela reprova.
+
+**`openskill` fica em `dependencies`** de `packages/rating` (condição 3 da Parte 3): `src/openskill-model.ts` a importa, então movê-la mentiria sobre o pacote; ele é `private` e ninguém o consome (o app é proibido por teste e a API usa o porte C#), e o `pnpm audit` confere as duas listas.
+
 ## Consequências
 
 - Rodada sem partida terminada: `finishedMatches` e `players` vazios, destaques e MVP nulos; na areia, `ranking: []`.
 - Partida terminada à mão sem nenhum rali tem `onCourt` vazio nos dois lados: ninguém esteve num rali ativo. O rating (Parte 2) não a avalia.
 - O plano pedia "4 duplas, 9 partidas" para a tela 12b, mas 7-2, 5-4, 4-5 e 2-7 somam 18 vitórias: o caso do golden tem 18 partidas.
-- O rating é gravado desde a Parte 4a, sem rota; a Parte 4b traz as rotas de leitura e os testes que provam que nenhuma delas o devolve.
+- O rating é gravado desde a Parte 4a e nenhuma rota o devolve (Parte 4b, testes acima).
+- Um grupo sem leitura fica com o pool velho (risco 2 do plano), e a temporada de quem tem muitas rodadas velhas paga um replay por rodada na primeira leitura, sob `court-sync`; o snapshot da E5.3b reduz esse custo.

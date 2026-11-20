@@ -145,6 +145,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/me/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetMyStats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}": {
     parameters: {
       query?: never;
@@ -577,6 +593,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetRoundSummary"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting": {
     parameters: {
       query?: never;
@@ -957,6 +989,52 @@ export interface components {
       /** Format: double */
       suggestedLevel: null | number;
     };
+    MyStatsGroupReport: {
+      /** Format: uuid */
+      groupId: string;
+      groupName: null | string;
+      modality: null | string;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      mvpCount: number;
+      /** Format: int32 */
+      rounds: number;
+      /** Format: int32 */
+      roundsHeld: number;
+    };
+    MyStatsReport: {
+      /** Format: int32 */
+      year: number;
+      total: components["schemas"]["MyStatsTotalsReport"];
+      groups: components["schemas"]["MyStatsGroupReport"][];
+    };
+    MyStatsTotalsReport: {
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      mvpCount: number;
+      /** Format: int32 */
+      rounds: number;
+      /** Format: int32 */
+      roundsHeld: number;
+    };
     /** @enum {string} */
     PlayingPosition: "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero";
     PreviewInviteRequest: {
@@ -1054,6 +1132,19 @@ export interface components {
     };
     /** @enum {string} */
     RoundStatus: "scheduled" | "canceled";
+    RoundSummaryReport: {
+      /** Format: uuid */
+      roundId: string;
+      modality: string;
+      /** Format: int32 */
+      mvpFormulaVersion: number;
+      /** Format: int32 */
+      finishedMatches: number;
+      mvp: null | components["schemas"]["SummaryMvpReport"];
+      sides: components["schemas"]["SummarySidesReport"];
+      players: components["schemas"]["SummaryPlayerReport"][];
+      ranking: null | components["schemas"]["SummaryStandingReport"][];
+    };
     RoundSummaryResponse: {
       /** Format: uuid */
       roundId: string;
@@ -1108,10 +1199,84 @@ export interface components {
       /** Format: uuid */
       userId: string;
     };
+    SummaryLongestStreakReport: {
+      side: components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      longestWinStreak: number;
+    };
     SummaryMe: {
       status: null | components["schemas"]["AttendanceStatus"];
       /** Format: int32 */
       position: null | number;
+    };
+    SummaryMostWinsReport: {
+      side: components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      wins: number;
+    };
+    /** @enum {string} */
+    SummaryMvpKind: "player" | "team";
+    SummaryMvpReport: {
+      kind: components["schemas"]["SummaryMvpKind"];
+      memberIds: string[];
+      side: null | components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+    };
+    SummaryPlayerReport: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      undecided: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      pointsByKind: components["schemas"]["SummaryPointsByKindReport"];
+      mainSide: null | components["schemas"]["SummarySide"];
+    };
+    SummaryPointsByKindReport: {
+      /** Format: int32 */
+      attack: number;
+      /** Format: int32 */
+      block: number;
+      /** Format: int32 */
+      ace: number;
+      /** Format: int32 */
+      other: number;
+    };
+    /** @enum {string} */
+    SummarySide: "a" | "b";
+    SummarySidesReport: {
+      mostWins: null | components["schemas"]["SummaryMostWinsReport"];
+      longestStreak: null | components["schemas"]["SummaryLongestStreakReport"];
+    };
+    SummaryStandingReport: {
+      memberIds: string[];
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      undecided: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      pointsFor: number;
+      /** Format: int32 */
+      pointsAgainst: number;
     };
     TakeOverCourtRequest: {
       /** Format: uuid */
@@ -2082,6 +2247,77 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetMyStats: {
+    parameters: {
+      query?: {
+        year?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyStatsReport"];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
       };
       /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
       429: {
@@ -5175,6 +5411,85 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["GetCourtSessionResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetRoundSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RoundSummaryReport"];
         };
       };
       /** @description Not signed in, or the ID token was refused. */
