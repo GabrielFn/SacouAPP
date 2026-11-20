@@ -225,10 +225,19 @@ public sealed class StatsProjectorTests
             {
                 Projections[roundId] = new RoundProjectionRow
                 {
-                    RoundId = row.RoundId, GroupId = row.GroupId, CourtSessionId = row.CourtSessionId, EventCount = row.EventCount,
-                    ProjectionVersion = row.ProjectionVersion, FactsHash = row.FactsHash, StartsAt = row.StartsAt, LocalDate = row.LocalDate,
-                    Counts = row.Counts, Modality = row.Modality, FinishedMatches = row.FinishedMatches, Summary = "{\"players\":7}",
+                    RoundId = row.RoundId,
+                    GroupId = row.GroupId,
+                    CourtSessionId = row.CourtSessionId,
+                    EventCount = row.EventCount,
+                    ProjectionVersion = row.ProjectionVersion,
+                    FactsHash = row.FactsHash,
+                    StartsAt = row.StartsAt,
+                    LocalDate = row.LocalDate,
+                    Counts = row.Counts,
+                    Modality = row.Modality,
+                    FinishedMatches = row.FinishedMatches,
                     RebuiltAt = row.RebuiltAt,
+                    Summary = "{\"players\":7}",
                 };
             }
         }
