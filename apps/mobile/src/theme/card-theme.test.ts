@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { CARD_COMPACT_RATIO, cardMeasures } from "./card-tokens.data";
+import { CARD_COMPACT_RATIO, cardAvatarColor, cardMeasures } from "./card-tokens.data";
 import { contrastRatio } from "./contrast";
 import { createScaledTokens } from "./scale";
 import { palette } from "./tokens.data";
@@ -60,7 +60,7 @@ describe("the card colors reach AA", () => {
     ["night on the yellow season seal", palette.night, palette.ballYellow],
     ["yellow position on night", palette.ballYellow, palette.night],
     ["orange brand on night", palette.serveOrange, palette.night],
-    ["sand initials on the avatar blue", palette.sand, palette.cardAvatar],
+    ["sand initials on the avatar blue", palette.sand, cardAvatarColor],
     ["labels at 82% on night", mix(palette.sand, palette.night, LABEL_OPACITY), palette.night],
   ])("%s", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);

@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import Svg, { Path, Rect } from "react-native-svg";
+import Svg, { G, Path, Rect } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
 import { CARD_ASPECT_RATIO, cardMeasures } from "../../../theme/card-tokens.data";
@@ -9,7 +9,17 @@ import { fontFamilies } from "../../../theme/tokens.data";
 import { PersonIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
 import { cardAccessibilityLabel, type CardStat, type PlayerCardModel } from "../model/player-card";
-import { cardLayout, MESH_VIEW_BOX, meshPath } from "./player-card.layout";
+import {
+  cardLayout,
+  FLUSH,
+  GLYPH_COLUMNS,
+  GLYPH_RADIUS,
+  GLYPH_ROWS,
+  GLYPH_SQUARE,
+  GLYPH_VIEW_BOX,
+  MESH_VIEW_BOX,
+} from "./player-card.layout.data";
+import { meshPath } from "./player-card.mesh";
 
 export type PlayerCardSize = "compact" | "full";
 
@@ -22,12 +32,6 @@ export interface PlayerCardViewProps {
 
 /** The nickname shrinks, to this fraction at most, before it is cut (20 letters in the band). */
 const NAME_MIN_FONT_SCALE = 0.4;
-/** The six squares of the glyph, in the viewBox of the drawing (`.klv svg`): 3 by 2, the last lit. */
-const GLYPH_VIEW_BOX = "0 0 26 18";
-const GLYPH_SQUARE = 7;
-const GLYPH_RADIUS = 1.5;
-const GLYPH_COLUMNS = [0, 9.5, 19] as const;
-const GLYPH_ROWS = [0, 10] as const;
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
 /** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */
@@ -50,7 +54,13 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
       }}
     >
       <View
-        style={{ position: "absolute", left: 0, right: 0, top: 0, height: cardLayout.mesh.height }}
+        style={{
+          position: "absolute",
+          left: FLUSH,
+          right: FLUSH,
+          top: FLUSH,
+          height: cardLayout.mesh.height,
+        }}
       >
         <Svg
           width="100%"
@@ -120,8 +130,8 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
       <View
         style={{
           position: "absolute",
-          left: 0,
-          right: 0,
+          left: FLUSH,
+          right: FLUSH,
           top: cardLayout.nameBand.top,
           height: cardLayout.nameBand.height,
           backgroundColor: colors.primary,
@@ -190,7 +200,7 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
   );
 }
 
-interface StatsGridProps {
+export interface StatsGridProps {
   readonly stats: readonly CardStat[];
   readonly measures: ScaledCardTokens["full"];
 }
@@ -231,7 +241,7 @@ function StatsGrid({ stats, measures: m }: StatsGridProps) {
   );
 }
 
-interface PositionGlyphProps {
+export interface PositionGlyphProps {
   readonly width: number;
   readonly height: number;
 }
@@ -244,15 +254,17 @@ function PositionGlyph({ width, height }: PositionGlyphProps) {
   return (
     <Svg width={width} height={height} viewBox={GLYPH_VIEW_BOX}>
       {cells.map((cell, index) => (
-        <Rect
+        <G
           key={`${String(cell.x)}-${String(cell.y)}`}
-          x={cell.x}
-          y={cell.y}
-          width={GLYPH_SQUARE}
-          height={GLYPH_SQUARE}
-          rx={GLYPH_RADIUS}
-          fill={index === lit ? colors.accent : colors.onPanel}
-        />
+          transform={`translate(${String(cell.x)} ${String(cell.y)})`}
+        >
+          <Rect
+            width={GLYPH_SQUARE}
+            height={GLYPH_SQUARE}
+            rx={GLYPH_RADIUS}
+            fill={index === lit ? colors.accent : colors.onPanel}
+          />
+        </G>
       ))}
     </Svg>
   );

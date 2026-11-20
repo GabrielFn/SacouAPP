@@ -21,11 +21,14 @@ const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings",
  * default is not to persist: `["me"]` (the internal user ID; of `["me", "profile"]` only the nickname is written, never the level nor the positions: see `cache-persister.ts`; `["me", "stats"]` is the person's own whole numbers, with no rating), the invites and the saved templates (admin
  * only) and anything unknown stay out.
  */
+function isPersistedOwnKey(key: SacouQueryKey): boolean {
+  const [, scope] = key;
+  return key.length === GROUP_KEY_LENGTH && (scope === "profile" || scope === "stats");
+}
+
 export function isPersistedKey(key: SacouQueryKey): boolean {
   const [root, groupId, child] = key;
-  if (root === "me") {
-    return key.length === GROUP_KEY_LENGTH && (groupId === "profile" || groupId === "stats");
-  }
+  if (root === "me") return isPersistedOwnKey(key);
   if (root !== "groups") return false;
   if (key.length === 1) return true;
   if (typeof groupId !== "string") return false;

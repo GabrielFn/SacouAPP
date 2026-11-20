@@ -26,12 +26,15 @@ const { me } = strings.profile;
 /** The compact card takes this share of the row; the rest is the name and the buttons (190 of 358). */
 const COMPACT_CARD_BASIS = "53%";
 
-export interface ProfileScreenProps {
+export interface BodyActions {
   /** The name of the Google account, only for the line at the top; the card never has it (question 163). */
   readonly accountName: string | null;
-  readonly onOpenAccount: () => void;
   readonly onShare: () => void;
   readonly onEditProfile: () => void;
+}
+
+export interface ProfileScreenProps extends BodyActions {
+  readonly onOpenAccount: () => void;
 }
 
 /** The "Eu" tab (screen 14): the card, the six numbers of the season and the numbers per group. */
@@ -56,7 +59,7 @@ export function ProfileScreen({
   );
 }
 
-interface HeaderProps {
+export interface HeaderProps {
   readonly onOpenAccount: () => void;
 }
 
@@ -84,9 +87,7 @@ function Header({ onOpenAccount }: HeaderProps) {
   );
 }
 
-type BodyBaseProps = Pick<ProfileScreenProps, "accountName" | "onShare" | "onEditProfile">;
-
-interface ProfileBodyProps extends BodyBaseProps {
+export interface ProfileBodyProps extends BodyActions {
   readonly view: ProfileView;
   readonly onRetry: () => void;
 }
@@ -122,7 +123,7 @@ function ProfileBody({ view, onRetry, ...rest }: ProfileBodyProps) {
   }
 }
 
-interface LoadedBodyProps extends BodyBaseProps {
+export interface LoadedBodyProps extends BodyActions {
   readonly view: LoadedView;
 }
 
@@ -168,7 +169,7 @@ function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyPro
   );
 }
 
-interface NumbersProps {
+export interface NumbersProps {
   readonly view: LoadedView;
 }
 

@@ -41,6 +41,9 @@ export const CARD_COMPACT_RATIO = 190 / 270;
 /** The shape of the card (`.kc`: 270 x 378). */
 export const CARD_ASPECT_RATIO = 270 / 378;
 
+/** The blue of the avatar (Perfil.dc.html `.kj`), one color for everyone (question 161). */
+export const cardAvatarColor = "#33496B";
+
 /** The sand of the labels over the night: 82% of opacity (`.kst span`). */
 export const cardLabelColor = `rgba(${sandRgb}, 0.82)`;
 /** The mesh lines: sand at 9% (`.kmesh`). */

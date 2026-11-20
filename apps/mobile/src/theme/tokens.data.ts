@@ -32,8 +32,6 @@ export const palette = {
   goingFill: "#E3F3E8",
   goingText: "#0C6B35",
   // The draw (Sorteio.dc.html): the pale blue of a selected name and the green band of the meter.
-  // The player card (Perfil.dc.html .kj): the blue of the avatar, one color for everyone (question 161).
-  cardAvatar: "#33496B",
   selectFill: "#E8EEFF",
   meterBand: "#12A150",
 } as const;
@@ -96,9 +94,7 @@ export const fontSizes = {
   displayLevelCard: 28,
   displayLevelBadge: 20,
   levelCaption: 11,
-  // The draw (Sorteio.dc.html): the title, the name of a team card.
-  // Screen 14 (Perfil.dc.html .sv): the number of a statistic tile.
-  statValue: 30,
+  // The draw (Sorteio.dc.html): the title, the name of a team card; the number of a stat tile of screen 14.
   drawTitle: 29,
   teamTitle: 22,
 } as const;

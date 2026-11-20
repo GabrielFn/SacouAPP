@@ -1,4 +1,4 @@
-import { cardLabelColor, cardMeshColor } from "./card-tokens.data";
+import { cardAvatarColor, cardLabelColor, cardMeshColor } from "./card-tokens.data";
 import { courtPalette, nightAlpha, nightRgb, palette } from "./tokens.data";
 
 export const THEME_ROLES = [
@@ -75,7 +75,7 @@ const memberColors = {
   selectOutline: palette.netBlue,
   meterBand: palette.meterBand,
   // The player card (Perfil.dc.html .kc): the avatar blue, the labels and the mesh over the night.
-  cardAvatarSurface: palette.cardAvatar,
+  cardAvatarSurface: cardAvatarColor,
   cardLabel: cardLabelColor,
   cardMesh: cardMeshColor,
 } as const;

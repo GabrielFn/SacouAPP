@@ -27,7 +27,7 @@ describe("the numbers query", () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyStats", apiOk(REPORT));
     const client = new QueryClient();
-    await expect(client.fetchQuery(myStatsQuery(fake.api, true))).resolves.toEqual(REPORT);
+    await expect(client.query(myStatsQuery(fake.api, true))).resolves.toEqual(REPORT);
     expect(client.getQueryData(queryKeys.myStats())).toEqual(REPORT);
     expect(fake.calls()).toEqual([{ operation: "getMyStats", args: [] }]);
   });
@@ -36,7 +36,7 @@ describe("the numbers query", () => {
     const fake = createFakeSacouApi();
     fake.respond("getMyStats", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
     const client = new QueryClient();
-    await expect(client.fetchQuery(myStatsQuery(fake.api, true))).rejects.toBeDefined();
+    await expect(client.query(myStatsQuery(fake.api, true))).rejects.toBeDefined();
     expect(client.getQueryData(queryKeys.myStats())).toBeUndefined();
   });
 });
