@@ -77,6 +77,13 @@ async function send(
   );
 }
 
+async function acknowledged(context: UploadContext, sequence: number): Promise<UploadOutcome> {
+  const { log, target, onAcknowledged } = context;
+  const outcome = written(await log.markAcknowledged(target.courtSessionId, sequence));
+  if (outcome.type === "progress") onAcknowledged?.(target);
+  return outcome;
+}
+
 async function apply(
   context: UploadContext,
   decision: SyncDecision,
@@ -85,11 +92,8 @@ async function apply(
   const { log, target, deviceId } = context;
   const id = target.courtSessionId;
   switch (decision.type) {
-    case "acknowledge": {
-      const outcome = written(await log.markAcknowledged(id, decision.sequence));
-      if (outcome.type === "progress") context.onAcknowledged?.(target);
-      return outcome;
-    }
+    case "acknowledge":
+      return acknowledged(context, decision.sequence);
     case "rewind":
       return written(await log.rewindAcknowledged(id, decision.sequence));
     case "take-over":

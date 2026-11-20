@@ -13,10 +13,11 @@ export const summaryStrings = {
   mvpAccessibility: (name: string) => `MVP do dia: ${name}`,
   noName: "Jogador",
   /** "Bia", "Bia e Caio", "Bia, Caio e Dani": the MVP shared by votes. */
-  names: (names: readonly string[]) =>
-    names.length < 2
-      ? (names[0] ?? "")
-      : `${names.slice(0, -1).join(", ")} e ${names[names.length - 1] ?? ""}`,
+  names: (names: readonly string[]) => {
+    const last = names.at(-1) ?? "";
+    const rest = names.slice(0, -1);
+    return rest.length === 0 ? last : `${rest.join(", ")} e ${last}`;
+  },
   mostWinsTitle: "Time que mais venceu",
   longestStreakTitle: "Maior sequência",
   teamLabel: (letter: string, name: string) => `${letter} ${name}`,
