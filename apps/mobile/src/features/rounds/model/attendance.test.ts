@@ -108,6 +108,8 @@ describe("presenceCard, one case per row of D7", () => {
     const round = attendanceRound({
       localDate: "2026-11-07",
       startsAt: "2026-11-07T22:00:00Z",
+      closedAt: null,
+      endsAt: "2026-11-07T22:00:00Z",
       dropInOpensAt: opensAt,
     });
     const opens = Date.parse(opensAt);
