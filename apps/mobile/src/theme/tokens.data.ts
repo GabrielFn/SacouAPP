@@ -94,7 +94,7 @@ export const fontSizes = {
   displayLevelCard: 28,
   displayLevelBadge: 20,
   levelCaption: 11,
-  // The draw (Sorteio.dc.html): the title, the name of a team card; the number of a stat tile of screen 14.
+  // The draw (Sorteio.dc.html): the title, the name of a team card.
   drawTitle: 29,
   teamTitle: 22,
 } as const;

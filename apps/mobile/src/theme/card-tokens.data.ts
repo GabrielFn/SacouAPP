@@ -2,8 +2,8 @@ import { sandRgb } from "./tokens.data";
 
 /**
  * The player card (Perfil.dc.html `.kc`, Cartinha.dc.html), in canvas pixels of the FULL card (270 wide).
- * They scale by the window like the other tokens, but not by the system font scale: the card is a
- * picture with a fixed shape, and its text must not outgrow its bands (ADR 0046 of the pilot card).
+ * They scale by the window like the other tokens, and the text by the system font scale up to
+ * `cardFontScaleCap`: the card is a picture with a fixed shape, so its text must not outgrow its bands.
  * The compact card (screen 14) is the full one times `CARD_COMPACT_RATIO`, declared once here.
  */
 export const cardMeasures = {
@@ -34,6 +34,12 @@ export const cardMeasures = {
   meshStep: 12,
   meshStroke: 1.5,
 } as const;
+
+/** The most the system font scale grows the text of the card (lower than the app cap: the bands are fixed). */
+export const cardFontScaleCap = 1.15;
+
+/** The number of a stat tile of screen 14 (`.st`), in canvas pixels; grows with the system font scale. */
+export const statTileValueFont = 30;
 
 /** 190 of the compact card over the 270 of the full one: the ratio of the canvas (Perfil.dc.html). */
 export const CARD_COMPACT_RATIO = 190 / 270;

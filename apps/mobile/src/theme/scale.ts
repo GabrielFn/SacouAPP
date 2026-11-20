@@ -13,7 +13,7 @@ import {
   sizes,
   spacing,
 } from "./tokens.data";
-import { CARD_COMPACT_RATIO, cardMeasures } from "./card-tokens.data";
+import { CARD_COMPACT_RATIO, cardFontScaleCap, cardMeasures, statTileValueFont } from "./card-tokens.data";
 import { sheetFontSizes, sheetRadii, sheetSizes } from "./sheet-tokens.data";
 
 /**
@@ -58,6 +58,8 @@ export interface ScaledTokens {
   readonly court: ScaledCourtTokens;
   readonly sheet: ScaledSheetTokens;
   readonly card: ScaledCardTokens;
+  /** The number of a stat tile of screen 14, grown by the system font scale up to the cap. */
+  readonly statTileValue: number;
 }
 
 function mapValues<T extends Readonly<Record<string, number>>>(
@@ -99,11 +101,18 @@ function createCourtTokens(factor: number, fontFactor: number): ScaledCourtToken
   };
 }
 
-function createCardTokens(factor: number): ScaledCardTokens {
+function createCardTokens(factor: number, fontScale: number): ScaledCardTokens {
+  const textGrowth = Math.min(fontScale, cardFontScaleCap);
   const at = (ratio: number) =>
-    mapValues(cardMeasures, (value) =>
-      Math.max(accessibilityFloors.hairline, Math.round(value * factor * ratio)),
-    );
+    Object.fromEntries(
+      Object.entries(cardMeasures).map(([key, value]) => {
+        const growth = key.endsWith("Font") ? textGrowth : 1;
+        return [
+          key,
+          Math.max(accessibilityFloors.hairline, Math.round(value * factor * ratio * growth)),
+        ] as const;
+      }),
+    ) as NumberMap<typeof cardMeasures>;
   return { full: at(1), compact: at(CARD_COMPACT_RATIO) };
 }
 
@@ -119,7 +128,8 @@ export function createScaledTokens({ windowWidth, fontScale }: ScaleInput): Scal
     borderWidths: mapValues(borderWidths, (value) => scaleBorder(value, factor)),
     sizes: mapValues(sizes, (value) => scaleSize(value, factor)),
     court: createCourtTokens(factor, fontFactor),
-    card: createCardTokens(factor),
+    card: createCardTokens(factor, fontScale),
+    statTileValue: Math.round(statTileValueFont * fontFactor),
     sheet: {
       sizes: mapValues(sheetSizes, (value) => scaleSize(value, factor)),
       fontSizes: mapValues(sheetFontSizes, (value) => Math.round(value * fontFactor)),

@@ -88,8 +88,4 @@ export const profileStrings = {
     mvpCount: "vezes MVP",
     rounds: "rodadas",
   },
-  groupRow: {
-    summary: (matches: number, winRate: string, wins: number) =>
-      `${String(matches)} partidas · ${winRate} (${String(wins)} vitórias)`,
-  },
 } as const;

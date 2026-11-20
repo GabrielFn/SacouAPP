@@ -30,7 +30,7 @@ export function StatTile({ tile }: StatTileProps) {
         variant="display"
         tabular
         numberOfLines={1}
-        style={{ fontSize: tokens.fontSizes.drawTitle }}
+        style={{ fontSize: tokens.statTileValue }}
       >
         {tile.value}
       </Text>

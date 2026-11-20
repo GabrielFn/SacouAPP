@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
 
-import { CARD_COMPACT_RATIO, cardAvatarColor, cardMeasures } from "./card-tokens.data";
+import { CARD_COMPACT_RATIO, cardAvatarColor, cardFontScaleCap, cardMeasures } from "./card-tokens.data";
 import { contrastRatio } from "./contrast";
 import { createScaledTokens } from "./scale";
+import { NAME_MIN_FONT_SCALE } from "../features/profile/ui/PlayerCardView";
 import { palette } from "./tokens.data";
 
 const AA_TEXT = 4.5;
@@ -64,5 +65,26 @@ describe("the card colors reach AA", () => {
     ["labels at 82% on night", mix(palette.sand, palette.night, LABEL_OPACITY), palette.night],
   ])("%s", (_name, foreground, background) => {
     expect(ratio(foreground, background)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+});
+
+describe("the system font scale on the card", () => {
+  const NICKNAME_FONT_SCALES = [1.3, 2] as const;
+
+  test.each(NICKNAME_FONT_SCALES)("at font scale %s the text stops at the card cap", (fontScale) => {
+    const normal = createScaledTokens({ windowWidth: 390, fontScale: 1 }).card.full;
+    const large = createScaledTokens({ windowWidth: 390, fontScale }).card.full;
+    expect(large.nameFont).toBe(Math.round(normal.nameFont * cardFontScaleCap));
+    expect(large.avatarRadius).toBe(normal.avatarRadius);
+  });
+
+  test("the nickname of 20 letters fits the band at the capped size", () => {
+    const NICKNAME_LETTERS = 20;
+    const LETTER_WIDTH_EM = 0.5;
+    const { full } = createScaledTokens({ windowWidth: 390, fontScale: 2 }).card;
+    const textWidth = NICKNAME_LETTERS * LETTER_WIDTH_EM * full.nameFont;
+    const bandWidth = full.avatarRadius * 2 * (260 / 116);
+    // the name shrinks to fit (adjustsFontSizeToFit) down to NAME_MIN_FONT_SCALE: the cap leaves room for that
+    expect(bandWidth / textWidth).toBeGreaterThanOrEqual(NAME_MIN_FONT_SCALE);
   });
 });

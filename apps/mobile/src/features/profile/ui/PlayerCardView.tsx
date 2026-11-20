@@ -31,7 +31,7 @@ export interface PlayerCardViewProps {
 }
 
 /** The nickname shrinks, to this fraction at most, before it is cut (20 letters in the band). */
-const NAME_MIN_FONT_SCALE = 0.4;
+export const NAME_MIN_FONT_SCALE = 0.4;
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
 /** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */
@@ -74,7 +74,7 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
 
       {card.positionLabel === null ? null : (
         <View
-          style={{ position: "absolute", left: cardLayout.level.left, top: cardLayout.level.top }}
+          style={{ position: "absolute", left: cardLayout.position.left, top: cardLayout.position.top }}
         >
           <Text
             numberOfLines={1}

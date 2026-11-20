@@ -4,7 +4,7 @@
  */
 export const cardLayout = {
   mesh: { height: "48.37%" },
-  level: { left: "6.15%", top: "3.26%" },
+  position: { left: "6.15%", top: "3.26%" },
   avatar: { top: "9.24%", right: "8.46%", width: "44.62%" },
   nameBand: { top: "47.28%", height: "15.22%" },
   stats: { side: "4.62%", top: "65.76%" },
