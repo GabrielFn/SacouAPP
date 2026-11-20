@@ -75,6 +75,7 @@ export const apiErrorCodes = [
   "sessions.round-limit",
   "sessions.round-link-invalid",
   "sessions.round-not-found",
+  "sessions.round-not-started",
   "sessions.series-limit",
   "sessions.series-not-found",
   "stats.mvp-already-voted",
