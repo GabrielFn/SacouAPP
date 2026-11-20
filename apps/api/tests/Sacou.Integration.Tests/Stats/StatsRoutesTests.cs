@@ -53,14 +53,14 @@ public sealed partial class StatsRoutesTests(IntegrationDatabase database) : IAs
         var summary = await StatsCalls.SummaryAsync(world, A.Player, round);
 
         Assert.Equal(
-            ["roundId", "modality", "mvpFormulaVersion", "finishedMatches", "mvp", "sides", "players", "ranking"],
+            ["roundId", "modality", "mvpFormulaVersion", "finishedMatches", "mvp", "mvpVoting", "sides", "players", "ranking"],
             summary.Select(pair => pair.Key));
         Assert.Equal("indoor-6x6", summary["modality"]!.GetValue<string>());
         Assert.Equal(1, summary["mvpFormulaVersion"]!.GetValue<int>());
         Assert.Equal(3, summary["finishedMatches"]!.GetValue<int>());
         Assert.Null(summary["ranking"]);
         Assert.Equal(
-            $$"""{"kind":"player","memberIds":["{{admin}}"],"side":"a","plusMinus":2,"wins":2,"matchesPlayed":3,"longestWinStreak":1}""",
+            $$"""{"source":"stats","kind":"player","memberIds":["{{admin}}"],"side":"a","plusMinus":2,"wins":2,"matchesPlayed":3,"longestWinStreak":1}""",
             summary["mvp"]!.ToJsonString());
         Assert.Equal("""{"mostWins":{"side":"a","wins":2},"longestStreak":null}""", summary["sides"]!.ToJsonString());
         Assert.Equal(

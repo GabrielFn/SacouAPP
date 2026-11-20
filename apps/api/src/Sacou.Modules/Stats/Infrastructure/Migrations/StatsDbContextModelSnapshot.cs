@@ -75,6 +75,41 @@ namespace Sacou.Modules.Stats.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Stats.Infrastructure.MvpResultRow", b =>
+                {
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<DateTimeOffset>("TalliedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("tallied_at");
+
+                    b.Property<int>("Voters")
+                        .HasColumnType("integer")
+                        .HasColumnName("voters");
+
+                    b.PrimitiveCollection<Guid[]>("WinnerMemberIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("winner_member_ids");
+
+                    b.HasKey("RoundId")
+                        .HasName("pk_mvp_results");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_mvp_results_group");
+
+                    b.ToTable("mvp_results", "stats", t =>
+                        {
+                            t.HasCheckConstraint("ck_mvp_results_voters", "voters >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Stats.Infrastructure.MvpVoteRow", b =>
                 {
                     b.Property<Guid>("RoundId")

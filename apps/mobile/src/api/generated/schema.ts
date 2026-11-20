@@ -705,6 +705,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting/result": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetMvpVotingResult"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1031,6 +1047,14 @@ export interface components {
       wins: number;
       mainSide: null | components["schemas"]["CourtSide"];
     };
+    MvpVotingResultResponse: {
+      state: components["schemas"]["MvpVotingState"];
+      /** Format: date-time */
+      closesAt: string;
+      winners: null | string[];
+      /** Format: int32 */
+      voters: null | number;
+    };
     /** @enum {string} */
     MvpVotingState: "notOpen" | "open" | "closed";
     MyGroupResponse: {
@@ -1233,6 +1257,7 @@ export interface components {
       /** Format: int32 */
       finishedMatches: number;
       mvp: null | components["schemas"]["SummaryMvpReport"];
+      mvpVoting: null | components["schemas"]["SummaryMvpVotingReport"];
       sides: components["schemas"]["SummarySidesReport"];
       players: components["schemas"]["SummaryPlayerReport"][];
       ranking: null | components["schemas"]["SummaryStandingReport"][];
@@ -1309,6 +1334,7 @@ export interface components {
     /** @enum {string} */
     SummaryMvpKind: "player" | "team";
     SummaryMvpReport: {
+      source: components["schemas"]["SummaryMvpSource"];
       kind: components["schemas"]["SummaryMvpKind"];
       memberIds: string[];
       side: null | components["schemas"]["SummarySide"];
@@ -1320,6 +1346,15 @@ export interface components {
       matchesPlayed: number;
       /** Format: int32 */
       longestWinStreak: number;
+    };
+    /** @enum {string} */
+    SummaryMvpSource: "stats" | "votes";
+    SummaryMvpVotingReport: {
+      state: components["schemas"]["MvpVotingState"];
+      /** Format: date-time */
+      opensAt: string;
+      /** Format: date-time */
+      closesAt: string;
     };
     SummaryPlayerReport: {
       /** Format: uuid */
@@ -6144,6 +6179,85 @@ export interface operations {
         content: {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetMvpVotingResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MvpVotingResultResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
       429: {
