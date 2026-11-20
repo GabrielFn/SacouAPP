@@ -76,6 +76,10 @@
     "meterBand": {
       "hex": "#12A150",
       "source": "design/mvp/Sorteio.dc.html (meter band)"
+    },
+    "choiceFill": {
+      "hex": "#FFF1EA",
+      "source": "design/mvp/VotarMvp.dc.html (.vt[aria-checked])"
     }
   },
   "court": {

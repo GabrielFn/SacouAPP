@@ -30,3 +30,8 @@ export function drawHref(groupId: string, roundId: string): Href {
 export function summaryHref(groupId: string, roundId: string): Href {
   return { pathname: "/groups/[groupId]/rounds/[roundId]/summary", params: { groupId, roundId } };
 }
+
+/** Screen 12a, the MVP vote (E4.18): the stable target of the notification of screen 28 too. */
+export function mvpVoteHref(groupId: string, roundId: string): Href {
+  return { pathname: "/groups/[groupId]/rounds/[roundId]/mvp-vote", params: { groupId, roundId } };
+}

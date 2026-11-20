@@ -32,6 +32,8 @@ export const palette = {
   // The draw (Sorteio.dc.html): the pale blue of a selected name and the green band of the meter.
   selectFill: "#E8EEFF",
   meterBand: "#12A150",
+  // The MVP ballot (VotarMvp.dc.html .vt[aria-checked]): the pale orange of the chosen row.
+  choiceFill: "#FFF1EA",
 } as const;
 
 export const nightAlpha = {
@@ -185,6 +187,8 @@ export const sizes = {
   highlightDot: 8,
   // Members (Membros.dc.html .av, .more) and the invite QR frame (Convidar.dc.html).
   avatar: 40,
+  // A row of the MVP ballot (VotarMvp.dc.html .vt): taller than the touch floor.
+  ballotRowMin: 58,
   moreButtonWidth: 44,
   moreButtonHeight: 48,
   memberRowMin: 56,
@@ -242,6 +246,7 @@ export const interactiveHeights = [
   sizes.levelStep,
   sizes.levelShortcut,
   sizes.levelOption,
+  sizes.ballotRowMin,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.
