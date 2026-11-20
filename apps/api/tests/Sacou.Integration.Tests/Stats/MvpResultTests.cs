@@ -113,6 +113,61 @@ public sealed class MvpResultTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(2L, await CourtCalls.CountAsync(api.ConnectionString, "SELECT count(*) FROM stats.mvp_votes WHERE round_id = @id", Guid.Parse(round)));
     }
 
+    /// <summary>Many first reads at once after the close freeze one row and answer with the same count.</summary>
+    [Fact]
+    public async Task ParallelFirstReads_FreezeASingleRow_WithTheSameCount()
+    {
+        using var client = api.CreateClient();
+        var (world, round, _, closesAt, _) = await VotedRoundAsync(client);
+        api.Clock.SetNow(closesAt);
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => ResultAsync(world, A.Player, round)));
+
+        Assert.All(results, result => Assert.Equal([world.MemberIds[A.Admin]], Winners(result)));
+        Assert.All(results, result => Assert.Equal(2, result["voters"]!.GetValue<int>()));
+        Assert.Equal(1L, await CourtCalls.CountAsync(api.ConnectionString, "SELECT count(*) FROM stats.mvp_results WHERE round_id = @id", Guid.Parse(round)));
+    }
+
+    /// <summary>People outside the group, removed or gone get the same 404; while open there are no winners nor voters.</summary>
+    [Fact]
+    public async Task TheResultAccess_IsTheSame404ForAnyoneOutside_AndHasNoCountWhileOpen()
+    {
+        using var client = api.CreateClient();
+        var (world, round, _, closesAt, _) = await VotedRoundAsync(client);
+
+        var open = await ResultAsync(world, A.Player, round);
+        var outside = new List<string>();
+        foreach (var actor in new[] { A.NonMember, A.OutsiderMember, A.RemovedMember, A.LeftMember })
+        {
+            using var response = await world.SendAsync(actor, HttpMethod.Get, ResultPath(world, round));
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            outside.Add(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        }
+
+        Assert.Single(outside.Select(body => JsonNode.Parse(body)!["code"]?.ToString() ?? JsonNode.Parse(body)!["type"]?.ToString()).Distinct());
+        Assert.Equal("open", open["state"]!.GetValue<string>());
+        Assert.Null(open["winners"]);
+        Assert.Null(open["voters"]);
+        api.Clock.SetNow(closesAt);
+        var closed = (await ResultAsync(world, A.Admin, round)).ToJsonString();
+        Assert.DoesNotContain("count", closed, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("votes", closed, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The Admin's export has the vote the Admin gave, never the one received nor another person's.</summary>
+    [Fact]
+    public async Task TheExport_HasNoReceivedVoteNorAnotherPersonsVote()
+    {
+        using var client = api.CreateClient();
+        var (world, _, _, _, _) = await VotedRoundAsync(client);
+
+        var votes = (await ExportAsync(world, A.Admin))["mvpVotes"]!.AsArray();
+
+        var vote = Assert.Single(votes)!.AsObject();
+        Assert.Equal(world.MemberIds[A.Player], vote["candidateMemberId"]!.GetValue<Guid>());
+        Assert.DoesNotContain(world.MemberIds[A.Admin].ToString(), votes.ToJsonString(), StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// A round with the vote on: the Admin beats the Player 1-0, the round is closed an hour after its start, and each
     /// votes for the other (a tie on votes, the Admin ahead on the balance).
