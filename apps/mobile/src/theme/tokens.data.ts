@@ -1,5 +1,4 @@
-// Design tokens read from design/telas/*.dc.html. Numbers live here (data file) and are
-// read by name everywhere else. The golden file tokens.golden.json mirrors the canvas.
+// Design tokens read from design/telas/*.dc.html. Numbers live here (data file) and are read by name everywhere else. The golden file tokens.golden.json mirrors the canvas.
 
 export const palette = {
   sand: "#F6F1E7",
@@ -23,8 +22,7 @@ export const palette = {
   // The "Excluir conta" card of the account (Conta.dc.html): pale red ground and its dark red title.
   dangerFill: "#FDECEA",
   dangerTitle: "#8C1D18",
-  // The admin's level (Membros.dc.html .sug, NotaMembro.dc.html, RevisarNotas.dc.html): the pale yellow
-  // of the pending strip and of a suggestion, its dashed brown border and its dark brown text.
+  // The admin's level (Membros.dc.html .sug, NotaMembro.dc.html, RevisarNotas.dc.html): the pale yellow of the pending strip and of a suggestion, its dashed brown border and its dark brown text.
   noticeFill: "#FFF8E1",
   suggestBorder: "#9A6A00",
   suggestText: "#5C3F00",
@@ -94,10 +92,9 @@ export const fontSizes = {
   displayLevelCard: 28,
   displayLevelBadge: 20,
   levelCaption: 11,
-  // The draw (Sorteio.dc.html): the title, the name of a team card.
+  // The draw (Sorteio.dc.html): the title, a team card name; the summary (Resumo.dc.html): the title, the MVP name.
   drawTitle: 29,
   teamTitle: 22,
-  // The summary of the round (Resumo.dc.html): the title and the name of the MVP of the day.
   summaryTitle: 38,
   displayMvp: 84,
 } as const;

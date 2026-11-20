@@ -23,11 +23,15 @@ const PERSISTED_CHILDREN: ReadonlySet<unknown> = new Set(["members", "settings",
  * only) and anything unknown stay out.
  */
 export function isPersistedKey(key: SacouQueryKey): boolean {
-  const [root, groupId, child] = key;
+  const [root, groupId] = key;
   if (root === "me") return key.length === GROUP_KEY_LENGTH && groupId === "profile";
   if (root !== "groups") return false;
   if (key.length === 1) return true;
-  if (typeof groupId !== "string") return false;
+  return typeof groupId === "string" && isPersistedGroupKey(key);
+}
+
+function isPersistedGroupKey(key: SacouQueryKey): boolean {
+  const child = key[2];
   if (key.length === ROUND_KEY_LENGTH) return child === "rounds" && typeof key[3] === "string";
   if (key.length === ROUND_CHILD_KEY_LENGTH) {
     return child === "rounds" && typeof key[3] === "string" && key[4] === "summary";

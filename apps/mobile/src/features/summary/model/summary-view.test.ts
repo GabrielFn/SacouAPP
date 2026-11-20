@@ -50,7 +50,7 @@ function withSides(sides: RoundSummaryReport["sides"]): RoundSummaryReport {
 }
 
 function withMvp(changes: Record<string, unknown>): RoundSummaryReport {
-  return { ...E2_9_ROUND, mvp: { ...(E2_9_ROUND.mvp as Mvp), ...changes } as Mvp };
+  return { ...E2_9_ROUND, mvp: { ...E2_9_ROUND.mvp, ...changes } as Mvp };
 }
 
 describe("the simulated round of the E2.9 (G1 to G5)", () => {

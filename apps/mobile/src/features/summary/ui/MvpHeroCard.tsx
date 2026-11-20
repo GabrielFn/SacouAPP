@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import Svg, { Line, Path, Rect } from "react-native-svg";
+import Svg, { Line, Path } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
@@ -54,7 +54,7 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
         strokeOpacity={COURT_LINE_OPACITY}
         strokeWidth={COURT_STROKE}
       >
-        <Rect x={200} y={14} width={140} height={200} />
+        <Path d="M200 14h140v200h-140z" />
         <Line x1={200} y1={84} x2={340} y2={84} strokeWidth={NET_STROKE} />
         <Line x1={200} y1={56} x2={340} y2={56} />
         <Line x1={200} y1={112} x2={340} y2={112} />
