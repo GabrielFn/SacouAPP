@@ -5,7 +5,11 @@ namespace Sacou.Modules.Notifications.Infrastructure;
 
 /// <summary>A delivery the pump owns now, with what its push needs. The token never leaves the pump and the gateway.</summary>
 internal sealed record ClaimedDelivery(
-    Guid DeliveryId, int Attempts, Guid NotificationId, string Kind, Guid GroupId, Guid RoundId, DateTimeOffset ExpiresAt, Guid DeviceId, string ExpoToken);
+    Guid DeliveryId, int Attempts, Guid NotificationId, string Kind, Guid GroupId, Guid RoundId, DateTimeOffset ExpiresAt, Guid DeviceId, string ExpoToken)
+{
+    /// <summary>Never prints the token.</summary>
+    public override string ToString() => $"ClaimedDelivery {{ DeliveryId = {DeliveryId} }}";
+}
 
 /// <summary>How one claimed delivery ends this run. <see cref="ErrorCode"/> is the push service's code, never a token.</summary>
 internal sealed record DeliveryOutcome(
