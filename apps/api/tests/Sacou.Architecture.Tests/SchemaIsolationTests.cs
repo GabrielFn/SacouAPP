@@ -23,6 +23,17 @@ public sealed class SchemaIsolationTests
         ViolationAssert.None(SchemaIsolationRules.ModuleViolations(directory, ["groups", "sessions", "identity"]));
     }
 
+    /// <summary>4.6 (c) of E3.9: the Stats reads the streams only through <c>ICourtSessionResults</c>, never their tables.</summary>
+    [Fact]
+    public void StatsSource_NeverNamesAnotherModulesSchema_NorTheCourtEvents()
+    {
+        var directory = Path.Combine(RepositoryFiles.ModulesDirectory, "Stats");
+
+        Assert.True(Directory.Exists(directory), "The Stats module directory must exist for the rule to mean anything.");
+        ViolationAssert.None(SchemaIsolationRules.ModuleViolations(directory, ["matches", "groups", "sessions", "identity"]));
+        ViolationAssert.None(SchemaIsolationRules.TextViolations(directory, "court_events"));
+    }
+
     [Theory]
     [InlineData("SELECT status FROM sessions.rounds WHERE id = 1")]
     [InlineData("SELECT 1 FROM matches.court_sessions c JOIN identity.users u ON u.id = c.id")]

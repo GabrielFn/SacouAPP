@@ -61,6 +61,7 @@ public static class SessionsModule
         services.AddScoped<DrawTeamsHandler>();
         // The round of a court stream, for the Matches (E3.7, ADR 0060, D14).
         services.AddScoped<IRoundDirectory, StoreRoundDirectory>();
+        services.AddScoped<IRoundFacts, StoreRoundFacts>();
         return services;
     }
 

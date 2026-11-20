@@ -18,13 +18,9 @@ internal sealed record RatingPoolKind
 
     public string Code { get; }
 
-    /// <summary>The pool of a <c>format.modality</c> code, or <c>null</c> for any other text.</summary>
-    public static RatingPoolKind? OfModality(string modality) => modality switch
-    {
-        "indoor-6x6" => Indoor,
-        "beach-2x2" or "beach-4x4" => Beach,
-        _ => null,
-    };
+    /// <summary>The pool of a stored code, or <c>null</c> for any other text.</summary>
+    public static RatingPoolKind? FromCode(string code) =>
+        All.FirstOrDefault(pool => string.Equals(pool.Code, code, StringComparison.Ordinal));
 }
 
 /// <summary>The side that won a rated match; a match without a winner has none.</summary>

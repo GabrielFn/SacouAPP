@@ -17,9 +17,9 @@ internal static class DrawRulesReader
     /// <summary>The catalog only lets these three through (settings-catalog.json), so any other is a bug.</summary>
     private static int PlayersPerTeam(string modality) => modality switch
     {
-        "indoor-6x6" => IndoorPlayers,
-        "beach-4x4" => BeachFourPlayers,
-        "beach-2x2" => BeachTwoPlayers,
+        GameModalities.Indoor6x6Code => IndoorPlayers,
+        GameModalities.Beach4x4Code => BeachFourPlayers,
+        GameModalities.Beach2x2Code => BeachTwoPlayers,
         _ => throw new InvalidOperationException("A modality outside the catalog."),
     };
 }

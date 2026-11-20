@@ -17,8 +17,9 @@ namespace Sacou.Modules.Matches.Tests.CourtSessions.PlayerStatistics;
 /// Debug on the local machine: replay 0.83 s, summary 1.17 s (ADR 0071, part 3). A wall-clock ceiling
 /// failed under the parallel test run (5.6 s with the other assemblies), so the ceiling is relative to
 /// the replay of the same log, in the same process and under the same load: the summary walks the same
-/// timeline, so anything above a few replays means a quadratic return, not noise. The replay cost
-/// itself is ADR 0060, A10.
+/// timeline, so anything above a few replays means a quadratic return, not noise. Part 4: one warm-up
+/// run is thrown away (the JIT) and the median of 3 runs is compared (ADR 0071). The replay cost itself
+/// is ADR 0060, A10.
 /// </summary>
 public sealed class RoundSummaryWorstCaseTests
 {
@@ -28,6 +29,8 @@ public sealed class RoundSummaryWorstCaseTests
     private const int LineupMembers = 6;
     /// <summary>How many replays of the same log the summary may cost.</summary>
     private const double SummaryCeilingInReplays = 4;
+    /// <summary>Odd, so the median is one of the runs.</summary>
+    private const int MeasuredRuns = 3;
     private const string Court = "c0000000-0000-4000-8000-000000000001";
     private const string Device = "d0000000-0000-4000-8000-000000000001";
 
@@ -35,24 +38,36 @@ public sealed class RoundSummaryWorstCaseTests
     public void Summary_OfTheWorstRound_StaysUnderTheCeiling()
     {
         var log = Log();
+        var options = new RoundSummaryOptions(RoundModality.Indoor6x6, MvpEnabled: true, MvpByStats: true, IndividualPoints: true);
+        // The first run pays the JIT of the replay and of the summary: it is thrown away (part 3, condition 1).
+        _ = Measure(log, options);
+        var runs = Enumerable.Range(0, MeasuredRuns).Select(_ => Measure(log, options)).ToList();
+        var replaySeconds = Median(runs.Select(run => run.ReplaySeconds));
+        var summarySeconds = Median(runs.Select(run => run.SummarySeconds));
+
+        TestContext.Current.TestOutputHelper?.WriteLine(
+            $"{log.Length} events, median of {MeasuredRuns} after a warm-up: replay {replaySeconds:F2} s, summary {summarySeconds:F2} s");
+        Assert.True(
+            summarySeconds < SummaryCeilingInReplays * replaySeconds,
+            $"summary took {summarySeconds:F2} s, the replay {replaySeconds:F2} s");
+    }
+
+    private static (double ReplaySeconds, double SummarySeconds) Measure(ImmutableArray<EventEnvelope> log, RoundSummaryOptions options)
+    {
         var replayStarted = Stopwatch.GetTimestamp();
         var timeline = EventReplayer.ReplayTimeline(ScoreAppliers.Config(Court), log);
         var replaySeconds = Stopwatch.GetElapsedTime(replayStarted).TotalSeconds;
         Assert.True(timeline.IsSuccess);
 
-        var options = new RoundSummaryOptions(RoundModality.Indoor6x6, MvpEnabled: true, MvpByStats: true, IndividualPoints: true);
         var summaryStarted = Stopwatch.GetTimestamp();
         var summary = RoundSummaryRules.GetRoundSummary(timeline.Value, options);
         var summarySeconds = Stopwatch.GetElapsedTime(summaryStarted).TotalSeconds;
-
-        TestContext.Current.TestOutputHelper?.WriteLine(
-            $"{log.Length} events: replay {replaySeconds:F2} s, summary {summarySeconds:F2} s");
         Assert.Equal(FinishedMatches, summary.FinishedMatches.Length);
         Assert.Equal(TeamMembers * 2, summary.Players.Length);
-        Assert.True(
-            summarySeconds < SummaryCeilingInReplays * replaySeconds,
-            $"summary took {summarySeconds:F2} s, the replay {replaySeconds:F2} s");
+        return (replaySeconds, summarySeconds);
     }
+
+    private static double Median(IEnumerable<double> values) => values.Order().ElementAt(MeasuredRuns / 2);
 
     private static ImmutableArray<EventEnvelope> Log()
     {
