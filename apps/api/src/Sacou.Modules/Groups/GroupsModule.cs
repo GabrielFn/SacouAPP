@@ -57,6 +57,8 @@ public static class GroupsModule
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
         services.AddScoped<IGroupJoining, StoreGroupJoining>();
         services.AddScoped<IGroupDirectory, StoreGroupDirectory>();
+        // The account behind a member, for the Notifications (E3.11, ADR 0069, D4).
+        services.AddScoped<IMemberAccounts, StoreMemberAccounts>();
         services.AddScoped<IRoundListNames, StoreRoundListNames>();
         services.AddScoped<IGroupSettingsReader, StoreGroupSettingsReader>();
         services.AddScoped<IMemberLevels, StoreMemberLevels>();

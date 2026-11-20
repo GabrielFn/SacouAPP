@@ -5,6 +5,7 @@
         <Project Path="apps/api/src/Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
         <Project Path="apps/api/src/Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />
         <Project Path="apps/api/src/Sacou.Modules/Matches/Sacou.Modules.Matches.csproj" />
+        <Project Path="apps/api/src/Sacou.Modules/Notifications/Sacou.Modules.Notifications.csproj" />
         <Project Path="apps/api/src/Sacou.Modules/Payments/Sacou.Modules.Payments.csproj" />
         <Project Path="apps/api/src/Sacou.Modules/Summaries/Sacou.Modules.Summaries.csproj" />
         <Project Path="apps/api/src/Sacou.Modules/Stats/Sacou.Modules.Stats.csproj" />
@@ -19,6 +20,7 @@
         <Project Path="apps/api/tests/Sacou.Modules.Groups.Tests/Sacou.Modules.Groups.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Identity.Tests/Sacou.Modules.Identity.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Matches.Tests/Sacou.Modules.Matches.Tests.csproj" />
+        <Project Path="apps/api/tests/Sacou.Modules.Notifications.Tests/Sacou.Modules.Notifications.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Sessions.Tests/Sacou.Modules.Sessions.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Modules.Stats.Tests/Sacou.Modules.Stats.Tests.csproj" />
         <Project Path="apps/api/tests/Sacou.Shared.Tests/Sacou.Shared.Tests.csproj" />
