@@ -93,6 +93,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "sessions.series-limit":
     "O grupo já tem o máximo de rodadas que se repetem. Pare uma antes de criar outra.",
   "sessions.series-not-found": "Essa repetição não existe mais.",
+  "stats.year-invalid": "Esse ano não tem estatísticas.",
 };
 
 /** What the person reads for the other kinds of `ApiError` (E4.2, D5). */

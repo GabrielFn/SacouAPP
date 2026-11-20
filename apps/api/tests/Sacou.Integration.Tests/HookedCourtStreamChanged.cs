@@ -2,8 +2,8 @@ using Sacou.Modules.Matches.Contracts;
 
 namespace Sacou.Integration.Tests;
 
-/// <summary>A pass-through <see cref="ICourtStreamChanged"/> that lets a test act, or fail, before the Stats hears of a write.</summary>
-internal sealed class HookedCourtStreamChanged(ICourtStreamChanged inner, Func<Func<Task>?> hook) : ICourtStreamChanged
+/// <summary>An <see cref="ICourtStreamChanged"/> of the tests only: it runs the hook, or fails, after a write that changed a finished match.</summary>
+internal sealed class HookedCourtStreamChanged(Func<Func<Task>?> hook) : ICourtStreamChanged
 {
     public async Task CourtStreamChangedAsync(Guid groupId, Guid roundId, Guid courtSessionId, CancellationToken cancellationToken)
     {
@@ -11,7 +11,5 @@ internal sealed class HookedCourtStreamChanged(ICourtStreamChanged inner, Func<F
         {
             await before().ConfigureAwait(false);
         }
-
-        await inner.CourtStreamChangedAsync(groupId, roundId, courtSessionId, cancellationToken).ConfigureAwait(false);
     }
 }

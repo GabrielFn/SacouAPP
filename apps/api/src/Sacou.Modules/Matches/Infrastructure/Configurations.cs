@@ -16,6 +16,9 @@ internal sealed class CourtSessionConfiguration : IEntityTypeConfiguration<Court
     public const string Table = "court_sessions";
     public const string RoundIndex = "ux_court_sessions_round";
 
+    /// <summary>The streams of a group, for the projections of the Stats (E3.9, ADR 0071): no scan of the table.</summary>
+    public const string GroupIndex = "ix_court_sessions_group";
+
     /// <summary>The columns of the stored scoreboard: the open match, the set, and the points and sets of each team.</summary>
     private const int ScoreboardColumns = 6;
 
@@ -50,6 +53,7 @@ internal sealed class CourtSessionConfiguration : IEntityTypeConfiguration<Court
         builder.Property(session => session.SetsB).HasColumnName("sets_b");
 
         builder.HasIndex(session => session.RoundId).IsUnique().HasDatabaseName(RoundIndex);
+        builder.HasIndex(session => session.GroupId).HasDatabaseName(GroupIndex);
     }
 }
 

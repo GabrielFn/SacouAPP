@@ -3,7 +3,6 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Access;
-using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Matches.CourtSessionJson;
 using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
@@ -27,7 +26,7 @@ internal sealed class AppendCourtEventsHandler(
     IRoundDirectory rounds,
     IGroupMembership membership,
     ICourtStreamStore store,
-    IEnumerable<ICourtStreamChanged> listeners,
+    CourtStreamNotifier notifier,
     TimeProvider time,
     ILogger<AppendCourtEventsHandler> logger)
 {
@@ -52,7 +51,7 @@ internal sealed class AppendCourtEventsHandler(
             CourtLog.Stored(logger, route.CourtSessionId, response.Stored, duplicates, elapsedMs);
             if (changesResults)
             {
-                await NotifyAsync(access.GroupId, route, cancellationToken).ConfigureAwait(false);
+                await notifier.NotifyAsync(access.GroupId, route.RoundId, route.CourtSessionId, cancellationToken).ConfigureAwait(false);
             }
 
             return Result<AppendCourtEventsResponse, CourtProblem>.Success(response);
@@ -61,25 +60,6 @@ internal sealed class AppendCourtEventsHandler(
         var reason = written.Error.Extensions.GetValueOrDefault(CourtProblem.ReasonExtension) as string;
         CourtLog.Refused(logger, written.Error.Error.Code, reason ?? NoReason, elapsedMs);
         return Result<AppendCourtEventsResponse, CourtProblem>.Failure(written.Error);
-    }
-
-    /// <summary>
-    /// Outside the lock and after the commit. A listener that fails leaves the projection stale, which the next read
-    /// rebuilds: the write already happened, so it answers as it did. Only the stream id reaches the log.
-    /// </summary>
-    private async Task NotifyAsync(Guid groupId, CourtRoute route, CancellationToken cancellationToken)
-    {
-        foreach (var listener in listeners)
-        {
-            try
-            {
-                await listener.CourtStreamChangedAsync(groupId, route.RoundId, route.CourtSessionId, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (exception is not OutOfMemoryException)
-            {
-                CourtLog.ListenerFailed(logger, route.CourtSessionId, exception.GetType().Name);
-            }
-        }
     }
 
     private async Task<Result<(AppendCourtEventsResponse Response, int Duplicates, bool ChangesResults), CourtProblem>> WriteAsync(

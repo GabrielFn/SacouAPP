@@ -42,7 +42,7 @@ public sealed class AccountDataTests(IntegrationDatabase database) : IAsyncLifet
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("sacou-personal-data", document["format"]!.GetValue<string>());
         Assert.Equal(1, document["version"]!.GetValue<int>());
-        Assert.Equal(["format", "version", "generatedAt", "account", "profile", "groups", "attendances", "courtWrites"], document.Select(pair => pair.Key));
+        Assert.Equal(["format", "version", "generatedAt", "account", "profile", "groups", "attendances", "courtWrites", "stats"], document.Select(pair => pair.Key));
         Assert.NotNull(document["account"]!["createdAt"]);
         Assert.Equal(
             $$"""{"nickname":"{{PersonNickname}}","primaryPosition":"setter","otherPositions":["libero"],"suggestedLevel":2}""",
@@ -85,6 +85,7 @@ public sealed class AccountDataTests(IntegrationDatabase database) : IAsyncLifet
         Assert.Empty(document["groups"]!.AsArray());
         Assert.Empty(document["attendances"]!.AsArray());
         Assert.Empty(document["courtWrites"]!.AsArray());
+        Assert.Empty(document["stats"]!.AsArray());
     }
 
     /// <summary>E3: the admin's note about the person never leaves the API (question 42); the person's own suggestion does.</summary>
