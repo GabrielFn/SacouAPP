@@ -28,6 +28,9 @@ public sealed class GroupRouteGuardTests
     /// <summary>The court stream's write (E3.7, ADR 0060), its takeover, summary and read (E3.8, ADR 0063), behind the Matches' filter.</summary>
     private const int CourtRoutes = 4;
 
+    /// <summary>The summary of a round (E3.9 part 4b, ADR 0071), behind the Stats' filter.</summary>
+    private const int StatsRoutes = 1;
+
     private const string Development = "Development";
     private const string Production = "Production";
 
@@ -41,9 +44,10 @@ public sealed class GroupRouteGuardTests
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints, environment == Development));
         var withGroupId = endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null);
-        Assert.Equal(GroupRoutes + RoundRoutes + CourtRoutes, withGroupId);
+        Assert.Equal(GroupRoutes + RoundRoutes + CourtRoutes + StatsRoutes, withGroupId);
         Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null));
         Assert.Equal(CourtRoutes, endpoints.OfType<RouteEndpoint>().Count(GroupRouteGuard.HasCourtFilter));
+        Assert.Equal(StatsRoutes, endpoints.OfType<RouteEndpoint>().Count(GroupRouteGuard.HasStatsFilter));
     }
 
     /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>

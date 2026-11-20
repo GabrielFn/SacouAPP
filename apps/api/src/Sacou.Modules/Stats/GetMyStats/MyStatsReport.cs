@@ -18,11 +18,14 @@ internal sealed record MyStatsTotalsReport(
     }
 }
 
-/// <summary>One group of the person, with its name and its own modality code (the chip "Quadra 6x6", L6).</summary>
+/// <summary>
+/// One group of the person, with its name and its own modality code (the chip "Quadra 6x6", L6); both null for a
+/// group the person left or was removed from ("Ex-jogador"), as in the export.
+/// </summary>
 internal sealed record MyStatsGroupReport(
     Guid GroupId,
-    string GroupName,
-    string Modality,
+    string? GroupName,
+    string? Modality,
     int MatchesPlayed,
     int Wins,
     int Losses,

@@ -113,7 +113,7 @@ internal static class GetMyStatsEndpoint
     private static MyStatsGroupReport GroupOf(UserMembership membership, SeasonTotals totals) => new(
         membership.GroupId,
         membership.GroupName,
-        GameModalities.CodeOf(membership.Modality),
+        membership.Modality is { } modality ? GameModalities.CodeOf(modality) : null,
         totals.MatchesPlayed,
         totals.Wins,
         totals.Losses,

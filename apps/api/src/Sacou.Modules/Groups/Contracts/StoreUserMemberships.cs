@@ -3,7 +3,7 @@ using Sacou.Modules.Groups.Infrastructure;
 
 namespace Sacou.Modules.Groups.Contracts;
 
-/// <summary>One read of the memberships, then one read of the settings of each group (a person is in few groups).</summary>
+/// <summary>One read of the memberships, then one read of the settings of each active group (a person is in few groups).</summary>
 internal sealed class StoreUserMemberships(IGroupStore store, IGroupSettingsReader settings) : IUserMemberships
 {
     public async Task<IReadOnlyList<UserMembership>> ListAsync(Guid userId, CancellationToken cancellationToken)
@@ -12,10 +12,16 @@ internal sealed class StoreUserMemberships(IGroupStore store, IGroupSettingsRead
         var found = new List<UserMembership>(memberships.Count);
         foreach (var membership in memberships)
         {
-            var modality = await ModalityAsync(membership.GroupId.Value, cancellationToken).ConfigureAwait(false);
             var member = membership.Member;
+            var modality = member.IsActive ? await ModalityAsync(membership.GroupId.Value, cancellationToken).ConfigureAwait(false) : (GameModality?)null;
             found.Add(new UserMembership(
-                membership.GroupId.Value, membership.GroupName.Value, member.Id.Value, member.IsActive, member.JoinedAt, member.LeftAt, modality));
+                membership.GroupId.Value,
+                member.IsActive ? membership.GroupName.Value : null,
+                member.Id.Value,
+                member.IsActive,
+                member.JoinedAt,
+                member.LeftAt,
+                modality));
         }
 
         return found;

@@ -12,10 +12,11 @@ public interface IUserMemberships
 
 /// <summary>
 /// One membership of the person: <see cref="LeftAt"/> is null while active. <see cref="Modality"/> is the group's
-/// own <c>format.modality</c> (the chip "Quadra 6x6"), not a round's.
+/// own <c>format.modality</c> (the chip "Quadra 6x6"), not a round's. The name and the modality only while active:
+/// of a group the person left or was removed from they are the group's data, as in the export (ADR 0056).
 /// </summary>
 public sealed record UserMembership(
-    Guid GroupId, string GroupName, Guid MemberId, bool Active, DateTimeOffset JoinedAt, DateTimeOffset? LeftAt, GameModality Modality)
+    Guid GroupId, string? GroupName, Guid MemberId, bool Active, DateTimeOffset JoinedAt, DateTimeOffset? LeftAt, GameModality? Modality)
 {
     /// <summary>The group name is shown to the person only: never printed.</summary>
     public override string ToString() => nameof(UserMembership);
