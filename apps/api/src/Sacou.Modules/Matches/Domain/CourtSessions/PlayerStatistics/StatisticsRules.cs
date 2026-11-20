@@ -15,10 +15,14 @@ internal static class StatisticsRules
     /// The statistics of each member who played a finished match, in the order they first appear:
     /// <c>teams.a</c>, then <c>teams.b</c>, match by match. Never ordered by member id.
     /// </summary>
-    public static ImmutableArray<PlayerStats> GetPlayerStats(ReplayedTimeline<CourtSessionState> timeline)
+    public static ImmutableArray<PlayerStats> GetPlayerStats(ReplayedTimeline<CourtSessionState> timeline) =>
+        GetPlayerStats(timeline, MatchTallies.PlayedRallies(timeline));
+
+    /// <summary>As <see cref="GetPlayerStats(ReplayedTimeline{CourtSessionState})"/>, with the rallies the caller already worked out.</summary>
+    public static ImmutableArray<PlayerStats> GetPlayerStats(ReplayedTimeline<CourtSessionState> timeline, ImmutableArray<PlayedRally> rallies)
     {
         var finishedMatches = FinishedMatchesOf(timeline);
-        var balancesByMatch = MatchTallies.CourtBalancesByMatch(timeline);
+        var balancesByMatch = MatchTallies.CourtBalancesByMatch(rallies);
         var pointsByMatch = MatchTallies.PointsByMatch(timeline);
         ImmutableArray<MatchTally> tallies =
         [
@@ -38,9 +42,12 @@ internal static class StatisticsRules
     }
 
     /// <summary>A match without a winner is neither a win nor a loss for anyone (ADR 0032, P2).</summary>
-    public static MatchResult ResultOfSide(FinishedMatch finished, TeamSide side) =>
-        finished.Winner is null ? MatchResult.Undecided
-        : finished.Winner == side ? MatchResult.Win
+    public static MatchResult ResultOfSide(FinishedMatch finished, TeamSide side) => ResultOfSide(finished.Winner, side);
+
+    /// <summary>As <see cref="ResultOfSide(FinishedMatch, TeamSide)"/>, from the winner alone.</summary>
+    public static MatchResult ResultOfSide(TeamSide? winner, TeamSide side) =>
+        winner is null ? MatchResult.Undecided
+        : winner == side ? MatchResult.Win
         : MatchResult.Loss;
 
     /// <summary>A loss and a match without a winner both break the run; the current run ends with the last result.</summary>
@@ -53,7 +60,7 @@ internal static class StatisticsRules
         });
 
     /// <summary>The last state of the timeline, as <c>entries.at(-1)</c>: an empty timeline has no finished match.</summary>
-    private static ImmutableArray<FinishedMatch> FinishedMatchesOf(ReplayedTimeline<CourtSessionState> timeline) =>
+    public static ImmutableArray<FinishedMatch> FinishedMatchesOf(ReplayedTimeline<CourtSessionState> timeline) =>
         timeline.Entries.IsEmpty ? [] : timeline.Entries[^1].State.FinishedMatches;
 
     private static SideStats SideStatsOf(ImmutableArray<FinishedMatch> finishedMatches, TeamSide side)
