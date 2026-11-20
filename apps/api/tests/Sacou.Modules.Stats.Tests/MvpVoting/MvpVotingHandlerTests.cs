@@ -228,5 +228,8 @@ public sealed class MvpVotingHandlerTests : IDisposable
 
         public Task<IReadOnlyList<MvpVote>> ListForRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<MvpVote>>(Stored);
+
+        public Task<IReadOnlyList<GivenMvpVote>> ListGivenAsync(Guid groupId, MemberId voter, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<GivenMvpVote>>([.. Stored.Where(vote => vote.Voter == voter).Select(vote => new GivenMvpVote(RoundId, vote.Candidate, vote.CastAt))]);
     }
 }

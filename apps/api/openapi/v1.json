@@ -6495,6 +6495,119 @@
           }
         }
       }
+    },
+    "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting/result": {
+      "get": {
+        "tags": [
+          "GetMvpVotingResultEndpoint"
+        ],
+        "operationId": "GetMvpVotingResult",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MvpVotingResultResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7710,6 +7823,42 @@
         },
         "additionalProperties": false
       },
+      "MvpVotingResultResponse": {
+        "required": [
+          "state",
+          "closesAt",
+          "winners",
+          "voters"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/MvpVotingState"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "winners": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "voters": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "MvpVotingState": {
         "enum": [
           "notOpen",
@@ -8443,6 +8592,7 @@
           "mvpFormulaVersion",
           "finishedMatches",
           "mvp",
+          "mvpVoting",
           "sides",
           "players",
           "ranking"
@@ -8471,6 +8621,16 @@
               },
               {
                 "$ref": "#/components/schemas/SummaryMvpReport"
+              }
+            ]
+          },
+          "mvpVoting": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SummaryMvpVotingReport"
               }
             ]
           },
@@ -8785,6 +8945,7 @@
       },
       "SummaryMvpReport": {
         "required": [
+          "source",
           "kind",
           "memberIds",
           "side",
@@ -8795,6 +8956,9 @@
         ],
         "type": "object",
         "properties": {
+          "source": {
+            "$ref": "#/components/schemas/SummaryMvpSource"
+          },
           "kind": {
             "$ref": "#/components/schemas/SummaryMvpKind"
           },
@@ -8830,6 +8994,35 @@
           "longestWinStreak": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryMvpSource": {
+        "enum": [
+          "stats",
+          "votes"
+        ],
+        "type": "string"
+      },
+      "SummaryMvpVotingReport": {
+        "required": [
+          "state",
+          "opensAt",
+          "closesAt"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/MvpVotingState"
+          },
+          "opensAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

@@ -7,6 +7,7 @@ using Sacou.Modules.Stats.Access;
 using Sacou.Modules.Stats.AccountData;
 using Sacou.Modules.Stats.CastMvpVote;
 using Sacou.Modules.Stats.GetMvpVoting;
+using Sacou.Modules.Stats.GetMvpVotingResult;
 using Sacou.Modules.Stats.GetMyStats;
 using Sacou.Modules.Stats.GetRoundSummary;
 using Sacou.Modules.Stats.Infrastructure;
@@ -31,19 +32,23 @@ public static class StatsModule
         services.AddScoped<IMvpVotingRounds, ProjectedMvpVotingRounds>();
         services.AddScoped<GetMvpVotingHandler>();
         services.AddScoped<CastMvpVoteHandler>();
+        services.AddScoped<MvpOutcomes>();
+        services.AddScoped<GetMvpVotingResultHandler>();
         // The person's after-game in the export, never the rating (ADR 0071).
         services.AddScoped<IAccountExportSection, StatsExportSection>();
+        // Only the votes the person gave (ADR 0072, D7).
+        services.AddScoped<IAccountExportSection, MvpVotesExportSection>();
         return services;
     }
 
     /// <summary>
-    /// The summary of a round, the ballot and the vote of the MVP (ADR 0072) behind the Stats' group filter, and the
+    /// The summary of a round, the ballot, the vote and the result of the MVP (ADR 0072) behind the Stats' group filter, and the
     /// person's own season outside it (on the closed list of the route guard). The summary and the season may replay a
     /// stale stream, so both are under <c>court-sync</c>.
     /// </summary>
     public static IEndpointRouteBuilder MapStatsEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapStatsRoutes().MapGetRoundSummary().MapGetMvpVoting().MapCastMvpVote();
+        endpoints.MapStatsRoutes().MapGetRoundSummary().MapGetMvpVoting().MapCastMvpVote().MapGetMvpVotingResult();
         endpoints.MapGetMyStats();
         return endpoints;
     }

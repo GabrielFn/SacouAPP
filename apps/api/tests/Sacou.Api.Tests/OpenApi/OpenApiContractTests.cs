@@ -65,6 +65,7 @@ public sealed class OpenApiContractTests
         "get /v1/groups/{groupId}/rounds/{roundId}/court-session GetCourtSession",
         "get /v1/groups/{groupId}/rounds/{roundId}/mvp-voting GetMvpVoting",
         "post /v1/groups/{groupId}/rounds/{roundId}/mvp-voting/vote CastMvpVote",
+        "get /v1/groups/{groupId}/rounds/{roundId}/mvp-voting/result GetMvpVotingResult",
         "get /v1/groups/{groupId}/rounds/{roundId}/summary GetRoundSummary",
         "get /v1/me/stats GetMyStats",
         "post /v1/groups/{groupId}/series/{seriesId}/stop StopSeries",

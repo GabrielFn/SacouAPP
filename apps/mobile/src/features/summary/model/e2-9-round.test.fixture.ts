@@ -14,6 +14,7 @@ export const E2_9_ROUND: RoundSummaryReport = {
   mvpFormulaVersion: 1,
   finishedMatches: 4,
   mvp: {
+    source: "stats",
     kind: "player",
     memberIds: [BIA],
     side: "a",
@@ -22,6 +23,7 @@ export const E2_9_ROUND: RoundSummaryReport = {
     matchesPlayed: 3,
     longestWinStreak: 2,
   },
+  mvpVoting: null,
   sides: {
     mostWins: { side: "a", wins: 2 },
     longestStreak: { side: "a", longestWinStreak: 2 },

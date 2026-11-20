@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
 using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Stats.Access;
+using Sacou.Modules.Stats.MvpVoting;
 using Sacou.Modules.Stats.Projections;
 
 namespace Sacou.Modules.Stats.GetRoundSummary;
@@ -22,10 +23,16 @@ internal static class GetRoundSummaryEndpoint
     public static RouteGroupBuilder MapGetRoundSummary(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync);
 
     private static async Task<Results<Ok<RoundSummaryReport>, ProblemHttpResult>> HandleAsync(
-        Guid roundId, HttpContext context, StatsProjector projector, CancellationToken cancellationToken)
+        Guid roundId, HttpContext context, StatsProjector projector, MvpOutcomes outcomes, CancellationToken cancellationToken)
     {
         var access = context.StatsAccess();
         var round = await projector.GetRoundAsync(access.GroupId, roundId, cancellationToken).ConfigureAwait(false);
-        return round is null ? ProblemResults.From(RoundDirectoryErrors.RoundNotFound) : TypedResults.Ok(RoundSummaryReport.From(round));
+        if (round is null)
+        {
+            return ProblemResults.From(RoundDirectoryErrors.RoundNotFound);
+        }
+
+        var vote = await outcomes.OfRoundAsync(access.GroupId, round, cancellationToken).ConfigureAwait(false);
+        return TypedResults.Ok(RoundSummaryReport.From(round, vote));
     }
 }

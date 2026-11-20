@@ -91,7 +91,8 @@ describe("the simulated round of the E2.9 (G1 to G5)", () => {
       readonly expected: { readonly roundSummary: Record<string, unknown> };
     }[];
     const summary = golden.find((item) => item.id.startsWith("r1-"))?.expected.roundSummary;
-    expect(summary?.mvp).toEqual(E2_9_ROUND.mvp);
+    // The engine has no source: the server adds it on the read (ADR 0072, D13).
+    expect({ ...(summary?.mvp as object), source: "stats" }).toEqual(E2_9_ROUND.mvp);
     expect(summary?.sides).toEqual(E2_9_ROUND.sides);
     expect((summary?.finishedMatches as readonly unknown[]).length).toBe(
       E2_9_ROUND.finishedMatches,

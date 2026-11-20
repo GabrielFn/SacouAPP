@@ -1,6 +1,6 @@
 # ADR 0072 · Votação do MVP
 
-**Status:** aceito em parte (20/11/2026): a Parte 1 da E3.18 (fim da rodada, domínio, voto e cédula). A Parte 2 (resultado, Resumo, perfil e exportação) completa os itens D6, D10 e D11 nas rotas. **Tarefa:** E3.18. Plano em [`docs/estado/tarefas/E3.18.md`](../../estado/tarefas/E3.18.md). Regras em [`mvp.md`](../../dominio/mvp.md). Estende o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md) (item 2) e lê as projeções do [ADR 0071](0071-projecoes-de-estatisticas-mvp-e-rating.md).
+**Status:** aceito (20/11/2026). Parte 1 da E3.18: fim da rodada, domínio, voto e cédula. Parte 2: resultado congelado no fechamento (D12), Resumo, perfil e exportação (D13). **Tarefa:** E3.18. Plano em [`docs/estado/tarefas/E3.18.md`](../../estado/tarefas/E3.18.md). Regras em [`mvp.md`](../../dominio/mvp.md). Estende o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md) (item 2) e lê as projeções do [ADR 0071](0071-projecoes-de-estatisticas-mvp-e-rating.md).
 
 ## Contexto
 
@@ -30,13 +30,19 @@ O ADR 0048 decidiu a votação da galera: só vota quem jogou, ninguém vota em 
 
 **D11 · Onde vive.** Fatias `Stats/GetMvpVoting/` e `Stats/CastMvpVote/`, domínio puro em `Stats/Domain/MvpVoting/` (`MvpVotingWindow`, `MvpBallot`, `MvpTally`, `MvpVotingErrors`), leitura da rodada em `Stats/MvpVoting/` (`IMvpVotingRounds`, sobre o `StatsProjector`). O filtro do Stats (`Stats/Access/`) é o mesmo da E3.9 Parte 4b. `mvp.voting` entra em `SummaryRules` como membro `init` (`MvpVoting`), fora da chave da projeção (`facts_hash`): ligar a votação não reconstrói nada. `closedAt` entra em `RoundFacts` do mesmo jeito, com `EndsAt` calculado.
 
-## Para a Parte 2
+**D12 · Resultado congelado no fechamento (condição da revisão de segurança do PR #184).** A primeira leitura depois de `closesAt` (o resultado, o Resumo, o perfil ou a exportação, o que vier primeiro) apura os votos com a projeção fresca daquele momento (`MvpTally`, D5 e D6) e grava a apuração em `stats.mvp_results`: PK `round_id`, `group_id`, `winner_member_ids` (`uuid[]`, na ordem da apuração), `voters` (`CHECK >= 0`) e `tallied_at`. A gravação é `INSERT ... ON CONFLICT (round_id) DO NOTHING` seguida da leitura da linha guardada: duas primeiras leituras ao mesmo tempo respondem a mesma apuração. Depois disso, correção do placar ou partida sincronizada tarde mudam os números do Resumo (que seguem "correção recalcula tudo"), nunca os vencedores nem o número de votantes. `MvpOutcomes` (`Stats/MvpVoting/`) é a única porta: recebe a projeção lida pelo `StatsProjector` e devolve, por rodada, a janela, o estado e a apuração congelada. Sem job, como o D2. **Risco residual aceito:** uma correção feita entre `closesAt` e a primeira leitura ainda entra na apuração (ninguém viu resultado antes dela); no piloto a tela 12 é lida logo, e o perfil e a exportação também congelam.
 
-`GET .../mvp-voting/result` (D6, D7), `mvp.source` e `mvpVoting` no Resumo da E3.9 (calculados na leitura, nunca na projeção), `mvpCount` do perfil com o MVP final, seção `mvpVotes` da exportação (só votos dados) e o teste de exclusão da conta. Condição da revisão de segurança do PR #184: o resultado congela no fechamento da janela, ou o risco de uma correção do placar depois de fechar mudar candidatos e vencedor fica aceito e registrado aqui.
+**D13 · Resultado, Resumo, perfil e exportação.**
+- `GET .../mvp-voting/result` (`ViewGroup`, `court-sync`, `no-store`): `{ state, closesAt, winners, voters }`. Antes de fechar, `winners` e `voters` vêm `null`. Fechada: os vencedores (lista vazia sem voto válido; mais de um no MVP dividido) e quantos votaram. Nunca contagem por candidato nem quem votou em quem (pergunta 144). Mesmos 404 da cédula.
+- `GET .../summary` (rota da E3.9): `mvp.source` (`stats` ou `votes`) e `mvpVoting` (`null` ou `{ state, opensAt, closesAt }`), compostos na leitura; nunca entram na `round_projections` nem no `facts_hash`. Regra do MVP final (`FinalMvps`, perguntas 142 e 143): votação fechada com vencedor → o da votação (`source: "votes"`, `kind: "player"`, um ou mais `memberIds`, `side` só com um vencedor, números do primeiro vencedor lidos agora da projeção: os empatados do MVP dividido tinham o mesmo saldo e as mesmas vitórias na apuração; um vencedor que uma correção tirou das partidas vem com zeros); senão o dos dados (`source: "stats"`, ou `null` com `mvp.byStats` desligado). Na areia, o da votação é sempre de pessoas. `mvpVoting` é `null` sem votação (`mvp.enabled` ou `mvp.voting` desligado, ou rodada cancelada). O Resumo nunca traz `voters`.
+- `GET /v1/me/stats`: `mvpCount` conta o MVP final de cada rodada; MVP dividido conta para cada vencedor. A coluna `round_member_stats.was_mvp` segue sendo o MVP pelos dados (cache da projeção; nenhuma rota a lê).
+- Exportação: a seção `stats` marca `wasMvp` pela mesma regra; a seção nova `mvpVotes` (`AccountExportSections.MvpVotes`, ordem 650, entre `stats` e `notifications`) traz só os votos **dados** pela pessoa: `groupId`, `roundId`, `candidateMemberId`, `castAt`. Nunca votos recebidos nem de outros.
+- Exclusão da conta: nada a apagar (só `MemberId`); o voto segue contado (teste I10).
 
 ## Consequências
 
 - A E4.12 Parte 2 liga o botão "Encerrar rodada" à rota `close`; offline, a rodada termina sozinha.
 - A E3.11 manda o push "Votação do MVP aberta" no `RoundEnded` e agenda o do fim automático.
 - A E4.18 traduz os códigos novos e mostra "fecha em N h" a partir de `closesAt`.
-- Risco aceito: num grupo de dois votantes com vencedor único dá para deduzir o voto pelo resultado (inerente a qualquer resultado). Partidas sincronizadas depois do fim da janela não reabrem a votação.
+- Risco aceito: num grupo de dois votantes com vencedor único dá para deduzir o voto pelo resultado (inerente a qualquer resultado). Partidas sincronizadas depois do fim da janela não reabrem a votação. Uma correção entre o fim da janela e a primeira leitura entra na apuração (D12).
+- A E4.12 e a E4.18 leem `mvp.source` e `mvpVoting` do Resumo.
