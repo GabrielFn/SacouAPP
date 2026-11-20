@@ -41,14 +41,14 @@ export function lost(reason: NoResponse): ApiOutcome<never> {
 
 export interface ApiClient {
   /** One request to the API: JSON body, the ID token in `Authorization`, no cookie, no cache, no redirect. */
-  call(method: string, path: string, body?: unknown): Promise<Response | NoResponse>;
+  readonly call: (method: string, path: string, body?: unknown) => Promise<Response | NoResponse>;
   /** The answer's body through `parse`; a body `parse` refuses is `unexpected`. */
-  read<T>(
+  readonly read: <T>(
     response: Response | NoResponse,
     parse: (body: unknown) => T | null,
-  ): Promise<ApiOutcome<T>>;
+  ) => Promise<ApiOutcome<T>>;
   /** A request whose body the page does not read: only whether it passed. */
-  send(method: string, path: string, body?: unknown): Promise<ApiOutcome<null>>;
+  readonly send: (method: string, path: string, body?: unknown) => Promise<ApiOutcome<null>>;
 }
 
 /** The Sacou API on the page's own origin: JSON bodies, the ID token in `Authorization`, never a cookie (ADR 0070, D4). */
