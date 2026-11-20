@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Sacou.Modules.Matches.Contracts;
 using Sacou.Integration.Tests.Groups;
 using Sacou.Integration.Tests.Matches;
 using Sacou.Integration.Tests.Sessions;
@@ -146,6 +148,42 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
 
         Assert.Equal(1, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id AND finished_matches = 2", Guid.Parse(round)));
         Assert.Equal("wl", await MemberResultsAsync(round, world.MemberIds[A.Admin]));
+    }
+
+    /// <summary>
+    /// 5.4.8 (condition 4 of the review): four scopes rebuild the same stale round at once. Every call ends without
+    /// error and the round keeps one row, one set of member rows and one row per member of the pool.
+    /// </summary>
+    [Fact]
+    public async Task ConcurrentRebuildsOfTheSameRound_LeaveOneRow_AndNoKeyError()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var round = await CourtCalls.RoundAsync(world);
+        var phone = CourtPhone.New();
+        api.BeforeCourtStreamChanged = () => throw new InvalidOperationException("listener down");
+        try
+        {
+            _ = await PlayAsync(world, round, phone, winner: "a", pointsA: 3, pointsB: 1);
+        }
+        finally
+        {
+            api.BeforeCourtStreamChanged = null;
+        }
+
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id", Guid.Parse(round)));
+
+        await Task.WhenAll(Enumerable.Range(0, 4).Select(async _ =>
+        {
+            using var scope = api.Services.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<ICourtStreamChanged>()
+                .CourtStreamChangedAsync(world.GroupId, Guid.Parse(round), phone.CourtSessionId, TestContext.Current.CancellationToken);
+        }));
+
+        Assert.Equal(1, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id AND finished_matches = 1", Guid.Parse(round)));
+        Assert.Equal(2, await CountAsync("SELECT count(*) FROM stats.round_member_stats WHERE round_id = @id", Guid.Parse(round)));
+        Assert.Equal(2, (await RatingsAsync(world.GroupId)).Count);
+        Assert.Equal(2, await CountAsync("SELECT count(*) FROM stats.rating_pools WHERE group_id = @id", world.GroupId));
     }
 
     /// <summary>A batch with only points of the open match changes nothing finished, so it rebuilds nothing.</summary>

@@ -135,6 +135,78 @@ public sealed class StatsProjectorTests
         Assert.Equal(2, store.Ratings.Count);
     }
 
+    [Fact]
+    public async Task RowOfAnOlderProjectionVersion_OrAnotherStream_IsRebuilt_AndAnEqualRowIsNot()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(1, courts.Summaries);
+
+        store.OlderVersion();
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(2, courts.Summaries);
+
+        courts.Stream(Guid.NewGuid(), eventCount: 4);
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(3, courts.Summaries);
+    }
+
+    [Fact]
+    public async Task CancelThenUncancel_RemovesAndRestoresTheMemberRowsAndTheRating()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(2, store.Ratings.Count);
+
+        rounds.Replace(Round() with { State = RoundState.Canceled });
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Empty(store.Members);
+        Assert.Empty(store.Ratings);
+
+        rounds.Replace(Round());
+        _ = await Projector().GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(2, store.Members.Count);
+        Assert.Equal(2, store.Ratings.Count);
+        Assert.All(store.Ratings, row => Assert.Equal(1, row.MatchesRated));
+    }
+
+    [Fact]
+    public async Task Logs_CarryNoRatingValueNorSummary()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        levels.Grade(Bia, 45, LevelSource.Admin);
+        var sink = new List<string>();
+        var ratings = new RatingProjector(levels, store, EmbeddedRatingParams.Load(), TimeProvider.System, new CapturingLogger<RatingProjector>(sink));
+        var projector = new StatsProjector(rounds, courts, store, ratings, TimeProvider.System, new CapturingLogger<StatsProjector>(sink));
+
+        _ = await projector.GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
+
+        Assert.NotEmpty(sink);
+        foreach (var line in sink)
+        {
+            foreach (var word in new[] { "mu", "sigma", "seed", "level", "45", "mvp", "summary" })
+            {
+                Assert.DoesNotContain(word, line, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+    }
+
+    private sealed class CapturingLogger<T>(List<string> sink) : Microsoft.Extensions.Logging.ILogger<T>
+    {
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull => null;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state,
+            Exception? exception, Func<TState, Exception?, string> formatter) => sink.Add(formatter(state, exception));
+    }
+
     private StatsProjector Projector()
     {
         var parameters = EmbeddedRatingParams.Load();
@@ -218,6 +290,29 @@ public sealed class StatsProjectorTests
         public int Swaps { get; private set; }
 
         private readonly Dictionary<string, RatingPoolRow> pools = new(StringComparer.Ordinal);
+
+        public void OlderVersion()
+        {
+            foreach (var (roundId, row) in Projections.ToList())
+            {
+                Projections[roundId] = new RoundProjectionRow
+                {
+                    RoundId = row.RoundId,
+                    GroupId = row.GroupId,
+                    CourtSessionId = row.CourtSessionId,
+                    EventCount = row.EventCount,
+                    ProjectionVersion = ProjectionKeys.ProjectionVersion - 1,
+                    FactsHash = row.FactsHash,
+                    StartsAt = row.StartsAt,
+                    LocalDate = row.LocalDate,
+                    Counts = row.Counts,
+                    Modality = row.Modality,
+                    FinishedMatches = row.FinishedMatches,
+                    RebuiltAt = row.RebuiltAt,
+                    Summary = row.Summary,
+                };
+            }
+        }
 
         public void CorruptSummaries()
         {

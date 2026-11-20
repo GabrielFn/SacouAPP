@@ -65,6 +65,29 @@ public sealed class ProjectionKeysTests
     }
 
     [Fact]
+    public void InputsHash_ChangesWithTheOrderOfTheRounds_AndWithACanceledOne()
+    {
+        var other = Facts with { RoundId = Guid.Parse("00000000-0000-4000-8000-000000000009") };
+        var (first, second) = (Of(Facts), Of(other));
+
+        var hash = ProjectionKeys.InputsHashOf(1, RatingPoolKind.Indoor, [first, second], []);
+
+        Assert.NotEqual(hash, ProjectionKeys.InputsHashOf(1, RatingPoolKind.Indoor, [second, first], []));
+        Assert.NotEqual(hash, ProjectionKeys.InputsHashOf(1, RatingPoolKind.Indoor, [first, Of(other with { State = RoundState.Canceled })], []));
+    }
+
+    [Fact]
+    public void FactsHash_DoesNotDependOnTheOffsetOfTheStart()
+    {
+        var sameInstant = Facts with { StartsAt = Facts.StartsAt.ToOffset(TimeSpan.FromHours(-3)) };
+
+        Assert.Equal(ProjectionKeys.FactsHashOf(Facts), ProjectionKeys.FactsHashOf(sameInstant));
+    }
+
+    private static RoundProjection Of(RoundFacts facts) =>
+        new(facts, new CourtStreamHead(facts.RoundId, facts.RoundId, 3), 3, ProjectionKeys.FactsHashOf(facts), SessionSummary.Empty);
+
+    [Fact]
     public void StoredSummary_RoundTrips_ToTheSameText()
     {
         var memberId = Guid.Parse("00000000-0000-4000-8000-0000000000a1");
