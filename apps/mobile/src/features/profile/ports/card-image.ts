@@ -1,9 +1,9 @@
 import type { Result } from "@sacou/volley-rules";
-import type { RefObject } from "react";
+import type { ComponentRef, RefObject } from "react";
 import type { View } from "react-native";
 
 /** The view to turn into a picture: the card, held by a ref of the screen. */
-export type CaptureTarget = RefObject<View | null>;
+export type CaptureTarget = RefObject<ComponentRef<typeof View> | null>;
 
 /** The address of the temporary PNG in the private cache of the app. */
 export type LocalImageUri = string;

@@ -10,6 +10,13 @@
       "@react-native-firebase/auth",
       "@react-native-google-signin/google-signin",
       [
+        "expo-media-library",
+        {
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

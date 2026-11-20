@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ComponentRef, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
 
 import { apiErrorText } from "../../../services/api/api-error-text";
@@ -68,7 +68,7 @@ interface CardShareBodyProps {
 
 function CardShareBody({ stale, card }: CardShareBodyProps) {
   const { colors, tokens } = useTheme();
-  const target = useRef<View>(null);
+  const target = useRef<ComponentRef<typeof View>>(null);
   // A single isolated field: not kept between visits (frontend.md, rule 4).
   const [showStats, setShowStats] = useState(true);
   const model = useCardShare(target);
