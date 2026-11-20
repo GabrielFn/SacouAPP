@@ -64,16 +64,15 @@ function nameOf(memberId: string, members: readonly Member[] | undefined): strin
   return nickname === null || nickname.trim() === "" ? summaryStrings.noName : nickname;
 }
 
-/** A single player; a pair or a quartet is drawn by the sand screen (E4.18), not here. */
+/** The player or players (a tie of the votes): a team of the sand is drawn by screen 12b (E4.18). */
 function mvpViewOf(
   report: RoundSummaryReport,
   members: readonly Member[] | undefined,
 ): MvpView | null {
   const { mvp } = report;
-  const [first] = mvp?.memberIds ?? [];
-  if (mvp === null || mvp.kind !== "player" || first === undefined) return null;
+  if (mvp === null || mvp.kind !== "player" || mvp.memberIds.length === 0) return null;
   return {
-    name: nameOf(first, members),
+    name: summaryStrings.names(mvp.memberIds.map((memberId) => nameOf(memberId, members))),
     line: mvpLine(mvp),
     byStats: !mvpIsFromVotes(mvp),
   };
@@ -128,7 +127,7 @@ export function summaryView(input: SummaryViewInput): SummaryView {
     header,
     mvp: mvpViewOf(report, members),
     highlights: highlightsOf(report),
-    stale: query.status === "error",
+    stale: query.status === "error" || !input.online,
     unsentNote: unsentPoints > 0 ? summaryStrings.unsent(unsentPoints) : null,
   };
 }

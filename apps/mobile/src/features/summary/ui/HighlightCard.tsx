@@ -40,7 +40,9 @@ export function HighlightCard({ highlight }: HighlightCardProps) {
         <Text variant="display" displaySize="displayLevelCard">
           {highlight.label}
         </Text>
-        <Text variant="bodyStrong">{highlight.figure}</Text>
+        <Text variant="bodyStrong" style={{ fontSize: tokens.fontSizes.small }}>
+          {highlight.figure}
+        </Text>
       </View>
     </View>
   );

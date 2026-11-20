@@ -162,6 +162,15 @@ describe("who is shown (T3, T5, T8, T9)", () => {
     expect(view.highlights.kind).toBe("teams");
   });
 
+  test("a tie of the votes joins the names of the players", () => {
+    const members = [member(BIA, "Bia"), member("c1", "Caio"), member("d1", "Dani")];
+    const named = (memberIds: string[]) =>
+      ready(withMvp({ source: "votes", memberIds }), { members }).mvp?.name;
+    expect(named([BIA, "c1"])).toBe("Bia e Caio");
+    expect(named([BIA, "c1", "d1"])).toBe("Bia, Caio e Dani");
+    expect(named([BIA])).toBe("Bia");
+  });
+
   test("T9: an MVP of the votes hides the note, a missing source counts as the stats", () => {
     expect(ready(withMvp({ source: "votes" })).mvp?.byStats).toBe(false);
     expect(ready(E2_9_ROUND).mvp?.byStats).toBe(true);
@@ -198,6 +207,11 @@ describe("states (T4, T6, T7)", () => {
       stale: true,
     });
     expect(ready(E2_9_ROUND).stale).toBe(false);
+  });
+
+  test("offline with the summary on disk (query paused in success) says it is the last seen", () => {
+    expect(ready(E2_9_ROUND, { online: false }).stale).toBe(true);
+    expect(ready(E2_9_ROUND, { online: true }).stale).toBe(false);
   });
 
   test("T7: points not sent warn, in the singular too", () => {

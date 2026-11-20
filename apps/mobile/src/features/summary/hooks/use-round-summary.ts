@@ -19,7 +19,7 @@ export function useRoundSummary(groupId: string, roundId: string): RoundSummaryM
   const group = useGroup(groupId);
   const members = useGroupMembers(groupId);
   const online = useOnline();
-  const unsentPoints = useUnsentPoints(groupId, roundId);
+  const unsentPoints = useUnsentPoints(roundId);
   return {
     view: summaryView({
       query: { status: summary.status, data: summary.data, error: summary.error },

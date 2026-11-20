@@ -12,6 +12,8 @@ const STAR_VIEW_BOX = "0 0 24 24";
 const STAR_PATH = "M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7L12 17.5 5.8 21.1l1.6-7L2 9.3l7.1-.7z";
 const COURT_LINE_OPACITY = 0.12;
 const NOTE_OPACITY = 0.75;
+/** The name of the MVP is tight, as in the design (line-height 0.9). */
+const NAME_LINE_HEIGHT = 0.9;
 const LINE_OPACITY = 0.85;
 const COURT_STROKE = 2;
 const NET_STROKE = 3;
@@ -68,7 +70,10 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
         >
           <Path d={STAR_PATH} />
         </Svg>
-        <Text variant="bodyStrong" style={{ color: colors.panelAccent }}>
+        <Text
+          variant="bodyStrong"
+          style={{ color: colors.panelAccent, fontSize: tokens.fontSizes.small }}
+        >
           {summary.mvpTitle}
         </Text>
       </View>
@@ -77,7 +82,10 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
         displaySize="displayMvp"
         numberOfLines={1}
         adjustsFontSizeToFit
-        style={{ color: colors.onPanel }}
+        style={{
+          color: colors.onPanel,
+          lineHeight: tokens.fontSizes.displayMvp * NAME_LINE_HEIGHT,
+        }}
       >
         {name}
       </Text>
@@ -85,7 +93,14 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
         {line}
       </Text>
       {byStats ? (
-        <Text variant="caption" style={{ color: colors.onPanel, opacity: NOTE_OPACITY }}>
+        <Text
+          variant="caption"
+          style={{
+            color: colors.onPanel,
+            opacity: NOTE_OPACITY,
+            fontSize: tokens.fontSizes.legal,
+          }}
+        >
           {summary.mvpNote}
         </Text>
       ) : null}
