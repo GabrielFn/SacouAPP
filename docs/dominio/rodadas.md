@@ -8,6 +8,7 @@ Uma ocorrência do racha (`Round`; no glossário, "Rodada"): grupo, série (opci
 
 - **Data e hora:** `YYYY-MM-DD` e `HH:mm`, só esses formatos. O admin só cria no futuro e até 365 dias adiante.
 - **Editar:** recusado (`sessions.round-closed`) com a rodada cancelada ou já começada.
+- **Fim da rodada (E3.18, [ADR 0072](../arquitetura/adr/0072-votacao-do-mvp.md), D1):** "Encerrar rodada" grava `closedAt`; sem toque, a rodada termina sozinha 6 h depois do início. `endsAt` é o menor dos dois (um toque depois do fim automático não adia). Fechar de novo devolve o mesmo `closedAt`; cancelada não fecha (`sessions.round-canceled`). Eventos da quadra que chegam depois ainda contam. É a âncora da votação do MVP ([mvp.md](mvp.md)).
 - **Horário de verão:** hora que não existe avança pelo tamanho do pulo (00h30 de 04/11/2018 vira 01h30); hora repetida fica com a primeira (23h30 de 16/02/2019 é a do horário de verão).
 
 ## Presença
@@ -64,7 +65,7 @@ Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
 
 ## Eventos
 
-`RoundCreated`, `RoundCanceled`, `AttendanceChanged`, `WaitlistPromoted`: só IDs (rodada, grupo, membro), estado e instante.
+`RoundCreated`, `RoundCanceled`, `RoundClosed`, `AttendanceChanged`, `WaitlistPromoted`: só IDs (rodada, grupo, membro), estado e instante.
 
 ## Códigos de erro
 
@@ -75,6 +76,7 @@ Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
 | `sessions.round-not-found` (404), `sessions.series-not-found` (404), `sessions.member-not-found` (404) | Não existe neste grupo (inexistente, de outro grupo e quem saiu parecem iguais) |
 | `sessions.round-closed` (409) | Cancelada, ou jogador depois do início, ou edição de rodada cancelada ou começada |
 | `sessions.round-full` (409) | Cheia e sem espera |
+| `sessions.round-canceled` (409) | "Encerrar rodada" numa rodada cancelada |
 | `sessions.drop-in-window-closed` (409) | Avulso antes da janela |
 | `sessions.attendance-disabled` (409) | Presença desligada na rodada |
 | `sessions.round-limit`, `sessions.series-limit` (409) | Tetos de 20 rodadas futuras e 7 séries ativas por grupo |
@@ -82,7 +84,7 @@ Decisões no [ADR 0070](../arquitetura/adr/0070-pagina-web-da-rodada.md).
 
 ## Permissões
 
-`ManageRounds` (criar, editar, cancelar, parar a série, mexer na lista): Admin e Co-admin. `RespondAttendance` (responder por si): os quatro papéis. Ver a rodada é `ViewGroup`. Tabela completa em [grupos.md](grupos.md).
+`ManageRounds` (criar, editar, cancelar, parar a série, mexer na lista): Admin e Co-admin. `WriteCourt` (encerrar a rodada, como quem marca a quadra): Admin, Co-admin e Placar. `RespondAttendance` (responder por si): os quatro papéis. Ver a rodada é `ViewGroup`. Tabela completa em [grupos.md](grupos.md).
 
 ## Rotas (E3.4, Parte 2)
 
@@ -95,6 +97,7 @@ Todas sob `/v1/groups/{groupId}`, com o filtro do Sessions (mesmas respostas do 
 | `GET /rounds/{roundId}` | `ViewGroup` | 200, repara se preciso |
 | `PATCH /rounds/{roundId}` | `ManageRounds` | 200; `settings` substitui a camada (`{}` a limpa) |
 | `POST /rounds/{roundId}/cancel` | `ManageRounds` | 200 (de novo, sem efeito) |
+| `POST /rounds/{roundId}/close` | `WriteCourt` | 200 `{ closedAt, endsAt }` (de novo, o mesmo `closedAt`), `Cache-Control: no-store` |
 | `PUT /rounds/{roundId}/attendance/me` | `RespondAttendance` | 200 `{ status, position }` |
 | `PUT /rounds/{roundId}/attendance/{memberId}` | `ManageRounds` | 200; ignora janela e horário, respeita a vaga |
 | `POST /series/{seriesId}/stop` | `ManageRounds` | 204 (de novo, 204) |
