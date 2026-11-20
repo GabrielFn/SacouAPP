@@ -44,6 +44,10 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     private Func<Task>? beforeCourtStreamChanged;
 
+    private Func<NotificationRequest, Task>? afterNotificationRequested;
+
+    private Func<Task>? beforePump;
+
     public ApiWithDatabase(IntegrationDatabase database)
         : this(database, new Dictionary<string, string?>())
     {
@@ -103,6 +107,23 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref beforeCourtStreamChanged, value);
     }
 
+    /// <summary>
+    /// Runs after each <see cref="INotificationRequests.RequestAsync"/> of the relay has written, so a test can fail the
+    /// relay between the Notifications' insert and the outbox's <c>processed_at</c> (I6 of E3.11).
+    /// </summary>
+    internal Func<NotificationRequest, Task>? AfterNotificationRequested
+    {
+        get => Volatile.Read(ref afterNotificationRequested);
+        set => Volatile.Write(ref afterNotificationRequested, value);
+    }
+
+    /// <summary>Runs before each <see cref="INotificationPump.RunAsync"/>, so a test can make the drain fail after the write's commit.</summary>
+    internal Func<Task>? BeforePump
+    {
+        get => Volatile.Read(ref beforePump);
+        set => Volatile.Write(ref beforePump, value);
+    }
+
     /// <summary>Applies the Identity, Groups, Sessions, Matches and then Stats migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
@@ -139,6 +160,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.ConfigureServices(HookMembership);
         builder.ConfigureServices(HookCurrentUser);
         builder.ConfigureServices(HookCourtStreamChanged);
+        builder.ConfigureServices(HookNotifications);
         builder.ConfigureServices(services =>
         {
             _ = services.RemoveAll<TimeProvider>();
@@ -184,6 +206,21 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.Remove(original);
         _ = services.AddScoped<ICourtStreamChanged>(provider => new HookedCourtStreamChanged(
             (ICourtStreamChanged)ActivatorUtilities.CreateInstance(provider, implementation), () => BeforeCourtStreamChanged));
+    }
+
+    /// <summary>Wraps the Notifications' request handler and pump in pass-throughs that run <see cref="AfterNotificationRequested"/> and <see cref="BeforePump"/>.</summary>
+    private void HookNotifications(IServiceCollection services)
+    {
+        var requests = services.Single(descriptor => descriptor.ServiceType == typeof(INotificationRequests));
+        var requestsType = requests.ImplementationType ?? throw new InvalidOperationException("INotificationRequests is registered by type.");
+        var pump = services.Single(descriptor => descriptor.ServiceType == typeof(INotificationPump));
+        var pumpType = pump.ImplementationType ?? throw new InvalidOperationException("INotificationPump is registered by type.");
+        _ = services.Remove(requests);
+        _ = services.Remove(pump);
+        _ = services.AddScoped<INotificationRequests>(provider => new HookedNotificationRequests(
+            (INotificationRequests)ActivatorUtilities.CreateInstance(provider, requestsType), () => AfterNotificationRequested));
+        _ = services.AddScoped<INotificationPump>(provider => new HookedNotificationPump(
+            (INotificationPump)ActivatorUtilities.CreateInstance(provider, pumpType), () => BeforePump));
     }
 
     private static Dictionary<string, string?> BuildRoomyRateLimits()
