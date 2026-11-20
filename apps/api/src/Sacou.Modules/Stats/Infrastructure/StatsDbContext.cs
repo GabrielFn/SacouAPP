@@ -16,6 +16,8 @@ internal sealed class StatsDbContext(DbContextOptions<StatsDbContext> options) :
 
     public DbSet<MemberRatingRow> MemberRatings => Set<MemberRatingRow>();
 
+    public DbSet<MvpVoteRow> MvpVotes => Set<MvpVoteRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -23,5 +25,6 @@ internal sealed class StatsDbContext(DbContextOptions<StatsDbContext> options) :
         modelBuilder.ApplyConfiguration(new RoundMemberStatsConfiguration());
         modelBuilder.ApplyConfiguration(new RatingPoolConfiguration());
         modelBuilder.ApplyConfiguration(new MemberRatingConfiguration());
+        modelBuilder.ApplyConfiguration(new MvpVoteConfiguration());
     }
 }

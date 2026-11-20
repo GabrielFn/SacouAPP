@@ -23,10 +23,14 @@ public sealed class GroupRouteGuardTests
     /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
     /// </summary>
     private const int GroupRoutes = 21;
-    private const int RoundRoutes = 9;
+    /// <summary>The nine of the rounds and their close (E3.18, ADR 0072).</summary>
+    private const int RoundRoutes = 10;
 
     /// <summary>The court stream's write (E3.7, ADR 0060), its takeover, summary and read (E3.8, ADR 0063), behind the Matches' filter.</summary>
     private const int CourtRoutes = 4;
+
+    /// <summary>The ballot and the vote of the MVP (E3.18, ADR 0072), behind the Stats' filter.</summary>
+    private const int StatsRoutes = 2;
 
     private const string Development = "Development";
     private const string Production = "Production";
@@ -41,9 +45,10 @@ public sealed class GroupRouteGuardTests
 
         Assert.Empty(GroupRouteGuard.Violations(endpoints, environment == Development));
         var withGroupId = endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.RoutePattern.GetParameter(GroupAccessFilter.GroupIdRouteValue) is not null);
-        Assert.Equal(GroupRoutes + RoundRoutes + CourtRoutes, withGroupId);
+        Assert.Equal(GroupRoutes + RoundRoutes + CourtRoutes + StatsRoutes, withGroupId);
         Assert.Equal(GroupRoutes, endpoints.OfType<RouteEndpoint>().Count(endpoint => endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null));
         Assert.Equal(CourtRoutes, endpoints.OfType<RouteEndpoint>().Count(GroupRouteGuard.HasCourtFilter));
+        Assert.Equal(StatsRoutes, endpoints.OfType<RouteEndpoint>().Count(GroupRouteGuard.HasStatsFilter));
     }
 
     /// <summary>A2 of E3.3: reading the settings is <c>ViewGroup</c>; everything else about settings and templates is <c>ManageSettings</c>.</summary>
