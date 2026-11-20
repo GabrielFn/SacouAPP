@@ -10,6 +10,7 @@ namespace Sacou.Api.Web;
 internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPolicy policy)
 {
     public const string PagePrefix = "/r";
+    public const string InvitePagePrefix = "/c";
     public const string AssetsPrefix = "/web";
     public const string BrandPrefix = "/brand";
     public const string HashedAssetsPrefix = "/web/assets/";
@@ -23,7 +24,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     {
         ArgumentNullException.ThrowIfNull(context);
         var path = context.Request.Path;
-        if (path.StartsWithSegments(PagePrefix, StringComparison.Ordinal))
+        if (path.StartsWithSegments(PagePrefix, StringComparison.Ordinal) || path.StartsWithSegments(InvitePagePrefix, StringComparison.Ordinal))
         {
             context.Response.OnStarting(() => WritePageHeaders(context.Response));
         }

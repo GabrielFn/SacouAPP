@@ -17,6 +17,7 @@ const DEFAULT_RETRY_SECONDS = 1;
 const BY_CODE: Readonly<Record<string, (joined: boolean) => Failure>> = {
   "api.rate-limited": () => ({ kind: "rateLimited", retryAfterSeconds: DEFAULT_RETRY_SECONDS }),
   "sessions.round-link-invalid": () => ({ kind: "linkInvalid" }),
+  "groups.invite-invalid": () => ({ kind: "inviteInvalid" }),
   "sessions.round-closed": () => ({ kind: "roundClosed" }),
   "groups.member-removed": () => ({ kind: "removed" }),
   "groups.member-limit": () => ({ kind: "groupFull" }),

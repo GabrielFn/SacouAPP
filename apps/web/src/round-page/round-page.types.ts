@@ -24,6 +24,8 @@ export type Failure =
   | { readonly kind: "offline" }
   | { readonly kind: "rateLimited"; readonly retryAfterSeconds: number }
   | { readonly kind: "linkInvalid" }
+  /** The invite of `/c`: revoked, expired, unknown and malformed alike (ADR 0040, D10). */
+  | { readonly kind: "inviteInvalid" }
   | { readonly kind: "roundClosed" }
   | { readonly kind: "removed" }
   | { readonly kind: "groupFull" }

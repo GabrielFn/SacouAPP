@@ -53,6 +53,17 @@ internal static class WebTexts
     public const string PrivacyPolicy = "Política de Privacidade";
     public const string LegalAfter = ".";
 
+    // The invite page (E3.12 Part 3, ADR 0070, D8): the server has no group, so only the Sacou's own words.
+    public const string InviteTitle = "Convite para um grupo no Sacou";
+    public const string InvitePreview = "Toque para ver o grupo de vôlei e entrar.";
+    public const string InviteSignInHint = "Entre para ver o grupo do convite.";
+    public const string InviteUnavailable = "O convite pela web não está disponível agora. Abra o link no app Sacou.";
+    public const string InviteSignIn = "ENTRAR PRA VER O CONVITE";
+    public const string InviteJoin = "ENTRAR NO GRUPO";
+    public const string InviteNoScript = "Ative o JavaScript para ver o convite.";
+    public const string InviteSheetTitle = "Entrar pra ver o convite";
+    public const string InviteSheetBody = "É só uma vez. Depois você confirma as rodadas do grupo com um toque.";
+
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
     private static readonly string[] Weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];

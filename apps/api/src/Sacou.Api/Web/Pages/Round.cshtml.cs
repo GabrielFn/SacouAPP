@@ -32,16 +32,20 @@ internal sealed class RoundModel(
 
     public static int NicknameMaxLength => PersonName.MaxLength;
 
-    public Uri? TermsUrl => HttpsOrNull(page.Value.TermsUrl);
-
-    public Uri? PrivacyUrl => HttpsOrNull(page.Value.PrivacyUrl);
+    public SignInSheetView SignInSheet => new(
+        Round?.When,
+        WebTexts.SheetTitle,
+        WebTexts.SheetBody,
+        WebTexts.Privacy,
+        SignInSheetView.HttpsOrNull(page.Value.TermsUrl),
+        SignInSheetView.HttpsOrNull(page.Value.PrivacyUrl));
 
     public string PageUrl => Origin + PagePath + Code;
 
     public string PreviewImageUrl => Origin + PreviewImagePath;
 
     /// <summary>The public origin of the configuration; on a developer machine without it, the request's own.</summary>
-    private string Origin => HttpsOrNull(page.Value.PublicBaseUrl)?.GetLeftPart(UriPartial.Authority)
+    private string Origin => SignInSheetView.HttpsOrNull(page.Value.PublicBaseUrl)?.GetLeftPart(UriPartial.Authority)
         ?? $"{Request.Scheme}://{Request.Host}";
 
     public async Task<IActionResult> OnGetAsync(string? code, CancellationToken cancellationToken)
@@ -57,7 +61,4 @@ internal sealed class RoundModel(
         Code = code;
         return Page();
     }
-
-    private static Uri? HttpsOrNull(string? value) =>
-        Uri.TryCreate(value, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps ? uri : null;
 }

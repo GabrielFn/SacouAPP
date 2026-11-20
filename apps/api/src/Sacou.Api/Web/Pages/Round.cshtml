@@ -116,50 +116,7 @@ else
             }
             <button type="button" id="sign-out" class="link" hidden>@WebTexts.SignOut</button>
         </footer>
-        <div id="sheet" class="sheet-backdrop" hidden>
-            <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-                <button type="button" id="sheet-close" class="sheet-close" aria-label="@WebTexts.Close">×</button>
-                <p class="sheet-context">@round.When</p>
-                <h2 id="sheet-title">@WebTexts.SheetTitle</h2>
-                <div id="sheet-choice" class="sheet-group">
-                    <p>@WebTexts.SheetBody</p>
-                    <p id="embedded-warning" class="message" hidden>@WebTexts.Embedded</p>
-                    <button type="button" id="sign-in-google" class="primary"><span class="google-mark" aria-hidden="true">@WebTexts.GoogleMark</span>@WebTexts.Google</button>
-                    <button type="button" id="sign-in-email" class="link">@WebTexts.Email</button>
-                </div>
-                <form id="sheet-email" class="sheet-group" novalidate hidden>
-                    <div id="email-tabs" class="tabs">
-                        <button type="button" id="email-sign-in">@WebTexts.SignInTab</button>
-                        <button type="button" id="email-sign-up">@WebTexts.SignUpTab</button>
-                    </div>
-                    <label class="field">@WebTexts.EmailLabel
-                        <input id="email" type="email" autocomplete="email" inputmode="email" required>
-                    </label>
-                    <label id="password-field" class="field">@WebTexts.PasswordLabel
-                        <input id="password" type="password" autocomplete="current-password" minlength="6" aria-describedby="password-rule">
-                        <span id="password-rule" class="list-note">@WebTexts.PasswordRule</span>
-                    </label>
-                    <button type="submit" id="email-submit" class="secondary">@WebTexts.SignInTab</button>
-                    <button type="button" id="email-forgot" class="link">@WebTexts.Forgot</button>
-                    <button type="button" id="email-back" class="link">@WebTexts.Back</button>
-                </form>
-                <form id="sheet-nickname" class="sheet-group" novalidate hidden>
-                    <label class="field">@WebTexts.NicknameLabel
-                        <input id="nickname" type="text" autocomplete="nickname" maxlength="@RoundModel.NicknameMaxLength" required>
-                    </label>
-                    <button type="submit" id="nickname-submit" class="primary">@WebTexts.NicknameSubmit</button>
-                </form>
-                <p id="sheet-message" class="message" role="alert" hidden></p>
-                <p>@WebTexts.Privacy</p>
-                <p class="legal">@WebTexts.LegalBefore@if (Model.TermsUrl is { } terms)
-                    {<a href="@terms" rel="noopener noreferrer" target="_blank">@WebTexts.Terms</a>}
-                    else
-                    {@WebTexts.Terms}@WebTexts.LegalBetween@if (Model.PrivacyUrl is { } privacy)
-                    {<a href="@privacy" rel="noopener noreferrer" target="_blank">@WebTexts.PrivacyPolicy</a>}
-                    else
-                    {@WebTexts.PrivacyPolicy}@WebTexts.LegalAfter</p>
-            </section>
-        </div>
+        @await Html.PartialAsync("Shared/_SignInSheet", Model.SignInSheet)
     </main>
 }
 </body>
