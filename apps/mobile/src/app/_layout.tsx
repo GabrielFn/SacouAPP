@@ -17,6 +17,9 @@ import { reactNativeBackGuard } from "../adapters/react-native-back-guard";
 import { createReactNativeReducedMotion } from "../adapters/react-native-reduced-motion";
 import { reactNativeShareSheet } from "../adapters/react-native-share-sheet";
 import { expoFileShare } from "../adapters/expo-file-share";
+import { expoImageShare } from "../adapters/expo-image-share";
+import { expoMediaLibrarySaver } from "../adapters/expo-media-library-saver";
+import { viewShotCardCapture } from "../adapters/view-shot-card-capture";
 import { expoClipboard } from "../adapters/expo-clipboard";
 import { expoCryptoIdGenerator } from "../adapters/expo-crypto-id-generator";
 import { expoCryptoCoinFlip } from "../adapters/expo-crypto-coin-flip";
@@ -130,6 +133,9 @@ const realServices: Services = {
   sessionEnder,
   legalLinks: buildLegalLinks(),
   onboardingSkip,
+  cardCapture: viewShotCardCapture,
+  imageShare: expoImageShare,
+  gallerySaver: expoMediaLibrarySaver,
 };
 
 /**

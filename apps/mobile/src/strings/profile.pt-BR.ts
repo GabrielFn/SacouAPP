@@ -38,7 +38,6 @@ export const profileStrings = {
     statsTitle: "Estatísticas",
     allGroups: (year: number) => `Todos os grupos · ${String(year)}`,
     byGroupTitle: "Por grupo",
-    shareSoonTitle: "A tela de compartilhar chega em breve.",
     emptyStats: "Seus números aparecem depois da primeira partida.",
     loading: "Carregando seus números",
     loadFailed: "Não deu para abrir seus números",
@@ -49,6 +48,25 @@ export const profileStrings = {
     groupRow: {
       summary: (matches: number, winRate: string, wins: number) =>
         `${String(matches)} partidas · ${winRate} (${String(wins)} ${wins === 1 ? "vitória" : "vitórias"})`,
+    },
+  },
+  /** Screen 15, share the card (Cartinha.dc.html). */
+  cardShare: {
+    title: "Sua cartinha",
+    optionsTitle: "O que aparece",
+    showStats: "Mostrar estatísticas",
+    whatsapp: "WhatsApp",
+    save: "Salvar",
+    working: "Preparando a imagem...",
+    saved: "Cartinha salva na galeria.",
+    note: "A cartinha atualiza a cada rodada. Os números vêm do placar, não de notas dos amigos.",
+    openSettings: "Abrir ajustes",
+    failures: {
+      "capture-failed": "Não deu para gerar a imagem. Tente de novo.",
+      "share-unavailable": "Este celular não consegue compartilhar a imagem.",
+      "share-failed": "Não deu para compartilhar. Tente de novo.",
+      "permission-denied": "Sem permissão para salvar na galeria. Libere nos ajustes do celular.",
+      "save-failed": "Não deu para salvar a imagem. Tente de novo.",
     },
   },
   /** The player card (`.kc`): the labels of the six numbers and the season seal. No level, no tier. */
