@@ -22,7 +22,7 @@ internal sealed class StoreRoundFacts(SessionsDbContext database, IGroupSettings
     {
         var rows = await rounds
             .OrderBy(round => round.StartsAt).ThenBy(round => round.Id)
-            .Select(round => new { round.Id, round.Status, round.StartsAt, round.LocalDate, round.SettingsLayer })
+            .Select(round => new { round.Id, round.Status, round.StartsAt, round.LocalDate, round.SettingsLayer, round.ClosedAt })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         if (rows.Count == 0)
         {
@@ -40,7 +40,10 @@ internal sealed class StoreRoundFacts(SessionsDbContext database, IGroupSettings
             StoreRoundDirectory.ToContract(EnumColumns.Parse(ColumnValues.RoundStatuses, row.Status)),
             row.StartsAt,
             row.LocalDate,
-            Resolve(settings, snapshot, row.SettingsLayer)))];
+            Resolve(settings, snapshot, row.SettingsLayer))
+        {
+            ClosedAt = row.ClosedAt,
+        })];
     }
 
     private static SummaryRules Resolve(IGroupSettingsReader settings, GroupSettingsSnapshot snapshot, string? layer)

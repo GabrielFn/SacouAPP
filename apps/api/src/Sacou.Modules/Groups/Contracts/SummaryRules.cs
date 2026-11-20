@@ -13,7 +13,17 @@ public enum GameModality
 /// comes from the scoreboard, and whether the points of each player count. Typed here, so no other module repeats
 /// the codes of the catalog.
 /// </summary>
-public sealed record SummaryRules(GameModality Modality, bool MvpEnabled, bool MvpByStats, bool IndividualPoints);
+public sealed record SummaryRules(GameModality Modality, bool MvpEnabled, bool MvpByStats, bool IndividualPoints)
+{
+    /// <summary>
+    /// <c>mvp.voting</c>: the group votes for the MVP after the round (ADR 0072). The summary of the scoreboard does not
+    /// read it and the projection key does not hash it: turning it on rebuilds nothing.
+    /// </summary>
+    public bool MvpVoting { get; init; }
+
+    /// <summary>Whether this round has an MVP vote: the MVP shows and the group votes for it.</summary>
+    public bool HasMvpVote => MvpEnabled && MvpVoting;
+}
 
 /// <summary>The catalog codes of <see cref="GameModality"/> (settings-catalog.json), the only place they are written in C#.</summary>
 public static class GameModalities
@@ -50,5 +60,8 @@ internal static class SummaryRulesReader
             ?? throw new InvalidOperationException("A modality outside the catalog."),
         MvpEnabled: resolved.ValueOf("mvp.enabled").Boolean,
         MvpByStats: resolved.ValueOf("mvp.byStats").Boolean,
-        IndividualPoints: resolved.ValueOf("mvp.individualPoints").Boolean);
+        IndividualPoints: resolved.ValueOf("mvp.individualPoints").Boolean)
+    {
+        MvpVoting = resolved.ValueOf("mvp.voting").Boolean,
+    };
 }

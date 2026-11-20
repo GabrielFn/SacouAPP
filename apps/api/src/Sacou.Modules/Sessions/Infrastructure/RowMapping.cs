@@ -25,6 +25,7 @@ internal static class RowMapping
         [.. attendances.Select(ToAttendance)])
     {
         LinkCode = row.LinkCode is { } code ? RoundLinkCode.FromStored(code) : null,
+        ClosedAt = row.ClosedAt,
     };
 
     public static RoundRow ToRow(Round round, DateTimeOffset createdAt) => new()
@@ -42,6 +43,7 @@ internal static class RowMapping
         NextSequence = round.NextSequence,
         CreatedAt = createdAt,
         LinkCode = round.LinkCode?.Value,
+        ClosedAt = round.ClosedAt?.ToUniversalTime(),
     };
 
     public static Attendance ToAttendance(AttendanceRow row) => new(

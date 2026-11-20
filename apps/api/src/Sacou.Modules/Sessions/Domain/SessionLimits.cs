@@ -10,4 +10,7 @@ internal static class SessionLimits
     public const int MaxVenueCodePoints = 320;
     public const int MaxMarksPerCharacter = 4;
     public const int MaxSettingsLayerBytes = 4096;
+
+    /// <summary>A round nobody closed ends this long after its start (ADR 0072, D1, question 140).</summary>
+    public const int RoundAutoEndHours = 6;
 }

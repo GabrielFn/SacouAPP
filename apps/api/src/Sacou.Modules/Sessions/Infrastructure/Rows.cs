@@ -50,6 +50,9 @@ internal sealed class RoundRow
 
     /// <summary>The public link's code, in clear (ADR 0070, D1); null only for a round made before the link existed.</summary>
     public string? LinkCode { get; init; }
+
+    /// <summary>When someone tapped "Encerrar rodada" (ADR 0072, D1); null while nobody did.</summary>
+    public DateTimeOffset? ClosedAt { get; init; }
 }
 
 /// <summary>A row of <c>sessions.attendances</c>: by <c>MemberId</c> only, no name, e-mail or user.</summary>
