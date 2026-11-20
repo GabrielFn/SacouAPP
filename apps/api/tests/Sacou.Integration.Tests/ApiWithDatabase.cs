@@ -8,6 +8,7 @@ using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
+using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;
 using Sacou.Tests.TestSupport;
@@ -37,6 +38,8 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     private readonly IReadOnlyDictionary<string, string?> settings;
 
     private Func<Task>? afterCurrentUserResolved;
+
+    private Func<Task>? beforeCourtStreamChanged;
 
     public ApiWithDatabase(IntegrationDatabase database)
         : this(database, new Dictionary<string, string?>())
@@ -84,6 +87,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref afterCurrentUserResolved, value);
     }
 
+    /// <summary>
+    /// Runs before the Stats hears of a write that finished or undid a match (E3.9, ADR 0071), so a test can make the
+    /// listener fail after the commit.
+    /// </summary>
+    internal Func<Task>? BeforeCourtStreamChanged
+    {
+        get => Volatile.Read(ref beforeCourtStreamChanged);
+        set => Volatile.Write(ref beforeCourtStreamChanged, value);
+    }
+
     /// <summary>Applies the Identity, Groups, Sessions, Matches and then Stats migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
@@ -118,6 +131,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(HookMembership);
         builder.ConfigureServices(HookCurrentUser);
+        builder.ConfigureServices(HookCourtStreamChanged);
         builder.ConfigureServices(services =>
         {
             _ = services.RemoveAll<TimeProvider>();
@@ -148,6 +162,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.AddScoped<ICurrentUser>(provider => new HookedCurrentUser(
             (ICurrentUser)ActivatorUtilities.CreateInstance(provider, implementation),
             () => Interlocked.Exchange(ref afterCurrentUserResolved, null)));
+    }
+
+    /// <summary>Wraps the Stats' listener of the court writes in a pass-through that runs <see cref="BeforeCourtStreamChanged"/>.</summary>
+    private void HookCourtStreamChanged(IServiceCollection services)
+    {
+        var original = services.Single(descriptor => descriptor.ServiceType == typeof(ICourtStreamChanged));
+        var implementation = original.ImplementationType ?? throw new InvalidOperationException("ICourtStreamChanged is registered by type.");
+        _ = services.Remove(original);
+        _ = services.AddScoped<ICourtStreamChanged>(provider => new HookedCourtStreamChanged(
+            (ICourtStreamChanged)ActivatorUtilities.CreateInstance(provider, implementation), () => BeforeCourtStreamChanged));
     }
 
     private static Dictionary<string, string?> BuildRoomyRateLimits()

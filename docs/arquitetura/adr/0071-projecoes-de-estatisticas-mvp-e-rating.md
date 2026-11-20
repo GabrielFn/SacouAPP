@@ -1,6 +1,6 @@
 # ADR 0071 · Projeções de estatísticas, MVP e rating OpenSkill
 
-**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada), 2 (rating TS, `packages/rating`) e 3 (porte C# dos dois) da E3.9. A Parte 4 (projeções e rotas) completa este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
+**Status:** aceito em parte (19/11/2026): as Partes 1 (motor TS do resumo da rodada), 2 (rating TS, `packages/rating`), 3 (porte C# dos dois) e 4a (contratos, schema `stats` e reconstrução) da E3.9. A Parte 4b (rotas, exportação e documentos de segurança) completa este ADR. **Tarefa:** E3.9. Plano em [`docs/estado/tarefas/E3.9.md`](../../estado/tarefas/E3.9.md). Regras em [`estatisticas.md`](../../dominio/estatisticas.md). Estende o [ADR 0032](0032-estatisticas-por-jogador.md), o [ADR 0047](0047-nota-do-admin-e-rating-openskill.md) e o [ADR 0048](0048-modos-de-fila-votacao-e-areia.md).
 
 ## Padrões adotados (perguntas 97 a 99, respostas antes do merge da Parte 4)
 
@@ -56,9 +56,35 @@
 
 Os códigos de erro do C# são `stats.rating-invalid-level`, `stats.rating-duplicate-seed` e `stats.rating-duplicate-member`, sem o `memberId` (nada de dado no erro de um dado escondido).
 
+## Decisões da Parte 4a (contratos, persistência e reconstrução)
+
+**Contratos.** Três peças novas, só com IDs e inteiros:
+
+1. `Groups.Contracts.SummaryRules(Modality, MvpEnabled, MvpByStats, IndividualPoints)`, nova folha tipada do `RoundSettings`, com `GameModality` e `GameModalities` (o único lugar do C# com os códigos `indoor-6x6`, `beach-2x2` e `beach-4x4`; teste de paridade com o catálogo). O `RatingPool` não repete mais os códigos (condição 2 da Parte 3): o pool sai do tipo (`RatingPoolMapping.Of`, fora do domínio, que não pode ver contratos).
+2. `Sessions.Contracts.IRoundFacts` (`FindAsync` e `ListAsync` por grupo) devolve `RoundFacts(RoundId, State, StartsAt, LocalDate, Summary)`. Interface nova, em vez de crescer o `IRoundDirectory`: o Matches só precisa do estado e não paga a leitura da configuração.
+3. `Matches.Contracts.ICourtSessionResults`: `FindOfRoundAsync` e `ListOfGroupAsync` devolvem `CourtStreamHead(RoundId, CourtSessionId, EventCount)` por leitura indexada de `court_sessions`; `SummarizeAsync(head, rules)` carrega o stream por `ICourtEventStore.LoadAsync`, refaz o replay e devolve o resumo inteiro (`SessionSummary`, com `mainSide` por jogador) e a contagem de eventos lida. As regras do resumo continuam `internal` no Matches; o plano falava em devolver só partidas e estatísticas, mas o MVP e o ranking já moram lá (Parte 3), então o contrato devolve o resumo pronto. Stream guardado que não refaz o replay falha fechado (`CorruptCourtStreamException`).
+
+**Gancho pós-commit.** `Matches.Contracts.ICourtStreamChanged`, implementado pelo Stats (`StatsStreamChanged`) e chamado pelo `AppendCourtEventsHandler` depois do `COMMIT`, só quando o lote gravou um `MatchEnded` ou um `RevertedTo`, só com `(groupId, roundId, courtSessionId)`. Cada ouvinte roda num `try`: a falha vira um aviso com o ID do stream e o tipo da exceção (nunca a mensagem, que pode trazer valor do banco), e a escrita responde igual. A reconstrução roda dentro do pedido de escrita (sem processo em segundo plano, ADR 0068), o que soma ao lote que fecha uma partida o custo de um replay.
+
+**Schema `stats`** (migração `CreateStatsProjections`, histórico próprio):
+
+- `round_projections`: uma linha por rodada (`round_id` chave). Chave de frescor `(court_session_id, event_count, projection_version, facts_hash)`; `facts_hash` é o SHA-256 em hexa do estado, do início e das folhas do resumo da rodada (nunca os valores). Guarda o resumo em `jsonb` (camelCase, enums por nome), `counts` (falso em rodada cancelada), `modality` e `finished_matches`.
+- `round_member_stats`: uma linha por membro de rodada que conta, com `results` em letras (`w`, `l`, `u`, `CHECK` com o tamanho igual a `matches_played`) para a sequência atravessar rodadas, e `was_mvp`. Índices por membro e por grupo. Rodada cancelada fica legível no resumo, mas sem linhas aqui.
+- `rating_pools (group_id, pool, inputs_hash, params_version, rebuilt_at)` e `member_ratings (group_id, pool, member_id, mu, sigma, seed_tenths, seed_source, matches_rated)`, com `CHECK` de `pool in ('indoor','beach')`, da fonte e da semente. Sem FK entre schemas; as FKs internas apagam em cascata.
+
+**Reconstrução** (`Stats/Projections/`). `StatsProjector.GetGroupAsync(groupId)` lê os fatos das rodadas, as cabeças dos streams e as linhas guardadas, refaz só as rodadas com chave diferente (ou com resumo que esta versão não lê) e depois chama o `RatingProjector`. `GetRoundAsync(groupId, roundId)` é o método nomeado que a cédula da E3.18 usa (lacuna L2): passa pelo grupo, então a leitura de qualquer rodada também confere a nota do admin. Rodada sem stream tem resumo vazio e não grava nada. Uma linha feita de mais eventos que a cabeça lida é fresca (o stream cresceu entre as duas leituras).
+
+**Gravação condicional.** O upsert da projeção é `ON CONFLICT (round_id) DO UPDATE ... WHERE event_count <= novo`, e só quando ele grava as linhas dos membros são trocadas, na mesma transação (o upsert trava a linha antes, então duas reconstruções da mesma rodada se enfileiram). O pool troca inteiro sob a trava da linha de `rating_pools`: se outra troca já gravou o mesmo `inputs_hash`, nada muda.
+
+**Hash do pool.** `inputs_hash` = SHA-256 de `ratingParamsVersion`, do código do pool, das rodadas do pool em ordem de jogo (rodada, stream, contagem de eventos e `facts_hash`) e das sementes dos membros do pool ordenadas pelo ID (nível em décimos e fonte). Mudar a nota do admin, cancelar uma rodada, trocar a modalidade ou chegar um lote atrasado muda o hash e refaz o pool do zero.
+
+**Logs.** `StatsLog` leva só IDs, contagens, códigos e tempos; `MemberRatingRow`, `RoundProjectionRow` e `RoundProjection` não imprimem os campos no `ToString`.
+
+**Desempenho do pior caso** (condição 1 da Parte 3). `RoundSummaryWorstCaseTests` descarta uma rodada de aquecimento (JIT) e compara a mediana de 3: o resumo pode custar até 4 replays do mesmo log.
+
 ## Consequências
 
 - Rodada sem partida terminada: `finishedMatches` e `players` vazios, destaques e MVP nulos; na areia, `ranking: []`.
 - Partida terminada à mão sem nenhum rali tem `onCourt` vazio nos dois lados: ninguém esteve num rali ativo. O rating (Parte 2) não a avalia.
 - O plano pedia "4 duplas, 9 partidas" para a tela 12b, mas 7-2, 5-4, 4-5 e 2-7 somam 18 vitórias: o caso do golden tem 18 partidas.
-- O rating da Parte 2 não tem rota, banco nem log: nada o expõe até a Parte 4, que o grava e prova que nenhuma rota o devolve.
+- O rating é gravado desde a Parte 4a, sem rota; a Parte 4b traz as rotas de leitura e os testes que provam que nenhuma delas o devolve.

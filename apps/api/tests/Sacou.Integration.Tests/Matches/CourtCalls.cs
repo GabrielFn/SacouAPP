@@ -54,6 +54,9 @@ internal sealed class CourtPhone(Guid courtSessionId, Guid deviceId, long batch 
 
     public string ManualEnd() => Envelope("MatchEnded", $$"""{"endReason":"manual","matchId":"{{MatchId}}","winner":null}""");
 
+    /// <summary>Ends the match by hand with <paramref name="winner"/> (<c>a</c> or <c>b</c>), as the scorekeeper may.</summary>
+    public string ManualEnd(string winner) => Envelope("MatchEnded", $$"""{"endReason":"manual","matchId":"{{MatchId}}","winner":"{{winner}}"}""");
+
     public string Envelope(string type, string payload) => Envelope(Guid.NewGuid(), type, payload.Trim());
 
     public string Envelope(Guid eventId, string type, string payload) =>
