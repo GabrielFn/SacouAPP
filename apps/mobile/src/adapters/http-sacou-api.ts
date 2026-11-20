@@ -283,6 +283,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createRoundOperations(client, execute),
     ...createStatsOperations(client, execute),
     ...createProfileOperations(client, execute),
+    ...createStatsOperations(client, execute),
     ...createAccountOperations(client, execute),
     ...createCourtOperations(client, executeAs),
   };

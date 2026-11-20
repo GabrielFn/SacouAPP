@@ -1,5 +1,6 @@
 import type { GroupRole, Invite, Member } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
+import { initialsOfName } from "../../../ui/initials";
 import { organizes, roleLabel } from "./groups-list.selectors";
 
 const { row, tabs, months } = strings.members;
@@ -68,8 +69,6 @@ export function shortDay(isoDateTime: string): string {
 export type BadgeLook = GroupRole | "noAccount";
 
 const { positions, guestOrigin } = strings.ratings;
-const INITIALS_LENGTH = 2;
-const INITIAL_CHARACTER = /[\p{L}\p{N}]/gu;
 
 /** The nickname (E3.17), or "Você" / "Membro desde 12 out" for who never saved a profile. */
 export function memberName(member: Member): string {
@@ -79,10 +78,7 @@ export function memberName(member: Member): string {
 
 /** "JO" for João: the first two letters or digits; `null` (the neutral avatar) without a nickname. */
 export function initialsOf(member: Member): string | null {
-  if (member.nickname === null) return null;
-  const letters = member.nickname.match(INITIAL_CHARACTER) ?? [];
-  const initials = letters.slice(0, INITIALS_LENGTH).join("").toLocaleUpperCase("pt-BR");
-  return initials === "" ? null : initials;
+  return member.nickname === null ? null : initialsOfName(member.nickname);
 }
 
 /** "Ponteiro · líbero": the main position first, the others in lower case, as the API orders them. */

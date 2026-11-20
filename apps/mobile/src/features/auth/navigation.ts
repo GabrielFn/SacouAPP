@@ -6,6 +6,7 @@ export const SIGNED_OUT_ROUTES = ["sign-in"] as const;
 
 export const SIGNED_IN_ROUTES = [
   "(tabs)",
+  "me/card",
   "notifications",
   "account/index",
   "account/profile",
