@@ -45,7 +45,7 @@ export function SignOutIcon({ color }: IconProps) {
   return <MenuIcon color={color} paths={SIGN_OUT} />;
 }
 
-/** The gear of the "Conta" row of the "Eu" tab, until screen 14 has it in its header (E4.8). */
+/** The gear of the header of the "Eu" tab (screen 14). */
 export function GearIcon({ color }: IconProps) {
   return <MenuIcon color={color} paths={GEAR} />;
 }
