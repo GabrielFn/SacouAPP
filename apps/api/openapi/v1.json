@@ -4880,6 +4880,119 @@
         }
       }
     },
+    "/v1/groups/{groupId}/rounds/{roundId}/close": {
+      "post": {
+        "tags": [
+          "CloseRoundEndpoint"
+        ],
+        "operationId": "CloseRound",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseRoundResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
     "/v1/groups/{groupId}/rounds/{roundId}/attendance/me": {
       "put": {
         "tags": [
@@ -6110,6 +6223,278 @@
           }
         }
       }
+    },
+    "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting": {
+      "get": {
+        "tags": [
+          "GetMvpVotingEndpoint"
+        ],
+        "operationId": "GetMvpVoting",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MvpBallotResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
+    "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting/vote": {
+      "post": {
+        "tags": [
+          "CastMvpVoteEndpoint"
+        ],
+        "operationId": "CastMvpVote",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roundId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CastMvpVoteRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyMvpVoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6331,6 +6716,21 @@
         ],
         "type": "string"
       },
+      "CastMvpVoteRequest": {
+        "required": [
+          "candidateMemberId"
+        ],
+        "type": "object",
+        "properties": {
+          "candidateMemberId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
       "ChangeMemberRoleRequest": {
         "required": [
           "role"
@@ -6385,6 +6785,24 @@
           },
           "memberType": {
             "$ref": "#/components/schemas/MemberType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CloseRoundResponse": {
+        "required": [
+          "closedAt",
+          "endsAt"
+        ],
+        "type": "object",
+        "properties": {
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -6448,6 +6866,13 @@
           }
         },
         "additionalProperties": false
+      },
+      "CourtSide": {
+        "enum": [
+          "a",
+          "b"
+        ],
+        "type": "string"
       },
       "CourtWriterResponse": {
         "required": [
@@ -7182,6 +7607,117 @@
         },
         "additionalProperties": false
       },
+      "MvpBallotRefusal": {
+        "enum": [
+          "notOpen",
+          "closed",
+          "notPlayed",
+          "alreadyVoted"
+        ],
+        "type": "string"
+      },
+      "MvpBallotResponse": {
+        "required": [
+          "state",
+          "opensAt",
+          "closesAt",
+          "canVote",
+          "reason",
+          "myVote",
+          "candidates"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/MvpVotingState"
+          },
+          "opensAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "canVote": {
+            "type": "boolean"
+          },
+          "reason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MvpBallotRefusal"
+              }
+            ]
+          },
+          "myVote": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MyMvpVoteResponse"
+              }
+            ]
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MvpCandidateResponse"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "MvpCandidateResponse": {
+        "required": [
+          "memberId",
+          "matchesPlayed",
+          "plusMinus",
+          "wins",
+          "mainSide"
+        ],
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "matchesPlayed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plusMinus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mainSide": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CourtSide"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "MvpVotingState": {
+        "enum": [
+          "notOpen",
+          "open",
+          "closed"
+        ],
+        "type": "string"
+      },
       "MyGroupResponse": {
         "required": [
           "groupId",
@@ -7203,6 +7739,24 @@
           },
           "memberType": {
             "$ref": "#/components/schemas/MemberType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MyMvpVoteResponse": {
+        "required": [
+          "candidateMemberId",
+          "castAt"
+        ],
+        "type": "object",
+        "properties": {
+          "candidateMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "castAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -7728,6 +8282,8 @@
           "localTime",
           "timeZone",
           "startsAt",
+          "closedAt",
+          "endsAt",
           "dropInOpensAt",
           "venue",
           "status",
@@ -7762,6 +8318,17 @@
             "type": "string"
           },
           "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "endsAt": {
             "type": "string",
             "format": "date-time"
           },
@@ -8631,6 +9198,7 @@
     "sessions.draw-reserves-invalid",
     "sessions.drop-in-window-closed",
     "sessions.member-not-found",
+    "sessions.round-canceled",
     "sessions.round-closed",
     "sessions.round-date-taken",
     "sessions.round-full",
@@ -8638,8 +9206,17 @@
     "sessions.round-limit",
     "sessions.round-link-invalid",
     "sessions.round-not-found",
+    "sessions.round-not-started",
     "sessions.series-limit",
     "sessions.series-not-found",
+    "stats.mvp-already-voted",
+    "stats.mvp-candidate-invalid",
+    "stats.mvp-self-vote",
+    "stats.mvp-vote-invalid",
+    "stats.mvp-voter-not-eligible",
+    "stats.mvp-voting-closed",
+    "stats.mvp-voting-not-open",
+    "stats.mvp-voting-off",
     "stats.year-invalid"
   ]
 }

@@ -10,6 +10,7 @@ using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.Application.Outbox;
 using Sacou.Modules.Sessions.CancelRound;
+using Sacou.Modules.Sessions.CloseRound;
 using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Sessions.CreateRound;
 using Sacou.Modules.Sessions.Domain.Time;
@@ -57,6 +58,7 @@ public static class SessionsModule
         services.AddScoped<GetRoundHandler>();
         services.AddScoped<UpdateRoundHandler>();
         services.AddScoped<CancelRoundHandler>();
+        services.AddScoped<CloseRoundHandler>();
         services.AddScoped<RespondAttendanceHandler>();
         services.AddScoped<SetMemberAttendanceHandler>();
         services.AddScoped<StopSeriesHandler>();
@@ -84,6 +86,7 @@ public static class SessionsModule
             .MapGetRound()
             .MapUpdateRound()
             .MapCancelRound()
+            .MapCloseRound()
             .MapRespondAttendance()
             .MapSetMemberAttendance()
             .MapStopSeries()

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 
 namespace Sacou.Modules.Stats.Access;
@@ -10,7 +11,7 @@ internal static class StatsRouteExtensions
 {
     public const string GroupRoute = "/v1/groups/{" + StatsAccessFilter.GroupIdRouteValue + ":guid}";
 
-    /// <summary>The stats routes are reads: no body is expected, so Kestrel refuses any but a tiny one with 413.</summary>
+    /// <summary>The stats routes read, or take one id (the MVP vote, ADR 0072): Kestrel refuses any larger body with 413.</summary>
     public const long MaxRequestBytes = 1024;
 
     /// <summary>How the start-up error names a route of this group.</summary>
@@ -21,4 +22,16 @@ internal static class StatsRouteExtensions
 
     public static RouteHandlerBuilder RequireCapability(this RouteHandlerBuilder builder, GroupCapability capability) =>
         builder.WithMetadata(new StatsCapabilityMetadata(capability));
+
+    /// <summary>
+    /// A read of a round to any member of the group (<c>ViewGroup</c>), <c>no-store</c>: it may replay a stale stream
+    /// through the <see cref="Projections.StatsProjector"/>, so it is limited by <c>court-sync</c> (ADR 0062).
+    /// </summary>
+    public static RouteGroupBuilder MapRoundRead(this RouteGroupBuilder group, string route, string name, Delegate handler)
+    {
+        group.MapGet(route, handler).WithName(name).RequireRateLimiting(RateLimitPolicies.CourtSync)
+            .RequireCapability(GroupCapability.ViewGroup)
+            .WithNoStore();
+        return group;
+    }
 }

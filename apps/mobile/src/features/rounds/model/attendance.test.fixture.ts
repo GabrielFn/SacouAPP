@@ -57,6 +57,8 @@ export function attendanceRound(patch: Partial<Round> = {}): Round {
     localTime: "19:00",
     timeZone: "America/Sao_Paulo",
     startsAt: "2026-11-05T22:00:00Z",
+    closedAt: null,
+    endsAt: "2026-11-06T04:00:00Z",
     dropInOpensAt: null,
     venue: "Arena Beira-Mar",
     status: "scheduled",

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Shared.Members;
+using Sacou.Shared.Persistence;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.Domain.Rounds;
@@ -27,7 +28,13 @@ internal sealed partial record Round(
     /// <summary>The code of the public link (ADR 0070, D1). Null only for a round made before the link existed, until an admin reads it.</summary>
     public RoundLinkCode? LinkCode { get; init; }
 
+    /// <summary>When someone tapped "Encerrar rodada" (ADR 0072, D1); null while nobody did.</summary>
+    public DateTimeOffset? ClosedAt { get; init; }
+
     public bool IsCanceled => Status == RoundStatus.Canceled;
+
+    /// <summary>When the round ended: the tap, or the automatic end, whichever comes first (ADR 0072, D1).</summary>
+    public DateTimeOffset EndsAt => RoundEnd.Of(Slot.StartsAt, ClosedAt);
 
     /// <summary>
     /// Whether the round's link still lets someone in and answer: not cancelled, and not started. At the very instant
@@ -47,6 +54,27 @@ internal sealed partial record Round(
     public RoundChange Cancel() => IsCanceled
         ? RoundChange.Unchanged(this)
         : new RoundChange(this with { Status = RoundStatus.Canceled }, [], [new RoundCanceled(Id, GroupId)]) { RoundRowChanged = true };
+
+    /// <summary>
+    /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled or before the start; closing again keeps the first
+    /// instant. A tap after the automatic end is stored but does not move the end (the earlier one wins).
+    /// </summary>
+    public Result<RoundChange> Close(DateTimeOffset now)
+    {
+        if (IsCanceled)
+        {
+            return Result.Failure<RoundChange>(RoundErrors.RoundCanceled);
+        }
+
+        if (now < Slot.StartsAt)
+        {
+            return Result.Failure<RoundChange>(RoundErrors.RoundNotStarted);
+        }
+
+        return Result.Success(ClosedAt is not null
+            ? RoundChange.Unchanged(this)
+            : new RoundChange(this with { ClosedAt = StoredInstant.Of(now) }, [], [new RoundEnded(Id, GroupId)]) { RoundRowChanged = true });
+    }
 
     /// <summary>
     /// The admin's edit (date, time, venue, layer): refused once cancelled or started. A new date or time

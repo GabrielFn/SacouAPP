@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
-using Sacou.Http.RateLimiting;
-using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Stats.Access;
 using Sacou.Modules.Stats.Projections;
@@ -22,13 +19,7 @@ internal static class GetRoundSummaryEndpoint
     public const string Name = "GetRoundSummary";
     public const string Route = "/rounds/{roundId:guid}/summary";
 
-    public static RouteGroupBuilder MapGetRoundSummary(this RouteGroupBuilder group)
-    {
-        group.MapGet(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.CourtSync)
-            .RequireCapability(GroupCapability.ViewGroup)
-            .WithNoStore();
-        return group;
-    }
+    public static RouteGroupBuilder MapGetRoundSummary(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync);
 
     private static async Task<Results<Ok<RoundSummaryReport>, ProblemHttpResult>> HandleAsync(
         Guid roundId, HttpContext context, StatsProjector projector, CancellationToken cancellationToken)

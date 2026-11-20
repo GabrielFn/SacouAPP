@@ -19,4 +19,11 @@ public interface IRoundFacts
 /// A round as the projections read it: its state, its start (an instant, and the local date in the round's time
 /// zone, <c>America/Sao_Paulo</c>, for the season), and the summary leaves of its resolved settings.
 /// </summary>
-public sealed record RoundFacts(Guid RoundId, RoundState State, DateTimeOffset StartsAt, DateOnly LocalDate, SummaryRules Summary);
+public sealed record RoundFacts(Guid RoundId, RoundState State, DateTimeOffset StartsAt, DateOnly LocalDate, SummaryRules Summary)
+{
+    /// <summary>When someone tapped "Encerrar rodada" (ADR 0072, D1). Not in the projection's key: closing rebuilds nothing.</summary>
+    public DateTimeOffset? ClosedAt { get; init; }
+
+    /// <summary>When the round ended, or will end on its own: the MVP vote opens then (ADR 0072, D1).</summary>
+    public DateTimeOffset EndsAt => Domain.Rounds.RoundEnd.Of(StartsAt, ClosedAt);
+}

@@ -8,7 +8,7 @@ using Sacou.Shared.Members;
 namespace Sacou.Modules.Sessions.Application;
 
 /// <summary>
-/// The round as the screens read it (tela 06 and 21). Only ids, types and numbers: no name, no
+/// The round as the screens read it (tela 06 and 21). <c>endsAt</c> is when it ended or will end on its own (ADR 0072, D1). Only ids, types and numbers: no name, no
 /// <c>userId</c>, no e-mail. Names come from the profile of E3.17, by <c>memberId</c>.
 /// </summary>
 internal sealed record RoundResponse(
@@ -18,6 +18,8 @@ internal sealed record RoundResponse(
     string LocalTime,
     string TimeZone,
     DateTimeOffset StartsAt,
+    DateTimeOffset? ClosedAt,
+    DateTimeOffset EndsAt,
     DateTimeOffset? DropInOpensAt,
     string Venue,
     RoundStatus Status,
@@ -45,6 +47,8 @@ internal sealed record RoundResponse(
             RoundFormat.Time(round.Slot.Time),
             round.Slot.TimeZoneId,
             round.Slot.StartsAt,
+            round.ClosedAt,
+            round.EndsAt,
             rules.DropInWindowEnabled ? round.Slot.DropInOpensAt(rules.DropInOpensHoursBefore) : null,
             round.Venue.Value,
             round.Status,

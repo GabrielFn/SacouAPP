@@ -75,6 +75,40 @@ namespace Sacou.Modules.Stats.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Sacou.Modules.Stats.Infrastructure.MvpVoteRow", b =>
+                {
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.Property<Guid>("VoterMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("voter_member_id");
+
+                    b.Property<Guid>("CandidateMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("candidate_member_id");
+
+                    b.Property<DateTimeOffset>("CastAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cast_at");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.HasKey("RoundId", "VoterMemberId")
+                        .HasName("pk_mvp_votes");
+
+                    b.HasIndex("VoterMemberId")
+                        .HasDatabaseName("ix_mvp_votes_voter");
+
+                    b.ToTable("mvp_votes", "stats", t =>
+                        {
+                            t.HasCheckConstraint("ck_mvp_votes_not_self", "voter_member_id <> candidate_member_id");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Stats.Infrastructure.RatingPoolRow", b =>
                 {
                     b.Property<Guid>("GroupId")

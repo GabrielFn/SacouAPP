@@ -262,9 +262,7 @@ A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do 
 | ---------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | Rating calculado (E3.6, E3.9)            | I: jogador lê o próprio rating             | No piloto, o rating não sai da API (ADR 0047). A nota do admin já tem a mitigação e os testes na seção 2 (E3.17)  |
 | Nota do admin (E3.6)                     | I: nota na imagem compartilhada do sorteio | Nunca na imagem (`decisoes.md:16`); a imagem é da E4.7. A rota do sorteio já tem as mitigações na seção 2         |
-| Votação do MVP (E3.18)                   | S/E: quem não jogou vota, ou vota em si    | Só quem jogou a rodada, sem votar em si, conferido no servidor (ADR 0048)                                         |
-| Votação do MVP (E3.18)                   | T: voto duplicado ou fora do prazo         | Um voto por `MemberId` e rodada, com trava; fecha 24 h depois do fim da rodada                                    |
-| Votação do MVP (E3.18)                   | I: ver em quem cada um votou               | Voto secreto: nenhuma rota devolve o voto de outro, nem ao admin; só o resultado                                  |
+| Votação do MVP (E3.18)                   | S/E, T e I: votar sem ter jogado, em si, duas vezes, fora do prazo, ou ver o voto de outro | Seção 16 |
 | Resumo com IA (E3.13, pós-piloto)        | I: dados enviados ao provedor              | Provedor ainda não definido ([`perguntas.md`](../estado/perguntas.md), item 4); dados enviados a definir na E3.13 |
 | Resumo com IA (E3.13, pós-piloto)        | T: texto de usuário alterando o resumo     | A definir na E3.13. Falha usa texto padrão (aceite da E3.13)                                                      |
 | Resumo com IA (E3.13, pós-piloto)        | D: custo por uso abusivo                   | Cota por grupo (`revisao-mvp.md:116`)                                                                             |
@@ -458,6 +456,23 @@ A seção que o plano chamava de 6.1 ficou com o número livre seguinte, porque 
 | Nota do admin como semente | Lida só por `IMemberLevels` (sem rota); nunca no log; no `inputs_hash` só entra o hash (a semente usada fica em `member_ratings`, também escondida) | Feito (4a) |
 | Dado derivado de perfil (LGPD art. 20, decisão automatizada) | No piloto nada decide sobre o jogador com o rating; registrado em `dados-pessoais.md`; base legal e direito de acesso na E6.2 | Aberto (E6.2) |
 | Cadeia de suprimentos da `openskill` | `openskill` 5.0.1 (MIT), versão exata, só no pacote TS de referência `packages/rating` (golden e testes); a API usa o porte C#, sem dependência nova; ~517 pacotes `@stdlib` transitivos, sem scripts de instalação; `pnpm audit` na CI | Mantido. Decidido na 4b: fica em `dependencies` de `packages/rating`, porque `src/openskill-model.ts` a importa (movê-la para `devDependencies` mentiria sobre o pacote); o pacote é `private`, ninguém o consome (o app é proibido por teste e a API é C#) e o `pnpm audit` confere as duas listas igual |
+
+## 16. Votação do MVP (E3.18, [ADR 0072](../arquitetura/adr/0072-votacao-do-mvp.md))
+
+Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodada, o voto e a cédula; a Parte 2, o resultado, o Resumo e a exportação.
+
+| Ameaça | Controle | Situação |
+|---|---|---|
+| S/E: quem não jogou vota, ou vota em si | Conferido no servidor, no domínio (`MvpBallot`): quem vota e o candidato com partida terminada na projeção fresca da rodada; auto-voto recusado no domínio e por `CHECK` na tabela | Feito (Parte 1) |
+| T: voto duplicado, inclusive em corrida | PK `(round_id, voter_member_id)` e `INSERT ... ON CONFLICT DO NOTHING`: o segundo é `409`; voto final, sem rota de troca | Feito (Parte 1); teste de corrida I2 na integração |
+| T: voto fora do prazo | Janela calculada a cada pedido com o relógio do servidor (`TimeProvider`), intervalo semiaberto; nada depende de job | Feito (Parte 1) |
+| T: abrir a votação cedo ou adiar o fim | Só `WriteCourt` encerra a rodada (Admin, Co-admin, Placar), sob a trava; antes do início o `close` é recusado (`409 sessions.round-not-started`); fechar de novo não muda o instante; um toque depois do fim automático não adia | Feito (Parte 1). Risco aceito: quem tem `WriteCourt` pode encerrar logo depois do início e abrir a votação cedo (o grupo vê pelo prazo) |
+| I: ver em quem cada um votou | Nenhuma rota devolve voto de outro, nem ao admin; a cédula só traz o próprio voto, sem contagem nem lista de votantes; erros não ecoam o candidato | Feito (Parte 1); resultado só com vencedores e votantes na Parte 2 |
+| I: voto no log | `MvpVotingLog` só com `roundId` e o resultado; `MvpVote` e `MvpVoteRow` não se imprimem; teste de captura do log | Feito (Parte 1) |
+| I: inferir o voto pelo resultado | Num grupo de dois votantes com vencedor único dá para deduzir; o Resumo não traz `voters` | Aceito |
+| IDOR: votar ou ler a cédula de outro grupo | Filtro do Stats (membro ativo, 404 igual a inexistente); rodada e votos lidos sempre por `(groupId, roundId)`; rodada cancelada igual a inexistente | Feito (Parte 1); matriz ator × rota no voto, na cédula e no `close` (de fora, removido e ex-membro com o mesmo 404; Jogador 403 no `close`) |
+| D: cédula e voto refazem o replay | `court-sync` na cédula e no voto (os dois leem a projeção fresca), como nas rotas de estatística; `close` no limite global | Feito (Parte 1); revisar na E5.3 |
+| T: correção do placar depois do fechamento muda o vencedor | O resultado é apurado na leitura sobre a projeção fresca, então uma correção depois do fim da janela muda candidatos e vencedor | Aberto: a Parte 2 congela o resultado no fechamento ou registra o risco como aceito (`pendencias.md`) |
 
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 

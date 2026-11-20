@@ -15,6 +15,7 @@ internal static class StatsDatabase
         services.AddDbContext<StatsDbContext>(options => Configure(
             options, configuration.GetConnectionString(ConnectionStringName) ?? string.Empty));
         services.AddScoped<IStatsStore, PostgresStatsStore>();
+        services.AddScoped<IMvpVoteStore, PostgresMvpVoteStore>();
         return services;
     }
 

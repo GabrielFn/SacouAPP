@@ -529,6 +529,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["CloseRound"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}/rounds/{roundId}/attendance/me": {
     parameters: {
       query?: never;
@@ -657,6 +673,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetMvpVoting"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting/vote": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["CastMvpVote"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -718,6 +766,9 @@ export interface components {
     AttendanceSource: "self" | "admin" | "regular";
     /** @enum {string} */
     AttendanceStatus: "going" | "notGoing" | "waitlisted" | "promoted";
+    CastMvpVoteRequest: {
+      candidateMemberId: null | string;
+    };
     ChangeMemberRoleRequest: {
       role: components["schemas"]["GroupRole"];
     };
@@ -733,6 +784,12 @@ export interface components {
       /** Format: uuid */
       memberId: string;
       memberType: components["schemas"]["MemberType"];
+    };
+    CloseRoundResponse: {
+      /** Format: date-time */
+      closedAt: string;
+      /** Format: date-time */
+      endsAt: string;
     };
     CorrectGuestRequest: {
       name: null | string;
@@ -752,6 +809,8 @@ export interface components {
       /** Format: int32 */
       setsB: number;
     };
+    /** @enum {string} */
+    CourtSide: "a" | "b";
     CourtWriterResponse: {
       /** Format: uuid */
       memberId: string;
@@ -948,12 +1007,44 @@ export interface components {
       /** Format: int32 */
       regularPosition: null | number;
     };
+    /** @enum {string} */
+    MvpBallotRefusal: "notOpen" | "closed" | "notPlayed" | "alreadyVoted";
+    MvpBallotResponse: {
+      state: components["schemas"]["MvpVotingState"];
+      /** Format: date-time */
+      opensAt: string;
+      /** Format: date-time */
+      closesAt: string;
+      canVote: boolean;
+      reason: null | components["schemas"]["MvpBallotRefusal"];
+      myVote: null | components["schemas"]["MyMvpVoteResponse"];
+      candidates: components["schemas"]["MvpCandidateResponse"][];
+    };
+    MvpCandidateResponse: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      wins: number;
+      mainSide: null | components["schemas"]["CourtSide"];
+    };
+    /** @enum {string} */
+    MvpVotingState: "notOpen" | "open" | "closed";
     MyGroupResponse: {
       /** Format: uuid */
       groupId: string;
       name: string;
       role: components["schemas"]["GroupRole"];
       memberType: components["schemas"]["MemberType"];
+    };
+    MyMvpVoteResponse: {
+      /** Format: uuid */
+      candidateMemberId: string;
+      /** Format: date-time */
+      castAt: string;
     };
     MyProfileResponse: {
       nickname: string;
@@ -1102,6 +1193,10 @@ export interface components {
       timeZone: string;
       /** Format: date-time */
       startsAt: string;
+      /** Format: date-time */
+      closedAt: null | string;
+      /** Format: date-time */
+      endsAt: string;
       /** Format: date-time */
       dropInOpensAt: null | string;
       venue: string;
@@ -4954,6 +5049,85 @@ export interface operations {
       };
     };
   };
+  CloseRound: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CloseRoundResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
   RespondAttendance: {
     parameters: {
       query?: never;
@@ -5781,6 +5955,195 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetMvpVoting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MvpBallotResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  CastMvpVote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": null | components["schemas"]["CastMvpVoteRequest"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyMvpVoteResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
       };
       /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
       429: {

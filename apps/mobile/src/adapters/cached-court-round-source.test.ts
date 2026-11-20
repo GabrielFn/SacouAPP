@@ -20,6 +20,8 @@ function roundWith(resolved: unknown): Round {
     localTime: "20:30",
     timeZone: "America/Sao_Paulo",
     startsAt: "2026-11-03T23:30:00Z",
+    closedAt: null,
+    endsAt: "2026-11-03T23:30:00Z",
     dropInOpensAt: null,
     venue: "Ginásio",
     status: "scheduled",

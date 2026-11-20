@@ -86,6 +86,8 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "sessions.drop-in-window-closed":
     "A lista ainda não abriu para avulsos. Tente de novo mais perto da rodada.",
   "sessions.member-not-found": "Essa pessoa não faz parte deste grupo.",
+  "sessions.round-canceled": "Esta rodada foi cancelada e não pode ser encerrada.",
+  "sessions.round-not-started": "A rodada ainda não começou e não pode ser encerrada.",
   "sessions.round-closed": "Esta rodada não aceita mais mudanças.",
   "sessions.round-date-taken": "Essa repetição já tem uma rodada nesse dia. Escolha outra data.",
   "sessions.round-full": "A rodada está cheia e a lista de espera está desligada.",
@@ -97,6 +99,14 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "sessions.series-limit":
     "O grupo já tem o máximo de rodadas que se repetem. Pare uma antes de criar outra.",
   "sessions.series-not-found": "Essa repetição não existe mais.",
+  "stats.mvp-already-voted": "Você já votou nesta rodada. O voto não pode ser trocado.",
+  "stats.mvp-candidate-invalid": "Só dá para votar em quem jogou esta rodada.",
+  "stats.mvp-self-vote": "Não dá para votar em você mesmo.",
+  "stats.mvp-vote-invalid": "Escolha alguém da lista para votar.",
+  "stats.mvp-voter-not-eligible": "Só vota quem jogou esta rodada.",
+  "stats.mvp-voting-closed": "A votação do MVP já fechou.",
+  "stats.mvp-voting-not-open": "A votação do MVP abre quando a rodada termina.",
+  "stats.mvp-voting-off": "A votação do MVP está desligada nesta rodada.",
   "stats.year-invalid": "Esse ano não tem estatísticas.",
 };
 
