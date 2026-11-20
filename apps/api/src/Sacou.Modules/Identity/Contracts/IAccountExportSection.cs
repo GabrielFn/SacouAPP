@@ -46,4 +46,8 @@ public static class AccountExportSections
     /// <summary>The court batches the person wrote (E3.7, ADR 0060, D16).</summary>
     public const string CourtWrites = "courtWrites";
     public const int CourtWritesOrder = 500;
+
+    /// <summary>The phones and the notifications of the person, never a push token (E3.11, ADR 0069, D9).</summary>
+    public const string Notifications = "notifications";
+    public const int NotificationsOrder = 600;
 }

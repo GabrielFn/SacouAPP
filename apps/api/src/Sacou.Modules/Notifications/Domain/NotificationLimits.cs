@@ -1,0 +1,23 @@
+namespace Sacou.Modules.Notifications.Domain;
+
+/// <summary>The numbers of the module (ADR 0069), in one place.</summary>
+internal static class NotificationLimits
+{
+    /// <summary>Active phones per account; a sixth turns the oldest off.</summary>
+    public const int MaxActiveDevices = 5;
+
+    /// <summary>Notifications per page of screen 28.</summary>
+    public const int PageSize = 20;
+
+    /// <summary>The body of <c>PUT /v1/me/push-devices/{installationId}</c>: a token and a platform.</summary>
+    public const long MaxDeviceBodyBytes = 1024;
+
+    /// <summary>Messages per call to the push service (Expo takes up to 100).</summary>
+    public const int SendBatchSize = 100;
+
+    /// <summary>How long a pump owns a claimed delivery; after that it counts as ambiguous.</summary>
+    public static readonly TimeSpan SendingLease = TimeSpan.FromMinutes(2);
+
+    /// <summary>A phone seen again within this time is not written again.</summary>
+    public static readonly TimeSpan LastSeenResolution = TimeSpan.FromDays(1);
+}

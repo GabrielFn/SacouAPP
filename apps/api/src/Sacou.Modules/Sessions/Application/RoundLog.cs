@@ -5,7 +5,7 @@ namespace Sacou.Modules.Sessions.Application;
 
 /// <summary>
 /// Everything the Sessions logs: ids and codes, never the venue (it may name a person), the settings layer,
-/// a user or a name (docs/seguranca/dados-pessoais.md). Events are not stored until the Outbox of E3.11; here they are counted.
+/// a user or a name (docs/seguranca/dados-pessoais.md). The promotions also go to the Outbox, in the same transaction (ADR 0069); here they are counted.
 /// </summary>
 internal static partial class RoundLog
 {

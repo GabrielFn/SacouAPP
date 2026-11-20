@@ -63,6 +63,19 @@ public sealed class AttendanceTests
     }
 
     [Fact]
+    public void U1_WaitlistPromoted_CarriesTheSequenceOfThePromotedAttendance()
+    {
+        var rules = Rules(capacity: 2);
+        var round = Going(NewRound(), rules, 4);
+
+        var change = Respond(round, rules, 1, Reply.NotGoing).Value;
+
+        var promoted = Assert.Single(change.Events.OfType<WaitlistPromoted>());
+        Assert.Equal(change.Round.AttendanceOf(Member(3))!.Sequence, promoted.Sequence);
+        Assert.Equal(round.AttendanceOf(Member(3))!.Sequence, promoted.Sequence);
+    }
+
+    [Fact]
     public void A5_PromotedGivesUp_NextIsPromoted_AndPromotedHoldsASpot()
     {
         var rules = Rules(capacity: 1);

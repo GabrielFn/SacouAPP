@@ -11,7 +11,7 @@ using Sacou.Modules.Sessions.Infrastructure;
 namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 {
     [DbContext(typeof(SessionsDbContext))]
-    internal partial class SessionsDbContextModelSnapshot : ModelSnapshot
+    partial class SessionsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -84,6 +84,58 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                             t.HasCheckConstraint("ck_attendances_source", "source IN ('admin', 'regular', 'self')");
 
                             t.HasCheckConstraint("ck_attendances_status", "status IN ('going', 'not_going', 'promoted', 'waitlisted')");
+                        });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Sessions.Infrastructure.Outbox.OutboxMessageRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("DedupeKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("dedupe_key");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
+
+                    b.HasIndex("DedupeKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_outbox_messages_dedupe_key");
+
+                    b.HasIndex("OccurredAt", "Id")
+                        .HasDatabaseName("ix_outbox_messages_unprocessed")
+                        .HasFilter("processed_at IS NULL");
+
+                    b.ToTable("outbox_messages", "sessions", t =>
+                        {
+                            t.HasCheckConstraint("ck_outbox_messages_attempts", "attempts >= 0");
+
+                            t.HasCheckConstraint("ck_outbox_messages_type", "type IN ('sessions.waitlist-promoted')");
                         });
                 });
 

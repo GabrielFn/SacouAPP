@@ -8,6 +8,7 @@ using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
+using Sacou.Modules.Notifications;
 using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
@@ -93,6 +94,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             await GroupsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await SessionsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await MatchesModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await NotificationsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
         }
         finally
         {
@@ -152,7 +154,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     {
         const string Section = "RateLimiting";
         const string Roomy = "1000000";
-        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink"];
+        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink", "PushDevice"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
         limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;
