@@ -12,6 +12,7 @@ import { useRoundSummary } from "../hooks/use-round-summary";
 import type { ReadySummary, SummaryView } from "../model/summary-view";
 import { HighlightCard } from "./HighlightCard";
 import { MvpHeroCard } from "./MvpHeroCard";
+import { ShareBlock } from "./ShareBlock";
 
 const { summary } = strings;
 
@@ -22,9 +23,10 @@ export interface RoundSummaryScreenProps {
 
 export interface SummaryBodyProps {
   readonly ready: ReadySummary;
+  readonly onShare: () => void;
 }
 
-function SummaryBody({ ready }: SummaryBodyProps) {
+function SummaryBody({ ready, onShare }: SummaryBodyProps) {
   const { tokens } = useTheme();
   const { mvp, highlights, stale, unsentNote } = ready;
   const cards = [highlights.mostWins, highlights.longestStreak].filter(
@@ -46,6 +48,7 @@ function SummaryBody({ ready }: SummaryBodyProps) {
           ))}
         </View>
       )}
+      <ShareBlock onShare={onShare} />
     </View>
   );
 }
@@ -57,9 +60,10 @@ function headerOf(view: SummaryView): string {
 export interface SummaryContentProps {
   readonly view: SummaryView;
   readonly retry: () => void;
+  readonly onShare: () => void;
 }
 
-function SummaryContent({ view, retry }: SummaryContentProps) {
+function SummaryContent({ view, retry, onShare }: SummaryContentProps) {
   const retryAction = { label: summary.retry, variant: "secondary" as const, onPress: retry };
   switch (view.kind) {
     case "loading":
@@ -77,15 +81,24 @@ function SummaryContent({ view, retry }: SummaryContentProps) {
         <EmptyState alert title={summary.errorTitle} body={view.text} actions={[retryAction]} />
       );
     case "empty":
-      return <EmptyState title={summary.emptyTitle} />;
+      return (
+        <>
+          {view.unsentNote === null ? null : (
+            <Text variant="muted" accessibilityRole="alert">
+              {view.unsentNote}
+            </Text>
+          )}
+          <EmptyState title={summary.emptyTitle} />
+        </>
+      );
     case "ready":
-      return <SummaryBody ready={view} />;
+      return <SummaryBody ready={view} onShare={onShare} />;
   }
 }
 
 /** Screen 12: the numbers of the round, read from the server and only formatted here. */
 export function RoundSummaryScreen({ groupId, roundId }: RoundSummaryScreenProps) {
-  const { view, retry } = useRoundSummary(groupId, roundId);
+  const { view, retry, share } = useRoundSummary(groupId, roundId);
   const { tokens } = useTheme();
   return (
     <Screen scroll>
@@ -95,7 +108,7 @@ export function RoundSummaryScreen({ groupId, roundId }: RoundSummaryScreenProps
           {summary.title}
         </Text>
       </View>
-      <SummaryContent view={view} retry={retry} />
+      <SummaryContent view={view} retry={retry} onShare={share} />
     </Screen>
   );
 }

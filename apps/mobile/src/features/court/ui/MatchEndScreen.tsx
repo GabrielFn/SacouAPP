@@ -6,6 +6,7 @@ import { useTheme } from "../../../theme/theme-context";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { Button } from "../../../ui/Button";
 import { Text } from "../../../ui/Text";
+import type { EndRoundView } from "../end-round/end-round-view";
 import type { ExitRows, ManualPick, ResultView } from "../next-match/match-end-selectors";
 import { CourtPage } from "./CourtPage";
 import { ExitList, PickList } from "./ExitList";
@@ -36,6 +37,9 @@ export interface MatchEndScreenProps {
   readonly onToggle: (side: TeamSide, memberId: MemberId, required: number) => void;
   readonly onConfirm: () => void;
   readonly onLeave: () => void;
+  /** "Encerrar rodada" under "Confirmar": ends the whole night (E4.12). */
+  readonly endRound: EndRoundView;
+  readonly onEndRound: () => void;
 }
 
 export interface ResultColumnProps {
@@ -154,6 +158,17 @@ function NextColumn(props: MatchEndScreenProps) {
       {props.failure === null ? null : (
         <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
           {props.failure}
+        </Text>
+      )}
+      <Button
+        label={matchEnd.endRound}
+        variant="link"
+        disabled={props.endRound.busy}
+        onPress={props.onEndRound}
+      />
+      {props.endRound.failure === null ? null : (
+        <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
+          {props.endRound.failure}
         </Text>
       )}
       <Button label={matchEnd.home} variant="outline" onPress={props.onLeave} />

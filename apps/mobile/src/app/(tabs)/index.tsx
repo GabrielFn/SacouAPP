@@ -11,7 +11,7 @@ import { greetingText } from "../../features/groups/model/greeting";
 import { useGreetingNickname } from "../../features/profile/hooks/use-profile";
 import { createGroupHref, groupsHref, notificationsHref } from "../../features/groups/navigation";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
-import { roundHref } from "../../features/rounds/navigation";
+import { roundHref, summaryHref } from "../../features/rounds/navigation";
 import { HomeRoundCards } from "../../features/rounds/ui/HomeRoundCards";
 import { strings } from "../../strings/pt-BR";
 import { useTheme } from "../../theme/theme-context";
@@ -84,6 +84,9 @@ export default function HomeScreen() {
             emptyActions={seeGroups}
             onOpenRound={(groupId, roundId) => {
               router.push(roundHref(groupId, roundId));
+            }}
+            onOpenSummary={(groupId, roundId) => {
+              router.push(summaryHref(groupId, roundId));
             }}
           />
         )}

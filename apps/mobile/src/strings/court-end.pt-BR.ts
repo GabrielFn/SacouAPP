@@ -72,6 +72,17 @@ export const courtEndStrings = {
       "A rodada desta quadra não está no celular. Abra a rodada com internet e volte aqui.",
     startFailed: "Não deu para começar a próxima partida. Tente de novo.",
     home: "Voltar ao início",
+    endRound: "Encerrar rodada",
+  },
+  endRound: {
+    title: "Encerrar a rodada?",
+    openMatch: (score: string) =>
+      `A partida em andamento (${score}) não entra no resumo. Encerrar a rodada?`,
+    score: (a: number, b: number) => `${String(a)} × ${String(b)}`,
+    confirm: "Encerrar rodada",
+    cancel: "Cancelar",
+    closing: "Encerrando a rodada",
+    storageFailed: "Não deu para encerrar a rodada. Tente de novo.",
   },
   names: {
     join: (names: readonly string[]) =>

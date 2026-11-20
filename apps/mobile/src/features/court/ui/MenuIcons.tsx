@@ -77,6 +77,15 @@ export function EndMatchIcon({ color }: IconProps) {
   );
 }
 
+export function EndRoundIcon({ color }: IconProps) {
+  return (
+    <MenuStroke color={color}>
+      <Circle cx="12" cy="12" r="9" />
+      <Path d="M9.5 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5A.5.5 0 0 1 9.5 9z" />
+    </MenuStroke>
+  );
+}
+
 export function LeaveCourtIcon({ color }: IconProps) {
   return (
     <MenuStroke color={color}>

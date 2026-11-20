@@ -26,4 +26,7 @@ Regras de texto e de quem aparece na tela 12 do app (E4.12 Parte 1). Os números
 
 ## Entradas
 
-Parte 1: linha "Resumo da rodada" nas telas da rodada (06 e 26), depois do horário de início e para rodada não cancelada (pergunta 152). "Encerrar rodada", o card do Início e "Mandar pro grupo" são da Parte 2.
+- Linha "Resumo da rodada" nas telas da rodada (06 e 26), depois do horário de início e para rodada não cancelada (pergunta 152).
+- **Início (pergunta 153):** o card "Rodada de ter, 3/11 · Ver resumo" aparece do início da rodada até 24 h depois do fim. A lista de rodadas ainda não traz o `endsAt`, então o app usa o fim automático (início + 6 h, `ROUND_DURATION_MS`); um `close` adiantado não encurta a janela do card (pendência: `endsAt` na lista e janela de 30 h no servidor).
+- **Encerrar rodada (pergunta 150)**, na tela 11 (link sob "Confirmar") e no menu 23 ("Encerrar rodada · fecha a noite toda", em vermelho): chama `POST .../close` (melhor esforço: offline, 5xx e rodada cancelada não impedem), fecha a sessão no celular (os pontos continuam sendo enviados), dispara um envio e abre o resumo com `replace`. A rodada que ainda não começou (`409 sessions.round-not-started`) para antes de fechar a quadra e mostra a mensagem. Por isso o servidor é chamado antes de fechar a sessão local. Com partida em andamento (pergunta 151) o menu pede confirmação: "A partida em andamento (12 × 10) não entra no resumo. Encerrar a rodada?".
+- **Mandar pro grupo · WhatsApp:** texto puro pelo `ShareSheet`, sem link, rating nem nota: "Resumo do Racha de terça · 4 partidas. MVP do dia: Bia (+2 de saldo, 2 vitórias em 3). Time que mais venceu: A Laranja, 2 vitórias. Maior sequência: A Laranja, 2 seguidas." Destaque `null` e MVP `null` não entram no texto.

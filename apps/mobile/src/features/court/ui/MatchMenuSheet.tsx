@@ -6,13 +6,23 @@ import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
+import type { EndRoundView } from "../end-round/end-round-view";
 import type { EndMatchSummary } from "../model/menu-selectors";
 import type { CourtThemeChoice } from "../ports/court-theme-preference";
 import { CourtPage } from "./CourtPage";
-import { EndMatchIcon, FlipSidesIcon, LeaveCourtIcon, ThemeIcon } from "./MenuIcons";
+import { EndMatchIcon, EndRoundIcon, FlipSidesIcon, LeaveCourtIcon, ThemeIcon } from "./MenuIcons";
 import { EndMatchDialog } from "./EndMatchDialog";
+import { EndRoundDialog } from "./EndRoundDialog";
 import { MenuRow } from "./MenuRow";
 import { screenRows } from "./MenuScreenRows";
+
+/** "Encerrar rodada · fecha a noite toda" and its dialog: absent for a session without a round. */
+export interface EndRoundMenuControl {
+  readonly view: EndRoundView;
+  readonly onAsk: () => void;
+  readonly onConfirm: () => void;
+  readonly onCancel: () => void;
+}
 
 export interface MatchMenuSheetProps {
   readonly subtitle: string | null;
@@ -33,6 +43,7 @@ export interface MatchMenuSheetProps {
   readonly onLeave: () => void;
   /** Confirmed in the dialog (or, with the set decided, the way to the end of the set). */
   readonly onEndMatch: () => void;
+  readonly endRound?: EndRoundMenuControl | null;
 }
 
 export interface GroupProps {
@@ -67,6 +78,48 @@ function Group({ children }: GroupProps) {
   );
 }
 
+export interface EndGroupProps {
+  readonly hasEndMatch: boolean;
+  readonly endRound: EndRoundMenuControl | null;
+  readonly onEndMatch: () => void;
+}
+
+/** "Encerrar partida" and "Encerrar rodada · fecha a noite toda", the last group of the menu. */
+function EndGroup({ hasEndMatch, endRound, onEndMatch }: EndGroupProps) {
+  const { menu } = strings.court;
+  const { colors } = useTheme();
+  if (!hasEndMatch && endRound === null) return null;
+  return (
+    <>
+      {endRound?.view.failure == null ? null : (
+        <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
+          {endRound.view.failure}
+        </Text>
+      )}
+      <Group>
+        {hasEndMatch ? (
+          <MenuRow
+            label={menu.endMatch}
+            renderIcon={(color) => <EndMatchIcon color={color} />}
+            chevron
+            onPress={onEndMatch}
+          />
+        ) : null}
+        {endRound === null ? null : (
+          <MenuRow
+            label={menu.endRound}
+            hint={menu.endRoundHint}
+            danger
+            disabled={endRound.view.busy}
+            renderIcon={(color) => <EndRoundIcon color={color} />}
+            onPress={endRound.onAsk}
+          />
+        )}
+      </Group>
+    </>
+  );
+}
+
 /** Screen 23: the menu of the match, over the court. The dialog of "Encerrar partida" is its only state. */
 export function MatchMenuSheet({
   subtitle,
@@ -83,6 +136,7 @@ export function MatchMenuSheet({
   onChooseTheme,
   onLeave,
   onEndMatch,
+  endRound = null,
 }: MatchMenuSheetProps) {
   const { menu } = strings.court;
   const { colors, tokens } = useTheme();
@@ -150,17 +204,15 @@ export function MatchMenuSheet({
             {refusal}
           </Text>
         )}
-        {endSummary === null ? null : (
-          <Group>
-            <MenuRow
-              label={menu.endMatch}
-              renderIcon={(color) => <EndMatchIcon color={color} />}
-              chevron
-              onPress={askToEnd}
-            />
-          </Group>
-        )}
+        <EndGroup hasEndMatch={endSummary !== null} endRound={endRound} onEndMatch={askToEnd} />
       </ScrollView>
+      {endRound === null ? null : (
+        <EndRoundDialog
+          score={endRound.view.confirmingScore}
+          onConfirm={endRound.onConfirm}
+          onCancel={endRound.onCancel}
+        />
+      )}
       {endSummary === null || endSummary.kind === "confirm-set" ? null : (
         <EndMatchDialog
           visible={dialogOpen}

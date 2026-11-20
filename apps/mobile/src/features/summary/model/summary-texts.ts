@@ -48,6 +48,13 @@ export function mvpLine({ side, plusMinus, wins, matchesPlayed }: MvpLineInput):
   return parts.join(" · ");
 }
 
+/** "+2 de saldo, 2 vitórias em 3": the numbers of the MVP without the side, for the shared text. */
+export function mvpDetail({ plusMinus, wins, matchesPlayed }: MvpLineInput): string {
+  return [summaryStrings.plusMinus(plusMinus), summaryStrings.winsOf(wins, matchesPlayed)].join(
+    ", ",
+  );
+}
+
 /** Whether the MVP came from the votes (E3.18): then "Calculado pelo placar" is not true. */
 export function mvpIsFromVotes(mvp: object): boolean {
   return "source" in mvp && mvp.source === "votes";
