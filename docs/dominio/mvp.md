@@ -25,6 +25,7 @@ A galera escolhe o MVP do dia depois da rodada (ADR 0048, item 2). É opção do
 - Ninguém votou (ou nenhum voto válido) → sem MVP pela votação; o Resumo mostra o MVP pelos dados, se estiver ligado (pergunta 142).
 - "Quantos votaram" conta todos os votos da rodada, inclusive os descartados por correção.
 - Partidas sincronizadas depois do fim da janela não reabrem a votação; quem só aparece nelas não votou.
+- **A apuração congela** na primeira leitura depois do fechamento (resultado, Resumo, perfil ou exportação), com quem jogou e o saldo daquele momento. Uma correção do placar depois disso muda os números do Resumo, nunca o vencedor nem quantos votaram. Uma correção entre o fechamento e essa primeira leitura ainda entra (risco aceito, ADR 0072, D12).
 
 Casos (golden só C#, em `apps/api/tests/Sacou.Modules.Stats.Tests/MvpVoting/mvp-tally-cases.json`):
 
@@ -39,14 +40,28 @@ Casos (golden só C#, em `apps/api/tests/Sacou.Modules.Stats.Tests/MvpVoting/mvp
 | G7 | quem votou é tirado por correção depois | o voto conta |
 | G8 | empate de votos, saldos −2 e −11 | o de −2 |
 
+## MVP mostrado (perguntas 142 e 143)
+
+| Configuração da rodada | Votação aberta (ou ainda não abriu) | Fechada com voto válido | Fechada sem voto válido |
+|---|---|---|---|
+| Só pelos dados | MVP pelos dados (`source: "stats"`), sem aviso | igual | igual |
+| Pelos dados e votação | MVP pelos dados, com o aviso de votação (`mvpVoting`) | MVP da votação (`source: "votes"`, "Escolhido pela galera") | MVP pelos dados |
+| Só votação | Sem MVP, com o aviso | MVP da votação | Sem MVP |
+| MVP desligado | Sem MVP e sem aviso | igual | igual |
+
+- MVP dividido: todos os vencedores aparecem e cada um ganha 1 em "vezes MVP" do perfil.
+- Na areia, o MVP da votação é uma ou mais pessoas, não a dupla do ranking.
+- O perfil (`mvpCount`) e a exportação ("foi MVP") usam o MVP mostrado.
+
 ## Sigilo
 
 - Ninguém vê em quem cada um votou, nem o admin. Não existe rota de admin para votos.
 - Com a votação aberta, cada pessoa vê só o próprio voto e o prazo, sem contagem parcial nem lista de quem já votou.
-- Fechada, aparecem só os vencedores e quantos votaram (Parte 2).
+- Fechada, aparecem só os vencedores e quantos votaram. O Resumo mostra só o MVP, sem o número de votantes.
+- A exportação dos dados de cada pessoa traz só os votos que ela deu ("seu voto"), nunca os recebidos.
 - Os logs do voto têm só a rodada e o resultado; nunca o votante nem o candidato.
 
-## Rotas (E3.18, Parte 1)
+## Rotas (E3.18)
 
 Sob `/v1/groups/{groupId}`, com o filtro do Stats (mesmas respostas dos outros filtros) e `Cache-Control: no-store`.
 
@@ -54,6 +69,8 @@ Sob `/v1/groups/{groupId}`, com o filtro do Stats (mesmas respostas dos outros f
 |---|---|---|
 | `GET /rounds/{roundId}/mvp-voting` | `ViewGroup` | 200 `{ state, opensAt, closesAt, canVote, reason, myVote, candidates }`; `state` ∈ `notOpen`, `open`, `closed`; `reason` ∈ `notOpen`, `closed`, `notPlayed`, `alreadyVoted`; `candidates` com `memberId`, `matchesPlayed`, `plusMinus`, `wins` e `mainSide` (`a`/`b`, o app põe a cor), sem a própria pessoa. Limite `court-sync` |
 | `POST /rounds/{roundId}/mvp-voting/vote` `{ candidateMemberId }` | `ViewGroup` e as regras acima | 201 `{ candidateMemberId, castAt }` |
+| `GET /rounds/{roundId}/mvp-voting/result` | `ViewGroup` | 200 `{ state, closesAt, winners, voters }`; `winners` e `voters` `null` antes de fechar; fechada, os vencedores (vazio sem voto válido) e quantos votaram. Limite `court-sync` |
+| `GET /rounds/{roundId}/summary` (E3.9) | `ViewGroup` | ganha `mvp.source` (`stats`/`votes`) e `mvpVoting` (`null` ou `{ state, opensAt, closesAt }`) |
 
 ## Códigos de erro
 
