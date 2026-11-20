@@ -89,12 +89,26 @@ public sealed class WebPartsTests(SacouApiFactory factory) : IClassFixture<Sacou
         using var manifest = JsonDocument.Parse(
             """{"src/main.ts":{"file":"assets/round-AB.js","isEntry":true,"css":["assets/round-CD.css"]},"src/fonts/x.woff2":{"file":"assets/x.woff2"}}""");
 
-        var entry = ManifestWebAssets.Parse(manifest.RootElement);
+        var entry = ManifestWebAssets.Parse(manifest.RootElement, ManifestWebAssets.EntryKey);
 
         Assert.Equal("/web/assets/round-AB.js", entry?.Script);
         Assert.Equal(["/web/assets/round-CD.css"], entry?.Styles);
         using var empty = JsonDocument.Parse("{}");
-        Assert.Null(ManifestWebAssets.Parse(empty.RootElement));
+        Assert.Null(ManifestWebAssets.Parse(empty.RootElement, ManifestWebAssets.EntryKey));
+    }
+
+    [Fact]
+    public void Manifest_GivesEachPage_TheStylesOfTheChunksItImports()
+    {
+        using var manifest = JsonDocument.Parse(
+            """{"src/main.ts":{"file":"assets/round-AB.js","isEntry":true,"imports":["_shared.js"],"css":["assets/round-EF.css"]},"src/invite-main.ts":{"file":"assets/invite-GH.js","isEntry":true,"imports":["_shared.js"]},"_shared.js":{"file":"assets/shared-IJ.js","imports":["_shared.js"],"css":["assets/shared-CD.css"]}}""");
+
+        var round = ManifestWebAssets.Parse(manifest.RootElement, ManifestWebAssets.EntryKey);
+        var invite = ManifestWebAssets.Parse(manifest.RootElement, ManifestWebAssets.InviteEntryKey);
+
+        Assert.Equal(["/web/assets/shared-CD.css", "/web/assets/round-EF.css"], round?.Styles);
+        Assert.Equal("/web/assets/invite-GH.js", invite?.Script);
+        Assert.Equal(["/web/assets/shared-CD.css"], invite?.Styles);
     }
 
     [Fact]

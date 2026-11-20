@@ -17,6 +17,7 @@ internal static class RoundPageFixture
     public const string OtherCode = "ZZZZZZZZZZZZZZZZZZZZZZ";
     public const string Script = "/web/assets/round-HASH.js";
     public const string Style = "/web/assets/round-HASH.css";
+    public const string InviteScript = "/web/assets/invite-HASH.js";
     public const string AuthDomain = "sacou-test.firebaseapp.com";
 
     /// <summary>"9 de 12, 1 na espera" of screen 01: six mensalistas and three avulsos, names as markers.</summary>
@@ -48,6 +49,14 @@ internal static class RoundPageFixture
                 builder.UseSetting("Firebase:Web:ProjectId", "sacou-test");
                 builder.UseSetting("Firebase:Web:AppId", "1:2:web:3");
             }
+            else
+            {
+                // appsettings.json carries the real public config (19/11/2026): a machine without it is emptied here.
+                builder.UseSetting("Firebase:Web:ApiKey", string.Empty);
+                builder.UseSetting("Firebase:Web:AuthDomain", string.Empty);
+                builder.UseSetting("Firebase:Web:ProjectId", string.Empty);
+                builder.UseSetting("Firebase:Web:AppId", string.Empty);
+            }
 
             builder.ConfigureTestServices(services =>
             {
@@ -68,5 +77,7 @@ internal static class RoundPageFixture
     private sealed class FakeAssets : IWebAssets
     {
         public WebEntry? Round { get; } = new(Script, ImmutableArray.Create(Style));
+
+        public WebEntry? Invite { get; } = new(InviteScript, ImmutableArray.Create(Style));
     }
 }

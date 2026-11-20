@@ -1,6 +1,6 @@
-import type { PageElements } from "./round-view";
+import type { SheetElements } from "./sign-in-sheet";
 
-/** The ids the Razor page renders (`Web/Pages/Round.cshtml`); a missing one means the page and the script disagree. */
+/** The ids the Razor pages render (`Web/Pages/Round.cshtml`, `Shared/_SignInSheet.cshtml`); a missing one means the page and the script disagree. */
 export const ELEMENT_IDS = {
   root: "round-page",
   going: "answer-going",
@@ -36,14 +36,23 @@ export interface DocumentLike {
   getElementById(id: string): HTMLElement | null;
 }
 
+/** The node of an id, of its type; a missing one means the page and the script disagree. */
+export function requiredById<T extends HTMLElement>(
+  document: DocumentLike,
+  id: string,
+  type: new () => T,
+): T {
+  const element = document.getElementById(id);
+  if (!(element instanceof type)) throw new Error(`The page has no #${id}.`);
+  return element;
+}
+
 function required<T extends HTMLElement>(
   document: DocumentLike,
   key: ElementKey,
   type: new () => T,
 ): T {
-  const element = document.getElementById(ELEMENT_IDS[key]);
-  if (!(element instanceof type)) throw new Error(`The round page has no #${ELEMENT_IDS[key]}.`);
-  return element;
+  return requiredById(document, ELEMENT_IDS[key], type);
 }
 
 function optional(document: DocumentLike, key: ElementKey): HTMLButtonElement | null {
@@ -51,11 +60,8 @@ function optional(document: DocumentLike, key: ElementKey): HTMLButtonElement | 
   return element instanceof HTMLButtonElement ? element : null;
 }
 
-/** The page's nodes, the ones the view draws and the ones the script listens to. */
-export interface PageNodes extends PageElements {
-  readonly going: HTMLButtonElement | null;
-  readonly notGoing: HTMLButtonElement | null;
-  readonly signOut: HTMLButtonElement;
+/** The nodes of the sheet of screen 02 (`Shared/_SignInSheet.cshtml`) the view draws and the script listens to. */
+export interface SheetNodes extends SheetElements {
   readonly sheetClose: HTMLButtonElement;
   readonly google: HTMLButtonElement;
   readonly emailChoice: HTMLButtonElement;
@@ -70,13 +76,17 @@ export interface PageNodes extends PageElements {
   readonly nickname: HTMLInputElement;
 }
 
-/** The answer buttons exist only while the round is open; everything else is always on the page. */
-export function findPageElements(document: DocumentLike): PageNodes {
+/** The page's nodes, the ones the view draws and the ones the script listens to. */
+export interface PageNodes extends SheetNodes {
+  readonly going: HTMLButtonElement | null;
+  readonly notGoing: HTMLButtonElement | null;
+  readonly status: HTMLElement;
+  readonly signOut: HTMLButtonElement;
+}
+
+/** The sheet, on the round page and on the invite page alike. */
+export function findSheetNodes(document: DocumentLike): SheetNodes {
   return {
-    going: optional(document, "going"),
-    notGoing: optional(document, "notGoing"),
-    status: required(document, "status", HTMLElement),
-    signOut: required(document, "signOut", HTMLButtonElement),
     sheet: required(document, "sheet", HTMLElement),
     sheetTitle: required(document, "sheetTitle", HTMLElement),
     sheetClose: required(document, "sheetClose", HTMLButtonElement),
@@ -98,5 +108,16 @@ export function findPageElements(document: DocumentLike): PageNodes {
     nickname: required(document, "nickname", HTMLInputElement),
     nicknameSubmit: required(document, "nicknameSubmit", HTMLButtonElement),
     sheetMessage: required(document, "sheetMessage", HTMLElement),
+  };
+}
+
+/** The answer buttons exist only while the round is open; everything else is always on the page. */
+export function findPageElements(document: DocumentLike): PageNodes {
+  return {
+    ...findSheetNodes(document),
+    going: optional(document, "going"),
+    notGoing: optional(document, "notGoing"),
+    status: required(document, "status", HTMLElement),
+    signOut: required(document, "signOut", HTMLButtonElement),
   };
 }

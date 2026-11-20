@@ -27,6 +27,11 @@ function confirmedNoun(amount: number): string {
   return amount === 1 ? "confirmado" : "confirmados";
 }
 
+/** "Vôlei de quinta · Ter, 3/11 · 20h30 · Arena · 14 vagas": the start of the WhatsApp message (question 45). */
+function shareHeadline(title: string, when: string, venue: string, capacity: string): string {
+  return `${title} · ${when}${venue === "" ? "" : ` · ${venue}`}${capacity === "" ? "" : ` · ${capacity}`}`;
+}
+
 export const roundsStrings = {
   weekdayShort,
   chips: {
@@ -90,8 +95,12 @@ export const roundsStrings = {
   },
   setBestOf: (sets: number) => (sets === 1 ? "1 set" : `Melhor de ${String(sets)}`),
   share: {
+    /** Without the page link (a member without ManageRounds, or a build without the public base). */
     text: (title: string, when: string, venue: string, capacity: string) =>
-      `${title} · ${when}${venue === "" ? "" : ` · ${venue}`}${capacity === "" ? "" : ` · ${capacity}`}. Confirma no app Sacou.`,
+      `${shareHeadline(title, when, venue, capacity)}. Confirma no app Sacou.`,
+    /** With the link of the round page (E3.12, ADR 0070, D1): the URL comes from the API, never built here. */
+    textWithLink: (title: string, when: string, venue: string, capacity: string, url: string) =>
+      `${shareHeadline(title, when, venue, capacity)}. Confirma aqui: ${url}`,
     spots: (capacity: number) => `${String(capacity)} vagas`,
   },
   detail: {

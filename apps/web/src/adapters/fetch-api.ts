@@ -1,14 +1,9 @@
-import { failureOf } from "../round-page/api-failures";
 import type { ApiOutcome, ApiPort } from "../round-page/ports";
 import type { AttendanceStatus, Intent, Standing } from "../round-page/round-page.types";
 
-/** The parts of `fetch` the adapter uses, so a test hands a fake. */
-export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
+import { createApiClient, isRecord, lost, refusal, type FetchApiOptions } from "./api-client";
 
-export interface FetchApiOptions {
-  readonly fetch: FetchLike;
-  readonly idToken: () => Promise<string | null>;
-}
+export type { FetchApiOptions, FetchLike } from "./api-client";
 
 const HTTP_NOT_FOUND = 404;
 
@@ -19,10 +14,6 @@ interface Resolved {
   readonly groupId: string | null;
   readonly roundId: string | null;
   readonly isMember: boolean;
-}
-
-function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
-  return typeof value === "object" && value !== null;
 }
 
 function statusOf(value: unknown): AttendanceStatus | null {
@@ -52,67 +43,9 @@ function resolvedOf(body: unknown): Resolved | null {
   };
 }
 
-const unexpected = { ok: false, failure: { kind: "unexpected" } } as const;
-const offline = { ok: false, failure: { kind: "offline" } } as const;
-
-async function bodyOf(response: Response): Promise<unknown> {
-  try {
-    return (await response.json()) as unknown;
-  } catch {
-    return null;
-  }
-}
-
-async function refusal(response: Response): Promise<ApiOutcome<never>> {
-  const body = await bodyOf(response);
-  const code = isRecord(body) && typeof body.code === "string" ? body.code : null;
-  const joined = isRecord(body) && typeof body.joined === "boolean" ? body.joined : null;
-  const retryAfter = response.headers.get("Retry-After");
-  return { ok: false, failure: failureOf({ status: response.status, code, retryAfter, joined }) };
-}
-
-/** No request left: no connection, or no session to sign it with. */
-type NoResponse = "offline" | "signedOut";
-
-function lost(reason: NoResponse): ApiOutcome<never> {
-  return reason === "offline" ? offline : unexpected;
-}
-
-/** The Sacou API on the page's own origin: JSON bodies, the ID token in `Authorization`, never a cookie (ADR 0070, D4). */
+/** The round page's calls (ADR 0070, D3 and D4), through the shared client of the API. */
 export function createFetchApi(options: FetchApiOptions): ApiPort {
-  async function call(
-    method: string,
-    path: string,
-    body?: unknown,
-  ): Promise<Response | NoResponse> {
-    const token = await options.idToken();
-    if (token === null) return "signedOut";
-    const auth = { Authorization: `Bearer ${token}`, Accept: "application/json" };
-    const init: RequestInit = { method, credentials: "omit", cache: "no-store", redirect: "error" };
-    const request: RequestInit =
-      body === undefined
-        ? { ...init, headers: auth }
-        : {
-            ...init,
-            headers: { ...auth, "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          };
-    try {
-      return await options.fetch(path, request);
-    } catch {
-      return "offline";
-    }
-  }
-
-  async function read<T>(
-    response: Response | NoResponse,
-    parse: (body: unknown) => T | null,
-  ): Promise<ApiOutcome<T>> {
-    if (typeof response === "string") return lost(response);
-    if (!response.ok) return refusal(response);
-    const value = parse(await bodyOf(response));
-    return value === null ? unexpected : { ok: true, value };
-  }
+  const { call, read, send } = createApiClient(options);
 
   async function standing(code: string): Promise<ApiOutcome<Standing | null>> {
     const resolved = await read(
@@ -142,9 +75,7 @@ export function createFetchApi(options: FetchApiOptions): ApiPort {
 
   async function saveNickname(nickname: string): Promise<ApiOutcome<null>> {
     const body = { nickname, primaryPosition: null, otherPositions: null, suggestedLevel: null };
-    const response = await call("PUT", "/v1/me/profile", body);
-    if (typeof response === "string") return lost(response);
-    return response.ok ? { ok: true, value: null } : refusal(response);
+    return send("PUT", "/v1/me/profile", body);
   }
 
   return {

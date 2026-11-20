@@ -60,6 +60,8 @@
 
 ## Em andamento
 
+- 19/11/2026, noite: **E3.12 Parte 3** no código (desenvolvedor Opus, `task/E3.12-share-invite`): texto do compartilhar com o link da rodada (tela 20) e página de convite `/c` (ADR 0070, D8 e D9). Fecha a pendência do destino do link do convite. Falta revisão, segurança e testes; o Gabriel põe `EXPO_PUBLIC_INVITE_BASE_URL` (origem `run.app`) no EAS.
+
 - 19/11/2026, noite: **E3.12 Parte 1 mergeada** (#171, `977fe6d`: revisor e segurança Opus aprovaram com achados, desenvolvedor Opus novo corrigiu, verificador Opus aprovou, testador Sonnet 6 de 6 sabotagens) e **E3.9 Parte 1 mergeada** (#173, `dd8661d`: revisor Opus com oráculo próprio, 0 divergências em 1.800 rodadas; segurança Opus aprovou com condições para as Partes 2 a 4, em `pendencias.md`; testador Sonnet 8 de 8). Respostas 96 a 178 do Gabriel na `main` (#174). Em andamento: **E3.12 Parte 2** (desenvolvedor Opus, `task/E3.12-round-page`, worktree `SacouAPP-E3.12`; o spike do login web no celular espera o Gabriel registrar o app Web no Firebase) e **E3.9 Parte 2** (rating, desenvolvedor Opus, `task/E3.9-rating`, worktree `SacouAPP-E3.9`). Próximo: revisão de cada PR; depois E3.11 Parte 1 (Opus) e E3.9 Parte 3.
 
 - 19/11/2026, tarde: **M4 fechado** ([relatório](relatorios/M4.md)). #172 mergeado e conferido no celular. M5: E3.12 Parte 1 (#171) em correção dos achados do revisor e da segurança (desenvolvedor Opus novo); E3.9 Parte 1 (desenvolvedor Opus, `task/E3.9-stats-engine`, worktree `SacouAPP-E3.9`). Próximo passo no [diário de 18/11](sessoes/2026-11-18.md).

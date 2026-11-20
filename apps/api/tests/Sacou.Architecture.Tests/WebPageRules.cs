@@ -12,9 +12,12 @@ internal static partial class WebPageRules
     /// <summary>Written by hand: a new page is a decision about what is anonymous, never a side effect (ADR 0040, D4).</summary>
     internal static readonly IReadOnlyList<string> Pages =
     [
+        "Invite.cshtml",
+        "Invite.cshtml.cs",
         "Round.cshtml",
         "Round.cshtml.cs",
         "Shared/_OpenGraph.cshtml",
+        "Shared/_SignInSheet.cshtml",
         "_ViewImports.cshtml",
     ];
 

@@ -84,7 +84,7 @@ public sealed class RoundPageTests(SacouApiFactory factory) : IClassFixture<Saco
         Assert.Contains("form-action 'none'", csp, StringComparison.Ordinal);
         Assert.DoesNotContain("unsafe", csp, StringComparison.Ordinal);
         Assert.Equal("nosniff", Header(response, "X-Content-Type-Options"));
-        Assert.Equal("no-referrer", Header(response, "Referrer-Policy"));
+        Assert.Equal("strict-origin", Header(response, "Referrer-Policy"));
         Assert.Equal("noindex, nofollow", Header(response, "X-Robots-Tag"));
         Assert.Equal("same-origin-allow-popups", Header(response, "Cross-Origin-Opener-Policy"));
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
