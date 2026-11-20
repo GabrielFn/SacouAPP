@@ -11,7 +11,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="referrer" content="no-referrer">
+    <meta name="referrer" content="strict-origin">
     <title>@(round?.GroupName ?? WebTexts.LinkInvalidTitle)</title>
     @await Html.PartialAsync("Shared/_OpenGraph", Model)
     @if (Model.Assets is { } assets)

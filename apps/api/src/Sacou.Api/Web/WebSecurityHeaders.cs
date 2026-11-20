@@ -15,6 +15,11 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     public const string BrandPrefix = "/brand";
     public const string HashedAssetsPrefix = "/web/assets/";
     public const string PageCache = "no-store";
+
+    // Only the origin leaves the page: the Firebase Web key is restricted by referrer (ADR 0070, D4), while the path
+    // (the round code) and the fragment (the invite token) never go to Google nor to an outside link.
+    public const string ReferrerPolicy = "strict-origin";
+
     public const string UnhashedFileCache = "no-cache, private";
     public const string ImmutableCache = "public, max-age=31536000, immutable";
     public const string BrandCache = "public, max-age=86400";
@@ -48,7 +53,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
         var headers = response.Headers;
         headers[HeaderNames.ContentSecurityPolicy] = policy.Value;
         headers[HeaderNames.XContentTypeOptions] = "nosniff";
-        headers["Referrer-Policy"] = "no-referrer";
+        headers["Referrer-Policy"] = ReferrerPolicy;
         headers["X-Robots-Tag"] = "noindex, nofollow";
         headers[HeaderNames.XFrameOptions] = "DENY";
         headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
@@ -65,7 +70,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     private static Task WriteFileHeaders(HttpResponse response, PathString path)
     {
         response.Headers[HeaderNames.XContentTypeOptions] = "nosniff";
-        response.Headers["Referrer-Policy"] = "no-referrer";
+        response.Headers["Referrer-Policy"] = ReferrerPolicy;
         if (response.StatusCode == StatusCodes.Status200OK)
         {
             response.Headers[HeaderNames.CacheControl] = path.StartsWithSegments(BrandPrefix, StringComparison.Ordinal)
