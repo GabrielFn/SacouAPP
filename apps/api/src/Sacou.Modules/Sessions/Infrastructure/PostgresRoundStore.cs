@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Sacou.Modules.Sessions.Domain.Series;
+using Sacou.Modules.Sessions.Infrastructure.Outbox;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.Infrastructure;
@@ -81,6 +82,7 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         try
         {
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await WriteOutboxAsync(changed.Value, cancellationToken).ConfigureAwait(false);
         }
         catch (DbUpdateException exception) when (IsSeriesDateTaken(exception))
         {
@@ -109,6 +111,25 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         if (change.RoundRowChanged || change.Round.NextSequence != before.NextSequence)
         {
             database.Rounds.Update(RowMapping.ToRow(change.Round, createdAt));
+        }
+    }
+
+    /// <summary>
+    /// One outbox row per promotion, in the transaction of the lock (ADR 0069, D1): no commit, no row. A key already there
+    /// is left alone (<c>ON CONFLICT DO NOTHING</c>), so a promotion is never told twice and never fails the write.
+    /// </summary>
+    private async Task WriteOutboxAsync(RoundChange change, CancellationToken cancellationToken)
+    {
+        foreach (var promoted in change.Events.OfType<WaitlistPromoted>())
+        {
+            var row = OutboxMessages.For(change.Round, promoted);
+            _ = await database.Database.ExecuteSqlAsync(
+                $"""
+                INSERT INTO sessions.outbox_messages (id, dedupe_key, type, payload, occurred_at, attempts)
+                VALUES ({row.Id}, {row.DedupeKey}, {row.Type}, {row.Payload}::jsonb, {row.OccurredAt}, {row.Attempts})
+                ON CONFLICT (dedupe_key) DO NOTHING
+                """,
+                cancellationToken).ConfigureAwait(false);
         }
     }
 

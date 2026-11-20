@@ -23,7 +23,7 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 | `SACOU_SENTRY_DSN` | Sentry | Secret Manager; `.env` | E5.2 |
 | `SENTRY_AUTH_TOKEN` | Sentry (envio de símbolos no build) | GitHub Actions | E5.2 |
 | `SACOU_POSTHOG_API_KEY` | PostHog | Secret Manager; `.env` | Pós-piloto (ADR 0046) |
-| `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | E3.11 |
+| `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | A definir (nenhuma tela do piloto manda e-mail; a E3.11 não usa) |
 | `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |
 | `SACOU_PIX_ENCRYPTION_KEY` | Chave de criptografia do Pix | Secret Manager; `.env` | E3.10 (pós-piloto) |
 

@@ -49,6 +49,7 @@ function defaults(): Answers {
     acceptInvite: none,
     listRounds: none,
     getRound: none,
+    getRoundSummary: none,
     createRound: none,
     updateRound: none,
     respondAttendance: none,
@@ -110,6 +111,7 @@ export function createFakeSacouApi(): FakeSacouApi {
     acceptInvite: (token) => answer("acceptInvite", [token]),
     listRounds: (groupId) => answer("listRounds", [groupId]),
     getRound: (groupId, roundId) => answer("getRound", [groupId, roundId]),
+    getRoundSummary: (groupId, roundId) => answer("getRoundSummary", [groupId, roundId]),
     createRound: (groupId, body) => answer("createRound", [groupId, body]),
     updateRound: (groupId, roundId, body) => answer("updateRound", [groupId, roundId, body]),
     respondAttendance: (groupId, roundId, response) =>

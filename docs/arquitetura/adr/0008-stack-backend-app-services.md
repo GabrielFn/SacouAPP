@@ -10,7 +10,7 @@ O produto precisa de um app para a quadra (vibração, push e tela ligada, inclu
 
 ## Decisão
 
-**Back-end.** Monólito modular em ASP.NET Core .NET 10 com Minimal APIs; PostgreSQL no Neon com EF Core; SignalR; Hangfire; Razor Pages para a página da rodada, no mesmo projeto; FirebaseAdmin; Expo Push; Railway plano Hobby. **A hospedagem foi substituída pelo Google Cloud Run no [ADR 0068](0068-deploy-cloud-run-neon.md) (18/11/2026).**
+**Back-end.** Monólito modular em ASP.NET Core .NET 10 com Minimal APIs; PostgreSQL no Neon com EF Core; SignalR; Hangfire; Razor Pages para a página da rodada, no mesmo projeto; FirebaseAdmin; Expo Push; Railway plano Hobby. **A hospedagem foi substituída pelo Google Cloud Run no [ADR 0068](0068-deploy-cloud-run-neon.md) (18/11/2026). O Hangfire foi substituído pelo Outbox drenado na requisição e pelo Cloud Tasks no [ADR 0069](0069-outbox-e-notificacoes.md) (20/11/2026).**
 
 **App.** Nativo desde a Fase 1: Expo, TypeScript strict, Expo Router, EAS, TanStack Query, Zustand, React Hook Form + Zod, cliente gerado do OpenAPI, Unistyles, expo-sqlite para o log de eventos offline, Reanimated, view-shot, expo-keep-awake e expo-haptics.
 

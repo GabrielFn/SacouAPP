@@ -163,5 +163,6 @@ export function createCourtSyncRunner(deps: CourtSyncRunnerDeps): CourtSync {
       };
     },
     countUnsent: () => countUnsent(deps),
+    countUnsentOfRound: (roundId) => countUnsent(deps, roundId),
   };
 }

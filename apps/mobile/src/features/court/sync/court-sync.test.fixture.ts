@@ -17,7 +17,7 @@ import { createListeners } from "../../../adapters/listeners";
 import type { SessionIdentity } from "../../../services/auth/auth-session";
 import { makeEnvelope, SESSION_A } from "../persistence/log-envelopes.test.fixture";
 import type { CourtAccount, CourtAccountRef } from "../ports/court-account";
-import type { CourtEventLog } from "../ports/court-event-log";
+import type { CourtEventLog, SessionToSync } from "../ports/court-event-log";
 import type { CourtSync } from "../ports/court-sync";
 import { createCourtSyncRunner } from "./court-sync-runner";
 import {
@@ -74,6 +74,7 @@ export interface SyncHarness {
 export interface SyncHarnessOptions {
   readonly log?: CourtEventLog;
   readonly online?: boolean;
+  readonly onAcknowledged?: (target: SessionToSync) => void;
 }
 
 export async function createSyncHarness(options: SyncHarnessOptions = {}): Promise<SyncHarness> {
@@ -98,6 +99,7 @@ export async function createSyncHarness(options: SyncHarnessOptions = {}): Promi
       clock,
       scheduler,
       random: { next: () => MIDDLE_JITTER },
+      onAcknowledged: options.onAcknowledged,
     });
   const current = { value: make() };
   current.value.start();

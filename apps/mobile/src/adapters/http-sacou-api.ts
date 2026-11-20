@@ -281,6 +281,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       execute((init) => client.POST("/v1/invites/accept", { ...init, body: { token } })),
     ...createLevelOperations(client, execute),
     ...createRoundOperations(client, execute),
+    ...createStatsOperations(client, execute),
     ...createProfileOperations(client, execute),
     ...createStatsOperations(client, execute),
     ...createAccountOperations(client, execute),

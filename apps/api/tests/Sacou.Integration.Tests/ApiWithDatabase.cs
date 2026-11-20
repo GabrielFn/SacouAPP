@@ -9,6 +9,9 @@ using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
 using Sacou.Modules.Matches.Contracts;
+using Sacou.Modules.Notifications;
+using Sacou.Modules.Notifications.Application;
+using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Sessions;
 using Sacou.Modules.Stats;
 using Sacou.Tests.TestSupport;
@@ -41,6 +44,10 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     private Func<Task>? beforeCourtStreamChanged;
 
+    private Func<NotificationRequest, Task>? afterNotificationRequested;
+
+    private Func<Task>? beforePump;
+
     public ApiWithDatabase(IntegrationDatabase database)
         : this(database, new Dictionary<string, string?>())
     {
@@ -66,6 +73,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
+
+    /// <summary>The push service the API talks to; null keeps the one the API registers (in part 1 of E3.11, the disabled one).</summary>
+    internal IPushGateway? PushGateway { get; init; }
 
     /// <summary>The API's clock: the real time, moved to wherever a test sets it (tokens are minted by it too, so they stay valid).</summary>
     internal ShiftableClock Clock { get; } = new();
@@ -97,6 +107,23 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref beforeCourtStreamChanged, value);
     }
 
+    /// <summary>
+    /// Runs after each <see cref="INotificationRequests.RequestAsync"/> of the relay has written, so a test can fail the
+    /// relay between the Notifications' insert and the outbox's <c>processed_at</c> (I6 of E3.11).
+    /// </summary>
+    internal Func<NotificationRequest, Task>? AfterNotificationRequested
+    {
+        get => Volatile.Read(ref afterNotificationRequested);
+        set => Volatile.Write(ref afterNotificationRequested, value);
+    }
+
+    /// <summary>Runs before each <see cref="INotificationPump.RunAsync"/>, so a test can make the drain fail after the write's commit.</summary>
+    internal Func<Task>? BeforePump
+    {
+        get => Volatile.Read(ref beforePump);
+        set => Volatile.Write(ref beforePump, value);
+    }
+
     /// <summary>Applies the Identity, Groups, Sessions, Matches and then Stats migrations, through the entry points Program uses, in its order.</summary>
     public async Task MigrateAsync()
     {
@@ -108,6 +135,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             await SessionsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await MatchesModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
             await StatsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
+            await NotificationsModule.MigrateAsync(Services, TestContext.Current.CancellationToken);
         }
         finally
         {
@@ -132,10 +160,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.ConfigureServices(HookMembership);
         builder.ConfigureServices(HookCurrentUser);
         builder.ConfigureServices(HookCourtStreamChanged);
+        builder.ConfigureServices(HookNotifications);
         builder.ConfigureServices(services =>
         {
             _ = services.RemoveAll<TimeProvider>();
             _ = services.AddSingleton<TimeProvider>(Clock);
+            if (PushGateway is { } gateway)
+            {
+                _ = services.RemoveAll<IPushGateway>();
+                _ = services.AddSingleton(gateway);
+            }
         });
         builder.ConfigureServices(services => services
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
@@ -174,11 +208,26 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.AddScoped<ICourtStreamChanged>(_ => new HookedCourtStreamChanged(() => BeforeCourtStreamChanged));
     }
 
+    /// <summary>Wraps the Notifications' request handler and pump in pass-throughs that run <see cref="AfterNotificationRequested"/> and <see cref="BeforePump"/>.</summary>
+    private void HookNotifications(IServiceCollection services)
+    {
+        var requests = services.Single(descriptor => descriptor.ServiceType == typeof(INotificationRequests));
+        var requestsType = requests.ImplementationType ?? throw new InvalidOperationException("INotificationRequests is registered by type.");
+        var pump = services.Single(descriptor => descriptor.ServiceType == typeof(INotificationPump));
+        var pumpType = pump.ImplementationType ?? throw new InvalidOperationException("INotificationPump is registered by type.");
+        _ = services.Remove(requests);
+        _ = services.Remove(pump);
+        _ = services.AddScoped<INotificationRequests>(provider => new HookedNotificationRequests(
+            (INotificationRequests)ActivatorUtilities.CreateInstance(provider, requestsType), () => AfterNotificationRequested));
+        _ = services.AddScoped<INotificationPump>(provider => new HookedNotificationPump(
+            (INotificationPump)ActivatorUtilities.CreateInstance(provider, pumpType), () => BeforePump));
+    }
+
     private static Dictionary<string, string?> BuildRoomyRateLimits()
     {
         const string Section = "RateLimiting";
         const string Roomy = "1000000";
-        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink"];
+        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink", "PushDevice"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
         limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;

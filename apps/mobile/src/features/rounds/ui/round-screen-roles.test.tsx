@@ -103,6 +103,28 @@ describe("Tirar only for who manages the rounds", () => {
     expect(dispatch).toHaveBeenCalledWith({ type: "remove-asked", memberId: "m-x" });
   });
 
+  test("screens 06 and 26 both carry the link to the summary of the round (E4.12)", () => {
+    const players = PlayerRoundScreen({
+      group: { groupId: "g", name: "Racha", role: "player" } as Group,
+      round,
+      settings,
+      members,
+      model,
+    });
+    const admins = AdminRoundScreen({
+      groupId: "g",
+      group: { name: "Racha", role: "admin" } as Group,
+      round,
+      settings,
+      members,
+      model,
+    });
+    for (const tree of [players, admins]) {
+      const [link] = findNamed(tree, "SummaryLink");
+      expect(link?.props.round).toBe(round);
+    }
+  });
+
   test.each([
     ["player", PlayerRoundScreen],
     ["scorekeeper", PlayerRoundScreen],
