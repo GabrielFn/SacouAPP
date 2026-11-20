@@ -12,6 +12,7 @@ export function createRoundOperations(
   | "getRound"
   | "createRound"
   | "updateRound"
+  | "closeRound"
   | "respondAttendance"
   | "setMemberAttendance"
   | "addGuest"
@@ -38,6 +39,13 @@ export function createRoundOperations(
           ...init,
           ...round(groupId, roundId),
           body,
+        }),
+      ),
+    closeRound: (groupId, roundId) =>
+      execute((init) =>
+        client.POST("/v1/groups/{groupId}/rounds/{roundId}/close", {
+          ...init,
+          ...round(groupId, roundId),
         }),
       ),
     respondAttendance: (groupId, roundId, response) =>

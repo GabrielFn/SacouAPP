@@ -1,8 +1,11 @@
+import { useRoundClosed } from "../../../features/rounds/hooks/use-round-closed";
 import type { TeamSide } from "@sacou/match-engine";
 import { useEffect } from "react";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
+import { endRoundView } from "../../../features/court/end-round/end-round-view";
+import { useEndRound } from "../../../features/court/end-round/use-end-round";
 import { useMatchEnd } from "../../../features/court/hooks/use-match-end";
 import { nextCourtRoute } from "../../../features/court/model/court-route-step";
 import {
@@ -26,6 +29,8 @@ export default function MatchEndRoute() {
   const { courtRoster } = useServices();
   const { view, dispatch, retry } = useCourtSession();
   const timeline = view.status === "ready" ? view.timeline : null;
+  const onRoundClosed = useRoundClosed();
+  const endRound = useEndRound(route.params.courtSessionId, onRoundClosed);
   const screen = useMatchEnd(route.params.courtSessionId, timeline, dispatch);
   const phase = timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline));
   const step = nextCourtRoute("match-end", phase, true);
@@ -75,6 +80,10 @@ export default function MatchEndRoute() {
       onToggle={screen.toggle}
       onConfirm={screen.start}
       onLeave={route.leave}
+      endRound={endRoundView(endRound.state)}
+      onEndRound={() => {
+        endRound.request(null);
+      }}
     />
   );
 }

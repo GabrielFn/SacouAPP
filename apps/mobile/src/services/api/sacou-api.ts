@@ -44,6 +44,8 @@ export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
 /** The numbers of a finished round, computed by the server (E3.9); the app only formats them (screen 12). */
 export type RoundSummaryReport = Schemas["RoundSummaryReport"];
+/** The instants the server marked when the round was closed (E3.18): `endsAt` moved to `closedAt`. */
+export type CloseRoundAnswer = Schemas["CloseRoundResponse"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
 export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
 export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
@@ -144,6 +146,11 @@ export interface SacouApi {
     roundId: string,
     response: AttendanceResponse,
   ): Promise<ApiResult<AttendanceAnswer>>;
+  /**
+   * Ends the round now and opens the votation (E3.18). Idempotent; `WriteCourt`. 409
+   * `sessions.round-not-started` before the start and `sessions.round-canceled` for a canceled one.
+   */
+  closeRound(groupId: string, roundId: string): Promise<ApiResult<CloseRoundAnswer>>;
   /** Marks another member (admin and co-admin only): the server decides the place. */
   setMemberAttendance(
     member: MemberRef & { readonly roundId: string },

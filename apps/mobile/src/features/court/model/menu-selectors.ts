@@ -34,6 +34,14 @@ export function menuSubtitle(timeline: CourtSessionTimeline, roster: CourtRoster
   );
 }
 
+/** "12 × 10": the score of the match in play, which "Encerrar rodada" leaves out; `null` without a match. */
+export function openMatchScore(timeline: CourtSessionTimeline): string | null {
+  const match = stateOfTimeline(timeline).currentMatch;
+  if (match === null) return null;
+  const score = match.currentSet?.score ?? { a: 0, b: 0 };
+  return strings.court.endRound.score(score.a, score.b);
+}
+
 /** What "Encerrar partida" does and says: derived from the match, never kept. */
 export type EndMatchSummary =
   /** The set is decided and waiting: the way is to confirm it (screen 25). */

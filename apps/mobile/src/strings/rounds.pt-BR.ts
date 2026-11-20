@@ -236,6 +236,8 @@ export const roundsStrings = {
     confirmed: (count: string, amount: number) => `${count} ${confirmedNoun(amount)}`,
     withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
     next: (when: string) => `Próxima: ${when}`,
+    recent: (when: string) => `Rodada de ${when}`,
+    seeSummary: "Ver resumo",
     editRound: "Editar rodada",
     createRound: "Criar rodada",
     stripLabel: (day: string, hour: string) => `${day}, ${hour}`,

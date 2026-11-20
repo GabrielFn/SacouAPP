@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 
 import type { MyGroup } from "../../../services/api/sacou-api";
@@ -17,22 +18,25 @@ export interface HomeRoundCardsProps {
   readonly groups: readonly MyGroup[];
   readonly emptyActions: readonly ScreenAction[];
   readonly onOpenRound: (groupId: string, roundId: string) => void;
+  readonly onOpenSummary: (groupId: string, roundId: string) => void;
 }
 
 export interface HomeRoundCardProps {
   readonly groupName: string;
   readonly round: RoundCardModel;
-  readonly onOpenRound: (groupId: string, roundId: string) => void;
+  /** The foot of the card: the status of the next round, or "Ver resumo" for a round that took place. */
+  readonly footer: ReactNode;
+  readonly onOpen: (groupId: string, roundId: string) => void;
 }
 
-function HomeRoundCard({ groupName, round, onOpenRound }: HomeRoundCardProps) {
+function HomeRoundCard({ groupName, round, footer, onOpen }: HomeRoundCardProps) {
   const { colors, tokens } = useTheme();
   return (
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={groupName}
       onPress={() => {
-        onOpenRound(round.groupId, round.roundId);
+        onOpen(round.groupId, round.roundId);
       }}
       style={{
         flexDirection: "row",
@@ -52,20 +56,45 @@ function HomeRoundCard({ groupName, round, onOpenRound }: HomeRoundCardProps) {
         <Text variant="muted" numberOfLines={1}>
           {round.venue}
         </Text>
-        <RoundCardStatus round={round} />
+        {footer}
       </View>
     </Pressable>
   );
 }
 
+export interface RecentRoundFooterProps {
+  readonly round: RoundCardModel;
+}
+
+/** "Rodada de ter, 3/11" and the link "Ver resumo" (question 153). */
+function RecentRoundFooter({ round }: RecentRoundFooterProps) {
+  const { tokens } = useTheme();
+  return (
+    <View style={{ marginTop: "auto", gap: tokens.spacing.xs, paddingTop: tokens.spacing.xs }}>
+      <Text variant="muted">{round.recentText}</Text>
+      <Text variant="bodyStrong" accessibilityRole="link">
+        {strings.rounds.cards.seeSummary}
+      </Text>
+    </View>
+  );
+}
+
 /** The home (03): "N rodadas essa semana." and the next round of each group, the soonest first. */
-export function HomeRoundCards({ groups, emptyActions, onOpenRound }: HomeRoundCardsProps) {
+export function HomeRoundCards({
+  groups,
+  emptyActions,
+  onOpenRound,
+  onOpenSummary,
+}: HomeRoundCardsProps) {
   const { tokens } = useTheme();
   const cards = useRoundCards(groups);
   const withRound = cards.groups.flatMap(({ group, round }) =>
     round === null ? [] : [{ name: group.name, round }],
   );
-  if (withRound.length === 0) {
+  const withSummary = cards.groups.flatMap(({ group, recent }) =>
+    recent === null ? [] : [{ name: group.name, recent }],
+  );
+  if (withRound.length === 0 && withSummary.length === 0) {
     return (
       <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={emptyActions} />
     );
@@ -73,12 +102,22 @@ export function HomeRoundCards({ groups, emptyActions, onOpenRound }: HomeRoundC
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
       {cards.weekText === null ? null : <Text variant="muted">{cards.weekText}</Text>}
+      {withSummary.map(({ name, recent }) => (
+        <HomeRoundCard
+          key={`summary-${recent.roundId}`}
+          groupName={name}
+          round={recent}
+          footer={<RecentRoundFooter round={recent} />}
+          onOpen={onOpenSummary}
+        />
+      ))}
       {withRound.map(({ name, round }) => (
         <HomeRoundCard
           key={round.groupId}
           groupName={name}
           round={round}
-          onOpenRound={onOpenRound}
+          footer={<RoundCardStatus round={round} />}
+          onOpen={onOpenRound}
         />
       ))}
     </View>

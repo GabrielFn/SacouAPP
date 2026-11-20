@@ -276,6 +276,14 @@ const OPERATIONS: readonly Operation[] = [
     { localDate: null, localTime: "19:00", venue: null, settings: {} },
   ],
   [
+    "closeRound",
+    (a) => a.closeRound(GROUP, ROUND),
+    "POST",
+    "/v1/groups/{groupId}/rounds/{roundId}/close",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/close`,
+    null,
+  ],
+  [
     "respondAttendance",
     (a) => a.respondAttendance(GROUP, ROUND, "going"),
     "PUT",
@@ -314,8 +322,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 32 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(32);
+  test("the table covers the 33 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(33);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {
