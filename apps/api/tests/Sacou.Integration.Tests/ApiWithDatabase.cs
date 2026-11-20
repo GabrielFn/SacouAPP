@@ -198,14 +198,14 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             () => Interlocked.Exchange(ref afterCurrentUserResolved, null)));
     }
 
-    /// <summary>Wraps the Stats' listener of the court writes in a pass-through that runs <see cref="BeforeCourtStreamChanged"/>.</summary>
+    /// <summary>
+    /// No module listens to the court writes since E3.9 part 4b (the Stats rebuilds on the read), so the test adds a
+    /// listener of its own that runs <see cref="BeforeCourtStreamChanged"/>: the seam and its log stay tested.
+    /// </summary>
     private void HookCourtStreamChanged(IServiceCollection services)
     {
-        var original = services.Single(descriptor => descriptor.ServiceType == typeof(ICourtStreamChanged));
-        var implementation = original.ImplementationType ?? throw new InvalidOperationException("ICourtStreamChanged is registered by type.");
-        _ = services.Remove(original);
-        _ = services.AddScoped<ICourtStreamChanged>(provider => new HookedCourtStreamChanged(
-            (ICourtStreamChanged)ActivatorUtilities.CreateInstance(provider, implementation), () => BeforeCourtStreamChanged));
+        Assert.DoesNotContain(services, descriptor => descriptor.ServiceType == typeof(ICourtStreamChanged));
+        _ = services.AddScoped<ICourtStreamChanged>(_ => new HookedCourtStreamChanged(() => BeforeCourtStreamChanged));
     }
 
     /// <summary>Wraps the Notifications' request handler and pump in pass-throughs that run <see cref="AfterNotificationRequested"/> and <see cref="BeforePump"/>.</summary>

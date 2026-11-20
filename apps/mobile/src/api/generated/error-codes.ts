@@ -76,6 +76,7 @@ export const apiErrorCodes = [
   "sessions.round-not-found",
   "sessions.series-limit",
   "sessions.series-not-found",
+  "stats.year-invalid",
 ] as const;
 
 export type ApiErrorCode = (typeof apiErrorCodes)[number];

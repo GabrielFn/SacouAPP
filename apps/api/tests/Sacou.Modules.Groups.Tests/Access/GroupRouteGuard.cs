@@ -5,8 +5,8 @@ using Sacou.Modules.Groups.Access;
 namespace Sacou.Modules.Groups.Tests.Access;
 
 /// <summary>
-/// A4 (ADR 0040, D3; ADR 0043, D9; ADR 0060, D5): every route with a group id has exactly one of the three access filters (the Groups', the
-/// Sessions' or the Matches') and exactly one permission or capability; every
+/// A4 (ADR 0040, D3; ADR 0043, D9; ADR 0060, D5; ADR 0071): every route with a group id has exactly one of the four access filters (the
+/// Groups', the Sessions', the Matches' or the Stats') and exactly one permission or capability; every
 /// other route of the API is on a closed list. Like the fallback policy of E3.1, a forgotten line fails.
 /// </summary>
 internal static class GroupRouteGuard
@@ -18,6 +18,8 @@ internal static class GroupRouteGuard
     private const string RoundCapabilityMarker = "RoundCapabilityMetadata";
     private const string CourtFilterMarker = "CourtAccessFilterMetadata";
     private const string CourtCapabilityMarker = "CourtCapabilityMetadata";
+    private const string StatsFilterMarker = "StatsAccessFilterMetadata";
+    private const string StatsCapabilityMarker = "StatsCapabilityMetadata";
 
     /// <summary>Routes without a group id, written by hand. A new one means a reviewed change here.</summary>
     public static readonly IReadOnlySet<string> RoutesOutsideTheGroupFilter = new HashSet<string>(StringComparer.Ordinal)
@@ -30,6 +32,8 @@ internal static class GroupRouteGuard
         "GET /v1/me/export",
         "GET /v1/me/deletion-blockers",
 
+        // The person's own season (E3.9 part 4b, ADR 0071): resolved from the token, no group id.
+        "GET /v1/me/stats",
         // The caller's own phones and notifications (E3.11, ADR 0069): by the signed-in account only.
         "PUT /v1/me/push-devices/{installationId:guid}",
         "DELETE /v1/me/push-devices/{installationId:guid}",
@@ -73,18 +77,23 @@ internal static class GroupRouteGuard
         var groupFilter = endpoint.Metadata.GetMetadata<GroupAccessFilterMetadata>() is not null;
         var roundFilter = HasMarker(endpoint, RoundFilterMarker);
         var courtFilter = HasMarker(endpoint, CourtFilterMarker);
-        return (groupFilter, roundFilter, courtFilter) switch
+        var statsFilter = HasMarker(endpoint, StatsFilterMarker);
+        return (groupFilter, roundFilter, courtFilter, statsFilter) switch
         {
-            (false, false, false) => [$"{route}: without the group access filter"],
-            (true, false, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
-            (false, true, false) => ExactlyOne(route, CountMarkers(endpoint, RoundCapabilityMarker), "capabilities"),
-            (false, false, true) => ExactlyOne(route, CountMarkers(endpoint, CourtCapabilityMarker), "capabilities"),
+            (false, false, false, false) => [$"{route}: without the group access filter"],
+            (true, false, false, false) => ExactlyOne(route, endpoint.Metadata.GetOrderedMetadata<GroupPermissionMetadata>().Count, "permissions"),
+            (false, true, false, false) => ExactlyOne(route, CountMarkers(endpoint, RoundCapabilityMarker), "capabilities"),
+            (false, false, true, false) => ExactlyOne(route, CountMarkers(endpoint, CourtCapabilityMarker), "capabilities"),
+            (false, false, false, true) => ExactlyOne(route, CountMarkers(endpoint, StatsCapabilityMarker), "capabilities"),
             _ => [$"{route}: has more than one access filter"],
         };
     }
 
     /// <summary>Whether the route sits behind the Matches' court access filter.</summary>
     public static bool HasCourtFilter(RouteEndpoint endpoint) => HasMarker(endpoint, CourtFilterMarker);
+
+    /// <summary>Whether the route sits behind the Stats' access filter.</summary>
+    public static bool HasStatsFilter(RouteEndpoint endpoint) => HasMarker(endpoint, StatsFilterMarker);
 
     private static bool HasMarker(RouteEndpoint endpoint, string marker) => CountMarkers(endpoint, marker) > 0;
 

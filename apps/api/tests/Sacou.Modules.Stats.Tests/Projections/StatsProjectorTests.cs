@@ -104,6 +104,20 @@ public sealed class StatsProjectorTests
     }
 
     [Fact]
+    public async Task ExportRead_RebuildsTheStaleRound_AndFoldsNoPool()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+
+        var listed = await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+
+        Assert.Equal(RoundId, Assert.Single(listed).Facts.RoundId);
+        Assert.Equal(1, courts.Summaries);
+        Assert.Equal(0, store.Swaps);
+        Assert.Empty(store.Ratings);
+    }
+
+    [Fact]
     public async Task Pool_IsSwappedOnlyWhenItsInputsChange_AndTheGradeIsAnInput()
     {
         rounds.Add(Round());
@@ -171,6 +185,69 @@ public sealed class StatsProjectorTests
         Assert.Equal(2, store.Members.Count);
         Assert.Equal(2, store.Ratings.Count);
         Assert.All(store.Ratings, row => Assert.Equal(1, row.MatchesRated));
+    }
+
+    /// <summary>
+    /// Condition 1 of the review of part 4a: the read of a round replays only that round; while another counted round
+    /// of the group is stale, the pools wait, and the read that freshens the last one folds them.
+    /// </summary>
+    [Fact]
+    public async Task RoundRead_ReplaysOnlyItsRound_AndThePoolsWaitForTheLastStaleRound()
+    {
+        var later = Guid.Parse("00000000-0000-4000-8000-000000000012");
+        rounds.Add(Round());
+        rounds.Add(Round() with { RoundId = later, StartsAt = StartsAt.AddDays(7) });
+        courts.Stream(RoundId, StreamId, eventCount: 4);
+        courts.Stream(later, Guid.NewGuid(), eventCount: 4);
+
+        _ = await Projector().GetRoundAsync(GroupId, later, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, courts.Summaries);
+        Assert.Equal(0, store.Swaps);
+        Assert.Equal([later], store.Projections.Keys);
+
+        _ = await Projector().GetRoundAsync(GroupId, RoundId, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, courts.Summaries);
+        Assert.Equal(2, store.Swaps);
+        Assert.All(store.Ratings, row => Assert.Equal(2, row.MatchesRated));
+    }
+
+    /// <summary>A canceled round left stale is not waited for: it is in no pool.</summary>
+    [Fact]
+    public async Task StaleCanceledRound_DoesNotHoldThePools()
+    {
+        var canceled = Guid.Parse("00000000-0000-4000-8000-000000000013");
+        rounds.Add(Round());
+        rounds.Add(Round() with { RoundId = canceled, State = RoundState.Canceled });
+        courts.Stream(RoundId, StreamId, eventCount: 4);
+        courts.Stream(canceled, Guid.NewGuid(), eventCount: 4);
+
+        _ = await Projector().GetRoundAsync(GroupId, RoundId, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, courts.Summaries);
+        Assert.Equal(2, store.Swaps);
+    }
+
+    /// <summary>
+    /// Condition 2 of the review of part 4a: a rebuild that lost a race writes an older key and other ratings after the
+    /// newer ones; nothing trusts them, so the next read redoes the round and the pools to the same values.
+    /// </summary>
+    [Fact]
+    public async Task OlderWriteAfterANewerOne_IsNeverServed_AndTheNextReadRedoesIt()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        var fresh = await Projector().GetRoundAsync(GroupId, RoundId, TestContext.Current.CancellationToken);
+        var ratings = store.Ratings.Select(row => (row.MemberId, row.Mu, row.Sigma)).ToList();
+
+        store.LoseTheRace();
+        var again = await Projector().GetRoundAsync(GroupId, RoundId, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, courts.Summaries);
+        Assert.Equal(fresh!.Summary.Players, again!.Summary.Players, (left, right) => left.MemberId == right.MemberId && left.PlusMinus == right.PlusMinus);
+        Assert.Single(again.Summary.FinishedMatches);
+        Assert.Equal(ratings, store.Ratings.Select(row => (row.MemberId, row.Mu, row.Sigma)));
     }
 
     [Fact]
@@ -261,16 +338,19 @@ public sealed class StatsProjectorTests
 
     private sealed class FakeCourts : ICourtSessionResults
     {
-        private CourtStreamHead? head;
+        private readonly Dictionary<Guid, CourtStreamHead> heads = [];
 
         public int Summaries { get; private set; }
 
-        public void Stream(Guid courtSessionId, int eventCount) => head = new CourtStreamHead(RoundId, courtSessionId, eventCount);
+        public void Stream(Guid courtSessionId, int eventCount) => Stream(RoundId, courtSessionId, eventCount);
 
-        public Task<CourtStreamHead?> FindOfRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken) => Task.FromResult(head);
+        public void Stream(Guid roundId, Guid courtSessionId, int eventCount) => heads[roundId] = new CourtStreamHead(roundId, courtSessionId, eventCount);
+
+        public Task<CourtStreamHead?> FindOfRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken) =>
+            Task.FromResult(heads.GetValueOrDefault(roundId));
 
         public Task<IReadOnlyList<CourtStreamHead>> ListOfGroupAsync(Guid groupId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<CourtStreamHead>>(head is null ? [] : [head]);
+            Task.FromResult<IReadOnlyList<CourtStreamHead>>([.. heads.Values]);
 
         public Task<CourtSessionResults> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken)
         {
@@ -310,6 +390,51 @@ public sealed class StatsProjectorTests
                     FinishedMatches = row.FinishedMatches,
                     RebuiltAt = row.RebuiltAt,
                     Summary = row.Summary,
+                };
+            }
+        }
+
+        /// <summary>What an older rebuild leaves when it lands last: the old facts of the round, an old pool hash, other ratings.</summary>
+        public void LoseTheRace()
+        {
+            foreach (var (roundId, row) in Projections.ToList())
+            {
+                Projections[roundId] = new RoundProjectionRow
+                {
+                    RoundId = row.RoundId,
+                    GroupId = row.GroupId,
+                    CourtSessionId = row.CourtSessionId,
+                    EventCount = row.EventCount,
+                    ProjectionVersion = row.ProjectionVersion,
+                    FactsHash = "older",
+                    StartsAt = row.StartsAt,
+                    LocalDate = row.LocalDate,
+                    Counts = row.Counts,
+                    Modality = row.Modality,
+                    FinishedMatches = 0,
+                    RebuiltAt = row.RebuiltAt,
+                    Summary = SummaryJson.Write(SessionSummary.Empty),
+                };
+            }
+
+            foreach (var key in pools.Keys.ToList())
+            {
+                pools[key] = new RatingPoolRow { GroupId = GroupId, Pool = key, InputsHash = "older", ParamsVersion = 1, RebuiltAt = StartsAt };
+            }
+
+            for (var index = 0; index < Ratings.Count; index++)
+            {
+                var row = Ratings[index];
+                Ratings[index] = new MemberRatingRow
+                {
+                    GroupId = row.GroupId,
+                    Pool = row.Pool,
+                    MemberId = row.MemberId,
+                    Mu = 1,
+                    Sigma = 1,
+                    SeedTenths = row.SeedTenths,
+                    SeedSource = row.SeedSource,
+                    MatchesRated = row.MatchesRated,
                 };
             }
         }

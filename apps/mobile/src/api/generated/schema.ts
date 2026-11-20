@@ -145,64 +145,16 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/v1/me/push-devices/{installationId}": {
+  "/v1/me/stats": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put: operations["RegisterPushDevice"];
-    post?: never;
-    delete: operations["RemovePushDevice"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/me/notifications": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["ListNotifications"];
+    get: operations["GetMyStats"];
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/me/notifications/{notificationId}/read": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["MarkNotificationRead"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/me/notifications/read-all": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["MarkAllNotificationsRead"];
     delete?: never;
     options?: never;
     head?: never;
@@ -625,6 +577,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["GetRoundSummary"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -930,27 +898,51 @@ export interface components {
       /** Format: double */
       suggestedLevel: null | number;
     };
-    NotificationItem: {
-      /** Format: uuid */
-      id: string;
-      kind: components["schemas"]["NotificationItemKind"];
+    MyStatsGroupReport: {
       /** Format: uuid */
       groupId: string;
-      /** Format: uuid */
-      roundId: string;
-      title: string;
-      subtitle: string;
-      /** Format: date-time */
-      createdAt: string;
-      read: boolean;
-    };
-    /** @enum {string} */
-    NotificationItemKind: "waitlistPromoted";
-    NotificationListResponse: {
-      items: components["schemas"]["NotificationItem"][];
+      groupName: null | string;
+      modality: null | string;
       /** Format: int32 */
-      unreadCount: number;
-      nextCursor: null | string;
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      mvpCount: number;
+      /** Format: int32 */
+      rounds: number;
+      /** Format: int32 */
+      roundsHeld: number;
+    };
+    MyStatsReport: {
+      /** Format: int32 */
+      year: number;
+      total: components["schemas"]["MyStatsTotalsReport"];
+      groups: components["schemas"]["MyStatsGroupReport"][];
+    };
+    MyStatsTotalsReport: {
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      mvpCount: number;
+      /** Format: int32 */
+      rounds: number;
+      /** Format: int32 */
+      roundsHeld: number;
     };
     /** @enum {string} */
     PlayingPosition: "setter" | "outsideHitter" | "opposite" | "middleBlocker" | "libero";
@@ -972,12 +964,6 @@ export interface components {
       status: number;
       code?: string;
       traceId?: string;
-    };
-    /** @enum {string} */
-    PushDevicePlatform: "android" | "ios";
-    RegisterPushDeviceRequest: {
-      token: null | string;
-      platform: null | components["schemas"]["PushDevicePlatform"];
     };
     RenameGroupRequest: {
       name: null | string;
@@ -1051,6 +1037,19 @@ export interface components {
     };
     /** @enum {string} */
     RoundStatus: "scheduled" | "canceled";
+    RoundSummaryReport: {
+      /** Format: uuid */
+      roundId: string;
+      modality: string;
+      /** Format: int32 */
+      mvpFormulaVersion: number;
+      /** Format: int32 */
+      finishedMatches: number;
+      mvp: null | components["schemas"]["SummaryMvpReport"];
+      sides: components["schemas"]["SummarySidesReport"];
+      players: components["schemas"]["SummaryPlayerReport"][];
+      ranking: null | components["schemas"]["SummaryStandingReport"][];
+    };
     RoundSummaryResponse: {
       /** Format: uuid */
       roundId: string;
@@ -1105,10 +1104,84 @@ export interface components {
       /** Format: uuid */
       userId: string;
     };
+    SummaryLongestStreakReport: {
+      side: components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      longestWinStreak: number;
+    };
     SummaryMe: {
       status: null | components["schemas"]["AttendanceStatus"];
       /** Format: int32 */
       position: null | number;
+    };
+    SummaryMostWinsReport: {
+      side: components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      wins: number;
+    };
+    /** @enum {string} */
+    SummaryMvpKind: "player" | "team";
+    SummaryMvpReport: {
+      kind: components["schemas"]["SummaryMvpKind"];
+      memberIds: string[];
+      side: null | components["schemas"]["SummarySide"];
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+    };
+    SummaryPlayerReport: {
+      /** Format: uuid */
+      memberId: string;
+      /** Format: int32 */
+      matchesPlayed: number;
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      undecided: number;
+      /** Format: int32 */
+      plusMinus: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      pointsByKind: components["schemas"]["SummaryPointsByKindReport"];
+      mainSide: null | components["schemas"]["SummarySide"];
+    };
+    SummaryPointsByKindReport: {
+      /** Format: int32 */
+      attack: number;
+      /** Format: int32 */
+      block: number;
+      /** Format: int32 */
+      ace: number;
+      /** Format: int32 */
+      other: number;
+    };
+    /** @enum {string} */
+    SummarySide: "a" | "b";
+    SummarySidesReport: {
+      mostWins: null | components["schemas"]["SummaryMostWinsReport"];
+      longestStreak: null | components["schemas"]["SummaryLongestStreakReport"];
+    };
+    SummaryStandingReport: {
+      memberIds: string[];
+      /** Format: int32 */
+      wins: number;
+      /** Format: int32 */
+      losses: number;
+      /** Format: int32 */
+      undecided: number;
+      /** Format: int32 */
+      longestWinStreak: number;
+      /** Format: int32 */
+      pointsFor: number;
+      /** Format: int32 */
+      pointsAgainst: number;
     };
     TakeOverCourtRequest: {
       /** Format: uuid */
@@ -2104,150 +2177,10 @@ export interface operations {
       };
     };
   };
-  RegisterPushDevice: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        installationId: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegisterPushDeviceRequest"];
-      };
-    };
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description A body that does not bind (no code), or a rule refusal (with code). */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description Not signed in, or the ID token was refused. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ApiProblem"];
-        };
-      };
-      /** @description The body is over the route's limit. */
-      413: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
-      429: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
-      503: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-    };
-  };
-  RemovePushDevice: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        installationId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not signed in, or the ID token was refused. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ApiProblem"];
-        };
-      };
-      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
-      429: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
-      503: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-    };
-  };
-  ListNotifications: {
+  GetMyStats: {
     parameters: {
       query?: {
-        cursor?: string;
+        year?: string;
       };
       header?: never;
       path?: never;
@@ -2261,7 +2194,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["NotificationListResponse"];
+          "application/json": components["schemas"]["MyStatsReport"];
         };
       };
       /** @description Bad Request */
@@ -2272,133 +2205,6 @@ export interface operations {
         content: {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
-      };
-      /** @description Not signed in, or the ID token was refused. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ApiProblem"];
-        };
-      };
-      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
-      429: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
-      503: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-    };
-  };
-  MarkNotificationRead: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        notificationId: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not signed in, or the ID token was refused. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ApiProblem"];
-        };
-      };
-      /** @description Not Found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ApiProblem"];
-        };
-      };
-      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
-      429: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
-      503: {
-        headers: {
-          /** @description Seconds to wait before trying again. */
-          "Retry-After": number;
-          [name: string]: unknown;
-        };
-        content: {
-          "application/problem+json": components["schemas"]["ProblemDetails"];
-        };
-      };
-    };
-  };
-  MarkAllNotificationsRead: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Not signed in, or the ID token was refused. */
       401: {
@@ -5431,6 +5237,85 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["GetCourtSessionResponse"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  GetRoundSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RoundSummaryReport"];
         };
       };
       /** @description Not signed in, or the ID token was refused. */

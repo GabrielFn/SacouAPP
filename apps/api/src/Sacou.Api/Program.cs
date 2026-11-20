@@ -70,6 +70,7 @@ app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
 app.MapSessionsEndpoints();
 app.MapMatchesEndpoints();
+app.MapStatsEndpoints();
 app.MapNotificationsEndpoints();
 // GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
 app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);

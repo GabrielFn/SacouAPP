@@ -62,6 +62,8 @@ public static class GroupsModule
         services.AddScoped<IRoundListNames, StoreRoundListNames>();
         services.AddScoped<IGroupSettingsReader, StoreGroupSettingsReader>();
         services.AddScoped<IMemberLevels, StoreMemberLevels>();
+        // The memberships of the person with the name and modality of each group, for their own stats (E3.9).
+        services.AddScoped<IUserMemberships, StoreUserMemberships>();
         // The person's own data, for the Identity routes of E3.16 (ADR 0056, D6): Groups implements the Identity ports.
         services.AddScoped<IAccountExportSection, GroupsExportSection>();
         services.AddScoped<IAccountDeletionBlockers, GroupsDeletionBlockers>();

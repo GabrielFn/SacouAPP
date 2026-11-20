@@ -1,8 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Nodes;
-using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
-using Sacou.Modules.Matches.Contracts;
 using Sacou.Integration.Tests.Groups;
 using Sacou.Integration.Tests.Matches;
 using Sacou.Integration.Tests.Sessions;
@@ -12,30 +10,43 @@ using A = Sacou.Integration.Tests.Groups.GroupActor;
 namespace Sacou.Integration.Tests.Stats;
 
 /// <summary>
-/// 5.4 of E3.9 (part 4a) on the real API and a real Postgres: a write that finished or undid a match rebuilds the
-/// projection of its round and the pools of its group after the commit; a correction recalculates everything; a late
-/// round gives the same rating as from scratch; the seed is the current level; a failing listener never fails the write.
-/// The rating is read only straight from the table, as the internal reader of a test (no route returns it).
+/// 5.4 of E3.9 on the real API and a real Postgres. Since part 4b (condition 1 of the review of 4a) nothing is rebuilt
+/// on the write of the court: the read rebuilds the stale round, and the pools once every counted round is fresh. A
+/// correction recalculates everything; a late round gives the same rating as from scratch; the seed is the current
+/// level. The rating is read only straight from the table, as the internal reader of a test (no route returns it).
 /// </summary>
 public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncLifetime
 {
+    private const string RoundRebuilt = "Round projection rebuilt.";
+
     private readonly ApiWithDatabase api = new(database);
 
     public async ValueTask InitializeAsync() => await api.MigrateAsync();
 
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
-    /// <summary>The acceptance of the projection: one row per round, the member rows and both pools, from one finished match.</summary>
+    /// <summary>
+    /// Condition 1 of part 4a: the batch that closes the match replays nothing and writes no projection; the first
+    /// read rebuilds the round, the member rows and both pools; the second read replays nothing.
+    /// </summary>
     [Fact]
-    public async Task FinishedMatch_RebuildsTheRound_TheMemberRows_AndThePools()
+    public async Task ClosingBatch_ReplaysNothing_AndTheReadRebuildsTheRoundAndThePools()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var round = await CourtCalls.RoundAsync(world);
         var phone = CourtPhone.New();
+        var logsBefore = api.Logs.Count;
 
         _ = await PlayAsync(world, round, phone, winner: "a", pointsA: 3, pointsB: 1);
 
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id", Guid.Parse(round)));
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.rating_pools WHERE group_id = @id", world.GroupId));
+        Assert.DoesNotContain(api.Logs.EntriesSince(logsBefore), entry => entry.Contains(RoundRebuilt, StringComparison.Ordinal));
+
+        _ = await StatsCalls.SummaryAsync(world, A.Player, round);
+
+        Assert.Single(api.Logs.EntriesSince(logsBefore), entry => entry.Contains(RoundRebuilt, StringComparison.Ordinal));
         Assert.Equal(1, await CountAsync(
             "SELECT count(*) FROM stats.round_projections WHERE round_id = @id AND event_count = 6 AND finished_matches = 1 AND counts AND projection_version = 1 AND summary->'finishedMatches'->0->>'winner' = 'a'",
             Guid.Parse(round)));
@@ -46,9 +57,12 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
         Assert.Equal(2, ratings.Count);
         Assert.All(ratings.Values, rating => Assert.Equal(1, rating.MatchesRated));
         Assert.True(ratings[world.MemberIds[A.Admin]].Mu > ratings[world.MemberIds[A.Player]].Mu);
+
+        _ = await StatsCalls.SummaryAsync(world, A.Player, round);
+        Assert.Single(api.Logs.EntriesSince(logsBefore), entry => entry.Contains(RoundRebuilt, StringComparison.Ordinal));
     }
 
-    /// <summary>5.4.2: a revert to before the <c>MatchEnded</c>, then another end, changes the result and the rating.</summary>
+    /// <summary>5.4.2: a revert to before the <c>MatchEnded</c>, then another end, changes the result and the rating on the next read.</summary>
     [Fact]
     public async Task RevertBeforeTheEnd_RecalculatesTheRound_AndTheRating()
     {
@@ -59,21 +73,25 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
         var started = phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player]);
         var firstPoint = phone.Point("a");
         _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone, [started, firstPoint, phone.Point("a"), phone.ManualEnd("a")]);
+        _ = await StatsCalls.SummaryAsync(world, A.Player, round);
         Assert.Equal("w", await MemberResultsAsync(round, world.MemberIds[A.Admin]));
 
         _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone,
             [phone.RevertedTo(EventIdOf(firstPoint)), phone.Point("b"), phone.Point("b"), phone.ManualEnd("b")]);
+        var summary = await StatsCalls.SummaryAsync(world, A.Player, round);
 
         Assert.Equal("l", await MemberResultsAsync(round, world.MemberIds[A.Admin]));
         Assert.Equal("w", await MemberResultsAsync(round, world.MemberIds[A.Player]));
+        Assert.Equal(1, summary["finishedMatches"]!.GetValue<int>());
         var ratings = await RatingsAsync(world.GroupId);
         Assert.True(ratings[world.MemberIds[A.Player]].Mu > ratings[world.MemberIds[A.Admin]].Mu);
         Assert.All(ratings.Values, rating => Assert.Equal(1, rating.MatchesRated));
     }
 
     /// <summary>
-    /// 5.4.3 and 5.4.7: the later round synced first (a phone offline) folds in play order, and deleting every
-    /// projection of the group and rebuilding gives the very same rows, byte for byte.
+    /// 5.4.3 and 5.4.7: the later round synced first (a phone offline) folds in play order; a read with another round
+    /// still stale defers the pools; deleting every projection of the group and reading again gives the very same
+    /// rows and answers, byte for byte.
     /// </summary>
     [Fact]
     public async Task LateRound_FoldsInPlayOrder_AndFromScratchEqualsIncremental()
@@ -82,47 +100,57 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
         var world = await GroupWorld.CreateAsync(api, client);
         var earlier = await RoundOnAsync(world, days: 3);
         var later = await RoundOnAsync(world, days: 5);
-        var laterPhone = CourtPhone.New();
-        var earlierPhone = CourtPhone.New();
-        _ = await PlayAsync(world, later, laterPhone, winner: "a", pointsA: 2, pointsB: 0);
-        _ = await PlayAsync(world, earlier, earlierPhone, winner: "b", pointsA: 0, pointsB: 2);
+        _ = await PlayAsync(world, later, CourtPhone.New(), winner: "a", pointsA: 2, pointsB: 0);
+        _ = await StatsCalls.SummaryAsync(world, A.Player, later);
+        Assert.Equal(2, await CountAsync("SELECT count(*) FROM stats.rating_pools WHERE group_id = @id", world.GroupId));
+
+        _ = await PlayAsync(world, earlier, CourtPhone.New(), winner: "b", pointsA: 0, pointsB: 2);
+        var poolsBefore = await SnapshotAsync(world.GroupId);
+        _ = await StatsCalls.SummaryAsync(world, A.Player, later);
+        Assert.Equal(poolsBefore.Ratings, (await SnapshotAsync(world.GroupId)).Ratings);
+        var earlierAnswer = (await StatsCalls.SummaryAsync(world, A.Player, earlier)).ToJsonString();
+        var laterAnswer = (await StatsCalls.SummaryAsync(world, A.Player, later)).ToJsonString();
         var incremental = await SnapshotAsync(world.GroupId);
+        Assert.NotEqual(poolsBefore.Ratings, incremental.Ratings);
+        var season = (await StatsCalls.MyStatsAsync(world, A.Admin)).ToJsonString();
 
         await DeleteProjectionsAsync(world.GroupId);
-        // A match without a winner rates no one and adds no member: it only wakes the rebuild of the whole group.
-        string[] undecided = [earlierPhone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player]), earlierPhone.ManualEnd()];
-        _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, earlier, earlierPhone, undecided);
+        var fromScratchSeason = (await StatsCalls.MyStatsAsync(world, A.Admin)).ToJsonString();
         var fromScratch = await SnapshotAsync(world.GroupId);
 
         Assert.Equal(incremental.Ratings, fromScratch.Ratings);
-        Assert.Equal(incremental.LaterSummary(later), fromScratch.LaterSummary(later));
+        Assert.Equal(incremental.Summaries[later], fromScratch.Summaries[later]);
+        Assert.Equal(incremental.Summaries[earlier], fromScratch.Summaries[earlier]);
+        Assert.Equal(season, fromScratchSeason);
+        Assert.Equal(earlierAnswer, (await StatsCalls.SummaryAsync(world, A.Player, earlier)).ToJsonString());
+        Assert.Equal(laterAnswer, (await StatsCalls.SummaryAsync(world, A.Player, later)).ToJsonString());
         var ratings = await RatingsAsync(world.GroupId);
         Assert.All(ratings.Values, rating => Assert.Equal(2, rating.MatchesRated));
     }
 
-    /// <summary>5.4.4 and question 98: the admin's new grade seeds the pool again on the next rebuild, with a low σ.</summary>
+    /// <summary>5.4.4 and question 98: the admin's new grade seeds the pool again on the next read, with a low σ; no answer changes.</summary>
     [Fact]
-    public async Task AdminGrade_Changed_SeedsThePoolAgain_OnTheNextRebuild()
+    public async Task AdminGrade_Changed_SeedsThePoolAgain_OnTheNextRead()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var round = await CourtCalls.RoundAsync(world);
-        var phone = CourtPhone.New();
-        _ = await PlayAsync(world, round, phone, winner: "a", pointsA: 1, pointsB: 0);
+        _ = await PlayAsync(world, round, CourtPhone.New(), winner: "a", pointsA: 1, pointsB: 0);
+        var answer = (await StatsCalls.SummaryAsync(world, A.Player, round)).ToJsonString();
         var before = (await RatingsAsync(world.GroupId))[world.MemberIds[A.Player]];
 
         using var graded = await LevelCalls.SetAsync(world, A.Admin, world.MemberIds[A.Player], "4.5");
         Assert.True(graded.IsSuccessStatusCode, await graded.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-        _ = await PlayAsync(world, round, phone, winner: "a", pointsA: 1, pointsB: 0);
 
+        Assert.Equal(answer, (await StatsCalls.SummaryAsync(world, A.Player, round)).ToJsonString());
         var after = (await RatingsAsync(world.GroupId))[world.MemberIds[A.Player]];
         Assert.Equal((45, "admin"), (after.SeedTenths, after.SeedSource));
         Assert.NotEqual(before.Mu, after.Mu);
     }
 
-    /// <summary>5.4.9: a listener that throws after the commit leaves the write as it was; the next write rebuilds all of it.</summary>
+    /// <summary>5.4.9: a listener that throws after the commit leaves the write as it was and logs only the stream and the type; the read rebuilds.</summary>
     [Fact]
-    public async Task FailingListener_NeverFailsTheWrite_AndTheNextWriteRebuilds()
+    public async Task FailingListener_NeverFailsTheWrite_AndTheReadRebuilds()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
@@ -139,66 +167,63 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
             api.BeforeCourtStreamChanged = null;
         }
 
-        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id", Guid.Parse(round)));
         Assert.Contains(api.Logs.EntriesSince(logsBefore), entry =>
-            entry.Contains("Court projections not refreshed", StringComparison.Ordinal) && entry.Contains(phone.CourtSessionId.ToString(), StringComparison.Ordinal));
+            entry.Contains("Court projections not refreshed", StringComparison.Ordinal)
+            && entry.Contains(phone.CourtSessionId.ToString(), StringComparison.Ordinal)
+            && entry.Contains(nameof(InvalidOperationException), StringComparison.Ordinal));
         Assert.DoesNotContain(api.Logs.EntriesSince(logsBefore), entry => entry.Contains("listener down", StringComparison.Ordinal));
 
-        _ = await PlayAsync(world, round, phone, winner: "b", pointsA: 0, pointsB: 1);
+        var summary = await StatsCalls.SummaryAsync(world, A.Player, round);
 
-        Assert.Equal(1, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id AND finished_matches = 2", Guid.Parse(round)));
-        Assert.Equal("wl", await MemberResultsAsync(round, world.MemberIds[A.Admin]));
+        Assert.Equal(1, summary["finishedMatches"]!.GetValue<int>());
+        Assert.Equal("w", await MemberResultsAsync(round, world.MemberIds[A.Admin]));
     }
 
     /// <summary>
-    /// 5.4.8 (condition 4 of the review): four scopes rebuild the same stale round at once. Every call ends without
-    /// error and the round keeps one row, one set of member rows and one row per member of the pool.
+    /// 5.4.8 (condition 4 of the review of 4a): four reads of the same stale round at once. Every call is a 200 with
+    /// the same answer, and the round keeps one row, one set of member rows and one row per member of the pool.
     /// </summary>
     [Fact]
-    public async Task ConcurrentRebuildsOfTheSameRound_LeaveOneRow_AndNoKeyError()
+    public async Task ConcurrentReadsOfAStaleRound_LeaveOneRow_AndNoKeyError()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var round = await CourtCalls.RoundAsync(world);
-        var phone = CourtPhone.New();
-        api.BeforeCourtStreamChanged = () => throw new InvalidOperationException("listener down");
-        try
-        {
-            _ = await PlayAsync(world, round, phone, winner: "a", pointsA: 3, pointsB: 1);
-        }
-        finally
-        {
-            api.BeforeCourtStreamChanged = null;
-        }
+        _ = await PlayAsync(world, round, CourtPhone.New(), winner: "a", pointsA: 3, pointsB: 1);
 
-        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id", Guid.Parse(round)));
+        var answers = await Task.WhenAll(Enumerable.Range(0, 4).Select(async index =>
+            (await StatsCalls.SummaryAsync(world, index % 2 == 0 ? A.Player : A.Admin, round)).ToJsonString()));
 
-        await Task.WhenAll(Enumerable.Range(0, 4).Select(async _ =>
-        {
-            using var scope = api.Services.CreateScope();
-            await scope.ServiceProvider.GetRequiredService<ICourtStreamChanged>()
-                .CourtStreamChangedAsync(world.GroupId, Guid.Parse(round), phone.CourtSessionId, TestContext.Current.CancellationToken);
-        }));
-
+        Assert.Single(answers.Distinct(StringComparer.Ordinal));
         Assert.Equal(1, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id AND finished_matches = 1", Guid.Parse(round)));
         Assert.Equal(2, await CountAsync("SELECT count(*) FROM stats.round_member_stats WHERE round_id = @id", Guid.Parse(round)));
         Assert.Equal(2, (await RatingsAsync(world.GroupId)).Count);
         Assert.Equal(2, await CountAsync("SELECT count(*) FROM stats.rating_pools WHERE group_id = @id", world.GroupId));
     }
 
-    /// <summary>A batch with only points of the open match changes nothing finished, so it rebuilds nothing.</summary>
+    /// <summary>
+    /// Condition 2 of the review of 4a: an older rebuild that lands after a newer one (written here by hand: an old key
+    /// of the round, an old hash of the pool and other ratings) is never served; the next read redoes both.
+    /// </summary>
     [Fact]
-    public async Task PointsOfTheOpenMatch_RebuildNothing()
+    public async Task OlderWrite_AfterANewerOne_IsRedoneByTheNextRead()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
         var round = await CourtCalls.RoundAsync(world);
-        var phone = CourtPhone.New();
+        _ = await PlayAsync(world, round, CourtPhone.New(), winner: "a", pointsA: 1, pointsB: 0);
+        var answer = (await StatsCalls.SummaryAsync(world, A.Player, round)).ToJsonString();
+        var fresh = await SnapshotAsync(world.GroupId);
 
-        _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone,
-            [phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player]), .. phone.AlternatingPoints(4)]);
+        await CourtCalls.ExecuteAsync(api.ConnectionString,
+            "UPDATE stats.round_projections SET facts_hash = 'stale', summary = '{}'::jsonb WHERE round_id = @id", ("id", Guid.Parse(round)));
+        await CourtCalls.ExecuteAsync(api.ConnectionString, "UPDATE stats.rating_pools SET inputs_hash = 'stale' WHERE group_id = @id", ("id", world.GroupId));
+        await CourtCalls.ExecuteAsync(api.ConnectionString, "UPDATE stats.member_ratings SET mu = 1, sigma = 1 WHERE group_id = @id", ("id", world.GroupId));
 
-        Assert.Equal(0, await CountAsync("SELECT count(*) FROM stats.round_projections WHERE round_id = @id", Guid.Parse(round)));
+        Assert.Equal(answer, (await StatsCalls.SummaryAsync(world, A.Player, round)).ToJsonString());
+        var redone = await SnapshotAsync(world.GroupId);
+        Assert.Equal(fresh.Ratings, redone.Ratings);
+        Assert.Equal(fresh.Summaries[round], redone.Summaries[round]);
     }
 
     private static async Task<(long LastSequence, int Stored)> PlayAsync(
@@ -251,7 +276,7 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
     {
         await using var connection = await OpenAsync();
         await using var ratings = new NpgsqlCommand(
-            "SELECT string_agg(concat_ws(':', pool, member_id, mu::text, sigma::text, seed_tenths, seed_source, matches_rated), ',' ORDER BY pool, member_id) FROM stats.member_ratings WHERE group_id = @id",
+            "SELECT coalesce(string_agg(concat_ws(':', pool, member_id, mu::text, sigma::text, seed_tenths, seed_source, matches_rated), ',' ORDER BY pool, member_id), '') FROM stats.member_ratings WHERE group_id = @id",
             connection);
         ratings.Parameters.AddWithValue("id", groupId);
         var ratingText = (string)(await ratings.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
@@ -285,8 +310,5 @@ public sealed class StatsProjectionTests(IntegrationDatabase database) : IAsyncL
 
     private sealed record StoredRating(double Mu, double Sigma, int SeedTenths, string SeedSource, int MatchesRated);
 
-    private sealed record StatsSnapshot(string Ratings, IReadOnlyDictionary<string, string> Summaries)
-    {
-        public string LaterSummary(string round) => Summaries[round];
-    }
+    private sealed record StatsSnapshot(string Ratings, IReadOnlyDictionary<string, string> Summaries);
 }

@@ -47,7 +47,10 @@ public static class AccountExportSections
     public const string CourtWrites = "courtWrites";
     public const int CourtWritesOrder = 500;
 
+    /// <summary>The person's after-game of each round they played, without the rating nor the grade (E3.9, ADR 0071).</summary>
+    public const string Stats = "stats";
+    public const int StatsOrder = 600;
     /// <summary>The phones and the notifications of the person, never a push token (E3.11, ADR 0069, D9).</summary>
     public const string Notifications = "notifications";
-    public const int NotificationsOrder = 600;
+    public const int NotificationsOrder = 700;
 }
