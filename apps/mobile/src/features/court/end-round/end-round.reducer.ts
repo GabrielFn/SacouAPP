@@ -22,17 +22,25 @@ export type EndRoundAction =
 
 export const INITIAL_END_ROUND: EndRoundState = { phase: "idle" };
 
+const CLOSING: EndRoundState = { phase: "closing" };
+
+function requested(state: EndRoundState, openMatchScore: string | null): EndRoundState {
+  if (state.phase === "closing" || state.phase === "confirming") return state;
+  return openMatchScore === null ? CLOSING : { phase: "confirming", openMatchScore };
+}
+
+function cancelled(state: EndRoundState): EndRoundState {
+  return state.phase === "confirming" || state.phase === "failed" ? INITIAL_END_ROUND : state;
+}
+
 export function endRoundReducer(state: EndRoundState, action: EndRoundAction): EndRoundState {
   switch (action.type) {
     case "requested":
-      if (state.phase === "closing" || state.phase === "confirming") return state;
-      return action.openMatchScore === null
-        ? { phase: "closing" }
-        : { phase: "confirming", openMatchScore: action.openMatchScore };
+      return requested(state, action.openMatchScore);
     case "confirmed":
-      return state.phase === "confirming" ? { phase: "closing" } : state;
+      return state.phase === "confirming" ? CLOSING : state;
     case "cancelled":
-      return state.phase === "confirming" || state.phase === "failed" ? INITIAL_END_ROUND : state;
+      return cancelled(state);
     case "closed":
       return state.phase === "closing" ? INITIAL_END_ROUND : state;
     case "failed":

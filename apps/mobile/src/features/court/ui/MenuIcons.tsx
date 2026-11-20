@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Circle, Path, Rect } from "react-native-svg";
+import { Circle, Path } from "react-native-svg";
 
 import { useTheme } from "../../../theme/theme-context";
 import { StrokeIcon, type IconProps } from "../../../ui/Icons";
@@ -81,7 +81,7 @@ export function EndRoundIcon({ color }: IconProps) {
   return (
     <MenuStroke color={color}>
       <Circle cx="12" cy="12" r="9" />
-      <Rect x="9" y="9" width="6" height="6" rx="0.5" />
+      <Path d="M9.5 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5A.5.5 0 0 1 9.5 9z" />
     </MenuStroke>
   );
 }

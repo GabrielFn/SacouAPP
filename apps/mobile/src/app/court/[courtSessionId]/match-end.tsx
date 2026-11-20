@@ -1,3 +1,4 @@
+import { useRoundClosed } from "../../../features/rounds/hooks/use-round-closed";
 import type { TeamSide } from "@sacou/match-engine";
 import { useEffect } from "react";
 
@@ -28,7 +29,8 @@ export default function MatchEndRoute() {
   const { courtRoster } = useServices();
   const { view, dispatch, retry } = useCourtSession();
   const timeline = view.status === "ready" ? view.timeline : null;
-  const endRound = useEndRound(route.params.courtSessionId);
+  const onRoundClosed = useRoundClosed();
+  const endRound = useEndRound(route.params.courtSessionId, onRoundClosed);
   const screen = useMatchEnd(route.params.courtSessionId, timeline, dispatch);
   const phase = timeline === null ? null : selectCourtPhase(stateOfTimeline(timeline));
   const step = nextCourtRoute("match-end", phase, true);

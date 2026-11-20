@@ -78,6 +78,48 @@ function Group({ children }: GroupProps) {
   );
 }
 
+export interface EndGroupProps {
+  readonly hasEndMatch: boolean;
+  readonly endRound: EndRoundMenuControl | null;
+  readonly onEndMatch: () => void;
+}
+
+/** "Encerrar partida" and "Encerrar rodada · fecha a noite toda", the last group of the menu. */
+function EndGroup({ hasEndMatch, endRound, onEndMatch }: EndGroupProps) {
+  const { menu } = strings.court;
+  const { colors } = useTheme();
+  if (!hasEndMatch && endRound === null) return null;
+  return (
+    <>
+      {endRound?.view.failure == null ? null : (
+        <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
+          {endRound.view.failure}
+        </Text>
+      )}
+      <Group>
+        {hasEndMatch ? (
+          <MenuRow
+            label={menu.endMatch}
+            renderIcon={(color) => <EndMatchIcon color={color} />}
+            chevron
+            onPress={onEndMatch}
+          />
+        ) : null}
+        {endRound === null ? null : (
+          <MenuRow
+            label={menu.endRound}
+            hint={menu.endRoundHint}
+            danger
+            disabled={endRound.view.busy}
+            renderIcon={(color) => <EndRoundIcon color={color} />}
+            onPress={endRound.onAsk}
+          />
+        )}
+      </Group>
+    </>
+  );
+}
+
 /** Screen 23: the menu of the match, over the court. The dialog of "Encerrar partida" is its only state. */
 export function MatchMenuSheet({
   subtitle,
@@ -162,33 +204,7 @@ export function MatchMenuSheet({
             {refusal}
           </Text>
         )}
-        {endRound?.view.failure == null ? null : (
-          <Text accessibilityLiveRegion="polite" style={{ color: colors.refusal }}>
-            {endRound.view.failure}
-          </Text>
-        )}
-        {endSummary === null && endRound === null ? null : (
-          <Group>
-            {endSummary === null ? null : (
-              <MenuRow
-                label={menu.endMatch}
-                renderIcon={(color) => <EndMatchIcon color={color} />}
-                chevron
-                onPress={askToEnd}
-              />
-            )}
-            {endRound === null ? null : (
-              <MenuRow
-                label={menu.endRound}
-                hint={menu.endRoundHint}
-                danger
-                disabled={endRound.view.busy}
-                renderIcon={(color) => <EndRoundIcon color={color} />}
-                onPress={endRound.onAsk}
-              />
-            )}
-          </Group>
-        )}
+        <EndGroup hasEndMatch={endSummary !== null} endRound={endRound} onEndMatch={askToEnd} />
       </ScrollView>
       {endRound === null ? null : (
         <EndRoundDialog

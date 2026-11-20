@@ -8,10 +8,12 @@ const { cards } = roundsStrings;
 const DAYS_PER_WEEK = 7;
 const MONDAY_ISO = 1;
 const HOUR_MS = 3_600_000;
+const ROUND_DURATION_HOURS = 6;
+const SUMMARY_WINDOW_HOURS = 24;
 /** A round ends on its own 6 h after it starts (E3.18, D1); the list does not carry an earlier `close`. */
-export const ROUND_DURATION_MS = 6 * HOUR_MS;
+export const ROUND_DURATION_MS = ROUND_DURATION_HOURS * HOUR_MS;
 /** The home offers "Ver resumo" until 24 h after the end of the round: the window of the votation (question 153). */
-export const SUMMARY_CARD_WINDOW_MS = 24 * HOUR_MS;
+export const SUMMARY_CARD_WINDOW_MS = SUMMARY_WINDOW_HOURS * HOUR_MS;
 
 /** The round a group card shows: the first scheduled one that has not started yet. */
 export function nextRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {

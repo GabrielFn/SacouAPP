@@ -5,6 +5,7 @@ import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { ChevronRightIcon } from "../../../ui/Icons";
+import type { Theme } from "../../../theme/themes";
 import { Text } from "../../../ui/Text";
 
 export interface MenuRowProps {
@@ -20,6 +21,30 @@ export interface MenuRowProps {
   readonly onPress: () => void;
 }
 
+function inkOf(colors: Theme, disabled: boolean, danger: boolean): string {
+  if (disabled) return colors.textMuted;
+  return danger ? colors.refusal : colors.text;
+}
+
+function spokenLabel(label: string, hint: string | undefined, custom: string | undefined): string {
+  if (custom !== undefined) return custom;
+  return hint === undefined ? label : strings.court.menu.hintLabel(label, hint);
+}
+
+export interface RowHintProps {
+  readonly hint: string;
+  /** Set only on the row of a refusal, where the hint takes the color of the label. */
+  readonly ink: string | null;
+}
+
+function RowHint({ hint, ink }: RowHintProps) {
+  return (
+    <Text variant="muted" style={ink === null ? undefined : { color: ink }}>
+      {strings.court.menu.hintAfter(hint)}
+    </Text>
+  );
+}
+
 export function MenuRow({
   label,
   renderIcon,
@@ -31,16 +56,13 @@ export function MenuRow({
   onPress,
 }: MenuRowProps) {
   const { colors, tokens } = useTheme();
-  const tint = danger ? colors.refusal : colors.text;
+  const ink = inkOf(colors, disabled, danger);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      accessibilityLabel={
-        accessibilityLabel ??
-        (hint === undefined ? label : strings.court.menu.hintLabel(label, hint))
-      }
+      accessibilityLabel={spokenLabel(label, hint, accessibilityLabel)}
       onPress={onPress}
       style={{
         minHeight: tokens.sheet.sizes.menuRow,
@@ -50,21 +72,17 @@ export function MenuRow({
         paddingHorizontal: tokens.spacing.xs,
       }}
     >
-      {renderIcon(disabled ? colors.textMuted : tint)}
+      {renderIcon(ink)}
       <Text
         variant="title"
         style={{
           flexShrink: 1,
           fontFamily: fontFamilies.body600,
-          color: disabled ? colors.textMuted : tint,
+          color: ink,
         }}
       >
         {label}
-        {hint === undefined ? null : (
-          <Text variant="muted" style={danger ? { color: tint } : undefined}>
-            {strings.court.menu.hintAfter(hint)}
-          </Text>
-        )}
+        {hint === undefined ? null : <RowHint hint={hint} ink={danger ? ink : null} />}
       </Text>
       {chevron ? (
         <View style={{ marginLeft: "auto" }}>

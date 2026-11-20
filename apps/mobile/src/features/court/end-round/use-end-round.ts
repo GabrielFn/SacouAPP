@@ -1,12 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useReducer } from "react";
 
 import { useServices } from "../../../services/services-context";
-import { queryKeys } from "../../../services/query/query-keys";
 import { summaryHref } from "../../rounds/navigation";
 import { useCourtRuntime } from "../hooks/court-runtime-context";
 import { endRoundReducer, INITIAL_END_ROUND, type EndRoundState } from "./end-round.reducer";
+import type { CourtSessionOrigin } from "../ports/court-event-log";
 import { runEndRound } from "./run-end-round";
 
 export interface EndRoundFlow {
@@ -22,9 +21,12 @@ export interface EndRoundFlow {
  * (server, log, upload) and then opens the summary with `replace`, so "Voltar" never lands on a closed
  * court. The round of the session comes from its origin in the log, never from a copy.
  */
-export function useEndRound(courtSessionId: string): EndRoundFlow {
+export function useEndRound(
+  courtSessionId: string,
+  /** The server marked the end: the routes read the round (its `endsAt`) again; the court slice has no cache. */
+  onServerClosed: (round: CourtSessionOrigin) => void,
+): EndRoundFlow {
   const router = useRouter();
-  const client = useQueryClient();
   const { sacouApi } = useServices();
   const runtime = useCourtRuntime();
   const [state, send] = useReducer(endRoundReducer, INITIAL_END_ROUND);
@@ -44,13 +46,10 @@ export function useEndRound(courtSessionId: string): EndRoundFlow {
       send({ type: "failed", failure: ended.error });
       return;
     }
-    if (ended.value.serverClosed) {
-      void client.invalidateQueries({ queryKey: queryKeys.round(groupId, roundId) });
-      void client.invalidateQueries({ queryKey: queryKeys.rounds(groupId) });
-    }
+    if (ended.value.serverClosed) onServerClosed({ groupId, roundId });
     send({ type: "closed" });
     router.replace(summaryHref(groupId, roundId));
-  }, [runtime, sacouApi, client, router, courtSessionId]);
+  }, [runtime, sacouApi, onServerClosed, router, courtSessionId]);
 
   return {
     state,

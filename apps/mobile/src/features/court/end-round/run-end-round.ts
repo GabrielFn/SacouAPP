@@ -24,7 +24,7 @@ export interface EndRoundOutcome {
 }
 
 function isNotStarted(error: ApiError): boolean {
-  return error.kind === "problem" && error.status === 409 && error.code === ROUND_NOT_STARTED;
+  return error.kind === "problem" && error.code === ROUND_NOT_STARTED;
 }
 
 /**

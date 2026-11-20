@@ -1,3 +1,4 @@
+import { useRoundClosed } from "../../../features/rounds/hooks/use-round-closed";
 import { useMemo, useState } from "react";
 
 import { useCourtSides } from "../../../features/court/hooks/court-sides-context";
@@ -30,7 +31,8 @@ export default function MenuRoute() {
   const theme = useCourtTheme();
   const { view, dispatch, retry } = useCourtSession();
   const [refusal, setRefusal] = useState<string | null>(null);
-  const endRound = useEndRound(route.params.courtSessionId);
+  const onRoundClosed = useRoundClosed();
+  const endRound = useEndRound(route.params.courtSessionId, onRoundClosed);
   const timeline = view.status === "ready" ? view.timeline : null;
   const subtitle = useMemo(
     () => (timeline === null ? null : menuSubtitle(timeline, courtRoster)),
