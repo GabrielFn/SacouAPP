@@ -117,6 +117,7 @@ export const roundsStrings = {
     waitlistLabel: "na espera",
     waitlistTitle: "Espera",
     noName: "Sem apelido",
+    summaryLink: "Resumo da rodada",
     canceled: "Rodada cancelada",
     loading: "Carregando a rodada",
     retry: "Tentar de novo",

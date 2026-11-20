@@ -22,6 +22,8 @@ export interface UploadDeps {
   readonly api: Pick<SacouApi, "appendCourtEvents">;
   /** The loop wrote a halt or a take-over in this session. */
   readonly onSessionChanged: (courtSessionId: string) => void;
+  /** The server confirmed events of this session, so what it computes from them (the summary) changed. */
+  readonly onAcknowledged?: (target: SessionToSync) => void;
 }
 
 interface UploadContext extends UploadDeps {
@@ -75,6 +77,13 @@ async function send(
   );
 }
 
+async function acknowledged(context: UploadContext, sequence: number): Promise<UploadOutcome> {
+  const { log, target, onAcknowledged } = context;
+  const outcome = written(await log.markAcknowledged(target.courtSessionId, sequence));
+  if (outcome.type === "progress") onAcknowledged?.(target);
+  return outcome;
+}
+
 async function apply(
   context: UploadContext,
   decision: SyncDecision,
@@ -84,7 +93,7 @@ async function apply(
   const id = target.courtSessionId;
   switch (decision.type) {
     case "acknowledge":
-      return written(await log.markAcknowledged(id, decision.sequence));
+      return acknowledged(context, decision.sequence);
     case "rewind":
       return written(await log.rewindAcknowledged(id, decision.sequence));
     case "take-over":

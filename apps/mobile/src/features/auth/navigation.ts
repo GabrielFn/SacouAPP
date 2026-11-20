@@ -6,6 +6,7 @@ export const SIGNED_OUT_ROUTES = ["sign-in"] as const;
 
 export const SIGNED_IN_ROUTES = [
   "(tabs)",
+  "me/card",
   "notifications",
   "account/index",
   "account/profile",
@@ -27,6 +28,7 @@ export const SIGNED_IN_ROUTES = [
   "groups/[groupId]/rounds/[roundId]/add",
   "groups/[groupId]/rounds/[roundId]/draw",
   "groups/[groupId]/rounds/[roundId]/take-over",
+  "groups/[groupId]/rounds/[roundId]/summary",
 ] as const;
 
 /**

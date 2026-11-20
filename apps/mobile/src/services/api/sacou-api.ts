@@ -35,8 +35,15 @@ export type MyDataExport = Schemas["JsonObject"];
 /** A group where the person is the only admin, with someone else in it (ADR 0056, D3 and D10). */
 export type DeletionBlocker = Schemas["DeletionBlockerResponse"];
 
+/** The person's own numbers of the season, total and per group: whole numbers only, never a rating (ADR 0047). */
+export type MyStats = Schemas["MyStatsReport"];
+export type MyStatsTotals = Schemas["MyStatsTotalsReport"];
+export type MyStatsGroup = Schemas["MyStatsGroupReport"];
+
 export type Round = Schemas["RoundResponse"];
 export type RoundSummary = Schemas["RoundSummaryResponse"];
+/** The numbers of a finished round, computed by the server (E3.9); the app only formats them (screen 12). */
+export type RoundSummaryReport = Schemas["RoundSummaryReport"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
 export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
 export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
@@ -142,10 +149,14 @@ export interface SacouApi {
     member: MemberRef & { readonly roundId: string },
     response: AttendanceResponse,
   ): Promise<ApiResult<AttendanceAnswer>>;
+  /** Any member of the group. `finishedMatches: 0` for a round with no match finished (E4.12). */
+  getRoundSummary(groupId: string, roundId: string): Promise<ApiResult<RoundSummaryReport>>;
   /** 404 `identity.profile-not-found` before the quick profile (screen 27) is ever saved. */
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */
   saveMyProfile(body: SaveMyProfileBody): Promise<ApiResult<MyProfile>>;
+  /** Screen 14: the season of the server (`America/Sao_Paulo`), only of the person who is signed in. */
+  getMyStats(): Promise<ApiResult<MyStats>>;
   /** Screen 30a: built on the spot, `no-store`; the answer lives only in the export, never in the cache. */
   exportMyData(): Promise<ApiResult<MyDataExport>>;
   /** Screen 30b: a preview only; the `DELETE` judges again under the locks of the groups. */

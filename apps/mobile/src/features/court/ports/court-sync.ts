@@ -31,4 +31,6 @@ export interface CourtSync extends CourtSyncHooks {
   /** Told when another account signs in or out, so an open court asks again whose it is. */
   onAccountChanged(listener: () => void): () => void;
   countUnsent(): Promise<UnsentSummary>;
+  /** The same, over the sessions of one round (E4.12: the summary may change until they leave). */
+  countUnsentOfRound(roundId: string): Promise<UnsentSummary>;
 }

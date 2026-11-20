@@ -25,3 +25,8 @@ export function addPlayerHref(groupId: string, roundId: string): Href {
 export function drawHref(groupId: string, roundId: string): Href {
   return { pathname: "/groups/[groupId]/rounds/[roundId]/draw", params: { groupId, roundId } };
 }
+
+/** Screen 12, the summary of the round (E4.12). */
+export function summaryHref(groupId: string, roundId: string): Href {
+  return { pathname: "/groups/[groupId]/rounds/[roundId]/summary", params: { groupId, roundId } };
+}

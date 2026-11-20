@@ -71,3 +71,29 @@ describe("export and deletion of the account (ADR 0056)", () => {
     expect(tokens.accountDeletedCount()).toBe(0);
   });
 });
+
+describe("the person's own numbers (E4.13)", () => {
+  test("a GET of /v1/me/stats without a year; the answer is the report", async () => {
+    const { api, http } = setup();
+    const report = {
+      year: 2026,
+      total: {
+        matchesPlayed: 48,
+        wins: 30,
+        losses: 18,
+        plusMinus: 112,
+        longestWinStreak: 7,
+        mvpCount: 4,
+        rounds: 23,
+        roundsHeld: 25,
+      },
+      groups: [],
+    };
+    http.enqueue(jsonAnswer(200, report));
+    expect(await api.getMyStats()).toEqual({ ok: true, value: report });
+    const request = only(http);
+    expect(request.method).toBe("GET");
+    expect(request.url).toBe(`${BASE}/v1/me/stats`);
+    expect(request.headers.get("authorization")).toBe(`Bearer ${FAKE_ID_TOKEN}`);
+  });
+});

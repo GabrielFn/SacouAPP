@@ -6,6 +6,8 @@ export const queryKeys = {
   me: () => ["me"] as const,
   /** The person's own profile, the one record of the nickname; on disk only the nickname goes (ADR 0057, D9). */
   myProfile: () => ["me", "profile"] as const,
+  /** The person's own numbers (screen 14): the server picks the season; persisted, with no rating in it. */
+  myStats: () => ["me", "stats"] as const,
   /** What keeps the account from being deleted (screen 30b): outside the persisted allow list. */
   deletionBlockers: () => ["me", "deletion-blockers"] as const,
   groups: () => ["groups"] as const,
@@ -21,6 +23,11 @@ export const queryKeys = {
   /** Who marks the court of a round and its score (screen 09a): outside the persisted allow list. */
   courtSummary: (groupId: string, roundId: string) =>
     ["groups", groupId, "rounds", roundId, "court-session"] as const,
+  /** The numbers of a round (screen 12): persisted, so the last summary seen opens offline (E4.12). */
+  roundSummary: (groupId: string, roundId: string) =>
+    ["groups", groupId, "rounds", roundId, "summary"] as const,
+  /** Points of a round this phone has not sent yet, counted from the court log: never persisted. */
+  courtUnsent: (roundId: string) => ["court-unsent", roundId] as const,
   /** Where a court session came from, read from the court log: outside the persisted allow list. */
   courtSessionOrigin: (courtSessionId: string) => ["court-session-origin", courtSessionId] as const,
 };

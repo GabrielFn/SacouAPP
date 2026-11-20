@@ -8,7 +8,7 @@ import { SegmentedControl } from "../../../ui/SegmentedControl";
 import { Text } from "../../../ui/Text";
 import type { SubstitutionRow, SubstitutionView } from "../substitution/substitution-selectors";
 import { CourtPage } from "./CourtPage";
-import { initialsOfName } from "../model/name-initials";
+import { initialsOfName } from "../../../ui/initials";
 import { PickRow } from "./PickRow";
 
 export interface SubstitutionScreenProps {

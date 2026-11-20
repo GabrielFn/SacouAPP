@@ -98,3 +98,8 @@ export function statsCells(round: Round, values: GroupSettings): readonly StatsC
 export function isCanceled(round: Round): boolean {
   return round.status === "canceled";
 }
+
+/** The entry to the summary (screen 12) from the round: after it started, never for a canceled one (question 152). */
+export function summaryAvailable(round: Round, now: number): boolean {
+  return !isCanceled(round) && Date.parse(round.startsAt) <= now;
+}

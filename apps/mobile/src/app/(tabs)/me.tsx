@@ -1,33 +1,26 @@
 import { useRouter } from "expo-router";
 
 import { accountRoutes } from "../../features/account/navigation";
-import { AccountCard, AccountRow } from "../../features/account/ui/AccountRow";
-import { strings } from "../../strings/pt-BR";
-import { GearIcon } from "../../ui/MenuIcons";
-import { Screen } from "../../ui/Screen";
-import { Text } from "../../ui/Text";
+import { meRoutes } from "../../features/profile/navigation";
+import { ProfileScreen } from "../../features/profile/ui/ProfileScreen";
+import { useSession } from "../../services/auth/use-session";
 
-/**
- * Placeholder of the "Eu" tab: the profile (screen 14) arrives with E4.8, which moves the way to the
- * account (screen 30, where "Sair" is) to the gear of its header.
- */
+/** The "Eu" tab (screen 14, E4.13). The gear opens the account (screen 30). */
 export default function MeScreen() {
   const router = useRouter();
+  const session = useSession();
   return (
-    <Screen aboveTabBar>
-      <Text variant="display" displaySize="displayTitle">
-        {strings.groups.meTitle}
-      </Text>
-      <AccountCard title={strings.account.more}>
-        <AccountRow
-          icon={<GearIcon />}
-          label={strings.account.entry}
-          onPress={() => {
-            router.push(accountRoutes.account);
-          }}
-          last
-        />
-      </AccountCard>
-    </Screen>
+    <ProfileScreen
+      accountName={session.status === "signedIn" ? session.account.displayName : null}
+      onOpenAccount={() => {
+        router.push(accountRoutes.account);
+      }}
+      onShare={() => {
+        router.push(meRoutes.card);
+      }}
+      onEditProfile={() => {
+        router.push(accountRoutes.editProfile);
+      }}
+    />
   );
 }

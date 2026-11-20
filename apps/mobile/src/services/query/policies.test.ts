@@ -169,6 +169,8 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.templates(G), false],
     [queryKeys.me(), false],
     [queryKeys.myProfile(), true],
+    [queryKeys.myStats(), true],
+    [["me", "stats", "x"], false],
     [queryKeys.deletionBlockers(), false],
     [["me", "profile", "x"], false],
     [["me", "nickname"], false],
@@ -225,5 +227,13 @@ describe("the allow list of the persisted cache (P6)", () => {
 
   test("the buster joins the app version and the contract", () => {
     expect(cacheBuster("1.2.3")).toMatch(/^1\.2\.3\+[0-9a-f]{16}$/);
+  });
+});
+
+describe("the summary of a round (E4.12)", () => {
+  test("is kept on disk so it opens offline, and only that child of the round", () => {
+    expect(isPersistedKey(queryKeys.roundSummary(G, "r1"))).toBe(true);
+    expect(isPersistedKey(["groups", G, "rounds", "r1", "court-session"])).toBe(false);
+    expect(isPersistedKey(queryKeys.courtUnsent("r1"))).toBe(false);
   });
 });
