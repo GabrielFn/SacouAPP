@@ -317,7 +317,7 @@ public sealed partial class StatsRoutesTests(IntegrationDatabase database) : IAs
     private static partial Regex RouteParameter();
 
     /// <summary>The GET routes of the real API with every parameter the scenario has filled in; the others are skipped.</summary>
-    private IEnumerable<string> GetRoutes(IReadOnlyDictionary<string, string> values)
+    private IEnumerable<string> GetRoutes(Dictionary<string, string> values)
     {
         var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()?.HttpMethods.Contains(HttpMethods.Get) == true);
