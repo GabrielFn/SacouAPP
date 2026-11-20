@@ -43,7 +43,7 @@ builder.Services
     .AddMatchesModule(builder.Configuration)
     .AddPaymentsModule()
     .AddSummariesModule()
-    .AddStatsModule();
+    .AddStatsModule(builder.Configuration);
 // Per-user limits, and the concurrency of the two-connection routes (ADR 0062).
 builder.Services.AddSacouRateLimiting(builder.Configuration);
 builder.Services.AddSacouOpenApi();
@@ -89,6 +89,7 @@ if (app.Configuration.GetValue<bool>(DatabaseConnectionSetup.MigrateOnStartupKey
     await GroupsModule.MigrateAsync(app.Services);
     await SessionsModule.MigrateAsync(app.Services);
     await MatchesModule.MigrateAsync(app.Services);
+    await StatsModule.MigrateAsync(app.Services);
     await NotificationsModule.MigrateAsync(app.Services);
 }
 

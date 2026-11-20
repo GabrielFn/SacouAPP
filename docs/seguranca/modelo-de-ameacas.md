@@ -440,6 +440,23 @@ A API fica pública em `*.run.app` (Cloud Run, `us-east4`), com o banco no Neon 
 | Console do Google e do Neon | E: conta do Gabriel comprometida dá tudo | Fora do repositório: 2FA nas contas Google e Neon | Não verificável pelo repositório |
 | Transporte | I: tráfego em claro | O Cloud Run termina o TLS em `*.run.app`; a API não serve HTTP fora do contêiner; banco com `VerifyFull` | — |
 
+## 15. Estatísticas, MVP e rating escondido (E3.9, [ADR 0071](../arquitetura/adr/0071-projecoes-de-estatisticas-mvp-e-rating.md))
+
+A seção que o plano chamava de 6.1 ficou com o número livre seguinte, porque a 6 é a do Pix. A Parte 4a grava as projeções e o rating no schema `stats`; a Parte 4b traz as rotas de leitura e completa as linhas marcadas.
+
+| Ameaça | Controle | Situação |
+|---|---|---|
+| Rating vaza por rota, DTO, OpenAPI, erro, log ou exportação | Tipos `internal` no Stats, sem contrato público; `StatsLog` só com IDs, contagens, códigos e tempos; as linhas (`MemberRatingRow`, `RoundProjectionRow`) não imprimem os campos; o aviso do gancho leva só o ID do stream e o tipo da exceção | 4a feito; testes 4.6 (a), (b) e (d), varredura 5.4.13 e exportação sem rating na 4b |
+| O Stats lê o stream ou outro schema direto | Só pelo `ICourtSessionResults` do Matches; teste de texto: o Stats não cita `matches`, `groups`, `sessions`, `identity` nem `court_events` (4.6 c) | Feito (4a) |
+| Inferir o rating pelo sorteio | O sorteio usa a nota do admin (`IMemberLevels`), nunca o rating (ADR 0047, item 5); o Sessions não referencia o Stats | Mantido |
+| Ler estatística de outro grupo (IDOR) | Projeções lidas sempre por grupo; rodada lida por `(groupId, roundId)` pelos contratos | Rotas e 404 igual para inexistente e de outro grupo na 4b |
+| Eventos forjados inflam saldo e MVP | Risco aceito do ADR 0032: só Admin, Co-admin e Placar escrevem; `court_writers` guarda quem escreveu cada lote; a votação (E3.18) é o contrapeso social | Aceito |
+| Negação de serviço pela reconstrução | Cache por chave de frescor (nunca recalcula a cada leitura); só o lote com `MatchEnded` ou `RevertedTo` reconstrói depois do commit; o fold do pool é em memória, sem replay. Custo medido do resumo no pior caso legal (200 partidas, times de 24, 19.600 eventos, Debug, máquina local): replay 0,83 s e resumo 1,17 s; a reconstrução soma esse custo ao lote que fecha a partida | `court-sync` nas duas rotas de leitura na 4b; snapshot na E5.3b **Revisão da 4a (#180), achado 1 (médio):** o gancho pós-commit da 4a reconstrói o grupo inteiro dentro da escrita que fecha a partida e agrava o M4-A1 (replay + resumo + fold no pior caso); condição da **4b**: o gancho não reconstrói nada (a chave `event_count`/`facts_hash` já detecta a projeção velha), a reconstrução fica na leitura, sob `court-sync`, por rodada; a **E5.3b** cobre também o `SummarizeAsync` com o snapshot. |
+| Reconstrução velha sobrescreve uma nova, ou duas trocas do pool se misturam | Upsert condicional (`event_count <= novo`) que trava a linha antes de trocar as linhas dos membros; troca do pool inteiro sob a trava da linha de `rating_pools`, que pula quando o hash já é o mesmo | Feito (4a) **Revisão da 4a (#180), achado 2 (médio):** a troca do pool fica com o último que grava (só pula hash igual), e o upsert aceita `facts_hash` velho com o mesmo `event_count`; a próxima leitura corrige. Condição da **4b**: todo consumidor lê pelo `GetGroupAsync`, nunca `member_ratings` direto, ou versão monotônica na troca. |
+| Nota do admin como semente | Lida só por `IMemberLevels` (sem rota); nunca no log; no `inputs_hash` só entra o hash (a semente usada fica em `member_ratings`, também escondida) | Feito (4a) |
+| Dado derivado de perfil (LGPD art. 20, decisão automatizada) | No piloto nada decide sobre o jogador com o rating; registrado em `dados-pessoais.md`; base legal e direito de acesso na E6.2 | Aberto (E6.2) |
+| Cadeia de suprimentos da `openskill` | `openskill` 5.0.1 (MIT), versão exata, só no pacote TS de referência `packages/rating` (golden e testes); a API usa o porte C#, sem dependência nova; ~517 pacotes `@stdlib` transitivos, sem scripts de instalação; `pnpm audit` na CI | Mantido; a 4b decide se sai de `dependencies` |
+
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 
 `stored-next-match-drafts.ts`: uma leitura que falha vale "sem rascunho", e a tela 11 sorteia de novo quem sai (critério `draw`). Quem abrir o app depois de uma falha de leitura pode ver outro sorteio, e a escolha já feita some. Impacto: só a ordem de saída, sem dado pessoal e sem perda de partida. Aceito no piloto; o rascunho é local e o motor valida o plano na confirmação.

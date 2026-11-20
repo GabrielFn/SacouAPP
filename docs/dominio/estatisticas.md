@@ -67,6 +67,13 @@ Código em `packages/rating/` (`ratePool`, `seedOf`, `levelOf`) e, no servidor, 
 24. **Parâmetros** em `packages/rating/src/rating-params.json` (versão 1, a calibrar com o piloto): `beta` 100, `tau` 1, `kappa` 0,0001, `limitSigma` falso. Mudar qualquer valor sobe `ratingParamsVersion`, e o servidor refaz tudo.
 25. **Saída**, por pool (`indoor` primeiro) e na ordem da primeira aparição (`teams.a`, `teams.b`, `onCourt`, partida a partida): `{ memberId, pool, seedTenths, seedSource, mu, sigma, matchesRated }`, nessa ordem de chaves, que é contrato com o porte C#.
 
+## Projeções no servidor (E3.9 Parte 4a, ADR 0071)
+
+26. **Cache, nunca soma.** O servidor guarda o resumo de cada rodada e o rating de cada pool como cache de funções puras, no schema `stats`; nada é incrementado em cima do valor anterior. Apagar tudo e ler de novo dá o mesmo resultado.
+27. **Quando reconstrói:** depois do commit de um lote que gravou um `MatchEnded` ou um `RevertedTo` (lote só com pontos da partida aberta não muda nada terminado), e na leitura quando a chave mudou: outro número de eventos no stream, outra versão da projeção, ou outro estado, início, modalidade ou opção `mvp.*` da rodada. Uma falha depois do commit não desfaz a escrita; a próxima leitura refaz.
+28. **Pool refeito do zero** quando muda qualquer entrada: as rodadas do pool e suas chaves, a nota atual de um membro (pergunta 98) ou a versão dos parâmetros. Cancelar uma rodada a tira das somas e do rating; descancelar devolve.
+29. **Rodada cancelada** continua legível no resumo, mas não entra nas somas (sem linhas por membro) nem no rating.
+
 ## Fora daqui
 
-Votação do MVP (E3.18); porte C# do rating (E3.9, Parte 3); projeções no servidor, somas e rotas (E3.9, Parte 4); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).
+Votação do MVP (E3.18); somas, rotas e exportação (E3.9, Parte 4b); texto da IA (E3.13, pós-piloto); esconder estatísticas (E4.13).

@@ -31,6 +31,14 @@ internal static class SchemaIsolationRules
             from violation in Violations(Path.GetRelativePath(moduleDirectory, file), source, schema)
             select violation];
 
+    /// <summary>Every line of the module that names <paramref name="text"/>, a table of another module, in any form.</summary>
+    internal static IReadOnlyList<string> TextViolations(string moduleDirectory, string text) =>
+        [.. from file in Directory.EnumerateFiles(moduleDirectory, "*.cs", SearchOption.AllDirectories)
+            where !IsBuildOutput(file)
+            from line in File.ReadLines(file)
+            where line.Contains(text, StringComparison.OrdinalIgnoreCase)
+            select $"{Path.GetRelativePath(moduleDirectory, file)}: {line.Trim()}"];
+
     private static bool IsBuildOutput(string path) =>
         path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
         || path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal);
