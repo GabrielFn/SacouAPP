@@ -59,7 +59,7 @@ internal static class PlackettLuce
 
         var gamma = Math.Sqrt(rating.SigmaSquared) / c;
         var omega = omegaSum * (rating.SigmaSquared / c);
-        var delta = deltaSum * (rating.SigmaSquared / (c * c)) * gamma;
+        var delta = gamma * deltaSum * (rating.SigmaSquared / (c * c));
         return [.. rating.Team.Select(skill =>
         {
             var share = skill.Sigma * skill.Sigma / rating.SigmaSquared;

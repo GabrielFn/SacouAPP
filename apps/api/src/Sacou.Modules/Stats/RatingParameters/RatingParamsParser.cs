@@ -12,11 +12,13 @@ internal static class RatingParamsParser
 {
     private const string LimitSigmaKey = "limitSigma";
 
+    private const string VersionKey = "ratingParamsVersion";
+
     private static readonly JsonDocumentOptions StrictOptions = new() { AllowDuplicateProperties = false };
 
     private static readonly string[] NumberKeys =
     [
-        "ratingParamsVersion",
+        VersionKey,
         "mu0",
         "levelStep",
         "sigmaAdmin",
@@ -41,10 +43,10 @@ internal static class RatingParamsParser
             throw Invalid(unknown, "no such key");
         }
 
-        var version = Positive(root, NumberKeys[0]);
+        var version = Positive(root, VersionKey);
         if (version != Math.Floor(version) || version > int.MaxValue)
         {
-            throw Invalid(NumberKeys[0], "an integer");
+            throw Invalid(VersionKey, "an integer");
         }
 
         return new RatingParams(
