@@ -10,7 +10,7 @@ Detalhes no [ADR 0008](adr/0008-stack-backend-app-services.md); monorepo no [ADR
 |---|---|
 | API | ASP.NET Core .NET 10, Minimal APIs, monólito modular |
 | Banco | PostgreSQL (Neon) + EF Core |
-| Tempo real e jobs | SignalR (placar ao vivo, pós-piloto, [ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)); Hangfire com intervalo de consulta alto |
+| Tempo real e jobs | SignalR (placar ao vivo, pós-piloto, [ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)); sem Hangfire: Outbox drenado na requisição, Cloud Tasks e uma varredura diária ([ADR 0069](adr/0069-outbox-e-notificacoes.md)) |
 | Página da rodada | Razor Pages no mesmo projeto |
 | Login | Firebase Auth; a API valida o ID token como JWT pelas chaves públicas do Google ([ADR 0036](adr/0036-verificacao-do-token-e-usuario.md)); FirebaseAdmin só para administrar contas (E3.16) ([ADR 0014](adr/0014-firebase-auth.md)) |
 | App | Expo + TypeScript strict, com log de eventos em expo-sqlite; tipos da API gerados do contrato OpenAPI versionado (`apps/api/openapi/v1.json`), que a API só serve em `Development` ([ADR 0042](adr/0042-contrato-openapi-e-cliente.md)) |
@@ -63,7 +63,7 @@ Caminhos relativos a `apps/api/`. Pastas de módulo só existem quando têm cont
 
 ## Fluxos principais
 
-**Confirmar presença pelo link.** Prévia no WhatsApp → página da rodada (Razor) → VOU → login via Firebase, uma vez → Sessions grava a presença e controla as vagas com `xmin` → Pix, se a cobrança estiver ligada. Promoção da espera sai pela Outbox e pelo Hangfire, em push (`produto.md:115, 308, 310`).
+**Confirmar presença pelo link.** Prévia no WhatsApp → página da rodada (Razor) → VOU → login via Firebase, uma vez → Sessions grava a presença e controla as vagas com `xmin` → Pix, se a cobrança estiver ligada. Promoção da espera sai pela Outbox do Sessions para o módulo Notifications, drenada na própria requisição, em push ([ADR 0069](adr/0069-outbox-e-notificacoes.md)) (`produto.md:115, 308, 310`).
 
 **Jogo na quadra.** O app aplica as regras em `match-engine` e grava os eventos em expo-sqlite, mesmo sem internet (`apps/mobile/src/features/court/`: o controlador simula o replay e só então grava; o estado da partida é o replay do log persistido, [ADR 0038](adr/0038-log-local-da-quadra.md)) → sincroniza evento a evento quando há sinal ([ADR 0046](adr/0046-escopo-do-piloto-e-papel-placar.md)), com reenvio idempotente; um celular escreve por vez, e o Placar, o Co-admin ou o Admin pode assumir a escrita → Matches aplica os eventos ao stream `CourtSession`, sem reimplementar a lógica → SignalR leva ao espectador (pós-piloto) → Stats recalcula as projeções ([ADR 0009](adr/0009-court-session-event-sourcing.md)).
 

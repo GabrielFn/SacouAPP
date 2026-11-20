@@ -236,6 +236,24 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | D   | Excesso de conexões                     | Pós-piloto, fora da E3.7                                                              |
 | E   | Entrar no canal de outra quadra         | Pós-piloto, fora da E3.7                                                              |
 
+## 9a. Notificações e aparelhos do push (E3.11, ADR 0069)
+
+| Ameaça | Mitigação |
+|---|---|
+| S: alguém registra um aparelho em nome de outra conta | O `PUT /v1/me/push-devices/{installationId}` só existe com o ID token do Firebase; o aparelho fica na conta do token, nunca numa conta escolhida no corpo (corpo fechado: `userId` dá 400) |
+| T: corpo grande ou fora do formato no registro | Corpo de até 1 KB, campos fechados, token validado (`ExponentPushToken[...]`/`ExpoPushToken[...]`, ASCII visível, até 200), plataforma em lista fechada |
+| T: notificação duplicada (requisição repetida, queda entre passos, duas drenagens) | Outbox na transação da trava; `UNIQUE (dedupe_key)` no outbox e na notificação; `UNIQUE (notification_id, device_id)`; relay e pump com `FOR UPDATE SKIP LOCKED`; reivindicação confirmada antes do envio; resposta ambígua nunca repete |
+| R: o que aconteceu com um push | Cada entrega guarda estado, tentativas e o código do Expo, sem token |
+| I: o token ou o `installation_id` vazam | Nunca em log, resposta, erro, evento ou exportação; `ToString` mascarado; testes L1 e I14 |
+| I: ler a notificação de outra pessoa | Lista e "marcar como lida" só pelos `MemberId` da própria conta; id de outra pessoa é o mesmo 404 do inexistente; `DELETE` de instalação de outra conta responde 204 sem efeito |
+| I: o push passa por Expo, Google FCM e Apple APNs (EUA) e aparece na tela de bloqueio | Só o nome do grupo, o dia e a hora; **sem o local** (texto livre) e sem nomes (pergunta 112); `data` só com o tipo e três UUIDs. Lista com `no-store` |
+| I: o token de uma conta fica num celular emprestado | Registrar o mesmo token em outra conta apaga a linha anterior e as entregas pendentes dela (teste I11); a saída da conta apaga o aparelho (Parte 3) |
+| D: registro em massa ou drenagem lenta | Política `push-device` (10 por minuto), teto de 5 aparelhos ativos por conta, drenagem com orçamento de 3 s depois do commit, que nunca falha a escrita |
+| E: token roubado manda push pelo Expo | Fica para a Parte 2: o token de acesso do Expo com a segurança reforçada (pergunta 111) |
+| Risco aceito | Exclusão bloqueada pelo Groups numa corrida rara pode apagar antes os aparelhos e as notificações (o app registra de novo); saída da conta sem rede deixa a linha do aparelho até o próximo login nele |
+
+A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do Google) entra na Parte 2 e completa esta seção.
+
 ## 10. Outras superfícies em aberto
 
 | Superfície                               | Ameaça                                     | Mitigação                                                                                                         |
