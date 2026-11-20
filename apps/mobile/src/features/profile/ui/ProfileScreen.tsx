@@ -84,7 +84,9 @@ function Header({ onOpenAccount }: HeaderProps) {
   );
 }
 
-interface ProfileBodyProps extends Omit<ProfileScreenProps, "onOpenAccount"> {
+type BodyBaseProps = Pick<ProfileScreenProps, "accountName" | "onShare" | "onEditProfile">;
+
+interface ProfileBodyProps extends BodyBaseProps {
   readonly view: ProfileView;
   readonly onRetry: () => void;
 }
@@ -120,7 +122,7 @@ function ProfileBody({ view, onRetry, ...rest }: ProfileBodyProps) {
   }
 }
 
-interface LoadedBodyProps extends Omit<ProfileScreenProps, "onOpenAccount"> {
+interface LoadedBodyProps extends BodyBaseProps {
   readonly view: LoadedView;
 }
 

@@ -1,7 +1,7 @@
 import type { MyStats, MyStatsTotals, PlayingPosition } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 import { initialsOfName } from "../../../ui/initials";
-import { isProfileStub, type StoredProfile } from "./profile-stub";
+import type { StoredProfile } from "./profile-stub";
 
 const { card, stats: tileTexts } = strings.profile;
 const { positions } = strings.ratings;
@@ -83,12 +83,12 @@ function joinPositions(labels: readonly string[]): string {
 }
 
 export function positionLabelOf(profile: StoredProfile): string | null {
-  if (isProfileStub(profile) || profile.primaryPosition === null) return null;
+  if (!("primaryPosition" in profile) || profile.primaryPosition === null) return null;
   return positions[profile.primaryPosition];
 }
 
 export function otherPositionsLabelOf(profile: StoredProfile): string | null {
-  if (isProfileStub(profile) || profile.otherPositions.length === 0) return null;
+  if (!("otherPositions" in profile) || profile.otherPositions.length === 0) return null;
   return card.alsoPlays(joinPositions(profile.otherPositions.map(lowerPosition)));
 }
 
@@ -101,18 +101,30 @@ export function positionLineOf(profile: StoredProfile): string | null {
 }
 
 function showsGlyph(profile: StoredProfile): boolean {
-  return !isProfileStub(profile) && profile.primaryPosition !== null && profile.primaryPosition !== "any";
+  return (
+    "primaryPosition" in profile &&
+    profile.primaryPosition !== null &&
+    profile.primaryPosition !== "any"
+  );
 }
 
 /** The numbers of the card; the presence is rounds played over rounds held (question 99). */
 export function cardStatsOf(totals: MyStatsTotals): readonly CardStat[] {
   return [
     { key: "matches", value: String(totals.matchesPlayed), label: card.matches },
-    { key: "winRate", value: formatPercent(totals.wins, totals.matchesPlayed), label: card.winRate },
+    {
+      key: "winRate",
+      value: formatPercent(totals.wins, totals.matchesPlayed),
+      label: card.winRate,
+    },
     { key: "plusMinus", value: formatSigned(totals.plusMinus), label: card.plusMinus },
     { key: "longestStreak", value: String(totals.longestWinStreak), label: card.longestStreak },
     { key: "mvpCount", value: String(totals.mvpCount), label: card.mvpCount },
-    { key: "presence", value: formatPercent(totals.rounds, totals.roundsHeld), label: card.presence },
+    {
+      key: "presence",
+      value: formatPercent(totals.rounds, totals.roundsHeld),
+      label: card.presence,
+    },
   ];
 }
 
@@ -126,7 +138,11 @@ export function statTilesOf(totals: MyStatsTotals): readonly StatTileModel[] {
       label: tileTexts.wins(formatPercent(totals.wins, totals.matchesPlayed)),
     },
     { key: "plusMinus", value: formatSigned(totals.plusMinus), label: tileTexts.plusMinus },
-    { key: "longestStreak", value: String(totals.longestWinStreak), label: tileTexts.longestStreak },
+    {
+      key: "longestStreak",
+      value: String(totals.longestWinStreak),
+      label: tileTexts.longestStreak,
+    },
     { key: "mvpCount", value: String(totals.mvpCount), label: tileTexts.mvpCount },
     { key: "rounds", value: String(totals.rounds), label: tileTexts.rounds },
   ];

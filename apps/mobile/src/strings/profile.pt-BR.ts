@@ -46,6 +46,10 @@ export const profileStrings = {
     offlineBody: "Seus números aparecem quando a internet voltar.",
     retry: "Tentar de novo",
     formerGroup: "Ex-jogador",
+    groupRow: {
+      summary: (matches: number, winRate: string, wins: number) =>
+        `${String(matches)} partidas · ${winRate} (${String(wins)} ${wins === 1 ? "vitória" : "vitórias"})`,
+    },
   },
   /** The player card (`.kc`): the labels of the six numbers and the season seal. No level, no tier. */
   card: {
@@ -62,7 +66,10 @@ export const profileStrings = {
     avatarLabel: (nickname: string) => `Avatar de ${nickname}`,
     /** "Sua cartinha: ponteiro, 48 partidas, ..."; without numbers when the card hides them. */
     label: (position: string | null, numbers: readonly string[]) =>
-      [position === null ? "Sua cartinha" : `Sua cartinha: ${position.toLocaleLowerCase("pt-BR")}`, ...numbers].join(", "),
+      [
+        position === null ? "Sua cartinha" : `Sua cartinha: ${position.toLocaleLowerCase("pt-BR")}`,
+        ...numbers,
+      ].join(", "),
     summary: {
       matches: (value: string) => `${value} partidas`,
       winRate: (value: string) => `${value} de vitórias`,

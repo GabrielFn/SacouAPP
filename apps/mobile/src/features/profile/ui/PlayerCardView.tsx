@@ -49,7 +49,9 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
         backgroundColor: colors.panelSurface,
       }}
     >
-      <View style={{ position: "absolute", left: 0, right: 0, top: 0, height: cardLayout.mesh.height }}>
+      <View
+        style={{ position: "absolute", left: 0, right: 0, top: 0, height: cardLayout.mesh.height }}
+      >
         <Svg
           width="100%"
           height="100%"
@@ -61,7 +63,9 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
       </View>
 
       {card.positionLabel === null ? null : (
-        <View style={{ position: "absolute", left: cardLayout.level.left, top: cardLayout.level.top }}>
+        <View
+          style={{ position: "absolute", left: cardLayout.level.left, top: cardLayout.level.top }}
+        >
           <Text
             numberOfLines={1}
             style={{
@@ -218,10 +222,7 @@ function StatsGrid({ stats, measures: m }: StatsGridProps) {
           >
             {stat.value}
           </Text>
-          <Text
-            numberOfLines={1}
-            style={{ color: colors.cardLabel, fontSize: m.statLabelFont }}
-          >
+          <Text numberOfLines={1} style={{ color: colors.cardLabel, fontSize: m.statLabelFont }}>
             {stat.label}
           </Text>
         </View>

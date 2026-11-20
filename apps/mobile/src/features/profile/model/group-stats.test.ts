@@ -20,7 +20,7 @@ function group(overrides: Partial<MyStatsGroup>): MyStatsGroup {
   };
 }
 
-function report(groups: readonly MyStatsGroup[]): MyStats {
+function report(groups: MyStats["groups"]): MyStats {
   return {
     year: 2026,
     groups,
