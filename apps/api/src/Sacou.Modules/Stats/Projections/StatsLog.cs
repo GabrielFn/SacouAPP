@@ -12,6 +12,9 @@ internal static partial class StatsLog
     [LoggerMessage(Level = LogLevel.Information, Message = "Rating pool rebuilt. Group {GroupId}, pool {Pool}: {Members} members.")]
     public static partial void PoolRebuilt(ILogger logger, Guid groupId, string pool, int members);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Rating pools deferred. Group {GroupId}: {StaleRounds} stale rounds.")]
+    public static partial void PoolDeferred(ILogger logger, Guid groupId, int staleRounds);
+
     [LoggerMessage(Level = LogLevel.Warning, Message = "Rating pool not rated. Group {GroupId}: {Code}.")]
     public static partial void PoolNotRated(ILogger logger, Guid groupId, string code);
 }

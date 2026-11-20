@@ -67,6 +67,7 @@ app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
 app.MapSessionsEndpoints();
 app.MapMatchesEndpoints();
+app.MapStatsEndpoints();
 // GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
 app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);
 // The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).

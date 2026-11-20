@@ -26,6 +26,7 @@ public static class MatchesModule
         services.AddSingleton(EmbeddedFormationCatalog.Load());
         services.AddMatchesDatabase(configuration);
         services.AddScoped<AppendCourtEventsHandler>();
+        services.AddScoped<CourtStreamNotifier>();
         services.AddScoped<TakeOverCourtHandler>();
         // The after-game of the streams, for the projections of the Stats (E3.9, ADR 0071).
         services.AddScoped<ICourtSessionResults, StoreCourtSessionResults>();
