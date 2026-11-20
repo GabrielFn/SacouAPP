@@ -244,6 +244,9 @@ public sealed partial class StatsRoutesTests(IntegrationDatabase database) : IAs
             Assert.True(graded.IsSuccessStatusCode);
         }
 
+        // The summary folds the pools (the export never does), so the export is checked against stored values.
+        _ = await StatsCalls.SummaryAsync(world, A.Admin, round);
+        Assert.True(await RatingCountAsync(world.GroupId) > 0);
         using var response = await world.SendAsync(A.Player, HttpMethod.Get, "/v1/me/export");
         var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

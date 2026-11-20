@@ -75,6 +75,13 @@ internal sealed class StatsProjector(
     }
 
     /// <summary>
+    /// Every round of the group, earliest first, each fresh, without folding the pools: the export reads the person's
+    /// rounds only, and leaves the hidden rating (and its log line, which names the group) to the reads that use it.
+    /// </summary>
+    public async Task<IReadOnlyList<RoundProjection>> ListRoundsAsync(Guid groupId, CancellationToken cancellationToken) =>
+        (await LoadAsync(groupId, _ => true, cancellationToken).ConfigureAwait(false)).Fresh;
+
+    /// <summary>
     /// The rounds of the group that are fresh after rebuilding the stale ones <paramref name="rebuild"/> allows, and how
     /// many stale ones that would count were left as they are.
     /// </summary>

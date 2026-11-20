@@ -104,6 +104,20 @@ public sealed class StatsProjectorTests
     }
 
     [Fact]
+    public async Task ExportRead_RebuildsTheStaleRound_AndFoldsNoPool()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+
+        var listed = await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+
+        Assert.Equal(RoundId, Assert.Single(listed).Facts.RoundId);
+        Assert.Equal(1, courts.Summaries);
+        Assert.Equal(0, store.Swaps);
+        Assert.Empty(store.Ratings);
+    }
+
+    [Fact]
     public async Task Pool_IsSwappedOnlyWhenItsInputsChange_AndTheGradeIsAnInput()
     {
         rounds.Add(Round());

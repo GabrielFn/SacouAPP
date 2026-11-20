@@ -22,7 +22,7 @@ internal sealed class StatsExportSection(IUserMemberships memberships, StatsProj
         var entries = new List<StatsExportEntry>();
         foreach (var membership in found)
         {
-            var rounds = await projector.GetGroupAsync(membership.GroupId, cancellationToken).ConfigureAwait(false);
+            var rounds = await projector.ListRoundsAsync(membership.GroupId, cancellationToken).ConfigureAwait(false);
             entries.AddRange(rounds.SelectMany(round => EntriesOf(membership, round)));
         }
 
