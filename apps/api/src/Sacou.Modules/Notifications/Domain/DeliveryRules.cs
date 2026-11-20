@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Sacou.Shared.Results;
 
@@ -20,12 +19,11 @@ internal static class DeliveryRules
     public static readonly ImmutableArray<TimeSpan> RetryDelays =
         [TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30)];
 
-    private static readonly FrozenDictionary<DeliveryState, FrozenSet<DeliveryState>> Moves = new Dictionary<DeliveryState, FrozenSet<DeliveryState>>
-    {
-        [DeliveryState.Pending] = FrozenSet.Create(DeliveryState.Sending, DeliveryState.Expired),
-        [DeliveryState.Sending] = FrozenSet.Create(DeliveryState.Pending, DeliveryState.Sent, DeliveryState.Failed, DeliveryState.Unknown),
-        [DeliveryState.Sent] = FrozenSet.Create(DeliveryState.Delivered, DeliveryState.Failed, DeliveryState.Unknown),
-    }.ToFrozenDictionary();
+    private static readonly ImmutableDictionary<DeliveryState, ImmutableHashSet<DeliveryState>> Moves =
+        ImmutableDictionary<DeliveryState, ImmutableHashSet<DeliveryState>>.Empty
+            .Add(DeliveryState.Pending, [DeliveryState.Sending, DeliveryState.Expired])
+            .Add(DeliveryState.Sending, [DeliveryState.Pending, DeliveryState.Sent, DeliveryState.Failed, DeliveryState.Unknown])
+            .Add(DeliveryState.Sent, [DeliveryState.Delivered, DeliveryState.Failed, DeliveryState.Unknown]);
 
     public static bool IsFinal(DeliveryState state) => !Moves.ContainsKey(state);
 

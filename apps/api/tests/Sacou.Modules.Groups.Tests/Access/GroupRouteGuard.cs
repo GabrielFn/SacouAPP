@@ -29,6 +29,13 @@ internal static class GroupRouteGuard
         "PUT /v1/me/profile",
         "GET /v1/me/export",
         "GET /v1/me/deletion-blockers",
+
+        // The caller's own phones and notifications (E3.11, ADR 0069): by the signed-in account only.
+        "PUT /v1/me/push-devices/{installationId:guid}",
+        "DELETE /v1/me/push-devices/{installationId:guid}",
+        "GET /v1/me/notifications",
+        "POST /v1/me/notifications/{notificationId:guid}/read",
+        "POST /v1/me/notifications/read-all",
         "POST /v1/groups",
         "GET /v1/groups",
         "POST /v1/invites/preview",

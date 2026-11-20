@@ -9,6 +9,7 @@ using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
 using Sacou.Modules.Notifications;
+using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Sessions;
 using Sacou.Tests.TestSupport;
 using Xunit;
@@ -63,6 +64,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     /// <summary>Every log message and scope of the API, at the levels appsettings.json lets through, for the tests that prove what never reaches a log.</summary>
     internal CollectingLoggerProvider Logs { get; } = new();
+
+    /// <summary>The push service the API talks to; null keeps the one the API registers (in part 1 of E3.11, the disabled one).</summary>
+    internal IPushGateway? PushGateway { get; init; }
 
     /// <summary>The API's clock: the real time, moved to wherever a test sets it (tokens are minted by it too, so they stay valid).</summary>
     internal ShiftableClock Clock { get; } = new();
@@ -122,6 +126,11 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         {
             _ = services.RemoveAll<TimeProvider>();
             _ = services.AddSingleton<TimeProvider>(Clock);
+            if (PushGateway is { } gateway)
+            {
+                _ = services.RemoveAll<IPushGateway>();
+                _ = services.AddSingleton(gateway);
+            }
         });
         builder.ConfigureServices(services => services
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
