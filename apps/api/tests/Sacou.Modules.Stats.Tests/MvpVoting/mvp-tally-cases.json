@@ -1,0 +1,727 @@
+[
+  {
+    "id": "G1-most-votes",
+    "note": "Bia 3, Gabi 2: Bia.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 10
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 40
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000d",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000f",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-000000000010",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000b"
+      ],
+      "voters": 5
+    }
+  },
+  {
+    "id": "G2-tie-by-balance",
+    "note": "Bia 2 (+34), Gabi 2 (+21): Bia, by the balance.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 2,
+        "plusMinus": 34
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 4,
+        "plusMinus": 21
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000d",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000f",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000b"
+      ],
+      "voters": 4
+    }
+  },
+  {
+    "id": "G3-tie-by-wins",
+    "note": "Same votes and balance, Bia 4 wins, Gabi 3: Bia.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 4,
+        "plusMinus": 12
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 12
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000b"
+      ],
+      "voters": 2
+    }
+  },
+  {
+    "id": "G4-shared",
+    "note": "A tie in everything: Bia and Gabi share it, in member id order (Gabi's id is lower).",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 12
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 12
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000a",
+        "00000000-0000-0000-0000-00000000000b"
+      ],
+      "voters": 2
+    }
+  },
+  {
+    "id": "G5-no-votes",
+    "note": "Nobody voted: no winner, no voter.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 12
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 12
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [],
+    "expected": {
+      "winners": [],
+      "voters": 0
+    }
+  },
+  {
+    "id": "G6-candidate-corrected-out",
+    "note": "A correction took Bia out of every finished match: her 3 votes drop, Gabi wins with 2. Every voter still counts.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 0,
+        "wins": 0,
+        "plusMinus": 0
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 8
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000d",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000f",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-000000000010",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000a"
+      ],
+      "voters": 5
+    }
+  },
+  {
+    "id": "G6b-candidate-gone",
+    "note": "Bia is no longer in the after-game at all: her votes drop.",
+    "players": [
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 8
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000d",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000f",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000a"
+      ],
+      "voters": 3
+    }
+  },
+  {
+    "id": "G7-voter-corrected-out",
+    "note": "A correction took the voter Caio out after he voted: his vote still counts.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 1
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 3,
+        "plusMinus": 30
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 0,
+        "wins": 0,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000d",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000b"
+      ],
+      "voters": 3
+    }
+  },
+  {
+    "id": "G8-negative-balance",
+    "note": "Tied votes, both balances negative: -2 beats -11.",
+    "players": [
+      {
+        "name": "bia",
+        "memberId": "00000000-0000-0000-0000-00000000000b",
+        "matchesPlayed": 5,
+        "wins": 1,
+        "plusMinus": -11
+      },
+      {
+        "name": "gabi",
+        "memberId": "00000000-0000-0000-0000-00000000000a",
+        "matchesPlayed": 5,
+        "wins": 1,
+        "plusMinus": -2
+      },
+      {
+        "name": "caio",
+        "memberId": "00000000-0000-0000-0000-00000000000c",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "davi",
+        "memberId": "00000000-0000-0000-0000-00000000000d",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "edu",
+        "memberId": "00000000-0000-0000-0000-00000000000e",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "fe",
+        "memberId": "00000000-0000-0000-0000-00000000000f",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "gil",
+        "memberId": "00000000-0000-0000-0000-000000000010",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      },
+      {
+        "name": "hugo",
+        "memberId": "00000000-0000-0000-0000-000000000011",
+        "matchesPlayed": 3,
+        "wins": 1,
+        "plusMinus": 0
+      }
+    ],
+    "votes": [
+      {
+        "voter": "00000000-0000-0000-0000-00000000000c",
+        "candidate": "00000000-0000-0000-0000-00000000000b"
+      },
+      {
+        "voter": "00000000-0000-0000-0000-00000000000e",
+        "candidate": "00000000-0000-0000-0000-00000000000a"
+      }
+    ],
+    "expected": {
+      "winners": [
+        "00000000-0000-0000-0000-00000000000a"
+      ],
+      "voters": 2
+    }
+  }
+]

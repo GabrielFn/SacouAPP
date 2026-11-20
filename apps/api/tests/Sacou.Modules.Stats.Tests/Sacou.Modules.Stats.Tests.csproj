@@ -10,6 +10,9 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="../Golden/GoldenFile.cs" Link="Golden/GoldenFile.cs" />
+        <Compile Include="../TestSupport/CollectingLoggerProvider.cs" Link="TestSupport/CollectingLoggerProvider.cs" />
+        <Compile Include="../TestSupport/FixedTimeProvider.cs" Link="TestSupport/FixedTimeProvider.cs" />
+        <EmbeddedResource Include="MvpVoting/mvp-tally-cases.json" LogicalName="golden/mvp-tally-cases.json" />
         <EmbeddedResource Include="../../../../packages/volley-rules/golden/player-card-level.json" LogicalName="golden/player-card-level.json" />
         <EmbeddedResource Include="../../../../packages/rating/golden/openskill-plackett-luce.json" LogicalName="golden/openskill-plackett-luce.json" />
         <EmbeddedResource Include="../../../../packages/rating/golden/rating-pools.json" LogicalName="golden/rating-pools.json" />

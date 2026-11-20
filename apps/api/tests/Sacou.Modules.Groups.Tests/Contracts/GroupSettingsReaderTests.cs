@@ -98,6 +98,17 @@ public sealed class GroupSettingsReaderTests
         Assert.Equal(new SummaryRules(GameModality.Indoor6x6, false, true, false), Reader().ResolveRound(Snapshot(), null).Value.Summary);
     }
 
+    /// <summary>E10 of E3.18: <c>mvp.voting</c> on the group, off on the round, is off for that round (ADR 0072).</summary>
+    [Fact]
+    public void MvpVoting_ComesFromTheResolvedDocument_AndTheRoundLayerWins()
+    {
+        var group = Snapshot(("mvp.enabled", true), ("mvp.voting", true));
+
+        Assert.True(Reader().ResolveRound(group, null).Value.Summary.HasMvpVote);
+        Assert.False(Reader().ResolveRound(group, """{"schemaVersion":1,"mvp":{"voting":false}}""").Value.Summary.MvpVoting);
+        Assert.False(Reader().ResolveRound(Snapshot(("mvp.voting", true)), null).Value.Summary.HasMvpVote);
+    }
+
     /// <summary>Parity of the codes (E3.9 part 3, condition 2): every modality of the catalog has one typed value, and back.</summary>
     [Fact]
     public void EveryModalityOfTheCatalog_HasOneTypedValue_AndItsCodeBack()

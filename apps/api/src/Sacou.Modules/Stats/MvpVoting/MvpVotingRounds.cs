@@ -33,6 +33,12 @@ internal sealed class ProjectedMvpVotingRounds(StatsProjector projector) : IMvpV
     public async Task<Result<MvpVotingRound>> FindAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken)
     {
         var projection = await projector.GetRoundAsync(groupId, roundId, cancellationToken).ConfigureAwait(false);
+        return From(projection);
+    }
+
+    /// <summary>The decision on a projection read: no round and a cancelled one look the same (D4, E9).</summary>
+    internal static Result<MvpVotingRound> From(RoundProjection? projection)
+    {
         if (projection is null || projection.Facts.State == RoundState.Canceled)
         {
             return Result.Failure<MvpVotingRound>(RoundDirectoryErrors.RoundNotFound);
