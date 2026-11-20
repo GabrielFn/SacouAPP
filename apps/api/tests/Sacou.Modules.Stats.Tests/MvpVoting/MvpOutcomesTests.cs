@@ -208,6 +208,32 @@ public sealed class MvpOutcomesTests
         Assert.Equal(2, closed.Voters);
     }
 
+    /// <summary>The result route: before the close nothing is counted nor frozen; at the close it is frozen once.</summary>
+    [Fact]
+    public async Task TheResultRoute_CountsOnlyAfterTheClose()
+    {
+        votes.Add(Ana, Bia);
+        var ballot = ProjectedMvpVotingRounds.From(Projection(Both)).Value.Ballot;
+        time.Advance(StartsAt.AddHours(1) - WhileOpen);
+        var beforeOpen = await BallotOutcomeAsync(ballot);
+        time.Advance(WhileOpen - StartsAt.AddHours(1));
+        var open = await BallotOutcomeAsync(ballot);
+        Assert.Equal(0, results.Freezes);
+
+        time.Advance(AfterTheClose - WhileOpen);
+        var closed = await BallotOutcomeAsync(ballot);
+        var again = await BallotOutcomeAsync(ballot);
+
+        Assert.Equal((MvpVotingState.NotOpen, null), (beforeOpen.State, beforeOpen.Result));
+        Assert.Equal((MvpVotingState.Open, null), (open.State, open.Result));
+        Assert.Equal([Bia], closed.Result!.Winners);
+        Assert.Equal([Bia], again.Result!.Winners);
+        Assert.Equal(1, results.Freezes);
+    }
+
+    private Task<RoundMvpVote> BallotOutcomeAsync(MvpBallot ballot) =>
+        new MvpOutcomes(votes, results, time).OfBallotAsync(GroupId, RoundId, ballot, TestContext.Current.CancellationToken);
+
     private Task<RoundMvpVote?> OutcomeAsync(RoundProjection round) =>
         new MvpOutcomes(votes, results, time).OfRoundAsync(GroupId, round, TestContext.Current.CancellationToken);
 
