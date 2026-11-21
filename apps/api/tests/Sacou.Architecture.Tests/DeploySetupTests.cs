@@ -90,6 +90,10 @@ public sealed class DeploySetupTests
             valueFrom:
               secretKeyRef:
                 name: ${DATABASE_SECRET}
+          - name: SACOU_EXPO_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ${EXPO_SECRET}
         startupProbe:
           httpGet:
             path: /health
@@ -220,6 +224,7 @@ public sealed class DeploySetupTests
     [InlineData("google-github-actions/auth@" + Sha, "google-github-actions/auth@v3")]
     [InlineData("/sacou/api@sha256:[0-9a-f]{64}$", "/sacou/api[:@].*$")]
     [InlineData("[[ \"$IMAGE\"", "echo \"$SACOU_DATABASE_URL\"; [[ \"$IMAGE\"")]
+    [InlineData("[[ \"$IMAGE\"", "echo \"$SACOU_EXPO_ACCESS_TOKEN\"; [[ \"$IMAGE\"")]
     public void Action_Violations(string valid, string planted)
     {
         Assert.Contains(valid, ValidAction, StringComparison.Ordinal);
@@ -233,6 +238,7 @@ public sealed class DeploySetupTests
     [InlineData("path: /health", "path: /healthz")]
     [InlineData("valueFrom:\n      secretKeyRef:\n        name: ${DATABASE_SECRET}", "value: postgresql://u:p@h/db")]
     [InlineData("cpu-throttling: \"true\"", "cpu-throttling: \"false\"")]
+    [InlineData("valueFrom:\n      secretKeyRef:\n        name: ${EXPO_SECRET}", "value: planted-expo-token")]
     public void Service_Violations(string valid, string planted)
     {
         var service = ValidService.ReplaceLineEndings("\n");

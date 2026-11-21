@@ -45,6 +45,28 @@ spec:
                 secretKeyRef:
                   name: ${DATABASE_SECRET}
                   key: latest
+            # Push through Expo (ADR 0069, D11): the access token of this environment, read by the runtime account only.
+            - name: SACOU_EXPO_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ${EXPO_SECRET}
+                  key: latest
+            # The OIDC token Cloud Tasks and the daily sweep send (ADR 0069, D10): each pair must be equal, or the API
+            # refuses to start. The audience is the service's own URL; the e-mail is the invoker of this environment.
+            - name: ServiceCaller__Audience
+              value: ${SERVICE_URL}
+            - name: NotificationTasks__ServiceUrl
+              value: ${SERVICE_URL}
+            - name: ServiceCaller__Email
+              value: ${INVOKER_EMAIL}
+            - name: NotificationTasks__InvokerEmail
+              value: ${INVOKER_EMAIL}
+            - name: NotificationTasks__Project
+              value: ${PROJECT_ID}
+            - name: NotificationTasks__Location
+              value: us-east4
+            - name: NotificationTasks__Queue
+              value: ${TASKS_QUEUE}
           # The migrations run before the port opens: 24 × 5 s gives them two minutes (ADR 0068, D7).
           startupProbe:
             httpGet:

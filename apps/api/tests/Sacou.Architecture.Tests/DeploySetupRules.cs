@@ -14,6 +14,7 @@ internal static partial class DeploySetupRules
     internal const string ActionPath = ".github/actions/deploy-cloud-run/action.yml";
     internal const string ServicePath = "deploy/cloud-run/service.yaml";
     internal const string DatabaseUrlVariable = "SACOU_DATABASE_URL";
+    internal const string ExpoTokenVariable = "SACOU_EXPO_ACCESS_TOKEN";
 
     private const string AllFiles = "*";
     private const string EnvFiles = "**/.env*";
@@ -159,6 +160,7 @@ internal static partial class DeploySetupRules
             .. UnpinnedActions(code),
             .. code.Contains(@"/sacou/api@sha256:[0-9a-f]{64}$", StringComparison.Ordinal) ? Array.Empty<string>() : ["The deploy action must refuse an image without a digest"],
             .. code.Contains(DatabaseUrlVariable, StringComparison.Ordinal) ? ["The deploy action must not name the database URL"] : Array.Empty<string>(),
+            .. code.Contains(ExpoTokenVariable, StringComparison.Ordinal) ? ["The deploy action must not name the Expo access token"] : Array.Empty<string>(),
         ];
     }
 
@@ -173,6 +175,8 @@ internal static partial class DeploySetupRules
             .. probePath.Success && probePath.Groups["path"].Value == healthPath ? Array.Empty<string>() : [$"The startup probe must call {healthPath}"],
             .. SecretReferencePattern().IsMatch(code) ? Array.Empty<string>() : [$"{DatabaseUrlVariable} must come from secretKeyRef"],
             .. PlainDatabaseUrlPattern().IsMatch(code) ? [$"{DatabaseUrlVariable} must never have a plain value"] : Array.Empty<string>(),
+            .. ExpoSecretReferencePattern().IsMatch(code) ? Array.Empty<string>() : [$"{ExpoTokenVariable} must come from secretKeyRef"],
+            .. PlainExpoTokenPattern().IsMatch(code) ? [$"{ExpoTokenVariable} must never have a plain value"] : Array.Empty<string>(),
             .. code.Contains("run.googleapis.com/cpu-throttling: \"true\"", StringComparison.Ordinal) ? Array.Empty<string>() : ["The service must bill by request (cpu-throttling)"],
         ];
     }
@@ -267,6 +271,12 @@ internal static partial class DeploySetupRules
 
     [GeneratedRegex(@"SACOU_DATABASE_URL\s*\n\s+value:|SACOU_DATABASE_URL\s*[=:]\s*\S")]
     private static partial Regex PlainDatabaseUrlPattern();
+
+    [GeneratedRegex(@"-\s+name:\s*SACOU_EXPO_ACCESS_TOKEN\s*\n\s+valueFrom:\s*\n\s+secretKeyRef:\s*\n")]
+    private static partial Regex ExpoSecretReferencePattern();
+
+    [GeneratedRegex(@"SACOU_EXPO_ACCESS_TOKEN\s*\n\s+value:|SACOU_EXPO_ACCESS_TOKEN\s*[=:]\s*\S")]
+    private static partial Regex PlainExpoTokenPattern();
 
     [GeneratedRegex(@"\bAddHostedService\b|\bIHostedService\b|\bBackgroundService\b")]
     private static partial Regex HostedServiceCallPattern();
