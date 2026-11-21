@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Notifications.Domain;
 using Sacou.Modules.Notifications.Infrastructure;
@@ -7,12 +6,18 @@ using Sacou.Modules.Notifications.Infrastructure;
 namespace Sacou.Modules.Notifications.Application;
 
 /// <summary>
-/// The pump (ADR 0069, D5): recovers the stale, then claims due deliveries in batches, sends each batch and records what
-/// the service said. A batch is claimed and committed before anything is sent, so two pumps never send one delivery.
-/// What is recorded after the send is never cancelled: a delivery left sending would only count as unknown later.
+/// The pump (ADR 0069, D5 and D10): recovers the stale, claims due deliveries in batches, sends each batch and records
+/// what the service said, then reads the receipts that are due, and last asks the scheduler for a call when the next
+/// thing is due. A batch is claimed and committed before anything is sent, so two pumps never send one delivery. What
+/// is sent and recorded after the claim is never cancelled: a delivery left sending would only count as unknown later.
 /// </summary>
 internal sealed class PushPump(
-    IDeliveryStore deliveries, IPushGateway gateway, PushMessages messages, TimeProvider time, ILogger<PushPump> logger) : INotificationPump
+    IDeliveryStore deliveries,
+    IPushGateway gateway,
+    PushMessages messages,
+    INotificationScheduler scheduler,
+    TimeProvider time,
+    ILogger<PushPump> logger) : INotificationPump
 {
     public async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -21,13 +26,27 @@ internal sealed class PushPump(
             return;
         }
 
-        await deliveries.RecoverAsync(time.GetUtcNow(), cancellationToken).ConfigureAwait(false);
-        int claimed;
+        try
+        {
+            await deliveries.RecoverAsync(time.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+            await RepeatAsync(PumpBatchAsync, NotificationLimits.SendBatchSize, cancellationToken).ConfigureAwait(false);
+            await RepeatAsync(ReadReceiptsAsync, NotificationLimits.ReceiptBatchSize, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Also after a cut budget: what was left gets its call, never only the next write.
+            await ScheduleNextAsync().ConfigureAwait(false);
+        }
+    }
+
+    private static async Task RepeatAsync(Func<CancellationToken, Task<int>> batch, int fullBatch, CancellationToken cancellationToken)
+    {
+        int taken;
         do
         {
-            claimed = await PumpBatchAsync(cancellationToken).ConfigureAwait(false);
+            taken = await batch(cancellationToken).ConfigureAwait(false);
         }
-        while (claimed == NotificationLimits.SendBatchSize && !cancellationToken.IsCancellationRequested);
+        while (taken == fullBatch && !cancellationToken.IsCancellationRequested);
     }
 
     private async Task<int> PumpBatchAsync(CancellationToken cancellationToken)
@@ -38,14 +57,48 @@ internal sealed class PushPump(
             return 0;
         }
 
-        var composed = await messages.ComposeAsync(batch, cancellationToken).ConfigureAwait(false);
+        // From the claim on, nothing is cancelled: a send cut in the middle would be ambiguous for every message.
+        var composed = await messages.ComposeAsync(batch, CancellationToken.None).ConfigureAwait(false);
         var results = composed.Messages.Count == 0
             ? []
-            : await gateway.SendAsync(composed.Messages, cancellationToken).ConfigureAwait(false);
+            : await gateway.SendAsync(composed.Messages, CancellationToken.None).ConfigureAwait(false);
         var outcomes = PushOutcomes.Of(batch, [.. results, .. composed.Unsendable], time.GetUtcNow());
         await deliveries.RecordAsync(outcomes, time.GetUtcNow(), CancellationToken.None).ConfigureAwait(false);
         Log(outcomes);
         return batch.Count;
+    }
+
+    private async Task<int> ReadReceiptsAsync(CancellationToken cancellationToken)
+    {
+        var sent = await deliveries.ClaimReceiptsAsync(time.GetUtcNow(), NotificationLimits.ReceiptBatchSize, cancellationToken).ConfigureAwait(false);
+        if (sent.Count == 0)
+        {
+            return 0;
+        }
+
+        var receipts = await gateway.GetReceiptsAsync([.. sent.Select(delivery => delivery.TicketId)], CancellationToken.None).ConfigureAwait(false);
+        var outcomes = ReceiptOutcomes.Of(sent, receipts, time.GetUtcNow());
+        await deliveries.RecordReceiptsAsync(outcomes, time.GetUtcNow(), CancellationToken.None).ConfigureAwait(false);
+        LogReceipts(sent.Count, outcomes);
+        return sent.Count;
+    }
+
+    private async Task ScheduleNextAsync()
+    {
+        try
+        {
+            var now = time.GetUtcNow();
+            if (await deliveries.NextDueAsync(now, CancellationToken.None).ConfigureAwait(false) is { } due)
+            {
+                await scheduler.ScheduleAsync(due, CancellationToken.None).ConfigureAwait(false);
+            }
+        }
+#pragma warning disable CA1031 // Scheduling is best effort: the daily sweep and the next write catch up (ADR 0069, D10).
+        catch (Exception exception)
+#pragma warning restore CA1031
+        {
+            NotificationLog.ScheduleFailed(logger, exception.GetType().Name);
+        }
     }
 
     private void Log(IReadOnlyList<DeliveryOutcome> outcomes)
@@ -62,70 +115,18 @@ internal sealed class PushPump(
         var unknown = byState.GetValueOrDefault(DeliveryState.Unknown);
         NotificationLog.Pumped(logger, outcomes.Count, sent, retry, failed, unknown);
     }
-}
 
-/// <summary>The messages of a batch, and the deliveries that cannot become one (their round is gone).</summary>
-internal sealed record ComposedBatch(IReadOnlyList<PushMessage> Messages, IReadOnlyList<PushResult> Unsendable);
-
-/// <summary>
-/// Builds each push from ids (ADR 0069, D6 and D7): the group's current name and the round's local day and hour, rendered
-/// now. Never the venue nor a name. <c>data</c> has the kind and three ids only; the expiration is the round's start.
-/// </summary>
-internal sealed class PushMessages(IGroupDirectory groups, INotificationRounds rounds)
-{
-    public const string RoundMissing = "round-missing";
-
-    /// <summary>The kind the app reads in <c>data</c>, from a closed list.</summary>
-    public const string WaitlistPromotedKind = "waitlistPromoted";
-
-    public async Task<ComposedBatch> ComposeAsync(IReadOnlyList<ClaimedDelivery> batch, CancellationToken cancellationToken)
+    private void LogReceipts(int read, IReadOnlyList<DeliveryOutcome> outcomes)
     {
-        ArgumentNullException.ThrowIfNull(batch);
-        var names = new Dictionary<Guid, string>();
-        foreach (var group in batch.Select(delivery => delivery.GroupId).Distinct())
+        foreach (var refused in outcomes.Where(outcome => outcome.State == DeliveryState.Failed && !outcome.DisableDevice))
         {
-            names[group] = await groups.FindNameAsync(group, cancellationToken).ConfigureAwait(false) ?? NotificationTexts.UnknownGroup;
+            NotificationLog.DeliveryFailed(logger, refused.DeliveryId, refused.ErrorCode ?? PushOutcomes.NoAnswer);
         }
 
-        var keys = batch.Select(delivery => new NotificationRoundKey(delivery.GroupId, delivery.RoundId)).Distinct().ToList();
-        var found = (await rounds.FindAsync(keys, cancellationToken).ConfigureAwait(false))
-            .ToDictionary(round => new NotificationRoundKey(round.GroupId, round.RoundId));
-        var messages = new List<PushMessage>();
-        var unsendable = new List<PushResult>();
-        foreach (var delivery in batch)
-        {
-            if (found.TryGetValue(new NotificationRoundKey(delivery.GroupId, delivery.RoundId), out var round))
-            {
-                messages.Add(Compose(delivery, names[delivery.GroupId], round));
-            }
-            else
-            {
-                unsendable.Add(new PushResult(delivery.DeliveryId, PushResultKind.Failed, Code: RoundMissing));
-            }
-        }
-
-        return new ComposedBatch(messages, unsendable);
+        var byState = outcomes.CountBy(outcome => outcome.State).ToDictionary();
+        var delivered = byState.GetValueOrDefault(DeliveryState.Delivered);
+        var failed = byState.GetValueOrDefault(DeliveryState.Failed);
+        var unknown = byState.GetValueOrDefault(DeliveryState.Unknown);
+        NotificationLog.ReceiptsRead(logger, read, delivered, failed, unknown);
     }
-
-    public static PushMessage Compose(ClaimedDelivery delivery, string groupName, NotificationRound round)
-    {
-        ArgumentNullException.ThrowIfNull(delivery);
-        ArgumentNullException.ThrowIfNull(round);
-        return new PushMessage(
-            delivery.DeliveryId,
-            delivery.ExpoToken,
-            NotificationTexts.PushTitle,
-            NotificationTexts.PushBody(groupName, round.LocalDate, round.LocalTime),
-            new PushData(WaitlistPromotedKind, delivery.NotificationId, delivery.GroupId, delivery.RoundId),
-            delivery.ExpiresAt);
-    }
-}
-
-/// <summary>The gateway of part 1 of E3.11: sends nothing, so the pump claims nothing and every delivery stays pending.</summary>
-internal sealed class DisabledPushGateway : IPushGateway
-{
-    public bool IsEnabled => false;
-
-    public Task<IReadOnlyList<PushResult>> SendAsync(IReadOnlyList<PushMessage> messages, CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<PushResult>>([]);
 }
