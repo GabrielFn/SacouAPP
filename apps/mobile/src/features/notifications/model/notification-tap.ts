@@ -37,7 +37,12 @@ export function parseNotificationTap(data: unknown): NotificationTap | null {
 }
 
 export type TapTarget =
-  | { readonly kind: "round"; readonly groupId: string; readonly roundId: string }
+  | {
+      readonly kind: "round";
+      readonly groupId: string;
+      readonly roundId: string;
+      readonly notificationId: string;
+    }
   | { readonly kind: "home" };
 
 const HOME: TapTarget = { kind: "home" };
@@ -51,5 +56,10 @@ export function tapTarget(data: unknown, knownGroupIds: ReadonlySet<string> | nu
   const tap = parseNotificationTap(data);
   if (tap === null) return HOME;
   if (knownGroupIds !== null && !knownGroupIds.has(tap.groupId)) return HOME;
-  return { kind: "round", groupId: tap.groupId, roundId: tap.roundId };
+  return {
+    kind: "round",
+    groupId: tap.groupId,
+    roundId: tap.roundId,
+    notificationId: tap.notificationId,
+  };
 }

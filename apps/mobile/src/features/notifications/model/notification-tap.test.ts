@@ -10,20 +10,26 @@ const VALID = {
   roundId: ROUND_ID,
 };
 const MINE: ReadonlySet<string> = new Set([GROUP_ID]);
+const ROUND_TARGET = {
+  kind: "round",
+  groupId: GROUP_ID,
+  roundId: ROUND_ID,
+  notificationId: NOTIFICATION_ID,
+};
 
 describe("M5 the data of a touched push", () => {
   test("a valid one opens the round of the group", () => {
-    expect(tapTarget(VALID, MINE)).toEqual({ kind: "round", groupId: GROUP_ID, roundId: ROUND_ID });
+    expect(tapTarget(VALID, MINE)).toEqual(ROUND_TARGET);
     expect(parseNotificationTap(VALID)).toEqual(VALID);
   });
 
   test("before the groups are read, the round screen judges the access", () => {
-    expect(tapTarget(VALID, null)).toEqual({ kind: "round", groupId: GROUP_ID, roundId: ROUND_ID });
+    expect(tapTarget(VALID, null)).toEqual(ROUND_TARGET);
   });
 
   test("upper case ids are read as the lower case the API writes", () => {
     const upper = { ...VALID, groupId: GROUP_ID.toUpperCase() };
-    expect(tapTarget(upper, MINE)).toEqual({ kind: "round", groupId: GROUP_ID, roundId: ROUND_ID });
+    expect(tapTarget(upper, MINE)).toEqual(ROUND_TARGET);
   });
 
   test.each([

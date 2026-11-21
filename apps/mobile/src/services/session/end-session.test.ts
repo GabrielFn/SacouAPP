@@ -1,6 +1,6 @@
 import { QueryObserver } from "@tanstack/react-query";
 import { persistQueryClientSave } from "@tanstack/react-query-persist-client";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import {
   createFakeAuthSession,
@@ -11,6 +11,19 @@ import { createFakeHttpTransport, jsonAnswer } from "../../adapters/fake-http-tr
 import { createHttpSacouApi } from "../../adapters/http-sacou-api";
 import { createMemoryInviteLinkStore } from "../../adapters/memory-invite-link-store";
 import { createMemoryKeyValueStore } from "../../adapters/memory-key-value-store";
+import { createFakeClock } from "../../adapters/fake-clock";
+import { createFakePushTokenSource } from "../../adapters/fake-push-token-source";
+import { createFakeNotificationPermission } from "../../adapters/fake-notification-permission";
+import { createFakeScheduler } from "../../adapters/fake-scheduler";
+import {
+  createMemoryInstallationIdStore,
+  FAKE_INSTALLATION_ID,
+} from "../../adapters/memory-installation-id-store";
+import {
+  createPushDevices,
+  DEREGISTER_TIMEOUT_MS,
+} from "../../features/notifications/registration/push-registration";
+import { apiErr, apiOk, type ApiResult } from "../api/api-result";
 import {
   createStoredOnboardingSkip,
   ONBOARDING_SKIP_KEY,
@@ -50,7 +63,10 @@ function sessionOf(auth: FakeAuthSession): SessionIdentity {
   return session;
 }
 
-function setup(initial: SessionSnapshot = SIGNED_IN) {
+/** What the `DELETE` of the push device answers, and when (M3). */
+type RemoveAnswer = "ok" | "error" | "never";
+
+function setup(initial: SessionSnapshot = SIGNED_IN, remove: RemoveAnswer = "ok") {
   const order: string[] = [];
   const auth = createFakeAuthSession({
     initial,
@@ -80,8 +96,45 @@ function setup(initial: SessionSnapshot = SIGNED_IN) {
     inviteLinkStore,
     onboardingSkip,
   };
-  const ender = createSessionEnder({ authSession: auth, queries, stores });
-  return { auth, client, store, persister, inviteLinkStore, onboardingSkip, ender, order };
+  const scheduler = createFakeScheduler(createFakeClock());
+  const tokens = createFakePushTokenSource();
+  const answers: Readonly<Record<RemoveAnswer, () => Promise<ApiResult<null>>>> = {
+    ok: () => Promise.resolve(apiOk(null)),
+    error: () => Promise.resolve(apiErr({ kind: "offline" })),
+    never: () => new Promise<ApiResult<null>>(() => undefined),
+  };
+  const pushDevices = createPushDevices({
+    api: {
+      registerPushDevice: () => Promise.resolve(apiOk(null)),
+      removePushDevice: (body) => {
+        order.push(`removePushDevice:${body.installationId}`);
+        return answers[remove]();
+      },
+    },
+    permission: createFakeNotificationPermission("granted"),
+    tokens: {
+      ...tokens,
+      unregister: async () => {
+        order.push("unregisterPush");
+        await tokens.unregister();
+      },
+    },
+    installationIds: createMemoryInstallationIdStore(FAKE_INSTALLATION_ID),
+    session: auth,
+    scheduler,
+  });
+  const ender = createSessionEnder({ authSession: auth, queries, stores, pushDevices });
+  return {
+    auth,
+    client,
+    store,
+    persister,
+    inviteLinkStore,
+    onboardingSkip,
+    ender,
+    order,
+    scheduler,
+  };
 }
 
 function callsOf(auth: FakeAuthSession): string[] {
@@ -96,10 +149,12 @@ function signOutCount(harness: { readonly auth: FakeAuthSession }): number {
 }
 
 describe("endSession", () => {
-  test("signs out first, then cancels, clears and forgets the Google account, in this order", async () => {
+  test("the push device leaves first, then the SDK, the calls, the cache and the Google account", async () => {
     const harness = setup();
     await harness.ender.end("signedOut");
     expect(harness.order).toEqual([
+      `removePushDevice:${FAKE_INSTALLATION_ID}`,
+      "unregisterPush",
       "signOut",
       "cancelQueries",
       "clearSession",
@@ -185,6 +240,9 @@ describe("endSession", () => {
     expect(harness.client.getQueryData(queryKeys.groups())).toBeUndefined();
     expect(callsOf(harness.auth)).toEqual(["forgetProviderAccount"]);
     expect(signOutCount(harness)).toBe(0);
+    // No token to call the server with: only the phone unregisters.
+    expect(harness.order.filter((step) => step.startsWith("removePushDevice"))).toEqual([]);
+    expect(harness.order.filter((step) => step === "unregisterPush")).toEqual(["unregisterPush"]);
   });
 
   test("account switch: B starts with nothing of A, in memory or on disk", async () => {
@@ -293,6 +351,7 @@ describe("the end of a deleted account (screen 30b)", () => {
     harness.client.setQueryData(queryKeys.group(GROUP_A), { name: "Racha" });
     await harness.ender.endDeleted(sessionOf(harness.auth));
     expect(harness.order).toEqual([
+      "unregisterPush",
       "deleteAccount",
       "cancelQueries",
       "clearSession",
@@ -309,5 +368,37 @@ describe("the end of a deleted account (screen 30b)", () => {
     await harness.ender.endDeleted(accountA);
     expect(harness.order).toEqual([]);
     expect(harness.auth.snapshot()).toEqual(SIGNED_IN_B);
+  });
+});
+
+describe("M3 the push device on the exit of the account", () => {
+  test("a DELETE that fails does not keep the person signed in", async () => {
+    const harness = setup(SIGNED_IN, "error");
+    await harness.ender.end("signedOut");
+    expect(harness.order.slice(0, 3)).toEqual([
+      `removePushDevice:${FAKE_INSTALLATION_ID}`,
+      "unregisterPush",
+      "signOut",
+    ]);
+    expect(harness.auth.snapshot()).toEqual({ status: "signedOut", reason: "signedOut" });
+  });
+
+  test("a DELETE slower than 2 s: the exit goes on when the time runs out", async () => {
+    const harness = setup(SIGNED_IN, "never");
+    const exit = harness.ender.end("signedOut");
+    await vi.waitFor(() => {
+      expect(harness.scheduler.pendingDelays()).toEqual([DEREGISTER_TIMEOUT_MS]);
+    });
+    expect(signOutCount(harness)).toBe(0);
+    harness.scheduler.advance(DEREGISTER_TIMEOUT_MS);
+    await exit;
+    expect(harness.auth.snapshot()).toEqual({ status: "signedOut", reason: "signedOut" });
+    expect(harness.order.indexOf("signOut")).toBeGreaterThan(harness.order.indexOf("unregisterPush"));
+  });
+
+  test("a deleted account sends no DELETE: the server already forgot the devices", async () => {
+    const harness = setup();
+    await harness.ender.endDeleted(sessionOf(harness.auth));
+    expect(harness.order.some((step) => step.startsWith("removePushDevice"))).toBe(false);
   });
 });
