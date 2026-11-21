@@ -82,8 +82,10 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
    * The removal leaves at once, so it always goes out inside the 2 s while the session still signs it.
    * A registration still on the way is then waited for and, if it landed, followed by one more removal
    * (204 again): on the server the last write wins, so the phone ends without the account either way.
+   * That second removal is skipped once the 2 s are over: by then the sign-out may have run and another
+   * account may sign it, which would take the phone away from that new account.
    */
-  async function removeOnServer(): Promise<void> {
+  async function removeOnServer(timedOut: () => boolean): Promise<void> {
     const pending = inFlight.current;
     const installationId = await deps.installationIds.read();
     if (installationId === null) return;
@@ -95,14 +97,18 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     }
     const outcomes = await Promise.all(pending);
     await first;
-    if (outcomes.includes("registered")) await remove();
+    if (outcomes.includes("registered") && !timedOut()) await remove();
   }
 
   /** Resolves when the work ends or the time runs out, whichever first; never rejects. */
-  function bounded(work: Promise<void>): Promise<void> {
+  function bounded(work: (timedOut: () => boolean) => Promise<void>): Promise<void> {
     return new Promise((resolve) => {
-      const cancel = deps.scheduler.after(timeoutMs, resolve);
-      work
+      const expired = { value: false };
+      const cancel = deps.scheduler.after(timeoutMs, () => {
+        expired.value = true;
+        resolve();
+      });
+      work(() => expired.value)
         .catch(() => undefined)
         .finally(() => {
           cancel();
@@ -127,7 +133,7 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
       }),
     async deregister() {
       closed.current = deps.session.currentSession();
-      await bounded(removeOnServer());
+      await bounded(removeOnServer);
       await forgetLocally();
     },
     forgetLocally,

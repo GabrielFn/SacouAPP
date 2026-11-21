@@ -259,4 +259,36 @@ describe("the exit of the account (deregister)", () => {
     expect(order).toEqual(["PUT", "DELETE"]);
     expect(harness.tokens.unregistered()).toBe(1);
   });
+  test("a PUT that lands after the 2 s sends no second DELETE, which another account could sign", async () => {
+    const harness = setup();
+    const order: string[] = [];
+    const landing: { resolve: (result: ApiResult<null>) => void } = { resolve: () => undefined };
+    const api: Pick<SacouApi, "registerPushDevice" | "removePushDevice"> = {
+      registerPushDevice: () => {
+        order.push("PUT");
+        return new Promise<ApiResult<null>>((resolve) => {
+          landing.resolve = resolve;
+        });
+      },
+      removePushDevice: () => {
+        order.push("DELETE");
+        return Promise.resolve(apiOk(null));
+      },
+    };
+    const devices = createPushDevices({ ...harness.deps, api });
+    const sync = devices.sync();
+    await vi.waitFor(() => {
+      expect(order).toEqual(["PUT"]);
+    });
+    const exit = devices.deregister();
+    await vi.waitFor(() => {
+      expect(harness.scheduler.pendingDelays()).toEqual([DEREGISTER_TIMEOUT_MS]);
+    });
+    harness.scheduler.advance(DEREGISTER_TIMEOUT_MS);
+    await exit;
+    landing.resolve(apiOk(null));
+    await sync;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(order).toEqual(["PUT", "DELETE"]);
+  });
 });
