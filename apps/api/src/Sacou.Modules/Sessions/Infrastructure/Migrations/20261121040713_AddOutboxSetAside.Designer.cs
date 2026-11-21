@@ -13,7 +13,7 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 {
     [DbContext(typeof(SessionsDbContext))]
     [Migration("20261121040713_AddOutboxSetAside")]
-    partial class AddOutboxSetAside
+    internal partial class AddOutboxSetAside
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

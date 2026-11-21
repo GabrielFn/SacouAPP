@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Sacou.Modules.Sessions.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOutboxSetAside : Migration
+    internal partial class AddOutboxSetAside : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
