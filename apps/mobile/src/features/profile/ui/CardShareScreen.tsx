@@ -20,7 +20,7 @@ import { useProfileView } from "../hooks/use-profile-view";
 import { isBusy } from "../model/card-share.reducer";
 import { noticeOf, offersSettings } from "../model/card-share.selectors";
 import { playerCardOf } from "../model/player-card";
-import { meRoutes } from "../navigation";
+import { meHref } from "../../groups/navigation";
 import { PlayerCardView } from "./PlayerCardView";
 
 const { cardShare } = strings.profile;
@@ -33,7 +33,7 @@ export function CardShareScreen() {
   const { view, retry } = useProfileView();
   return (
     <Screen scroll>
-      <BackBar title={cardShare.title} fallbackHref={meRoutes.card} look="heading" />
+      <BackBar title={cardShare.title} fallbackHref={meHref} look="heading" />
       {view.kind === "loading" ? (
         <LoadingState accessibilityLabel={strings.profile.me.loading} />
       ) : null}
