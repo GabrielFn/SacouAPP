@@ -98,13 +98,14 @@ internal sealed record MeResponse(Guid MemberId, AttendanceStatus? Status, int? 
     }
 }
 
-/// <summary>One line of the list of rounds (tela 06): counts and the caller's own place, not the lists. <c>SeriesId</c> lets the app see whether the group already repeats weekly.</summary>
+/// <summary>One line of the list of rounds (tela 06): counts and the caller's own place, not the lists. <c>SeriesId</c> lets the app see whether the group already repeats weekly. <c>EndsAt</c> is the real end (an early close included), so the app closes the summary card 24 h after it.</summary>
 internal sealed record RoundSummaryResponse(
     Guid RoundId,
     Guid? SeriesId,
     string LocalDate,
     string LocalTime,
     DateTimeOffset StartsAt,
+    DateTimeOffset EndsAt,
     string Venue,
     RoundStatus Status,
     int? Capacity,
@@ -122,6 +123,7 @@ internal sealed record RoundSummaryResponse(
             RoundFormat.Date(round.Slot.Date),
             RoundFormat.Time(round.Slot.Time),
             round.Slot.StartsAt,
+            round.EndsAt,
             round.Venue.Value,
             round.Status,
             resolved.Rules.CapacityLimited ? resolved.Rules.Capacity : null,

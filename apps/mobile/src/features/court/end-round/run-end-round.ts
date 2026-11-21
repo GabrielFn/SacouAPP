@@ -23,6 +23,10 @@ export interface EndRoundOutcome {
   readonly serverClosed: boolean;
 }
 
+function noop(): void {
+  // No one is waiting for the server to close the round.
+}
+
 function isNotStarted(error: ApiError): boolean {
   return error.kind === "problem" && error.code === ROUND_NOT_STARTED;
 }
@@ -31,15 +35,19 @@ function isNotStarted(error: ApiError): boolean {
  * "Encerrar rodada" (E4.12, question 150). The server goes first and is best effort: offline, a 5xx or a
  * canceled round do not stop the user, since the round ends on its own 6 h after it starts (E3.18, D1),
  * and nothing is queued to try again. The one answer that stops it is "the round has not started", which
- * must reach the user before the court is closed. Then the session closes on the phone (the points keep
+ * must reach the user before the court is closed. `onServerClosed` runs whenever the server answered the close,
+ * even if closing the session on the phone then fails. Then the session closes on the phone (the points keep
  * being sent) and an upload starts at once.
  */
 export async function runEndRound(
   { log, sync, api }: EndRoundPorts,
   target: EndRoundTarget,
+  onServerClosed: () => void = noop,
 ): Promise<Result<EndRoundOutcome, EndRoundFailure>> {
   const closed = await api.closeRound(target.groupId, target.roundId);
   if (!closed.ok && isNotStarted(closed.error)) return err("round-not-started");
+  // The server marked the end even if the phone then fails: the cached round is stale either way.
+  if (closed.ok) onServerClosed();
   const session = await log.closeSession(target.courtSessionId);
   if (!session.ok) return err("storage");
   sync.notifyAppended();

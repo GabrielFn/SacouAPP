@@ -14,6 +14,7 @@ export function useRoundClosed(): (round: ClosedRound) => void {
   return useCallback(
     ({ groupId, roundId }) => {
       void client.invalidateQueries({ queryKey: queryKeys.round(groupId, roundId) });
+      void client.invalidateQueries({ queryKey: queryKeys.roundSummary(groupId, roundId) });
       void client.invalidateQueries({ queryKey: queryKeys.rounds(groupId) });
     },
     [client],

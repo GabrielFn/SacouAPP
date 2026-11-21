@@ -8662,6 +8662,7 @@
           "localDate",
           "localTime",
           "startsAt",
+          "endsAt",
           "venue",
           "status",
           "capacity",
@@ -8689,6 +8690,10 @@
             "type": "string"
           },
           "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
             "type": "string",
             "format": "date-time"
           },
