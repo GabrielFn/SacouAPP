@@ -118,9 +118,11 @@ public sealed class PushOutcomesTests
         attempts,
         new Guid("00000000-0000-0000-0000-000000000002"),
         "waitlist_promoted",
+        new Guid("00000000-0000-0000-0000-000000000006"),
         new Guid("00000000-0000-0000-0000-000000000003"),
         new Guid("00000000-0000-0000-0000-000000000004"),
         Now.AddDays(1),
         new Guid("00000000-0000-0000-0000-000000000005"),
+        new Guid("00000000-0000-0000-0000-000000000007"),
         "ExponentPushToken[secret-token-value]");
 }

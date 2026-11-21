@@ -1,9 +1,9 @@
 namespace Sacou.Modules.Notifications.Application;
 
 /// <summary>
-/// The port to the push service (Expo, in part 2 of E3.11). Internal, as the token it carries: no other module sees it,
-/// and only the integration tests (the one friend assembly besides the module's own tests) swap it for a fake. The one
-/// registered in part 1 is <c>DisabledPushGateway</c>: it sends nothing and the deliveries stay pending.
+/// The port to the push service (Expo, <c>ExpoPushGateway</c>). Internal, as the token it carries: no other module sees
+/// it, and only the integration tests (the one friend assembly besides the module's own tests) swap it for a fake.
+/// Without <c>SACOU_EXPO_ACCESS_TOKEN</c> it is off: nothing is claimed and the deliveries stay pending.
 /// </summary>
 internal interface IPushGateway
 {
@@ -12,6 +12,24 @@ internal interface IPushGateway
 
     /// <summary>One result per message, in any order, by <see cref="PushMessage.DeliveryId"/>. A message without a result is ambiguous.</summary>
     Task<IReadOnlyList<PushResult>> SendAsync(IReadOnlyList<PushMessage> messages, CancellationToken cancellationToken);
+
+    /// <summary>The receipts the service has of these tickets; a ticket it does not answer about is left out.</summary>
+    Task<IReadOnlyList<PushReceipt>> GetReceiptsAsync(IReadOnlyList<string> ticketIds, CancellationToken cancellationToken);
+}
+
+/// <summary>What the service said about a ticket after handing it to Google or Apple. <see cref="Code"/> is its code.</summary>
+internal sealed record PushReceipt(string TicketId, PushReceiptKind Kind, string? Code = null);
+
+internal enum PushReceiptKind
+{
+    /// <summary>Handed to the phone's service (FCM or APNs).</summary>
+    Delivered,
+
+    /// <summary>The token no longer reaches a phone: the device is turned off.</summary>
+    DeviceNotRegistered,
+
+    /// <summary>Surely not handed over (credentials, size, rate): never sent again, the notification stays on screen 28.</summary>
+    Failed,
 }
 
 /// <summary>

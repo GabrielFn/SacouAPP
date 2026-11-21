@@ -102,7 +102,9 @@ public sealed class OutboxRelayTests : IAsyncLifetime
             Assert.Equal(HttpStatusCode.OK, (await RoundCalls.RespondAsync(world, leaving.Subject, first, going: false)).Status);
         }
 
-        Assert.Equal((MaxAttempts, true), await N.OutboxStateAsync(api.ConnectionString, poison));
+        // Set aside, never processed: a query or the alert tells it from a message that went (condition of part 2).
+        Assert.Equal((MaxAttempts, false, true), await N.OutboxStateAsync(api.ConnectionString, poison));
+        Assert.Contains(api.Logs.Entries, entry => entry.Contains($"Outbox message {poison} set aside: max-attempts after {MaxAttempts} attempts.", StringComparison.Ordinal));
         Assert.Equal(0, await N.CountAsync(
             api.ConnectionString,
             "SELECT count(*) FROM sessions.outbox_messages WHERE payload->>'roundId' = @round AND processed_at IS NULL",
@@ -137,7 +139,7 @@ public sealed class OutboxRelayTests : IAsyncLifetime
         Assert.All(statuses, status => Assert.Equal(HttpStatusCode.OK, status));
         foreach (var message in seeded)
         {
-            Assert.Equal((1, true), await N.OutboxStateAsync(api.ConnectionString, message));
+            Assert.Equal((1, true, false), await N.OutboxStateAsync(api.ConnectionString, message));
         }
 
         Assert.Equal(Seeded, await N.NotificationsOfMemberAsync(api.ConnectionString, person.MemberId));

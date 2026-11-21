@@ -18,6 +18,7 @@ internal static class NotificationsDatabase
         services.AddScoped<INotificationStore, PostgresNotificationStore>();
         services.AddScoped<IPushDeviceStore, PostgresPushDeviceStore>();
         services.AddScoped<IDeliveryStore, PostgresDeliveryStore>();
+        services.AddScoped<INotificationRetention, PostgresNotificationRetention>();
         return services;
     }
 

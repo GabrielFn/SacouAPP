@@ -14,8 +14,9 @@ using Sacou.Shared.Results;
 namespace Sacou.Modules.Notifications.RegisterPushDevice;
 
 /// <summary>
-/// <c>PUT /v1/me/push-devices/{installationId}</c> <c>{ token, platform }</c>: registers or refreshes the phone (ADR 0069,
-/// D8). Idempotent: the same body again is a 204 that writes at most once a day. The answer never echoes the token.
+/// <c>PUT /v1/me/push-devices</c> <c>{ installationId, token, platform }</c>: registers or refreshes the phone (ADR 0069,
+/// D8). Idempotent: the same body again is a 204 that writes at most once a day. The answer never echoes the token, and
+/// the installation id stays in the body, out of the path the hosting logs see.
 /// </summary>
 internal static class RegisterPushDeviceEndpoint
 {
@@ -23,7 +24,7 @@ internal static class RegisterPushDeviceEndpoint
 
     public static IEndpointRouteBuilder MapRegisterPushDevice(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPut(NotificationRoutes.PushDevice, HandleAsync).WithName(Name).RequireAuthorization()
+        endpoints.MapPut(NotificationRoutes.PushDevices, HandleAsync).WithName(Name).RequireAuthorization()
             .WithMetadata(new RequestSizeLimitAttribute(NotificationLimits.MaxDeviceBodyBytes))
             .RequireRateLimiting(RateLimitPolicies.PushDevice)
             .WithNoStore()
@@ -33,26 +34,24 @@ internal static class RegisterPushDeviceEndpoint
     }
 
     private static async Task<Results<NoContent, ProblemHttpResult>> HandleAsync(
-        Guid installationId,
         RegisterPushDeviceRequest request,
         Recipients recipients,
         IPushDeviceStore devices,
         TimeProvider time,
         CancellationToken cancellationToken)
     {
-        var registered = await RegisterAsync(installationId, request, recipients, devices, time, cancellationToken).ConfigureAwait(false);
+        var registered = await RegisterAsync(request, recipients, devices, time, cancellationToken).ConfigureAwait(false);
         return registered.ToHttpResult(_ => TypedResults.NoContent());
     }
 
     private static async Task<Result<bool>> RegisterAsync(
-        Guid installationId,
         RegisterPushDeviceRequest request,
         Recipients recipients,
         IPushDeviceStore devices,
         TimeProvider time,
         CancellationToken cancellationToken)
     {
-        if (installationId == Guid.Empty)
+        if (request.InstallationId is not { } installationId || installationId == Guid.Empty)
         {
             return Result.Failure<bool>(NotificationErrors.InstallationInvalid);
         }
@@ -82,8 +81,9 @@ internal static class RegisterPushDeviceEndpoint
     };
 }
 
-/// <summary>Both fields present (a missing key is a 400); a field the record does not declare is a 400 too (ADR 0039).</summary>
+/// <summary>All three fields present (a missing key is a 400); a field the record does not declare is a 400 too (ADR 0039).</summary>
 internal sealed record RegisterPushDeviceRequest(
+    [property: JsonRequired] Guid? InstallationId,
     [property: JsonRequired] string? Token,
     [property: JsonRequired] PushDevicePlatform? Platform);
 

@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { countLines, findSizeViolations } from "./lib/file-size.mjs";
+import { countLines, findSizeViolations, isGenerated } from "./lib/file-size.mjs";
 import { exceptedPaths, readQualityExceptionsFile } from "./lib/quality-exceptions.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -15,10 +15,10 @@ const trackedFiles = execFileSync("git", ["ls-files", "-z", "--", "apps/api/**/*
   .split("\0")
   .filter((path) => path.length > 0);
 
-const files = trackedFiles.map((path) => ({
-  path,
-  lines: countLines(readFileSync(resolve(ROOT, path), "utf8")),
-}));
+const files = trackedFiles.map((path) => {
+  const text = readFileSync(resolve(ROOT, path), "utf8");
+  return { path, lines: countLines(text), generated: isGenerated(text) };
+});
 
 const { exceptions, failures } = readQualityExceptionsFile();
 const violations = [

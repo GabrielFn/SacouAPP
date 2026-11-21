@@ -8,4 +8,7 @@
     <ItemGroup>
         <ProjectReference Include="../../src/Sacou.Modules/Notifications/Sacou.Modules.Notifications.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="../TestSupport/StubHttpHandler.cs;../TestSupport/FixedTimeProvider.cs;../TestSupport/CollectingLoggerProvider.cs" LinkBase="TestSupport" />
+    </ItemGroup>
 </Project>

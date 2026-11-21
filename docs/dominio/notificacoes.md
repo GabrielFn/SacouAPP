@@ -34,6 +34,15 @@ Só esse tipo no piloto (pergunta 113). "Lista abriu", "times sorteados", "vota�
 - No máximo 5 aparelhos ativos por conta; o sexto desliga o visto há mais tempo.
 - O mesmo token só fica numa conta: registrar em outra conta (celular emprestado, outro login) tira da anterior, com as entregas pendentes dela.
 - Aparelho que o serviço de push diz não conhecer mais é desligado.
+- Registro: `PUT /v1/me/push-devices` com `{ installationId, token, platform }`; saída: `POST /v1/me/push-devices/remove` com `{ installationId }`. O `installationId` vai no corpo, nunca no caminho, que aparece nos logs de requisição.
+
+## Envio (E3.11 Parte 2)
+
+- Na hora do envio, a entrega é conferida de novo: o `MemberId` precisa ser membro ativo e o aparelho precisa ser da conta dessa pessoa. Se não for, a entrega falha sem envio (`recipient-gone`).
+- Pelo Expo, em lotes de até 100. Resposta certa de recusa passageira (limite, 5xx sem tickets, conexão que nem abriu) volta para a fila em 30 s, 2 min, 10 min e 30 min, até 5 tentativas. Resposta ambígua (tempo esgotado ou conexão cortada depois do envio) fica `unknown` e nunca repete.
+- O recibo é lido 15 min depois do ticket, em lotes de até 1.000: `ok` vira `delivered`; `DeviceNotRegistered` desliga o aparelho; outro erro (inclusive `MessageRateExceeded` no recibo) vira `failed` sem novo envio, porque a notificação continua na lista. Sem recibo depois de 24 h, vira `unknown`.
+- Quando sobra trabalho com hora marcada, uma tarefa do Cloud Tasks (uma por minuto, `pump-yyyyMMddHHmm`) chama a rota interna; um job diário do Cloud Scheduler chama a mesma rota.
+- Sem `SACOU_EXPO_ACCESS_TOKEN`, nada é enviado e as entregas ficam `pending`.
 
 ## Lista
 
@@ -51,4 +60,4 @@ Só esse tipo no piloto (pergunta 113). "Lista abriu", "times sorteados", "vota�
 
 ## Retenção
 
-Na exclusão da conta, os aparelhos e as notificações da pessoa são apagados. A limpeza periódica (entregas encerradas com mais de 7 dias, notificações com mais de 30 dias, outbox processado com mais de 7 dias) entra na Parte 2 da E3.11.
+Na exclusão da conta, os aparelhos e as notificações da pessoa são apagados. A rota interna do pump limpa, em lotes de 500: entregas encerradas com mais de 7 dias, notificações com mais de 30 dias (com as entregas), mensagens processadas do outbox com mais de 7 dias e mensagens postas de lado com mais de 30 dias.
