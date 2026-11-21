@@ -101,24 +101,8 @@ internal sealed class PostgresDeliveryStore(NotificationsDbContext database) : I
             """).ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task RecordAsync(IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(outcomes);
-        foreach (var outcome in outcomes)
-        {
-            var state = ColumnValues.States[outcome.State];
-            _ = await database.Database.ExecuteSqlAsync(
-                $"""
-                UPDATE notifications.push_deliveries
-                SET state = {state}, next_attempt_at = {outcome.NextAttemptAt}, lease_until = NULL,
-                    ticket_id = {outcome.TicketId}, error_code = {outcome.ErrorCode}, updated_at = {now}
-                WHERE id = {outcome.DeliveryId} AND state = {Sending}
-                """,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        await DisableAsync(outcomes, now, cancellationToken).ConfigureAwait(false);
-    }
+    public Task RecordAsync(IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken) =>
+        RecordFromAsync(Sending, outcomes, now, cancellationToken);
 
     public async Task<IReadOnlyList<SentDelivery>> ClaimReceiptsAsync(DateTimeOffset now, int take, CancellationToken cancellationToken)
     {
@@ -137,23 +121,8 @@ internal sealed class PostgresDeliveryStore(NotificationsDbContext database) : I
             """).ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task RecordReceiptsAsync(IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(outcomes);
-        foreach (var outcome in outcomes)
-        {
-            var state = ColumnValues.States[outcome.State];
-            _ = await database.Database.ExecuteSqlAsync(
-                $"""
-                UPDATE notifications.push_deliveries
-                SET state = {state}, next_attempt_at = {outcome.NextAttemptAt}, error_code = {outcome.ErrorCode}, updated_at = {now}
-                WHERE id = {outcome.DeliveryId} AND state = {Sent}
-                """,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        await DisableAsync(outcomes, now, cancellationToken).ConfigureAwait(false);
-    }
+    public Task RecordReceiptsAsync(IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken) =>
+        RecordFromAsync(Sent, outcomes, now, cancellationToken);
 
     public async Task<DateTimeOffset?> NextDueAsync(DateTimeOffset now, CancellationToken cancellationToken) =>
         await database.Database.SqlQuery<DateTimeOffset?>(
@@ -168,6 +137,29 @@ internal sealed class PostgresDeliveryStore(NotificationsDbContext database) : I
                 UNION ALL
                 SELECT min(lease_until) FROM notifications.push_deliveries WHERE state = {Sending}) AS waiting
             """).SingleAsync(cancellationToken).ConfigureAwait(false);
+
+    /// <summary>
+    /// Each outcome on a delivery still in <paramref name="from"/> (a pump that lost its lease writes nothing), then the
+    /// phones the service no longer knows. A ticket, once given, is kept: <c>COALESCE</c> with the one stored.
+    /// </summary>
+    private async Task RecordFromAsync(string from, IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(outcomes);
+        foreach (var outcome in outcomes)
+        {
+            var state = ColumnValues.States[outcome.State];
+            _ = await database.Database.ExecuteSqlAsync(
+                $"""
+                UPDATE notifications.push_deliveries
+                SET state = {state}, next_attempt_at = {outcome.NextAttemptAt}, lease_until = NULL,
+                    ticket_id = COALESCE({outcome.TicketId}, ticket_id), error_code = {outcome.ErrorCode}, updated_at = {now}
+                WHERE id = {outcome.DeliveryId} AND state = {from}
+                """,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        await DisableAsync(outcomes, now, cancellationToken).ConfigureAwait(false);
+    }
 
     private async Task DisableAsync(IReadOnlyList<DeliveryOutcome> outcomes, DateTimeOffset now, CancellationToken cancellationToken)
     {

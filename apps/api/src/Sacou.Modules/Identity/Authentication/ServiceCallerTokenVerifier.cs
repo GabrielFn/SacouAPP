@@ -39,19 +39,16 @@ internal sealed class ServiceCallerSigningKeys(GoogleSigningKeySource keys) : IS
 /// </summary>
 internal sealed class ServiceCallerTokenVerifier(ISigningKeySource keys, IOptions<ServiceCallerOptions> options, TimeProvider time)
 {
-    public const int MaximumTokenSizeInBytes = 8 * 1024;
+    public const int MaximumTokenSizeInBytes = JwtReading.MaximumTokenSizeInBytes;
 
     /// <summary>The two forms Google documents for the issuer of its OIDC tokens.</summary>
     public static readonly string[] Issuers = ["https://accounts.google.com", "accounts.google.com"];
 
-    private const int SignedTokenParts = 3;
-    private const char PartSeparator = '.';
     private const string EmailClaim = "email";
     private const string EmailVerifiedClaim = "email_verified";
     private const string IssuedAtClaim = "iat";
 
     private static readonly string[] AllowedAlgorithms = [SecurityAlgorithms.RsaSha256];
-    private static readonly JsonDocumentOptions StrictJson = new() { AllowDuplicateProperties = false };
 
     private readonly JsonWebTokenHandler handler = new() { MaximumTokenSizeInBytes = MaximumTokenSizeInBytes };
 
@@ -65,7 +62,7 @@ internal sealed class ServiceCallerTokenVerifier(ISigningKeySource keys, IOption
             return ServiceCallerRejection.NotConfigured;
         }
 
-        if (ReadHeader(token) is not { } header)
+        if (JwtReading.ReadHeader(handler, token) is not { } header)
         {
             return ServiceCallerRejection.Malformed;
         }
@@ -97,7 +94,7 @@ internal sealed class ServiceCallerTokenVerifier(ISigningKeySource keys, IOption
             return ServiceCallerRejection.Invalid;
         }
 
-        return ReadPayload((JsonWebToken)result.SecurityToken) is { } payload ? Check(payload, caller, time.GetUtcNow()) : ServiceCallerRejection.Malformed;
+        return JwtReading.ReadPayload((JsonWebToken)result.SecurityToken) is { } payload ? Check(payload, caller, time.GetUtcNow()) : ServiceCallerRejection.Malformed;
     }
 
     /// <summary>The rules the library does not know: the calling account, verified, and a token not issued in the future.</summary>
@@ -132,35 +129,4 @@ internal sealed class ServiceCallerTokenVerifier(ISigningKeySource keys, IOption
         LogValidationExceptions = false,
         LogTokenId = false,
     };
-
-    private JsonWebToken? ReadHeader(string token)
-    {
-        if (token.Length > MaximumTokenSizeInBytes || token.Split(PartSeparator).Length != SignedTokenParts)
-        {
-            return null;
-        }
-
-        try
-        {
-            return handler.ReadJsonWebToken(token);
-        }
-        catch (ArgumentException)
-        {
-            // SecurityTokenMalformedException derives from ArgumentException. Its message may echo the token.
-            return null;
-        }
-    }
-
-    private static JsonElement? ReadPayload(JsonWebToken token)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(Base64UrlEncoder.Decode(token.EncodedPayload), StrictJson);
-            return document.RootElement.ValueKind == JsonValueKind.Object ? document.RootElement.Clone() : null;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-    }
 }

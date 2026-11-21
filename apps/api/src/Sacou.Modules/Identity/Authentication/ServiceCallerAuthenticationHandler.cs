@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using Sacou.Modules.Identity.Contracts;
 
 namespace Sacou.Modules.Identity.Authentication;
@@ -23,14 +22,13 @@ internal sealed partial class ServiceCallerAuthenticationHandler(
     /// <summary>The subject of the principal: the rate limiter counts the service caller as one caller.</summary>
     public const string Subject = "service:" + ServiceCallers.AuthenticationScheme;
 
-    private const string BearerPrefix = "Bearer ";
     private const string FailureMessage = "The service caller token was refused.";
 
     private readonly ILogger rejectionLogger = loggerFactory.CreateLogger<ServiceCallerAuthenticationHandler>();
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (ReadBearerToken(Request.Headers.Authorization) is not { } token)
+        if (JwtReading.ReadBearerToken(Request.Headers.Authorization) is not { } token)
         {
             return Refuse(ServiceCallerRejection.Malformed);
         }
@@ -52,18 +50,6 @@ internal sealed partial class ServiceCallerAuthenticationHandler(
     }
 
     protected override Task HandleForbiddenAsync(AuthenticationProperties properties) => HandleChallengeAsync(properties);
-
-    private static string? ReadBearerToken(StringValues headers)
-    {
-        var value = headers.Count == 1 ? headers[0] : null;
-        if (value is null || !value.StartsWith(BearerPrefix, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        var token = value[BearerPrefix.Length..];
-        return token.Length > 0 && !token.Any(char.IsWhiteSpace) ? token : null;
-    }
 
     private AuthenticateResult Refuse(ServiceCallerRejection rejection)
     {

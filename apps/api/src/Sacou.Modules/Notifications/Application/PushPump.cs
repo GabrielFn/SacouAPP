@@ -103,11 +103,7 @@ internal sealed class PushPump(
 
     private void Log(IReadOnlyList<DeliveryOutcome> outcomes)
     {
-        foreach (var refused in outcomes.Where(outcome => outcome.State == DeliveryState.Failed && !outcome.DisableDevice))
-        {
-            NotificationLog.DeliveryFailed(logger, refused.DeliveryId, refused.ErrorCode ?? PushOutcomes.NoAnswer);
-        }
-
+        LogFailures(outcomes);
         var byState = outcomes.CountBy(outcome => outcome.State).ToDictionary();
         var sent = byState.GetValueOrDefault(DeliveryState.Sent);
         var retry = byState.GetValueOrDefault(DeliveryState.Pending);
@@ -118,15 +114,20 @@ internal sealed class PushPump(
 
     private void LogReceipts(int read, IReadOnlyList<DeliveryOutcome> outcomes)
     {
-        foreach (var refused in outcomes.Where(outcome => outcome.State == DeliveryState.Failed && !outcome.DisableDevice))
-        {
-            NotificationLog.DeliveryFailed(logger, refused.DeliveryId, refused.ErrorCode ?? PushOutcomes.NoAnswer);
-        }
-
+        LogFailures(outcomes);
         var byState = outcomes.CountBy(outcome => outcome.State).ToDictionary();
         var delivered = byState.GetValueOrDefault(DeliveryState.Delivered);
         var failed = byState.GetValueOrDefault(DeliveryState.Failed);
         var unknown = byState.GetValueOrDefault(DeliveryState.Unknown);
         NotificationLog.ReceiptsRead(logger, read, delivered, failed, unknown);
+    }
+
+    /// <summary>A failure that is not a phone gone is our defect or a credential: logged by its delivery and code.</summary>
+    private void LogFailures(IReadOnlyList<DeliveryOutcome> outcomes)
+    {
+        foreach (var refused in outcomes.Where(outcome => outcome.State == DeliveryState.Failed && !outcome.DisableDevice))
+        {
+            NotificationLog.DeliveryFailed(logger, refused.DeliveryId, refused.ErrorCode ?? PushOutcomes.NoAnswer);
+        }
     }
 }
