@@ -42,4 +42,9 @@ internal static partial class NotificationLog
     /// <summary>The type of what failed in one step of the internal route, never its message.</summary>
     [LoggerMessage(EventId = 6914, EventName = "InternalPumpStepFailed", Level = LogLevel.Warning, Message = "Internal pump step {Step} stopped: {Reason}.")]
     public static partial void StepFailed(ILogger logger, string step, string reason);
+
+    /// <summary>The type of an exception the gateway did not classify, never its message.</summary>
+    [LoggerMessage(EventId = 6915, EventName = "PushGatewayCrashed", Level = LogLevel.Error,
+        Message = "Push gateway call {Call} threw {ExceptionType}; the claimed batch is recorded without a resend.")]
+    public static partial void GatewayCrashed(ILogger logger, string call, string exceptionType);
 }

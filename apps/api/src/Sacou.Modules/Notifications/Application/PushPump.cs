@@ -61,7 +61,7 @@ internal sealed class PushPump(
         var composed = await messages.ComposeAsync(batch, CancellationToken.None).ConfigureAwait(false);
         var results = composed.Messages.Count == 0
             ? []
-            : await gateway.SendAsync(composed.Messages, CancellationToken.None).ConfigureAwait(false);
+            : await SendAsync(composed.Messages).ConfigureAwait(false);
         var outcomes = PushOutcomes.Of(batch, [.. results, .. composed.Unsendable], time.GetUtcNow());
         await deliveries.RecordAsync(outcomes, time.GetUtcNow(), CancellationToken.None).ConfigureAwait(false);
         Log(outcomes);
@@ -76,11 +76,46 @@ internal sealed class PushPump(
             return 0;
         }
 
-        var receipts = await gateway.GetReceiptsAsync([.. sent.Select(delivery => delivery.TicketId)], CancellationToken.None).ConfigureAwait(false);
+        var receipts = await GetReceiptsAsync([.. sent.Select(delivery => delivery.TicketId)]).ConfigureAwait(false);
         var outcomes = ReceiptOutcomes.Of(sent, receipts, time.GetUtcNow());
         await deliveries.RecordReceiptsAsync(outcomes, time.GetUtcNow(), CancellationToken.None).ConfigureAwait(false);
         LogReceipts(sent.Count, outcomes);
         return sent.Count;
+    }
+
+    /// <summary>
+    /// Any failure of the gateway outside its own list leaves the batch ambiguous: the service may have taken the
+    /// messages, so they are recorded as unknown and never sent again, instead of staying sending until the lease ends.
+    /// </summary>
+    private async Task<IReadOnlyList<PushResult>> SendAsync(IReadOnlyList<PushMessage> outgoing)
+    {
+        try
+        {
+            return await gateway.SendAsync(outgoing, CancellationToken.None).ConfigureAwait(false);
+        }
+#pragma warning disable CA1031 // A claimed batch must always be recorded; only the type of the exception is logged.
+        catch (Exception exception)
+#pragma warning restore CA1031
+        {
+            NotificationLog.GatewayCrashed(logger, PushOutcomes.SendCall, exception.GetType().Name);
+            return [.. outgoing.Select(message => new PushResult(message.DeliveryId, PushResultKind.Ambiguous, Code: PushOutcomes.UnexpectedFailure))];
+        }
+    }
+
+    /// <summary>A failure of the receipts read reads nothing: the receipts are asked again, and after a day are unknown.</summary>
+    private async Task<IReadOnlyList<PushReceipt>> GetReceiptsAsync(IReadOnlyList<string> ticketIds)
+    {
+        try
+        {
+            return await gateway.GetReceiptsAsync(ticketIds, CancellationToken.None).ConfigureAwait(false);
+        }
+#pragma warning disable CA1031 // The claimed receipts must always be recorded; only the type of the exception is logged.
+        catch (Exception exception)
+#pragma warning restore CA1031
+        {
+            NotificationLog.GatewayCrashed(logger, PushOutcomes.ReceiptsCall, exception.GetType().Name);
+            return [];
+        }
     }
 
     private async Task ScheduleNextAsync()
