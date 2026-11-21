@@ -26,6 +26,8 @@ function textOf(report: RoundSummaryReport): string {
     members: MEMBERS,
     online: true,
     unsentPoints: 0,
+    ballot: undefined,
+    nowMs: 0,
   });
   if (view.kind !== "ready") throw new Error(`expected ready, got ${view.kind}`);
   return summaryShareText(view);

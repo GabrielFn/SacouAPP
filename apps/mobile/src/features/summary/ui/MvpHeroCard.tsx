@@ -21,19 +21,21 @@ const NET_STROKE = 3;
 export interface MvpHeroCardProps {
   /** Already assembled: "Bia", and "Bia e Gabi" for a pair of the sand (E4.18). */
   readonly name: string;
-  /** "Laranja · +2 de saldo · 2 vitórias em 3". */
-  readonly line: string;
-  /** Shows "Calculado pelo placar". */
-  readonly byStats: boolean;
+  /** "Laranja · +2 de saldo · 2 vitórias em 3"; `null` for a tie of votes. */
+  readonly line: string | null;
+  /** The small print: "Calculado pelo placar", "Escolhido pela galera", "Votação da galera aberta". */
+  readonly notes: readonly string[];
 }
 
 /** The dark card of the MVP of the day (Resumo.dc.html): grows with the name, never a fixed height. */
-export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
+export function MvpHeroCard({ name, line, notes }: MvpHeroCardProps) {
   const { colors, tokens } = useTheme();
   return (
     <View
       accessible
-      accessibilityLabel={`${summary.mvpAccessibility(name)}. ${line}`}
+      accessibilityLabel={[summary.mvpAccessibility(name), line, ...notes]
+        .filter((part) => part !== null)
+        .join(". ")}
       style={{
         backgroundColor: colors.panelSurface,
         borderRadius: tokens.radii.pill,
@@ -89,11 +91,14 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
       >
         {name}
       </Text>
-      <Text variant="muted" style={{ color: colors.onPanel, opacity: LINE_OPACITY }}>
-        {line}
-      </Text>
-      {byStats ? (
+      {line === null ? null : (
+        <Text variant="muted" style={{ color: colors.onPanel, opacity: LINE_OPACITY }}>
+          {line}
+        </Text>
+      )}
+      {notes.map((note) => (
         <Text
+          key={note}
           variant="caption"
           style={{
             color: colors.onPanel,
@@ -101,9 +106,9 @@ export function MvpHeroCard({ name, line, byStats }: MvpHeroCardProps) {
             fontSize: tokens.fontSizes.legal,
           }}
         >
-          {summary.mvpNote}
+          {note}
         </Text>
-      ) : null}
+      ))}
     </View>
   );
 }

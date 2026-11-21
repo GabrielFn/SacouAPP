@@ -1,4 +1,5 @@
 const MINUS = "−";
+const MIN_STREAK_TO_SHOW = 2;
 
 function plural(amount: number, one: string, many: string): string {
   return `${String(amount)} ${amount === 1 ? one : many}`;
@@ -10,6 +11,25 @@ export const summaryStrings = {
   matches: (amount: number) => plural(amount, "partida", "partidas"),
   mvpTitle: "MVP do dia",
   mvpNote: "Calculado pelo placar",
+  mvpByVotesNote: "Escolhido pela galera",
+  votingOpenNote: "Votação da galera aberta",
+  /** "7 vitórias · ficaram 4 seguidas na quadra": the MVP of a team of the sand (screen 12b). */
+  teamMvpLine: (wins: number, streak: number) =>
+    streak >= MIN_STREAK_TO_SHOW
+      ? `${plural(wins, "vitória", "vitórias")} · ficaram ${String(streak)} seguidas na quadra`
+      : plural(wins, "vitória", "vitórias"),
+  rankingTitle: "Ranking do dia",
+  /** The sand header: "Areia de sábado · 9 partidas · duplas". */
+  sandTeamKind: { pairs: "duplas", quartets: "quartetos" },
+  /** "7 vitórias · 2 derrotas", and "· 1 sem vencedor" only when a match ended without one. */
+  record: (wins: number, losses: number, undecided: number) =>
+    [
+      plural(wins, "vitória", "vitórias"),
+      plural(losses, "derrota", "derrotas"),
+      ...(undecided > 0 ? [`${String(undecided)} sem vencedor`] : []),
+    ].join(" · "),
+  rankingAccessibility: (position: number, name: string, record: string) =>
+    `${String(position)}º, ${name}, ${record}`,
   mvpAccessibility: (name: string) => `MVP do dia: ${name}`,
   noName: "Jogador",
   /** "Bia", "Bia e Caio", "Bia, Caio e Dani": the MVP shared by votes. */
@@ -48,6 +68,12 @@ export const summaryStrings = {
     /** "Resumo do Racha de terça · 4 partidas." */
     intro: (header: string) => `Resumo do ${header}.`,
     mvp: (name: string, detail: string) => `MVP do dia: ${name} (${detail}).`,
+    mvpNoDetail: (name: string) => `MVP do dia: ${name}.`,
+    mvpByVotes: (name: string) => `MVP do dia (escolhido pela galera): ${name}.`,
+    /** "Ranking do dia: 1. Bia e Gabi, 7-2; 2. Caio e Léo, 5-4." */
+    ranking: (lines: readonly string[]) => `Ranking do dia: ${lines.join("; ")}.`,
+    rankingLine: (position: number, name: string, wins: number, losses: number) =>
+      `${String(position)}. ${name}, ${String(wins)}-${String(losses)}`,
     mostWins: (label: string, figure: string) => `Time que mais venceu: ${label}, ${figure}.`,
     longestStreak: (label: string, figure: string) => `Maior sequência: ${label}, ${figure}.`,
   },

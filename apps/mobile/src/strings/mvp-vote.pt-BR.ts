@@ -35,7 +35,7 @@ export const mvpVoteStrings = {
   retry: "Tentar de novo",
   seeSummary: "Ver resumo",
   staleNote: "Sem conexão. Mostrando a votação que o celular viu por último.",
-  votingOff: "A votação do MVP está desligada neste grupo.",
+  votingOff: "A votação do MVP está desligada nesta rodada.",
   notOpen: "A votação abre quando a rodada terminar.",
   /** "Abre às 02h30", in the time of the phone. */
   opensAt: (time: string) => `Abre às ${time}`,
@@ -48,5 +48,10 @@ export const mvpVoteStrings = {
     `O resultado sai quando a votação fechar, em ${remaining}.`,
   closed: "A votação fechou.",
   closedBody: "O MVP escolhido aparece no resumo da rodada.",
+  dismissError: "Fechar",
+  /** The entry on screen 12: it never names the vote nor counts anyone (plan, section 4, item 2). */
+  entryNotOpen: "A votação do MVP abre quando a rodada terminar",
+  entryVote: (remaining: string) => `Votar no MVP · fecha em ${remaining}`,
+  entryVoted: (remaining: string) => `Você já votou · resultado em ${remaining}`,
   offlineFailure: "Sem conexão. Tente de novo.",
 } as const;

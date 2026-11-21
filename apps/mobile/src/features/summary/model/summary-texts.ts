@@ -25,10 +25,18 @@ export function sideLook(side: SummarySide): SideLook {
   };
 }
 
-/** "Racha de terça · 4 partidas"; without the group name yet, only the matches. */
-export function headerLine(groupName: string | null, finishedMatches: number): string {
+/**
+ * "Racha de terça · 4 partidas"; without the group name yet, only the matches. The sand adds the kind of
+ * team ("Areia de sábado · 9 partidas · duplas", screen 12b).
+ */
+export function headerLine(
+  groupName: string | null,
+  finishedMatches: number,
+  teamKind: string | null = null,
+): string {
   const matches = summaryStrings.matches(finishedMatches);
-  return groupName === null || groupName === "" ? matches : `${groupName} · ${matches}`;
+  const base = groupName === null || groupName === "" ? matches : `${groupName} · ${matches}`;
+  return teamKind === null ? base : `${base} · ${teamKind}`;
 }
 
 export interface MvpLineInput {
