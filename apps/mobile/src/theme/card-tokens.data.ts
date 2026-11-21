@@ -13,8 +13,8 @@ export const cardMeasures = {
   initialsFont: 50,
   /** The nickname in the orange band. */
   nameFont: 46,
-  statValueFont: 30,
-  statLabelFont: 12,
+  statValueFont: 26,
+  statLabelFont: 11,
   brandFont: 17,
   seasonFont: 12,
   /** The glyph of the six squares under the position. */
@@ -23,7 +23,7 @@ export const cardMeasures = {
   glyphGap: 6,
   seasonHeight: 22,
   seasonPadding: 9,
-  statRowGap: 8,
+  statRowGap: 4,
   frameRadius: 24,
   /** Half the avatar (`.kj`: 116), so it is a circle at any size. */
   avatarRadius: 58,
@@ -37,6 +37,9 @@ export const cardMeasures = {
 
 /** The most the system font scale grows the text of the card (lower than the app cap: the bands are fixed). */
 export const cardFontScaleCap = 1.15;
+
+/** How far the position may shrink to stay beside the avatar. */
+export const POSITION_MIN_FONT_SCALE = 0.6;
 
 /** How far the nickname may shrink to fit its band (adjustsFontSizeToFit). */
 export const NAME_MIN_FONT_SCALE = 0.4;

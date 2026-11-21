@@ -1,10 +1,11 @@
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Svg, { G, Path, Rect } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
 import {
   CARD_ASPECT_RATIO,
   NAME_MIN_FONT_SCALE,
+  POSITION_MIN_FONT_SCALE,
   cardMeasures,
 } from "../../../theme/card-tokens.data";
 import type { ScaledCardTokens } from "../../../theme/scale";
@@ -80,10 +81,13 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
             position: "absolute",
             left: cardLayout.position.left,
             top: cardLayout.position.top,
+            maxWidth: cardLayout.position.maxWidth,
           }}
         >
           <Text
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={POSITION_MIN_FONT_SCALE}
             style={{
               color: colors.panelAccent,
               fontFamily: fontFamilies.body700,
@@ -160,51 +164,71 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
         </Text>
       </View>
 
-      {showStats ? <StatsGrid stats={card.stats} measures={m} /> : null}
-
-      <View
-        style={{
-          position: "absolute",
-          left: cardLayout.footer.side,
-          right: cardLayout.footer.side,
-          bottom: cardLayout.footer.bottom,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text
-          style={{
-            color: colors.primary,
-            fontFamily: fontFamilies.display800,
-            fontSize: m.brandFont,
-          }}
-        >
-          {strings.profile.card.brand}
-        </Text>
-        <View
-          style={{
-            height: m.seasonHeight,
-            paddingHorizontal: m.seasonPadding,
-            borderRadius: m.seasonRadius,
-            backgroundColor: colors.accent,
-            justifyContent: "center",
-          }}
-        >
+      <View style={cardStyles.lowerSection}>
+        <View style={cardStyles.statsArea}>
+          {showStats ? <StatsGrid stats={card.stats} measures={m} /> : null}
+        </View>
+        <View style={cardStyles.footer}>
           <Text
             style={{
-              color: colors.onPrimary,
-              fontFamily: fontFamilies.body700,
-              fontSize: m.seasonFont,
+              color: colors.primary,
+              fontFamily: fontFamilies.display800,
+              fontSize: m.brandFont,
             }}
           >
-            {card.seasonLabel}
+            {strings.profile.card.brand}
           </Text>
+          <View
+            style={{
+              height: m.seasonHeight,
+              paddingHorizontal: m.seasonPadding,
+              borderRadius: m.seasonRadius,
+              backgroundColor: colors.accent,
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.onPrimary,
+                fontFamily: fontFamilies.body700,
+                fontSize: m.seasonFont,
+              }}
+            >
+              {card.seasonLabel}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
   );
 }
+
+/**
+ * Below the name band: the grid of numbers takes what is left and the footer (brand and season) is its own
+ * strip under it, in the flow, so nothing can overlap (no `position: absolute` over the grid).
+ */
+export const cardStyles = StyleSheet.create({
+  lowerSection: {
+    position: "absolute",
+    left: FLUSH,
+    right: FLUSH,
+    top: cardLayout.lower.top,
+    bottom: FLUSH,
+  },
+  statsArea: {
+    flex: 1,
+    marginHorizontal: cardLayout.stats.side,
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  footer: {
+    marginHorizontal: cardLayout.footer.side,
+    marginBottom: cardLayout.footer.bottom,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});
 
 export interface StatsGridProps {
   readonly stats: readonly CardStat[];
@@ -216,10 +240,6 @@ function StatsGrid({ stats, measures: m }: StatsGridProps) {
   return (
     <View
       style={{
-        position: "absolute",
-        left: cardLayout.stats.side,
-        right: cardLayout.stats.side,
-        top: cardLayout.stats.top,
         flexDirection: "row",
         flexWrap: "wrap",
         rowGap: m.statRowGap,
