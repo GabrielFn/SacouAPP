@@ -41,6 +41,7 @@ export const THEME_ROLES = [
   "selectFill",
   "selectOutline",
   "meterBand",
+  "choiceFill",
   "cardAvatarSurface",
   "cardLabel",
   "cardMesh",
@@ -74,6 +75,8 @@ const memberColors = {
   selectFill: palette.selectFill,
   selectOutline: palette.netBlue,
   meterBand: palette.meterBand,
+  // The chosen row of the MVP ballot (VotarMvp.dc.html).
+  choiceFill: palette.choiceFill,
   // The player card (Perfil.dc.html .kc): the avatar blue, the labels and the mesh over the night.
   cardAvatarSurface: cardAvatarColor,
   cardLabel: cardLabelColor,

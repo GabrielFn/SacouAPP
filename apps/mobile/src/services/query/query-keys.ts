@@ -26,6 +26,12 @@ export const queryKeys = {
   /** The numbers of a round (screen 12): persisted, so the last summary seen opens offline (E4.12). */
   roundSummary: (groupId: string, roundId: string) =>
     ["groups", groupId, "rounds", roundId, "summary"] as const,
+  /**
+   * The MVP ballot of the person (screen 12a), with their own vote: outside the persisted allow list, so
+   * the vote is never written on the phone (E4.18, question 178).
+   */
+  mvpVoting: (groupId: string, roundId: string) =>
+    ["groups", groupId, "rounds", roundId, "mvp-voting"] as const,
   /** Points of a round this phone has not sent yet, counted from the court log: never persisted. */
   courtUnsent: (roundId: string) => ["court-unsent", roundId] as const,
   /** Where a court session came from, read from the court log: outside the persisted allow list. */

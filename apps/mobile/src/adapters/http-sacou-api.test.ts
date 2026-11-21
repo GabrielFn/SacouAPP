@@ -284,6 +284,22 @@ const OPERATIONS: readonly Operation[] = [
     null,
   ],
   [
+    "getMvpVoting",
+    (a) => a.getMvpVoting(GROUP, ROUND),
+    "GET",
+    "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/mvp-voting`,
+    null,
+  ],
+  [
+    "castMvpVote",
+    (a) => a.castMvpVote(GROUP, ROUND, MEMBER),
+    "POST",
+    "/v1/groups/{groupId}/rounds/{roundId}/mvp-voting/vote",
+    `/v1/groups/${GROUP}/rounds/${ROUND}/mvp-voting/vote`,
+    { candidateMemberId: MEMBER },
+  ],
+  [
     "respondAttendance",
     (a) => a.respondAttendance(GROUP, ROUND, "going"),
     "PUT",
@@ -322,8 +338,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 33 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(33);
+  test("the table covers the 35 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(35);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {

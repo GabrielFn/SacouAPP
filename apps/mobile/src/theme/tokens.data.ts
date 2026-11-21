@@ -29,9 +29,10 @@ export const palette = {
   // The "Vou" pill of the round cards (Inicio.dc.html, Grupos.dc.html): pale green, dark green text.
   goingFill: "#E3F3E8",
   goingText: "#0C6B35",
-  // The draw (Sorteio.dc.html): the pale blue of a selected name and the green band of the meter.
+  // The draw (Sorteio.dc.html): selected name and meter band; the MVP ballot (VotarMvp.dc.html): the chosen row.
   selectFill: "#E8EEFF",
   meterBand: "#12A150",
+  choiceFill: "#FFF1EA",
 } as const;
 
 export const nightAlpha = {
@@ -183,8 +184,9 @@ export const sizes = {
   courtIconHeight: 22,
   // Round screens (CriarRodada.dc.html, Rodada.dc.html): the orange dot of a leaf set only for the round.
   highlightDot: 8,
-  // Members (Membros.dc.html .av, .more) and the invite QR frame (Convidar.dc.html).
+  // Members (Membros.dc.html .av, .more), the invite QR frame (Convidar.dc.html), a row of the MVP ballot (VotarMvp.dc.html .vt).
   avatar: 40,
+  ballotRowMin: 58,
   moreButtonWidth: 44,
   moreButtonHeight: 48,
   memberRowMin: 56,
@@ -212,10 +214,7 @@ export const sizes = {
   lineupBadge: 20,
 } as const;
 
-/**
- * The invite QR (Convidar.dc.html): its frame takes 236 of the 390 of the canvas, and the quiet zone is
- * the 4 modules of the QR standard (ADR 0049, D7).
- */
+/** The invite QR (Convidar.dc.html): 236 of the 390 of the canvas, quiet zone of the 4 modules of the standard (ADR 0049, D7). */
 export const qrLayout = { width: "60%", margin: 4 } as const;
 
 /** Width of the day strip of a card, in proportion to the card (78 of the 358 of the canvas list). */

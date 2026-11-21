@@ -8,6 +8,7 @@ import { groupsStrings } from "./groups.pt-BR";
 import { inviteStrings } from "./invite.pt-BR";
 import { lineupStrings } from "./lineup.pt-BR";
 import { membersStrings } from "./members.pt-BR";
+import { mvpVoteStrings } from "./mvp-vote.pt-BR";
 import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
@@ -25,6 +26,7 @@ export const strings = {
   settings: settingsStrings,
   rounds: roundsStrings,
   summary: summaryStrings,
+  mvpVote: mvpVoteStrings,
   draw: drawStrings,
   lineup: lineupStrings,
   members: membersStrings,

@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
+import { RadioDot } from "../../../ui/RadioDot";
 import { Stepper } from "../../../ui/Stepper";
 import { Switch } from "../../../ui/Switch";
 import { Text } from "../../../ui/Text";
@@ -15,26 +16,6 @@ import {
 import type { QueueRuleAction } from "../model/queue-rule.reducer";
 
 const { queueRuleScreen: texts } = strings.settings;
-
-export interface RadioDotProps {
-  readonly selected: boolean;
-}
-
-function RadioDot({ selected }: RadioDotProps) {
-  const { colors, tokens } = useTheme();
-  const size = tokens.sizes.radioDot;
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size,
-        borderWidth: selected ? tokens.sizes.radioDotSelectedBorder : tokens.borderWidths.thick,
-        borderColor: selected ? colors.primary : colors.trackOff,
-      }}
-    />
-  );
-}
 
 export interface OptionTextProps {
   readonly title: string;

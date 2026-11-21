@@ -50,6 +50,8 @@ function defaults(): Answers {
     listRounds: none,
     getRound: none,
     getRoundSummary: none,
+    getMvpVoting: none,
+    castMvpVote: none,
     createRound: none,
     updateRound: none,
     closeRound: none,
@@ -113,6 +115,9 @@ export function createFakeSacouApi(): FakeSacouApi {
     listRounds: (groupId) => answer("listRounds", [groupId]),
     getRound: (groupId, roundId) => answer("getRound", [groupId, roundId]),
     getRoundSummary: (groupId, roundId) => answer("getRoundSummary", [groupId, roundId]),
+    getMvpVoting: (groupId, roundId) => answer("getMvpVoting", [groupId, roundId]),
+    castMvpVote: (groupId, roundId, candidateMemberId) =>
+      answer("castMvpVote", [groupId, roundId, candidateMemberId]),
     createRound: (groupId, body) => answer("createRound", [groupId, body]),
     updateRound: (groupId, roundId, body) => answer("updateRound", [groupId, roundId, body]),
     closeRound: (groupId, roundId) => answer("closeRound", [groupId, roundId]),

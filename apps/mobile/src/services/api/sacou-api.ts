@@ -46,6 +46,15 @@ export type RoundSummary = Schemas["RoundSummaryResponse"];
 export type RoundSummaryReport = Schemas["RoundSummaryReport"];
 /** The instants the server marked when the round was closed (E3.18): `endsAt` moved to `closedAt`. */
 export type CloseRoundAnswer = Schemas["CloseRoundResponse"];
+/**
+ * The MVP ballot of the person signed in (E3.18): the window, whether they may vote, their own vote and
+ * the candidates without themselves. No count of votes exists in it (ADR 0048): never persisted (question 178).
+ */
+export type MvpBallot = Schemas["MvpBallotResponse"];
+export type MvpCandidate = Schemas["MvpCandidateResponse"];
+export type MvpVotingState = Schemas["MvpVotingState"];
+/** The person's own vote: shown only to them, on screen 12a, and never logged nor shared. */
+export type MvpVote = Schemas["MyMvpVoteResponse"];
 export type CreateRoundBody = Schemas["CreateRoundRequest"];
 export type UpdateRoundBody = Schemas["UpdateRoundRequest"];
 export type AttendanceAnswer = Schemas["AttendanceAnswerResponse"];
@@ -158,6 +167,14 @@ export interface SacouApi {
   ): Promise<ApiResult<AttendanceAnswer>>;
   /** Any member of the group. `finishedMatches: 0` for a round with no match finished (E4.12). */
   getRoundSummary(groupId: string, roundId: string): Promise<ApiResult<RoundSummaryReport>>;
+  /** Screen 12a. 404 `stats.mvp-voting-off` when the group has the vote off. */
+  getMvpVoting(groupId: string, roundId: string): Promise<ApiResult<MvpBallot>>;
+  /** One final vote (`201`); refusals are `stats.mvp-*` codes that never name the candidate. */
+  castMvpVote(
+    groupId: string,
+    roundId: string,
+    candidateMemberId: string,
+  ): Promise<ApiResult<MvpVote>>;
   /** 404 `identity.profile-not-found` before the quick profile (screen 27) is ever saved. */
   getMyProfile(): Promise<ApiResult<MyProfile>>;
   /** Replaces the whole profile: what is `null` in the body is cleared. */
