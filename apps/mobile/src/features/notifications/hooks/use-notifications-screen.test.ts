@@ -54,24 +54,26 @@ describe("M10 activate on screen 28", () => {
     expect(world.state).toBe("granted");
   });
 
-  // Finding of the review (a): a rejected system question leaves the card stuck in "asking".
-  test.fails("a request() that rejects does not leave the card stuck in asking", async () => {
+  // Finding of the review (a): a rejected system question must not leave the card stuck in "asking".
+  test("a request() that rejects puts the card back in askable, with no rejection left loose", async () => {
     world.services.notificationPermission = {
       status: () => Promise.resolve("askable"),
       request: () => Promise.reject(new Error("system failed")),
       openSettings: () => Promise.resolve(),
     };
-    // The hook leaves the rejection unhandled; swallow it here so only the state assertion speaks.
-    const listeners = process.listeners("unhandledRejection");
-    process.removeAllListeners("unhandledRejection");
-    process.on("unhandledRejection", () => undefined);
+    const loose: unknown[] = [];
+    const record = (reason: unknown): void => {
+      loose.push(reason);
+    };
+    process.on("unhandledRejection", record);
     try {
       useNotificationsScreen().activate();
       await flush();
     } finally {
-      process.removeAllListeners("unhandledRejection");
-      listeners.forEach((listener) => process.on("unhandledRejection", listener));
+      process.off("unhandledRejection", record);
     }
-    expect(world.state).not.toBe("asking");
+    expect(loose).toEqual([]);
+    // "askable" lands in "denied": the card that can ask again.
+    expect(world.state).toBe("denied");
   });
 });

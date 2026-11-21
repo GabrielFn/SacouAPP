@@ -68,10 +68,14 @@ export function useNotificationsScreen(): NotificationsScreenModel {
       switch (activationOf(permission)) {
         case "request":
           send({ type: "request-started" });
-          void notificationPermission.request().then((answer) => {
-            send({ type: "request-answered", answer });
-            if (answer === "granted") void pushDevices.sync();
-          });
+          // A request the system fails counts as not answered: the card goes back to askable.
+          void notificationPermission.request().then(
+            (answer) => {
+              send({ type: "request-answered", answer });
+              if (answer === "granted") void pushDevices.sync();
+            },
+            () => send({ type: "request-answered", answer: "askable" }),
+          );
           return;
         case "open-settings":
           void notificationPermission.openSettings();
