@@ -93,8 +93,6 @@ export function toggleBench(
   )
     return draft;
   const inBench = draft.bench.includes(memberId);
-  const next = inBench
-    ? draft.bench.filter((id) => id !== memberId)
-    : [...draft.bench, memberId];
+  const next = inBench ? draft.bench.filter((id) => id !== memberId) : [...draft.bench, memberId];
   return { ...draft, bench: pool.filter((id) => next.includes(id)) };
 }
