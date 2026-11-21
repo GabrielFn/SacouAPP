@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { NO_ROUND_END } from "./no-round-end.test.fixture";
 
 import { createFakeCourtRuntime } from "../../../adapters/fake-court-runtime-opener";
 import { startSampleMatch } from "../dev/start-sample-match";
@@ -62,13 +63,15 @@ describe("retry after a failed opening", () => {
 
 describe("resuming after the app was closed", () => {
   test("nothing open, nothing to resume", async () => {
-    expect(await findResumableCourtSession(createFakeCourtRuntime())).toBeNull();
+    expect(
+      await findResumableCourtSession({ ...createFakeCourtRuntime(), ...NO_ROUND_END }),
+    ).toBeNull();
   });
 
   test("an open court with a match in progress is resumed", async () => {
     const runtime = createFakeCourtRuntime();
     const started = await startSampleMatch(runtime, "one-set");
-    expect(started.ok && (await findResumableCourtSession(runtime))).toBe(
+    expect(started.ok && (await findResumableCourtSession({ ...runtime, ...NO_ROUND_END }))).toBe(
       started.ok ? started.value.courtSessionId : null,
     );
   });
@@ -78,13 +81,13 @@ describe("resuming after the app was closed", () => {
     const started = await startSampleMatch(runtime, "one-set");
     if (!started.ok) throw new Error("did not start");
     await runtime.log.closeSession(started.value.courtSessionId);
-    expect(await findResumableCourtSession(runtime)).toBeNull();
+    expect(await findResumableCourtSession({ ...runtime, ...NO_ROUND_END })).toBeNull();
   });
 
   test("a session opened with no match started is not resumed", async () => {
     const runtime = createFakeCourtRuntime();
     await runtime.log.openSession(SESSION);
-    expect(await findResumableCourtSession(runtime)).toBeNull();
+    expect(await findResumableCourtSession({ ...runtime, ...NO_ROUND_END })).toBeNull();
   });
 
   test("a match that ended is not resumed: the court has nothing to play", async () => {
@@ -100,7 +103,7 @@ describe("resuming after the app was closed", () => {
       await controller.dispatch({ type: "score-point", team: team === "a" ? "a" : "b" });
     }
     await controller.dispatch({ type: "confirm-set-end" });
-    expect(await findResumableCourtSession(runtime)).toBeNull();
+    expect(await findResumableCourtSession({ ...runtime, ...NO_ROUND_END })).toBeNull();
   });
 });
 
