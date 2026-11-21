@@ -1,5 +1,5 @@
 import { err, ok } from "@sacou/volley-rules";
-import { createAssetAsync, requestPermissionsAsync } from "expo-media-library";
+import { Asset, requestPermissionsAsync } from "expo-media-library";
 import { Linking } from "react-native";
 
 import type { GallerySaver } from "../features/profile/ports/card-image";
@@ -12,7 +12,7 @@ export const expoMediaLibrarySaver: GallerySaver = {
     try {
       const permission = await requestPermissionsAsync(WRITE_ONLY);
       if (!permission.granted) return err("permission-denied");
-      await createAssetAsync(uri);
+      await Asset.create(uri);
       return ok(null);
     } catch {
       // The reason may carry the path: only the kind goes on.

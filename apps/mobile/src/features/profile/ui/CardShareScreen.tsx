@@ -158,7 +158,7 @@ function ShareTile({ label, icon, disabled, onPress }: ShareTileProps) {
       onPress={onPress}
       style={{
         flex: 1,
-        minHeight: tokens.sizes.shareTile,
+        minHeight: tokens.sizes.systemButton,
         alignItems: "center",
         justifyContent: "center",
         gap: tokens.spacing.xs,

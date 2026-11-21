@@ -32,6 +32,14 @@ function request(state: CardShareState, intent: CardShareIntent): CardShareState
   return isBusy(state) ? state : { status: "capturing", intent };
 }
 
+function finish(
+  state: CardShareState,
+  from: CardShareState["status"],
+  next: CardShareState,
+): CardShareState {
+  return state.status === from ? next : state;
+}
+
 function captured(state: CardShareState): CardShareState {
   if (state.status !== "capturing") return state;
   return state.intent === "share" ? { status: "sharing" } : { status: "saving" };
@@ -46,9 +54,9 @@ export function cardShareReducer(state: CardShareState, action: CardShareAction)
     case "captured":
       return captured(state);
     case "shared":
-      return state.status === "sharing" ? initialCardShareState : state;
+      return finish(state, "sharing", initialCardShareState);
     case "saved":
-      return state.status === "saving" ? { status: "saved" } : state;
+      return finish(state, "saving", { status: "saved" });
     case "failed":
       return isBusy(state) ? { status: "failed", reason: action.reason } : state;
     case "dismissed":

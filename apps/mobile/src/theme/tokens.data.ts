@@ -210,8 +210,6 @@ export const sizes = {
   swapIcon: 18,
   orderCell: 52,
   lineupBadge: 20,
-  // Share the card (Cartinha.dc.html .sh): the tile with the icon over the label.
-  shareTile: 60,
 } as const;
 
 /**
@@ -233,7 +231,6 @@ export const interactiveHeights = [
   sizes.switchTarget,
   sizes.segment,
   sizes.systemButton,
-  sizes.shareTile,
   sizes.templateOptionMin,
   sizes.courtOption,
   sizes.blockHeaderMin,
