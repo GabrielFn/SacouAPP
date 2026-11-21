@@ -32,9 +32,18 @@ public sealed class NotificationSchedulerTests : IDisposable
     [InlineData("2026-11-20T12:05:00Z", "pump-202611201205")]
     [InlineData("2026-11-20T12:05:00.001Z", "pump-202611201206")]
     [InlineData("2026-11-20T12:05:59Z", "pump-202611201206")]
-    [InlineData("2026-11-20T11:00:00Z", "pump-202611201202")]
-    public void Window_RoundsUp_AndNeverBeforeTheNextMinute(string due, string task) =>
+    [InlineData("2026-11-20T11:00:00Z", "pump-202611201201")]
+    public void Window_RoundsUp_AndIsAlwaysAfterNow(string due, string task) =>
         Assert.Equal(task, PumpWindow.Of(DateTimeOffset.Parse(due, System.Globalization.CultureInfo.InvariantCulture), Now).TaskId);
+
+    [Fact]
+    public void AtTheTurnOfAMinute_TheWindowIsTheNextOne()
+    {
+        var turn = new DateTimeOffset(2026, 11, 20, 12, 1, 0, TimeSpan.Zero);
+
+        Assert.Equal("pump-202611201202", PumpWindow.Of(turn.AddMinutes(-1), turn).TaskId);
+        Assert.Equal("pump-202611201202", PumpWindow.Of(turn, turn).TaskId);
+    }
 
     [Fact]
     public async Task E10_TenWritesInOneMinute_MakeOneTask()

@@ -161,7 +161,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/v1/me/push-devices/{installationId}": {
+  "/v1/me/push-devices": {
     parameters: {
       query?: never;
       header?: never;
@@ -171,7 +171,23 @@ export interface paths {
     get?: never;
     put: operations["RegisterPushDevice"];
     post?: never;
-    delete: operations["RemovePushDevice"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me/push-devices/remove": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["RemovePushDevice"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -1169,8 +1185,14 @@ export interface components {
     /** @enum {string} */
     PushDevicePlatform: "android" | "ios";
     RegisterPushDeviceRequest: {
+      /** Format: uuid */
+      installationId: null | string;
       token: null | string;
       platform: null | components["schemas"]["PushDevicePlatform"];
+    };
+    RemovePushDeviceRequest: {
+      /** Format: uuid */
+      installationId: null | string;
     };
     RenameGroupRequest: {
       name: null | string;
@@ -2476,9 +2498,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        installationId: string;
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody: {
@@ -2556,12 +2576,14 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        installationId: string;
-      };
+      path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RemovePushDeviceRequest"];
+      };
+    };
     responses: {
       /** @description No Content */
       204: {
@@ -2569,6 +2591,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
       };
       /** @description Not signed in, or the ID token was refused. */
       401: {
@@ -2587,6 +2618,13 @@ export interface operations {
         content: {
           "application/problem+json": components["schemas"]["ApiProblem"];
         };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
       429: {

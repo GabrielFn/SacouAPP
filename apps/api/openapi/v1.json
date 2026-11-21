@@ -1315,23 +1315,12 @@
         }
       }
     },
-    "/v1/me/push-devices/{installationId}": {
+    "/v1/me/push-devices": {
       "put": {
         "tags": [
           "RegisterPushDeviceEndpoint"
         ],
         "operationId": "RegisterPushDevice",
-        "parameters": [
-          {
-            "name": "installationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1420,26 +1409,37 @@
             "description": "The body is over the route's limit."
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/v1/me/push-devices/remove": {
+      "post": {
         "tags": [
           "RemovePushDeviceEndpoint"
         ],
         "operationId": "RemovePushDevice",
-        "parameters": [
-          {
-            "name": "installationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemovePushDeviceRequest"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden",
@@ -1500,6 +1500,9 @@
                 }
               }
             }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
           }
         }
       }
@@ -8262,11 +8265,19 @@
       },
       "RegisterPushDeviceRequest": {
         "required": [
+          "installationId",
           "token",
           "platform"
         ],
         "type": "object",
         "properties": {
+          "installationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "token": {
             "type": [
               "null",
@@ -8282,6 +8293,22 @@
                 "$ref": "#/components/schemas/PushDevicePlatform"
               }
             ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "RemovePushDeviceRequest": {
+        "required": [
+          "installationId"
+        ],
+        "type": "object",
+        "properties": {
+          "installationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         },
         "additionalProperties": false

@@ -18,8 +18,8 @@ internal sealed class NoopNotificationScheduler : INotificationScheduler
 }
 
 /// <summary>
-/// The one-minute window a due time falls in, rounded up, and never before the next minute: every write of the same
-/// minute names the same task (<c>pump-yyyyMMddHHmm</c>), so Cloud Tasks keeps one call (case E10).
+/// The one-minute window a due time falls in, rounded up, and always after now: every write of the same minute names
+/// the same task (<c>pump-yyyyMMddHHmm</c>), so Cloud Tasks keeps one call (case E10).
 /// </summary>
 internal sealed record PumpWindow(DateTimeOffset StartsAt)
 {
@@ -27,12 +27,15 @@ internal sealed record PumpWindow(DateTimeOffset StartsAt)
 
     public string TaskId => "pump-" + StartsAt.UtcDateTime.ToString("yyyyMMddHHmm", CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Always after <paramref name="now"/>: the call running in the current minute already has that minute's name, so a
+    /// task of it would be refused as a duplicate and the work left would wait for the daily sweep.
+    /// </summary>
     public static PumpWindow Of(DateTimeOffset dueAt, DateTimeOffset now)
     {
-        var earliest = now + Width;
-        var at = dueAt < earliest ? earliest : dueAt;
-        var ticks = at.UtcTicks;
-        var remainder = ticks % Width.Ticks;
-        return new PumpWindow(new DateTimeOffset(remainder == 0 ? ticks : ticks - remainder + Width.Ticks, TimeSpan.Zero));
+        var at = dueAt < now ? now : dueAt;
+        var remainder = at.UtcTicks % Width.Ticks;
+        var window = new DateTimeOffset(at.UtcTicks - remainder, TimeSpan.Zero) + (remainder == 0 ? TimeSpan.Zero : Width);
+        return new PumpWindow(window > now ? window : window + Width);
     }
 }
