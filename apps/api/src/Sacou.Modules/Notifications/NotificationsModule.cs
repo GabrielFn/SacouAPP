@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Notifications.AccountData;
 using Sacou.Modules.Notifications.Application;
@@ -63,7 +64,8 @@ public static class NotificationsModule
             .RedactLoggedHeaders(_ => true);
         services.AddTransient<IPushGateway>(provider => provider.GetRequiredService<ExpoPushGateway>());
 
-        services.AddOptions<NotificationTasksOptions>().Bind(configuration.GetSection(NotificationTasksOptions.SectionName));
+        services.AddOptions<NotificationTasksOptions>().Bind(configuration.GetSection(NotificationTasksOptions.SectionName)).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<NotificationTasksOptions>>(new NotificationTasksOptionsValidator(configuration));
         var tasks = configuration.GetSection(NotificationTasksOptions.SectionName).Get<NotificationTasksOptions>() ?? new NotificationTasksOptions();
         if (!tasks.IsConfigured)
         {

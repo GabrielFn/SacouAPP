@@ -11,4 +11,13 @@ public static class ServiceCallers
 
     /// <summary>The authentication scheme behind <see cref="Policy"/>.</summary>
     public const string AuthenticationScheme = "GoogleServiceCaller";
+
+    /// <summary>The configuration section of the accepted caller. Its <c>Audience</c> and <c>Email</c> must be what the sender puts in the token.</summary>
+    public const string SectionName = "ServiceCaller";
+
+    /// <summary>The <c>aud</c> accepted: the service's own URL.</summary>
+    public const string AudienceKey = SectionName + ":Audience";
+
+    /// <summary>The calling account accepted.</summary>
+    public const string EmailKey = SectionName + ":Email";
 }
