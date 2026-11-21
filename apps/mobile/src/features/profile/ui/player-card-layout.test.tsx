@@ -2,7 +2,7 @@ import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import { createScaledTokens } from "../../../theme/scale";
-import type { PlayerCardModel } from "../model/player-card";
+import { CARD_STAT_KEYS, type PlayerCardModel } from "../model/player-card";
 import { cardLayout } from "./player-card.layout.data";
 import { cardStyles, PlayerCardView } from "./PlayerCardView";
 
@@ -31,7 +31,7 @@ const CARD: PlayerCardModel = {
   positionLabel: "Qualquer uma",
   showGlyph: false,
   seasonLabel: "Temporada 2026",
-  stats: ["a", "b", "c", "d", "e", "f"].map((key) => ({ key, value: "1", label: key })),
+  stats: CARD_STAT_KEYS.map((key) => ({ key, value: "1", label: key })),
 } as unknown as PlayerCardModel;
 
 function elements(node: ReactNode): readonly ReactElement<Props>[] {
