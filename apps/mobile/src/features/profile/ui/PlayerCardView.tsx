@@ -1,5 +1,6 @@
-import { StyleSheet, View } from "react-native";
-import Svg, { G, Path, Rect } from "react-native-svg";
+import { useState } from "react";
+import { StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
 import {
@@ -8,23 +9,16 @@ import {
   POSITION_MIN_FONT_SCALE,
   cardMeasures,
 } from "../../../theme/card-tokens.data";
-import type { ScaledCardTokens } from "../../../theme/scale";
+import { cardMeasuresFor, type ScaledCardMeasures } from "../../../theme/scale";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { PersonIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
-import { cardAccessibilityLabel, type CardStat, type PlayerCardModel } from "../model/player-card";
-import {
-  cardLayout,
-  FLUSH,
-  GLYPH_COLUMNS,
-  GLYPH_RADIUS,
-  GLYPH_ROWS,
-  GLYPH_SQUARE,
-  GLYPH_VIEW_BOX,
-  MESH_VIEW_BOX,
-} from "./player-card.layout.data";
+import { cardAccessibilityLabel, type PlayerCardModel } from "../model/player-card";
+import { cardLayout, FLUSH, MESH_VIEW_BOX } from "./player-card.layout.data";
+import { cardTextLines } from "./player-card-budget";
 import { meshPath } from "./player-card.mesh";
+import { PositionGlyph, StatsGrid } from "./player-card-parts";
 
 export type PlayerCardSize = "compact" | "full";
 
@@ -37,12 +31,43 @@ export interface PlayerCardViewProps {
 
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
-/** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */
+/**
+ * The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. Its
+ * measures follow its REAL width (`onLayout`): the window only gives the first frame, so screen 14,
+ * screen 15 and the saved picture keep the proportions of the drawing.
+ */
 export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
-  const { colors, tokens } = useTheme();
-  const m = tokens.card[size];
+  const { tokens } = useTheme();
+  const { fontScale } = useWindowDimensions();
+  // A single isolated field, the measured width (frontend.md, rule 4).
+  const [width, setWidth] = useState<number | null>(null);
+  const measures = width === null ? tokens.card[size] : cardMeasuresFor(width, fontScale);
+  return (
+    <PlayerCardFace
+      card={card}
+      showStats={showStats}
+      measures={measures}
+      onLayout={(event: LayoutChangeEvent) => {
+        setWidth(event.nativeEvent.layout.width);
+      }}
+    />
+  );
+}
+
+export interface PlayerCardFaceProps {
+  readonly card: PlayerCardModel;
+  readonly showStats: boolean;
+  readonly measures: ScaledCardMeasures;
+  readonly onLayout?: (event: LayoutChangeEvent) => void;
+}
+
+/** The drawing of the card for given measures. */
+export function PlayerCardFace({ card, showStats, measures: m, onLayout }: PlayerCardFaceProps) {
+  const { colors } = useTheme();
+  const lines = cardTextLines(m);
   return (
     <View
+      onLayout={onLayout}
       accessible
       accessibilityRole="image"
       accessibilityLabel={cardAccessibilityLabel(card, showStats)}
@@ -174,6 +199,7 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
               color: colors.primary,
               fontFamily: fontFamilies.display800,
               fontSize: m.brandFont,
+              lineHeight: lines.brand,
             }}
           >
             {strings.profile.card.brand}
@@ -229,69 +255,3 @@ export const cardStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
 });
-
-export interface StatsGridProps {
-  readonly stats: readonly CardStat[];
-  readonly measures: ScaledCardTokens["full"];
-}
-
-function StatsGrid({ stats, measures: m }: StatsGridProps) {
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        flexWrap: "wrap",
-        rowGap: m.statRowGap,
-      }}
-    >
-      {stats.map((stat) => (
-        <View key={stat.key} style={{ width: cardLayout.statColumn, alignItems: "center" }}>
-          <Text
-            tabular
-            numberOfLines={1}
-            style={{
-              color: colors.onPanel,
-              fontFamily: fontFamilies.display800,
-              fontSize: m.statValueFont,
-            }}
-          >
-            {stat.value}
-          </Text>
-          <Text numberOfLines={1} style={{ color: colors.cardLabel, fontSize: m.statLabelFont }}>
-            {stat.label}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-export interface PositionGlyphProps {
-  readonly width: number;
-  readonly height: number;
-}
-
-/** Six squares, the last one lit: decoration of a position, the same for all (question 162). */
-function PositionGlyph({ width, height }: PositionGlyphProps) {
-  const { colors } = useTheme();
-  const cells = GLYPH_ROWS.flatMap((y) => GLYPH_COLUMNS.map((x) => ({ x, y })));
-  const lit = cells.length - 1;
-  return (
-    <Svg width={width} height={height} viewBox={GLYPH_VIEW_BOX}>
-      {cells.map((cell, index) => (
-        <G
-          key={`${String(cell.x)}-${String(cell.y)}`}
-          transform={`translate(${String(cell.x)} ${String(cell.y)})`}
-        >
-          <Rect
-            width={GLYPH_SQUARE}
-            height={GLYPH_SQUARE}
-            rx={GLYPH_RADIUS}
-            fill={index === lit ? colors.accent : colors.onPanel}
-          />
-        </G>
-      ))}
-    </Svg>
-  );
-}
