@@ -33,8 +33,7 @@ export const notificationsStrings = {
     title: "Ative as notificações pra não perder a lista",
     body: "A gente avisa quando a lista abre, quando você sai da espera e quando os times saem.",
     enable: "Ativar",
-    /** The person said no for good: only the settings of the phone can turn it on. */
-    openSettings: "Abrir ajustes",
+    /** The person said no for good: only the settings of the phone can turn it on ("Ativar" opens them). */
     blockedBody:
       "As notificações estão desligadas nos ajustes do celular. Ligue por lá pra saber quando sair da espera.",
   },

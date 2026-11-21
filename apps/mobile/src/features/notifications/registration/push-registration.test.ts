@@ -20,7 +20,9 @@ import { createPushDevices, DEREGISTER_TIMEOUT_MS } from "./push-registration";
 
 const NEW_TOKEN = { token: "ExponentPushToken[rotated]", platform: "android" } as const;
 
-function setup(options: { readonly permission?: PermissionAnswer; readonly signedIn?: boolean } = {}) {
+function setup(
+  options: { readonly permission?: PermissionAnswer; readonly signedIn?: boolean } = {},
+) {
   const fake = createFakeSacouApi();
   fake.respond("registerPushDevice", apiOk(null));
   fake.respond("removePushDevice", apiOk(null));
@@ -106,7 +108,7 @@ describe("M2 push-registration with fake ports", () => {
 
   test("a failure is silent and makes no new loop: one PUT, no wait scheduled", async () => {
     const harness = setup();
-    harness.fake.respond("registerPushDevice", apiErr({ kind: "unavailable" }));
+    harness.fake.respond("registerPushDevice", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
     expect(await createPushDevices(harness.deps).sync()).toBe("failed");
     expect(registers(harness.fake)).toHaveLength(1);
     expect(harness.scheduler.pendingDelays()).toEqual([]);

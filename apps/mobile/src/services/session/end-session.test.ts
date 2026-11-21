@@ -393,7 +393,9 @@ describe("M3 the push device on the exit of the account", () => {
     harness.scheduler.advance(DEREGISTER_TIMEOUT_MS);
     await exit;
     expect(harness.auth.snapshot()).toEqual({ status: "signedOut", reason: "signedOut" });
-    expect(harness.order.indexOf("signOut")).toBeGreaterThan(harness.order.indexOf("unregisterPush"));
+    expect(harness.order.indexOf("signOut")).toBeGreaterThan(
+      harness.order.indexOf("unregisterPush"),
+    );
   });
 
   test("a deleted account sends no DELETE: the server already forgot the devices", async () => {

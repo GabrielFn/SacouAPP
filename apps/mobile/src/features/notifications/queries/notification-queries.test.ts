@@ -80,7 +80,7 @@ describe("M6 Marcar como lidas, optimistic", () => {
 
   test("one row that fails goes back unread", async () => {
     const { fake, client, deps, server } = setup();
-    fake.respond("markNotificationRead", apiErr({ kind: "unavailable" }));
+    fake.respond("markNotificationRead", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
     await markNotificationRead(deps, B);
     expect(listOf(client)).toEqual(server);
   });

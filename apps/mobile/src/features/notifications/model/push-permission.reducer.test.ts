@@ -10,7 +10,13 @@ import {
   type PushPermissionState,
 } from "./push-permission.reducer";
 
-const STATES: readonly PushPermissionState[] = ["unknown", "asking", "granted", "denied", "blocked"];
+const STATES: readonly PushPermissionState[] = [
+  "unknown",
+  "asking",
+  "granted",
+  "denied",
+  "blocked",
+];
 const ANSWERS: readonly PermissionAnswer[] = ["granted", "askable", "blocked"];
 const FROM_ANSWER: Readonly<Record<PermissionAnswer, PushPermissionState>> = {
   granted: "granted",

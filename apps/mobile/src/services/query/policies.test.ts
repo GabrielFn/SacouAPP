@@ -172,6 +172,8 @@ describe("the allow list of the persisted cache (P6)", () => {
     [queryKeys.myStats(), true],
     [["me", "stats", "x"], false],
     [queryKeys.deletionBlockers(), false],
+    // M8 (E3.11): the list of screen 28 and the count of the bell never reach sacou-cache.db.
+    [queryKeys.notifications(), false],
     [["me", "profile", "x"], false],
     [["me", "nickname"], false],
     [["groups", G, "members", "extra"], false],

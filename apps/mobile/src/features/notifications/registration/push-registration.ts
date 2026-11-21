@@ -9,12 +9,7 @@ import type { PushToken, PushTokenSource } from "../ports/push-token-source";
 export const DEREGISTER_TIMEOUT_MS = 2_000;
 
 export type PushSyncOutcome =
-  | "registered"
-  | "no-session"
-  | "no-permission"
-  | "no-token"
-  | "closing"
-  | "failed";
+  "registered" | "no-session" | "no-permission" | "no-token" | "closing" | "failed";
 
 export interface PushRegistrationDeps {
   readonly api: Pick<SacouApi, "registerPushDevice" | "removePushDevice">;

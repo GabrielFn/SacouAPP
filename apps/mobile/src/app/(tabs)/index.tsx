@@ -13,10 +13,12 @@ import { createGroupHref, groupsHref, notificationsHref } from "../../features/g
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
 import { roundHref, summaryHref } from "../../features/rounds/navigation";
 import { HomeRoundCards } from "../../features/rounds/ui/HomeRoundCards";
+import { useHasUnreadNotifications } from "../../features/notifications/hooks/use-push-session";
+import { BellButton } from "../../features/notifications/ui/BellButton";
 import { strings } from "../../strings/pt-BR";
 import { useTheme } from "../../theme/theme-context";
 import { AppHeader } from "../../ui/AppHeader";
-import { BellIcon, PlusIcon } from "../../ui/Icons";
+import { PlusIcon } from "../../ui/Icons";
 import { Button } from "../../ui/Button";
 import { IconButton } from "../../ui/IconButton";
 import { OfflineBanner } from "../../ui/OfflineBanner";
@@ -32,6 +34,7 @@ export default function HomeScreen() {
   const resume = useResumeOnce();
   const { state, bannerText, retry } = useGroupsScreen();
   const nickname = useGreetingNickname();
+  const unread = useHasUnreadNotifications();
   // The court is resumed once per opening of the app: leaving it for the home must not bring it back.
   useEffect(() => {
     const target = takeResumeTarget(resume);
@@ -56,14 +59,12 @@ export default function HomeScreen() {
       <AppHeader
         action={
           <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
-            <IconButton
-              accessibilityLabel={home.notifications}
+            <BellButton
+              unread={unread}
               onPress={() => {
                 router.push(notificationsHref);
               }}
-            >
-              <BellIcon />
-            </IconButton>
+            />
             <IconButton accessibilityLabel={strings.groups.createGroup} onPress={goToCreateGroup}>
               <PlusIcon />
             </IconButton>

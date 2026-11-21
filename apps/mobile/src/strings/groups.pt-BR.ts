@@ -37,7 +37,6 @@ export const groupsStrings = {
     noRoundsTitle: "Nenhuma rodada marcada.",
     noRoundsBody: "Quando o organizador abrir a lista, ela aparece aqui.",
     seeGroups: "Ver seus grupos",
-    notifications: "Notificações",
   },
   tabs: { home: "Início", groups: "Grupo", me: "Eu", navigation: "Navegação principal" },
   meTitle: "Eu",

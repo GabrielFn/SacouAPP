@@ -158,7 +158,12 @@
     "lockIcon": 13,
     "swapIcon": 18,
     "orderCell": 52,
-    "lineupBadge": 20
+    "lineupBadge": 20,
+    "notificationRowMin": 48,
+    "notificationIcon": 40,
+    "unreadDot": 8,
+    "permissionIcon": 44,
+    "headerTextButton": 48
   },
   "radii": {
     "field": 12,

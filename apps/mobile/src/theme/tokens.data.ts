@@ -212,6 +212,12 @@ export const sizes = {
   swapIcon: 18,
   orderCell: 52,
   lineupBadge: 20,
+  // The notifications (Notificacoes.dc.html .it, .ic, .dot, the bell of the permission card, the 48 of "Marcar como lidas").
+  notificationRowMin: 48,
+  notificationIcon: 40,
+  unreadDot: 8,
+  permissionIcon: 44,
+  headerTextButton: 48,
 } as const;
 
 /** The invite QR (Convidar.dc.html): 236 of the 390 of the canvas, quiet zone of the 4 modules of the standard (ADR 0049, D7). */
@@ -241,6 +247,8 @@ export const interactiveHeights = [
   sizes.levelStep,
   sizes.levelShortcut,
   sizes.levelOption,
+  sizes.notificationRowMin,
+  sizes.headerTextButton,
 ] as const;
 
 // Channels of palette.night, for the translucent borders.

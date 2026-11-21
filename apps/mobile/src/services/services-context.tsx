@@ -23,6 +23,9 @@ import type {
   ImageShare,
 } from "../features/profile/ports/card-image";
 import type { OnboardingSkip } from "../features/profile/ports/onboarding-skip";
+import type { NotificationPermission } from "../features/notifications/ports/notification-permission";
+import type { NotificationTaps } from "../features/notifications/ports/notification-taps";
+import type { PushRegistration } from "../features/notifications/registration/push-registration";
 import type { NetworkStatus } from "./api/network-status";
 import type { AuthSession } from "./auth/auth-session";
 import type { SacouApi } from "./api/sacou-api";
@@ -109,6 +112,12 @@ export interface Services {
   readonly imageShare: ImageShare;
   /** Screen 15, "Salvar": the PNG in the gallery, write-only. */
   readonly gallerySaver: GallerySaver;
+  /** The system permission of the notifications, read on screen 28 (E3.11). */
+  readonly notificationPermission: NotificationPermission;
+  /** The touches on the pushes and the pushes that arrive with the app in front (E3.11). */
+  readonly notificationTaps: NotificationTaps;
+  /** The push device of this install, registered only while signed in (E3.11). */
+  readonly pushDevices: PushRegistration;
 }
 
 const ServicesContext = createContext<Services | null>(null);
