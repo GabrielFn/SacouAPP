@@ -4,10 +4,7 @@ import type { Scheduler } from "../../court/ports/scheduler";
 import { unwrap } from "../../../services/api/api-result";
 import type { SacouApi } from "../../../services/api/sacou-api";
 import { queryKeys } from "../../../services/query/query-keys";
-import {
-  scheduleInvalidation,
-  type MvpVoteTarget,
-} from "../mvp-vote/queries/mvp-vote-queries";
+import { scheduleInvalidation, type MvpVoteTarget } from "../mvp-vote/queries/mvp-vote-queries";
 
 /** A correction after the end recalculates everything on the server (E3.9, 3.9), so it ages fast. */
 export const SUMMARY_STALE_MS = 30_000;
