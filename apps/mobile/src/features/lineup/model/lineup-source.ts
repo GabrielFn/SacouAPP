@@ -24,6 +24,11 @@ export interface LineupTeamSource {
    * the bench of the draft, so a libero turned off can come back (`liberoExit: "bench"`, D5).
    */
   readonly liberoPool: readonly MemberId[];
+  /**
+   * Who can wait on the bench of the team in the pre-game: the reserves of the queue, in order (R96).
+   * `null` in a match, where the bench cannot take anyone from the queue.
+   */
+  readonly benchPool: readonly MemberId[] | null;
   /** What the "Líbero" row says with nobody to choose. */
   readonly noLiberoText: string;
 }

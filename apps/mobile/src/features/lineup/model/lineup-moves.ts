@@ -75,3 +75,26 @@ export function withLibero(
     libero: memberId === null ? null : liberoOf(memberId),
   };
 }
+
+/**
+ * A reserve of the queue goes to the bench, or comes back (R96). The bench is always `pool` filtered,
+ * so it keeps the order of the queue and undoing puts each one back where it was. Never the libero,
+ * nor anyone of `lineup`, nor anyone outside `pool`.
+ */
+export function toggleBench(
+  draft: LineupDraft,
+  memberId: MemberId,
+  pool: readonly MemberId[],
+): LineupDraft {
+  if (
+    !pool.includes(memberId) ||
+    draft.lineup.includes(memberId) ||
+    draft.libero?.memberId === memberId
+  )
+    return draft;
+  const inBench = draft.bench.includes(memberId);
+  const next = inBench
+    ? draft.bench.filter((id) => id !== memberId)
+    : [...draft.bench, memberId];
+  return { ...draft, bench: pool.filter((id) => next.includes(id)) };
+}

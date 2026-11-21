@@ -137,6 +137,13 @@ export const drawStrings = {
     /** "Laranja tem 6 e líbero Sofia." (E4.8, D5). */
     withLibero: (team: string, size: number, libero: string) =>
       `${team} tem ${String(size)} e líbero ${libero}.`,
+    /** "Laranja tem 6 e banco Davi, Lia." (R96). */
+    withBench: (team: string, size: number, bench: string) =>
+      `${team} tem ${String(size)} e banco ${bench}.`,
+    /** "Laranja tem 6, líbero Sofia e banco Davi." */
+    withLiberoAndBench: (team: string, size: number, libero: string, bench: string) =>
+      `${team} tem ${String(size)}, líbero ${libero} e banco ${bench}.`,
+    benchSeparator: ", ",
     lineup: "Escalação",
     lineupLabel: (team: string) => `Escalação do ${team}`,
     noRotation: (team: string, size: number) => `${team} tem ${String(size)}: sem rotação.`,
