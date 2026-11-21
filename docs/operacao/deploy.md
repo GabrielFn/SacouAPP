@@ -28,6 +28,10 @@ As migrações rodam na partida de cada revisão, antes de a porta abrir. Se fal
 
 **Toda migração tem de ser compatível com a versão anterior** (expandir e depois contrair): durante o deploy, a revisão velha e a nova convivem. Renomear ou apagar coluna leva dois deploys: primeiro o código para de usar, depois a migração remove.
 
+## Push (E3.11 Parte 2)
+
+Até o segredo do Expo existir, o deploy não passa nada do push: o envio fica desligado (um aviso `PushSendingOff` no log, só com o nome), o Cloud Tasks não é chamado e a rota interna recusa tudo. Para ligar, depois de `scripts/gcp/setup-notifications.sh`: no `service.yaml`, `SACOU_EXPO_ACCESS_TOKEN` por `secretKeyRef` (segredo do ambiente) e as variáveis não secretas `ServiceCaller__Audience` e `NotificationTasks__ServiceUrl` (URL do serviço), `ServiceCaller__Email` e `NotificationTasks__InvokerEmail` (`sacou-tasks-invoker@sacou-api.iam.gserviceaccount.com`), `NotificationTasks__Project` (`sacou-api`), `NotificationTasks__Location` (`us-east4`) e `NotificationTasks__Queue` (`sacou-notifications-test` ou `sacou-notifications`), com as entradas correspondentes na ação `deploy-cloud-run`.
+
 ## Primeiro deploy de cada serviço
 
 Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".

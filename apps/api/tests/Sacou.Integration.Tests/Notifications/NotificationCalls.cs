@@ -34,6 +34,10 @@ internal sealed class RecordingPushGateway(TimeSpan delay = default) : IPushGate
 
         return [.. messages.Select(message => new PushResult(message.DeliveryId, PushResultKind.Accepted, TicketId: "ticket-" + message.DeliveryId))];
     }
+
+    /// <summary>Every ticket it gave was handed over.</summary>
+    public Task<IReadOnlyList<PushReceipt>> GetReceiptsAsync(IReadOnlyList<string> ticketIds, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<PushReceipt>>([.. ticketIds.Select(ticket => new PushReceipt(ticket, PushReceiptKind.Delivered))]);
 }
 
 /// <summary>The routes of the Notifications and the rows behind them, for the integration tests of E3.11.</summary>

@@ -15,7 +15,7 @@ public sealed class TokenSecrecyTests
     public void ClaimedDelivery_ToString_NeverPrintsTheToken()
     {
         var claimed = new ClaimedDelivery(
-            Guid.NewGuid(), 1, Guid.NewGuid(), "waitlistPromoted", Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Secret);
+            Guid.NewGuid(), 1, Guid.NewGuid(), "waitlistPromoted", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Guid.NewGuid(), Secret);
 
         Assert.DoesNotContain("SECRET", claimed.ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("SECRET", $"{claimed}", StringComparison.Ordinal);
@@ -43,7 +43,7 @@ public sealed class TokenSecrecyTests
     public void Compose_UsesGroupAndLocalTime_NeverTheVenue()
     {
         var delivery = new ClaimedDelivery(
-            Guid.NewGuid(), 1, Guid.NewGuid(), "waitlistPromoted", Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Secret);
+            Guid.NewGuid(), 1, Guid.NewGuid(), "waitlistPromoted", Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Guid.NewGuid(), Secret);
         var round = new NotificationRound(delivery.GroupId, delivery.RoundId, new DateOnly(2026, 11, 21), new TimeOnly(8, 0), "Posto 6");
 
         var message = PushMessages.Compose(delivery, "Areia", round);
