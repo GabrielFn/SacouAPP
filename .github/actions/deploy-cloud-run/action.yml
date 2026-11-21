@@ -17,6 +17,15 @@ inputs:
   database-secret:
     description: Secret Manager secret that holds the database URL
     required: true
+  expo-secret:
+    description: Secret Manager secret that holds the Expo access token of this environment
+    required: true
+  invoker-account:
+    description: Service account name Cloud Tasks and the sweep sign as (without the domain)
+    required: true
+  tasks-queue:
+    description: Cloud Tasks queue of this environment
+    required: true
   image:
     description: Image reference ending in @sha256:<digest>
     required: true
@@ -62,6 +71,9 @@ runs:
         ASPNETCORE_ENVIRONMENT: ${{ inputs.aspnetcore-environment }}
         RUNTIME_NAME: ${{ inputs.runtime-account }}
         DATABASE_SECRET: ${{ inputs.database-secret }}
+        EXPO_SECRET: ${{ inputs.expo-secret }}
+        INVOKER_NAME: ${{ inputs.invoker-account }}
+        TASKS_QUEUE: ${{ inputs.tasks-queue }}
         IMAGE: ${{ inputs.image }}
         PROJECT_ID: ${{ inputs.project-id }}
         PUBLIC_BASE_URL: ${{ inputs.public-base-url }}
@@ -73,18 +85,25 @@ runs:
           exit 1
         fi
         # The round page's origin (ADR 0070, D1): the input when given (a bought domain), else the service's own URL.
+        # The service's own URL: the audience of the Cloud Tasks token, and the round page's origin without a domain.
+        SERVICE_URL="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+        if ! [[ "$SERVICE_URL" =~ ^https://[a-z0-9.-]+\.run\.app$ ]]; then
+          echo "The service URL is not a run.app origin: $SERVICE_URL"
+          exit 1
+        fi
         ROUND_PAGE_BASE_URL="$PUBLIC_BASE_URL"
         if [[ -z "$ROUND_PAGE_BASE_URL" ]]; then
-          ROUND_PAGE_BASE_URL="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+          ROUND_PAGE_BASE_URL="$SERVICE_URL"
         fi
         if ! [[ "$ROUND_PAGE_BASE_URL" =~ ^https://[a-z0-9.-]+$ ]]; then
           echo "The round page base URL is not an https origin: $ROUND_PAGE_BASE_URL"
           exit 1
         fi
-        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET IMAGE ROUND_PAGE_BASE_URL
+        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE
         export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+        export INVOKER_EMAIL="${INVOKER_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         manifest="$RUNNER_TEMP/service.yaml"
-        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL}' \
+        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${EXPO_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL} ${SERVICE_URL} ${INVOKER_EMAIL} ${PROJECT_ID} ${TASKS_QUEUE}' \
           < deploy/cloud-run/service.yaml > "$manifest"
         gcloud run services replace "$manifest" --project="$PROJECT_ID" --region="$REGION" --quiet
         url="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
