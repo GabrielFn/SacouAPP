@@ -11,6 +11,7 @@ import { Screen } from "../../../ui/Screen";
 import { SegmentBar } from "../../../ui/SegmentBar";
 import { Text } from "../../../ui/Text";
 import type { LineupTeamView, LineupView } from "../model/lineup-selectors";
+import { BenchPicker } from "./BenchPicker";
 import { LiberoPicker } from "./LiberoPicker";
 import { LineupCourt } from "./LineupCourt";
 import { OfficialOrder } from "./OfficialOrder";
@@ -27,6 +28,7 @@ export interface LineupScreenHandlers {
   readonly onMakeSetter: () => void;
   readonly onFixRoles: () => void;
   readonly onLibero: (memberId: MemberId | null) => void;
+  readonly onBench: (memberId: MemberId) => void;
   readonly onSave: () => void;
 }
 
@@ -133,6 +135,9 @@ function DetailsBlock({ team, handlers }: TeamPartProps) {
     <View style={{ gap: tokens.spacing.m }}>
       <OfficialOrder cells={team.order} benchLine={team.benchLine} />
       <LiberoPicker row={team.libero} onSelect={handlers.onLibero} />
+      {team.benchRow === null ? null : (
+        <BenchPicker row={team.benchRow} onToggle={handlers.onBench} />
+      )}
       {team.serverChange === null ? null : <Text variant="bodyStrong">{team.serverChange}</Text>}
     </View>
   );

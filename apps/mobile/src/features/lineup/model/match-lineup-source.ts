@@ -50,6 +50,7 @@ function teamSourceOf(context: TeamContext, side: TeamSide): LineupTeamSource {
     base,
     phase: phaseOf(match, side, betweenSets),
     liberoPool: base?.state.bench ?? [],
+    benchPool: null,
     noLiberoText: lineupStrings.noBenchForLibero(size),
   };
 }

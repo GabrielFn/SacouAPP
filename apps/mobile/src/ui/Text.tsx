@@ -17,6 +17,7 @@ export type DisplaySize =
   | "displayLevelCard"
   | "displayLevelBadge"
   | "summaryTitle"
+  | "teamTitle"
   | "displayMvp";
 
 export interface TextProps extends NativeTextProps {

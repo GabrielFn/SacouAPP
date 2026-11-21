@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -16,20 +15,17 @@ internal sealed class FirebaseIdTokenVerifier(
     TimeProvider time) : IIdTokenVerifier
 {
     /// <summary>An ID token is about 1 KB.</summary>
-    public const int MaximumTokenSizeInBytes = 8 * 1024;
+    public const int MaximumTokenSizeInBytes = JwtReading.MaximumTokenSizeInBytes;
 
-    private const int SignedTokenParts = 3;
     private const int EncryptedTokenParts = 5;
-    private const char PartSeparator = '.';
-
-    private static readonly JsonDocumentOptions StrictJson = new() { AllowDuplicateProperties = false };
+    private const char PartSeparator = JwtReading.PartSeparator;
 
     private readonly JsonWebTokenHandler handler = new() { MaximumTokenSizeInBytes = MaximumTokenSizeInBytes };
 
     public async Task<Result<VerifiedLogin>> VerifyAsync(string token, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(token);
-        if (ReadHeader(token) is not { } header)
+        if (JwtReading.ReadHeader(handler, token) is not { } header)
         {
             return Refuse(ShapeRejection(token));
         }
@@ -57,27 +53,9 @@ internal sealed class FirebaseIdTokenVerifier(
             return Refuse(FirebaseValidationParameters.RejectionFor(result.Exception));
         }
 
-        return ReadPayload((JsonWebToken)result.SecurityToken) is { } payload
+        return JwtReading.ReadPayload((JsonWebToken)result.SecurityToken) is { } payload
             ? FirebaseTokenRules.Check(payload, project.Value, time.GetUtcNow())
             : Refuse(IdTokenRejection.Malformed);
-    }
-
-    private JsonWebToken? ReadHeader(string token)
-    {
-        if (token.Length > MaximumTokenSizeInBytes || token.Split(PartSeparator).Length != SignedTokenParts)
-        {
-            return null;
-        }
-
-        try
-        {
-            return handler.ReadJsonWebToken(token);
-        }
-        catch (ArgumentException)
-        {
-            // SecurityTokenMalformedException derives from ArgumentException. Its message may echo the token.
-            return null;
-        }
     }
 
     private static IdTokenRejection ShapeRejection(string token) =>
@@ -89,19 +67,6 @@ internal sealed class FirebaseIdTokenVerifier(
         header.Alg != SecurityAlgorithms.RsaSha256 ? IdTokenRejection.DisallowedAlgorithm
         : string.IsNullOrEmpty(header.Kid) ? IdTokenRejection.MissingKeyId
         : null;
-
-    private static JsonElement? ReadPayload(JsonWebToken token)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(Base64UrlEncoder.Decode(token.EncodedPayload), StrictJson);
-            return document.RootElement.ValueKind == JsonValueKind.Object ? document.RootElement.Clone() : null;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-    }
 
     private static Result<VerifiedLogin> Refuse(IdTokenRejection rejection) =>
         Result.Failure<VerifiedLogin>(rejection.ToError());

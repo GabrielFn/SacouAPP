@@ -1,16 +1,12 @@
 import { errorTextOf } from "../../../services/api/api-error-text";
 import { apiErrorOf } from "../../../services/api/api-error";
-import type { Member, RoundSummaryReport } from "../../../services/api/sacou-api";
+import type { Member, MvpBallot, RoundSummaryReport } from "../../../services/api/sacou-api";
 import { summaryStrings } from "../../../strings/summary.pt-BR";
 import type { TeamColor } from "../../draw/model/team-identity";
-import {
-  headerLine,
-  mvpDetail,
-  mvpIsFromVotes,
-  mvpLine,
-  sideLook,
-  type SummarySide,
-} from "./summary-texts";
+import { rankingHighlights, sandTeamKind, type RankingHighlights } from "./beach-ranking-view";
+import { mvpHeroText } from "./mvp-hero-text";
+import { headerLine, sideLook, type SummarySide } from "./summary-texts";
+import { votingEntryView, type VotingEntryView } from "./voting-entry";
 
 /** What the query says, as the screen needs it (only the part that decides the state). */
 export interface SummaryQueryState {
@@ -26,15 +22,21 @@ export interface SummaryViewInput {
   readonly online: boolean;
   /** Points of this round this phone still has to send; the screen warns the summary may change. */
   readonly unsentPoints: number;
+  /** The MVP ballot, read only while the voting is open (the entry to the vote). */
+  readonly ballot: MvpBallot | undefined;
+  /** The wall clock of the phone, for "fecha em 23 h" only. */
+  readonly nowMs: number;
 }
 
 export interface MvpView {
   readonly name: string;
-  readonly line: string;
+  /** "Laranja · +2 de saldo · 2 vitórias em 3"; `null` for a tie of votes (no single set of numbers). */
+  readonly line: string | null;
   /** "+2 de saldo, 2 vitórias em 3": the shared text uses it, without the side. */
-  readonly detail: string;
-  /** Shows "Calculado pelo placar". */
-  readonly byStats: boolean;
+  readonly detail: string | null;
+  readonly source: "stats" | "votes";
+  /** The lines of small print under the card, already in words. */
+  readonly notes: readonly string[];
 }
 
 export interface HighlightView {
@@ -44,7 +46,6 @@ export interface HighlightView {
   readonly color: TeamColor;
 }
 
-/** The union is for E4.18, which adds `ranking` for the sand (screen 12b). */
 export interface TeamsHighlights {
   readonly kind: "teams";
   readonly mostWins: HighlightView | null;
@@ -55,7 +56,8 @@ export interface ReadySummary {
   readonly kind: "ready";
   readonly header: string;
   readonly mvp: MvpView | null;
-  readonly highlights: TeamsHighlights;
+  readonly highlights: TeamsHighlights | RankingHighlights;
+  readonly voting: VotingEntryView;
   /** The last summary seen, shown because the new one could not be read. */
   readonly stale: boolean;
   readonly unsentNote: string | null;
@@ -75,18 +77,26 @@ export function nameOf(memberId: string, members: readonly Member[] | undefined)
   return nickname === null || nickname.trim() === "" ? summaryStrings.noName : nickname;
 }
 
-/** The player or players (a tie of the votes): a team of the sand is drawn by screen 12b (E4.18). */
+function mvpNotes(source: MvpView["source"], votingOpen: boolean): readonly string[] {
+  return [
+    source === "votes" ? summaryStrings.mvpByVotesNote : summaryStrings.mvpNote,
+    ...(votingOpen && source === "stats" ? [summaryStrings.votingOpenNote] : []),
+  ];
+}
+
+/** A player, a tie of players (votes) or a team of the sand; `null` when the server sent none. */
 function mvpViewOf(
   report: RoundSummaryReport,
   members: readonly Member[] | undefined,
 ): MvpView | null {
   const { mvp } = report;
-  if (mvp === null || mvp.kind !== "player" || mvp.memberIds.length === 0) return null;
+  if (mvp === null || mvp.memberIds.length === 0) return null;
+  const source = mvp.source;
   return {
     name: summaryStrings.names(mvp.memberIds.map((memberId) => nameOf(memberId, members))),
-    line: mvpLine(mvp),
-    detail: mvpDetail(mvp),
-    byStats: !mvpIsFromVotes(mvp),
+    ...mvpHeroText(mvp),
+    source,
+    notes: mvpNotes(source, report.mvpVoting?.state === "open"),
   };
 }
 
@@ -95,7 +105,7 @@ function highlight(title: string, side: SummarySide, figure: string): HighlightV
   return { title, label: look.label, figure, color: look.color };
 }
 
-function highlightsOf({ sides }: RoundSummaryReport): TeamsHighlights {
+function teamsOf({ sides }: RoundSummaryReport): TeamsHighlights {
   return {
     kind: "teams",
     mostWins:
@@ -117,6 +127,15 @@ function highlightsOf({ sides }: RoundSummaryReport): TeamsHighlights {
   };
 }
 
+function highlightsOf(
+  report: RoundSummaryReport,
+  members: readonly Member[] | undefined,
+): TeamsHighlights | RankingHighlights {
+  return sandTeamKind(report.modality) === null
+    ? teamsOf(report)
+    : rankingHighlights(report.ranking, members, nameOf);
+}
+
 function withoutData(input: SummaryViewInput): SummaryView {
   const { query, online } = input;
   if (query.status === "error") {
@@ -132,14 +151,15 @@ export function summaryView(input: SummaryViewInput): SummaryView {
   const { query, groupName, members, unsentPoints } = input;
   const report = query.data;
   if (report === undefined) return withoutData(input);
-  const header = headerLine(groupName, report.finishedMatches);
+  const header = headerLine(groupName, report.finishedMatches, sandTeamKind(report.modality));
   const unsentNote = unsentPoints > 0 ? summaryStrings.unsent(unsentPoints) : null;
   if (report.finishedMatches === 0) return { kind: "empty", header, unsentNote };
   return {
     kind: "ready",
     header,
     mvp: mvpViewOf(report, members),
-    highlights: highlightsOf(report),
+    highlights: highlightsOf(report, members),
+    voting: votingEntryView({ voting: report.mvpVoting, ballot: input.ballot, nowMs: input.nowMs }),
     stale: query.status === "error" || !input.online,
     unsentNote,
   };

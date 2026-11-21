@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 
 namespace Sacou.Modules.Identity.Authentication;
 
@@ -24,7 +23,6 @@ internal sealed partial class FirebaseAuthenticationHandler(
     public static readonly TimeSpan RetryAfter = TimeSpan.FromSeconds(30);
 
     private const string BearerScheme = "Bearer";
-    private const string BearerPrefix = BearerScheme + " ";
     private const string FailureMessage = "The bearer token was refused.";
 
     private static readonly object KeysUnavailableItem = new();
@@ -39,7 +37,7 @@ internal sealed partial class FirebaseAuthenticationHandler(
             return AuthenticateResult.NoResult();
         }
 
-        if (ReadBearerToken(headers) is not { } token)
+        if (JwtReading.ReadBearerToken(headers) is not { } token)
         {
             return Refuse(IdTokenRejection.Malformed);
         }
@@ -60,19 +58,6 @@ internal sealed partial class FirebaseAuthenticationHandler(
         Response.StatusCode = StatusCodes.Status401Unauthorized;
         Response.Headers.WWWAuthenticate = BearerScheme;
         return Task.CompletedTask;
-    }
-
-    /// <summary>Exactly one header, the scheme in its usual case, and a token with no spaces.</summary>
-    private static string? ReadBearerToken(StringValues headers)
-    {
-        var value = headers.Count == 1 ? headers[0] : null;
-        if (value is null || !value.StartsWith(BearerPrefix, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        var token = value[BearerPrefix.Length..];
-        return token.Length > 0 && !token.Any(char.IsWhiteSpace) ? token : null;
     }
 
     private AuthenticateResult Accept(VerifiedLogin login)

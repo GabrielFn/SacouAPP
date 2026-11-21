@@ -35,11 +35,14 @@ internal static class GroupRouteGuard
         // The person's own season (E3.9 part 4b, ADR 0071): resolved from the token, no group id.
         "GET /v1/me/stats",
         // The caller's own phones and notifications (E3.11, ADR 0069): by the signed-in account only.
-        "PUT /v1/me/push-devices/{installationId:guid}",
-        "DELETE /v1/me/push-devices/{installationId:guid}",
+        "PUT /v1/me/push-devices",
+        "POST /v1/me/push-devices/remove",
         "GET /v1/me/notifications",
         "POST /v1/me/notifications/{notificationId:guid}/read",
         "POST /v1/me/notifications/read-all",
+
+        // The pump route Cloud Tasks and Cloud Scheduler call (E3.11 part 2, ADR 0069, D11): a Google OIDC token, no person.
+        "POST /internal/notifications/pump",
         "POST /v1/groups",
         "GET /v1/groups",
         "POST /v1/invites/preview",

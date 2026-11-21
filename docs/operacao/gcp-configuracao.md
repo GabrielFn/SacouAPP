@@ -39,6 +39,10 @@ Ordem: rodar o script, criar `GCP_BUILDER_SA`, `GCP_DEPLOYER_TEST_SA` e `GCP_DEP
 
 Variáveis do repositório (Settings → Secrets and variables → Actions → **Variables**; não são segredo): `GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`, `GCP_BUILDER_SA`, `GCP_DEPLOYER_TEST_SA`, `GCP_DEPLOYER_PROD_SA`. Ambientes do GitHub: `test` (sem regra) e `production` (revisor obrigatório: o Gabriel; só a `main`).
 
+## Push (E3.11 Parte 2, ADR 0069)
+
+`scripts/gcp/setup-notifications.sh`, no Cloud Shell, depois que os dois serviços existem: liga as APIs do Cloud Tasks e do Cloud Scheduler; cria a conta `sacou-tasks-invoker` (sem chave e sem papel no projeto); as filas `sacou-notifications-test` e `sacou-notifications` em `us-east4` (`max-attempts` 3, `max-dispatches-per-second` 1); dá `cloudtasks.enqueuer` a cada conta de execução só na sua fila, `iam.serviceAccountUser` dela na `sacou-tasks-invoker` e `run.invoker` da `sacou-tasks-invoker` em cada serviço; cria vazios os segredos `sacou-expo-access-token-test` e `-prod`, cada um lido só pela conta de execução do seu serviço; e os jobs diários `sacou-notifications-sweep-test` e `sacou-notifications-sweep` (4h de Brasília, `POST /internal/notifications/pump` com OIDC da `sacou-tasks-invoker` e `audience` igual à URL do serviço). No fim ele mostra as URLs e o e-mail que vão nas variáveis `ServiceCaller__*` e `NotificationTasks__*` do deploy. Depois, no console, uma versão de cada segredo com o token de acesso do Expo (expo.dev, com a segurança reforçada do push ligada). Nunca pelo chat.
+
 ## Passos manuais no console
 
 - **Segredos:** em Security → Secret Manager, em cada segredo, "Nova versão" com a URL **direta** do Neon (sem "Connection pooling"). Nunca pelo chat.

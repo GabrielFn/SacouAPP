@@ -4,10 +4,15 @@ using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Notifications.Application;
 
-/// <summary>The routes of the module, all under the caller's own <c>/v1/me</c>: no group id, no other person's id.</summary>
+/// <summary>The routes of the module: the person's under <c>/v1/me</c> (no group id, no other person's id), and the one Google calls.</summary>
 internal static class NotificationRoutes
 {
-    public const string PushDevice = "/v1/me/push-devices/{installationId:guid}";
+    /// <summary>The installation id goes in the body, never in the path: a path reaches the hosting logs (ADR 0069, D8).</summary>
+    public const string PushDevices = "/v1/me/push-devices";
+    public const string RemovePushDevice = "/v1/me/push-devices/remove";
+
+    /// <summary>Called by Cloud Tasks and the daily Cloud Scheduler job only, with a Google OIDC token (ADR 0069, D11).</summary>
+    public const string InternalPump = "/internal/notifications/pump";
     public const string Notifications = "/v1/me/notifications";
     public const string ReadOne = "/v1/me/notifications/{notificationId:guid}/read";
     public const string ReadAll = "/v1/me/notifications/read-all";

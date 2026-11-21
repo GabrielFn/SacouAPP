@@ -13,6 +13,8 @@ function text(report: typeof E2_9_ROUND): string {
     members: [],
     online: true,
     unsentPoints: 0,
+    ballot: undefined,
+    nowMs: 0,
   });
   if (view.kind !== "ready") throw new Error(view.kind);
   return summaryShareText(view);

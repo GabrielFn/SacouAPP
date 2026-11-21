@@ -41,7 +41,9 @@ function all(node: ReactNode): Node[] {
 describe("MvpHeroCard with a long name (E4.12, widths 320, 390 and 600)", () => {
   test.each(WINDOW_WIDTHS)("at %i the name stays on one line and shrinks to fit", (width) => {
     window.width = width;
-    const nodes = all(MvpHeroCard({ name: LONG_NAME, line: "Laranja", byStats: true }));
+    const nodes = all(
+      MvpHeroCard({ name: LONG_NAME, line: "Laranja", notes: ["Calculado pelo placar"] }),
+    );
     const name = nodes.find((node) => node.props.children === LONG_NAME);
     expect(name?.props).toMatchObject({ numberOfLines: 1, adjustsFontSizeToFit: true });
     expect(name?.props.style?.lineHeight).toBeCloseTo(MVP_NAME_SIZE * LINE_HEIGHT_RATIO);
@@ -49,7 +51,7 @@ describe("MvpHeroCard with a long name (E4.12, widths 320, 390 and 600)", () => 
 
   test.each(WINDOW_WIDTHS)("at %i no box has a fixed width or height", (width) => {
     window.width = width;
-    const nodes = all(MvpHeroCard({ name: LONG_NAME, line: "Laranja", byStats: false }));
+    const nodes = all(MvpHeroCard({ name: LONG_NAME, line: "Laranja", notes: [] }));
     const boxes = nodes.filter((node) => node.type === "View");
     expect(boxes.length).toBeGreaterThan(0);
     for (const box of boxes) {

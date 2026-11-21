@@ -35,6 +35,7 @@ function teamSourceOf(input: MatchStartInput, side: TeamSide): LineupTeamSource 
     base: baseOf(input, side),
     phase: input.preGame.firstServer === side ? "serving" : "receiving",
     liberoPool: input.arrangement.reserves,
+    benchPool: input.arrangement.reserves,
     noLiberoText: lineupStrings.noReserves,
   };
 }

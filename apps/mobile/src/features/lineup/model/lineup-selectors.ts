@@ -10,6 +10,7 @@ import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import type { TeamColorName } from "../../../theme/team-colors";
 import { misplacedMembers } from "./fix-roles";
 import { DIAGRAM_ORDER } from "./lineup.data";
+import { benchPoolOf, benchRow, liberoTaken, type BenchRow } from "./lineup-bench";
 import { courtChips, serverOf, type LineupChip } from "./lineup-court";
 import {
   draftsToSave,
@@ -70,6 +71,8 @@ export interface LineupTeamView {
   readonly order: readonly OrderCell[];
   readonly benchLine: string;
   readonly libero: LiberoRow;
+  /** `null` in a match: the bench of a match takes nobody from the queue (R96). */
+  readonly benchRow: BenchRow | null;
   readonly serverChange: string | null;
 }
 
@@ -120,12 +123,6 @@ function benchLine(draft: LineupDraft, nameOf: LineupSource["nameOf"]): string {
     : texts.bench(draft.bench.map(nameOf).join(texts.nameSeparator));
 }
 
-/** The libero of the other team: the same name is never the libero of both (D5). */
-function otherLibero(state: LineupEditorState, source: LineupSource, side: TeamSide) {
-  const other = source.teams[side === "a" ? "b" : "a"].base;
-  return other === null ? null : (shownAllocation(state, other).libero?.memberId ?? null);
-}
-
 /** The reserves of the queue (pre-game), or the bench of the draft (match), where a libero goes (D5). */
 function liberoPoolOf(draft: LineupDraft, team: LineupTeamSource): readonly MemberId[] {
   return team.base?.liberoExit === "bench" ? draft.bench : team.liberoPool;
@@ -134,14 +131,14 @@ function liberoPoolOf(draft: LineupDraft, team: LineupTeamSource): readonly Memb
 function liberoRow(
   draft: LineupDraft,
   team: LineupTeamSource,
-  taken: MemberId | null,
+  taken: readonly MemberId[],
   nameOf: LineupSource["nameOf"],
 ): LiberoRow {
   const label = texts.liberoGroup(team.name);
   if (!LIBERO_SYSTEMS.includes(draft.system))
     return { label, options: [], note: texts.liberoSystemsOnly };
   const current = draft.libero?.memberId ?? null;
-  const pool = liberoPoolOf(draft, team).filter((id) => id !== taken && id !== current);
+  const pool = liberoPoolOf(draft, team).filter((id) => !taken.includes(id) && id !== current);
   const candidates = current === null ? pool : [current, ...pool];
   if (candidates.length === 0) return { label, options: [], note: team.noLiberoText };
   const options = [null, ...candidates].map((value) => ({
@@ -216,7 +213,8 @@ function teamView(
     stale: isDraftStale(state, base),
     order: officialOrder(draft, team, nameOf),
     benchLine: benchLine(draft, nameOf),
-    libero: liberoRow(draft, team, otherLibero(state, source, team.side), nameOf),
+    libero: liberoRow(draft, team, liberoTaken(state, source, team), nameOf),
+    benchRow: benchRow(draft, benchPoolOf(state, source, team.side), team, nameOf),
     serverChange: serverChange(draft, team, nameOf),
   };
 }

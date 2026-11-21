@@ -1,4 +1,5 @@
 import type { RoundSummaryReport } from "../../../services/api/sacou-api";
+import type { ReadySummary, TeamsHighlights } from "./summary-view";
 
 /** The first member of the simulated round of the E2.9 (plan, "Rodada simulada"), with the ID of the golden r1. */
 export const BIA = "a0000000-0000-4000-8000-000000000001";
@@ -31,3 +32,9 @@ export const E2_9_ROUND: RoundSummaryReport = {
   players: [],
   ranking: null,
 };
+
+/** The two team cards of a ready summary of a court modality (the sand has a ranking instead). */
+export function teamsOf(view: ReadySummary): TeamsHighlights {
+  if (view.highlights.kind !== "teams") throw new Error("expected team highlights");
+  return view.highlights;
+}

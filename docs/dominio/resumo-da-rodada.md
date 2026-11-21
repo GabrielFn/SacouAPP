@@ -42,3 +42,12 @@ A apuração, a janela e quem pode votar são do servidor ([`mvp.md`](mvp.md), A
 - **Sem internet (pergunta 172):** a última cédula vista nesta abertura do app aparece com a faixa "Sem conexão" e o botão "Conecte-se para votar", desabilitado. O voto nunca fica guardado para enviar depois.
 - **Toque duplo:** só um voto sai por vez; o segundo toque não chama a API.
 - **Nunca aparece:** contagem de votos, número de votantes, "faltam N", quem votou em quem. O próprio voto só na 12a e para a própria pessoa. Os textos de recusa não citam o candidato.
+
+## Areia e MVP da votação (tela 12b e entrada na 12, E4.18 Parte 2)
+
+- **Areia (`beach-2x2`, `beach-4x4`):** a tela 12 troca os cartões de time pelo "Ranking do dia", uma linha por time na ordem do servidor (posição 1 a n, sem repetir; o desempate é da E3.9): "Bia e Gabi · 7 vitórias · 2 derrotas", com "· 1 sem vencedor" quando alguma partida acabou sem vencedor. O cabeçalho ganha "· duplas" ou "· quartetos". Time remontado com outro parceiro é outra linha. Sem `ranking` do servidor a lista fica vazia (nada é inventado).
+- **MVP de time (`mvp.kind: "team"`):** "Bia e Gabi" e "7 vitórias · ficaram 4 seguidas na quadra" (a sequência só com 2 ou mais).
+- **MVP da votação (`mvp.source: "votes"`):** o nome do vencedor, ou os nomes juntos num empate, e "Escolhido pela galera" no lugar de "Calculado pelo placar". Com um vencedor só, a linha de números continua; num empate só os nomes. Nunca número de votos. Votação fechada sem votos volta a `source: "stats"`.
+- **Entrada da votação (pergunta 170):** só com `mvpVoting`. `notOpen`: "A votação do MVP abre quando a rodada terminar"; `open` e pode votar: botão "Votar no MVP · fecha em 23 h" para a 12a; `open` e já votou: "Você já votou · resultado em 23 h", sem o nome; `open` sem poder votar, `closed` ou votação desligada: nada. Com a votação aberta e MVP pelos dados, o cartão ganha "Votação da galera aberta". A cédula só é lida com `state: "open"` (consulta dependente, fora do cache persistido).
+- **Relógio:** o prazo se redesenha a cada minuto (porta `Scheduler`, nada guardado) na 12 e na 12a; ao chegar `opensAt` ou `closesAt` com a tela aberta, o resumo e a cédula são marcados como velhos e lidos de novo, e o servidor diz o estado.
+- **Mandar pro grupo (areia):** "Resumo do Areia de sábado · 9 partidas · duplas. MVP do dia: Bia e Gabi (7 vitórias). Ranking do dia: 1. Bia e Gabi, 7-2; 2. Caio e Léo, 5-4; ..." (até 5 linhas). MVP da votação: "MVP do dia (escolhido pela galera): Bia." O texto nunca traz o voto da pessoa, contagem nem prazo.

@@ -9,6 +9,8 @@ Regras da fila de uma `CourtSession` (E2.6, [ADR 0029](../arquitetura/adr/0029-f
 - O `MatchStarted` grava a fila de quando a partida começa, e o `QueueChanged` troca a fila inteira durante a partida (quem chegou, quem foi embora). Vale o último na ordem canônica. Entre o `MatchEnded` e o `MatchStarted` seguinte não há evento de fila: a próxima partida grava a fila que o plano propôs.
 - Desfazer volta placar, rotação e fila juntos, porque estão no mesmo estado.
 
+Quem foi para o banco de um time na escalação do pré-jogo (R96) sai da fila e é do time: segue as regras de banco acima, inclusive herdar o lugar de quem sai.
+
 ## Partidas seguidas
 
 - Conta as partidas **terminadas** seguidas, terminando na última, em que o membro estava no time: na escalação, no banco ou como líbero (decisão do Gabriel).
