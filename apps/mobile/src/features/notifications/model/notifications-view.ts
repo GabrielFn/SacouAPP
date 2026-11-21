@@ -1,5 +1,9 @@
-import { apiErrorOf, type ApiError } from "../../../services/api/api-error";
 import type { NotificationList } from "../../../services/api/sacou-api";
+import {
+  queryViewState,
+  type QuerySnapshot,
+  type QueryWaitState,
+} from "../../../services/query/query-view-state";
 import { groupByDay, type DayClock, type NotificationDay } from "./group-by-day";
 import {
   activationOf,
@@ -9,17 +13,10 @@ import {
 } from "./push-permission.reducer";
 
 /** What the list query says, as plain data, so the selector needs no React. */
-export interface NotificationsQuerySnapshot {
-  readonly status: "pending" | "error" | "success";
-  readonly fetchStatus: "fetching" | "paused" | "idle";
-  readonly data: NotificationList | undefined;
-  readonly error: unknown;
-}
+export type NotificationsQuerySnapshot = QuerySnapshot<NotificationList>;
 
 export type NotificationsBody =
-  | { readonly kind: "loading" }
-  | { readonly kind: "offline-empty" }
-  | { readonly kind: "error"; readonly error: ApiError }
+  | QueryWaitState
   | { readonly kind: "empty" }
   | { readonly kind: "list"; readonly days: readonly NotificationDay[] };
 
@@ -31,18 +28,12 @@ export interface NotificationsView {
   readonly permissionCard: Exclude<PermissionActivation, "none"> | "asking" | null;
 }
 
-const UNKNOWN_ERROR: ApiError = { kind: "unexpected", status: 0 };
-
 function bodyOf(query: NotificationsQuerySnapshot, clock: DayClock): NotificationsBody {
-  if (query.data !== undefined) {
-    return query.data.items.length === 0
+  return queryViewState(query, (list): NotificationsBody =>
+    list.items.length === 0
       ? { kind: "empty" }
-      : { kind: "list", days: groupByDay(query.data.items, clock) };
-  }
-  if (query.status === "error") {
-    return { kind: "error", error: apiErrorOf(query.error) ?? UNKNOWN_ERROR };
-  }
-  return query.fetchStatus === "paused" ? { kind: "offline-empty" } : { kind: "loading" };
+      : { kind: "list", days: groupByDay(list.items, clock) },
+  );
 }
 
 function cardOf(permission: PushPermissionState): NotificationsView["permissionCard"] {

@@ -11,14 +11,14 @@ function dataOf(response: Notifications.NotificationResponse | null): unknown {
 
 /** The touches through `expo-notifications`; the `data` goes out unread, as `unknown`. */
 export const expoNotificationsTaps: NotificationTaps = {
-  lastTap: async () => {
+  lastTap: () => {
     try {
-      const response = await Notifications.getLastNotificationResponseAsync();
+      const response = Notifications.getLastNotificationResponse();
       // Read once: another login on the same opening never acts on the same touch again.
-      await Notifications.clearLastNotificationResponseAsync();
-      return dataOf(response);
+      Notifications.clearLastNotificationResponse();
+      return Promise.resolve(dataOf(response));
     } catch {
-      return null;
+      return Promise.resolve(null);
     }
   },
   onTap(listener) {

@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import { IosAuthorizationStatus } from "expo-notifications";
 import { Linking } from "react-native";
 
 import type {
@@ -8,7 +9,7 @@ import type {
 import { ensureWaitlistChannel } from "./expo-notifications-channel";
 
 /** iOS gives a quiet trial permission ("provisional"): the pushes arrive, so it counts as given. */
-const PROVISIONAL = Notifications.IosAuthorizationStatus.PROVISIONAL;
+const PROVISIONAL = IosAuthorizationStatus.PROVISIONAL;
 
 function answerOf(status: Notifications.NotificationPermissionsStatus): PermissionAnswer {
   if (status.granted || status.ios?.status === PROVISIONAL) return "granted";

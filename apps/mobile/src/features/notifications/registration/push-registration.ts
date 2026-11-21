@@ -49,7 +49,7 @@ export type PushDevices = PushRegistration & PushDeviceDeregistrar;
  */
 export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
   const timeoutMs = deps.timeoutMs ?? DEREGISTER_TIMEOUT_MS;
-  const inFlight: { all: readonly Promise<PushSyncOutcome>[] } = { all: [] };
+  const inFlight: { current: readonly Promise<PushSyncOutcome>[] } = { current: [] };
   const closed: { current: SessionIdentity | null } = { current: null };
 
   function isClosing(session: SessionIdentity): boolean {
@@ -77,15 +77,15 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     if (session === null) return Promise.resolve("no-session");
     if (isClosing(session)) return Promise.resolve("closing");
     const running = send(session, token).catch((): PushSyncOutcome => "failed");
-    inFlight.all = [...inFlight.all, running];
+    inFlight.current = [...inFlight.current, running];
     void running.finally(() => {
-      inFlight.all = inFlight.all.filter((other) => other !== running);
+      inFlight.current = inFlight.current.filter((other) => other !== running);
     });
     return running;
   }
 
   async function removeOnServer(): Promise<void> {
-    await Promise.all(inFlight.all);
+    await Promise.all(inFlight.current);
     const installationId = await deps.installationIds.read();
     if (installationId !== null) await deps.api.removePushDevice({ installationId });
   }

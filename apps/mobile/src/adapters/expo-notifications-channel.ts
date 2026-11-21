@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import { AndroidImportance } from "expo-notifications";
 import { Platform } from "react-native";
 
 import { notificationsStrings } from "../strings/notifications.pt-BR";
@@ -16,7 +17,7 @@ export function ensureWaitlistChannel(): Promise<void> {
   if (Platform.OS !== "android") return Promise.resolve();
   created.current ??= Notifications.setNotificationChannelAsync(WAITLIST_CHANNEL_ID, {
     name: notificationsStrings.channelName,
-    importance: Notifications.AndroidImportance.HIGH,
+    importance: AndroidImportance.HIGH,
   }).then(
     () => undefined,
     () => {
