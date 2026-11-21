@@ -26,7 +26,7 @@ const MEMBERS: readonly Member[] = [
 }));
 
 type Mvp = NonNullable<RoundSummaryReport["mvp"]>;
-const NOT_OPEN = { state: "notOpen", opensAt: CLOSES } as const;
+const NOT_OPEN = { state: "notOpen", opensAt: CLOSES, closesAt: CLOSES } as const;
 const OPEN = { state: "open", opensAt: OPENS, closesAt: CLOSES } as const;
 const CLOSED = { state: "closed", opensAt: OPENS, closesAt: CLOSES } as const;
 const BALLOT: MvpBallot = {
