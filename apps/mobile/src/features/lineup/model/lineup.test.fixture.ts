@@ -64,6 +64,7 @@ export function teamSource(
     base,
     phase: side === "a" ? "serving" : "receiving",
     liberoPool: ["sofia", "rafa"],
+    benchPool: ["sofia", "rafa"],
     noLiberoText: "Sem reservas para líbero.",
     ...overrides,
   };

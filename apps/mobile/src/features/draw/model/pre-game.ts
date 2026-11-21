@@ -3,7 +3,7 @@ import type { FormationSystem, SetterZone } from "@sacou/volley-rules";
 
 /**
  * A lineup saved on screen 22 (E4.8, D3): it holds only while the team and the system are the ones
- * it was saved for, and the libero only while still a reserve; otherwise the default comes back.
+ * it was saved for, and the libero and the bench only while still free reserves; otherwise the default comes back.
  */
 export interface SavedLineup {
   readonly system: FormationSystem;
@@ -11,6 +11,8 @@ export interface SavedLineup {
   readonly setterZone: SetterZone;
   /** A reserve of the queue who plays as the libero (question 76). */
   readonly libero: MemberId | null;
+  /** Reserves of the queue who wait on the bench of the team, in the order of the queue (R96). */
+  readonly bench: readonly MemberId[];
 }
 
 export type SavedLineups = Readonly<Partial<Record<TeamSide, SavedLineup>>>;

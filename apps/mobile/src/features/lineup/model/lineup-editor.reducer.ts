@@ -6,6 +6,7 @@ import { fixRoles } from "./fix-roles";
 import {
   reanchor,
   swapInLineup,
+  toggleBench,
   withLibero,
   withSetterZone,
   type LiberoExit,
@@ -46,6 +47,13 @@ export type LineupEditorAction =
       readonly type: "libero-chosen";
       readonly base: LineupBase;
       readonly memberId: MemberId | null;
+    }
+  /** A reserve of the queue goes to the bench of the team or comes back; `pool` is who may (R96). */
+  | {
+      readonly type: "bench-toggled";
+      readonly base: LineupBase;
+      readonly memberId: MemberId;
+      readonly pool: readonly MemberId[];
     }
   | { readonly type: "selection-cleared" }
   | { readonly type: "draft-discarded"; readonly side: TeamSide };
@@ -131,6 +139,10 @@ export function lineupEditorReducer(
     case "libero-chosen":
       return edited(state, action.base, (draft) =>
         withLibero(draft, action.memberId, action.base.liberoExit),
+      );
+    case "bench-toggled":
+      return edited(state, action.base, (draft) =>
+        toggleBench(draft, action.memberId, action.pool),
       );
     case "selection-cleared":
       return { ...state, selection: null };

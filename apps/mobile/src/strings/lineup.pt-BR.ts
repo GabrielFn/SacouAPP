@@ -32,6 +32,11 @@ export const lineupStrings = {
   libero: "Líbero",
   liberoGroup: (team: string) => `Líbero do ${team}`,
   noLibero: "Sem líbero",
+  /** The bench of the pre-game takes reserves of the queue (R96). */
+  benchGroup: (team: string) => `Banco do ${team}`,
+  noReservesForBench: "Sem reservas para o banco.",
+  benchOption: (name: string, onBench: boolean) =>
+    onBench ? `${name}, no banco` : `${name}, na fila`,
   liberoSystemsOnly: "Líbero só no 5x1 e no 6x2.",
   noReserves: "Sem reservas para líbero.",
   noBenchForLibero: (size: number) => `Sem líbero: o time tem ${String(size)}.`,

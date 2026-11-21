@@ -131,7 +131,7 @@ function tabLabel(input: MatchStartInput, side: TeamSide, team: TeamIdentity): s
   return rotating ? texts.rotationTab(team.name, texts.systems[system]) : team.name;
 }
 
-/** "Laranja tem 6, sem banco.", "Laranja tem 6 e líbero Sofia." or "Laranja tem 5: sem rotação." */
+/** "Laranja tem 6, sem banco.", "Laranja tem 6 e líbero Sofia.", "... e banco Davi." or "Laranja tem 5: sem rotação." */
 function benchLine(
   rotation: TeamState | null,
   teamName: string,
@@ -139,9 +139,15 @@ function benchLine(
   nameOf: DrawNameOf,
 ): string {
   if (rotation === null) return texts.noRotation(teamName, size);
-  return rotation.libero === null
-    ? texts.fullTeam(teamName, size)
-    : texts.withLibero(teamName, size, nameOf(rotation.libero.memberId));
+  const libero = rotation.libero === null ? null : nameOf(rotation.libero.memberId);
+  const bench = rotation.bench.map(nameOf).join(texts.benchSeparator);
+  if (rotation.bench.length === 0)
+    return libero === null
+      ? texts.fullTeam(teamName, size)
+      : texts.withLibero(teamName, size, libero);
+  return libero === null
+    ? texts.withBench(teamName, size, bench)
+    : texts.withLiberoAndBench(teamName, size, libero, bench);
 }
 
 /** The section "Rotação de cada time": `null` when the round has the rotation off (D6). */

@@ -19,7 +19,7 @@ import {
 import type { DrawArrangement } from "./draw-arrangement";
 import { defaultLineup, type PositionOf } from "./default-lineup";
 import { chosenOr, type PreGameChoices } from "./pre-game";
-import { liberosOf, savedRotation } from "./pre-game-lineup";
+import { benchesOf, liberosOf, savedRotation } from "./pre-game-lineup";
 
 /** Only a team of six rotates (ADR 0024): any other size plays with the rotation off. */
 export const ROTATING_TEAM_SIZE = ROTATION_SLOTS.length;
@@ -72,11 +72,15 @@ export function defaultRotation(input: MatchStartInput, side: TeamSide): TeamSta
   };
 }
 
-/** Who can be the libero of a team: the reserves, but never the libero of team A for team B (D5). */
-export function liberoPoolOf(input: MatchStartInput, side: TeamSide): readonly MemberId[] {
+/**
+ * Who can be the libero or on the bench of a team: the reserves of the queue, in order, but never
+ * the libero nor the bench of team A for team B (D5, R96).
+ */
+export function reservePoolOf(input: MatchStartInput, side: TeamSide): readonly MemberId[] {
   const { reserves } = input.arrangement;
   if (side === "a") return reserves;
-  const taken = liberosOf([teamRotation(input, "a")]);
+  const rotation = teamRotation(input, "a");
+  const taken = [...liberosOf([rotation]), ...benchesOf([rotation])];
   return reserves.filter((memberId) => !taken.includes(memberId));
 }
 
@@ -85,12 +89,12 @@ export function teamRotation(input: MatchStartInput, side: TeamSide): TeamState 
   const base = defaultRotation(input, side);
   return base === null
     ? null
-    : savedRotation(base, input.preGame.lineups[side], liberoPoolOf(input, side));
+    : savedRotation(base, input.preGame.lineups[side], reservePoolOf(input, side));
 }
 
-/** The team as the match freezes it: the six and, with one, the libero (D5). */
+/** The team as the match freezes it: the six, the bench and, with one, the libero (D5, R96). */
 function rosterOf(team: readonly MemberId[], rotation: TeamState | null) {
-  return { memberIds: [...team, ...liberosOf([rotation])] };
+  return { memberIds: [...team, ...benchesOf([rotation]), ...liberosOf([rotation])] };
 }
 
 export function scoringOf({
@@ -121,7 +125,10 @@ export function buildMatchStart(
   const { arrangement, preGame } = input;
   if (arrangement.teams.length < SIDES.length) return err("not-enough-teams");
   const rotations = { a: teamRotation(input, "a"), b: teamRotation(input, "b") };
-  const liberos = liberosOf([rotations.a, rotations.b]);
+  const playing = [
+    ...liberosOf([rotations.a, rotations.b]),
+    ...benchesOf([rotations.a, rotations.b]),
+  ];
   return ok({
     matchId,
     rulesVersion: CURRENT_RULES_VERSION,
@@ -135,8 +142,8 @@ export function buildMatchStart(
     firstServer: preGame.firstServer,
     queue: {
       teams: arrangement.teams.slice(FIRST_QUEUED_TEAM).map((memberIds) => ({ memberIds })),
-      // A reserve who plays as a libero leaves the queue for the team (D5).
-      players: arrangement.reserves.filter((memberId) => !liberos.includes(memberId)),
+      // A reserve who plays as a libero or waits on a bench leaves the queue for the team (D5, R96).
+      players: arrangement.reserves.filter((memberId) => !playing.includes(memberId)),
     },
   });
 }

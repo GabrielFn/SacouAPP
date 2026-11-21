@@ -8,6 +8,7 @@ import {
   type LineupBase,
 } from "../model/lineup-editor.reducer";
 import type { LineupDraft } from "../model/lineup-moves";
+import { benchPoolOf } from "../model/lineup-bench";
 import { lineupView } from "../model/lineup-selectors";
 import { basesOf, type LineupSource } from "../model/lineup-source";
 import type { LineupScreenProps } from "../ui/LineupScreen";
@@ -65,6 +66,12 @@ export function useLineupEditor(deps: LineupEditorDeps): LineupScreenProps {
       onLibero: (memberId) => {
         withBase((shown) => {
           dispatch({ type: "libero-chosen", base: shown, memberId });
+        });
+      },
+      onBench: (memberId) => {
+        withBase((shown) => {
+          const pool = benchPoolOf(state, source, shown.side);
+          if (pool !== null) dispatch({ type: "bench-toggled", base: shown, memberId, pool });
         });
       },
       onSave: () => {
