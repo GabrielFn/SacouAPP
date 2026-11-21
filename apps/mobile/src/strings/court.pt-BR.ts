@@ -77,6 +77,14 @@ export const courtStrings = {
     fullExit: "perde sai",
   },
   roster: { unknownPlayer: "Jogador", orange: "Laranja", blue: "Azul" },
+  /** The bar of the home with a match open on this phone (Inicio.dc.html:88-95, R97 D1). */
+  activeBar: {
+    label: (group: string | null) => (group === null ? "EM QUADRA" : `EM QUADRA · ${group}`),
+    score: (a: number, b: number) => `Laranja ${String(a)} x ${String(b)} Azul`,
+    open: "Abrir quadra",
+    accessibilityLabel: (group: string | null, a: number, b: number) =>
+      `${group === null ? "Partida aberta" : `Partida aberta de ${group}`}, Laranja ${String(a)}, Azul ${String(b)}. Abrir quadra`,
+  },
   battery: {
     warning: (percent: number) => `Bateria em ${String(percent)}%. Ligue o carregador.`,
     dismiss: "Entendi",
@@ -113,6 +121,8 @@ export const courtStrings = {
     themeSun: "Sol",
     themeNight: "Noite",
     leave: "Sair do modo quadra",
+    /** The line under "Sair do modo quadra" (R97, D7): leaving closes nothing. */
+    leaveNote: "A partida continua aberta neste celular.",
     endMatch: "Encerrar partida",
     endRound: "Encerrar rodada",
     endRoundHint: "fecha a noite toda",

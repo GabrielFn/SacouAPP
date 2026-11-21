@@ -195,6 +195,7 @@ export function MatchMenuSheet({
           </View>
           <MenuRow
             label={menu.leave}
+            note={menu.leaveNote}
             renderIcon={(color) => <LeaveCourtIcon color={color} />}
             onPress={onLeave}
           />

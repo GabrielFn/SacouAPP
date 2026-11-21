@@ -153,6 +153,9 @@ export const sizes = {
   // Group card (Grupos.dc.html .main, .foot, .role) and the round list card of the home.
   groupCardMin: 128,
   cardFooter: 46,
+  // The bar "EM QUADRA" of the home (Inicio.dc.html:88-95): the bar, its live dot.
+  activeBarMin: 64,
+  liveDot: 10,
   roleBadge: 26,
   // Switch (AjustesGrupo.dc.html .sw/.tr): track, knob and a touch target taller than the track.
   switchTrackWidth: 50,
@@ -227,6 +230,7 @@ export const interactiveHeights = [
   sizes.chip,
   sizes.tabItem,
   sizes.cardFooter,
+  sizes.activeBarMin,
   sizes.switchTarget,
   sizes.segment,
   sizes.systemButton,

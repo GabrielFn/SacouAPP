@@ -7,7 +7,7 @@ import { overrideOf, steppedPoints, type PreGameChoices, type SavedLineups } fro
  * Sheet 08 lies over screen 07, in the same flow, so the draw never leaves the screen (D1); screen 22
  * opens from it in the same flow too, because the draw lives only here (E4.8, D1).
  */
-export type DrawSheet = "none" | "pre-game" | "lineup";
+export type DrawSheet = "none" | "pre-game" | "lineup" | "close-other";
 
 /** The actions of sheet 08 (D3). Each `base` is the resolved setting of the round, never stored. */
 export type PreGameAction =
@@ -29,7 +29,11 @@ export type PreGameAction =
   | { readonly type: "lineup-opened" }
   | { readonly type: "lineup-closed" }
   /** "Salvar escalação": the teams the admin changed, back to the 08. */
-  | { readonly type: "lineup-saved"; readonly lineups: SavedLineups };
+  | { readonly type: "lineup-saved"; readonly lineups: SavedLineups }
+  /** "Começar partida" with a forgotten match of a round that ended (R97, D5): the sheet asks first. */
+  | { readonly type: "close-other-asked" }
+  /** "Cancelar" of that sheet, or its confirmation: back to the 08. */
+  | { readonly type: "close-other-dismissed" };
 
 /** The part of the flow of screen 07 that the sheet reads and writes. */
 export interface PreGameSlice {
@@ -52,6 +56,8 @@ const PRE_GAME_ACTION_TYPES: Readonly<Record<PreGameAction["type"], true>> = {
   "lineup-opened": true,
   "lineup-closed": true,
   "lineup-saved": true,
+  "close-other-asked": true,
+  "close-other-dismissed": true,
 };
 
 export function isPreGameAction<A extends { readonly type: string }>(
@@ -142,5 +148,9 @@ export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGame
       return withChoices(state, { rotationTab: action.side });
     case "system-chosen":
       return systemChosen(state, action.side, action.system, action.base);
+    case "close-other-asked":
+      return state.sheet === "pre-game" ? { ...state, sheet: "close-other" } : state;
+    case "close-other-dismissed":
+      return state.sheet === "close-other" ? { ...state, sheet: "pre-game" } : state;
   }
 }

@@ -13,6 +13,8 @@ export interface MenuRowProps {
   /** The icon before the label, drawn in the color it receives. */
   readonly renderIcon: (color: string) => ReactNode;
   readonly hint?: string;
+  /** A line under the label (R97, D7: "A partida continua aberta neste celular."). */
+  readonly note?: string;
   readonly accessibilityLabel?: string;
   readonly chevron?: boolean;
   readonly disabled?: boolean;
@@ -26,9 +28,15 @@ function inkOf(colors: Theme, disabled: boolean, danger: boolean): string {
   return danger ? colors.refusal : colors.text;
 }
 
-function spokenLabel(label: string, hint: string | undefined, custom: string | undefined): string {
+function spokenLabel(
+  label: string,
+  hint: string | undefined,
+  custom: string | undefined,
+  note: string | undefined,
+): string {
   if (custom !== undefined) return custom;
-  return hint === undefined ? label : strings.court.menu.hintLabel(label, hint);
+  const spoken = hint === undefined ? label : strings.court.menu.hintLabel(label, hint);
+  return note === undefined ? spoken : `${spoken}. ${note}`;
 }
 
 export interface RowHintProps {
@@ -49,6 +57,7 @@ export function MenuRow({
   label,
   renderIcon,
   hint,
+  note,
   accessibilityLabel,
   chevron = false,
   disabled = false,
@@ -62,7 +71,7 @@ export function MenuRow({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      accessibilityLabel={spokenLabel(label, hint, accessibilityLabel)}
+      accessibilityLabel={spokenLabel(label, hint, accessibilityLabel, note)}
       onPress={onPress}
       style={{
         minHeight: tokens.sheet.sizes.menuRow,
@@ -73,17 +82,19 @@ export function MenuRow({
       }}
     >
       {renderIcon(ink)}
-      <Text
-        variant="title"
-        style={{
-          flexShrink: 1,
-          fontFamily: fontFamilies.body600,
-          color: ink,
-        }}
-      >
-        {label}
-        {hint === undefined ? null : <RowHint hint={hint} ink={danger ? ink : null} />}
-      </Text>
+      <View style={{ flexShrink: 1 }}>
+        <Text
+          variant="title"
+          style={{
+            fontFamily: fontFamilies.body600,
+            color: ink,
+          }}
+        >
+          {label}
+          {hint === undefined ? null : <RowHint hint={hint} ink={danger ? ink : null} />}
+        </Text>
+        {note === undefined ? null : <Text variant="muted">{note}</Text>}
+      </View>
       {chevron ? (
         <View style={{ marginLeft: "auto" }}>
           <ChevronRightIcon color={colors.textMuted} />
