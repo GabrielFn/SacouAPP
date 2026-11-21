@@ -1,4 +1,9 @@
-import type { CardImageCapture, CaptureTarget, GallerySaver, ImageShare } from "../ports/card-image";
+import type {
+  CardImageCapture,
+  CaptureTarget,
+  GallerySaver,
+  ImageShare,
+} from "../ports/card-image";
 import type { CardShareAction, CardShareIntent } from "./card-share.reducer";
 
 export interface CardSharePorts {

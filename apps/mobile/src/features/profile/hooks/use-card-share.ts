@@ -25,7 +25,7 @@ export function useCardShare(target: CaptureTarget): CardShareModel {
   const { cardCapture, imageShare, gallerySaver } = useServices();
   const [state, dispatch] = useReducer(cardShareReducer, initialCardShareState);
   // A second tap in the same frame joins the first run (the reducer sees it only on the next render).
-  const [flight] = useState(() => createSingleFlight<void>());
+  const [flight] = useState(() => createSingleFlight<null>());
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
@@ -38,14 +38,15 @@ export function useCardShare(target: CaptureTarget): CardShareModel {
   };
   const run = (intent: CardShareIntent) => {
     dispatch({ type: intent === "share" ? "share-requested" : "save-requested" });
-    void flight.run(() =>
-      runCardShare(
+    void flight.run(async () => {
+      await runCardShare(
         intent,
         target,
         { capture: cardCapture, imageShare, gallery: gallerySaver },
         safeDispatch,
-      ),
-    );
+      );
+      return null;
+    });
   };
   return {
     state,

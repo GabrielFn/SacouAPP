@@ -28,14 +28,15 @@ const { cardShare } = strings.profile;
 const CARD_WIDTH = "70%";
 const DISABLED_OPACITY = 0.6;
 
-
 /** Screen 15: the whole card, the switch for the numbers, and the two ways out of it (E4.13, part 2). */
 export function CardShareScreen() {
   const { view, retry } = useProfileView();
   return (
     <Screen scroll>
       <BackBar title={cardShare.title} fallbackHref={meRoutes.card} look="heading" />
-      {view.kind === "loading" ? <LoadingState accessibilityLabel={strings.profile.me.loading} /> : null}
+      {view.kind === "loading" ? (
+        <LoadingState accessibilityLabel={strings.profile.me.loading} />
+      ) : null}
       {view.kind === "offline-empty" ? (
         <EmptyState
           title={strings.profile.me.offlineTitle}
@@ -52,16 +53,13 @@ export function CardShareScreen() {
         />
       ) : null}
       {view.kind === "ready" || view.kind === "empty" ? (
-        <CardShareBody
-          stale={view.stale}
-          card={playerCardOf(view.profile, view.stats)}
-        />
+        <CardShareBody stale={view.stale} card={playerCardOf(view.profile, view.stats)} />
       ) : null}
     </Screen>
   );
 }
 
-interface CardShareBodyProps {
+export interface CardShareBodyProps {
   readonly stale: boolean;
   readonly card: ReturnType<typeof playerCardOf>;
 }
@@ -77,11 +75,7 @@ function CardShareBody({ stale, card }: CardShareBodyProps) {
   return (
     <View style={{ gap: tokens.spacing.l }}>
       {stale ? <OfflineBanner text={offlineTexts.bannerNow} /> : null}
-      <View
-        ref={target}
-        collapsable={false}
-        style={{ width: CARD_WIDTH, alignSelf: "center" }}
-      >
+      <View ref={target} collapsable={false} style={{ width: CARD_WIDTH, alignSelf: "center" }}>
         <PlayerCardView card={card} size="full" showStats={showStats} />
       </View>
       <View style={{ gap: tokens.spacing.s }}>
@@ -123,16 +117,14 @@ function CardShareBody({ stale, card }: CardShareBodyProps) {
           icon={<DownloadIcon color={colors.text} />}
         />
       </View>
-      {model.state.status === "capturing" ? <Text variant="caption">{cardShare.working}</Text> : null}
+      {model.state.status === "capturing" ? (
+        <Text variant="caption">{cardShare.working}</Text>
+      ) : null}
       {notice === null ? null : model.state.status === "failed" ? (
         <View style={{ gap: tokens.spacing.s }}>
           <ErrorStrip text={notice} />
           {offersSettings(model.state) ? (
-            <Button
-              label={cardShare.openSettings}
-              variant="outline"
-              onPress={model.openSettings}
-            />
+            <Button label={cardShare.openSettings} variant="outline" onPress={model.openSettings} />
           ) : null}
         </View>
       ) : (
@@ -147,7 +139,7 @@ function CardShareBody({ stale, card }: CardShareBodyProps) {
   );
 }
 
-interface ShareTileProps {
+export interface ShareTileProps {
   readonly label: string;
   readonly icon: ReactNode;
   readonly disabled: boolean;

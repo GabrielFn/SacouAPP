@@ -28,15 +28,23 @@ export function isBusy(state: CardShareState): boolean {
   return state.status === "capturing" || state.status === "sharing" || state.status === "saving";
 }
 
+function request(state: CardShareState, intent: CardShareIntent): CardShareState {
+  return isBusy(state) ? state : { status: "capturing", intent };
+}
+
+function captured(state: CardShareState): CardShareState {
+  if (state.status !== "capturing") return state;
+  return state.intent === "share" ? { status: "sharing" } : { status: "saving" };
+}
+
 export function cardShareReducer(state: CardShareState, action: CardShareAction): CardShareState {
   switch (action.type) {
     case "share-requested":
-      return isBusy(state) ? state : { status: "capturing", intent: "share" };
+      return request(state, "share");
     case "save-requested":
-      return isBusy(state) ? state : { status: "capturing", intent: "save" };
+      return request(state, "save");
     case "captured":
-      if (state.status !== "capturing") return state;
-      return state.intent === "share" ? { status: "sharing" } : { status: "saving" };
+      return captured(state);
     case "shared":
       return state.status === "sharing" ? initialCardShareState : state;
     case "saved":

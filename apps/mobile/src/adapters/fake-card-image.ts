@@ -18,26 +18,27 @@ export interface FakeCardImageCapture extends CardImageCapture {
 
 /** The capture of the tests: a PNG address in memory, deleted by `discard`. */
 export function createFakeCardImageCapture(): FakeCardImageCapture {
-  const state = { count: 0, alive: [] as readonly string[], failure: null as CaptureError | null };
+  const cell = {
+    value: { count: 0, alive: [] as readonly string[], failure: null as CaptureError | null },
+  };
   return {
     capture() {
-      if (state.failure !== null) {
-        const failure = state.failure;
-        state.failure = null;
+      const { failure, count, alive } = cell.value;
+      if (failure !== null) {
+        cell.value = { count, alive, failure: null };
         return Promise.resolve(err(failure));
       }
-      state.count += 1;
-      const uri = `file:///cache/card-${String(state.count)}.png`;
-      state.alive = [...state.alive, uri];
+      const uri = `file:///cache/card-${String(count + 1)}.png`;
+      cell.value = { count: count + 1, alive: [...alive, uri], failure: null };
       return Promise.resolve(ok(uri));
     },
     discard(uri) {
-      state.alive = state.alive.filter((entry) => entry !== uri);
+      cell.value = { ...cell.value, alive: cell.value.alive.filter((entry) => entry !== uri) };
       return Promise.resolve();
     },
-    alive: () => state.alive,
+    alive: () => cell.value.alive,
     fail(error) {
-      state.failure = error;
+      cell.value = { ...cell.value, failure: error };
     },
   };
 }
@@ -49,17 +50,18 @@ export interface FakeImageShare extends ImageShare {
 
 /** The share sheet of the tests: records the PNG addresses. */
 export function createFakeImageShare(): FakeImageShare {
-  const state = { shared: [] as readonly string[], failure: null as ImageShareError | null };
+  const cell = {
+    value: { shared: [] as readonly string[], failure: null as ImageShareError | null },
+  };
   return {
     share(uri) {
-      state.shared = [...state.shared, uri];
-      const failure = state.failure;
-      state.failure = null;
+      const { failure, shared } = cell.value;
+      cell.value = { shared: [...shared, uri], failure: null };
       return Promise.resolve(failure === null ? ok(null) : err(failure));
     },
-    shared: () => state.shared,
+    shared: () => cell.value.shared,
     fail(error) {
-      state.failure = error;
+      cell.value = { ...cell.value, failure: error };
     },
   };
 }
@@ -72,27 +74,27 @@ export interface FakeGallerySaver extends GallerySaver {
 
 /** The gallery of the tests: records the PNG addresses. */
 export function createFakeGallerySaver(): FakeGallerySaver {
-  const state = {
-    saved: [] as readonly string[],
-    settings: 0,
-    failure: null as SaveError | null,
+  const cell = {
+    value: { saved: [] as readonly string[], settings: 0, failure: null as SaveError | null },
   };
   return {
     save(uri) {
-      const failure = state.failure;
-      state.failure = null;
-      if (failure !== null) return Promise.resolve(err(failure));
-      state.saved = [...state.saved, uri];
+      const { failure, saved, settings } = cell.value;
+      if (failure !== null) {
+        cell.value = { saved, settings, failure: null };
+        return Promise.resolve(err(failure));
+      }
+      cell.value = { saved: [...saved, uri], settings, failure: null };
       return Promise.resolve(ok(null));
     },
     openSettings() {
-      state.settings += 1;
+      cell.value = { ...cell.value, settings: cell.value.settings + 1 };
       return Promise.resolve();
     },
-    saved: () => state.saved,
-    settingsOpened: () => state.settings,
+    saved: () => cell.value.saved,
+    settingsOpened: () => cell.value.settings,
     fail(error) {
-      state.failure = error;
+      cell.value = { ...cell.value, failure: error };
     },
   };
 }
