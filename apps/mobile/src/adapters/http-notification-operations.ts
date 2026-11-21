@@ -18,7 +18,8 @@ type NotificationOperations = Pick<
 
 /**
  * The Notifications module (E3.11): the list of screen 28, its reads and the push device of this
- * install. The push token goes only in the body of the `PUT`: never in a path, a query nor a log.
+ * install. The push token and the installation id go only in
+ * the body: never in a path, a query nor a log.
  */
 export function createNotificationOperations(
   client: Client,
@@ -37,24 +38,22 @@ export function createNotificationOperations(
       ),
     markAllNotificationsRead: () =>
       empty(execute((init) => client.POST("/v1/me/notifications/read-all", init))),
-    // The routes of Part 1 still carry the installation id in the path; Part 2 moves it into the body
-    // (`PUT /v1/me/push-devices`, `POST /v1/me/push-devices/remove`): only these two calls change then.
+    // The installation id goes in the body, never in a path: the routes carry no device identifier.
     registerPushDevice: ({ installationId, token, platform }) =>
       empty(
         execute((init) =>
-          client.PUT("/v1/me/push-devices/{installationId}", {
+          client.PUT("/v1/me/push-devices", {
             ...init,
-            params: { path: { installationId } },
-            body: { token, platform },
+            body: { installationId, token, platform },
           }),
         ),
       ),
     removePushDevice: ({ installationId }) =>
       empty(
         execute((init) =>
-          client.DELETE("/v1/me/push-devices/{installationId}", {
+          client.POST("/v1/me/push-devices/remove", {
             ...init,
-            params: { path: { installationId } },
+            body: { installationId },
           }),
         ),
       ),

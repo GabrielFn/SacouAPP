@@ -61,12 +61,17 @@ describe("the push device over HTTP (E3.11)", () => {
     expect(result).toEqual({ ok: true, value: null });
     const request = only(http);
     expect(request.method).toBe("PUT");
-    expect(request.url).toBe(`${BASE}/v1/me/push-devices/${INSTALLATION}`);
+    expect(request.url).toBe(`${BASE}/v1/me/push-devices`);
     expect(request.url).not.toContain("ExponentPushToken");
-    expect(JSON.parse(request.body ?? "{}")).toEqual({ token: TOKEN, platform: "android" });
+    expect(request.url).not.toContain(INSTALLATION);
+    expect(JSON.parse(request.body ?? "{}")).toEqual({
+      installationId: INSTALLATION,
+      token: TOKEN,
+      platform: "android",
+    });
   });
 
-  test("removes with a DELETE of the install", async () => {
+  test("removes with a POST of the install in the body", async () => {
     const { api, http } = setup();
     http.enqueue(noContent());
     expect(await api.removePushDevice({ installationId: INSTALLATION })).toEqual({
@@ -74,9 +79,7 @@ describe("the push device over HTTP (E3.11)", () => {
       value: null,
     });
     const request = only(http);
-    expect([request.method, request.url]).toEqual([
-      "DELETE",
-      `${BASE}/v1/me/push-devices/${INSTALLATION}`,
-    ]);
+    expect([request.method, request.url]).toEqual(["POST", `${BASE}/v1/me/push-devices/remove`]);
+    expect(JSON.parse(request.body ?? "{}")).toEqual({ installationId: INSTALLATION });
   });
 });
