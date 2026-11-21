@@ -19,7 +19,11 @@ const COURT = {
 describe("ActiveCourtBar (Inicio.dc.html:88-95, R97 D1)", () => {
   test("one link to the court of the open match, with the group and the score", () => {
     const onOpen = vi.fn();
-    const bar = ActiveCourtBar({ court: COURT, groupName: "Racha de terça", onOpen }) as ReactElement<{
+    const bar = ActiveCourtBar({
+      court: COURT,
+      groupName: "Racha de terça",
+      onOpen,
+    }) as ReactElement<{
       accessibilityRole: string;
       accessibilityLabel: string;
       onPress: () => void;

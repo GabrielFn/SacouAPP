@@ -1,6 +1,9 @@
 import type { MatchStartedPayload } from "@sacou/match-engine";
 
-import { createFakeCourtEventLog, type FakeCourtEventLog } from "../../../adapters/fake-court-event-log";
+import {
+  createFakeCourtEventLog,
+  type FakeCourtEventLog,
+} from "../../../adapters/fake-court-event-log";
 import { signedInCourtSyncHooks } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";

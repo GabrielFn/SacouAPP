@@ -23,7 +23,9 @@ export function nextRoundOf(rounds: readonly RoundSummary[], now: number): Round
 /** Whether a scheduled round is being played now: from its start, until its real end (`endsAt`, a early close included). */
 function isLive(round: RoundSummary, now: number): boolean {
   return (
-    round.status === "scheduled" && Date.parse(round.startsAt) <= now && now < Date.parse(round.endsAt)
+    round.status === "scheduled" &&
+    Date.parse(round.startsAt) <= now &&
+    now < Date.parse(round.endsAt)
   );
 }
 

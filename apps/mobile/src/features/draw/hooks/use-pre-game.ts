@@ -66,14 +66,15 @@ interface StartVariables {
   readonly closeFirst: string | null;
 }
 
-function otherOf(
-  read: OtherRoundCourtRead,
-  rounds: RoundEndLookup,
-): OtherCourtView {
+function otherOf(read: OtherRoundCourtRead, rounds: RoundEndLookup): OtherCourtView {
   if (read.status === "reading" || read.court === null) return { kind: "none" };
   const now = wallClockNow();
   const origin = read.court.origin;
-  return otherCourtView(read.court, origin === null ? { kind: "unknown" } : rounds.endOf(origin, now), now);
+  return otherCourtView(
+    read.court,
+    origin === null ? { kind: "unknown" } : rounds.endOf(origin, now),
+    now,
+  );
 }
 
 /**

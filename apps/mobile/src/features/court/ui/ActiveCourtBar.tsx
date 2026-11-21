@@ -71,7 +71,10 @@ export function ActiveCourtBar({ court, groupName, onOpen }: ActiveCourtBarProps
           backgroundColor: colors.primary,
         }}
       >
-        <Text variant="bodyStrong" style={{ color: colors.onPrimary, fontFamily: fontFamilies.body700 }}>
+        <Text
+          variant="bodyStrong"
+          style={{ color: colors.onPrimary, fontFamily: fontFamilies.body700 }}
+        >
           {texts.open}
         </Text>
       </View>
