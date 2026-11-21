@@ -72,7 +72,7 @@ function otherOf(read: OtherRoundCourtRead, rounds: RoundEndLookup): OtherCourtV
   const origin = read.court.origin;
   return otherCourtView(
     read.court,
-    origin === null ? { kind: "unknown" } : rounds.endOf(origin, now),
+    origin === null ? { kind: "unknown" } : rounds.endOf(origin, read.court.openedAt, now),
     now,
   );
 }
@@ -87,8 +87,6 @@ export function usePreGame(deps: PreGameDeps): PreGameModel {
   const runtime = useCourtRuntime();
   const router = useRouter();
   const court = useRoundCourt(deps.roundId);
-  const otherRead = useOtherRoundCourt(deps.roundId);
-  const otherCourt = otherOf(otherRead, roundEnds);
   const online = useOnline();
   const origin = { groupId: deps.groupId, roundId: deps.roundId };
   // Read only on the tap: the summary decides between the court and the 09a (E4.11, D5).
@@ -121,6 +119,9 @@ export function usePreGame(deps: PreGameDeps): PreGameModel {
       }
     },
   });
+  // Read again once each start settles: a start may close the old match and then fail (R97, D5).
+  const otherRead = useOtherRoundCourt(deps.roundId, start.isPending ? 0 : start.submittedAt);
+  const otherCourt = otherOf(otherRead, roundEnds);
   const answer = start.data;
   const run = (closeFirst: string | null) => {
     if (!start.isPending) start.mutate({ input, closeFirst });

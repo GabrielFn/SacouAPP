@@ -19,6 +19,7 @@ const LISTED: RoundEnd = {
 const OTHER: OtherRoundCourt = {
   courtSessionId: "old",
   origin: { groupId: "g1", roundId: "r-old" },
+  openedAt: null,
   ownership: "own",
 };
 

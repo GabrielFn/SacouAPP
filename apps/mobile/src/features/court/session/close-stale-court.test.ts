@@ -93,6 +93,45 @@ describe("closeStaleCourt and the start of a new round (R97, D5)", () => {
     expect(await court.log.findActiveSession()).toEqual({ ok: true, value: null });
   });
 
+  test("a start that closed the old match and then failed works on the next tap", async () => {
+    const court = testCourt();
+    await openWithMatch(court, OLD_ROUND);
+    // The old match ends and its session closes; then the new match is not written, once.
+    const failNew = { pending: true };
+    const flaky: TestCourt = {
+      ...court,
+      log: {
+        ...court.log,
+        append: (courtSessionId, envelopes) => {
+          if (courtSessionId === OLD_SESSION || !failNew.pending) {
+            return court.log.append(courtSessionId, envelopes);
+          }
+          failNew.pending = false;
+          return Promise.resolve({
+            ok: false as const,
+            error: { code: "storage-failed" as const },
+          });
+        },
+      },
+    };
+    expect(await startFromDraw(flaky, NEW_ROUND, g1Input(), OLD_SESSION)).toEqual({
+      ok: false,
+      error: "failed",
+    });
+    const ended = await typesOf(court, OLD_SESSION);
+
+    // The 08 still holds the old session as forgotten until it reads the log again: same tap.
+    const again = await startFromDraw(flaky, NEW_ROUND, g1Input(), OLD_SESSION);
+
+    expect(again.ok).toBe(true);
+    expect(await typesOf(court, OLD_SESSION)).toEqual(ended);
+    expect(ended.filter((type) => type === "MatchEnded")).toHaveLength(1);
+    expect(await court.log.findActiveSession()).toEqual({
+      ok: true,
+      value: again.ok ? again.value : "",
+    });
+  });
+
   test("a session that cannot be read stays open", async () => {
     const court = testCourt();
     await openWithMatch(court, OLD_ROUND);
@@ -117,7 +156,7 @@ describe("readOtherRoundCourt: the match of another round, seen by the 08 (R97, 
 
     expect(await readOtherRoundCourt(court, NEW_ROUND.roundId)).toEqual({
       ok: true,
-      value: { courtSessionId: OLD_SESSION, origin: OLD_ROUND, ownership: "own" },
+      value: { courtSessionId: OLD_SESSION, origin: OLD_ROUND, openedAt: null, ownership: "own" },
     });
   });
 

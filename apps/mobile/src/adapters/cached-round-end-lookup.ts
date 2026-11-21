@@ -11,14 +11,14 @@ import { queryKeys } from "../services/query/query-keys";
  */
 export function createCachedRoundEndLookup(client: QueryClient): RoundEndLookup {
   return {
-    endOf({ groupId, roundId }, now) {
+    endOf({ groupId, roundId }, openedAt, now) {
       const state = client.getQueryState<readonly RoundSummary[]>(queryKeys.rounds(groupId));
       const rounds = state?.data;
       const list =
         rounds === undefined || state === undefined
           ? undefined
           : { rounds, updatedAt: state.dataUpdatedAt };
-      return roundEndOf(list, roundId, now);
+      return roundEndOf(list, roundId, openedAt, now);
     },
   };
 }

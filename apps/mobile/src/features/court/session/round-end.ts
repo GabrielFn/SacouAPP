@@ -23,10 +23,22 @@ export interface CachedRoundList {
   readonly updatedAt: number;
 }
 
-/** What the cached list says of the end of one round (R97, D4 and D5). */
+/**
+ * Whether the silence of the list says the round has ended: the list is recent, and it was read after
+ * the session opened. A list read before may predate the round (created on another phone, opened from
+ * the push), so it says nothing of it; nor does it when the opening is not known.
+ */
+function trustsAbsence(list: CachedRoundList, openedAt: number | null, now: number): boolean {
+  return (
+    openedAt !== null && list.updatedAt > openedAt && now - list.updatedAt < ROUND_LIST_TRUST_MS
+  );
+}
+
+/** What the cached list says of the end of the round of a session opened at `openedAt` (R97, D4, D5). */
 export function roundEndOf(
   list: CachedRoundList | undefined,
   roundId: string,
+  openedAt: number | null,
   now: number,
 ): RoundEnd {
   if (list === undefined) return { kind: "unknown" };
@@ -39,7 +51,7 @@ export function roundEndOf(
       canceled: round.status === "canceled",
     };
   }
-  return now - list.updatedAt < ROUND_LIST_TRUST_MS ? { kind: "gone" } : { kind: "unknown" };
+  return trustsAbsence(list, openedAt, now) ? { kind: "gone" } : { kind: "unknown" };
 }
 
 /**

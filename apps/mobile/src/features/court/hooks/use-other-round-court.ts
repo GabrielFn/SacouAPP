@@ -16,8 +16,11 @@ async function readOrNone(runtime: CourtRuntime, roundId: string): Promise<Other
   return result.ok ? result.value : null;
 }
 
-/** The match open in another round on this device (R97, D2), read on each focus of the 08. */
-export function useOtherRoundCourt(roundId: string): OtherRoundCourtRead {
-  const read = useFocusedLogRead(roundId, readOrNone);
+/**
+ * The match open in another round on this device (R97, D2), read on each focus of the 08 and again on
+ * each new `revision` (after a start that closed it and then failed, the 08 must not offer it again).
+ */
+export function useOtherRoundCourt(roundId: string, revision = 0): OtherRoundCourtRead {
+  const read = useFocusedLogRead(roundId, readOrNone, revision);
   return read.status === "reading" ? read : { status: "read", court: read.value };
 }

@@ -129,6 +129,8 @@ export async function replaceWithServerStream(
     origin.groupId,
     origin.roundId,
     origin.ownerKey,
+    // When the stream was opened on the other phone is not known here: the round end stays unknown.
+    null,
   ]);
   await transaction.run(SET_IMPORTED_SESSION, [
     OPEN_STATUS,

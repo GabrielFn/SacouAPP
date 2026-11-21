@@ -174,7 +174,9 @@ describe("migration 3: the upload of the court sessions", () => {
     const legacy = repositoryOn(sqlite);
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
 
-    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(3);
+    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(
+      MIGRATION_STEPS.length,
+    );
     expect(await loaded(legacy)).toMatchObject({
       events: before,
       ackedSequence: 0,

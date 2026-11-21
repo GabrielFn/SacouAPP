@@ -16,6 +16,7 @@ interface FakeSession {
   readonly status: "open" | "closed";
   readonly events: readonly EventEnvelope[];
   readonly origin: CourtSessionOrigin | null;
+  readonly openedAt: number | null;
   readonly ownerKey: string | null;
   readonly ackedSequence: number;
   readonly takenOverBatch: number | null;
@@ -117,6 +118,7 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
           origin:
             origin === undefined ? null : { groupId: origin.groupId, roundId: origin.roundId },
           ownerKey: origin?.ownerKey ?? null,
+          openedAt: origin?.openedAt ?? null,
           ackedSequence: 0,
           takenOverBatch: null,
           syncHalt: null,
@@ -129,6 +131,9 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
     },
     findOrigin(courtSessionId) {
       return Promise.resolve(ok(sessions.value[courtSessionId]?.origin ?? null));
+    },
+    findOpenedAt(courtSessionId) {
+      return Promise.resolve(ok(sessions.value[courtSessionId]?.openedAt ?? null));
     },
     findActiveSession() {
       const open = Object.entries(sessions.value)
@@ -202,6 +207,7 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
         events,
         origin: { groupId: origin.groupId, roundId: origin.roundId },
         ownerKey: origin.ownerKey,
+        openedAt: null,
         ackedSequence: lastSequence,
         takenOverBatch: null,
         syncHalt: null,

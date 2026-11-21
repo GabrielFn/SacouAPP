@@ -12,12 +12,16 @@ export type RoundEnd =
       readonly localDate: string;
       readonly canceled: boolean;
     }
-  /** A list read in the last 24 h does not hold it: it ended more than 24 h ago (`GET /rounds`). */
+  /**
+   * A list read in the last 24 h, after the session opened, does not hold it: it ended more than 24 h
+   * ago (`GET /rounds`). A list read before the opening may predate the round itself.
+   */
   | { readonly kind: "gone" }
   /** No list, or one too old to trust its silence: the device does not know (offline, first use). */
   | { readonly kind: "unknown" };
 
 /** The end of the round of a session, from the cache; injected so the decisions stay pure. */
 export interface RoundEndLookup {
-  endOf(origin: CourtSessionOrigin, now: number): RoundEnd;
+  /** `openedAt` is when the session opened (wall clock, ms), or `null` when the log does not know. */
+  endOf(origin: CourtSessionOrigin, openedAt: number | null, now: number): RoundEnd;
 }

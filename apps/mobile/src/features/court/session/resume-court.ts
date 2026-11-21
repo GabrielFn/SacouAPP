@@ -45,6 +45,9 @@ export async function findResumableCourtSession({
   const origin = await log.findOrigin(active.value);
   if (!origin.ok) return null;
   if (origin.value === null) return active.value;
-  const ended = hasRoundEnded(rounds.endOf(origin.value, now), now, RESUME_GRACE_MS);
+  const openedAt = await log.findOpenedAt(active.value);
+  if (!openedAt.ok) return null;
+  const end = rounds.endOf(origin.value, openedAt.value, now);
+  const ended = hasRoundEnded(end, now, RESUME_GRACE_MS);
   return ended === true ? null : active.value;
 }

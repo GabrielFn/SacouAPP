@@ -1,5 +1,6 @@
 import { err, ok, type Result } from "@sacou/volley-rules";
 
+import { wallClockNow } from "../../../services/api/wall-clock";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
 import type { CourtRuntime } from "../ports/court-runtime";
 import { sessionOwnership } from "../sync/session-ownership";
@@ -60,6 +61,7 @@ async function closeOtherRound(
 export async function ensureRoundCourtSession(
   runtime: CourtRuntime,
   origin: CourtSessionOrigin,
+  openedAt: number = wallClockNow(),
 ): Promise<Ensured> {
   const { log, ids } = runtime;
   // The account that opens the session is the only one that ever marks and sends it.
@@ -71,6 +73,10 @@ export async function ensureRoundCourtSession(
   const closed = await closeOtherRound(runtime);
   if (!closed.ok) return closed;
   const courtSessionId = ids.newId();
-  const opened = await log.openSession(courtSessionId, { ...origin, ownerKey: accountKey });
+  const opened = await log.openSession(courtSessionId, {
+    ...origin,
+    ownerKey: accountKey,
+    openedAt,
+  });
   return opened.ok ? ok(courtSessionId) : err({ code: "load-failed", cause: opened.error.code });
 }

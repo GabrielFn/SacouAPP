@@ -14,6 +14,8 @@ export interface OtherRoundCourt {
   readonly courtSessionId: string;
   /** Only IDs; `null` for a sample session of the development screen. */
   readonly origin: CourtSessionOrigin | null;
+  /** When the session opened (wall clock, ms), or `null` when the log does not know (R97, D4). */
+  readonly openedAt: number | null;
   /** Whose it is for the account signed in now (D8): only the owner may end it. */
   readonly ownership: SessionOwnership;
 }
@@ -39,6 +41,8 @@ export async function readOtherRoundCourt(
   if (state.value.currentMatch === null) return ok(null);
   const stored = await log.load(courtSessionId);
   if (!stored.ok) return err(stored.error.code);
+  const openedAt = await log.findOpenedAt(courtSessionId);
+  if (!openedAt.ok) return err(openedAt.error.code);
   const ownership = sessionOwnership(stored.value, await runtime.sync.ownerKey());
-  return ok({ courtSessionId, origin: origin.value, ownership });
+  return ok({ courtSessionId, origin: origin.value, openedAt: openedAt.value, ownership });
 }
