@@ -43,7 +43,7 @@ export default function NotificationsScreen() {
           disabled={!view.canMarkAll}
           onPress={markAllRead}
           style={{
-            minHeight: tokens.sizes.headerTextButton,
+            minHeight: tokens.notifications.sizes.headerButton,
             paddingHorizontal: tokens.spacing.s,
             justifyContent: "center",
           }}

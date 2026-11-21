@@ -18,10 +18,12 @@ export const FAKE_PUSH_TOKEN: PushToken = {
 export function createFakePushTokenSource(
   initial: PushToken | null = FAKE_PUSH_TOKEN,
 ): FakePushTokenSource {
-  const state = { token: initial, unregistered: 0, failing: false };
+  const token = { value: initial };
+  const unregistered = { value: 0 };
+  const failing = { value: false };
   const listeners = { value: [] as readonly ((token: PushToken) => void)[] };
   return {
-    getToken: () => Promise.resolve(state.token),
+    getToken: () => Promise.resolve(token.value),
     onTokenChange(listener) {
       listeners.value = [...listeners.value, listener];
       return () => {
@@ -29,21 +31,21 @@ export function createFakePushTokenSource(
       };
     },
     unregister: () => {
-      state.unregistered += 1;
-      return state.failing ? Promise.reject(new Error("unregister failed")) : Promise.resolve();
+      unregistered.value += 1;
+      return failing.value ? Promise.reject(new Error("unregister failed")) : Promise.resolve();
     },
-    set(token) {
-      state.token = token;
+    set(next) {
+      token.value = next;
     },
-    change(token) {
-      state.token = token;
+    change(next) {
+      token.value = next;
       listeners.value.forEach((listener) => {
-        listener(token);
+        listener(next);
       });
     },
-    unregistered: () => state.unregistered,
+    unregistered: () => unregistered.value,
     failUnregister() {
-      state.failing = true;
+      failing.value = true;
     },
   };
 }

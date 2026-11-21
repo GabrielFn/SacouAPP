@@ -62,16 +62,20 @@ export function groupByDay(
   clock: DayClock,
 ): readonly NotificationDay[] {
   const today = dayNumber(wallTime(clock.nowMs, clock));
-  const days = new Map<number, { label: string; items: NotificationRowView[] }>();
-  items.forEach((item) => {
+  const placed = items.map((item) => {
     const parsed = Date.parse(item.createdAt);
     const wall = wallTime(Number.isNaN(parsed) ? clock.nowMs : parsed, clock);
-    const number = dayNumber(wall);
-    const day = days.get(number) ?? { label: dayLabel(wall, today - number), items: [] };
-    day.items.push({ item, time: timeLabel(wall) });
-    days.set(number, day);
+    return { item, wall, day: dayNumber(wall) };
   });
-  return [...days.entries()]
-    .sort(([first], [second]) => second - first)
-    .map(([, day]) => ({ label: day.label, items: day.items }));
+  const dayNumbers = [...new Set(placed.map((entry) => entry.day))].sort(
+    (first, second) => second - first,
+  );
+  return dayNumbers.map((day) => {
+    const ofDay = placed.filter((entry) => entry.day === day);
+    const first = ofDay[0];
+    return {
+      label: first === undefined ? "" : dayLabel(first.wall, today - day),
+      items: ofDay.map((entry) => ({ item: entry.item, time: timeLabel(entry.wall) })),
+    };
+  });
 }

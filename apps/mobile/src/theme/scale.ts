@@ -19,6 +19,7 @@ import {
   cardMeasures,
   statTileValueFont,
 } from "./card-tokens.data";
+import { notificationSizes } from "./notification-tokens.data";
 import { sheetFontSizes, sheetRadii, sheetSizes } from "./sheet-tokens.data";
 
 /**
@@ -63,6 +64,8 @@ export interface ScaledTokens {
   readonly court: ScaledCourtTokens;
   readonly sheet: ScaledSheetTokens;
   readonly card: ScaledCardTokens;
+  /** Screen 28 and the dot of the bell (see `notification-tokens.data.ts`). */
+  readonly notifications: { readonly sizes: NumberMap<typeof notificationSizes> };
   /** The number of a stat tile of screen 14, grown by the system font scale up to the cap. */
   readonly statTileValue: number;
 }
@@ -135,6 +138,7 @@ export function createScaledTokens({ windowWidth, fontScale }: ScaleInput): Scal
     court: createCourtTokens(factor, fontFactor),
     card: createCardTokens(factor, fontScale),
     statTileValue: Math.round(statTileValueFont * fontFactor),
+    notifications: { sizes: mapValues(notificationSizes, (value) => scaleSize(value, factor)) },
     sheet: {
       sizes: mapValues(sheetSizes, (value) => scaleSize(value, factor)),
       fontSizes: mapValues(sheetFontSizes, (value) => Math.round(value * fontFactor)),

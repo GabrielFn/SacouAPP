@@ -8,13 +8,13 @@ export interface FakeNotificationTaps extends NotificationTaps {
 }
 
 export function createFakeNotificationTaps(): FakeNotificationTaps {
-  const opened: { data: unknown } = { data: null };
+  const opened: { value: unknown } = { value: null };
   const taps = { value: [] as readonly ((data: unknown) => void)[] };
   const received = { value: [] as readonly (() => void)[] };
   return {
     lastTap: () => {
-      const data = opened.data;
-      opened.data = null;
+      const data = opened.value;
+      opened.value = null;
       return Promise.resolve(data);
     },
     onTap(listener) {
@@ -30,7 +30,7 @@ export function createFakeNotificationTaps(): FakeNotificationTaps {
       };
     },
     openedWith(data) {
-      opened.data = data;
+      opened.value = data;
     },
     tap(data) {
       taps.value.forEach((listener) => {

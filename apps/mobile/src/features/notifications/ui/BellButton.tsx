@@ -26,9 +26,9 @@ export function BellButton({ unread, onPress }: BellButtonProps) {
             position: "absolute",
             top: tokens.spacing.s10,
             right: tokens.spacing.s10,
-            width: tokens.sizes.unreadDot,
+            width: tokens.notifications.sizes.unreadDot,
             aspectRatio: 1,
-            borderRadius: tokens.sizes.unreadDot,
+            borderRadius: tokens.notifications.sizes.unreadDot,
             backgroundColor: colors.primary,
           }}
         />

@@ -3,7 +3,8 @@ import { describe, expect, test } from "vitest";
 import { contrastRatio } from "./contrast";
 import { createScaledTokens } from "./scale";
 import { appTheme } from "./themes";
-import { accessibilityFloors, fontScaleCap, interactiveHeights, sizes } from "./tokens.data";
+import { notificationSizes, notificationTargets } from "./notification-tokens.data";
+import { accessibilityFloors, fontScaleCap } from "./tokens.data";
 
 const AA_TEXT = 4.5;
 const AA_GRAPHIC = 3;
@@ -37,27 +38,33 @@ describe("M9 the measures of screen 28 in three widths", () => {
     (windowWidth, fontScale) => {
       const tokens = createScaledTokens({ windowWidth, fontScale });
       const floor = accessibilityFloors.touchTarget;
-      expect(tokens.sizes.notificationRowMin).toBeGreaterThanOrEqual(floor);
+      expect(tokens.notifications.sizes.rowMin).toBeGreaterThanOrEqual(floor);
       expect(tokens.sizes.minTouchTarget).toBeGreaterThanOrEqual(floor);
-      expect(tokens.sizes.headerTextButton).toBeGreaterThanOrEqual(floor);
+      expect(tokens.notifications.sizes.headerButton).toBeGreaterThanOrEqual(floor);
       expect(tokens.sizes.iconButton).toBeGreaterThanOrEqual(floor);
-      expect(tokens.sizes.unreadDot).toBeGreaterThan(0);
-      expect(tokens.sizes.notificationIcon).toBeGreaterThan(0);
+      expect(tokens.notifications.sizes.unreadDot).toBeGreaterThan(0);
+      expect(tokens.notifications.sizes.icon).toBeGreaterThan(0);
     },
   );
 
-  test("the measures of the canvas, and the targets in the list of the floors", () => {
-    expect([sizes.notificationRowMin, sizes.notificationIcon, sizes.unreadDot]).toEqual([
-      48, 40, 8,
-    ]);
-    expect([sizes.permissionIcon, sizes.headerTextButton]).toEqual([44, 48]);
-    expect(interactiveHeights).toContain(sizes.notificationRowMin);
-    expect(interactiveHeights).toContain(sizes.headerTextButton);
+  test("the measures of the canvas, and every target at or over the floor before scaling", () => {
+    expect(notificationSizes).toEqual({
+      rowMin: 48,
+      icon: 40,
+      unreadDot: 8,
+      permissionIcon: 44,
+      headerButton: 48,
+    });
+    notificationTargets.forEach((target) => {
+      expect(target).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+    });
   });
 
   test("the dot scales with the window: smaller on a small phone, larger on a tablet", () => {
-    const small = createScaledTokens({ windowWidth: 320, fontScale: 1 }).sizes.unreadDot;
-    const large = createScaledTokens({ windowWidth: 600, fontScale: 1 }).sizes.unreadDot;
+    const small = createScaledTokens({ windowWidth: 320, fontScale: 1 }).notifications.sizes
+      .unreadDot;
+    const large = createScaledTokens({ windowWidth: 600, fontScale: 1 }).notifications.sizes
+      .unreadDot;
     expect(small).toBeLessThan(large);
   });
 });

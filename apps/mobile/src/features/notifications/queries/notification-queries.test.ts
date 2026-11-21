@@ -41,7 +41,13 @@ function slowReadAll(fake: ReturnType<typeof createFakeSacouApi>) {
       });
     },
   };
-  return { api, sent, release: (result: ApiResult<null>) => pending.release(result) };
+  return {
+    api,
+    sent,
+    release: (result: ApiResult<null>) => {
+      pending.release(result);
+    },
+  };
 }
 
 describe("M6 Marcar como lidas, optimistic", () => {
@@ -107,7 +113,7 @@ describe("M7 the dot of the bell", () => {
     const client = createSacouQueryClient();
     const list = notificationList([notification()]);
     fake.respond("listNotifications", apiOk(list));
-    await client.fetchQuery(notificationsQuery(fake.api));
+    await client.query(notificationsQuery(fake.api));
     expect(client.getQueryData(KEY)).toEqual(list);
     expect(KEY).toEqual(["me", "notifications"]);
   });

@@ -40,9 +40,9 @@ export function PermissionCard({ card, onActivate }: PermissionCardProps) {
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
         style={{
-          width: tokens.sizes.permissionIcon,
+          width: tokens.notifications.sizes.permissionIcon,
           aspectRatio: 1,
-          borderRadius: tokens.sizes.permissionIcon,
+          borderRadius: tokens.notifications.sizes.permissionIcon,
           backgroundColor: colors.panelAccent,
           alignItems: "center",
           justifyContent: "center",

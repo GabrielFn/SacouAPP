@@ -15,26 +15,28 @@ export interface FakeNotificationPermission extends NotificationPermission {
 export function createFakeNotificationPermission(
   initial: PermissionAnswer = "askable",
 ): FakeNotificationPermission {
-  const state = { answer: initial, onRequest: "granted" as PermissionAnswer };
-  const counts = { requests: 0, settings: 0 };
+  const answer = { value: initial };
+  const onRequest: { value: PermissionAnswer } = { value: "granted" };
+  const requests = { value: 0 };
+  const settings = { value: 0 };
   return {
-    status: () => Promise.resolve(state.answer),
+    status: () => Promise.resolve(answer.value),
     request: () => {
-      counts.requests += 1;
-      if (state.answer === "askable") state.answer = state.onRequest;
-      return Promise.resolve(state.answer);
+      requests.value += 1;
+      if (answer.value === "askable") answer.value = onRequest.value;
+      return Promise.resolve(answer.value);
     },
     openSettings: () => {
-      counts.settings += 1;
+      settings.value += 1;
       return Promise.resolve();
     },
-    set(answer) {
-      state.answer = answer;
+    set(next) {
+      answer.value = next;
     },
-    answerRequestWith(answer) {
-      state.onRequest = answer;
+    answerRequestWith(next) {
+      onRequest.value = next;
     },
-    requests: () => counts.requests,
-    settingsOpened: () => counts.settings,
+    requests: () => requests.value,
+    settingsOpened: () => settings.value,
   };
 }

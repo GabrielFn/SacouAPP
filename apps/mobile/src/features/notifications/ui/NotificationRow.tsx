@@ -19,9 +19,9 @@ function UnreadDot() {
     <View
       accessibilityLabel={notificationsStrings.unread}
       style={{
-        width: tokens.sizes.unreadDot,
+        width: tokens.notifications.sizes.unreadDot,
         aspectRatio: 1,
-        borderRadius: tokens.sizes.unreadDot,
+        borderRadius: tokens.notifications.sizes.unreadDot,
         backgroundColor: colors.primary,
       }}
     />
@@ -55,16 +55,16 @@ export function NotificationRow({ row, first, onOpen }: NotificationRowProps) {
         alignItems: "flex-start",
         gap: tokens.spacing.m,
         padding: tokens.spacing.m,
-        minHeight: tokens.sizes.notificationRowMin,
+        minHeight: tokens.notifications.sizes.rowMin,
         borderTopWidth: first ? 0 : tokens.borderWidths.thin,
         borderTopColor: colors.borderDivider,
       }}
     >
       <View
         style={{
-          width: tokens.sizes.notificationIcon,
+          width: tokens.notifications.sizes.icon,
           aspectRatio: 1,
-          borderRadius: tokens.sizes.notificationIcon,
+          borderRadius: tokens.notifications.sizes.icon,
           backgroundColor: colors.goingFill,
           alignItems: "center",
           justifyContent: "center",

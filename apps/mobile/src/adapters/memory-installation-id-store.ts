@@ -6,12 +6,12 @@ export const FAKE_INSTALLATION_ID = "8a4c2f0e-4444-4c3b-9d2e-0000000000ee";
 export function createMemoryInstallationIdStore(
   initial: string | null = null,
 ): InstallationIdStore {
-  const state = { id: initial };
+  const state = { value: initial };
   return {
-    read: () => Promise.resolve(state.id),
+    read: () => Promise.resolve(state.value),
     readOrCreate: () => {
-      state.id ??= FAKE_INSTALLATION_ID;
-      return Promise.resolve(state.id);
+      state.value ??= FAKE_INSTALLATION_ID;
+      return Promise.resolve(state.value);
     },
   };
 }
