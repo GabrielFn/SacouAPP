@@ -186,15 +186,38 @@ public sealed class PushPumpHardeningTests : IDisposable
         Assert.DoesNotContain(AccessToken, string.Join('\n', logs.Entries), StringComparison.Ordinal);
     }
 
-    [Fact(Skip = "Finding 5 of the review: an exception outside the list of ExpoPushGateway (here NotSupportedException) leaves the claimed batch in 'sending' until the lease is recovered; the pump should record it as ambiguous or retry.")]
+    [Fact]
     public async Task AnUnexpectedExceptionOfTheGateway_NeverLeavesTheBatchSending()
     {
         var delivery = store.Add(Start);
-        var scripted = new ScriptedPushGateway { DuringSend = () => throw new NotSupportedException("boom") };
+        var scripted = new ScriptedPushGateway { DuringSend = () => throw new NotSupportedException("boom SECRET") };
 
-        await Record.ExceptionAsync(() => Pump(scripted).RunAsync(TestContext.Current.CancellationToken));
+        var escaped = await Record.ExceptionAsync(() => Pump(scripted).RunAsync(TestContext.Current.CancellationToken));
+        clock.Advance(TimeSpan.FromHours(3));
+        await Pump(scripted).RunAsync(TestContext.Current.CancellationToken);
 
-        Assert.NotEqual(DeliveryState.Sending, delivery.State);
+        Assert.Null(escaped);
+        Assert.Equal((DeliveryState.Unknown, PushOutcomes.UnexpectedFailure), (delivery.State, delivery.ErrorCode));
+        Assert.Single(scripted.Batches);
+        var all = string.Join('\n', logs.Entries);
+        Assert.Contains(nameof(NotSupportedException), all, StringComparison.Ordinal);
+        Assert.DoesNotContain("SECRET", all, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AnUnexpectedExceptionOfTheReceiptsRead_KeepsTheDeliverySent_AndReadsAgainLater()
+    {
+        var delivery = store.Add(Start);
+        var scripted = new ScriptedPushGateway();
+        await Pump(scripted).RunAsync(TestContext.Current.CancellationToken);
+        scripted.Receipts = _ => throw new NotSupportedException("boom SECRET");
+
+        clock.Advance(NotificationLimits.ReceiptDelay);
+        var escaped = await Record.ExceptionAsync(() => Pump(scripted).RunAsync(TestContext.Current.CancellationToken));
+
+        Assert.Null(escaped);
+        Assert.Equal(DeliveryState.Sent, delivery.State);
+        Assert.DoesNotContain("SECRET", string.Join('\n', logs.Entries), StringComparison.Ordinal);
     }
 
     public void Dispose()

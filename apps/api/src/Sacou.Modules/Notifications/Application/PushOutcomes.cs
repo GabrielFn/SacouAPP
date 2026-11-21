@@ -11,6 +11,12 @@ internal static class PushOutcomes
 {
     public const string NoAnswer = "no-answer";
 
+    /// <summary>The gateway failed in a way it does not classify: the batch may have been taken, so it is ambiguous.</summary>
+    public const string UnexpectedFailure = "unexpected-failure";
+
+    public const string SendCall = "send";
+    public const string ReceiptsCall = "getReceipts";
+
     public static IReadOnlyList<DeliveryOutcome> Of(IReadOnlyList<ClaimedDelivery> claimed, IReadOnlyList<PushResult> results, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(claimed);

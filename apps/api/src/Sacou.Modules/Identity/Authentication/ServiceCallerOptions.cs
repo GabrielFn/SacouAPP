@@ -1,13 +1,15 @@
+using Sacou.Modules.Identity.Contracts;
+
 namespace Sacou.Modules.Identity.Authentication;
 
 /// <summary>
 /// Who may call the internal routes (ADR 0069, D11): section <c>ServiceCaller</c>, not secret. <see cref="Audience"/> is
 /// the service's own URL (the <c>aud</c> Cloud Tasks puts in the token) and <see cref="Email"/> the account that calls
-/// (<c>sacou-tasks-invoker</c>). Missing either one, every call is refused: the routes stay closed, the API runs.
+/// (<c>sacou-tasks-invoker-test</c> or <c>sacou-tasks-invoker</c>, one per environment). Missing either one, every call is refused: the routes stay closed, the API runs.
 /// </summary>
 internal sealed class ServiceCallerOptions
 {
-    public const string SectionName = "ServiceCaller";
+    public const string SectionName = ServiceCallers.SectionName;
 
     public string Audience { get; init; } = string.Empty;
 
