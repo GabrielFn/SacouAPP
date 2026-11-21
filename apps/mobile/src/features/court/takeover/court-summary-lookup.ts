@@ -1,7 +1,7 @@
 import type { CourtSessionSummary } from "../../../services/api/sacou-api";
 import type { CourtAccountRef } from "../ports/court-account";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
-import type { Scheduler } from "../ports/scheduler";
+import type { Scheduler } from "../../../services/scheduler/scheduler";
 import type { RoundCourt } from "../session/round-court";
 import { takeoverFailureOf } from "./api-calls";
 import { readCourtSummary, type CourtSummaryDeps } from "./read-court-summary";

@@ -5,7 +5,7 @@ import type { Clock } from "../ports/clock";
 import type { CourtAccount, CourtAccountRef } from "../ports/court-account";
 import type { SessionToSync } from "../ports/court-event-log";
 import type { CourtSync, CourtSyncSnapshot } from "../ports/court-sync";
-import type { Scheduler } from "../ports/scheduler";
+import type { Scheduler } from "../../../services/scheduler/scheduler";
 import { createSnapshotStore } from "../session/snapshot-store";
 import { countUnsent } from "./count-unsent";
 import {

@@ -3,7 +3,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
 import type { AppForeground } from "../features/court/ports/app-foreground";
-import type { Scheduler } from "../features/court/ports/scheduler";
+import type { Scheduler } from "./scheduler/scheduler";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";

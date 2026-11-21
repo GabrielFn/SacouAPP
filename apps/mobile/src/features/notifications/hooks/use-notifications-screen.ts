@@ -74,7 +74,9 @@ export function useNotificationsScreen(): NotificationsScreenModel {
               send({ type: "request-answered", answer });
               if (answer === "granted") void pushDevices.sync();
             },
-            () => send({ type: "request-answered", answer: "askable" }),
+            () => {
+              send({ type: "request-answered", answer: "askable" });
+            },
           );
           return;
         case "open-settings":

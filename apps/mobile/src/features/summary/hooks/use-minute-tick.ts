@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from "react";
 
 import { wallClockNow } from "../../../services/api/wall-clock";
-import type { Scheduler } from "../../court/ports/scheduler";
+import type { Scheduler } from "../../../services/scheduler/scheduler";
 
 export const MINUTE_MS = 60_000;
 

@@ -1,7 +1,7 @@
 import { queryOptions, type QueryClient, type QueryKey } from "@tanstack/react-query";
 
 import type { ApiErrorCode } from "../../../../api/generated/error-codes";
-import type { Scheduler } from "../../../court/ports/scheduler";
+import type { Scheduler } from "../../../../services/scheduler/scheduler";
 import type { ApiError } from "../../../../services/api/api-error";
 import { unwrap, type ApiResult } from "../../../../services/api/api-result";
 import type { MvpBallot, MvpVote, SacouApi } from "../../../../services/api/sacou-api";

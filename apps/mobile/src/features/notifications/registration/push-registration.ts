@@ -1,6 +1,7 @@
-import type { Scheduler } from "../../court/ports/scheduler";
+import type { Scheduler } from "../../../services/scheduler/scheduler";
 import type { SacouApi } from "../../../services/api/sacou-api";
 import type { SessionIdentity } from "../../../services/auth/auth-session";
+import type { PushDeviceDeregistrar } from "../../../services/session/push-device-deregistrar";
 import type { InstallationIdStore } from "../ports/installation-id-store";
 import type { NotificationPermission } from "../ports/notification-permission";
 import type { PushToken, PushTokenSource } from "../ports/push-token-source";
@@ -32,21 +33,13 @@ export interface PushRegistration {
   start(): () => void;
 }
 
-/** The step of the exit of the account that comes before the SDK (ADR 0057, D4, changed by E3.11). */
-export interface PushDeviceDeregistrar {
-  /** The server first, for at most 2 s and never blocking the exit; then this phone. */
-  deregister(): Promise<void>;
-  /** Only this phone: the server already forgot the account (screen 30b) or the session fell elsewhere. */
-  forgetLocally(): Promise<void>;
-}
-
 export type PushDevices = PushRegistration & PushDeviceDeregistrar;
 
 /**
  * The register and the exit share one state: no registration starts once the exit began, and one on the
- * way is followed by a second `DELETE` when it lands inside the 2 s, so it cannot put the old account
- * back on the phone. The token is
- * never logged nor kept here: it goes from the system straight into the body of the `PUT`.
+ * way is followed by a second removal when it lands inside the 2 s, so it cannot put the old account
+ * back on the phone. The token is never logged nor kept here: it goes from the system straight into
+ * the body of the `PUT`.
  */
 export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
   const timeoutMs = deps.timeoutMs ?? DEREGISTER_TIMEOUT_MS;
@@ -86,8 +79,8 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
   }
 
   /**
-   * The `DELETE` leaves at once, so it always goes out inside the 2 s while the session still signs it.
-   * A registration still on the way is then waited for and, if it landed, followed by one more `DELETE`
+   * The removal leaves at once, so it always goes out inside the 2 s while the session still signs it.
+   * A registration still on the way is then waited for and, if it landed, followed by one more removal
    * (204 again): on the server the last write wins, so the phone ends without the account either way.
    */
   async function removeOnServer(): Promise<void> {

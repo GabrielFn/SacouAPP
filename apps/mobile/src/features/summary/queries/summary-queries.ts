@@ -1,6 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
-import type { Scheduler } from "../../court/ports/scheduler";
+import type { Scheduler } from "../../../services/scheduler/scheduler";
 import { unwrap } from "../../../services/api/api-result";
 import type { SacouApi } from "../../../services/api/sacou-api";
 import { queryKeys } from "../../../services/query/query-keys";

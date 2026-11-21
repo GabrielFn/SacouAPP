@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-import type { PushDeviceDeregistrar } from "../../features/notifications/registration/push-registration";
+import type { PushDeviceDeregistrar } from "./push-device-deregistrar";
 import type { IdTokenProvider } from "../api/id-token-provider";
 import type { AuthSession, SessionIdentity, SignOutReason } from "../auth/auth-session";
 import { clearSession, type SessionStores } from "./clear-session";
