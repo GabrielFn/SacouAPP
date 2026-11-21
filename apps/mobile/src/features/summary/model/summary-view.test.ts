@@ -6,7 +6,7 @@ import { describe, expect, test } from "vitest";
 import { ApiFailure, type ApiError } from "../../../services/api/api-error";
 import type { Member, RoundSummaryReport } from "../../../services/api/sacou-api";
 import { summaryStrings } from "../../../strings/summary.pt-BR";
-import { BIA, E2_9_ROUND } from "./e2-9-round.test.fixture";
+import { BIA, E2_9_ROUND, teamsOf } from "./e2-9-round.test.fixture";
 import { summaryView, type SummaryViewInput } from "./summary-view";
 
 const MINUS = "−";
@@ -35,6 +35,8 @@ function input(report: RoundSummaryReport | undefined, rest: Partial<SummaryView
     members: MEMBERS,
     online: true,
     unsentPoints: 0,
+    ballot: undefined,
+    nowMs: 0,
   };
   return { ...base, ...rest };
 }
@@ -61,15 +63,16 @@ describe("the simulated round of the E2.9 (G1 to G5)", () => {
       name: "Bia",
       line: "Laranja · +2 de saldo · 2 vitórias em 3",
       detail: "+2 de saldo, 2 vitórias em 3",
-      byStats: true,
+      source: "stats",
+      notes: ["Calculado pelo placar"],
     });
-    expect(view.highlights.mostWins).toMatchObject({
+    expect(teamsOf(view).mostWins).toMatchObject({
       title: "Time que mais venceu",
       label: "A Laranja",
       figure: "2 vitórias",
       color: "orange",
     });
-    expect(view.highlights.longestStreak).toMatchObject({
+    expect(teamsOf(view).longestStreak).toMatchObject({
       title: "Maior sequência",
       label: "A Laranja",
       figure: "2 seguidas",
@@ -110,8 +113,8 @@ describe("the simulated round of the E2.9 (G1 to G5)", () => {
     }[];
     const sides = golden.find((item) => item.id.startsWith("r17-"))?.expected.roundSummary.sides;
     const view = ready(withSides(sides as RoundSummaryReport["sides"]));
-    expect(view.highlights.mostWins).toBeNull();
-    expect(view.highlights.longestStreak).toMatchObject({ label: "B Azul" });
+    expect(teamsOf(view).mostWins).toBeNull();
+    expect(teamsOf(view).longestStreak).toMatchObject({ label: "B Azul" });
   });
 });
 
@@ -137,8 +140,8 @@ describe("texts (T1, T2)", () => {
     const view = ready(
       withSides({ mostWins: null, longestStreak: { side: "b", longestWinStreak: 3 } }),
     );
-    expect(view.highlights.mostWins).toBeNull();
-    expect(view.highlights.longestStreak).toMatchObject({ label: "B Azul", color: "blue" });
+    expect(teamsOf(view).mostWins).toBeNull();
+    expect(teamsOf(view).longestStreak).toMatchObject({ label: "B Azul", color: "blue" });
   });
 });
 
@@ -146,7 +149,7 @@ describe("who is shown (T3, T5, T8, T9)", () => {
   test("T3: without an MVP there is no dark card and the team cards stay", () => {
     const view = ready({ ...E2_9_ROUND, mvp: null });
     expect(view.mvp).toBeNull();
-    expect(view.highlights.mostWins).not.toBeNull();
+    expect(teamsOf(view).mostWins).not.toBeNull();
   });
 
   test("T5: a member without a name reads Jogador, never the ID", () => {
@@ -155,13 +158,13 @@ describe("who is shown (T3, T5, T8, T9)", () => {
     expect(ready(E2_9_ROUND, { members: undefined }).mvp?.name).toBe("Jogador");
   });
 
-  test("T8: a team of the sand has no dark card, the cards of teams stay", () => {
+  test("T8: a team of the sand has the dark card with both names and the ranking, not the team cards", () => {
     const view = ready({
       ...withMvp({ kind: "team", memberIds: [BIA, "x"] }),
       modality: "beach-2x2",
     });
-    expect(view.mvp).toBeNull();
-    expect(view.highlights.kind).toBe("teams");
+    expect(view.mvp?.name).toBe("Bia e Jogador");
+    expect(view.highlights.kind).toBe("ranking");
   });
 
   test("a tie of the votes joins the names of the players", () => {
@@ -174,8 +177,8 @@ describe("who is shown (T3, T5, T8, T9)", () => {
   });
 
   test("T9: an MVP of the votes hides the note, a missing source counts as the stats", () => {
-    expect(ready(withMvp({ source: "votes" })).mvp?.byStats).toBe(false);
-    expect(ready(E2_9_ROUND).mvp?.byStats).toBe(true);
+    expect(ready(withMvp({ source: "votes" })).mvp?.notes).toEqual(["Escolhido pela galera"]);
+    expect(ready(E2_9_ROUND).mvp?.notes).toEqual(["Calculado pelo placar"]);
   });
 
   test("the side is left out of the line when the server sends none", () => {

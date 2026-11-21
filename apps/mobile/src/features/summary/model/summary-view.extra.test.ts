@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import type { RoundSummaryReport } from "../../../services/api/sacou-api";
-import { E2_9_ROUND } from "./e2-9-round.test.fixture";
+import { E2_9_ROUND, teamsOf } from "./e2-9-round.test.fixture";
 import { summaryView, type SummaryViewInput } from "./summary-view";
 
 type Mvp = NonNullable<RoundSummaryReport["mvp"]>;
@@ -11,6 +11,8 @@ const INPUT: Omit<SummaryViewInput, "query"> = {
   members: [],
   online: true,
   unsentPoints: 0,
+  ballot: undefined,
+  nowMs: 0,
 };
 
 function ready(report: RoundSummaryReport) {
@@ -25,8 +27,8 @@ function ready(report: RoundSummaryReport) {
 describe("extra cases of the summary view (tester, E4.12 part 1)", () => {
   test("both highlights tied: no team card, the MVP card stays", () => {
     const view = ready({ ...E2_9_ROUND, sides: { mostWins: null, longestStreak: null } });
-    expect(view.highlights.mostWins).toBeNull();
-    expect(view.highlights.longestStreak).toBeNull();
+    expect(teamsOf(view).mostWins).toBeNull();
+    expect(teamsOf(view).longestStreak).toBeNull();
     expect(view.mvp).not.toBeNull();
   });
 
@@ -43,9 +45,9 @@ describe("extra cases of the summary view (tester, E4.12 part 1)", () => {
     ).toBeNull();
   });
 
-  test("the sand 4x4 with an MVP and sides does not break the view", () => {
+  test("the sand 4x4 without a ranking from the server shows an empty ranking, not the team cards", () => {
     const view = ready({ ...E2_9_ROUND, modality: "beach-4x4" });
-    expect(view.highlights.kind).toBe("teams");
+    expect(view.highlights).toEqual({ kind: "ranking", rows: [] });
   });
 
   test("a highlight of side b carries the color of side b, different from a", () => {
@@ -56,8 +58,8 @@ describe("extra cases of the summary view (tester, E4.12 part 1)", () => {
         longestStreak: { side: "b", longestWinStreak: 1 },
       },
     });
-    expect(a.highlights.mostWins?.color).not.toEqual(a.highlights.longestStreak?.color);
-    expect(a.highlights.longestStreak?.figure).toBe("1 seguida");
-    expect(a.highlights.mostWins?.figure).toBe("2 vitórias");
+    expect(teamsOf(a).mostWins?.color).not.toEqual(teamsOf(a).longestStreak?.color);
+    expect(teamsOf(a).longestStreak?.figure).toBe("1 seguida");
+    expect(teamsOf(a).mostWins?.figure).toBe("2 vitórias");
   });
 });

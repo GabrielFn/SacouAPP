@@ -24,13 +24,18 @@ export interface MvpVoteScreenProps {
 export interface BallotBodyProps {
   readonly choosing: ChoosingView;
   readonly onSelect: (memberId: string) => void;
+  readonly onDismissError: () => void;
 }
 
-function BallotBody({ choosing, onSelect }: BallotBodyProps) {
+function BallotBody({ choosing, onSelect, onDismissError }: BallotBodyProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
-      {choosing.errorText === null ? null : <ErrorStrip text={choosing.errorText} />}
+      {choosing.errorText === null ? null : <ErrorStrip
+          text={choosing.errorText}
+          dismissLabel={texts.dismissError}
+          onDismiss={onDismissError}
+        />}
       <BallotList rows={choosing.rows} disabled={choosing.submitting} onSelect={onSelect} />
       <Text variant="caption">{texts.rule}</Text>
     </View>
@@ -39,7 +44,7 @@ function BallotBody({ choosing, onSelect }: BallotBodyProps) {
 
 /** Screen 12a: the secret vote for the MVP of the round (VotarMvp.dc.html). */
 export function MvpVoteScreen({ groupId, roundId }: MvpVoteScreenProps) {
-  const { header, view, select, submit, retry } = useMvpVote(groupId, roundId);
+  const { header, view, select, submit, retry, dismissError } = useMvpVote(groupId, roundId);
   const { tokens } = useTheme();
   const router = useRouter();
   const { body } = view;
@@ -68,7 +73,7 @@ export function MvpVoteScreen({ groupId, roundId }: MvpVoteScreenProps) {
       </View>
       {view.stale ? <OfflineBanner text={texts.staleNote} /> : null}
       {body.kind === "choosing" ? (
-        <BallotBody choosing={body} onSelect={select} />
+        <BallotBody choosing={body} onSelect={select} onDismissError={dismissError} />
       ) : (
         <VoteStatusPanel
           body={body}

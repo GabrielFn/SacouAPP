@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
@@ -7,12 +8,14 @@ import { EmptyState } from "../../../ui/EmptyState";
 import { LoadingState } from "../../../ui/LoadingState";
 import { Screen } from "../../../ui/Screen";
 import { Text } from "../../../ui/Text";
-import { roundHref } from "../../rounds/navigation";
+import { mvpVoteHref, roundHref } from "../../rounds/navigation";
 import { useRoundSummary } from "../hooks/use-round-summary";
-import type { ReadySummary, SummaryView } from "../model/summary-view";
+import type { ReadySummary, SummaryView, TeamsHighlights } from "../model/summary-view";
 import { HighlightCard } from "./HighlightCard";
 import { MvpHeroCard } from "./MvpHeroCard";
+import { RankingList } from "./RankingList";
 import { ShareBlock } from "./ShareBlock";
+import { VotingEntry } from "./VotingEntry";
 
 const { summary } = strings;
 
@@ -24,14 +27,26 @@ export interface RoundSummaryScreenProps {
 export interface SummaryBodyProps {
   readonly ready: ReadySummary;
   readonly onShare: () => void;
+  readonly onVote: () => void;
 }
 
-function SummaryBody({ ready, onShare }: SummaryBodyProps) {
+function TeamCards({ highlights }: { readonly highlights: TeamsHighlights }) {
   const { tokens } = useTheme();
-  const { mvp, highlights, stale, unsentNote } = ready;
   const cards = [highlights.mostWins, highlights.longestStreak].filter(
     (highlight) => highlight !== null,
   );
+  return cards.length === 0 ? null : (
+    <View style={{ flexDirection: "row", gap: tokens.spacing.s10 }}>
+      {cards.map((highlight) => (
+        <HighlightCard key={highlight.title} highlight={highlight} />
+      ))}
+    </View>
+  );
+}
+
+function SummaryBody({ ready, onShare, onVote }: SummaryBodyProps) {
+  const { tokens } = useTheme();
+  const { mvp, highlights, stale, unsentNote } = ready;
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
       {stale ? <Text variant="muted">{summary.staleNote}</Text> : null}
@@ -40,13 +55,12 @@ function SummaryBody({ ready, onShare }: SummaryBodyProps) {
           {unsentNote}
         </Text>
       )}
-      {mvp === null ? null : <MvpHeroCard name={mvp.name} line={mvp.line} byStats={mvp.byStats} />}
-      {cards.length === 0 ? null : (
-        <View style={{ flexDirection: "row", gap: tokens.spacing.s10 }}>
-          {cards.map((highlight) => (
-            <HighlightCard key={highlight.title} highlight={highlight} />
-          ))}
-        </View>
+      {mvp === null ? null : <MvpHeroCard name={mvp.name} line={mvp.line} notes={mvp.notes} />}
+      <VotingEntry entry={ready.voting} onVote={onVote} />
+      {highlights.kind === "ranking" ? (
+        <RankingList rows={highlights.rows} />
+      ) : (
+        <TeamCards highlights={highlights} />
       )}
       <ShareBlock onShare={onShare} />
     </View>
@@ -61,9 +75,10 @@ export interface SummaryContentProps {
   readonly view: SummaryView;
   readonly retry: () => void;
   readonly onShare: () => void;
+  readonly onVote: () => void;
 }
 
-function SummaryContent({ view, retry, onShare }: SummaryContentProps) {
+function SummaryContent({ view, retry, onShare, onVote }: SummaryContentProps) {
   const retryAction = { label: summary.retry, variant: "secondary" as const, onPress: retry };
   switch (view.kind) {
     case "loading":
@@ -92,7 +107,7 @@ function SummaryContent({ view, retry, onShare }: SummaryContentProps) {
         </>
       );
     case "ready":
-      return <SummaryBody ready={view} onShare={onShare} />;
+      return <SummaryBody ready={view} onShare={onShare} onVote={onVote} />;
   }
 }
 
@@ -100,6 +115,7 @@ function SummaryContent({ view, retry, onShare }: SummaryContentProps) {
 export function RoundSummaryScreen({ groupId, roundId }: RoundSummaryScreenProps) {
   const { view, retry, share } = useRoundSummary(groupId, roundId);
   const { tokens } = useTheme();
+  const router = useRouter();
   return (
     <Screen scroll>
       <View style={{ gap: tokens.spacing.xs }}>
@@ -108,7 +124,14 @@ export function RoundSummaryScreen({ groupId, roundId }: RoundSummaryScreenProps
           {summary.title}
         </Text>
       </View>
-      <SummaryContent view={view} retry={retry} onShare={share} />
+      <SummaryContent
+        view={view}
+        retry={retry}
+        onShare={share}
+        onVote={() => {
+          router.push(mvpVoteHref(groupId, roundId));
+        }}
+      />
     </Screen>
   );
 }

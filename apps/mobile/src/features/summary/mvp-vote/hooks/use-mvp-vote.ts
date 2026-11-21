@@ -5,6 +5,7 @@ import { useOnline } from "../../../../services/api/use-online";
 import { wallClockNow } from "../../../../services/api/wall-clock";
 import { useServices } from "../../../../services/services-context";
 import { useGroup, useGroupMembers } from "../../../groups/queries/use-group-queries";
+import { useMinuteTick } from "../../hooks/use-minute-tick";
 import { headerLine } from "../../model/summary-texts";
 import { roundSummaryQuery } from "../../queries/summary-queries";
 import { mvpVoteView, type MvpVoteView } from "../model/mvp-vote-view";
@@ -23,6 +24,7 @@ export interface MvpVoteModel {
   readonly select: (memberId: string) => void;
   readonly submit: () => void;
   readonly retry: () => void;
+  readonly dismissError: () => void;
 }
 
 /**
@@ -37,6 +39,7 @@ export function useMvpVote(groupId: string, roundId: string): MvpVoteModel {
   const group = useGroup(groupId);
   const members = useGroupMembers(groupId);
   const online = useOnline();
+  const nowMs = useMinuteTick(scheduler, ballot.data?.state === "open");
   const [vote, send] = useReducer(mvpVoteReducer, INITIAL_MVP_VOTE);
   const submitter = useMemo(
     () => createVoteSubmitter({ api: sacouApi, client }, { groupId, roundId }),
@@ -52,7 +55,7 @@ export function useMvpVote(groupId: string, roundId: string): MvpVoteModel {
     query: { status: ballot.status, data: ballot.data, error: ballot.error },
     members: members.data,
     online,
-    nowMs: wallClockNow(),
+    nowMs,
     vote,
   });
   const groupName = group.data?.name ?? null;
@@ -78,6 +81,9 @@ export function useMvpVote(groupId: string, roundId: string): MvpVoteModel {
           result.ok ? { type: "submit-succeeded" } : { type: "submit-failed", error: result.error },
         );
       });
+    },
+    dismissError: () => {
+      send({ type: "error-dismissed" });
     },
     retry: () => void ballot.refetch(),
   };

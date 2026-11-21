@@ -92,7 +92,10 @@ export function createVoteSubmitter(deps: MvpVoteDeps, target: MvpVoteTarget): V
  * When the ballot changes by the clock alone: it opens at `opensAt` and closes at `closesAt`. The app
  * does not decide it: at that moment it reads the ballot again (V7). `null` once it is closed.
  */
-export function nextBallotChangeAt(ballot: MvpBallot | undefined): number | null {
+export function nextBallotChangeAt(
+  ballot: Pick<MvpBallot, "state" | "opensAt" | "closesAt"> | undefined | null,
+): number | null {
+  if (ballot === null) return null;
   if (ballot === undefined) return null;
   switch (ballot.state) {
     case "notOpen":
@@ -105,7 +108,7 @@ export function nextBallotChangeAt(ballot: MvpBallot | undefined): number | null
 }
 
 /** The longest wait a timer takes (2^31 − 1 ms, about 24 days); a later change waits for the next opening. */
-const LONGEST_WAIT_MS = 2_147_483_647;
+export const LONGEST_WAIT_MS = 2_147_483_647;
 
 /**
  * At the next change of the ballot by the clock, marks it old so the open screen reads it again; the
