@@ -1,4 +1,4 @@
-import { queryOptions, type QueryClient } from "@tanstack/react-query";
+import { queryOptions, type QueryClient, type QueryKey } from "@tanstack/react-query";
 
 import type { ApiErrorCode } from "../../../../api/generated/error-codes";
 import type { Scheduler } from "../../../court/ports/scheduler";
@@ -108,16 +108,16 @@ export function nextBallotChangeAt(
 }
 
 /** The longest wait a timer takes (2^31 − 1 ms, about 24 days); a later change waits for the next opening. */
-export const LONGEST_WAIT_MS = 2_147_483_647;
+const LONGEST_WAIT_MS = 2_147_483_647;
 
 /**
- * At the next change of the ballot by the clock, marks it old so the open screen reads it again; the
- * returned function cancels the wait. Nothing at all once the ballot is closed.
+ * At `changeAtMs`, marks the queries of `keys` old so the open screen reads them again; the returned
+ * function cancels the wait. Nothing at all without a moment (`null`) or when it is further than a timer takes.
  */
-export function scheduleBallotRefresh(
+export function scheduleInvalidation(
   scheduler: Scheduler,
   client: Pick<QueryClient, "invalidateQueries">,
-  { groupId, roundId }: MvpVoteTarget,
+  keys: readonly QueryKey[],
   changeAtMs: number | null,
   nowMs: number,
 ): () => void {
@@ -125,6 +125,18 @@ export function scheduleBallotRefresh(
   const wait = Math.max(0, changeAtMs - nowMs);
   if (wait > LONGEST_WAIT_MS) return () => undefined;
   return scheduler.after(wait, () => {
-    void client.invalidateQueries({ queryKey: queryKeys.mvpVoting(groupId, roundId) });
+    for (const queryKey of keys) void client.invalidateQueries({ queryKey });
   });
+}
+
+/** At the next change of the ballot by the clock, the open screen reads the ballot again (V7). */
+export function scheduleBallotRefresh(
+  scheduler: Scheduler,
+  client: Pick<QueryClient, "invalidateQueries">,
+  { groupId, roundId }: MvpVoteTarget,
+  changeAtMs: number | null,
+  nowMs: number,
+): () => void {
+  const keys = [queryKeys.mvpVoting(groupId, roundId)];
+  return scheduleInvalidation(scheduler, client, keys, changeAtMs, nowMs);
 }
