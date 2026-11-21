@@ -131,8 +131,7 @@ export const radii = {
 
 export const borderWidths = { thin: 1.5, thick: 2 } as const;
 
-// Icon stroke in viewBox units (Inicio.dc.html:26).
-export const iconStroke = { plus: 2.2, check: 2.5 } as const;
+export const iconStroke = { plus: 2.2, check: 2.5 } as const; // In viewBox units (Inicio.dc.html:26).
 
 export const sizes = {
   minTouchTarget: 44,
@@ -150,10 +149,9 @@ export const sizes = {
   tabItem: 56,
   tabIcon: 22,
   backIcon: 24,
-  // Group card (Grupos.dc.html .main, .foot, .role) and the round list card of the home.
+  // Group card (Grupos.dc.html .main, .foot, .role), the round card and the bar EM QUADRA of the home (Inicio.dc.html:88-95).
   groupCardMin: 128,
   cardFooter: 46,
-  // The bar "EM QUADRA" of the home (Inicio.dc.html:88-95): the bar, its live dot.
   activeBarMin: 64,
   liveDot: 10,
   roleBadge: 26,
@@ -230,7 +228,6 @@ export const interactiveHeights = [
   sizes.chip,
   sizes.tabItem,
   sizes.cardFooter,
-  sizes.activeBarMin,
   sizes.switchTarget,
   sizes.segment,
   sizes.systemButton,

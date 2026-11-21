@@ -130,9 +130,29 @@ function lineupSheetReducer<S extends PreGameSlice>(state: S, action: LineupShee
   }
 }
 
+type CloseOtherAction = Extract<
+  PreGameAction,
+  { type: "close-other-asked" | "close-other-dismissed" }
+>;
+
+function isCloseOtherAction(action: PreGameAction): action is CloseOtherAction {
+  return action.type === "close-other-asked" || action.type === "close-other-dismissed";
+}
+
+/** The sheet "Encerrar a partida antiga?" over the 08 (R97, D5). */
+function closeOtherReducer<S extends PreGameSlice>(state: S, action: CloseOtherAction): S {
+  switch (action.type) {
+    case "close-other-asked":
+      return state.sheet === "pre-game" ? { ...state, sheet: "close-other" } : state;
+    case "close-other-dismissed":
+      return state.sheet === "close-other" ? { ...state, sheet: "pre-game" } : state;
+  }
+}
+
 /** The sheet keeps only what differs from the round: back to the base, the choice goes (D3, D6). */
 export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGameAction): S {
   if (isLineupSheetAction(action)) return lineupSheetReducer(state, action);
+  if (isCloseOtherAction(action)) return closeOtherReducer(state, action);
   switch (action.type) {
     case "pre-game-opened":
       return opened(state);
@@ -148,9 +168,5 @@ export function preGameReducer<S extends PreGameSlice>(state: S, action: PreGame
       return withChoices(state, { rotationTab: action.side });
     case "system-chosen":
       return systemChosen(state, action.side, action.system, action.base);
-    case "close-other-asked":
-      return state.sheet === "pre-game" ? { ...state, sheet: "close-other" } : state;
-    case "close-other-dismissed":
-      return state.sheet === "close-other" ? { ...state, sheet: "pre-game" } : state;
   }
 }

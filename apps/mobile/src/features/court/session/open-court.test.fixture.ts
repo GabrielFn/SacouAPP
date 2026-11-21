@@ -4,7 +4,7 @@ import {
   createFakeCourtEventLog,
   type FakeCourtEventLog,
 } from "../../../adapters/fake-court-event-log";
-import { signedInCourtSyncHooks } from "../../../adapters/fake-court-sync";
+import { createFakeCourtSync, type FakeCourtSync } from "../../../adapters/fake-court-sync";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
@@ -33,30 +33,19 @@ export const ONE_POINT_MATCH: MatchStartedPayload = {
   scoring: { bestOf: 1, pointsPerSet: 1, tieBreakPoints: null, winMargin: 1 },
 };
 
-export interface SignedIn {
-  key: string | null;
-}
-
 export interface TestCourt extends CourtRuntime {
   readonly log: FakeCourtEventLog;
-  readonly appended: { count: number };
+  readonly sync: FakeCourtSync;
 }
 
-export function testCourt(account: SignedIn = { key: ACCOUNT_A }): TestCourt {
+/** A phone with `accountKey` signed in. */
+export function testCourt(accountKey: string | null = ACCOUNT_A): TestCourt {
   const ids = createSequentialIdGenerator();
-  const hooks = signedInCourtSyncHooks(account);
-  const appended = { count: 0 };
   return {
     log: createFakeCourtEventLog(ids),
     replayer: createCourtReplayer(),
     ids,
-    appended,
-    sync: {
-      ...hooks,
-      notifyAppended: () => {
-        appended.count += 1;
-      },
-    },
+    sync: createFakeCourtSync(accountKey),
   };
 }
 

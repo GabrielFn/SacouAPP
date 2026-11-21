@@ -45,7 +45,7 @@ describe("closeStaleCourt and the start of a new round (R97, D5)", () => {
     expect(await court.log.findActiveSession()).toEqual({ ok: true, value: fresh });
     // The points of the old match were never sent: closing keeps them in the upload.
     expect(await sessionsToSync(court)).toContain(OLD_SESSION);
-    expect(court.appended.count).toBeGreaterThan(0);
+    expect(court.sync.appendedCount()).toBeGreaterThan(0);
   });
 
   test("without the confirmation the start stays refused and nothing changes", async () => {
@@ -62,7 +62,7 @@ describe("closeStaleCourt and the start of a new round (R97, D5)", () => {
   });
 
   test("a session of another account is never ended nor closed", async () => {
-    const court = testCourt({ key: ACCOUNT_B });
+    const court = testCourt(ACCOUNT_B);
     await openWithMatch(court, OLD_ROUND, undefined, ACCOUNT_A);
     const before = await typesOf(court, OLD_SESSION);
 
@@ -136,7 +136,7 @@ describe("readOtherRoundCourt: the match of another round, seen by the 08 (R97, 
   });
 
   test("another account's session says so", async () => {
-    const court = testCourt({ key: ACCOUNT_B });
+    const court = testCourt(ACCOUNT_B);
     await openWithMatch(court, OLD_ROUND, undefined, ACCOUNT_A);
     const read = await readOtherRoundCourt(court, NEW_ROUND.roundId);
 

@@ -22,25 +22,33 @@ export interface ActiveCourtOptions {
   readonly includeSamples: boolean;
 }
 
-/**
- * The open session of this device with a match on, read from the log (the one source): `null` with
- * none, with the match ended, or with a log that does not load (the home never breaks on it).
- */
-export async function readActiveCourt(
+/** The score of the set of a match on in the session, or `null` with none or a log that does not load. */
+async function scoreInPlay(
   { log, replayer }: Pick<CourtRuntime, "log" | "replayer">,
-  { includeSamples }: ActiveCourtOptions,
-): Promise<ActiveCourt | null> {
-  const active = await log.findActiveSession();
-  if (!active.ok || active.value === null) return null;
-  const courtSessionId = active.value;
-  const origin = await log.findOrigin(courtSessionId);
-  if (!origin.ok || (origin.value === null && !includeSamples)) return null;
+  courtSessionId: string,
+): Promise<SetScore | null> {
   const loaded = await loadCourtSession(log, replayer, courtSessionId);
   if (!loaded.ok) return null;
   const replayed = replayer.replay(courtSessionId, loaded.value.events);
   if (!replayed.ok) return null;
   const state = stateOfTimeline(replayed.value);
   if (!isMatchInPlay(selectCourtPhase(state))) return null;
-  const score = state.currentMatch?.currentSet?.score ?? LEVEL_SCORE;
-  return { courtSessionId, origin: origin.value, score };
+  return state.currentMatch?.currentSet?.score ?? LEVEL_SCORE;
+}
+
+/**
+ * The open session of this device with a match on, read from the log (the one source): `null` with
+ * none, with the match ended, or with a log that does not load (the home never breaks on it).
+ */
+export async function readActiveCourt(
+  runtime: Pick<CourtRuntime, "log" | "replayer">,
+  { includeSamples }: ActiveCourtOptions,
+): Promise<ActiveCourt | null> {
+  const active = await runtime.log.findActiveSession();
+  if (!active.ok || active.value === null) return null;
+  const courtSessionId = active.value;
+  const origin = await runtime.log.findOrigin(courtSessionId);
+  if (!origin.ok || (origin.value === null && !includeSamples)) return null;
+  const score = await scoreInPlay(runtime, courtSessionId);
+  return score === null ? null : { courtSessionId, origin: origin.value, score };
 }
