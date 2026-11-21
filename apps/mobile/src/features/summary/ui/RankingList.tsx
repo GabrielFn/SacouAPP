@@ -47,7 +47,11 @@ export function RankingList({ rows }: RankingListProps) {
               borderTopColor: colors.borderDivider,
             }}
           >
-            <Text variant="display" displaySize="teamTitle" style={{ minWidth: tokens.spacing.xxl }}>
+            <Text
+              variant="display"
+              displaySize="teamTitle"
+              style={{ minWidth: tokens.spacing.xxl }}
+            >
               {String(row.position)}
             </Text>
             <Text variant="bodyStrong" numberOfLines={2} style={{ flex: 1 }}>

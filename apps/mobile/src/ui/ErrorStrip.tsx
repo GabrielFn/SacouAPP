@@ -35,7 +35,10 @@ export function ErrorStrip({ text, dismissLabel, onDismiss }: ErrorStripProps) {
           onPress={onDismiss}
           style={{ minHeight: tokens.sizes.minTouchTarget, justifyContent: "center" }}
         >
-          <Text variant="bodyStrong" style={{ color: colors.text, textDecorationLine: "underline" }}>
+          <Text
+            variant="bodyStrong"
+            style={{ color: colors.text, textDecorationLine: "underline" }}
+          >
             {dismissLabel}
           </Text>
         </Pressable>
