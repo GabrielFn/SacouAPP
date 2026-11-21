@@ -69,7 +69,8 @@ export type SummaryView =
   | { readonly kind: "empty"; readonly header: string; readonly unsentNote: string | null }
   | ReadySummary;
 
-function nameOf(memberId: string, members: readonly Member[] | undefined): string {
+/** The nickname of a member of the cache, or "Jogador" (screens 12 and 12a). */
+export function nameOf(memberId: string, members: readonly Member[] | undefined): string {
   const nickname = members?.find((member) => member.memberId === memberId)?.nickname ?? null;
   return nickname === null || nickname.trim() === "" ? summaryStrings.noName : nickname;
 }

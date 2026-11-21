@@ -3,6 +3,7 @@ import { apiErrorText, errorTextOf } from "../../../../services/api/api-error-te
 import type { Member, MvpBallot } from "../../../../services/api/sacou-api";
 import { mvpVoteStrings as texts } from "../../../../strings/mvp-vote.pt-BR";
 import { initialsOfName } from "../../../../ui/initials";
+import { nameOf } from "../../model/summary-view";
 import { orderBallot } from "./ballot-order";
 import { candidateLine } from "./candidate-line";
 import { canSubmit, type MvpVoteState } from "./mvp-vote.reducer";
@@ -66,11 +67,6 @@ export interface MvpVoteView {
 }
 
 const VOTING_OFF = "stats.mvp-voting-off";
-
-function nameOf(memberId: string, members: readonly Member[] | undefined): string {
-  const nickname = members?.find((member) => member.memberId === memberId)?.nickname ?? null;
-  return nickname === null || nickname.trim() === "" ? texts.noName : nickname;
-}
 
 function failureText(error: ApiError): string {
   return error.kind === "offline" ? texts.offlineFailure : apiErrorText(error);

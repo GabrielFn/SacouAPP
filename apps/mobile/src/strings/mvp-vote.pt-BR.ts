@@ -28,7 +28,6 @@ export const mvpVoteStrings = {
   chooseFirst: "Escolha quem foi o MVP",
   connectToVote: "Conecte-se para votar",
   sending: "Enviando o voto",
-  noName: "Jogador",
   loading: "Carregando a votação",
   offlineTitle: "Sem internet.",
   offlineBody: "A votação aparece quando o celular voltar a se conectar.",
