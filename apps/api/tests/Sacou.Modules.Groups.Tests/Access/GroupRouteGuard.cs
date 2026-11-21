@@ -40,6 +40,9 @@ internal static class GroupRouteGuard
         "GET /v1/me/notifications",
         "POST /v1/me/notifications/{notificationId:guid}/read",
         "POST /v1/me/notifications/read-all",
+
+        // The pump route Cloud Tasks and Cloud Scheduler call (E3.11 part 2, ADR 0069, D11): a Google OIDC token, no person.
+        "POST /internal/notifications/pump",
         "POST /v1/groups",
         "GET /v1/groups",
         "POST /v1/invites/preview",
