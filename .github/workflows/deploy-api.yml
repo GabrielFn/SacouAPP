@@ -125,6 +125,8 @@ jobs:
           expo-secret: sacou-expo-access-token-test
           invoker-account: sacou-tasks-invoker-test
           tasks-queue: sacou-notifications-test
+          # The host authorized in Firebase for the round page's web login (ADR 0070); status.url gives another alias.
+          public-base-url: https://sacou-api-test-804880427435.us-east4.run.app
           image: ${{ needs.build.outputs.image }}
           project-id: ${{ vars.GCP_PROJECT_ID }}
           workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}
