@@ -43,8 +43,9 @@ export interface PushDeviceDeregistrar {
 export type PushDevices = PushRegistration & PushDeviceDeregistrar;
 
 /**
- * The register and the exit share one state: a registration on the way when the exit begins is waited
- * for, so it can never land after the `DELETE` and put the old account back on the phone. The token is
+ * The register and the exit share one state: no registration starts once the exit began, and one on the
+ * way is followed by a second `DELETE` when it lands inside the 2 s, so it cannot put the old account
+ * back on the phone. The token is
  * never logged nor kept here: it goes from the system straight into the body of the `PUT`.
  */
 export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
@@ -84,10 +85,24 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     return running;
   }
 
+  /**
+   * The `DELETE` leaves at once, so it always goes out inside the 2 s while the session still signs it.
+   * A registration still on the way is then waited for and, if it landed, followed by one more `DELETE`
+   * (204 again): on the server the last write wins, so the phone ends without the account either way.
+   */
   async function removeOnServer(): Promise<void> {
-    await Promise.all(inFlight.current);
+    const pending = inFlight.current;
     const installationId = await deps.installationIds.read();
-    if (installationId !== null) await deps.api.removePushDevice({ installationId });
+    if (installationId === null) return;
+    const remove = () => deps.api.removePushDevice({ installationId });
+    const first = remove();
+    if (pending.length === 0) {
+      await first;
+      return;
+    }
+    const outcomes = await Promise.all(pending);
+    await first;
+    if (outcomes.includes("registered")) await remove();
   }
 
   /** Resolves when the work ends or the time runs out, whichever first; never rejects. */
