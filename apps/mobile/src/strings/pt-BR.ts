@@ -9,6 +9,7 @@ import { inviteStrings } from "./invite.pt-BR";
 import { lineupStrings } from "./lineup.pt-BR";
 import { membersStrings } from "./members.pt-BR";
 import { mvpVoteStrings } from "./mvp-vote.pt-BR";
+import { notificationsStrings } from "./notifications.pt-BR";
 import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
@@ -22,6 +23,7 @@ export const strings = {
   court: courtStrings,
   courtPlayers: courtPlayersStrings,
   groups: groupsStrings,
+  notifications: notificationsStrings,
   createGroup: createGroupStrings,
   settings: settingsStrings,
   rounds: roundsStrings,

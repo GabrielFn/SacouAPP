@@ -67,6 +67,27 @@ export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
 /** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
 export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
 
+/** A line of screen 28 (E3.11): the server renders the title and the subtitle from the ids, on reading. */
+export type NotificationItem = Schemas["NotificationItem"];
+export type NotificationKind = Schemas["NotificationItemKind"];
+/** The list of screen 28 and the count of the dot of the bell: only in memory, never persisted (E3.11). */
+export type NotificationList = Schemas["NotificationListResponse"];
+export type PushDevicePlatform = Schemas["PushDevicePlatform"];
+
+/**
+ * The push device of this install (E3.11, Part 2 moved the id from the path into the body). The token is
+ * never logged, cached nor shown.
+ */
+export interface RegisterPushDeviceBody {
+  readonly installationId: string;
+  readonly token: string;
+  readonly platform: PushDevicePlatform;
+}
+
+export interface RemovePushDeviceBody {
+  readonly installationId: string;
+}
+
 /** The stream of a court: the round it is in and the UUID the phone made when it opened (ADR 0060). */
 export interface CourtStreamRef {
   readonly groupId: string;
@@ -198,6 +219,15 @@ export interface SacouApi {
     roundId: string,
     body: DrawTeamsBody,
   ): Promise<ApiResult<DrawTeamsAnswer>>;
+  /** Screen 28: the newest page and the count of unread ones; `no-store` on the server. */
+  listNotifications(): Promise<ApiResult<NotificationList>>;
+  /** 204, again 204; 404 for a notification of someone else. */
+  markNotificationRead(notificationId: string): Promise<ApiResult<null>>;
+  markAllNotificationsRead(): Promise<ApiResult<null>>;
+  /** Upsert of this install: the same token only refreshes it; a token of another account moves here. */
+  registerPushDevice(body: RegisterPushDeviceBody): Promise<ApiResult<null>>;
+  /** The first step of the exit of the account (ADR 0057, D4, changed by E3.11): 204, again 204. */
+  removePushDevice(body: RemovePushDeviceBody): Promise<ApiResult<null>>;
   /**
    * From 1 to 200 events of one device, all or nothing (ADR 0060). It leaves only with the token of
    * `account`: when another account is signed in by then, it answers `account-changed` and sends nothing

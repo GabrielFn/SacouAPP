@@ -10,6 +10,11 @@ export const queryKeys = {
   myStats: () => ["me", "stats"] as const,
   /** What keeps the account from being deleted (screen 30b): outside the persisted allow list. */
   deletionBlockers: () => ["me", "deletion-blockers"] as const,
+  /**
+   * Screen 28 and the dot of the bell (E3.11): outside the persisted allow list, the list opens online
+   * and the dot is derived from its `unreadCount`, never kept apart.
+   */
+  notifications: () => ["me", "notifications"] as const,
   groups: () => ["groups"] as const,
   group: (groupId: string) => ["groups", groupId] as const,
   members: (groupId: string) => ["groups", groupId, "members"] as const,
