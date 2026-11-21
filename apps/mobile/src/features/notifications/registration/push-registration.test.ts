@@ -230,4 +230,35 @@ describe("the exit of the account (deregister)", () => {
     expect(harness.fake.calls()).toEqual([]);
     expect(harness.tokens.unregistered()).toBe(1);
   });
+
+  // Finding of the review (b): the 2 s bound covers the wait for the PUT too, so the DELETE never leaves.
+  test.fails(
+    "a PUT in flight slower than 2 s still lets the DELETE leave before the exit ends",
+    async () => {
+      const harness = setup();
+      const order: string[] = [];
+      const api: Pick<SacouApi, "registerPushDevice" | "removePushDevice"> = {
+        registerPushDevice: () => {
+          order.push("PUT");
+          return new Promise<ApiResult<null>>(() => undefined);
+        },
+        removePushDevice: () => {
+          order.push("DELETE");
+          return Promise.resolve(apiOk(null));
+        },
+      };
+      const devices = createPushDevices({ ...harness.deps, api });
+      void devices.sync();
+      await vi.waitFor(() => {
+        expect(order).toEqual(["PUT"]);
+      });
+      const exit = devices.deregister();
+      await vi.waitFor(() => {
+        expect(harness.scheduler.pendingDelays()).toEqual([DEREGISTER_TIMEOUT_MS]);
+      });
+      harness.scheduler.advance(DEREGISTER_TIMEOUT_MS);
+      await exit;
+      expect(order).toContain("DELETE");
+    },
+  );
 });
