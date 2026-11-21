@@ -20,18 +20,33 @@ export function nextRoundOf(rounds: readonly RoundSummary[], now: number): Round
   return upcoming[0] ?? null;
 }
 
+/** Whether a scheduled round is being played now: from its start, until its real end (`endsAt`, a early close included). */
+function isLive(round: RoundSummary, now: number): boolean {
+  return (
+    round.status === "scheduled" && Date.parse(round.startsAt) <= now && now < Date.parse(round.endsAt)
+  );
+}
+
 /**
- * The round the home offers "Ver resumo" for: the latest scheduled one that has started and is still
- * inside its window (its `endsAt` plus 24 h). A canceled round never; one that has not started has no summary.
+ * The round "rolando agora" (R97, D3): the latest scheduled one between its `startsAt` and its `endsAt`.
+ * Its card opens screen 06, where the admin draws again or opens the court. A canceled one never.
+ */
+export function liveRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {
+  const live = rounds
+    .filter((round) => isLive(round, now))
+    .sort((first, second) => Date.parse(second.startsAt) - Date.parse(first.startsAt));
+  return live[0] ?? null;
+}
+
+/**
+ * The round the home offers "Ver resumo" for: the latest scheduled one that has ended (`endsAt`) and is
+ * still inside its window (its `endsAt` plus 24 h). A canceled round never; one being played is "live".
  */
 export function recentRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {
   const recent = rounds
     .filter((round) => {
-      return (
-        round.status === "scheduled" &&
-        Date.parse(round.startsAt) <= now &&
-        now < Date.parse(round.endsAt) + SUMMARY_CARD_WINDOW_MS
-      );
+      const end = Date.parse(round.endsAt);
+      return round.status === "scheduled" && end <= now && now < end + SUMMARY_CARD_WINDOW_MS;
     })
     .sort((first, second) => Date.parse(second.startsAt) - Date.parse(first.startsAt));
   return recent[0] ?? null;
@@ -145,8 +160,12 @@ export function swatchIndexOf(groupId: string, size: number): number {
   return sum % size;
 }
 
-/** What a card shows of its next round; the screens add the group's own parts (name, role). */
+/** Which round a card shows: being played now, the next one, or one that took place (R97, D3). */
+export type RoundCardKind = "live" | "next" | "recent";
+
+/** What a card shows of its round; the screens add the group's own parts (name, role). */
 export interface RoundCardModel {
+  readonly kind: RoundCardKind;
   readonly groupId: string;
   readonly roundId: string;
   readonly strip: DayStripText;
@@ -157,13 +176,18 @@ export interface RoundCardModel {
   readonly countText: string;
 }
 
-export function roundCardModel(groupId: string, round: RoundSummary): RoundCardModel {
+export function roundCardModel(
+  groupId: string,
+  round: RoundSummary,
+  kind: RoundCardKind = "next",
+): RoundCardModel {
   return {
+    kind,
     groupId,
     roundId: round.roundId,
     strip: dayStripText(round),
     venue: round.venue,
-    nextText: nextRoundText(round),
+    nextText: kind === "live" ? cards.live : nextRoundText(round),
     recentText: recentRoundText(round),
     pill: cardPill(round),
     countText: cardCountText(round),
@@ -173,6 +197,8 @@ export function roundCardModel(groupId: string, round: RoundSummary): RoundCardM
 export interface GroupRoundCard {
   readonly group: MyGroup;
   readonly round: RoundCardModel | null;
+  /** The round being played now, that opens screen 06 (R97, D3), or `null`. */
+  readonly live: RoundCardModel | null;
   /** The round that offers "Ver resumo" (question 153), or `null`. */
   readonly recent: RoundCardModel | null;
   /** Whether the group has a next round; `null` while its rounds are loading or failed (unknown). */
@@ -196,15 +222,17 @@ export function roundCardsOf(
     return {
       group,
       next: nextRoundOf(list ?? [], now),
+      live: liveRoundOf(list ?? [], now),
       recent: recentRoundOf(list ?? [], now),
       known: list !== undefined,
     };
   });
   return {
-    groups: orderByNextRound(entries).map(({ group, next, recent, known }) => ({
+    groups: orderByNextRound(entries).map(({ group, next, live, recent, known }) => ({
       group,
       round: next === null ? null : roundCardModel(group.groupId, next),
-      recent: recent === null ? null : roundCardModel(group.groupId, recent),
+      live: live === null ? null : roundCardModel(group.groupId, live, "live"),
+      recent: recent === null ? null : roundCardModel(group.groupId, recent, "recent"),
       hasNextRound: known ? next !== null : null,
     })),
     weekText: weekSummaryText(

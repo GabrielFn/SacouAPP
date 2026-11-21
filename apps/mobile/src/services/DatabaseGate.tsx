@@ -1,4 +1,4 @@
-import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useIsRestoring, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { CourtRuntimeProvider } from "../features/court/hooks/court-runtime-context";
@@ -12,6 +12,7 @@ import { findResumableCourtSession } from "../features/court/session/resume-cour
 import { createResumeOnce, type ResumeOnce } from "../features/court/session/resume-once";
 import { strings } from "../strings/pt-BR";
 import { ErrorScreen } from "../ui/ErrorScreen";
+import { wallClockNow } from "./api/wall-clock";
 import { useServices, type Services } from "./services-context";
 import { invalidateSummaryOfRound } from "./summary-invalidation";
 
@@ -64,7 +65,7 @@ function createSync(
 
 async function openRuntime(
   opener: CourtRuntimeOpener,
-  services: SyncServices,
+  services: SyncServices & Pick<Services, "roundEnds">,
   client: QueryClient,
 ): Promise<GateState> {
   const opened = await opener.open();
@@ -73,19 +74,29 @@ async function openRuntime(
   }
   const sync = createSync(opened.value.log, services, client);
   const runtime: CourtRuntime = { ...opened.value, sync };
-  // Decided here, once per opening of the app, together with the database.
-  const resumable = await findResumableCourtSession(runtime);
+  // Decided here, once per opening of the app, together with the database: after the persisted cache
+  // is restored, since the end of the round of the session comes from it (R97, D4).
+  const resumable = await findResumableCourtSession({
+    ...runtime,
+    rounds: services.roundEnds,
+    now: wallClockNow(),
+  });
   return { status: "ready", runtime, sync, resume: createResumeOnce(resumable) };
 }
 
-/** Waits for the local database to open and migrate before any route shows (like the font gate). */
+/**
+ * Waits for the persisted cache to be restored and the local database to open and migrate before any
+ * route shows (like the font gate).
+ */
 export function DatabaseGate({ children }: DatabaseGateProps) {
   const services = useServices();
   const { courtRuntimeOpener } = services;
   const client = useQueryClient();
   const [state, setState] = useState<GateState>({ status: "opening" });
   const [attempt, setAttempt] = useState(0);
+  const restoring = useIsRestoring();
   useEffect(() => {
+    if (restoring) return;
     const alive = { current: true };
     void openRuntime(courtRuntimeOpener, services, client).then((next) => {
       if (alive.current) {
@@ -95,7 +106,7 @@ export function DatabaseGate({ children }: DatabaseGateProps) {
     return () => {
       alive.current = false;
     };
-  }, [courtRuntimeOpener, services, client, attempt]);
+  }, [courtRuntimeOpener, services, client, attempt, restoring]);
   const sync = state.status === "ready" ? state.sync : null;
   // The loop runs while the database is open; it sends on its own, also the sessions already closed.
   useEffect(() => {

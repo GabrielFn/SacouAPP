@@ -18,17 +18,21 @@ export interface GroupCardListProps {
   readonly onOpenRound: (groupId: string, roundId: string) => void;
 }
 
-/** The cards of screen 17, the soonest next round first and the groups without a round at the end. */
+/**
+ * The cards of screen 17, the soonest next round first and the groups without a round at the end. A
+ * round being played takes the place of the next one on the card, so touching it opens screen 06 (R97,
+ * D3); "Editar rodada" still edits the next one.
+ */
 export function GroupCardList({ groups, onAction, onEditRound, onOpenRound }: GroupCardListProps) {
   const { tokens } = useTheme();
   const cards = useRoundCards(groups);
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
-      {cards.groups.map(({ group, round, hasNextRound }) => (
+      {cards.groups.map(({ group, round, live, hasNextRound }) => (
         <GroupCard
           key={group.groupId}
           model={groupCardModel(group)}
-          round={round}
+          round={live ?? round}
           actions={groupCardActions(group.role, PENDING_GROUP_SCREENS, hasNextRound)}
           onAction={(action, groupId) => {
             if (action !== "editRound") onAction(action, groupId);
