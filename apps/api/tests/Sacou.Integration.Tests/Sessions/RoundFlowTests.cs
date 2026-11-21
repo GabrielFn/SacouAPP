@@ -106,6 +106,21 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Null(rounds.Single(round => round["roundId"]!.GetValue<string>() == oneOff["roundId"]!.GetValue<string>())["seriesId"]);
     }
 
+    /// <summary>The list carries the real end of each round (ADR 0072, D1), so the app closes the summary card 24 h after it.</summary>
+    [Fact]
+    public async Task List_CarriesTheEndOfEachRound()
+    {
+        const int AutoEndHours = 6;
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(date: RoundCalls.FutureDate(5)));
+
+        using var listed = await world.SendAsync(A.Admin, HttpMethod.Get, RoundCalls.RoundsPath(world));
+        var round = (await RoundCalls.JsonAsyncArray(listed)).Single(item => item!["roundId"]!.GetValue<string>() == created["roundId"]!.GetValue<string>())!;
+
+        Assert.Equal(created["startsAt"]!.GetValue<DateTimeOffset>().AddHours(AutoEndHours), round["endsAt"]!.GetValue<DateTimeOffset>());
+    }
+
     /// <summary>F1: the whole week of a racha, on a clock the test moves: mensalistas in, the drop-in window, the waitlist, and the next round.</summary>
     [Fact]
     public async Task WeeklyRacha_RunsFromTheMensalistasToTheNextRound()

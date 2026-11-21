@@ -84,6 +84,34 @@ describe("runEndRound (E4.12, question 150)", () => {
     expect(result).toEqual(err("storage"));
     expect(pushes.count).toBe(0);
   });
+
+  test("tells the caller the server closed the round even when the session fails to close", async () => {
+    const { api, sync } = await world();
+    const broken = {
+      closeSession: () => Promise.resolve(err({ code: "session-not-found" as const })),
+    } satisfies Pick<CourtEventLog, "closeSession">;
+    api.respond("closeRound", apiOk(CLOSED));
+    let told = 0;
+
+    const result = await runEndRound({ log: broken, sync, api: api.api }, TARGET, () => {
+      told += 1;
+    });
+
+    expect(result).toEqual(err("storage"));
+    expect(told).toBe(1);
+  });
+
+  test("does not tell the caller when the server did not answer", async () => {
+    const { log, api, sync } = await world();
+    api.respond("closeRound", apiErr({ kind: "offline" }));
+    let told = 0;
+
+    await runEndRound({ log, sync, api: api.api }, TARGET, () => {
+      told += 1;
+    });
+
+    expect(told).toBe(0);
+  });
 });
 
 describe("endRoundView", () => {

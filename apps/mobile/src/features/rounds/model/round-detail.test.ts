@@ -261,6 +261,7 @@ describe("a weekly series already there", () => {
     localDate: "2026-11-03",
     localTime: "20:30",
     startsAt: "2026-11-03T23:30:00Z",
+    endsAt: "2026-11-04T05:30:00Z",
     venue: "",
     status: "scheduled",
     capacity: null,

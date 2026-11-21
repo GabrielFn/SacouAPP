@@ -1271,6 +1271,8 @@ export interface components {
       localTime: string;
       /** Format: date-time */
       startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
       venue: string;
       status: components["schemas"]["RoundStatus"];
       /** Format: int32 */

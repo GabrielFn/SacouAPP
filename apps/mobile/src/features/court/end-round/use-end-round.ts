@@ -41,12 +41,14 @@ export function useEndRound(
     const ended = await runEndRound(
       { log: runtime.log, sync: runtime.sync, api: sacouApi },
       { courtSessionId, groupId, roundId },
+      () => {
+        onServerClosed({ groupId, roundId });
+      },
     );
     if (!ended.ok) {
       send({ type: "failed", failure: ended.error });
       return;
     }
-    if (ended.value.serverClosed) onServerClosed({ groupId, roundId });
     send({ type: "closed" });
     router.replace(summaryHref(groupId, roundId));
   }, [runtime, sacouApi, onServerClosed, router, courtSessionId]);

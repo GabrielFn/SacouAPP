@@ -66,15 +66,13 @@ export interface RecentRoundFooterProps {
   readonly round: RoundCardModel;
 }
 
-/** "Rodada de ter, 3/11" and the link "Ver resumo" (question 153). */
+/** "Rodada de ter, 3/11" and the text "Ver resumo" (question 153). */
 function RecentRoundFooter({ round }: RecentRoundFooterProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ marginTop: "auto", gap: tokens.spacing.xs, paddingTop: tokens.spacing.xs }}>
       <Text variant="muted">{round.recentText}</Text>
-      <Text variant="bodyStrong" accessibilityRole="link">
-        {strings.rounds.cards.seeSummary}
-      </Text>
+      <Text variant="bodyStrong">{strings.rounds.cards.seeSummary}</Text>
     </View>
   );
 }

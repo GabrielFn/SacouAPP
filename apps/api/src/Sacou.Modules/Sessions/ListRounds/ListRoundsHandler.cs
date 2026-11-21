@@ -1,17 +1,21 @@
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Application;
+using Sacou.Modules.Sessions.Domain;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.ListRounds;
 
 /// <summary>
-/// The upcoming rounds and those of the last day, soonest first (tela 06). A read that first makes the next
+/// The upcoming rounds and those still inside the summary card window, soonest first (tela 06). A read that first makes the next
 /// occurrence of every active series (idempotent, ADR 0043, D3).
 /// </summary>
 internal sealed class ListRoundsHandler(IRoundStore store, RoundMaterializer materializer, GroupRoundContext groups, TimeProvider time)
 {
-    private static readonly TimeSpan RecentWindow = TimeSpan.FromHours(24);
+    private const int SummaryCardWindowHours = 24;
+
+    /// <summary>Counted from the start, so it covers the longest round (the automatic end) plus the 24 h of the summary card; the app trims it by <c>endsAt</c>.</summary>
+    private static readonly TimeSpan RecentWindow = TimeSpan.FromHours(SessionLimits.RoundAutoEndHours + SummaryCardWindowHours);
 
     public async Task<Result<IReadOnlyList<RoundSummaryResponse>>> HandleAsync(RoundAccess access, CancellationToken cancellationToken)
     {

@@ -10,7 +10,6 @@ import {
   nextRoundText,
   recentRoundOf,
   roundCardsOf,
-  ROUND_DURATION_MS,
   SUMMARY_CARD_WINDOW_MS,
   roundsThisWeek,
   swatchIndexOf,
@@ -18,6 +17,7 @@ import {
 } from "./round-cards";
 
 // Monday 2 November 2026, 10h local.
+const AUTO_END_HOURS = 6;
 const NOW = new Date(2026, 10, 2, 10, 0).getTime();
 
 function summary(
@@ -34,6 +34,7 @@ function summary(
     localDate,
     localTime,
     startsAt: new Date(year, month - 1, day, hours, minutes).toISOString(),
+    endsAt: new Date(year, month - 1, day, hours + AUTO_END_HOURS, minutes).toISOString(),
     venue: "Ginásio Sesc",
     status: "scheduled",
     capacity: 12,
@@ -174,9 +175,16 @@ describe("recentRoundOf (question 153)", () => {
   it("offers the round from its start until 24 h after it ends", () => {
     expect(recentRoundOf([started], startMs - 1)).toBeNull();
     expect(recentRoundOf([started], startMs)?.roundId).toBe("tue");
-    const lastMoment = startMs + ROUND_DURATION_MS + SUMMARY_CARD_WINDOW_MS - 1;
+    const lastMoment = Date.parse(started.endsAt) + SUMMARY_CARD_WINDOW_MS - 1;
     expect(recentRoundOf([started], lastMoment)?.roundId).toBe("tue");
     expect(recentRoundOf([started], lastMoment + 1)).toBeNull();
+  });
+
+  it("an early close shortens the window: it runs 24 h after the real endsAt", () => {
+    const closedEarly = { ...started, endsAt: new Date(startMs + 3_600_000).toISOString() };
+    const lastMoment = startMs + 3_600_000 + SUMMARY_CARD_WINDOW_MS;
+    expect(recentRoundOf([closedEarly], lastMoment - 1)?.roundId).toBe("tue");
+    expect(recentRoundOf([closedEarly], lastMoment)).toBeNull();
   });
 
   it("never shows a canceled round and picks the latest one", () => {

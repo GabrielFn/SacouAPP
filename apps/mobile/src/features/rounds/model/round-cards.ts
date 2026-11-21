@@ -8,11 +8,8 @@ const { cards } = roundsStrings;
 const DAYS_PER_WEEK = 7;
 const MONDAY_ISO = 1;
 const HOUR_MS = 3_600_000;
-const ROUND_DURATION_HOURS = 6;
 const SUMMARY_WINDOW_HOURS = 24;
-/** A round ends on its own 6 h after it starts (E3.18, D1); the list does not carry an earlier `close`. */
-export const ROUND_DURATION_MS = ROUND_DURATION_HOURS * HOUR_MS;
-/** The home offers "Ver resumo" until 24 h after the end of the round: the window of the votation (question 153). */
+/** The home offers "Ver resumo" until 24 h after the real end of the round (`endsAt`, a early `close` included): the window of the votation (question 153). */
 export const SUMMARY_CARD_WINDOW_MS = SUMMARY_WINDOW_HOURS * HOUR_MS;
 
 /** The round a group card shows: the first scheduled one that has not started yet. */
@@ -25,16 +22,15 @@ export function nextRoundOf(rounds: readonly RoundSummary[], now: number): Round
 
 /**
  * The round the home offers "Ver resumo" for: the latest scheduled one that has started and is still
- * inside its window (the end plus 24 h). A canceled round never; one that has not started has no summary.
+ * inside its window (its `endsAt` plus 24 h). A canceled round never; one that has not started has no summary.
  */
 export function recentRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {
   const recent = rounds
     .filter((round) => {
-      const start = Date.parse(round.startsAt);
       return (
         round.status === "scheduled" &&
-        start <= now &&
-        now < start + ROUND_DURATION_MS + SUMMARY_CARD_WINDOW_MS
+        Date.parse(round.startsAt) <= now &&
+        now < Date.parse(round.endsAt) + SUMMARY_CARD_WINDOW_MS
       );
     })
     .sort((first, second) => Date.parse(second.startsAt) - Date.parse(first.startsAt));
