@@ -13,7 +13,8 @@ import {
   type LineupBase,
   type LineupEditorAction,
 } from "../../lineup/model/lineup-editor.reducer";
-import { benchPoolOf, lineupView } from "../../lineup/model/lineup-selectors";
+import { benchPoolOf } from "../../lineup/model/lineup-bench";
+import { lineupView } from "../../lineup/model/lineup-selectors";
 import { RESERVES, TEAM_A, TEAM_B } from "./draw.test.fixture";
 import { buildMatchStart, teamRotation } from "./match-start";
 import type { PreGameChoices, SavedLineup } from "./pre-game";

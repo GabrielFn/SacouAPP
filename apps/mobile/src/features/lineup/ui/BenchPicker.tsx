@@ -5,7 +5,7 @@ import { lineupStrings as texts } from "../../../strings/lineup.pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { Text } from "../../../ui/Text";
-import type { BenchRow } from "../model/lineup-selectors";
+import type { BenchRow } from "../model/lineup-bench";
 
 export interface BenchPickerProps {
   readonly row: BenchRow;

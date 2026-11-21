@@ -8,7 +8,8 @@ import {
   type LineupBase,
 } from "../model/lineup-editor.reducer";
 import type { LineupDraft } from "../model/lineup-moves";
-import { benchPoolOf, lineupView } from "../model/lineup-selectors";
+import { benchPoolOf } from "../model/lineup-bench";
+import { lineupView } from "../model/lineup-selectors";
 import { basesOf, type LineupSource } from "../model/lineup-source";
 import type { LineupScreenProps } from "../ui/LineupScreen";
 
