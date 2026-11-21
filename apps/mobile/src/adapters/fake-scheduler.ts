@@ -1,4 +1,4 @@
-import type { Scheduler } from "../features/court/ports/scheduler";
+import type { Scheduler } from "../services/scheduler/scheduler";
 import type { FakeClock } from "./fake-clock";
 
 interface Pending {

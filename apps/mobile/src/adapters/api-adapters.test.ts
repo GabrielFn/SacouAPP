@@ -19,6 +19,14 @@ import { createFakeIdTokenProvider } from "./fake-id-token-provider";
 import { createFakeNetworkStatus } from "./fake-network-status";
 import { createFakeSacouApi } from "./fake-sacou-api";
 import { createMemoryKeyValueStore } from "./memory-key-value-store";
+import { createFakeNotificationPermission } from "./fake-notification-permission";
+import { createFakeNotificationTaps } from "./fake-notification-taps";
+import { createFakePushTokenSource } from "./fake-push-token-source";
+import { createMemoryInstallationIdStore } from "./memory-installation-id-store";
+import type { InstallationIdStore } from "../features/notifications/ports/installation-id-store";
+import type { NotificationPermission } from "../features/notifications/ports/notification-permission";
+import type { NotificationTaps } from "../features/notifications/ports/notification-taps";
+import type { PushTokenSource } from "../features/notifications/ports/push-token-source";
 
 async function openCacheStore() {
   const sqlite = openNodeSqliteDatabase();
@@ -86,8 +94,12 @@ describe("each new port has a fake with the same contract (A3)", () => {
       transport: createFakeHttpTransport().transport satisfies HttpTransport,
       network: createFakeNetworkStatus() satisfies NetworkStatus,
       store: createMemoryKeyValueStore() satisfies KeyValueStore,
+      permission: createFakeNotificationPermission() satisfies NotificationPermission,
+      pushTokens: createFakePushTokenSource() satisfies PushTokenSource,
+      taps: createFakeNotificationTaps() satisfies NotificationTaps,
+      installationIds: createMemoryInstallationIdStore() satisfies InstallationIdStore,
     };
-    expect(Object.keys(fakes)).toHaveLength(5);
+    expect(Object.keys(fakes)).toHaveLength(9);
   });
 
   test("the fake network tells its listeners until they stop", () => {

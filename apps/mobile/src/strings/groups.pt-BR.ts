@@ -1,4 +1,4 @@
-/** Texts of the home, the groups list and the notifications (screens 03, 17 and 28). */
+/** Texts of the home and the groups list (screens 03 and 17). */
 export const groupsStrings = {
   title: "Seus grupos",
   createGroup: "Criar grupo",
@@ -37,14 +37,7 @@ export const groupsStrings = {
     noRoundsTitle: "Nenhuma rodada marcada.",
     noRoundsBody: "Quando o organizador abrir a lista, ela aparece aqui.",
     seeGroups: "Ver seus grupos",
-    notifications: "Notificações",
   },
   tabs: { home: "Início", groups: "Grupo", me: "Eu", navigation: "Navegação principal" },
   meTitle: "Eu",
-  notifications: {
-    title: "Notificações",
-    emptyTitle: "Nenhuma notificação por enquanto.",
-    emptyBody:
-      "A gente avisa aqui quando a lista abrir, quando você sair da espera e quando os times saírem.",
-  },
 } as const;

@@ -1,4 +1,4 @@
-import type { Scheduler } from "../features/court/ports/scheduler";
+import type { Scheduler } from "../services/scheduler/scheduler";
 
 /** The timers of React Native behind the port. */
 export const timeoutScheduler: Scheduler = {

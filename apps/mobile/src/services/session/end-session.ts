@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 
+import type { PushDeviceDeregistrar } from "./push-device-deregistrar";
 import type { IdTokenProvider } from "../api/id-token-provider";
 import type { AuthSession, SessionIdentity, SignOutReason } from "../auth/auth-session";
 import { clearSession, type SessionStores } from "./clear-session";
@@ -8,6 +9,8 @@ export interface SessionEnderDeps {
   readonly authSession: AuthSession;
   readonly queries: Pick<QueryClient, "cancelQueries">;
   readonly stores: SessionStores;
+  /** The push device of this install: the one step before the SDK (E3.11). */
+  readonly pushDevices: PushDeviceDeregistrar;
 }
 
 /** The one way out of a session: the Sair button, the expired session and a session ended elsewhere. */
@@ -30,12 +33,15 @@ export interface SessionEnder {
 /**
  * The order is the defense (ADR 0057, D4): the SDK first, so that no call leaves with the token; then the
  * calls in flight are cancelled, so none writes the cache again; then the cache, the invite links and,
- * last, the account of the Google picker, so the next login asks which account.
+ * last, the account of the Google picker, so the next login asks which account. One call leaves before
+ * the SDK (E3.11, ADR 0069, D11): the `DELETE` of the push device, which needs the token, for at most 2 s and
+ * never holding the exit; then the phone unregisters for pushes.
  */
 export function createSessionEnder({
   authSession,
   queries,
   stores,
+  pushDevices,
 }: SessionEnderDeps): SessionEnder {
   const running: { current: Promise<void> | null } = { current: null };
   const cleaned = { value: false };
@@ -62,6 +68,7 @@ export function createSessionEnder({
       if (running.current !== null) return running.current;
       if (authSession.snapshot().status === "signedOut") return Promise.resolve();
       return once(async () => {
+        await pushDevices.deregister();
         await authSession.signOut(reason);
         await forget();
       });
@@ -70,6 +77,8 @@ export function createSessionEnder({
       if (running.current !== null) return running.current;
       if (authSession.currentSession() !== session) return Promise.resolve();
       return once(async () => {
+        // The server deleted the push devices with the account: only this phone is left (E3.11).
+        await pushDevices.forgetLocally();
         // A deleted account leaves Firebase too; signing out is part of it (ADR 0056, question 63).
         await authSession.deleteAccount(session);
         await forget();
@@ -78,7 +87,11 @@ export function createSessionEnder({
     cleanUp() {
       if (running.current !== null) return running.current;
       if (cleaned.value) return Promise.resolve();
-      return once(forget);
+      // Signed out already (elsewhere, or the app opened that way): no token for the server, only the phone.
+      return once(async () => {
+        await pushDevices.forgetLocally();
+        await forget();
+      });
     },
   };
 }

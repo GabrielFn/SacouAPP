@@ -16,6 +16,7 @@ import { createGuardedFetch, NetworkFailure, refuseEverything } from "./http-gua
 import { createAccountOperations } from "./http-account-operations";
 import { createCourtOperations } from "./http-court-operations";
 import { createLevelOperations } from "./http-level-operations";
+import { createNotificationOperations } from "./http-notification-operations";
 import { group, member } from "./http-path-params";
 import { createProfileOperations } from "./http-profile-operations";
 import { createRoundOperations } from "./http-round-operations";
@@ -286,5 +287,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createStatsOperations(client, execute),
     ...createAccountOperations(client, execute),
     ...createCourtOperations(client, executeAs),
+    ...createNotificationOperations(client, execute),
   };
 }

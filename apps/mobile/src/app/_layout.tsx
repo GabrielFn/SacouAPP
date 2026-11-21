@@ -45,6 +45,13 @@ import { createHttpSacouApi } from "../adapters/http-sacou-api";
 import { createNetInfoNetworkStatus } from "../adapters/netinfo-network-status";
 import { createStoredCourtThemePreference } from "../adapters/stored-court-theme-preference";
 import { createStoredOnboardingSkip } from "../adapters/stored-onboarding-skip";
+import { showPushesInForeground } from "../adapters/expo-notifications-channel";
+import { expoNotificationsPermission } from "../adapters/expo-notifications-permission";
+import { expoNotificationsPushTokenSource } from "../adapters/expo-notifications-push-token-source";
+import { expoNotificationsTaps } from "../adapters/expo-notifications-taps";
+import { secureStoreInstallationIdStore } from "../adapters/secure-store-installation-id-store";
+import { usePushSession } from "../features/notifications/hooks/use-push-session";
+import { createPushDevices } from "../features/notifications/registration/push-registration";
 import { buildApiBaseUrl } from "../config/api-url";
 import { buildGoogleWebClientId } from "../config/google-sign-in";
 import { buildLegalLinks } from "../config/legal-links";
@@ -80,11 +87,30 @@ const authSession = createFirebaseAuthSession({
   google: googleWebClientId === null ? null : createGoogleAccountPicker(googleWebClientId),
 });
 const cacheSession = createCacheSession(queryClient, cachePersister);
+// The API and the exit of the session need each other: `sacouApi` is read only when a call is made.
+const pushDevices = createPushDevices({
+  api: {
+    registerPushDevice: (body) => sacouApi.registerPushDevice(body),
+    removePushDevice: (body) => sacouApi.removePushDevice(body),
+  },
+  permission: expoNotificationsPermission,
+  tokens: expoNotificationsPushTokenSource,
+  installationIds: secureStoreInstallationIdStore,
+  session: authSession,
+  scheduler: timeoutScheduler,
+});
 const sessionEnder = createSessionEnder({
   authSession,
   queries: queryClient,
   stores: { cacheSession, inviteLinkStore: secureStoreInviteLinkStore, onboardingSkip },
+  pushDevices,
 });
+const sacouApi = createHttpSacouApi({
+  baseUrl: buildApiBaseUrl(__DEV__),
+  transport: fetchHttpTransport,
+  idTokens: sessionIdTokens(authSession, sessionEnder),
+});
+showPushesInForeground();
 bindAppStateFocus();
 void removeExportLeftovers(expoFileShare);
 
@@ -107,11 +133,7 @@ const realServices: Services = {
   reducedMotion: createReactNativeReducedMotion(),
   clock: performanceClock,
   benchmarkRuntimeOpener: expoBenchmarkRuntimeOpener,
-  sacouApi: createHttpSacouApi({
-    baseUrl: buildApiBaseUrl(__DEV__),
-    transport: fetchHttpTransport,
-    idTokens: sessionIdTokens(authSession, sessionEnder),
-  }),
+  sacouApi,
   networkStatus,
   appForeground: reactNativeAppForeground,
   scheduler: timeoutScheduler,
@@ -136,6 +158,9 @@ const realServices: Services = {
   cardCapture: viewShotCardCapture,
   imageShare: expoImageShare,
   gallerySaver: expoMediaLibrarySaver,
+  notificationPermission: expoNotificationsPermission,
+  notificationTaps: expoNotificationsTaps,
+  pushDevices,
 };
 
 /**
@@ -147,6 +172,7 @@ function SessionStack() {
   const session = useSession();
   useSessionCleanup(session);
   const signedIn = session.status === "signedIn";
+  usePushSession(signedIn);
   const onboarding = useOnboardingGate(signedIn) === "show";
   if (session.status === "unknown") return null;
   return (

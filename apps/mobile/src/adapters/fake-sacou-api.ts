@@ -69,6 +69,11 @@ function defaults(): Answers {
     getCourtSession: none,
     takeOverCourt: none,
     listCourtEvents: none,
+    listNotifications: none,
+    markNotificationRead: none,
+    markAllNotificationsRead: none,
+    registerPushDevice: none,
+    removePushDevice: none,
   };
 }
 
@@ -138,6 +143,11 @@ export function createFakeSacouApi(): FakeSacouApi {
       answer("getCourtSession", [groupId, roundId, account]),
     takeOverCourt: (ref, body, account) => answer("takeOverCourt", [ref, body, account]),
     listCourtEvents: (ref, after, account) => answer("listCourtEvents", [ref, after, account]),
+    listNotifications: () => answer("listNotifications", []),
+    markNotificationRead: (notificationId) => answer("markNotificationRead", [notificationId]),
+    markAllNotificationsRead: () => answer("markAllNotificationsRead", []),
+    registerPushDevice: (body) => answer("registerPushDevice", [body]),
+    removePushDevice: (body) => answer("removePushDevice", [body]),
   };
 
   return {
