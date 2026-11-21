@@ -30,7 +30,11 @@ export interface SummaryBodyProps {
   readonly onVote: () => void;
 }
 
-function TeamCards({ highlights }: { readonly highlights: TeamsHighlights }) {
+export interface TeamCardsProps {
+  readonly highlights: TeamsHighlights;
+}
+
+function TeamCards({ highlights }: TeamCardsProps) {
   const { tokens } = useTheme();
   const cards = [highlights.mostWins, highlights.longestStreak].filter(
     (highlight) => highlight !== null,
