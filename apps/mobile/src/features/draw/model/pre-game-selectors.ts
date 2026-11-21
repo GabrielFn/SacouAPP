@@ -11,6 +11,7 @@ import type { FormationSystem } from "@sacou/volley-rules";
 import { drawStrings } from "../../../strings/draw.pt-BR";
 import type { RoundCourt } from "../../court/session/round-court";
 import type { DrawNameOf } from "./draw-names";
+import type { OtherCourtView } from "./other-court-view";
 import { rotates, systemOf, teamOfSide, teamRotation, type MatchStartInput } from "./match-start";
 import { chosenOr, POINTS_PER_SET_RANGE } from "./pre-game";
 import { teamIdentity, type TeamIdentity } from "./team-identity";
@@ -181,14 +182,36 @@ export function matchNumber(court: RoundCourt | null): number {
   return (court?.startedMatches ?? 0) + 1;
 }
 
-export type StartBlocker = "stale" | "open-match";
+export type StartBlocker =
+  | "stale"
+  | "open-match"
+  /** A match is on in another round on this phone (R97, D2): the 08 links to it. */
+  | "other-round-open"
+  /** A match of another account is left in a round that ended (R97, D5): only that account ends it. */
+  | "other-round-other-account";
 
-/** Why "Começar partida" is off: someone left the list, or the session has a match on (D6). */
-export function startBlocker(leftSinceDraw: number, court: RoundCourt | null): StartBlocker | null {
+const NO_OTHER_COURT: OtherCourtView = { kind: "none" };
+
+/**
+ * Why "Começar partida" is off: someone left the list, the session has a match on (D6), or another
+ * round holds the court of this phone (R97, D2). A forgotten match of this account is not a blocker:
+ * the start asks to end it first (D5).
+ */
+export function startBlocker(
+  leftSinceDraw: number,
+  court: RoundCourt | null,
+  other: OtherCourtView = NO_OTHER_COURT,
+): StartBlocker | null {
   if (leftSinceDraw > 0) return "stale";
-  return court?.openMatch === true ? "open-match" : null;
+  if (court?.openMatch === true) return "open-match";
+  if (other.kind === "open") return "other-round-open";
+  return other.kind === "other-account" ? "other-round-other-account" : null;
 }
 
-export function canStart(leftSinceDraw: number, court: RoundCourt | null): boolean {
-  return startBlocker(leftSinceDraw, court) === null;
+export function canStart(
+  leftSinceDraw: number,
+  court: RoundCourt | null,
+  other: OtherCourtView = NO_OTHER_COURT,
+): boolean {
+  return startBlocker(leftSinceDraw, court, other) === null;
 }

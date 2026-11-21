@@ -9,6 +9,7 @@ Uma ocorrência do racha (`Round`; no glossário, "Rodada"): grupo, série (opci
 - **Data e hora:** `YYYY-MM-DD` e `HH:mm`, só esses formatos. O admin só cria no futuro e até 365 dias adiante.
 - **Editar:** recusado (`sessions.round-closed`) com a rodada cancelada ou já começada.
 - **Fim da rodada (E3.18, [ADR 0072](../arquitetura/adr/0072-votacao-do-mvp.md), D1):** "Encerrar rodada" grava `closedAt`; sem toque, a rodada termina sozinha 6 h depois do início. `endsAt` é o menor dos dois (um toque depois do fim automático não adia). Fechar de novo devolve o mesmo `closedAt`; cancelada não fecha (`sessions.round-canceled`); antes do início também não (`sessions.round-not-started`). Eventos da quadra que chegam depois ainda contam. É a âncora da votação do MVP ([mvp.md](mvp.md)).
+- **Cartões do Início e da aba Grupos (R97, D3):** cada rodada agendada cai numa janela só, sem sobreposição: **próxima** (`now < startsAt`), **rolando agora** (`startsAt ≤ now < endsAt`, abre a 06, onde o admin sorteia de novo ou abre a quadra) e **recente** ("Ver resumo", de `endsAt` até `endsAt + 24 h`). Encerrar cedo move `endsAt` para o `closedAt`, então a rodada vira recente nesse instante. Cancelada nunca é próxima, rolando agora nem recente. Na aba Grupos, a rodada rolando agora toma o lugar da próxima no cartão ("Editar rodada" continua editando a próxima).
 - **Horário de verão:** hora que não existe avança pelo tamanho do pulo (00h30 de 04/11/2018 vira 01h30); hora repetida fica com a primeira (23h30 de 16/02/2019 é a do horário de verão).
 
 ## Presença

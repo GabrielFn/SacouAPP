@@ -33,6 +33,7 @@ import {
   SELECT_MAX_SEQUENCE,
   SELECT_OPEN_SESSION_OF_ROUND,
   SELECT_SESSION,
+  SELECT_SESSION_OPENED_AT,
   SELECT_SESSION_ORIGIN,
   UPDATE_SESSION_STATUS,
 } from "./court-queries.data";
@@ -214,6 +215,7 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
           origin?.groupId ?? null,
           origin?.roundId ?? null,
           origin?.ownerKey ?? null,
+          origin?.openedAt ?? null,
         ]);
         return ok(undefined);
       }),
@@ -221,6 +223,11 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       guarded(async () => {
         const [row] = await database.getAll(SELECT_SESSION_ORIGIN, [courtSessionId]);
         return ok(originOf(row));
+      }),
+    findOpenedAt: (courtSessionId) =>
+      guarded(async () => {
+        const [row] = await database.getAll(SELECT_SESSION_OPENED_AT, [courtSessionId]);
+        return ok(readIntegerColumn(row, "opened_at"));
       }),
     findActiveSession: () =>
       guarded(async () => {

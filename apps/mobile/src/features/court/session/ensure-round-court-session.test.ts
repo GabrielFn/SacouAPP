@@ -133,7 +133,7 @@ describe("ensureRoundCourtSession (D7, D8)", () => {
 
     expect(await ensureRoundCourtSession(court, ROUND)).toEqual({
       ok: false,
-      error: { code: "other-round-match-open" },
+      error: { code: "other-round-match-open", courtSessionId: OTHER_SESSION },
     });
     expect(await court.log.findActiveSession()).toEqual({ ok: true, value: OTHER_SESSION });
   });

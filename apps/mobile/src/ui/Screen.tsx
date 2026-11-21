@@ -59,7 +59,8 @@ export function Screen({
             paddingLeft: insets.left + tokens.spacing.xl,
             paddingRight: insets.right + tokens.spacing.xl,
             paddingTop: tokens.spacing.m,
-            paddingBottom: insets.bottom + tokens.spacing.xl,
+            // Above the tab bar (the bar "EM QUADRA" of the home), the bar already covers the safe area.
+            paddingBottom: aboveTabBar ? tokens.spacing.m : insets.bottom + tokens.spacing.xl,
             gap: tokens.spacing.s10,
           }}
         >

@@ -15,6 +15,9 @@ vi.mock("../../court/hooks/court-runtime-context", () => ({ useCourtRuntime: () 
 vi.mock("../../court/hooks/use-round-court", () => ({
   useRoundCourt: () => ({ status: "reading" }),
 }));
+vi.mock("../../court/hooks/use-other-round-court", () => ({
+  useOtherRoundCourt: () => ({ status: "reading" }),
+}));
 vi.mock("../../court/hooks/use-court-summary-lookup", () => ({
   useCourtSummaryLookup: () => ({ lookup: undefined, fetching: false, refresh: vi.fn() }),
 }));

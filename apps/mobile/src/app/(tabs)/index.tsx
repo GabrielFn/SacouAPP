@@ -4,9 +4,12 @@ import { View } from "react-native";
 
 import { DEV_TOOLS_ENABLED } from "../../config/dev-tools";
 import { useResumeOnce } from "../../features/court/hooks/resume-context";
+import { useActiveCourt } from "../../features/court/hooks/use-active-court";
+import { ActiveCourtBar } from "../../features/court/ui/ActiveCourtBar";
 import { courtHref } from "../../features/court/navigation";
 import { takeResumeTarget } from "../../features/court/session/resume-target";
 import { useGroupsScreen } from "../../features/groups/hooks/use-groups-screen";
+import { groupNameOf } from "../../features/groups/model/groups-view-state";
 import { greetingText } from "../../features/groups/model/greeting";
 import { useGreetingNickname } from "../../features/profile/hooks/use-profile";
 import { createGroupHref, groupsHref, notificationsHref } from "../../features/groups/navigation";
@@ -27,7 +30,10 @@ import { Text } from "../../ui/Text";
 
 const { home } = strings.groups;
 
-/** The home (screen 03). A match in progress brings the user back to the court after a restart (E4.9). */
+/**
+ * The home (screen 03). A match in progress brings the user back to the court after a restart (E4.9),
+ * until its round ends (R97, D4); the bar "EM QUADRA" leads to it at any time (R97, D1).
+ */
 export default function HomeScreen() {
   const router = useRouter();
   const { tokens } = useTheme();
@@ -35,6 +41,7 @@ export default function HomeScreen() {
   const { state, bannerText, retry } = useGroupsScreen();
   const nickname = useGreetingNickname();
   const unread = useHasUnreadNotifications();
+  const active = useActiveCourt();
   // The court is resumed once per opening of the app: leaving it for the home must not bring it back.
   useEffect(() => {
     const target = takeResumeTarget(resume);
@@ -54,8 +61,18 @@ export default function HomeScreen() {
       },
     },
   ];
+  const activeBar =
+    active === null ? undefined : (
+      <ActiveCourtBar
+        court={active}
+        groupName={groupNameOf(state, active.origin?.groupId ?? null)}
+        onOpen={(courtSessionId) => {
+          router.push(courtHref("court", { courtSessionId }));
+        }}
+      />
+    );
   return (
-    <Screen aboveTabBar scroll>
+    <Screen aboveTabBar scroll footer={activeBar}>
       <AppHeader
         action={
           <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>

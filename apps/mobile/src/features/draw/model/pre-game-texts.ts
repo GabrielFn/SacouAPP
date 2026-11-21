@@ -7,6 +7,8 @@ const { blocked } = drawStrings.preGame;
 const BLOCKER_TEXT: Readonly<Record<StartBlocker, string>> = {
   stale: blocked.stale,
   "open-match": blocked.openMatch,
+  "other-round-open": blocked.otherRound,
+  "other-round-other-account": blocked.otherRoundOtherAccount,
 };
 
 const START_ERROR_TEXT: Readonly<Record<StartFromDrawError, string>> = {
@@ -15,6 +17,7 @@ const START_ERROR_TEXT: Readonly<Record<StartFromDrawError, string>> = {
   failed: blocked.failed,
   "other-account": blocked.otherAccount,
   "no-account": blocked.noAccount,
+  "close-other-failed": blocked.closeOtherFailed,
 };
 
 /** Why "Começar partida" is off, as the sheet says it (D6). */

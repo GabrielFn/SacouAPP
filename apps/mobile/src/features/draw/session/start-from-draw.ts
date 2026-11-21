@@ -6,6 +6,7 @@ import {
   ensureRoundCourtSession,
   type EnsureRoundCourtError,
 } from "../../court/session/ensure-round-court-session";
+import { closeStaleCourt } from "../../court/session/close-stale-court";
 import type { RoundCourt } from "../../court/session/round-court";
 import { startCourtMatch } from "../../court/session/start-court-match";
 import { opensTakeover, type CourtSummaryLookup } from "../../court/takeover/court-summary-lookup";
@@ -13,7 +14,13 @@ import { buildMatchStart, type MatchStartInput } from "../model/match-start";
 
 /** Why the match did not start; only codes, never a value of the draw. */
 export type StartFromDrawError =
-  "other-round-match-open" | "other-account" | "no-account" | "match-open" | "failed";
+  | "other-round-match-open"
+  | "other-account"
+  | "no-account"
+  | "match-open"
+  /** The forgotten match of another round was not ended (R97, D5): nothing started. */
+  | "close-other-failed"
+  | "failed";
 
 /** The session errors the pre-game says as they are; a load that failed is the generic line. */
 function sessionError(error: EnsureRoundCourtError): StartFromDrawError {
@@ -23,14 +30,21 @@ function sessionError(error: EnsureRoundCourtError): StartFromDrawError {
 /**
  * "Começar partida" (D7): the session of the round on this device, then the `MatchStarted` of the draw
  * through the one public door of the court. The session comes back, for `router.replace` to the court.
+ * `closeFirst` is the forgotten match of a round that ended, confirmed on the sheet (R97, D5): it is
+ * ended and closed first, and nothing starts when that fails.
  */
 export async function startFromDraw(
   runtime: CourtRuntime,
   origin: CourtSessionOrigin,
   input: MatchStartInput,
+  closeFirst: string | null = null,
 ): Promise<Result<string, StartFromDrawError>> {
   const payload = buildMatchStart(input, runtime.ids.newId());
   if (!payload.ok) return err("failed");
+  if (closeFirst !== null) {
+    const closed = await closeStaleCourt(runtime, closeFirst);
+    if (!closed.ok) return err("close-other-failed");
+  }
   const session = await ensureRoundCourtSession(runtime, origin);
   if (!session.ok) {
     return err(sessionError(session.error));

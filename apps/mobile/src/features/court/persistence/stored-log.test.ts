@@ -20,6 +20,8 @@ const EXPECTED_COLUMNS = {
     "sync_halt",
     // A hash of the account, never the UID nor a name (ADR 0067, D8).
     "owner_key",
+    // An instant, never a person (R97, D4).
+    "opened_at",
   ],
   court_events: [
     "court_session_id",

@@ -237,6 +237,8 @@ export const roundsStrings = {
     withWaitlist: (count: string, waitlist: number) => `${count} · ${String(waitlist)} na espera`,
     next: (when: string) => `Próxima: ${when}`,
     recent: (when: string) => `Rodada de ${when}`,
+    /** The card of the round between its start and its end (R97, D3); it opens screen 06. */
+    live: "Rolando agora",
     seeSummary: "Ver resumo",
     editRound: "Editar rodada",
     createRound: "Criar rodada",

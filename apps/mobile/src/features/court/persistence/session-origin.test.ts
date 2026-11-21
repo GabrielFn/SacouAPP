@@ -48,6 +48,18 @@ describe.each([
     expect(await log.findOrigin("missing")).toEqual({ ok: true, value: null });
   });
 
+  test("findOpenedAt reads the opening back, kept from the creation; none is null (R97, D4)", async () => {
+    const log = await open();
+    const openedAt = Date.parse("2026-11-20T12:00:00Z");
+    await log.openSession(SESSION_A, { ...ORIGIN, openedAt });
+    await log.openSession(SESSION_A, { ...ORIGIN, openedAt: openedAt + 1 });
+    await log.openSession(SESSION_B, ORIGIN);
+
+    expect(await log.findOpenedAt(SESSION_A)).toEqual({ ok: true, value: openedAt });
+    expect(await log.findOpenedAt(SESSION_B)).toEqual({ ok: true, value: null });
+    expect(await log.findOpenedAt("missing")).toEqual({ ok: true, value: null });
+  });
+
   test("the origin is written only when the session is created", async () => {
     const log = await open();
     await log.openSession(SESSION_A, ORIGIN);

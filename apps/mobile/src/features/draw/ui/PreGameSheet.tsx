@@ -28,6 +28,7 @@ import { startBlockerText, startErrorText } from "../model/pre-game-texts";
 import { PointsStepper } from "./PointsStepper";
 import { PreGameLineup } from "./PreGameLineup";
 import { RotationPicker } from "./RotationPicker";
+import { CloseOtherSheet } from "./CloseOtherSheet";
 import { teamSwatch } from "./team-swatch";
 
 const { preGame: texts } = strings.draw;
@@ -212,11 +213,14 @@ export interface StartButtonProps {
 }
 
 function StartButton({ pre, leftSinceDraw }: StartButtonProps) {
-  const blocker = startBlocker(leftSinceDraw, courtOf(pre.court));
-  const reading = pre.court.status === "reading";
+  const blocker = startBlocker(leftSinceDraw, courtOf(pre.court), pre.otherCourt);
+  const reading = pre.court.status === "reading" || pre.readingOther;
   return (
     <>
       {blocker === null ? null : <ErrorStrip text={startBlockerText(blocker)} />}
+      {blocker === "other-round-open" ? (
+        <Button label={texts.openOtherMatch} variant="outline" onPress={pre.openOther} />
+      ) : null}
       {pre.startError === null ? null : <ErrorStrip text={startErrorText(pre.startError)} />}
       <Button
         label={pre.starting ? texts.starting : texts.start}
@@ -274,6 +278,12 @@ export function PreGameSheet({
         <RotationSection pre={pre} model={model} />
         <StartButton pre={pre} leftSinceDraw={leftSinceDraw} />
       </BottomSheet>
+      <CloseOtherSheet
+        visible={model.state.sheet === "close-other"}
+        other={pre.otherCourt}
+        onConfirm={pre.confirmCloseOther}
+        onCancel={pre.cancelCloseOther}
+      />
     </>
   );
 }

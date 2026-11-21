@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NO_ROUND_END } from "./no-round-end.test.fixture";
 
 import { createFakeCourtRuntime } from "../../../adapters/fake-court-runtime-opener";
 import { startSampleMatch } from "../dev/start-sample-match";
@@ -22,12 +23,16 @@ describe("resuming the court once per opening of the app", () => {
     const started = await startSampleMatch(runtime, "one-set");
     if (!started.ok) throw new Error("did not start");
     // The gate decides when the app opens...
-    const resume = createResumeOnce(await findResumableCourtSession(runtime));
+    const resume = createResumeOnce(
+      await findResumableCourtSession({ ...runtime, ...NO_ROUND_END }),
+    );
     // ...the first home sends the user to the court...
     expect(takeResumeTarget(resume)).toEqual({ courtSessionId: started.value.courtSessionId });
     // ...and the home the user lands on after "Sair do modo quadra" finds nothing, though the
     // session is still open in the file.
     expect(takeResumeTarget(resume)).toBeNull();
-    expect(await findResumableCourtSession(runtime)).toBe(started.value.courtSessionId);
+    expect(await findResumableCourtSession({ ...runtime, ...NO_ROUND_END })).toBe(
+      started.value.courtSessionId,
+    );
   });
 });

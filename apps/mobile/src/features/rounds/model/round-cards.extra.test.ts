@@ -31,7 +31,7 @@ describe("recentRoundOf: extra cases (E4.12 part 2, E5)", () => {
 
   it("a canceled round does not hide an older good one", () => {
     const rounds = [round("good", "scheduled", START - 1000), round("c", "canceled")];
-    expect(recentRoundOf(rounds, START + 10)?.roundId).toBe("good");
+    expect(recentRoundOf(rounds, START + AUTO_END_MS + 10)?.roundId).toBe("good");
   });
 
   it("window is endsAt + 24 h, and a close before the automatic end brings it forward", () => {

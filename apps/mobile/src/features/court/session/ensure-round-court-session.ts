@@ -1,5 +1,6 @@
 import { err, ok, type Result } from "@sacou/volley-rules";
 
+import { wallClockNow } from "../../../services/api/wall-clock";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
 import type { CourtRuntime } from "../ports/court-runtime";
 import { sessionOwnership } from "../sync/session-ownership";
@@ -7,8 +8,11 @@ import type { LoadFailureCode } from "./court-errors";
 import { sessionState } from "./round-court";
 
 export type EnsureRoundCourtError =
-  /** The device plays one court at a time, and the open one of another round has a match on. */
-  | { readonly code: "other-round-match-open" }
+  /**
+   * The device plays one court at a time, and the open one of another round has a match on: its ID,
+   * so the 08 can lead to it (R97, D2).
+   */
+  | { readonly code: "other-round-match-open"; readonly courtSessionId: string }
   /** The open session of the round was opened by another account (or by none): D8. */
   | { readonly code: "other-account" }
   /** Nobody is signed in: a session without an owner would never be sent (fails closed). */
@@ -40,7 +44,9 @@ async function closeOtherRound(
   const state = await sessionState(runtime, active.value);
   // A session that cannot be read may have a match on: it stays open.
   if (!state.ok) return err({ code: "load-failed", cause: state.error });
-  if (state.value.currentMatch !== null) return err({ code: "other-round-match-open" });
+  if (state.value.currentMatch !== null) {
+    return err({ code: "other-round-match-open", courtSessionId: active.value });
+  }
   const closed = await log.closeSession(active.value);
   return closed.ok ? ok(undefined) : err({ code: "load-failed", cause: closed.error.code });
 }
@@ -55,6 +61,7 @@ async function closeOtherRound(
 export async function ensureRoundCourtSession(
   runtime: CourtRuntime,
   origin: CourtSessionOrigin,
+  openedAt: number = wallClockNow(),
 ): Promise<Ensured> {
   const { log, ids } = runtime;
   // The account that opens the session is the only one that ever marks and sends it.
@@ -66,6 +73,10 @@ export async function ensureRoundCourtSession(
   const closed = await closeOtherRound(runtime);
   if (!closed.ok) return closed;
   const courtSessionId = ids.newId();
-  const opened = await log.openSession(courtSessionId, { ...origin, ownerKey: accountKey });
+  const opened = await log.openSession(courtSessionId, {
+    ...origin,
+    ownerKey: accountKey,
+    openedAt,
+  });
   return opened.ok ? ok(courtSessionId) : err({ code: "load-failed", cause: opened.error.code });
 }
