@@ -1,29 +1,24 @@
-import { View } from "react-native";
-import Svg, { G, Path, Rect } from "react-native-svg";
+import { useState } from "react";
+import { StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
 import { strings } from "../../../strings/pt-BR";
 import {
   CARD_ASPECT_RATIO,
   NAME_MIN_FONT_SCALE,
+  POSITION_MIN_FONT_SCALE,
   cardMeasures,
 } from "../../../theme/card-tokens.data";
-import type { ScaledCardTokens } from "../../../theme/scale";
+import { cardMeasuresFor, type ScaledCardMeasures } from "../../../theme/scale";
 import { useTheme } from "../../../theme/theme-context";
 import { fontFamilies } from "../../../theme/tokens.data";
 import { PersonIcon } from "../../../ui/Icons";
 import { Text } from "../../../ui/Text";
-import { cardAccessibilityLabel, type CardStat, type PlayerCardModel } from "../model/player-card";
-import {
-  cardLayout,
-  FLUSH,
-  GLYPH_COLUMNS,
-  GLYPH_RADIUS,
-  GLYPH_ROWS,
-  GLYPH_SQUARE,
-  GLYPH_VIEW_BOX,
-  MESH_VIEW_BOX,
-} from "./player-card.layout.data";
+import { cardAccessibilityLabel, type PlayerCardModel } from "../model/player-card";
+import { cardLayout, FLUSH, MESH_VIEW_BOX } from "./player-card.layout.data";
+import { cardTextLines } from "./player-card-budget";
 import { meshPath } from "./player-card.mesh";
+import { PositionGlyph, StatsGrid } from "./player-card-parts";
 
 export type PlayerCardSize = "compact" | "full";
 
@@ -36,12 +31,43 @@ export interface PlayerCardViewProps {
 
 const MESH_PATH = meshPath(cardMeasures.meshStep);
 
-/** The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. */
+/**
+ * The player card (`.kc`): a night card with a yellow frame, in the shape 270 x 378 at any size. Its
+ * measures follow its REAL width (`onLayout`): the window only gives the first frame, so screen 14,
+ * screen 15 and the saved picture keep the proportions of the drawing.
+ */
 export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
-  const { colors, tokens } = useTheme();
-  const m = tokens.card[size];
+  const { tokens } = useTheme();
+  const { fontScale } = useWindowDimensions();
+  // A single isolated field, the measured width (frontend.md, rule 4).
+  const [width, setWidth] = useState<number | null>(null);
+  const measures = width === null ? tokens.card[size] : cardMeasuresFor(width, fontScale);
+  return (
+    <PlayerCardFace
+      card={card}
+      showStats={showStats}
+      measures={measures}
+      onLayout={(event: LayoutChangeEvent) => {
+        setWidth(event.nativeEvent.layout.width);
+      }}
+    />
+  );
+}
+
+export interface PlayerCardFaceProps {
+  readonly card: PlayerCardModel;
+  readonly showStats: boolean;
+  readonly measures: ScaledCardMeasures;
+  readonly onLayout?: (event: LayoutChangeEvent) => void;
+}
+
+/** The drawing of the card for given measures. */
+export function PlayerCardFace({ card, showStats, measures: m, onLayout }: PlayerCardFaceProps) {
+  const { colors } = useTheme();
+  const lines = cardTextLines(m);
   return (
     <View
+      onLayout={onLayout}
       accessible
       accessibilityRole="image"
       accessibilityLabel={cardAccessibilityLabel(card, showStats)}
@@ -80,10 +106,13 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
             position: "absolute",
             left: cardLayout.position.left,
             top: cardLayout.position.top,
+            maxWidth: cardLayout.position.maxWidth,
           }}
         >
           <Text
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={POSITION_MIN_FONT_SCALE}
             style={{
               color: colors.panelAccent,
               fontFamily: fontFamilies.body700,
@@ -160,118 +189,69 @@ export function PlayerCardView({ card, size, showStats }: PlayerCardViewProps) {
         </Text>
       </View>
 
-      {showStats ? <StatsGrid stats={card.stats} measures={m} /> : null}
-
-      <View
-        style={{
-          position: "absolute",
-          left: cardLayout.footer.side,
-          right: cardLayout.footer.side,
-          bottom: cardLayout.footer.bottom,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text
-          style={{
-            color: colors.primary,
-            fontFamily: fontFamilies.display800,
-            fontSize: m.brandFont,
-          }}
-        >
-          {strings.profile.card.brand}
-        </Text>
-        <View
-          style={{
-            height: m.seasonHeight,
-            paddingHorizontal: m.seasonPadding,
-            borderRadius: m.seasonRadius,
-            backgroundColor: colors.accent,
-            justifyContent: "center",
-          }}
-        >
+      <View style={cardStyles.lowerSection}>
+        <View style={cardStyles.statsArea}>
+          {showStats ? <StatsGrid stats={card.stats} measures={m} /> : null}
+        </View>
+        <View style={cardStyles.footer}>
           <Text
             style={{
-              color: colors.onPrimary,
-              fontFamily: fontFamilies.body700,
-              fontSize: m.seasonFont,
+              color: colors.primary,
+              fontFamily: fontFamilies.display800,
+              fontSize: m.brandFont,
+              lineHeight: lines.brand,
             }}
           >
-            {card.seasonLabel}
+            {strings.profile.card.brand}
           </Text>
+          <View
+            style={{
+              height: m.seasonHeight,
+              paddingHorizontal: m.seasonPadding,
+              borderRadius: m.seasonRadius,
+              backgroundColor: colors.accent,
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.onPrimary,
+                fontFamily: fontFamilies.body700,
+                fontSize: m.seasonFont,
+              }}
+            >
+              {card.seasonLabel}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
   );
 }
 
-export interface StatsGridProps {
-  readonly stats: readonly CardStat[];
-  readonly measures: ScaledCardTokens["full"];
-}
-
-function StatsGrid({ stats, measures: m }: StatsGridProps) {
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        position: "absolute",
-        left: cardLayout.stats.side,
-        right: cardLayout.stats.side,
-        top: cardLayout.stats.top,
-        flexDirection: "row",
-        flexWrap: "wrap",
-        rowGap: m.statRowGap,
-      }}
-    >
-      {stats.map((stat) => (
-        <View key={stat.key} style={{ width: cardLayout.statColumn, alignItems: "center" }}>
-          <Text
-            tabular
-            numberOfLines={1}
-            style={{
-              color: colors.onPanel,
-              fontFamily: fontFamilies.display800,
-              fontSize: m.statValueFont,
-            }}
-          >
-            {stat.value}
-          </Text>
-          <Text numberOfLines={1} style={{ color: colors.cardLabel, fontSize: m.statLabelFont }}>
-            {stat.label}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-export interface PositionGlyphProps {
-  readonly width: number;
-  readonly height: number;
-}
-
-/** Six squares, the last one lit: decoration of a position, the same for all (question 162). */
-function PositionGlyph({ width, height }: PositionGlyphProps) {
-  const { colors } = useTheme();
-  const cells = GLYPH_ROWS.flatMap((y) => GLYPH_COLUMNS.map((x) => ({ x, y })));
-  const lit = cells.length - 1;
-  return (
-    <Svg width={width} height={height} viewBox={GLYPH_VIEW_BOX}>
-      {cells.map((cell, index) => (
-        <G
-          key={`${String(cell.x)}-${String(cell.y)}`}
-          transform={`translate(${String(cell.x)} ${String(cell.y)})`}
-        >
-          <Rect
-            width={GLYPH_SQUARE}
-            height={GLYPH_SQUARE}
-            rx={GLYPH_RADIUS}
-            fill={index === lit ? colors.accent : colors.onPanel}
-          />
-        </G>
-      ))}
-    </Svg>
-  );
-}
+/**
+ * Below the name band: the grid of numbers takes what is left and the footer (brand and season) is its own
+ * strip under it, in the flow, so nothing can overlap (no `position: absolute` over the grid).
+ */
+export const cardStyles = StyleSheet.create({
+  lowerSection: {
+    position: "absolute",
+    left: FLUSH,
+    right: FLUSH,
+    top: cardLayout.lower.top,
+    bottom: FLUSH,
+  },
+  statsArea: {
+    flex: 1,
+    marginHorizontal: cardLayout.stats.side,
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  footer: {
+    marginHorizontal: cardLayout.footer.side,
+    marginBottom: cardLayout.footer.bottom,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});

@@ -4,11 +4,18 @@
  */
 export const cardLayout = {
   mesh: { height: "48.37%" },
-  position: { left: "6.15%", top: "3.26%" },
+  /** `maxWidth` stops short of the avatar (it starts at 46.92%): the text shrinks instead of going under it. */
+  position: { left: "6.15%", top: "3.26%", maxWidth: "38%" },
   avatar: { top: "9.24%", right: "8.46%", width: "44.62%" },
   nameBand: { top: "47.28%", height: "15.22%" },
-  stats: { side: "4.62%", top: "65.76%" },
-  footer: { side: "5.38%", bottom: "2.72%" },
+  /** From the end of the name band (47.28% + 15.22%) to the bottom: the grid of numbers, then the footer. */
+  lower: { top: "62.5%" },
+  stats: { side: "4.62%" },
+  /**
+   * `bottom` is a margin of the footer, and a margin in percent is a share of the WIDTH of the parent (260):
+   * 10 of the drawing (`.kft`) over 260.
+   */
+  footer: { side: "5.38%", bottom: "3.85%" },
   /** One of the three columns of the grid of numbers. */
   statColumn: "33.33%",
 } as const;

@@ -14,9 +14,11 @@ import {
   spacing,
 } from "./tokens.data";
 import {
+  CARD_CANVAS_WIDTH,
   CARD_COMPACT_RATIO,
   cardFontScaleCap,
   cardMeasures,
+  cardStatsFontScaleCap,
   statTileValueFont,
 } from "./card-tokens.data";
 import { notificationSizes } from "./notification-tokens.data";
@@ -49,9 +51,11 @@ export interface ScaledSheetTokens {
 }
 
 /** Measures of the player card: the full one, and the compact one of screen 14 (the full one times the ratio). */
+export type ScaledCardMeasures = NumberMap<typeof cardMeasures>;
+
 export interface ScaledCardTokens {
-  readonly full: NumberMap<typeof cardMeasures>;
-  readonly compact: NumberMap<typeof cardMeasures>;
+  readonly full: ScaledCardMeasures;
+  readonly compact: ScaledCardMeasures;
 }
 
 export interface ScaledTokens {
@@ -109,18 +113,38 @@ function createCourtTokens(factor: number, fontFactor: number): ScaledCourtToken
   };
 }
 
+/** The card text that grows less with the system font scale: the grid of numbers has a fixed height budget. */
+const STATS_TEXT_KEYS: ReadonlySet<string> = new Set<keyof typeof cardMeasures>([
+  "statValueFont",
+  "statLabelFont",
+]);
+
+function cardTextGrowth(key: string, fontScale: number): number {
+  if (!key.endsWith("Font")) return 1;
+  const cap = STATS_TEXT_KEYS.has(key) ? cardStatsFontScaleCap : cardFontScaleCap;
+  return Math.min(fontScale, cap);
+}
+
+/**
+ * The measures of a card drawn `cardWidth` wide (its real width, frame included): every measure is the
+ * canvas one times `cardWidth / CARD_CANVAS_WIDTH`, so the proportions hold on screen 14, 15 and the capture.
+ */
+export function cardMeasuresFor(cardWidth: number, fontScale: number): ScaledCardMeasures {
+  const ratio = cardWidth / CARD_CANVAS_WIDTH;
+  return Object.fromEntries(
+    Object.entries(cardMeasures).map(([key, value]) => [
+      key,
+      Math.max(
+        accessibilityFloors.hairline,
+        Math.round(value * ratio * cardTextGrowth(key, fontScale)),
+      ),
+    ]),
+  ) as ScaledCardMeasures;
+}
+
+/** The first guess, before the card knows its real width: the canvas card scaled by the window. */
 function createCardTokens(factor: number, fontScale: number): ScaledCardTokens {
-  const textGrowth = Math.min(fontScale, cardFontScaleCap);
-  const at = (ratio: number) =>
-    Object.fromEntries(
-      Object.entries(cardMeasures).map(([key, value]) => {
-        const growth = key.endsWith("Font") ? textGrowth : 1;
-        return [
-          key,
-          Math.max(accessibilityFloors.hairline, Math.round(value * factor * ratio * growth)),
-        ] as const;
-      }),
-    ) as NumberMap<typeof cardMeasures>;
+  const at = (ratio: number) => cardMeasuresFor(CARD_CANVAS_WIDTH * factor * ratio, fontScale);
   return { full: at(1), compact: at(CARD_COMPACT_RATIO) };
 }
 

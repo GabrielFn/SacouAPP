@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  CARD_CANVAS_WIDTH,
   CARD_COMPACT_RATIO,
   NAME_MIN_FONT_SCALE,
   cardAvatarColor,
@@ -8,7 +9,7 @@ import {
   cardMeasures,
 } from "./card-tokens.data";
 import { contrastRatio } from "./contrast";
-import { createScaledTokens } from "./scale";
+import { cardMeasuresFor, createScaledTokens } from "./scale";
 import { palette } from "./tokens.data";
 
 const AA_TEXT = 4.5;
@@ -43,6 +44,15 @@ describe("the player card tokens", () => {
     const small = createScaledTokens({ windowWidth: WIDTHS[2], fontScale: 1 }).card.full;
     const smaller = createScaledTokens({ windowWidth: WIDTHS[0], fontScale: 1 }).card.full;
     expect(small.nameFont).toBeGreaterThan(smaller.nameFont);
+  });
+
+  test("the measures follow the real width of the card, not the window", () => {
+    const canvas = cardMeasuresFor(CARD_CANVAS_WIDTH, 1);
+    expect(canvas.statValueFont).toBe(cardMeasures.statValueFont);
+    expect(canvas.nameFont).toBe(cardMeasures.nameFont);
+    const half = cardMeasuresFor(CARD_CANVAS_WIDTH / 2, 1);
+    expect(half.statValueFont).toBe(cardMeasures.statValueFont / 2);
+    expect(half.statRowGap).toBe(cardMeasures.statRowGap / 2);
   });
 
   test("every measure keeps the hairline at least", () => {
