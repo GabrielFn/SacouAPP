@@ -17,6 +17,11 @@ import type { ScreenAwake } from "../features/court/ports/screen-awake";
 import type { ScreenOrientation } from "../features/court/ports/screen-orientation";
 import type { InviteLinkStore } from "../features/groups/ports/invite-link-store";
 import type { LegalLinks } from "../config/legal-links";
+import type {
+  CardImageCapture,
+  GallerySaver,
+  ImageShare,
+} from "../features/profile/ports/card-image";
 import type { OnboardingSkip } from "../features/profile/ports/onboarding-skip";
 import type { NetworkStatus } from "./api/network-status";
 import type { AuthSession } from "./auth/auth-session";
@@ -98,6 +103,12 @@ export interface Services {
   readonly legalLinks: LegalLinks;
   /** "Pular" of screen 27 with nothing to save; forgotten when the session ends (E4.3, D6). */
   readonly onboardingSkip: OnboardingSkip;
+  /** Screen 15: the card turned into a temporary PNG (E4.13, part 2). */
+  readonly cardCapture: CardImageCapture;
+  /** Screen 15, "WhatsApp": the PNG in the system share sheet. */
+  readonly imageShare: ImageShare;
+  /** Screen 15, "Salvar": the PNG in the gallery, write-only. */
+  readonly gallerySaver: GallerySaver;
 }
 
 const ServicesContext = createContext<Services | null>(null);
