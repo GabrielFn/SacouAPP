@@ -8,7 +8,7 @@ import { useGroup, useGroupMembers } from "../../../groups/queries/use-group-que
 import { headerLine } from "../../model/summary-texts";
 import { roundSummaryQuery } from "../../queries/summary-queries";
 import { mvpVoteView, type MvpVoteView } from "../model/mvp-vote-view";
-import { canSubmit, INITIAL_MVP_VOTE, mvpVoteReducer } from "../model/mvp-vote.reducer";
+import { INITIAL_MVP_VOTE, mvpVoteReducer } from "../model/mvp-vote.reducer";
 import {
   createVoteSubmitter,
   mvpVotingQuery,
@@ -44,8 +44,7 @@ export function useMvpVote(groupId: string, roundId: string): MvpVoteModel {
   );
   const changeAt = nextBallotChangeAt(ballot.data);
   useEffect(
-    () =>
-      scheduleBallotRefresh(scheduler, client, { groupId, roundId }, changeAt, wallClockNow()),
+    () => scheduleBallotRefresh(scheduler, client, { groupId, roundId }, changeAt, wallClockNow()),
     [scheduler, client, groupId, roundId, changeAt],
   );
 
@@ -71,12 +70,13 @@ export function useMvpVote(groupId: string, roundId: string): MvpVoteModel {
     submit: () => {
       const candidate = vote.selected;
       if (candidate === null || view.body.kind !== "choosing" || !view.body.canSubmit) return;
-      if (!canSubmit(vote, online)) return;
       const sending = submitter.submit(candidate);
       if (sending === null) return;
       send({ type: "submit-requested" });
       void sending.then((result) => {
-        send(result.ok ? { type: "submit-succeeded" } : { type: "submit-failed", error: result.error });
+        send(
+          result.ok ? { type: "submit-succeeded" } : { type: "submit-failed", error: result.error },
+        );
       });
     },
     retry: () => void ballot.refetch(),

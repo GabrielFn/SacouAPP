@@ -10,7 +10,5 @@ export interface VoteFooterProps {
 
 /** The fixed button at the foot of screen 12a: it names the choice, so no dialog asks again (question 171). */
 export function VoteFooter({ label, enabled, submitting, onSubmit }: VoteFooterProps) {
-  return (
-    <Button label={label} onPress={onSubmit} disabled={!enabled} busy={submitting} />
-  );
+  return <Button label={label} onPress={onSubmit} disabled={!enabled} busy={submitting} />;
 }

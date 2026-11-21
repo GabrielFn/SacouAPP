@@ -30,9 +30,7 @@ function BallotBody({ choosing, onSelect }: BallotBodyProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
-      {choosing.errorText === null ? null : (
-        <ErrorStrip text={choosing.errorText} />
-      )}
+      {choosing.errorText === null ? null : <ErrorStrip text={choosing.errorText} />}
       <BallotList rows={choosing.rows} disabled={choosing.submitting} onSelect={onSelect} />
       <Text variant="caption">{texts.rule}</Text>
     </View>

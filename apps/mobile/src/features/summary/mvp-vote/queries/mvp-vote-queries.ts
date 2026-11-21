@@ -76,13 +76,13 @@ export interface VoteSubmitter {
 
 /** One vote on the way at a time, even when two taps arrive before the screen draws again (B3). */
 export function createVoteSubmitter(deps: MvpVoteDeps, target: MvpVoteTarget): VoteSubmitter {
-  const flight = { busy: false };
+  const busy = { value: false };
   return {
     submit(candidateMemberId) {
-      if (flight.busy) return null;
-      flight.busy = true;
+      if (busy.value) return null;
+      busy.value = true;
       return castMvpVote(deps, target, candidateMemberId).finally(() => {
-        flight.busy = false;
+        busy.value = false;
       });
     },
   };

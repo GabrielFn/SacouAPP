@@ -20,23 +20,38 @@ export type MvpVoteAction =
 /** Nothing chosen at first (question 171): a choice made for the person would steer the vote. */
 export const INITIAL_MVP_VOTE: MvpVoteState = { selected: null, phase: "choosing", error: null };
 
+function selected(state: MvpVoteState, memberId: string): MvpVoteState {
+  return state.phase === "submitting"
+    ? state
+    : { selected: memberId, phase: "choosing", error: null };
+}
+
+/** A second tap while sending, or a tap with nobody chosen, changes nothing. */
+function requested(state: MvpVoteState): MvpVoteState {
+  if (state.selected === null || state.phase === "submitting") return state;
+  return { ...state, phase: "submitting", error: null };
+}
+
+function failed(state: MvpVoteState, error: ApiError): MvpVoteState {
+  return state.phase === "submitting" ? { ...state, phase: "failed", error } : state;
+}
+
+function dismissed(state: MvpVoteState): MvpVoteState {
+  return state.phase === "failed" ? { ...state, phase: "choosing", error: null } : state;
+}
+
 export function mvpVoteReducer(state: MvpVoteState, action: MvpVoteAction): MvpVoteState {
   switch (action.type) {
     case "candidate-selected":
-      if (state.phase === "submitting") return state;
-      return { selected: action.memberId, phase: "choosing", error: null };
+      return selected(state, action.memberId);
     case "submit-requested":
-      // A second tap while sending, or a tap with nobody chosen, changes nothing.
-      if (state.selected === null || state.phase === "submitting") return state;
-      return { ...state, phase: "submitting", error: null };
+      return requested(state);
     case "submit-failed":
-      if (state.phase !== "submitting") return state;
-      return { ...state, phase: "failed", error: action.error };
+      return failed(state, action.error);
     case "submit-succeeded":
       return INITIAL_MVP_VOTE;
     case "error-dismissed":
-      if (state.phase !== "failed") return state;
-      return { ...state, phase: "choosing", error: null };
+      return dismissed(state);
   }
 }
 

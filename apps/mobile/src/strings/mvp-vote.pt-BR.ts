@@ -45,7 +45,8 @@ export const mvpVoteStrings = {
   closesIn: (remaining: string) => `Fecha em ${remaining}.`,
   votedFor: (name: string) => `Você votou em ${name}. Seu voto é secreto.`,
   votedSecret: "Você já votou. Seu voto é secreto.",
-  resultWhenClosed: (remaining: string) => `O resultado sai quando a votação fechar, em ${remaining}.`,
+  resultWhenClosed: (remaining: string) =>
+    `O resultado sai quando a votação fechar, em ${remaining}.`,
   closed: "A votação fechou.",
   closedBody: "O MVP escolhido aparece no resumo da rodada.",
   offlineFailure: "Sem conexão. Tente de novo.",

@@ -206,9 +206,7 @@ describe("the ballot and the deadline", () => {
     expect(candidateLine({ mainSide: null, matchesPlayed: 5, plusMinus: 34 })).toBe(
       "5 partidas · +34",
     );
-    expect(candidateLine({ mainSide: null, matchesPlayed: 1, plusMinus: 0 })).toBe(
-      "1 partida · 0",
-    );
+    expect(candidateLine({ mainSide: null, matchesPlayed: 1, plusMinus: 0 })).toBe("1 partida · 0");
   });
 
   test.each([

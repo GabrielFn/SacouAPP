@@ -28,7 +28,7 @@ describe("the secret of the vote on screen 12a", () => {
   );
 
   test("S2 a count the server leaked reaches neither the model nor a text", () => {
-    const leaked = { ...ballot(), voters: 9, counts: { "m-bia": 4 } } as MvpBallot;
+    const leaked = { ...ballot(), voters: 97, counts: { "m-bia": 4 } } as MvpBallot;
     const view = mvpVoteView({
       query: { status: "success", data: leaked, error: null },
       members: MEMBERS,
@@ -39,7 +39,7 @@ describe("the secret of the vote on screen 12a", () => {
     const written = JSON.stringify(view);
     expect(written).not.toContain("voters");
     expect(written).not.toContain("counts");
-    expect(written).not.toMatch(/\b9\b/);
+    expect(written).not.toContain("97");
     expect(written).not.toMatch(COUNT);
   });
 

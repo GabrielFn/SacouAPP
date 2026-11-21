@@ -60,7 +60,13 @@ function slowVote(fake: ReturnType<typeof createFakeSacouApi>) {
       });
     },
   };
-  return { api, calls, release: (result: ApiResult<MvpVote>) => pending.release(result) };
+  return {
+    api,
+    calls,
+    release: (result: ApiResult<MvpVote>) => {
+      pending.release(result);
+    },
+  };
 }
 
 afterEach(() => {
@@ -124,7 +130,7 @@ describe("the vote through the cache", () => {
     expect(client.getQueryData<MvpBallot>(KEY)?.myVote).toBeNull();
   });
 
-  test("D3 and D6 the ballot read again decides the screen: closed, not eligible", async () => {
+  test("D3 and D6 the ballot read again decides the screen: closed, not eligible", () => {
     const { client } = setup(SCENARIOS.closed);
     expect(bodyKindOf(client).kind).toBe("closed");
     client.setQueryData(KEY, SCENARIOS.notPlayed);
@@ -166,7 +172,11 @@ describe("the vote through the cache", () => {
     fake.respond("castMvpVote", apiErr(problem(422, "stats.mvp-candidate-invalid")));
     await castMvpVote(deps, TARGET, "m-bia");
 
-    const written = spies.flatMap((spy) => spy.mock.calls).flat().map(String).join(" ");
+    const written = spies
+      .flatMap((spy) => spy.mock.calls)
+      .flat()
+      .map(String)
+      .join(" ");
     expect(written).not.toContain("m-bia");
     expect(written).not.toContain("m-me");
   });
