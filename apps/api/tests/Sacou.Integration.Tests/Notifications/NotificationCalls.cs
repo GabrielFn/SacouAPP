@@ -41,16 +41,20 @@ internal static class NotificationCalls
 {
     public const string ListPath = "/v1/me/notifications";
 
-    public static string DevicePath(Guid installationId) => $"/v1/me/push-devices/{installationId}";
+    public const string DevicesPath = "/v1/me/push-devices";
+
+    public const string RemovePath = "/v1/me/push-devices/remove";
 
     public static string Token() => $"ExponentPushToken[{Guid.NewGuid():N}]";
 
-    public static string DeviceBody(string token, string platform = "android") =>
-        new JsonObject { ["token"] = token, ["platform"] = platform }.ToJsonString();
+    public static string DeviceBody(Guid installationId, string token, string platform = "android") =>
+        new JsonObject { ["installationId"] = installationId, ["token"] = token, ["platform"] = platform }.ToJsonString();
+
+    public static string RemoveBody(Guid installationId) => new JsonObject { ["installationId"] = installationId }.ToJsonString();
 
     public static async Task RegisterAsync(GroupWorld world, string subject, Guid installationId, string token)
     {
-        using var response = await world.SendAsAsync(subject, HttpMethod.Put, DevicePath(installationId), DeviceBody(token));
+        using var response = await world.SendAsAsync(subject, HttpMethod.Put, DevicesPath, DeviceBody(installationId, token));
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
@@ -123,15 +127,16 @@ internal static class NotificationCalls
         return id;
     }
 
-    /// <summary>An outbox row's attempts and whether it is out of the line (processed or set aside).</summary>
-    public static async Task<(int Attempts, bool Processed)> OutboxStateAsync(string connectionString, Guid id)
+    /// <summary>An outbox row's attempts, whether it was processed, and whether it was set aside (never both).</summary>
+    public static async Task<(int Attempts, bool Processed, bool SetAside)> OutboxStateAsync(string connectionString, Guid id)
     {
         await using var connection = await MemberRows.OpenAsync(connectionString);
-        await using var command = new NpgsqlCommand("SELECT attempts, processed_at IS NOT NULL FROM sessions.outbox_messages WHERE id = @id", connection);
+        await using var command = new NpgsqlCommand(
+            "SELECT attempts, processed_at IS NOT NULL, set_aside_at IS NOT NULL FROM sessions.outbox_messages WHERE id = @id", connection);
         command.Parameters.AddWithValue("id", id);
         await using var reader = await command.ExecuteReaderAsync(TestContext.Current.CancellationToken);
         Assert.True(await reader.ReadAsync(TestContext.Current.CancellationToken));
-        return (reader.GetInt32(0), reader.GetBoolean(1));
+        return (reader.GetInt32(0), reader.GetBoolean(1), reader.GetBoolean(2));
     }
 
     /// <summary>The outbox row of the promotion of <paramref name="member"/> in <paramref name="round"/> (the latest one).</summary>

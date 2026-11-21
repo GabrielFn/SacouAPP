@@ -8,7 +8,7 @@ namespace Sacou.Modules.Sessions.Application.Outbox;
 /// pump, within <see cref="Budget"/> of their own. The request is never failed nor cancelled by them: what does not fit,
 /// or fails, stays in the outbox or pending for the next run. Nothing runs outside a request (ADR 0068).
 /// </summary>
-internal sealed partial class OutboxDrain(SessionsOutboxRelay relay, INotificationPump pump, ILogger<OutboxDrain> logger)
+internal sealed partial class OutboxDrain(SessionsNotificationSource source, INotificationPump pump, ILogger<OutboxDrain> logger)
 {
     public static readonly TimeSpan Budget = TimeSpan.FromSeconds(3);
 
@@ -17,13 +17,7 @@ internal sealed partial class OutboxDrain(SessionsOutboxRelay relay, INotificati
         using var budget = new CancellationTokenSource(Budget);
         try
         {
-            RelayRun run;
-            do
-            {
-                run = await relay.RunAsync(budget.Token).ConfigureAwait(false);
-            }
-            while (run.Taken == SessionsOutboxRelay.BatchSize && run.Failed == 0);
-
+            await source.RelayAsync(budget.Token).ConfigureAwait(false);
             await pump.RunAsync(budget.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (budget.IsCancellationRequested)

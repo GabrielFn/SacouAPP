@@ -19,17 +19,19 @@ public sealed class DevicesAndListTests(IntegrationDatabase database) : IAsyncLi
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
     [Theory]
-    [InlineData("""{"token":"ExponentPushToken[ab c]","platform":"android"}""", "notifications.token-invalid")]
-    [InlineData("""{"token":"FcmToken[abc]","platform":"ios"}""", "notifications.token-invalid")]
-    [InlineData("""{"token":"ExponentPushToken[abc]"}""", null)]
-    [InlineData("""{"token":"ExponentPushToken[abc]","platform":"windows"}""", null)]
-    [InlineData("""{"token":"ExponentPushToken[abc]","platform":"android","userId":"x"}""", null)]
+    [InlineData("""{"installationId":"0193a5b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b","token":"ExponentPushToken[ab c]","platform":"android"}""", "notifications.token-invalid")]
+    [InlineData("""{"installationId":"0193a5b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b","token":"FcmToken[abc]","platform":"ios"}""", "notifications.token-invalid")]
+    [InlineData("""{"installationId":"0193a5b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b","token":"ExponentPushToken[abc]"}""", null)]
+    [InlineData("""{"installationId":"0193a5b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b","token":"ExponentPushToken[abc]","platform":"windows"}""", null)]
+    [InlineData("""{"installationId":"0193a5b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b","token":"ExponentPushToken[abc]","platform":"android","userId":"x"}""", null)]
+    [InlineData("""{"token":"ExponentPushToken[abc]","platform":"android"}""", null)]
+    [InlineData("""{"installationId":"00000000-0000-0000-0000-000000000000","token":"ExponentPushToken[abc]","platform":"android"}""", "notifications.installation-invalid")]
     public async Task Register_OutOfShape_Is400(string body, string? code)
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
 
-        using var response = await world.SendAsync(GroupActor.Player, HttpMethod.Put, N.DevicePath(Guid.NewGuid()), body);
+        using var response = await world.SendAsync(GroupActor.Player, HttpMethod.Put, N.DevicesPath, body);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         if (code is not null)
@@ -113,12 +115,12 @@ public sealed class DevicesAndListTests(IntegrationDatabase database) : IAsyncLi
         var token = N.Token();
         await N.RegisterAsync(world, owner.Subject, installation, token);
 
-        using var foreign = await world.SendAsync(GroupActor.Player, HttpMethod.Delete, N.DevicePath(installation));
+        using var foreign = await world.SendAsync(GroupActor.Player, HttpMethod.Post, N.RemovePath, N.RemoveBody(installation));
         Assert.Equal(HttpStatusCode.NoContent, foreign.StatusCode);
         Assert.Equal(1, await DevicesWithAsync(token));
 
-        using var own = await world.SendAsAsync(owner.Subject, HttpMethod.Delete, N.DevicePath(installation));
-        using var again = await world.SendAsAsync(owner.Subject, HttpMethod.Delete, N.DevicePath(installation));
+        using var own = await world.SendAsAsync(owner.Subject, HttpMethod.Post, N.RemovePath, N.RemoveBody(installation));
+        using var again = await world.SendAsAsync(owner.Subject, HttpMethod.Post, N.RemovePath, N.RemoveBody(installation));
         Assert.Equal(HttpStatusCode.NoContent, own.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, again.StatusCode);
         Assert.Equal(0, await DevicesWithAsync(token));

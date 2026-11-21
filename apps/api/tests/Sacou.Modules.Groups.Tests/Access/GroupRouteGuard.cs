@@ -35,8 +35,8 @@ internal static class GroupRouteGuard
         // The person's own season (E3.9 part 4b, ADR 0071): resolved from the token, no group id.
         "GET /v1/me/stats",
         // The caller's own phones and notifications (E3.11, ADR 0069): by the signed-in account only.
-        "PUT /v1/me/push-devices/{installationId:guid}",
-        "DELETE /v1/me/push-devices/{installationId:guid}",
+        "PUT /v1/me/push-devices",
+        "POST /v1/me/push-devices/remove",
         "GET /v1/me/notifications",
         "POST /v1/me/notifications/{notificationId:guid}/read",
         "POST /v1/me/notifications/read-all",

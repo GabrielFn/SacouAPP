@@ -40,6 +40,8 @@ public static class SessionsModule
         services.AddScoped<RoundWriter>();
         // The outbox of the promotions and its drain after the commit; the rounds the notification list shows (E3.11, ADR 0069).
         services.AddScoped<SessionsOutboxRelay>();
+        services.AddScoped<SessionsNotificationSource>();
+        services.AddScoped<INotificationSource>(provider => provider.GetRequiredService<SessionsNotificationSource>());
         services.AddScoped<OutboxDrain>();
         services.AddScoped<INotificationRounds, StoreNotificationRounds>();
         services.AddScoped<RoundMaterializer>();

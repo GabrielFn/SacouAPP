@@ -26,6 +26,12 @@ internal sealed class OutboxMessageRow
 
     public DateTimeOffset? ProcessedAt { get; init; }
 
+    /// <summary>
+    /// Set when the relay gave up on the message (out of shape, or failed <c>MaxAttempts</c> times): out of the line, but
+    /// never counted as processed, so a query or an alert tells one from the other (ADR 0069, D3).
+    /// </summary>
+    public DateTimeOffset? SetAsideAt { get; init; }
+
     public required int Attempts { get; init; }
 }
 
@@ -102,6 +108,9 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
     public const string Table = "outbox_messages";
     public const string DedupeIndex = "ux_outbox_messages_dedupe_key";
 
+    /// <summary>The messages still in the line: neither processed nor set aside.</summary>
+    public const string InLineFilter = "processed_at IS NULL AND set_aside_at IS NULL";
+
     private const string TimestampType = "timestamp with time zone";
 
     public void Configure(EntityTypeBuilder<OutboxMessageRow> builder)
@@ -110,6 +119,7 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         {
             table.HasCheckConstraint("ck_outbox_messages_type", $"type IN ({string.Join(", ", OutboxMessages.Types.Select(type => $"'{type}'"))})");
             table.HasCheckConstraint("ck_outbox_messages_attempts", "attempts >= 0");
+            table.HasCheckConstraint("ck_outbox_messages_one_end", "processed_at IS NULL OR set_aside_at IS NULL");
         });
         builder.HasKey(message => message.Id).HasName("pk_outbox_messages");
         builder.Property(message => message.Id).HasColumnName("id").ValueGeneratedNever();
@@ -118,10 +128,11 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.Property(message => message.Payload).HasColumnName("payload").HasColumnType("jsonb");
         builder.Property(message => message.OccurredAt).HasColumnName("occurred_at").HasColumnType(TimestampType);
         builder.Property(message => message.ProcessedAt).HasColumnName("processed_at").HasColumnType(TimestampType);
+        builder.Property(message => message.SetAsideAt).HasColumnName("set_aside_at").HasColumnType(TimestampType);
         builder.Property(message => message.Attempts).HasColumnName("attempts");
 
         builder.HasIndex(message => message.DedupeKey).IsUnique().HasDatabaseName(DedupeIndex);
         builder.HasIndex(message => new { message.OccurredAt, message.Id }).HasDatabaseName("ix_outbox_messages_unprocessed")
-            .HasFilter("processed_at IS NULL");
+            .HasFilter(InLineFilter);
     }
 }

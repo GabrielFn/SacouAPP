@@ -8,8 +8,9 @@ namespace Sacou.Modules.Identity.Authentication;
 internal sealed record FetchedSigningKeys(FrozenDictionary<string, X509SecurityKey> Keys, TimeSpan? MaxAge);
 
 /// <summary>
-/// One GET to the URL the Firebase documentation names, and nowhere else: no redirect, 5 s, 64 KB
-/// at most. A failure returns null and logs only its category (ADR 0036).
+/// One GET to the URL the Google documentation names, and nowhere else: no redirect, 5 s, 64 KB at most. A failure
+/// returns null and logs only its category (ADR 0036). The Firebase keys by default; the service caller's verifier
+/// (ADR 0069, D11) reads the Google OIDC keys, of the same shape, with its own <see cref="Source"/> and client.
 /// </summary>
 internal sealed partial class GoogleSigningKeyFetcher(
     IHttpClientFactory clients,
@@ -25,6 +26,12 @@ internal sealed partial class GoogleSigningKeyFetcher(
     /// <summary>The handler behind the named client. A redirect would leave the fixed URL.</summary>
     public static SocketsHttpHandler CreatePrimaryHandler() => new() { AllowAutoRedirect = false };
 
+    /// <summary>The fixed URL of the keys: never taken from a token.</summary>
+    public Uri Source { get; init; } = KeysUri;
+
+    /// <summary>The named client, so each source has its own handler.</summary>
+    public string ClientName { get; init; } = IdentityModule.SigningKeysHttpClientName;
+
     /// <summary>The whole fetch, headers and body, must end within this. Tests shorten it.</summary>
     internal TimeSpan FetchTimeout { get; init; } = Timeout;
 
@@ -37,8 +44,8 @@ internal sealed partial class GoogleSigningKeyFetcher(
         using var deadline = new CancellationTokenSource(FetchTimeout);
         try
         {
-            using var client = clients.CreateClient(IdentityModule.SigningKeysHttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Get, KeysUri);
+            using var client = clients.CreateClient(ClientName);
+            using var request = new HttpRequestMessage(HttpMethod.Get, Source);
             using var response = await client
                 .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token)
                 .ConfigureAwait(false);
