@@ -36,7 +36,7 @@ function isNotStarted(error: ApiError): boolean {
  * canceled round do not stop the user, since the round ends on its own 6 h after it starts (E3.18, D1),
  * and nothing is queued to try again. The one answer that stops it is "the round has not started", which
  * must reach the user before the court is closed. `onServerClosed` runs whenever the server answered the close,
-even if closing the session on the phone then fails. Then the session closes on the phone (the points keep
+ * even if closing the session on the phone then fails. Then the session closes on the phone (the points keep
  * being sent) and an upload starts at once.
  */
 export async function runEndRound(

@@ -16,6 +16,8 @@ import {
   weekSummaryText,
 } from "./round-cards";
 
+const HOUR_MS = 3_600_000;
+
 // Monday 2 November 2026, 10h local.
 const AUTO_END_HOURS = 6;
 const NOW = new Date(2026, 10, 2, 10, 0).getTime();
@@ -181,8 +183,8 @@ describe("recentRoundOf (question 153)", () => {
   });
 
   it("an early close shortens the window: it runs 24 h after the real endsAt", () => {
-    const closedEarly = { ...started, endsAt: new Date(startMs + 3_600_000).toISOString() };
-    const lastMoment = startMs + 3_600_000 + SUMMARY_CARD_WINDOW_MS;
+    const closedEarly = { ...started, endsAt: new Date(startMs + HOUR_MS).toISOString() };
+    const lastMoment = startMs + HOUR_MS + SUMMARY_CARD_WINDOW_MS;
     expect(recentRoundOf([closedEarly], lastMoment - 1)?.roundId).toBe("tue");
     expect(recentRoundOf([closedEarly], lastMoment)).toBeNull();
   });
