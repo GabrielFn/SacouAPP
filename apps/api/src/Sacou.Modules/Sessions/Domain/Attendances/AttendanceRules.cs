@@ -37,7 +37,7 @@ internal static partial class AttendanceRules
     private static Error? Refusal(
         Round round, AttendanceSettings rules, Respondent respondent, AttendanceResponse response, ResponseActor actor, DateTimeOffset now)
     {
-        if (round.IsCanceled || round.ClosedAt is not null)
+        if (round.IsCanceled || (actor == ResponseActor.Self && round.ClosedAt is not null))
         {
             return RoundErrors.RoundClosed;
         }

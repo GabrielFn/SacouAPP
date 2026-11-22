@@ -179,6 +179,26 @@ public sealed class AttendanceTests
     }
 
     [Fact]
+    public void A12b_AfterTheRoundEnded_PlayerIsRefused_AdminStillCorrectsTheAttendance()
+    {
+        var rules = Rules(capacity: 2);
+        var round = Going(NewRound(), rules, 1);
+        var early = round.Slot.StartsAt.AddHours(-2);
+        var normal = round.Slot.StartsAt.AddHours(1);
+
+        foreach (var (ended, now) in new[]
+        {
+            (round.Close(early, hasFinishedMatch: true).Value.Round, early),
+            (round.Close(normal, hasFinishedMatch: false).Value.Round, normal),
+        })
+        {
+            Assert.Equal("sessions.round-closed", Respond(ended, rules, 2, Reply.Going, now: now).Error.Code);
+            Assert.True(Respond(ended, rules, 2, Reply.Going, ResponseActor.Admin, now: now).IsSuccess);
+            Assert.True(Respond(ended, rules, 1, Reply.NotGoing, ResponseActor.Admin, now: now).IsSuccess);
+        }
+    }
+
+    [Fact]
     public void A13_ReconcileDropsWhoLeftTheGroup_AndPromotesTheFirstInLine()
     {
         var rules = Rules(capacity: 2);

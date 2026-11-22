@@ -35,7 +35,7 @@ public sealed class RoundLinkEndedEarlyTests(IntegrationDatabase database) : IAs
         var html = await page.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         var (status, body) = await RoundLinkCalls.AnswerAsync(world, A.Player, code);
 
-        Assert.Contains("Essa rodada já começou.", html, StringComparison.Ordinal);
+        Assert.Contains("Essa rodada já terminou.", html, StringComparison.Ordinal);
         Assert.Equal(HttpStatusCode.Conflict, status);
         Assert.Equal(RoundLinkCalls.RoundClosed, RoundLinkCalls.Code(body));
     }

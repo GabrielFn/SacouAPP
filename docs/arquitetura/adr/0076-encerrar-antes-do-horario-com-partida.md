@@ -22,7 +22,7 @@ começa cedo e uma partida já terminou, o resumo e a votação do MVP só abrir
   novo instante; o risco de filtros que assumem `endsAt >= startsAt` não tem teste dedicado (as consultas de estatísticas
   e `recentRoundOf` com `endsAt < startsAt` ficam como pendência).
 - Depois do encerramento antecipado, as regras de antes do início deixam de valer: o link (`IsOpenForLinkAt`) fecha
-  e a página `/r` mostra "já começou"; confirmar ou sair responde `sessions.round-closed`, para qualquer ator; e a
+  e a página `/r` mostra "já terminou"; confirmar ou sair responde `sessions.round-closed` para o próprio jogador (o admin segue corrigindo a presença); e a
   edição da rodada também é recusada (`sessions.round-closed`). Cobertos por testes de unidade e de integração.
 - Alternativas descartadas: antecipar o `startsAt` pelo primeiro evento da quadra (muda a data exibida e a página
   web) e esconder o botão (resumo só 6 h depois).

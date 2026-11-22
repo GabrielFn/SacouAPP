@@ -22,6 +22,7 @@ internal static class WebTexts
     public const string NoScript = "Ative o JavaScript para confirmar.";
     public const string Canceled = "Rodada cancelada.";
     public const string Started = "Essa rodada já começou.";
+    public const string Ended = "Essa rodada já terminou.";
     public const string LinkInvalidTitle = "Link inválido";
     public const string LinkInvalid = "Link inválido ou desativado. Peça um novo para quem organiza.";
     public const string TooManyRequests = "Muitas tentativas. Tente de novo em alguns segundos.";
