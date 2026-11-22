@@ -187,21 +187,21 @@ function SessionStack() {
   return (
     <PushPromptHost>
       <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={signedIn && !onboarding}>
-        {SIGNED_IN_ROUTES.map((name) => (
-          <Stack.Screen key={name} name={name} />
-        ))}
-      </Stack.Protected>
-      <Stack.Protected guard={onboarding}>
-        {ONBOARDING_ROUTES.map((name) => (
-          <Stack.Screen key={name} name={name} />
-        ))}
-      </Stack.Protected>
-      <Stack.Protected guard={!signedIn}>
-        {SIGNED_OUT_ROUTES.map((name) => (
-          <Stack.Screen key={name} name={name} />
-        ))}
-      </Stack.Protected>
+        <Stack.Protected guard={signedIn && !onboarding}>
+          {SIGNED_IN_ROUTES.map((name) => (
+            <Stack.Screen key={name} name={name} />
+          ))}
+        </Stack.Protected>
+        <Stack.Protected guard={onboarding}>
+          {ONBOARDING_ROUTES.map((name) => (
+            <Stack.Screen key={name} name={name} />
+          ))}
+        </Stack.Protected>
+        <Stack.Protected guard={!signedIn}>
+          {SIGNED_OUT_ROUTES.map((name) => (
+            <Stack.Screen key={name} name={name} />
+          ))}
+        </Stack.Protected>
       </Stack>
     </PushPromptHost>
   );

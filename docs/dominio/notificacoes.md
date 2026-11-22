@@ -35,6 +35,14 @@ Só esse tipo no piloto (pergunta 113). "Lista abriu", "times sorteados", "vota�
 - O mesmo token só fica numa conta: registrar em outra conta (celular emprestado, outro login) tira da anterior, com as entregas pendentes dela.
 - Aparelho que o serviço de push diz não conhecer mais é desligado.
 - Registro: `PUT /v1/me/push-devices` com `{ installationId, token, platform }`; saída: `POST /v1/me/push-devices/remove` com `{ installationId }`. O `installationId` vai no corpo, nunca no caminho, que aparece nos logs de requisição.
+- O app registra o aparelho a cada abertura com sessão e permissão dada. Se o registro falha, tenta **uma** vez mais depois de 30 s e para; a próxima abertura tenta de novo (nunca em laço, PR #209). Em desenvolvimento, o resultado (`registered`, `no-token`, `failed`...) vai para o log do Metro, nunca o token nem o `installationId` (R98, item 9).
+
+## Pedido da permissão (R98, item 9; Gabriel, 22/11/2026)
+
+- O app oferece as notificações depois do primeiro "VOU" aceito pelo servidor ou da primeira rodada criada (depois da folha de compartilhar), com uma frase antes do pedido do sistema: "Quer saber quando sair da espera?", com "Ativar notificações" e "Agora não".
+- Uma vez só por celular: a oferta é marcada no `sacou-cache.db` (`push-prompt-offered`) quando aparece. "Agora não", a recusa do sistema ou fechar a folha não voltam a perguntar. Sem a marca legível, não pergunta.
+- Só oferece se o sistema ainda pode perguntar: com a permissão dada ou recusada de vez, nada aparece. O cartão da tela 28 continua como antes.
+- Dada a permissão, o aparelho registra na hora.
 
 ## Envio (E3.11 Parte 2)
 

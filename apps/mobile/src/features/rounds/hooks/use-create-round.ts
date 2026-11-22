@@ -112,16 +112,18 @@ export function useCreateRound(
           onPublished(round.roundId);
           const capacity = round.capacity;
           // After the share sheet, the round created offers the notifications (R98, item 9).
-          void shareSheet.share(
-            shareTextOf(
-              input.groupName,
-              dateLabel(round.localDate),
-              formatTime(round.localTime),
-              round.venue,
-              capacity,
-              round.shareUrl ?? null,
-            ),
-          ).then(offerPushPrompt, offerPushPrompt);
+          void shareSheet
+            .share(
+              shareTextOf(
+                input.groupName,
+                dateLabel(round.localDate),
+                formatTime(round.localTime),
+                round.venue,
+                capacity,
+                round.shareUrl ?? null,
+              ),
+            )
+            .then(offerPushPrompt, offerPushPrompt);
         },
       });
     },
