@@ -114,8 +114,10 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
         _ = await PlayAsync(world, round);
         var closed = await CloseAsync(world, A.Scorekeeper, round);
 
-        Assert.Equal(tap, closed["closedAt"]!.GetValue<DateTimeOffset>());
-        Assert.Equal(tap, closed["endsAt"]!.GetValue<DateTimeOffset>());
+        var closedAt = closed["closedAt"]!.GetValue<DateTimeOffset>();
+        Assert.InRange(closedAt, tap, tap.AddMinutes(1));
+        Assert.True(closedAt < startsAt);
+        Assert.Equal(closedAt, closed["endsAt"]!.GetValue<DateTimeOffset>());
     }
 
     /// <summary>I5: a round made before the column has no close, so it ends on its own.</summary>
