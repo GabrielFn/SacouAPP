@@ -5,11 +5,7 @@ import type {
   TakeOverCourtAnswer,
 } from "../../../services/api/sacou-api";
 import type { CourtAccountRef } from "../ports/court-account";
-import type {
-  CourtEventLog,
-  CourtSessionOrigin,
-  StoredCourtLog,
-} from "../ports/court-event-log";
+import type { CourtEventLog, CourtSessionOrigin, StoredCourtLog } from "../ports/court-event-log";
 import { highestSequence } from "../persistence/append-rules";
 import { isRecord, takeoverFailureOf, withRetryAfter } from "./api-calls";
 import { MAX_IMPORTED_EVENTS, readServerStream, type ImportDeps } from "./import-stream";
@@ -61,7 +57,7 @@ interface KeptPair {
   readonly answer: TakeOverCourtAnswer;
   readonly target: TakeoverTarget;
   readonly deviceId: string;
-  readonly ownerKey: string;
+  readonly account: CourtAccountRef;
 }
 
 /**
@@ -71,24 +67,33 @@ interface KeptPair {
  * again whole, never replaced. Anything else, and the stream of the server is imported.
  */
 function keepsLocalLog(stored: StoredCourtLog, pair: KeptPair): boolean {
-  const { answer, target, deviceId, ownerKey } = pair;
+  const { answer, target, deviceId, account } = pair;
   return (
     answer.batch === target.summary.currentBatch &&
     stored.batch === answer.batch &&
     stored.takenOverBatch === null &&
     stored.syncHalt === null &&
     stored.fromRound &&
-    stored.ownerKey === ownerKey &&
+    stored.ownerKey === account.key &&
     highestSequence(stored.events, deviceId) >= answer.lastSequence
   );
 }
 
 /** The local session reopened as it is; `false` when it is not one this phone can go on writing. */
-async function reopenKept(deps: TakeoverDeps, pair: KeptPair, dispatch: Dispatch): Promise<boolean> {
+async function reopenKept(
+  deps: TakeoverDeps,
+  pair: KeptPair,
+  dispatch: Dispatch,
+): Promise<boolean> {
   const { courtSessionId } = pair.target.summary;
   const stored = await deps.log.load(courtSessionId);
   if (!stored.ok || !keepsLocalLog(stored.value, pair)) return false;
   dispatch({ type: "taken-over", eventsToRead: 0 });
+  // As on the import: another account signed in meanwhile gets nothing.
+  if ((await deps.account())?.session !== pair.account.session) {
+    dispatch({ type: "failed", reason: "no-account" });
+    return true;
+  }
   const reopened = await deps.log.reopenSession(courtSessionId);
   dispatch(
     reopened.ok ? { type: "imported", courtSessionId } : { type: "failed", reason: "failed" },
@@ -180,7 +185,7 @@ export async function runTakeover(
     dispatch({ type: "failed", reason: "import-invalid" });
     return;
   }
-  const pair = { answer: read, target, deviceId: device.value, ownerKey: account.key };
+  const pair = { answer: read, target, deviceId: device.value, account };
   if (await reopenKept(deps, pair, dispatch)) return;
   await importAndKeep(deps, target, { account, deviceId: device.value, answer: read }, dispatch);
 }
