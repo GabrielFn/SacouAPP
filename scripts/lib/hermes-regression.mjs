@@ -31,8 +31,11 @@ export function hermesLintCases(prefix) {
       NO_RESTRICTED_PROPERTIES,
       HERMES,
     ],
-    [`${home}sorted.test.ts`, sorted, CLEAN],
-    [`${home}at.ts`, "export const first = [1, 2].at(0);\n", CLEAN],
-    [`${home}sort-copy.ts`, "export const sorted = [...[3, 1]].sort((a, b) => a - b);\n", CLEAN],
+    [`${home}at.ts`, 'export const first = ["b", "a"].at(0);\n', CLEAN],
+    [
+      `${home}sort-copy.ts`,
+      'export const sorted = [...["b", "a"]].sort((a, b) => a.localeCompare(b));\n',
+      CLEAN,
+    ],
   ];
 }
