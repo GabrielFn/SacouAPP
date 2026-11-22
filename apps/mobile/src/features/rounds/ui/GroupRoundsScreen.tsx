@@ -31,6 +31,8 @@ export interface RoundsSectionProps {
 
 function RoundsSection({ title, items, emptyText, hint, onOpen }: RoundsSectionProps) {
   const { tokens } = useTheme();
+  const showEmpty = emptyText !== null && items.length === 0;
+  const showHint = hint !== undefined && items.length > 0;
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
       <Text
@@ -40,11 +42,11 @@ function RoundsSection({ title, items, emptyText, hint, onOpen }: RoundsSectionP
       >
         {title}
       </Text>
-      {items.length === 0 && emptyText !== null ? <Text variant="muted">{emptyText}</Text> : null}
+      {showEmpty ? <Text variant="muted">{emptyText}</Text> : null}
       {items.map((item) => (
         <GroupRoundRow key={item.card.roundId} item={item} onOpen={onOpen} />
       ))}
-      {hint !== undefined && items.length > 0 ? <Text variant="muted">{hint}</Text> : null}
+      {showHint ? <Text variant="muted">{hint}</Text> : null}
     </View>
   );
 }
@@ -58,6 +60,7 @@ export interface GroupRoundsBodyProps {
 export function GroupRoundsBody({ model, onOpen }: GroupRoundsBodyProps) {
   const { tokens } = useTheme();
   const { upcoming, recent } = model.view;
+  const hasRecent = recent.length > 0;
   if (upcoming.length === 0 && recent.length === 0) {
     return (
       <EmptyState
@@ -74,7 +77,7 @@ export function GroupRoundsBody({ model, onOpen }: GroupRoundsBodyProps) {
         emptyText={groupRounds.noUpcoming}
         onOpen={onOpen}
       />
-      {recent.length === 0 ? null : (
+      {hasRecent ? (
         <RoundsSection
           title={groupRounds.recent}
           items={recent}
@@ -82,7 +85,7 @@ export function GroupRoundsBody({ model, onOpen }: GroupRoundsBodyProps) {
           hint={groupRounds.recentHint}
           onOpen={onOpen}
         />
-      )}
+      ) : null}
     </View>
   );
 }

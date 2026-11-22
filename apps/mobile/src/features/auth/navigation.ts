@@ -23,6 +23,7 @@ export const SIGNED_IN_ROUTES = [
   "groups/[groupId]/queue-rule",
   "groups/[groupId]/ratings",
   "groups/[groupId]/settings",
+  "groups/[groupId]/rounds/index",
   "groups/[groupId]/rounds/new",
   "groups/[groupId]/rounds/[roundId]/index",
   "groups/[groupId]/rounds/[roundId]/add",
