@@ -22,6 +22,7 @@ import {
   nextFreeRoundDate,
   parseIsoDate,
   parseTime,
+  pickableDates,
   startOf,
 } from "./round-dates";
 
@@ -48,6 +49,12 @@ export function firstRoundDate(
   const fixedDay = group.schedule.enabled;
   const time = fixedDay ? group.schedule.startTime : DEFAULT_ROUND_TIME;
   return nextFreeRoundDate(now, fixedDay ? group.schedule.weekday : null, time, takenDates);
+}
+
+/** The first date of the sheet: the next day of the group, unless the selected date falls outside the 14 days from it (then it starts at the selected one, so it always shows). */
+export function sheetFirstDate(firstDate: string, selected: string): string {
+  const shown = pickableDates(firstDate).some((option) => option.date === selected);
+  return shown ? firstDate : selected;
 }
 
 /** The first state of screen 20, from the group's settings and the clock (never copied again). */

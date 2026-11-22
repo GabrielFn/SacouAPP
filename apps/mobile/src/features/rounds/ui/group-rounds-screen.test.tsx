@@ -2,6 +2,7 @@ import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { RoundSummary } from "../../../services/api/sacou-api";
+import { createScaledTokens } from "../../../theme/scale";
 import { groupsHref } from "../../groups/navigation";
 import type { GroupRoundsModel } from "../hooks/use-group-rounds";
 import { groupRoundsView } from "../model/group-rounds";
@@ -10,6 +11,7 @@ import { GroupRoundRow } from "./GroupRoundRow";
 import { GroupRoundsContent, GroupRoundsScreen } from "./GroupRoundsScreen";
 
 const screen = vi.hoisted(() => ({
+  width: 360,
   push: vi.fn(),
   model: { kind: "loading" },
 }));
@@ -19,13 +21,7 @@ vi.mock("react-native", () => ({ View: "View", Pressable: "Pressable" }));
 vi.mock("../../../theme/theme-context", () => ({
   useTheme: () => ({
     colors: {},
-    tokens: {
-      sizes: { groupCardMin: 128 },
-      spacing: {},
-      borderWidths: {},
-      radii: {},
-      fontSizes: {},
-    },
+    tokens: createScaledTokens({ windowWidth: screen.width, fontScale: 1 }),
   }),
 }));
 vi.mock("../hooks/use-group-rounds", () => ({ useGroupRounds: () => screen.model }));
@@ -122,6 +118,7 @@ function render(model: GroupRoundsModel): readonly Found[] {
 
 beforeEach(() => {
   screen.push.mockClear();
+  screen.width = 360;
 });
 
 describe("Nova rodada is for who organizes", () => {
@@ -150,6 +147,18 @@ describe("where a round leads", () => {
     (pressables[1]?.props.onPress as () => void)();
     expect(screen.push).toHaveBeenNthCalledWith(1, roundHref("g1", "open"));
     expect(screen.push).toHaveBeenNthCalledWith(2, summaryHref("g1", "ended"));
+  });
+});
+
+describe("a canceled round", () => {
+  test("a canceled past round still opens screen 06, never the summary", () => {
+    const now = START + HOUR_MS;
+    const found = render(
+      listOf([round("gone", START - DAY_MS, { status: "canceled" })], false, now),
+    );
+    const [row] = named(found, "Pressable");
+    (row?.props.onPress as () => void)();
+    expect(screen.push).toHaveBeenCalledWith(roundHref("g1", "gone"));
   });
 });
 
@@ -223,11 +232,15 @@ describe("the row of a round (accessibility and layout)", () => {
     expect(row?.props.accessibilityLabel).toBe("Qui, 19/11, Aberta, Ginásio Sesc");
   });
 
-  test.each([280, 360, 480])("keeps the 44 floor at %i dp wide (no width in the style)", () => {
-    if (item === undefined) throw new Error("no item");
-    const [row] = named(expand(GroupRoundRow({ item, onOpen: vi.fn() })), "Pressable");
-    const style = row?.props.style as { minHeight: number; width?: unknown };
-    expect(style.minHeight).toBeGreaterThanOrEqual(44);
-    expect(style.width).toBeUndefined();
-  });
+  test.each([280, 360, 480])(
+    "keeps the 44 floor at %i dp wide (no width in the style)",
+    (width) => {
+      screen.width = width;
+      if (item === undefined) throw new Error("no item");
+      const [row] = named(expand(GroupRoundRow({ item, onOpen: vi.fn() })), "Pressable");
+      const style = row?.props.style as { minHeight: number; width?: unknown };
+      expect(style.minHeight).toBeGreaterThanOrEqual(44);
+      expect(style.width).toBeUndefined();
+    },
+  );
 });

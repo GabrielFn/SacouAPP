@@ -259,7 +259,7 @@ export const roundsStrings = {
     rowTitle: (date: string, state: string) => `${date} · ${state}`,
     rowLabel: (date: string, state: string, venue: string) => `${date}, ${state}, ${venue}`,
     noUpcoming: "Nenhuma rodada marcada.",
-    recentHint: "Rodadas encerradas nas últimas 24 horas.",
+    recentHint: "Rodadas encerradas recentemente.",
     emptyTitle: "Nenhuma rodada por aqui",
     emptyOrganizer: "Marque a próxima em Nova rodada.",
     emptyPlayer: "Quando a organização marcar uma rodada, ela aparece aqui.",

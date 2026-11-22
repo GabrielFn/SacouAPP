@@ -17,7 +17,7 @@ import { formatTime } from "../../groups/model/schedule-text";
 import { useGroup, useGroupSettings } from "../../groups/queries/use-group-queries";
 import { useCreateRound, type CreateRoundModel } from "../hooks/use-create-round";
 import { useEditRound } from "../hooks/use-edit-round";
-import { firstRoundDate } from "../model/create-round.selectors";
+import { firstRoundDate, sheetFirstDate } from "../model/create-round.selectors";
 import { dateLabel } from "../model/round-dates";
 import { roundChips, sourceReader } from "../model/round-chips";
 import { managesRounds, roundSettingsOf, type RoundSettingsView } from "../model/round-detail";
@@ -117,7 +117,10 @@ function RoundForm({ groupName, settings, model, editing }: RoundFormProps) {
       <RepeatRow model={model} enabled={!editing && settings.schedule.enabled} />
       <DatePickerSheet
         visible={state.sheet.kind === "date"}
-        firstDate={firstRoundDate(settings, new Date(wallClockNow()))}
+        firstDate={sheetFirstDate(
+          firstRoundDate(settings, new Date(wallClockNow())),
+          state.localDate,
+        )}
         selected={state.localDate}
         onPick={(localDate) => {
           dispatch({ type: "date-picked", localDate });

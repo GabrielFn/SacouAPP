@@ -25,6 +25,7 @@ import {
   createRoundErrors,
   createRoundRequest,
   firstRoundDate,
+  sheetFirstDate,
   initialCreateRoundState,
   layerChangeCount,
   repeatSummary,
@@ -455,5 +456,25 @@ describe("Editar rodada (screen 20 with roundId)", () => {
     });
     const body = updateRoundRequest(group, plain, { ...state, capacityText: "14" });
     expect(body.settings).toEqual({});
+  });
+});
+
+describe("sheetFirstDate: the selected date always shows in the sheet (R97 part 2)", () => {
+  test("a selected date inside the 14 days keeps the next day first", () => {
+    expect(sheetFirstDate("2026-11-03", "2026-11-10")).toBe("2026-11-03");
+  });
+
+  test("a selected date before the first one starts the sheet there", () => {
+    expect(sheetFirstDate("2026-11-10", "2026-11-03")).toBe("2026-11-03");
+  });
+
+  test("the suggestion that skips 14+ days of taken dates still shows", () => {
+    const taken = Array.from({ length: 3 }, (_unused, week) =>
+      isoDateOf(new Date(2026, 10, 3 + week * 7)),
+    );
+    const first = firstRoundDate(rachaDeTerca(), MONDAY_MORNING);
+    const suggested = nextFreeRoundDate(MONDAY_MORNING, TUESDAY, "20:30", taken);
+    const dates = pickableDates(sheetFirstDate(first, suggested)).map((option) => option.date);
+    expect(dates).toContain(suggested);
   });
 });
