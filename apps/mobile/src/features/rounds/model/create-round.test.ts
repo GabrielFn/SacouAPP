@@ -292,6 +292,10 @@ describe("what is refused", () => {
     expect(errors(edit({ localDate: "2026-11-02", localTime: "09:00" })).time).not.toBeNull();
   });
 
+  test("today at 23:00 still passes in the morning", () => {
+    expect(errors(edit({ localDate: "2026-11-02", localTime: "23:00" })).time).toBeNull();
+  });
+
   test("a venue of 80 characters passes and one of 81 does not", () => {
     expect(errors(edit({ venue: "a".repeat(80) })).venue).toBeNull();
     expect(errors(edit({ venue: "a".repeat(81) })).venue).not.toBeNull();

@@ -11,7 +11,7 @@ import {
   recentRoundOf,
   roundCardsOf,
   SUMMARY_CARD_WINDOW_MS,
-  roundsThisWeek,
+  roundsInWindow,
   upcomingRoundsOf,
   swatchIndexOf,
   weekSummaryText,
@@ -67,9 +67,9 @@ describe("nextRoundOf", () => {
   });
 });
 
-describe("roundsThisWeek", () => {
+describe("roundsInWindow", () => {
   it("counts the scheduled rounds from now to the end of Sunday, of every group", () => {
-    expect(roundsThisWeek([[WEDNESDAY, FRIDAY, PAST], [NEXT_WEEK]], NOW)).toBe(2);
+    expect(roundsInWindow([[WEDNESDAY, FRIDAY, PAST], [NEXT_WEEK]], NOW)).toBe(2);
     expect(weekSummaryText(2)).toBe("2 rodadas nos próximos 7 dias.");
     expect(weekSummaryText(1)).toBe("1 rodada nos próximos 7 dias.");
     expect(weekSummaryText(0)).toBeNull();
@@ -82,24 +82,24 @@ describe("roundsThisWeek", () => {
       "mon",
       "tue",
     ]);
-    expect(roundsThisWeek([[monday, tuesday]], sunday)).toBe(2);
+    expect(roundsInWindow([[monday, tuesday]], sunday)).toBe(2);
   });
   it("includes a round exactly 7 days ahead and leaves out the one a minute later", () => {
     const edge = summary("edge", "2026-11-09", "10:00");
     const after = summary("after", "2026-11-09", "10:01");
-    expect(roundsThisWeek([[edge, after]], NOW)).toBe(1);
+    expect(roundsInWindow([[edge, after]], NOW)).toBe(1);
   });
   it("leaves out a canceled round, and with none in the window falls back to the next one", () => {
     const canceled = { ...WEDNESDAY, status: "canceled" as const };
-    expect(roundsThisWeek([[canceled]], NOW)).toBe(0);
+    expect(roundsInWindow([[canceled]], NOW)).toBe(0);
     expect(upcomingRoundsOf([canceled, NEXT_WEEK], NOW).map((round) => round.roundId)).toEqual([
       "next-week",
     ]);
   });
   it("works on a Saturday and a Monday as well", () => {
     const saturday = new Date(2026, 10, 7, 9, 0).getTime();
-    expect(roundsThisWeek([[NEXT_WEEK]], saturday)).toBe(1);
-    expect(roundsThisWeek([[WEDNESDAY]], NOW)).toBe(1);
+    expect(roundsInWindow([[NEXT_WEEK]], saturday)).toBe(1);
+    expect(roundsInWindow([[WEDNESDAY]], NOW)).toBe(1);
   });
 });
 

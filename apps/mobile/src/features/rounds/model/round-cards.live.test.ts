@@ -6,7 +6,7 @@ import {
   nextRoundOf,
   recentRoundOf,
   roundCardsOf,
-  roundsThisWeek,
+  roundsInWindow,
   SUMMARY_CARD_WINDOW_MS,
   upcomingRoundsOf,
 } from "./round-cards";
@@ -126,7 +126,7 @@ describe("upcomingRoundsOf: every round of the week (R97 part 2, D6)", () => {
     const list = [at("a", new Date(2026, 10, 20, 20)), at("b", new Date(2026, 10, 21, 20))];
     const group = { groupId: "g", name: "Racha", role: "admin", memberType: "regular" } as const;
     const cards = roundCardsOf([group], [list], NOW);
-    expect(cards.groups[0]?.upcoming).toHaveLength(roundsThisWeek([list], NOW));
+    expect(cards.groups[0]?.upcoming).toHaveLength(roundsInWindow([list], NOW));
     expect(cards.groups[0]?.round?.roundId).toBe("a");
     expect(cards.weekText).toBe("2 rodadas nos próximos 7 dias.");
   });

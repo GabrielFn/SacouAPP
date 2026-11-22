@@ -227,8 +227,9 @@ export const roundsStrings = {
   },
   /** The round cards of the home (03) and of the groups list (17). */
   cards: {
-    oneThisWeek: "1 rodada nos próximos 7 dias.",
-    manyThisWeek: (count: number) => `${String(count)} rodadas nos próximos 7 dias.`,
+    oneInWindow: (days: number) => `1 rodada nos próximos ${String(days)} dias.`,
+    manyInWindow: (count: number, days: number) =>
+      `${String(count)} rodadas nos próximos ${String(days)} dias.`,
     going: "Vou",
     waiting: (position: number | null) =>
       position === null ? "Na espera" : `Na espera · ${String(position)}º`,

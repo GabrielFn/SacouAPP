@@ -4,6 +4,7 @@ import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
 import type { AppForeground } from "../features/court/ports/app-foreground";
 import type { Scheduler } from "./scheduler/scheduler";
+import type { KeyboardVisibility } from "../ui/keyboard-visibility";
 import type { Clock } from "../features/court/ports/clock";
 import type { CourtFeedback } from "../features/court/ports/court-feedback";
 import type { CourtRoster } from "../features/court/ports/court-roster";
@@ -63,6 +64,8 @@ export interface Services {
   readonly backGuard: BackGuard;
   readonly reducedMotion: ReducedMotion;
   readonly clock: Clock;
+  /** The soft keyboard, so a sheet backdrop closes it first (R98 part 3). */
+  readonly keyboard: KeyboardVisibility;
   /** Opens a second database for the Hermes benchmark, never the one of the matches. */
   readonly benchmarkRuntimeOpener: CourtRuntimeOpener;
   /** The API, typed by the contract (E4.2). Its answers live only in the TanStack cache, never here. */
