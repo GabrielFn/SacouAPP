@@ -61,16 +61,14 @@ describe("usePreGame: 'Sortear' asks the injected coin (D10)", () => {
 });
 
 describe("usePreGame: the other round is read again once a start settles (R97, D5)", () => {
-  const callOnce = (): void => {
-    usePreGame({
-      groupId: "g1",
-      roundId: "r1",
-      state: initialDrawFlowState,
-      dispatch: vi.fn(),
-      arrangement: g1UuidArrangement(),
-      settings: drawSettings(),
-      members: [],
-    });
+  const input = {
+    groupId: "g1",
+    roundId: "r1",
+    state: initialDrawFlowState,
+    dispatch: vi.fn(),
+    arrangement: g1UuidArrangement(),
+    settings: drawSettings(),
+    members: [],
   };
   const lastRevision = (): number | undefined => otherRound.revisions.at(-1);
 
@@ -78,16 +76,16 @@ describe("usePreGame: the other round is read again once a start settles (R97, D
     const settledAt = 1_700_000_000_000;
     mutation.isPending = true;
     mutation.submittedAt = settledAt;
-    callOnce();
+    usePreGame(input);
     expect(lastRevision()).toBe(0);
 
     mutation.isPending = false;
-    callOnce();
+    usePreGame(input);
     expect(lastRevision()).toBe(settledAt);
 
     // A new start that settles later changes the revision, which makes the 08 read the log again.
     mutation.submittedAt = settledAt + 1;
-    callOnce();
+    usePreGame(input);
     expect(lastRevision()).toBe(settledAt + 1);
   });
 });
