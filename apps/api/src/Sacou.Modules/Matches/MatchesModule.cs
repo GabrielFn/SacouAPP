@@ -12,6 +12,7 @@ using Sacou.Modules.Matches.GetCourtSession;
 using Sacou.Modules.Matches.Infrastructure;
 using Sacou.Modules.Matches.ListCourtEvents;
 using Sacou.Modules.Matches.TakeOverCourt;
+using Sacou.Modules.Sessions.Contracts;
 
 namespace Sacou.Modules.Matches;
 
