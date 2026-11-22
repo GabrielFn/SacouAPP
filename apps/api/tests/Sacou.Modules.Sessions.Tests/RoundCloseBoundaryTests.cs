@@ -90,15 +90,16 @@ public sealed class RoundCloseBoundaryTests
 
     /// <summary>ADR 0076: ended early, the player can neither confirm nor leave (the same refusal as after the start).</summary>
     [Theory]
-    [InlineData(AttendanceResponse.Going)]
-    [InlineData(AttendanceResponse.NotGoing)]
-    public void ARoundEndedEarly_RefusesTheAnswer(AttendanceResponse response)
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ARoundEndedEarly_RefusesTheAnswer(bool going)
     {
         var rules = Rules();
         var round = Going(NewRound(), rules, 1);
         var tap = round.Slot.StartsAt.AddHours(-2);
         var ended = round.Close(tap, hasFinishedMatch: true).Value.Round;
 
+        var response = going ? AttendanceResponse.Going : AttendanceResponse.NotGoing;
         var answer = Respond(ended, rules, 1, response, now: tap.AddMinutes(1));
 
         Assert.Equal(RoundErrors.RoundClosed, answer.Error);
