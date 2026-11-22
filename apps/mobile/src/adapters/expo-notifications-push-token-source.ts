@@ -26,35 +26,83 @@ function platform(): PushPlatform | null {
   return null;
 }
 
-/**
- * The Expo push token. It never reaches a log, an error nor the cache: a failure of the system (an
- * emulator with no Google services, no network) is only `null`.
- */
-async function readToken(): Promise<PushToken | null> {
-  const id = projectId();
-  const os = platform();
-  if (id === null || os === null) return null;
-  try {
-    await ensureWaitlistChannel();
-    const { data } = await Notifications.getExpoPushTokenAsync({ projectId: id });
-    return { token: data, platform: os };
-  } catch {
-    return null;
-  }
+/** A device token as text, to tell a new one from the one already seen. */
+function deviceTokenKey(deviceToken: Notifications.DevicePushToken): string {
+  const data: unknown = deviceToken.data;
+  return typeof data === "string" ? data : JSON.stringify(data);
 }
 
-export const expoNotificationsPushTokenSource: PushTokenSource = {
-  getToken: readToken,
-  onTokenChange(listener) {
-    // The system gives the new device token; the Expo token is read again from it.
-    const subscription = Notifications.addPushTokenListener(() => {
-      void readToken().then((token) => {
-        if (token !== null) listener(token);
+/**
+ * Every native read of the device token emits the push token event again (Android `PushTokenModule`
+ * calls `onNewToken` after `getDevicePushTokenAsync`), and reading the Expo token reads the device
+ * token. So the listener only reads when the device token is new, and never while a read is on the
+ * way: otherwise each read fires the next one, a loop of `PUT /v1/me/push-devices`.
+ */
+function createExpoNotificationsPushTokenSource(): PushTokenSource {
+  const seen: { current: string | null } = { current: null };
+
+  /**
+   * The Expo push token. It never reaches a log, an error nor the cache: a failure of the system (an
+   * emulator with no Google services, no network) is only `null`.
+   */
+  async function readToken(): Promise<PushToken | null> {
+    const id = projectId();
+    const os = platform();
+    if (id === null || os === null) return null;
+    try {
+      await ensureWaitlistChannel();
+      const devicePushToken = await Notifications.getDevicePushTokenAsync();
+      // Marked before the Expo read, which emits the event again; undone below if the read fails.
+      seen.current = deviceTokenKey(devicePushToken);
+      const { data } = await Notifications.getExpoPushTokenAsync({
+        projectId: id,
+        devicePushToken,
       });
-    });
-    return () => {
-      subscription.remove();
-    };
-  },
-  unregister: () => Notifications.unregisterForNotificationsAsync(),
-};
+      return { token: data, platform: os };
+    } catch {
+      seen.current = null;
+      return null;
+    }
+  }
+
+  return {
+    getToken: readToken,
+    onTokenChange(listener) {
+      const reading: { current: boolean } = { current: false };
+      const pending: { current: string | null } = { current: null };
+      const active: { current: boolean } = { current: true };
+
+      const isNew = (): boolean => pending.current !== null && pending.current !== seen.current;
+
+      async function readWhileNew(): Promise<void> {
+        reading.current = true;
+        try {
+          while (isNew()) {
+            pending.current = null;
+            const token = await readToken();
+            // A failed read stops here: its own event must not start a retry loop.
+            if (token === null) break;
+            if (active.current) listener(token);
+          }
+        } finally {
+          pending.current = null;
+          reading.current = false;
+        }
+      }
+
+      const subscription = Notifications.addPushTokenListener((deviceToken) => {
+        pending.current = deviceTokenKey(deviceToken);
+        if (!reading.current) void readWhileNew();
+      });
+      return () => {
+        active.current = false;
+        pending.current = null;
+        subscription.remove();
+      };
+    },
+    unregister: () => Notifications.unregisterForNotificationsAsync(),
+  };
+}
+
+export const expoNotificationsPushTokenSource: PushTokenSource =
+  createExpoNotificationsPushTokenSource();
