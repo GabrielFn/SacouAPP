@@ -275,3 +275,18 @@ A rodada da tentativa anterior (Seg 23/11 · 20h, 5 pontos, 5x1, 10/12) continua
 
 ![Adicionar, sem resposta](58-adicionar-falha.jpg)
 ![Outro celular marcando](56-outro-celular.jpg)
+
+## Terceira tentativa (22/11, Metro em observação, main com os PRs #209 e #210)
+
+Data: 22/11/2026, a partir das 16h00. Mesmo aparelho, Metro em modo de observação (sem `CI=1`), com o laço do push corrigido (PR #209) e a tela "Rodadas do grupo" (PR #210).
+
+- **Nota sobre os passos 26 e 27:** os "Muitas tentativas" daqueles passos vieram do código antigo, porque o Metro rodava com `CI=1` e não recarregava; o app ainda tinha o laço do push. Não são evidência de falha do PR #209.
+- **Reabertura (16h00): a sessão se perdeu.** Ao reabrir pelo dev client o app voltou deslogado (folha "Entrar pra confirmar"). Foi preciso entrar de novo com a conta A. O bundle carregou em ~52 s.
+- **Observação (teste de tela):** na folha de e-mail e senha, a primeira toque no campo de senha caiu no campo de e-mail (a folha sobe quando o teclado abre), e a senha foi digitada no campo errado. Também Escape (keyevent 111) com a folha aberta fecha a folha.
+- **Defeito grave (16h02, bloqueia o percurso):** logo depois do login, a Início quebra com "Render Error: undefined is not a function" em `HomeRoundCards.tsx` linha 99, na chamada `.toSorted(`. O `Array.prototype.toSorted` (ES2023) não existe no Hermes deste dev client no Android. É o único uso de `toSorted` no app (introduzido pelo PR #210). Depois de **Dismiss** (ou **Minimize**) a tela fica em branco e não há como navegar. Reproduzi 3 vezes (login, reabrir sem parar o app, parar e reabrir). Não há caminho de contorno sem mexer no código: a Início é a rota inicial e o erro ocorre sempre que ela renderiza com a conta logada. Como o `toSorted` é chamado mesmo com lista vazia, qualquer conta é afetada.
+
+![Erro na Início](63-reabertura.jpg)
+
+- **Não verificados por causa do bloqueio:** a tela "Rodadas do grupo", as duas rodadas completas, a quadra presa (passo 27), a cartinha com fonte 1.3 e o modo avião.
+- **Push (só o que dá para ver sem o app):** a permissão `POST_NOTIFICATIONS` já está concedida ao pacote (concedida antes). Não houve chamada `push-devices` no log do Metro, mas o app nem chegou a renderizar a Início.
+- **Parada:** 3 travas no mesmo ponto. Próximo passo: trocar `toSorted` por `[...lista].sort(...)` (ou `slice().sort`) em `HomeRoundCards.tsx` e refazer a partir do passo 28.

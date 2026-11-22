@@ -92,13 +92,14 @@ export function HomeRoundCards({
 }: HomeRoundCardsProps) {
   const { tokens } = useTheme();
   const cards = useRoundCards(groups);
-  const withRound = cards.groups
-    .flatMap(({ group, upcoming }, index) =>
+  // A sorted copy, not `toSorted`: Hermes on the phones of the pilot lacks it (ES2023).
+  const withRound = [
+    ...cards.groups.flatMap(({ group, upcoming }, index) =>
       upcoming.map((round) => ({ name: group.name, round, index })),
-    )
-    .toSorted(
-      (first, second) => first.round.startsAt - second.round.startsAt || first.index - second.index,
-    );
+    ),
+  ].sort(
+    (first, second) => first.round.startsAt - second.round.startsAt || first.index - second.index,
+  );
   const withSummary = cards.groups.flatMap(({ group, recent }) =>
     recent === null ? [] : [{ name: group.name, recent }],
   );
