@@ -103,7 +103,7 @@ describe("the pills of 'Como vai ser'", () => {
   test("the canvas round reads 6x6, 25 pontos, Melhor de 3 (highlighted), Perde sai, Saída parcial", () => {
     if (settings === null) throw new Error("settings did not parse");
     const chips = roundChips(settings.values, sourceReader(settings.sources), {
-      withRotation: false,
+      withRotation: true,
     });
     expect(chips.map((chip) => [chip.label, chip.highlighted])).toEqual([
       ["6x6", false],
@@ -111,6 +111,7 @@ describe("the pills of 'Como vai ser'", () => {
       ["Melhor de 3", true],
       ["Perde sai", false],
       ["Saída parcial", false],
+      ["5x1", false],
     ]);
     expect(chips.some((chip) => chip.label.includes("R$"))).toBe(false);
   });
@@ -128,6 +129,26 @@ describe("the pills of 'Como vai ser'", () => {
     );
     const labels = roundChips(group, () => undefined, { withRotation: false }).map((c) => c.label);
     expect(labels).toEqual(["6x6", "25 pontos", "1 set", "Perde sai"]);
+  });
+
+  test("a rotation set only for this round shows with the orange dot (R98 part 3)", () => {
+    const chips = roundChips(
+      resolved(),
+      (path) => (path === "rotation.system" ? "round" : "group"),
+      {
+        withRotation: true,
+      },
+    );
+    expect(chips.find((chip) => chip.key === "rotation")).toMatchObject({
+      label: "5x1",
+      highlighted: true,
+    });
+  });
+
+  test("with the rotation off there is no rotation pill", () => {
+    const off = withLeaf(resolved(), "rotation.enabled", false);
+    const chips = roundChips(off, () => undefined, { withRotation: true });
+    expect(chips.some((chip) => chip.key === "rotation")).toBe(false);
   });
 });
 

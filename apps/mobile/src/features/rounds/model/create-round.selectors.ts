@@ -40,7 +40,7 @@ export function normalizeVenue(text: string): string {
   return text.trim().normalize("NFC");
 }
 
-/** The first of the 14 dates the sheet offers: the next day the group plays that has no round yet. */
+/** The date the form starts with (the suggestion): the next day the group plays that has no round yet. The sheet itself starts today. */
 export function firstRoundDate(
   group: GroupSettings,
   now: Date,
@@ -51,10 +51,18 @@ export function firstRoundDate(
   return nextFreeRoundDate(now, fixedDay ? group.schedule.weekday : null, time, takenDates);
 }
 
-/** The first date of the sheet: the next day of the group, unless the selected date falls outside the 14 days from it (then it starts at the selected one, so it always shows). */
+/** The first date of the sheet: today (a round of today at a time still ahead is valid, R98), unless the selected date falls outside the 14 days from it (then it starts at the selected one, so it always shows). */
 export function sheetFirstDate(firstDate: string, selected: string): string {
   const shown = pickableDates(firstDate).some((option) => option.date === selected);
   return shown ? firstDate : selected;
+}
+
+/** The number the draft of a number sheet confirms ("done" key or "Confirmar"): a whole number above zero, else `null`. */
+export function confirmableNumber(draft: string): number | null {
+  const text = draft.trim();
+  if (!WHOLE_NUMBER.test(text)) return null;
+  const value = Number(text);
+  return value > 0 ? value : null;
 }
 
 /** The first state of screen 20, from the group's settings and the clock (never copied again). */

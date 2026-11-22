@@ -18,7 +18,7 @@ export interface RoundChip {
 }
 
 export interface ChipOptions {
-  /** Screen 20 shows the rotation system; 06 and 26 do not. */
+  /** Screens 20, 06 and 26 show the rotation system (06 and 26 since R98 part 3). */
   readonly withRotation: boolean;
 }
 

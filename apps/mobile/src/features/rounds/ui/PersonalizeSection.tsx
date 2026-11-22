@@ -14,6 +14,7 @@ import { choiceOptions } from "../../groups/model/group-settings.selectors";
 import type { CreateRoundModel } from "../hooks/use-create-round";
 import type { PersonalizePath } from "../model/create-round.reducer";
 import {
+  confirmableNumber,
   groupValueOf,
   layerChangeCount,
   leafText,
@@ -22,7 +23,6 @@ import {
 import { HighlightDot } from "./RoundChips";
 
 const { create, settingTitles } = strings.rounds;
-const WHOLE_NUMBER = /^\d+$/;
 
 export interface PersonalizeRowProps {
   readonly path: PersonalizePath;
@@ -86,21 +86,21 @@ export interface NumberDraftSheetProps {
 /** The sheet of a number: the draft lives here, only while the sheet is open (a single field). */
 function NumberDraftSheet({ path, initial, onConfirm, onClose }: NumberDraftSheetProps) {
   const [draft, setDraft] = useState(initial);
-  const value = WHOLE_NUMBER.test(draft.trim()) ? Number(draft.trim()) : null;
+  const confirm = () => {
+    const value = confirmableNumber(draft);
+    if (value !== null) onConfirm(value);
+  };
   return (
     <BottomSheet visible title={settingTitles[path]} onClose={onClose}>
       <TextField
         label={settingTitles[path]}
         value={draft}
         keyboardType="number-pad"
+        returnKeyType="done"
         onChangeText={setDraft}
+        onSubmitEditing={confirm}
       />
-      <Button
-        label={create.confirm}
-        onPress={() => {
-          if (value !== null && value > 0) onConfirm(value);
-        }}
-      />
+      <Button label={create.confirm} onPress={confirm} />
       <Button label={create.cancel} variant="link" onPress={onClose} />
     </BottomSheet>
   );

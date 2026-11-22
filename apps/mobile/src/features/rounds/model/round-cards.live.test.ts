@@ -119,6 +119,6 @@ describe("upcomingRoundsOf: every round of the week (R97 part 2, D6)", () => {
     const cards = roundCardsOf([group], [list], NOW);
     expect(cards.groups[0]?.upcoming).toHaveLength(roundsThisWeek([list], NOW));
     expect(cards.groups[0]?.round?.roundId).toBe("a");
-    expect(cards.weekText).toBe("2 rodadas essa semana.");
+    expect(cards.weekText).toBe("2 rodadas nos próximos 7 dias.");
   });
 });

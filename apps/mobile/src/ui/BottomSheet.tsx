@@ -1,16 +1,18 @@
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { KeyboardAvoidingView, Modal, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { strings } from "../strings/pt-BR";
 import { useTheme } from "../theme/theme-context";
+import { createBackdropDismiss } from "./backdrop-dismiss";
 import { CloseIcon } from "./Icons";
+import { useKeyboardVisibility } from "./keyboard-visibility";
 import { Text } from "./Text";
 
 export interface BottomSheetProps {
   readonly visible: boolean;
   readonly title: string;
-  /** Back button, tap outside and the dismiss of the screen reader. */
+  /** Back button, tap outside (not while the keyboard is up, or just closed) and the dismiss of the screen reader. */
   readonly onClose: () => void;
   readonly children: ReactNode;
   /** A cross beside the title that closes the sheet, with this label ("Fechar" of PreJogo.dc.html). */
@@ -59,6 +61,21 @@ const KEYBOARD_BEHAVIOR = "padding";
 export function BottomSheet({ visible, title, onClose, children, closeLabel }: BottomSheetProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
+  const keyboard = useKeyboardVisibility();
+  const latestOnClose = useRef(onClose);
+  latestOnClose.current = onClose;
+  const backdrop = useMemo(
+    () =>
+      createBackdropDismiss(
+        keyboard,
+        () => {
+          latestOnClose.current();
+        },
+        Date.now,
+      ),
+    [keyboard],
+  );
+  useEffect(() => backdrop.release, [backdrop]);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -68,7 +85,7 @@ export function BottomSheet({ visible, title, onClose, children, closeLabel }: B
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={strings.settings.sheets.dismiss}
-          onPress={onClose}
+          onPress={backdrop.onBackdropPress}
           style={{ flex: 1, backgroundColor: colors.badgeSurface }}
         />
         <View

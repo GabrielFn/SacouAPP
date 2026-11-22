@@ -73,7 +73,10 @@ import { createSacouQueryClient } from "../services/query/query-client";
 import { QueryProvider } from "../services/query/query-provider";
 import { ServicesProvider, useServices, type Services } from "../services/services-context";
 import { ThemeProvider } from "../theme/theme-context";
+import { KeyboardVisibilityProvider } from "../ui/keyboard-visibility";
+import { createReactNativeKeyboardVisibility } from "../adapters/react-native-keyboard-visibility";
 
+const keyboardVisibility = createReactNativeKeyboardVisibility();
 const queryClient = createSacouQueryClient();
 const cacheStore = createExpoCacheStore();
 const cachePersister = createCachePersister(cacheStore);
@@ -219,7 +222,9 @@ export default function RootLayout() {
           appVersion={expoAppVersion()}
         >
           <ThemeProvider name="app">
-            <FontGate />
+            <KeyboardVisibilityProvider keyboard={keyboardVisibility}>
+              <FontGate />
+            </KeyboardVisibilityProvider>
           </ThemeProvider>
         </QueryProvider>
       </ServicesProvider>

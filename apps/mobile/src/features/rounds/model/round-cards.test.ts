@@ -12,6 +12,7 @@ import {
   roundCardsOf,
   SUMMARY_CARD_WINDOW_MS,
   roundsThisWeek,
+  upcomingRoundsOf,
   swatchIndexOf,
   weekSummaryText,
 } from "./round-cards";
@@ -69,14 +70,36 @@ describe("nextRoundOf", () => {
 describe("roundsThisWeek", () => {
   it("counts the scheduled rounds from now to the end of Sunday, of every group", () => {
     expect(roundsThisWeek([[WEDNESDAY, FRIDAY, PAST], [NEXT_WEEK]], NOW)).toBe(2);
-    expect(weekSummaryText(2)).toBe("2 rodadas essa semana.");
-    expect(weekSummaryText(1)).toBe("1 rodada essa semana.");
+    expect(weekSummaryText(2)).toBe("2 rodadas nos próximos 7 dias.");
+    expect(weekSummaryText(1)).toBe("1 rodada nos próximos 7 dias.");
     expect(weekSummaryText(0)).toBeNull();
   });
-  it("counts a round on Sunday night and not one on Monday", () => {
-    const sunday = summary("sun", "2026-11-08", "23:30");
-    const monday = summary("mon", "2026-11-09", "00:30");
-    expect(roundsThisWeek([[sunday, monday]], NOW)).toBe(1);
+  it("has no week cut: a Sunday shows the Monday and the Tuesday after it (R98)", () => {
+    const sunday = new Date(2026, 10, 22, 10, 0).getTime();
+    const monday = summary("mon", "2026-11-23", "20:00");
+    const tuesday = summary("tue", "2026-11-24", "20:00");
+    expect(upcomingRoundsOf([tuesday, monday], sunday).map((round) => round.roundId)).toEqual([
+      "mon",
+      "tue",
+    ]);
+    expect(roundsThisWeek([[monday, tuesday]], sunday)).toBe(2);
+  });
+  it("includes a round exactly 7 days ahead and leaves out the one a minute later", () => {
+    const edge = summary("edge", "2026-11-09", "10:00");
+    const after = summary("after", "2026-11-09", "10:01");
+    expect(roundsThisWeek([[edge, after]], NOW)).toBe(1);
+  });
+  it("leaves out a canceled round, and with none in the window falls back to the next one", () => {
+    const canceled = { ...WEDNESDAY, status: "canceled" as const };
+    expect(roundsThisWeek([[canceled]], NOW)).toBe(0);
+    expect(upcomingRoundsOf([canceled, NEXT_WEEK], NOW).map((round) => round.roundId)).toEqual([
+      "next-week",
+    ]);
+  });
+  it("works on a Saturday and a Monday as well", () => {
+    const saturday = new Date(2026, 10, 7, 9, 0).getTime();
+    expect(roundsThisWeek([[NEXT_WEEK]], saturday)).toBe(1);
+    expect(roundsThisWeek([[WEDNESDAY]], NOW)).toBe(1);
   });
 });
 
@@ -90,7 +113,7 @@ describe("roundCardsOf", () => {
       "Sem rodada",
     ]);
     expect(cards.groups[2]?.round).toBeNull();
-    expect(cards.weekText).toBe("2 rodadas essa semana.");
+    expect(cards.weekText).toBe("2 rodadas nos próximos 7 dias.");
   });
   it("marks a group whose rounds are loading or failed as unknown, not as without a round", () => {
     const cards = roundCardsOf([group("a", "A")], [undefined], NOW);

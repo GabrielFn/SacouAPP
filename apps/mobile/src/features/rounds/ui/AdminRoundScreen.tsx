@@ -52,7 +52,7 @@ export interface RoundBodyProps {
 function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundBodyProps) {
   const { tokens } = useTheme();
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
-    withRotation: false,
+    withRotation: true,
   });
   const attendance = settings.values.attendance.enabled;
   return (

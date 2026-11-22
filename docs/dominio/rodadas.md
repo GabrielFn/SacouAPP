@@ -123,4 +123,5 @@ Rota `groups/[groupId]/rounds`; lê só `GET /rounds` (a API não mudou) e o pap
 - **Destino do toque:** a rodada encerrada abre o resumo (12); as outras abrem a 06 (que escolhe a visão de admin ou de jogador).
 - **Janela de "Recentes":** só o que a API devolve, ou seja, até 24 h depois do fim (a mesma do cartão "Ver resumo" do Início). Histórico maior pede `?pastDays` na API (pergunta P4).
 - **"Nova rodada":** só admin e co-admin veem o botão; a API é quem recusa. A 20 sugere o próximo dia fixo do grupo que ainda não tem rodada `scheduled`; dois rachas no mesmo dia continuam válidos.
-- **Início:** um cartão por rodada futura da semana (até domingo 23:59), de todos os grupos, por horário; sem rodada na semana, a próxima.
+- **Início:** um cartão por rodada futura dos próximos 7 dias (janela móvel de agora até agora + 7 dias, sem corte de semana, R98), de todos os grupos, por horário; sem rodada na janela, a próxima.
+- **"Nova rodada" hoje:** o seletor de data começa em hoje e oferece 14 dias; um horário de hoje que já passou continua recusado (`timePast`). A data sugerida segue sendo o próximo dia do grupo.
