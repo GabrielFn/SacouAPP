@@ -4,7 +4,7 @@
 const { getDefaultConfig } = require("expo/metro-config");
 
 /** Any path inside `.claude/worktrees/`, with either separator. */
-const WORKTREES = /[\/]\.claude[\/]worktrees[\/].*/;
+const WORKTREES = /[\\/]\.claude[\\/]worktrees[\\/].*/;
 
 /** The default block list (a pattern, a list or none) with the worktrees added. */
 function withWorktreesBlocked(blockList) {
