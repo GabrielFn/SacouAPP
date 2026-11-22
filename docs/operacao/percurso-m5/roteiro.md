@@ -364,3 +364,15 @@ Não foi possível jogar o resumo e a cartinha de uma rodada nova hoje: o seleto
 - **Modo avião** (30 s com o app aberto): aparece a faixa amarela **Sem conexão** na Início, cartões continuam; ao desligar o modo avião a faixa some em segundos e o app volta a funcionar.
 
 ![Sem conexão](97-modo-aviao-30s.jpg)
+
+## Próxima tentativa · passos a incluir
+
+### Tornar o Beto mensalista (pedido do Gabriel, 22/11)
+
+Conta A (organizadora). **Grupo → Gerenciar Grupo Fluxo → Membros**, tocar no **Beto Teste**, e na folha de opções, seção **Tipo**, escolher **Mensalista**.
+
+- Conferir que a escolha está disponível mesmo com o grupo criado com "mensalistas fixos: Não" (se aparecer bloqueada, anotar como **Defeito** ou **Não desenvolvido**, com o texto exato).
+- Conferir que o Beto passa para a aba **Mensalistas** da lista de membros.
+- Abrir uma rodada aberta e conferir que, em "Ainda não confirmaram", o Beto aparece como **Mensalista** (antes: "Avulso") e no topo da lista.
+- Voltar o Beto para **Avulso** e conferir o caminho inverso.
+- Conferir que um convidado **Sem conta** não pode virar mensalista (opção bloqueada).
