@@ -7025,6 +7025,16 @@
               "null",
               "string"
             ]
+          },
+          "settings": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
           }
         },
         "additionalProperties": false

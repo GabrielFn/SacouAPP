@@ -852,6 +852,7 @@ export interface components {
     CreateGroupRequest: {
       name: null | string;
       templateKey?: null | string;
+      settings?: null | components["schemas"]["JsonElement"];
     };
     CreateGroupResponse: {
       /** Format: uuid */
