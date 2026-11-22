@@ -279,6 +279,15 @@ export default defineConfig([
   ...exceptionBlock("complexity", { complexity: "off" }),
   ...exceptionBlock("max-lines", { "max-lines": "off" }),
 
+  // The Metro config is CommonJS run by Node.
+  {
+    files: ["apps/mobile/metro.config.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { require: "readonly", module: "writable", __dirname: "readonly" },
+    },
+  },
+
   // No ES2023+ built-ins in the app: the Hermes of the phone lacks them (R98, item 10).
   ...hermesBlocks({ files: MOBILE_FILES, testFiles: TEST_FILES }),
 

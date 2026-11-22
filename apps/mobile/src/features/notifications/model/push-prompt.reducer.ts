@@ -14,23 +14,33 @@ export type PushPromptAction =
 
 export const INITIAL_PUSH_PROMPT: PushPromptState = "idle";
 
+/** Each action moves only from its own state; anywhere else it changes nothing. */
+const MOVES: Readonly<
+  Record<Exclude<PushPromptAction["type"], "checked">, readonly [PushPromptState, PushPromptState]>
+> = {
+  "offer-requested": ["idle", "checking"],
+  accepted: ["offering", "asking"],
+  declined: ["offering", "done"],
+  answered: ["asking", "done"],
+};
+
+function move(state: PushPromptState, [from, to]: readonly [PushPromptState, PushPromptState]) {
+  return state === from ? to : state;
+}
+
 /** Pure and with no effect: the reads, the system question and the registration are the hook's. */
 export function pushPromptReducer(
   state: PushPromptState,
   action: PushPromptAction,
 ): PushPromptState {
   switch (action.type) {
-    case "offer-requested":
-      return state === "idle" ? "checking" : state;
     case "checked":
-      if (state !== "checking") return state;
-      return action.due ? "offering" : "done";
+      return move(state, ["checking", action.due ? "offering" : "done"]);
+    case "offer-requested":
     case "accepted":
-      return state === "offering" ? "asking" : state;
     case "declined":
-      return state === "offering" ? "done" : state;
     case "answered":
-      return state === "asking" ? "done" : state;
+      return move(state, MOVES[action.type]);
   }
 }
 

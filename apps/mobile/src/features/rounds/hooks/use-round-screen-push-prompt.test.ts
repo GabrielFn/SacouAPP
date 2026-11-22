@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import type { AttendanceResponse } from "../../../services/api/sacou-api";
 import { useRoundScreen } from "./use-round-screen";
 
 const world = vi.hoisted(() => ({
@@ -41,10 +40,6 @@ vi.mock("../queries/round-mutations", () => ({
   setMemberAttendanceMutation: () => ({}),
 }));
 
-function answer(response: AttendanceResponse): void {
-  useRoundScreen("g", "r").respond(response);
-}
-
 beforeEach(() => {
   world.offers = 0;
   world.succeeds = true;
@@ -53,17 +48,17 @@ beforeEach(() => {
 
 describe("R98 item 9: a VOU that went through offers the notifications", () => {
   test("VOU accepted by the server: the offer starts", () => {
-    answer("going");
+    useRoundScreen("g", "r").respond("going");
     expect(world.offers).toBe(1);
   });
 
   test("not going, a refused VOU or one already on the way: no offer", () => {
-    answer("notGoing");
+    useRoundScreen("g", "r").respond("notGoing");
     world.succeeds = false;
-    answer("going");
+    useRoundScreen("g", "r").respond("going");
     world.succeeds = true;
     world.pending = true;
-    answer("going");
+    useRoundScreen("g", "r").respond("going");
     expect(world.offers).toBe(0);
   });
 });

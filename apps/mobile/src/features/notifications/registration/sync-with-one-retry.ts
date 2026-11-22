@@ -19,27 +19,25 @@ export interface SyncWithOneRetryDeps {
  */
 export function syncWithOneRetry(deps: SyncWithOneRetryDeps): () => void {
   const retryAfterMs = deps.retryAfterMs ?? PUSH_RETRY_AFTER_FAILURE_MS;
-  const state: { cancelled: boolean; cancelRetry: () => void } = {
-    cancelled: false,
-    cancelRetry: () => undefined,
-  };
+  const cancelled = { value: false };
+  const cancelRetry: { current: () => void } = { current: () => undefined };
 
   function sync(): Promise<PushSyncOutcome> {
     return deps.devices.sync().then((outcome) => {
-      if (!state.cancelled) deps.log.record(outcome);
+      if (!cancelled.value) deps.log.record(outcome);
       return outcome;
     });
   }
 
   void sync().then((outcome) => {
-    if (outcome !== "failed" || state.cancelled) return;
-    state.cancelRetry = deps.scheduler.after(retryAfterMs, () => {
-      if (!state.cancelled) void sync();
+    if (outcome !== "failed" || cancelled.value) return;
+    cancelRetry.current = deps.scheduler.after(retryAfterMs, () => {
+      if (!cancelled.value) void sync();
     });
   });
 
   return () => {
-    state.cancelled = true;
-    state.cancelRetry();
+    cancelled.value = true;
+    cancelRetry.current();
   };
 }

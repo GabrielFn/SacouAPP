@@ -50,7 +50,7 @@ function setup(permission: PermissionAnswer = "granted") {
 const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 async function settle(): Promise<void> {
-  for (const _ of [1, 2, 3, 4, 5]) await flush();
+  for (let round = 0; round < 5; round += 1) await flush();
 }
 
 describe("R98 item 9: the registration of an opening", () => {

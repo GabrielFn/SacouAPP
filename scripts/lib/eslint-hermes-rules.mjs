@@ -4,28 +4,23 @@
 const HERMES_MESSAGE =
   "The Hermes of the phone has no ES2023+ built-ins (R98). Use an ES2022 equivalent.";
 
+// Names no app object uses. `with`, `union`, `intersection`, `difference`, `transfer` and `resize`
+// are left to the ES2022 lib of the tsconfig: the app has its own `with` and `difference` properties.
 const INSTANCE_METHODS = [
   // Array
   "toSorted",
   "toReversed",
   "toSpliced",
-  "with",
   "findLast",
   "findLastIndex",
   // String
   "isWellFormed",
   "toWellFormed",
   // Set
-  "union",
-  "intersection",
-  "difference",
   "symmetricDifference",
   "isSubsetOf",
   "isSupersetOf",
   "isDisjointFrom",
-  // ArrayBuffer
-  "transfer",
-  "resize",
 ];
 
 const STATIC_METHODS = [

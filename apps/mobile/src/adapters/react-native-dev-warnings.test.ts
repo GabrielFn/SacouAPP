@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
+import { KNOWN_DEV_WARNINGS, quietKnownDevWarnings } from "./react-native-dev-warnings";
+
 const ignoreLogs = vi.hoisted(() => vi.fn());
 vi.mock("react-native", () => ({ LogBox: { ignoreLogs } }));
-
-import { KNOWN_DEV_WARNINGS, quietKnownDevWarnings } from "./react-native-dev-warnings";
 
 describe("the known warnings of development (R98, item 7)", () => {
   beforeEach(() => {
