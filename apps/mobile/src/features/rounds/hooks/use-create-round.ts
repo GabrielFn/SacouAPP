@@ -32,6 +32,8 @@ export interface CreateRoundInput {
   readonly groupName: string;
   readonly settings: GroupSettings;
   readonly hasSeries: boolean;
+  /** The dates that already have a round: the first date suggested skips them (R97 part 2, D4). */
+  readonly takenDates: readonly string[];
 }
 
 export interface CreateRoundModel {
@@ -87,7 +89,12 @@ export function useCreateRound(
   const client = useQueryClient();
   const { settings } = input;
   const form = useRoundForm(settings, () =>
-    initialCreateRoundState(settings, new Date(wallClockNow()), input.hasSeries),
+    initialCreateRoundState(
+      settings,
+      new Date(wallClockNow()),
+      input.hasSeries,
+      input.takenDates,
+    ),
   );
   const mutation = useMutation(createRoundMutation(sacouApi, client, input.groupId));
   return {

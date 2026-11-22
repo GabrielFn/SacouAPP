@@ -14,7 +14,7 @@ import {
 import { CreateGroupPill } from "../../features/groups/ui/CreateGroupPill";
 import { GroupCardList } from "../../features/groups/ui/GroupCardList";
 import { GroupsStateView } from "../../features/groups/ui/GroupsStateView";
-import { createRoundHref, editRoundHref, roundHref } from "../../features/rounds/navigation";
+import { createRoundHref, editRoundHref, groupRoundsHref } from "../../features/rounds/navigation";
 import { strings } from "../../strings/pt-BR";
 import { useTheme } from "../../theme/theme-context";
 import { OfflineBanner } from "../../ui/OfflineBanner";
@@ -64,8 +64,8 @@ export default function GroupsScreen() {
             onEditRound={(groupId, roundId) => {
               router.push(editRoundHref(groupId, roundId));
             }}
-            onOpenRound={(groupId, roundId) => {
-              router.push(roundHref(groupId, roundId));
+            onOpenGroup={(groupId) => {
+              router.push(groupRoundsHref(groupId));
             }}
           />
         )}

@@ -12,11 +12,11 @@ import { DayStrip } from "./DayStrip";
 
 export interface GroupCardProps {
   readonly model: GroupCardModel;
-  /** The next round of the group, or `null`: then the card is not touchable. */
+  /** The round the card shows (being played, or the next), or `null` without one. */
   readonly round: RoundCardModel | null;
   readonly actions: readonly GroupCardAction[];
   readonly onAction: (action: GroupCardAction, groupId: string) => void;
-  readonly onOpenRound: (groupId: string, roundId: string) => void;
+  readonly onOpenGroup: (groupId: string) => void;
 }
 
 function actionLabel(action: GroupCardAction): string {
@@ -65,8 +65,8 @@ function CardMain({ model, round }: CardMainProps) {
   );
 }
 
-/** A card of the groups list (17): touching it opens the next round; the footer links manage the group. */
-export function GroupCard({ model, round, actions, onAction, onOpenRound }: GroupCardProps) {
+/** A card of the groups list (17): touching it opens the rounds of the group (R97 part 2, D3); the footer links manage the group. */
+export function GroupCard({ model, round, actions, onAction, onOpenGroup }: GroupCardProps) {
   const { colors, tokens } = useTheme();
   return (
     <View
@@ -78,19 +78,16 @@ export function GroupCard({ model, round, actions, onAction, onOpenRound }: Grou
         overflow: "hidden",
       }}
     >
-      {round === null ? (
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={model.name}
+        accessibilityHint={strings.groups.card.openRounds}
+        onPress={() => {
+          onOpenGroup(model.groupId);
+        }}
+      >
         <CardMain model={model} round={round} />
-      ) : (
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={model.name}
-          onPress={() => {
-            onOpenRound(model.groupId, round.roundId);
-          }}
-        >
-          <CardMain model={model} round={round} />
-        </Pressable>
-      )}
+      </Pressable>
       {actions.length > 0 ? (
         <View
           accessibilityLabel={strings.groups.card.footerLabel(model.name)}

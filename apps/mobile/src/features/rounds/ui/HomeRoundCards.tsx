@@ -104,9 +104,11 @@ export function HomeRoundCards({
 }: HomeRoundCardsProps) {
   const { tokens } = useTheme();
   const cards = useRoundCards(groups);
-  const withRound = cards.groups.flatMap(({ group, round }) =>
-    round === null ? [] : [{ name: group.name, round }],
-  );
+  const withRound = cards.groups
+    .flatMap(({ group, upcoming }, index) =>
+      upcoming.map((round) => ({ name: group.name, round, index })),
+    )
+    .sort((first, second) => first.round.startsAt - second.round.startsAt || first.index - second.index);
   const withSummary = cards.groups.flatMap(({ group, recent }) =>
     recent === null ? [] : [{ name: group.name, recent }],
   );
@@ -141,7 +143,7 @@ export function HomeRoundCards({
       ))}
       {withRound.map(({ name, round }) => (
         <HomeRoundCard
-          key={round.groupId}
+          key={`next-${round.roundId}`}
           groupName={name}
           round={round}
           footer={<RoundCardStatus round={round} />}

@@ -75,6 +75,31 @@ export function nextRoundDate(now: Date, weekday: number | null, startTime: stri
     : isoDateOf(addDays(candidate, DAYS_PER_WEEK));
 }
 
+/** How many days or weeks `nextFreeRoundDate` may skip before it gives up and takes the first date. */
+const MAX_SKIPS = 60;
+
+/**
+ * Like `nextRoundDate`, but skipping the dates that already have a round (`taken`, as `YYYY-MM-DD`):
+ * week by week with a fixed day, day by day without one. It is only a suggestion (R97 part 2, D4): two
+ * rounds on one day stay valid, so with every candidate taken it falls back to the first one.
+ */
+export function nextFreeRoundDate(
+  now: Date,
+  weekday: number | null,
+  startTime: string,
+  taken: readonly string[],
+): string {
+  const first = nextRoundDate(now, weekday, startTime);
+  const step = weekday === null ? 1 : DAYS_PER_WEEK;
+  const start = parseIsoDate(first);
+  if (start === null) return first;
+  for (let skips = 0; skips <= MAX_SKIPS; skips += 1) {
+    const candidate = isoDateOf(addDays(start, skips * step));
+    if (!taken.includes(candidate)) return candidate;
+  }
+  return first;
+}
+
 /** "Ter, 3/11". */
 export function dateLabel(localDate: string): string {
   const date = parseIsoDate(localDate);

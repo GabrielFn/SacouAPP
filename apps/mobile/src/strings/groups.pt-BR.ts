@@ -18,6 +18,7 @@ export const groupsStrings = {
     noRound: "Nenhuma rodada marcada",
     noRoundStrip: "Sem rodada marcada",
     noRoundDash: "–",
+    openRounds: "Ver as rodadas do grupo",
     members: "Membros",
     settings: "Como jogamos",
     footerLabel: (groupName: string) => `Gerenciar ${groupName}`,
