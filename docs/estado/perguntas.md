@@ -240,3 +240,6 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 ## 22/11/2026: tela de rodadas do grupo (R97 Parte 2)
 - **P4 · Histórico em "Recentes".** Hoje `GET /rounds` devolve só as rodadas a partir de agora − 30 h, então "Recentes" mostra cerca de 24 h depois do fim. Opções: (1) deixar assim no piloto; (2) `?pastDays=1..30` em `GET /rounds` com teto de 60 itens (~150 linhas de C#, PR separado). **Recomendação: 1.** Aberta.
 - **Nota:** com P3 = tela de rodadas, o cartão da aba Grupos passa a abrir a lista; a 06 fica a dois toques ali (no Início continua a um). ADR 0075.
+
+## 22/11/2026: defeitos do percurso (R98)
+- **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. "Avulso" com conta: em esclarecimento (o rótulo já distingue "Sem conta" de "Avulso"/"Mensalista").
