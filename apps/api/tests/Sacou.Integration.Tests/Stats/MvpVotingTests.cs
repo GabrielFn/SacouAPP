@@ -97,6 +97,27 @@ public sealed class MvpVotingTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal("ck_mvp_votes_not_self", refused.ConstraintName);
     }
 
+    /// <summary>ADR 0076: before the start a round with one finished match closes at the tap; without a match it is still refused.</summary>
+    [Fact]
+    public async Task ARoundWithAFinishedMatch_ClosesBeforeItsStart()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var created = await RoundCalls.CreateAsync(world, RoundCalls.CreateBody(settings: VotingOn));
+        var round = created["roundId"]!.GetValue<string>();
+        var startsAt = created["startsAt"]!.GetValue<DateTimeOffset>();
+        var tap = startsAt.AddHours(-1);
+        api.Clock.SetNow(tap);
+
+        using var withoutMatch = await world.SendAsync(A.Admin, HttpMethod.Post, RoundCalls.RoundPath(world, round) + "/close");
+        Assert.Equal("sessions.round-not-started", await RoundCalls.CodeAsync(withoutMatch));
+        _ = await PlayAsync(world, round);
+        var closed = await CloseAsync(world, A.Scorekeeper, round);
+
+        Assert.Equal(tap, closed["closedAt"]!.GetValue<DateTimeOffset>());
+        Assert.Equal(tap, closed["endsAt"]!.GetValue<DateTimeOffset>());
+    }
+
     /// <summary>I5: a round made before the column has no close, so it ends on its own.</summary>
     [Fact]
     public async Task I5_ARoundWithoutClose_EndsSixHoursAfterItsStart()
