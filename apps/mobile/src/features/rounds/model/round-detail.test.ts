@@ -111,7 +111,7 @@ describe("the pills of 'Como vai ser'", () => {
       ["Melhor de 3", true],
       ["Perde sai", false],
       ["Saída parcial", false],
-      ["5x1", false],
+      ["Livre / 6x0", false],
     ]);
     expect(chips.some((chip) => chip.label.includes("R$"))).toBe(false);
   });

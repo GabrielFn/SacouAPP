@@ -95,15 +95,24 @@ describe("upcomingRoundsOf: every round of the week (R97 part 2, D6)", () => {
     expect(upcomingRoundsOf(rounds, NOW).map((item) => item.roundId)).toEqual(["a", "b"]);
   });
 
-  it("Sunday 23:59 is this week, Monday 00:00 is not", () => {
+  it("has no week cut: Sunday night and Monday morning are both inside the 7 days (R98)", () => {
     const sunday = at("sun", new Date(2026, 10, 22, 23, 59));
     const monday = at("mon", new Date(2026, 10, 23, 0, 0));
-    expect(upcomingRoundsOf([sunday, monday], NOW).map((item) => item.roundId)).toEqual(["sun"]);
+    expect(upcomingRoundsOf([sunday, monday], NOW).map((item) => item.roundId)).toEqual([
+      "sun",
+      "mon",
+    ]);
   });
 
-  it("with none this week, the next round stays so the group still shows up", () => {
-    const monday = at("mon", new Date(2026, 10, 23, 0, 0));
-    const later = at("later", new Date(2026, 10, 30, 20));
+  it("the 8th day is out of the window", () => {
+    const edge = at("edge", new Date(2026, 10, 26, 12, 0));
+    const after = at("after", new Date(2026, 10, 26, 12, 1));
+    expect(upcomingRoundsOf([edge, after], NOW).map((item) => item.roundId)).toEqual(["edge"]);
+  });
+
+  it("with none in the 7 days, the next round stays so the group still shows up", () => {
+    const monday = at("mon", new Date(2026, 10, 27, 0, 0));
+    const later = at("later", new Date(2026, 11, 3, 20));
     expect(upcomingRoundsOf([later, monday], NOW).map((item) => item.roundId)).toEqual(["mon"]);
   });
 
