@@ -236,3 +236,7 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 ## 21/11/2026: fluxo rodada → partidas (R97, teste no celular)
 - **Pergunta:** a partida esquecida aberta no celular trava partidas novas, o app sempre reabre na quadra antiga e o grupo só mostra a próxima rodada. Plano em `docs/estado/tarefas/R97.md`.
 - **Respostas do Gabriel (21/11):** P1 (partida esquecida de rodada encerrada) = folha "Encerrar a antiga e começar esta?"; P2 (retomada) = não retomar sozinho depois do fim da rodada, com a barra "EM QUADRA" no Início; P3 (várias rodadas futuras) = tela nova com a lista de rodadas do grupo. Link da rodada: fixar no deploy do teste o host autorizado no Firebase (`...804880427435.us-east4.run.app`), PR #203.
+
+## 22/11/2026: tela de rodadas do grupo (R97 Parte 2)
+- **P4 · Histórico em "Recentes".** Hoje `GET /rounds` devolve só as rodadas a partir de agora − 30 h, então "Recentes" mostra cerca de 24 h depois do fim. Opções: (1) deixar assim no piloto; (2) `?pastDays=1..30` em `GET /rounds` com teto de 60 itens (~150 linhas de C#, PR separado). **Recomendação: 1.** Aberta.
+- **Nota:** com P3 = tela de rodadas, o cartão da aba Grupos passa a abrir a lista; a 06 fica a dois toques ali (no Início continua a um). ADR 0075.
