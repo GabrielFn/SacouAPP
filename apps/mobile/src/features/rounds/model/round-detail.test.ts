@@ -132,13 +132,10 @@ describe("the pills of 'Como vai ser'", () => {
   });
 
   test("a rotation set only for this round shows with the orange dot (R98 part 3)", () => {
-    const chips = roundChips(
-      resolved(),
-      (path) => (path === "rotation.system" ? "round" : "group"),
-      {
-        withRotation: true,
-      },
-    );
+    const group = withLeaf(resolved(), "rotation.system", "5x1");
+    const chips = roundChips(group, (path) => (path === "rotation.system" ? "round" : "group"), {
+      withRotation: true,
+    });
     expect(chips.find((chip) => chip.key === "rotation")).toMatchObject({
       label: "5x1",
       highlighted: true,
