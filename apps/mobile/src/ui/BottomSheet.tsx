@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Modal, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { strings } from "../strings/pt-BR";
 import { useTheme } from "../theme/theme-context";
-import { createBackdropDismiss } from "./backdrop-dismiss";
 import { CloseIcon } from "./Icons";
-import { useKeyboardVisibility } from "./keyboard-visibility";
 import { Text } from "./Text";
+import { useBackdropPress } from "./use-backdrop-press";
 
 export interface BottomSheetProps {
   readonly visible: boolean;
@@ -61,21 +60,7 @@ const KEYBOARD_BEHAVIOR = "padding";
 export function BottomSheet({ visible, title, onClose, children, closeLabel }: BottomSheetProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
-  const keyboard = useKeyboardVisibility();
-  const latestOnClose = useRef(onClose);
-  latestOnClose.current = onClose;
-  const backdrop = useMemo(
-    () =>
-      createBackdropDismiss(
-        keyboard,
-        () => {
-          latestOnClose.current();
-        },
-        Date.now,
-      ),
-    [keyboard],
-  );
-  useEffect(() => backdrop.release, [backdrop]);
+  const onBackdropPress = useBackdropPress(onClose);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -85,7 +70,7 @@ export function BottomSheet({ visible, title, onClose, children, closeLabel }: B
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={strings.settings.sheets.dismiss}
-          onPress={backdrop.onBackdropPress}
+          onPress={onBackdropPress}
           style={{ flex: 1, backgroundColor: colors.badgeSurface }}
         />
         <View

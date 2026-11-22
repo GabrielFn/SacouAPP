@@ -1,30 +1,35 @@
 import type { KeyboardVisibility } from "../ui/keyboard-visibility";
 
+type Listener = (visible: boolean) => void;
+
 export interface FakeKeyboardVisibility extends KeyboardVisibility {
-  show(): void;
-  hide(): void;
+  readonly show: () => void;
+  readonly hide: () => void;
   /** How many times the keyboard was asked to close. */
   readonly dismissCount: () => number;
 }
 
 export function createFakeKeyboardVisibility(): FakeKeyboardVisibility {
-  const state = { visible: false, dismissed: 0 };
-  const listeners = new Set<(visible: boolean) => void>();
+  const state: { visible: boolean; dismissed: number; listeners: readonly Listener[] } = {
+    visible: false,
+    dismissed: 0,
+    listeners: [],
+  };
   const set = (visible: boolean) => {
     state.visible = visible;
-    listeners.forEach((listener) => {
+    state.listeners.forEach((listener) => {
       listener(visible);
     });
   };
   return {
     isVisible: () => state.visible,
-    subscribe(listener) {
-      listeners.add(listener);
+    subscribe: (listener) => {
+      state.listeners = [...state.listeners, listener];
       return () => {
-        listeners.delete(listener);
+        state.listeners = state.listeners.filter((item) => item !== listener);
       };
     },
-    dismiss() {
+    dismiss: () => {
       state.dismissed += 1;
       set(false);
     },

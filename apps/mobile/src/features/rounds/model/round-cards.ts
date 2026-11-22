@@ -6,7 +6,8 @@ import { dateLabel, isoWeekdayOf, parseIsoDate } from "./round-dates";
 const { cards } = roundsStrings;
 
 const HOUR_MS = 3_600_000;
-const DAY_MS = 24 * HOUR_MS;
+const HOURS_PER_DAY = 24;
+const DAY_MS = HOURS_PER_DAY * HOUR_MS;
 const SUMMARY_WINDOW_HOURS = 24;
 /** The home offers "Ver resumo" until 24 h after the real end of the round (`endsAt`, a early `close` included): the window of the votation (question 153). */
 export const SUMMARY_CARD_WINDOW_MS = SUMMARY_WINDOW_HOURS * HOUR_MS;

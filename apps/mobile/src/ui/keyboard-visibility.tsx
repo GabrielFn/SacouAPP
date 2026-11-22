@@ -2,11 +2,11 @@ import { createContext, useContext, type ReactNode } from "react";
 
 /** What the sheets need to know of the soft keyboard; the React Native adapter and the fake fulfil it. */
 export interface KeyboardVisibility {
-  isVisible(): boolean;
+  readonly isVisible: () => boolean;
   /** Tells every change (`true` when it opens); returns the way to stop listening. */
-  subscribe(listener: (visible: boolean) => void): () => void;
+  readonly subscribe: (listener: (visible: boolean) => void) => () => void;
   /** Closes the keyboard and keeps the screen where it is. */
-  dismiss(): void;
+  readonly dismiss: () => void;
 }
 
 /** Without a provider (tests, previews) the keyboard is never there. */

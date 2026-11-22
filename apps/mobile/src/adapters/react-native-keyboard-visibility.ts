@@ -5,7 +5,7 @@ import type { KeyboardVisibility } from "../ui/keyboard-visibility";
 export function createReactNativeKeyboardVisibility(): KeyboardVisibility {
   return {
     isVisible: () => Keyboard.isVisible(),
-    subscribe(listener) {
+    subscribe: (listener) => {
       const shown = Keyboard.addListener("keyboardDidShow", () => {
         listener(true);
       });

@@ -1,62 +1,39 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 
 import { createFakeKeyboardVisibility } from "../adapters/fake-keyboard-visibility";
-import { BACKDROP_GRACE_MS, createBackdropDismiss } from "./backdrop-dismiss";
-
-function setup() {
-  const keyboard = createFakeKeyboardVisibility();
-  const onClose = vi.fn();
-  const clock = { value: 10_000 };
-  const backdrop = createBackdropDismiss(keyboard, onClose, () => clock.value);
-  return { keyboard, onClose, clock, backdrop };
-}
+import { BACKDROP_GRACE_MS, backdropAction } from "./backdrop-dismiss";
 
 describe("the backdrop of a sheet (R98 part 3)", () => {
   test("without the keyboard a tap on the backdrop closes the sheet", () => {
-    const { backdrop, onClose } = setup();
-    backdrop.onBackdropPress();
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(backdropAction(false, Number.POSITIVE_INFINITY)).toBe("close-sheet");
   });
 
   test("with the keyboard up the tap only closes the keyboard and the sheet stays", () => {
-    const { backdrop, onClose, keyboard } = setup();
-    keyboard.show();
-    backdrop.onBackdropPress();
-    expect(onClose).not.toHaveBeenCalled();
-    expect(keyboard.dismissCount()).toBe(1);
+    expect(backdropAction(true, Number.POSITIVE_INFINITY)).toBe("dismiss-keyboard");
   });
 
   test("a tap that lands right after the keyboard went away is ignored", () => {
-    const { backdrop, onClose, keyboard, clock } = setup();
-    keyboard.show();
-    keyboard.hide();
-    clock.value += BACKDROP_GRACE_MS - 1;
-    backdrop.onBackdropPress();
-    expect(onClose).not.toHaveBeenCalled();
+    expect(backdropAction(false, BACKDROP_GRACE_MS - 1)).toBe("ignore");
+    expect(backdropAction(false, 0)).toBe("ignore");
   });
 
   test("after the grace time the tap closes the sheet again", () => {
-    const { backdrop, onClose, keyboard, clock } = setup();
-    keyboard.show();
-    keyboard.hide();
-    clock.value += BACKDROP_GRACE_MS;
-    backdrop.onBackdropPress();
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(backdropAction(false, BACKDROP_GRACE_MS)).toBe("close-sheet");
   });
+});
 
-  test("a sheet that never had the keyboard is not slowed down by the grace time", () => {
-    const { backdrop, onClose, clock } = setup();
-    clock.value = 0;
-    backdrop.onBackdropPress();
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  test("after release the backdrop no longer listens to the keyboard", () => {
-    const { backdrop, onClose, keyboard } = setup();
-    backdrop.release();
+describe("the fake keyboard", () => {
+  test("tells the listeners and closes on dismiss", () => {
+    const keyboard = createFakeKeyboardVisibility();
+    const seen: boolean[] = [];
+    const stop = keyboard.subscribe((visible) => {
+      seen.push(visible);
+    });
     keyboard.show();
-    keyboard.hide();
-    backdrop.onBackdropPress();
-    expect(onClose).toHaveBeenCalledTimes(1);
+    keyboard.dismiss();
+    stop();
+    keyboard.show();
+    expect(seen).toEqual([true, false]);
+    expect(keyboard.dismissCount()).toBe(1);
   });
 });
