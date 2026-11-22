@@ -1,4 +1,5 @@
 using Sacou.Modules.Sessions.Domain;
+using Sacou.Modules.Sessions.Domain.Attendances;
 using Sacou.Modules.Sessions.Domain.Rounds;
 using Xunit;
 using static Sacou.Modules.Sessions.Tests.RoundFixture;
@@ -73,5 +74,45 @@ public sealed class RoundCloseBoundaryTests
         var canceled = NewRound().Cancel().Round;
 
         Assert.Equal(RoundErrors.RoundCanceled, canceled.Close(canceled.Slot.StartsAt.AddHours(-2), hasFinishedMatch: true).Error);
+    }
+
+    /// <summary>ADR 0076: ended early, the link no longer takes answers, though the start has not come.</summary>
+    [Fact]
+    public void ARoundEndedEarly_IsClosedForTheLink()
+    {
+        var round = NewRound();
+        var tap = round.Slot.StartsAt.AddHours(-2);
+        var ended = round.Close(tap, hasFinishedMatch: true).Value.Round;
+
+        Assert.True(round.IsOpenForLinkAt(tap));
+        Assert.False(ended.IsOpenForLinkAt(tap.AddMinutes(1)));
+    }
+
+    /// <summary>ADR 0076: ended early, the player can neither confirm nor leave (the same refusal as after the start).</summary>
+    [Theory]
+    [InlineData(AttendanceResponse.Going)]
+    [InlineData(AttendanceResponse.NotGoing)]
+    public void ARoundEndedEarly_RefusesTheAnswer(AttendanceResponse response)
+    {
+        var rules = Rules();
+        var round = Going(NewRound(), rules, 1);
+        var tap = round.Slot.StartsAt.AddHours(-2);
+        var ended = round.Close(tap, hasFinishedMatch: true).Value.Round;
+
+        var answer = Respond(ended, rules, 1, response, now: tap.AddMinutes(1));
+
+        Assert.Equal(RoundErrors.RoundClosed, answer.Error);
+    }
+
+    /// <summary>ADR 0076: ended early, the admin can no longer edit the round.</summary>
+    [Fact]
+    public void ARoundEndedEarly_IsNotEdited()
+    {
+        var round = NewRound();
+        var tap = round.Slot.StartsAt.AddHours(-2);
+        var ended = round.Close(tap, hasFinishedMatch: true).Value.Round;
+
+        Assert.True(round.Edit(null, null, LayerEdit.Keep, tap).IsSuccess);
+        Assert.Equal(RoundErrors.RoundClosed, ended.Edit(null, null, LayerEdit.Keep, tap.AddMinutes(1)).Error);
     }
 }
