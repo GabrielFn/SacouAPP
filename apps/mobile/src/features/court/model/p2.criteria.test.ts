@@ -1,6 +1,7 @@
 import type { CourtSessionTimeline, MatchStartedPayload } from "@sacou/match-engine";
 import { ok } from "@sacou/volley-rules";
 import { describe, expect, test } from "vitest";
+import { NO_ROUND_END } from "../session/no-round-end.test.fixture";
 
 import { SAMPLE_MATCH_ONE_SET } from "../dev/sample-match.data";
 import { COURT_SESSION_ID } from "../session/court-harness.test.fixture";
@@ -117,6 +118,7 @@ describe("match-pending is resumed from the home", () => {
     expect(selectCourtPhase(stateOfTimeline(timeline))).toBe("match-pending");
 
     const resumable = await findResumableCourtSession({
+      ...NO_ROUND_END,
       log: scenario.harness.log,
       replayer: { replay: () => ok(timeline) },
     });
@@ -127,6 +129,6 @@ describe("match-pending is resumed from the home", () => {
     const scenario = await startScenario(SAMPLE_MATCH_ONE_SET);
     await score(scenario, A_SET);
     await confirmSet(scenario);
-    expect(await findResumableCourtSession(scenario.harness)).toBeNull();
+    expect(await findResumableCourtSession({ ...scenario.harness, ...NO_ROUND_END })).toBeNull();
   });
 });

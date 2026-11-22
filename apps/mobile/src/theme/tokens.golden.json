@@ -111,6 +111,8 @@
     "backIcon": 24,
     "groupCardMin": 128,
     "cardFooter": 46,
+    "activeBarMin": 64,
+    "liveDot": 10,
     "roleBadge": 26,
     "switchTrackWidth": 50,
     "switchTrackHeight": 30,

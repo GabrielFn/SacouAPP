@@ -174,10 +174,12 @@ describe("recentRoundOf (question 153)", () => {
   const started = summary("tue", "2026-11-02", "08:00");
   const startMs = Date.parse(started.startsAt);
 
-  it("offers the round from its start until 24 h after it ends", () => {
-    expect(recentRoundOf([started], startMs - 1)).toBeNull();
-    expect(recentRoundOf([started], startMs)?.roundId).toBe("tue");
-    const lastMoment = Date.parse(started.endsAt) + SUMMARY_CARD_WINDOW_MS - 1;
+  it("offers the round from its end until 24 h after it (R97: while it is played it is live)", () => {
+    const endMs = Date.parse(started.endsAt);
+    expect(recentRoundOf([started], startMs)).toBeNull();
+    expect(recentRoundOf([started], endMs - 1)).toBeNull();
+    expect(recentRoundOf([started], endMs)?.roundId).toBe("tue");
+    const lastMoment = endMs + SUMMARY_CARD_WINDOW_MS - 1;
     expect(recentRoundOf([started], lastMoment)?.roundId).toBe("tue");
     expect(recentRoundOf([started], lastMoment + 1)).toBeNull();
   });
@@ -193,12 +195,23 @@ describe("recentRoundOf (question 153)", () => {
     const canceled = summary("c", "2026-11-02", "09:00", { status: "canceled" });
     const earlier = summary("e", "2026-11-01", "20:00");
     expect(recentRoundOf([canceled], startMs + 1_000_000)).toBeNull();
-    expect(recentRoundOf([earlier, started], startMs + 1)?.roundId).toBe("tue");
+    const bothEnded = Date.parse(started.endsAt) + 1;
+    expect(recentRoundOf([earlier, started], bothEnded)?.roundId).toBe("tue");
   });
 
   it("shows up in the card of the group next to the next round", () => {
-    const cards = roundCardsOf([group("a", "A")], [[started, WEDNESDAY]], startMs + 60_000);
+    const afterEnd = Date.parse(started.endsAt) + 60_000;
+    const cards = roundCardsOf([group("a", "A")], [[started, WEDNESDAY]], afterEnd);
     expect(cards.groups[0]?.recent?.recentText).toBe("Rodada de seg, 2/11");
+    expect(cards.groups[0]?.recent?.kind).toBe("recent");
+    expect(cards.groups[0]?.round?.roundId).toBe("wed");
+  });
+
+  it("while it is played it is the live card, next to the next round", () => {
+    const cards = roundCardsOf([group("a", "A")], [[started, WEDNESDAY]], startMs + 60_000);
+    expect(cards.groups[0]?.live?.kind).toBe("live");
+    expect(cards.groups[0]?.live?.nextText).toBe("Rolando agora");
+    expect(cards.groups[0]?.recent).toBeNull();
     expect(cards.groups[0]?.round?.roundId).toBe("wed");
   });
 });

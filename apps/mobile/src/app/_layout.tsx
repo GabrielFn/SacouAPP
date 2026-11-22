@@ -28,6 +28,7 @@ import { createStoredNextMatchDrafts } from "../adapters/stored-next-match-draft
 import { createCachedCourtRoster } from "../adapters/cached-court-roster";
 import { createCachedCourtRoundSettings } from "../adapters/cached-court-round-settings";
 import { createCachedCourtRoundSource } from "../adapters/cached-court-round-source";
+import { createCachedRoundEndLookup } from "../adapters/cached-round-end-lookup";
 import { DEV_TOOLS_ENABLED } from "../config/dev-tools";
 import { qrcodeGeneratorEncoder } from "../adapters/qrcode-generator-encoder";
 import { reactNativeExternalLink } from "../adapters/react-native-external-link";
@@ -146,6 +147,7 @@ const realServices: Services = {
   shuffler: expoCryptoShuffler,
   nextMatchDrafts: createStoredNextMatchDrafts(cacheStore),
   courtRounds: createCachedCourtRoundSource(queryClient),
+  roundEnds: createCachedRoundEndLookup(queryClient),
   externalLink: reactNativeExternalLink,
   qrEncoder: qrcodeGeneratorEncoder,
   inviteLinkStore: secureStoreInviteLinkStore,

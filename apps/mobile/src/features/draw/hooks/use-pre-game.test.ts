@@ -15,13 +15,27 @@ vi.mock("../../court/hooks/court-runtime-context", () => ({ useCourtRuntime: () 
 vi.mock("../../court/hooks/use-round-court", () => ({
   useRoundCourt: () => ({ status: "reading" }),
 }));
+const otherRound = vi.hoisted(() => ({ revisions: [] as number[] }));
+const mutation = vi.hoisted(() => ({ isPending: false, submittedAt: 0 }));
+vi.mock("../../court/hooks/use-other-round-court", () => ({
+  useOtherRoundCourt: (_roundId: string, revision: number) => {
+    otherRound.revisions.push(revision);
+    return { status: "reading" };
+  },
+}));
 vi.mock("../../court/hooks/use-court-summary-lookup", () => ({
   useCourtSummaryLookup: () => ({ lookup: undefined, fetching: false, refresh: vi.fn() }),
 }));
 vi.mock("../../../services/api/use-online", () => ({ useOnline: () => false }));
 vi.mock("expo-router", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 vi.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ isPending: false, data: undefined, error: null, mutate: vi.fn() }),
+  useMutation: () => ({
+    isPending: mutation.isPending,
+    submittedAt: mutation.submittedAt,
+    data: undefined,
+    error: null,
+    mutate: vi.fn(),
+  }),
 }));
 
 const FLIPS = 40;
@@ -43,5 +57,35 @@ describe("usePreGame: 'Sortear' asks the injected coin (D10)", () => {
     expect(dispatch.mock.calls.map(([action]) => (action as { side: string }).side)).toEqual(
       new Array<string>(FLIPS).fill("b"),
     );
+  });
+});
+
+describe("usePreGame: the other round is read again once a start settles (R97, D5)", () => {
+  const input = {
+    groupId: "g1",
+    roundId: "r1",
+    state: initialDrawFlowState,
+    dispatch: vi.fn(),
+    arrangement: g1UuidArrangement(),
+    settings: drawSettings(),
+    members: [],
+  };
+  const lastRevision = (): number | undefined => otherRound.revisions.at(-1);
+
+  test("revision is 0 while a start runs and the time of the last submit once it settles", () => {
+    const settledAt = 1_700_000_000_000;
+    mutation.isPending = true;
+    mutation.submittedAt = settledAt;
+    usePreGame(input);
+    expect(lastRevision()).toBe(0);
+
+    mutation.isPending = false;
+    usePreGame(input);
+    expect(lastRevision()).toBe(settledAt);
+
+    // A new start that settles later changes the revision, which makes the 08 read the log again.
+    mutation.submittedAt = settledAt + 1;
+    usePreGame(input);
+    expect(lastRevision()).toBe(settledAt + 1);
   });
 });

@@ -10,6 +10,7 @@ import type { CourtRoster } from "../features/court/ports/court-roster";
 import type { CourtRoundSettings } from "../features/court/ports/court-round-settings";
 import type { CourtThemePreference } from "../features/court/ports/court-theme-preference";
 import type { CourtRoundSource } from "../features/court/ports/court-round-source";
+import type { RoundEndLookup } from "../features/court/ports/round-end-lookup";
 import type { NextMatchDraftStore } from "../features/court/ports/next-match-draft-store";
 import type { CourtRuntimeOpener } from "../features/court/ports/court-runtime";
 import type { ReducedMotion } from "../features/court/ports/reduced-motion";
@@ -91,6 +92,8 @@ export interface Services {
   readonly nextMatchDrafts: NextMatchDraftStore;
   /** The round of a court session from the persisted cache, never the network (E4.10, D7). */
   readonly courtRounds: CourtRoundSource;
+  /** The end of the round of a court session, from the persisted cache (R97, D4 and D5). */
+  readonly roundEnds: RoundEndLookup;
   readonly qrEncoder: QrEncoder;
   /** The only place of an invite token on the phone (ADR 0049, D7). */
   readonly inviteLinkStore: InviteLinkStore;

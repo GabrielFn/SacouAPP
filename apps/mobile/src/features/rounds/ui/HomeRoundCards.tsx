@@ -77,7 +77,25 @@ function RecentRoundFooter({ round }: RecentRoundFooterProps) {
   );
 }
 
-/** The home (03): "N rodadas essa semana." and the next round of each group, the soonest first. */
+export interface LiveRoundFooterProps {
+  readonly round: RoundCardModel;
+}
+
+/** "Rolando agora" over the status of the round being played (R97, D3). */
+function LiveRoundFooter({ round }: LiveRoundFooterProps) {
+  const { tokens } = useTheme();
+  return (
+    <View style={{ marginTop: "auto", gap: tokens.spacing.xs, paddingTop: tokens.spacing.xs }}>
+      <Text variant="bodyStrong">{round.nextText}</Text>
+      <RoundCardStatus round={round} />
+    </View>
+  );
+}
+
+/**
+ * The home (03): "N rodadas essa semana.", the rounds being played (they open screen 06, R97 D3), the
+ * ones that took place ("Ver resumo") and the next round of each group, the soonest first.
+ */
 export function HomeRoundCards({
   groups,
   emptyActions,
@@ -92,7 +110,10 @@ export function HomeRoundCards({
   const withSummary = cards.groups.flatMap(({ group, recent }) =>
     recent === null ? [] : [{ name: group.name, recent }],
   );
-  if (withRound.length === 0 && withSummary.length === 0) {
+  const withLive = cards.groups.flatMap(({ group, live }) =>
+    live === null ? [] : [{ name: group.name, live }],
+  );
+  if (withRound.length === 0 && withSummary.length === 0 && withLive.length === 0) {
     return (
       <EmptyState title={home.noRoundsTitle} body={home.noRoundsBody} actions={emptyActions} />
     );
@@ -100,6 +121,15 @@ export function HomeRoundCards({
   return (
     <View style={{ gap: tokens.spacing.s10 }}>
       {cards.weekText === null ? null : <Text variant="muted">{cards.weekText}</Text>}
+      {withLive.map(({ name, live }) => (
+        <HomeRoundCard
+          key={`live-${live.roundId}`}
+          groupName={name}
+          round={live}
+          footer={<LiveRoundFooter round={live} />}
+          onOpen={onOpenRound}
+        />
+      ))}
       {withSummary.map(({ name, recent }) => (
         <HomeRoundCard
           key={`summary-${recent.roundId}`}

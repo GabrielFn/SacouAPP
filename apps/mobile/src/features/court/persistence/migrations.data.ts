@@ -49,6 +49,9 @@ export const MIGRATION_STEPS: readonly string[] = [
      seen INTEGER NOT NULL DEFAULT 0 CHECK (seen IN (0, 1)),
      PRIMARY KEY (court_session_id, position)
    ) STRICT;`,
+  // The instant a court session was opened (R97, D4, ADR 0074): the silence of a list of rounds is
+  // trusted only when the list was read after it. Null in the sessions opened before.
+  `ALTER TABLE court_sessions ADD COLUMN opened_at INTEGER CHECK (opened_at >= 0);`,
 ];
 
 export const USER_VERSION_PRAGMA = "user_version";

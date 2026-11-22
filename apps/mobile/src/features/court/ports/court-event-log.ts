@@ -72,6 +72,11 @@ export interface CourtSessionOrigin {
  */
 export interface OpenedCourtSession extends CourtSessionOrigin {
   readonly ownerKey?: string | null;
+  /**
+   * The wall-clock instant the session was opened, in milliseconds (R97, D4): a list of rounds read
+   * before it says nothing of the round of the session. Absent in the sessions of before R97.
+   */
+  readonly openedAt?: number;
 }
 
 /** A session with events of this device the server has not confirmed yet (ADR 0067, D3). */
@@ -110,6 +115,8 @@ export interface CourtEventLog {
   openSession(courtSessionId: string, origin?: OpenedCourtSession): Promise<CourtLogResult<void>>;
   /** Where the session came from, or `null` for a sample session without one (E4.10, D7). */
   findOrigin(courtSessionId: string): Promise<CourtLogResult<CourtSessionOrigin | null>>;
+  /** When the session was opened (wall clock, ms), or `null` when unknown (a session of before R97). */
+  findOpenedAt(courtSessionId: string): Promise<CourtLogResult<number | null>>;
   /** The open session of the device, or `null`. */
   findActiveSession(): Promise<CourtLogResult<string | null>>;
   /** The open session that came from this round, or `null`. */

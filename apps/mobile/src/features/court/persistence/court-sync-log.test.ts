@@ -174,7 +174,9 @@ describe("migration 3: the upload of the court sessions", () => {
     const legacy = repositoryOn(sqlite);
     expect((await migrateDatabase(sqlite.database)).ok).toBe(true);
 
-    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(3);
+    expect(sqlite.raw.prepare("PRAGMA user_version").get()?.["user_version"]).toBe(
+      MIGRATION_STEPS.length,
+    );
     expect(await loaded(legacy)).toMatchObject({
       events: before,
       ackedSequence: 0,
@@ -184,6 +186,8 @@ describe("migration 3: the upload of the court sessions", () => {
     expect(
       (await legacy.append(SESSION_A, [makeEnvelope({ sequence: 3, eventNumber: 3 })])).ok,
     ).toBe(true);
+    // The session predates the opening stamp: its opening is unknown, never a guessed time (R97, D4).
+    expect(await legacy.findOpenedAt(SESSION_A)).toEqual({ ok: true, value: null });
     // Without an owner (a session from before this version), nothing ever leaves for any account.
     expect(await legacy.findSessionsToSync(DEVICE)).toEqual({
       ok: true,

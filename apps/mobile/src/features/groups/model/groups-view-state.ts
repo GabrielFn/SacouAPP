@@ -19,3 +19,9 @@ export function groupsViewState(query: GroupsQuerySnapshot): GroupsViewState {
     groups.length === 0 ? { kind: "empty" } : { kind: "list", groups },
   );
 }
+
+/** The name of a group of the list, for the bar "EM QUADRA" (R97, D1); `null` while unknown. */
+export function groupNameOf(state: GroupsViewState, groupId: string | null): string | null {
+  if (groupId === null || state.kind !== "list") return null;
+  return state.groups.find((group) => group.groupId === groupId)?.name ?? null;
+}

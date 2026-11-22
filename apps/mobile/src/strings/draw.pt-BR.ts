@@ -149,10 +149,27 @@ export const drawStrings = {
     noRotation: (team: string, size: number) => `${team} tem ${String(size)}: sem rotação.`,
     start: "Começar partida",
     starting: "Abrindo a quadra…",
+    /** R97, D2: the link of the notice of a match open in another round. */
+    openOtherMatch: "Abrir a partida aberta",
+    /** R97, D5: the sheet over the 08 when the match open is of a round that already ended. */
+    closeOther: {
+      title: "Encerrar a partida antiga?",
+      body: (date: string | null) =>
+        date === null
+          ? "Há uma partida aberta de uma rodada que já terminou. Encerrar a antiga e começar esta?"
+          : `Há uma partida aberta da rodada de ${date}. Encerrar a antiga e começar esta?`,
+      note: "Os pontos dela não se perdem: continuam sendo enviados.",
+      confirm: "Encerrar e começar",
+      cancel: "Cancelar",
+    },
     blocked: {
       stale: "A lista mudou depois do sorteio. Sorteie de novo.",
       openMatch: "Termine a partida aberta antes.",
-      otherRound: "Há uma partida aberta em outra rodada. Encerre-a antes.",
+      otherRound:
+        "Há uma partida aberta em outra rodada. Abra e encerre pelo Menu antes de começar esta.",
+      otherRoundOtherAccount:
+        "Há uma partida aberta de outra conta numa rodada que já terminou. Entre com a conta que abriu a quadra para encerrá-la.",
+      closeOtherFailed: "Não deu para encerrar a partida antiga. Tente de novo.",
       failed: "Não deu para começar a partida. Tente de novo.",
       otherAccount:
         "A quadra desta rodada foi aberta por outra conta. Entre com a conta que abriu a quadra.",
