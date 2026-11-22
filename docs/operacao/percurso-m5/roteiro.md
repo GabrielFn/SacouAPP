@@ -290,3 +290,77 @@ Data: 22/11/2026, a partir das 16h00. Mesmo aparelho, Metro em modo de observaç
 - **Não verificados por causa do bloqueio:** a tela "Rodadas do grupo", as duas rodadas completas, a quadra presa (passo 27), a cartinha com fonte 1.3 e o modo avião.
 - **Push (só o que dá para ver sem o app):** a permissão `POST_NOTIFICATIONS` já está concedida ao pacote (concedida antes). Não houve chamada `push-devices` no log do Metro, mas o app nem chegou a renderizar a Início.
 - **Parada:** 3 travas no mesmo ponto. Próximo passo: trocar `toSorted` por `[...lista].sort(...)` (ou `slice().sort`) em `HomeRoundCards.tsx` e refazer a partir do passo 28.
+
+## Quarta tentativa (22/11, código atual)
+
+Data: 22/11/2026, a partir das 16h10. Mesmo aparelho, Metro em observação, `main` com os PRs #209, #210 e #213 (`toSorted`). Prints a partir de 64.
+
+### Passo 28 · Recarregar e Início
+- Primeira carga do bundle demorou: o Metro ficou ~3 min sem responder em `/status` (tela em branco). Depois respondeu e o app abriu.
+- **Sessão mantida ao reabrir (defeito da terceira tentativa sumiu):** o app abriu direto na Início logada. **Início sem erro (`toSorted` corrigido).**
+
+![Início](64-inicio-ok.jpg)
+
+### Passo 29 · Tela "Rodadas do grupo"
+Aba **Grupo** → toque no cartão do grupo. Lista **Próximas** (Seg 23/11 Aberta, 11/12 confirmados) e **Recentes** (Dom 22/11 Encerrada · Ver resumo, 12/12). Funciona.
+- **Nova rodada** sugeriu **Ter 24/11 · 20h** (dia livre depois de Seg), vagas 12, 6x6 / 21 pontos / 1 set / Perde sai / Saída parcial / Livre. O campo **Local** veio vazio (o grupo tem "Quadra Fluxo"; o padrão não preenche o local). Preenchi "Quadra Fluxo" e publiquei.
+- Publicar abre a folha de compartilhar do sistema com o texto da rodada e o link (fechei sem enviar). A rodada nova entra em **Próximas**.
+
+![Rodadas do grupo](65-rodadas-do-grupo.jpg)
+![Nova rodada](66-nova-rodada.jpg)
+![Rodada publicada](69-rodada-ter.jpg)
+
+### Passo 30 · Presença
+**Adicionar quem confirmou no WhatsApp**: 10 toques em **Adicionar** (Beto + 9 avulsos) responderam em ~4 s cada, sem "Muitas tentativas" (10/12). O aviso "X entrou na lista" desloca a lista para baixo e faz o toque seguinte errar o alvo se for no mesmo lugar.
+- Observação: o Beto aparece como **Avulso** na lista de quem falta (embora tenha conta); os demais como "Sem conta".
+- Os chips da rodada mostram "Saída parcial" mas não a rotação.
+
+![Adicionar](70-adicionar-folha.jpg)
+
+### Passo 31 · Sorteio
+**Sortear times**: 2 times de 5, diferença 0,0 "ótimo" (Laranja: Beto, Fabi, Gabi, Hugo, Juca; Azul: Caio, Davi, Edu, Ivo, Leo). **Confirmar e compartilhar** abre a folha do sistema com o texto dos times (sem notas). Em seguida abre direto a preparação da **Partida 1**.
+
+![Sorteio](72-sortear.jpg)
+
+### Passo 32 · Rotação
+Na preparação: 21 pontos, 1 set, quem saca primeiro (A · Laranja), "Rotação de cada time: Laranja tem 5: sem rotação" (grupo Livre/6x0). **Não desenvolvido / não aplicável:** não há escolha de formação nesta rodada (o grupo está em Livre, 5x1/4x2/6x2 têm selo Pro).
+
+![Preparar partida](75-preparar-partida.jpg)
+
+### Passo 33 · Partida
+**Começar partida** abre o placar na horizontal ("Salvo no celular"), **sem** o aviso "Outro celular está marcando" (**defeito do passo 27 sumiu** com a própria conta). Marquei 14 a 14 e depois Laranja 21 a 14: tela "Fim do set 1?" → **Confirmar fim da partida** → "Laranja venceu 21–14, sets 1–0", com **Confirmar e ir para a próxima partida / Encerrar rodada / Voltar ao início**.
+
+![Placar](77-placar-14.jpg)
+![Fim](79-pos-partida.jpg)
+
+### Passo 34 · Encerrar rodada
+- **Defeito (ou limitação do percurso):** **Encerrar rodada** responde "A rodada ainda não começou e não pode ser encerrada." (409 `sessions.round-not-started`), porque a rodada é de Ter 24/11 (futura). O app deixa **Abrir quadra** e jogar uma rodada que ainda não começou, mas não deixa encerrá-la. Repeti 2 vezes, mesmo resultado.
+
+![Não pode encerrar](80-encerrar.jpg)
+
+Não foi possível jogar o resumo e a cartinha de uma rodada nova hoje: o seletor de dia de **Nova rodada** só começa amanhã (Seg 23/11) e o servidor só deixa encerrar depois do início. Todas as rodadas abertas são futuras.
+
+### Passo 35 · Segunda rodada (Seg 23/11, 11/12)
+- **Sortear times**: 2 times de 5 + 1 reserva (Mano na fila), diferença 0,0. **Confirmar e compartilhar** abriu a preparação da Partida 1 (5 pontos, 5x1 só nesta rodada). "Laranja tem 5: sem rotação" (5x1 pede 6 jogadores). Não há escolha de formação com 5 por time.
+- **Defeito (passo 27 continua):** **Começar partida** mostra "Outro celular está marcando — Org Teste está marcando esta quadra... Último ponto que chegou, há 256 min", com a própria conta. **Assumir o placar** respondeu em ~14 s "O placar do servidor veio com defeito. Nada mudou neste celular." Repeti 3 vezes (inclusive **Tentar de novo**), mesmo resultado, então esta rodada não foi jogada. (Já não demora minutos nem dá "Muitas tentativas".) A quadra desta rodada ficou presa pela tentativa anterior; a da rodada Ter 24/11 (nova) abriu normal.
+- **Defeito (repete o passo 20/27):** a página da rodada não mostra a rotação 5x1 nos chips; só em **Editar rodada**.
+
+![Outro celular](87-outro-celular-seg.jpg)
+![Placar com defeito](88-assumir-defeito.jpg)
+
+### Passo 36 · Resumo e cartinha
+- **Ver resumo** (Dom 22/11, rodada sem partida): "Grupo Fluxo · 0 partidas — Nenhuma partida terminou nesta rodada." Abre sem erro.
+- **Eu → cartinha**: abre sem "Muitas tentativas" (defeito antigo sumiu); zerada (0 partidas) porque nenhuma partida foi fechada no servidor. A cartinha com os números reais **não foi verificada**.
+- **Fonte 1.3**: a Início cabe sem cortar (print 93). A cartinha com 1.3 **não foi capturada**: a segunda tentativa de ajustar a fonte foi negada pelo sistema de permissões; a fonte voltou a 1.0.
+- **Defeito:** o aviso de desenvolvimento "Looks like you have configured linking..." volta a cobrir a barra de navegação e a aba Eu depois de recarregar/trocar a fonte.
+- **Defeito:** a Início só mostra Dom 22/11 e Seg 23/11; a rodada nova de **Ter 24/11** (publicada às 16h17) não aparece, mesmo depois de recarregar (a lista de Rodadas do grupo a mostra).
+- **Troca de fonte do sistema** reinicia o app na Início (perde a tela em que estava).
+
+![Início com fonte 1.3](93-cartinha-fonte-1-3.jpg)
+![Início sem a rodada de terça](94-inicio-sem-ter.jpg)
+
+### Passo 37 · Push e modo avião
+- **Push:** a permissão de notificação já estava concedida; o app não pediu nada nem mostrou tela de registro; sem chamada `push-devices` no log do Metro (laço sumiu). Não há como confirmar o registro no servidor pelo aparelho.
+- **Modo avião** (30 s com o app aberto): aparece a faixa amarela **Sem conexão** na Início, cartões continuam; ao desligar o modo avião a faixa some em segundos e o app volta a funcionar.
+
+![Sem conexão](97-modo-aviao-30s.jpg)
