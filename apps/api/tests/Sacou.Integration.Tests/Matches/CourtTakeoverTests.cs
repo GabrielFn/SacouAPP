@@ -54,7 +54,7 @@ public sealed class CourtTakeoverTests(IntegrationDatabase database) : IAsyncLif
         Assert.Equal(1, summary["currentBatch"]!.GetValue<long>());
         Assert.Equal(EventsOfA, summary["eventCount"]!.GetValue<int>());
         Assert.Equal(world.MemberIds[A.Scorekeeper], summary["writer"]!["memberId"]!.GetValue<Guid>());
-        Assert.Equal((2L, (long)EventsOfA, 0L), taken);
+        Assert.Equal((2L, (long)EventsOfA, 0L, (long)EventsOfA), taken);
         Assert.Equal(HttpStatusCode.Conflict, refused.StatusCode);
         Assert.Equal(NotTheWriter, refusedBody["code"]!.GetValue<string>());
         Assert.Equal(2, refusedBody["currentBatch"]!.GetValue<long>());
@@ -142,6 +142,25 @@ public sealed class CourtTakeoverTests(IntegrationDatabase database) : IAsyncLif
         Assert.Equal(2, taken.Batch);
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
         Assert.Equal("matches.court-session-not-found", await RoundCalls.CodeAsync(missing));
+    }
+
+    /// <summary>
+    /// R98: the phone that writes batch 1, back with the same login, gets its batch again with <c>eventsBefore</c> 0 and
+    /// its last sequence; <c>eventCount</c> is the whole stream, the snapshot that matches that sequence.
+    /// </summary>
+    [Fact]
+    public async Task ThePairAlreadyWriting_GetsItsBatchAgain_WithTheEventCountOfTheWholeStream()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var round = await CourtCalls.RoundAsync(world);
+        var phone = CourtPhone.New();
+        string[] sent = [phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player]), .. phone.AlternatingPoints(PointsOfA)];
+        _ = await CourtCalls.AcceptedAsync(world, A.Scorekeeper, round, phone, sent);
+
+        var taken = await CourtCalls.TakenOverAsync(world, A.Scorekeeper, round, phone, 1, EventsOfA);
+
+        Assert.Equal((1L, 0L, (long)EventsOfA, (long)EventsOfA), taken);
     }
 
     /// <summary>A9 and L1: the export of who took over has the new batch; no log carries a device id, a member id nor a body.</summary>

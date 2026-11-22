@@ -84,16 +84,16 @@ internal static class CourtCalls
         GroupWorld world, GroupActor actor, string roundId, CourtPhone phone, long expectedBatch, long expectedEventCount) =>
         world.SendAsync(actor, HttpMethod.Post, TakeoverPath(world, roundId, phone.CourtSessionId), TakeoverBody(phone.DeviceId, expectedBatch, expectedEventCount));
 
-    /// <summary>A takeover that must be accepted: its <c>batch</c>, <c>eventsBefore</c> and <c>lastSequence</c>.</summary>
-    public static async Task<(long Batch, long EventsBefore, long LastSequence)> TakenOverAsync(
+    /// <summary>A takeover that must be accepted: its <c>batch</c>, <c>eventsBefore</c>, <c>lastSequence</c> and <c>eventCount</c>.</summary>
+    public static async Task<(long Batch, long EventsBefore, long LastSequence, long EventCount)> TakenOverAsync(
         GroupWorld world, GroupActor actor, string roundId, CourtPhone phone, long expectedBatch, long expectedEventCount)
     {
         using var response = await TakeOverAsync(world, actor, roundId, phone, expectedBatch, expectedEventCount);
         var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.True(response.StatusCode == HttpStatusCode.OK, body);
         var json = JsonNode.Parse(body)!.AsObject();
-        Assert.Equal(["batch", "eventsBefore", "lastSequence"], json.Select(member => member.Key).Order(StringComparer.Ordinal));
-        return (json["batch"]!.GetValue<long>(), json["eventsBefore"]!.GetValue<long>(), json["lastSequence"]!.GetValue<long>());
+        Assert.Equal(["batch", "eventCount", "eventsBefore", "lastSequence"], json.Select(member => member.Key).Order(StringComparer.Ordinal));
+        return (json["batch"]!.GetValue<long>(), json["eventsBefore"]!.GetValue<long>(), json["lastSequence"]!.GetValue<long>(), json["eventCount"]!.GetValue<long>());
     }
 
     /// <summary>The summary of the round's stream, which must exist.</summary>

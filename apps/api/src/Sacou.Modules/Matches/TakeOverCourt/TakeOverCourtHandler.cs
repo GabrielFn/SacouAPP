@@ -36,7 +36,7 @@ internal sealed class TakeOverCourtHandler(
 
             var decision = taken.Value;
             return Result<TakeOverCourtResponse, CourtProblem>.Success(
-                new TakeOverCourtResponse(decision.Writer.Batch, decision.Writer.EventsBefore, decision.LastSequence));
+                new TakeOverCourtResponse(decision.Writer.Batch, decision.Writer.EventsBefore, decision.LastSequence, decision.EventCount));
         }
 
         CourtLog.TakeoverRefused(logger, taken.Error.Error.Code);

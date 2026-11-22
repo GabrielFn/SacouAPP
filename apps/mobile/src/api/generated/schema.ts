@@ -1444,6 +1444,8 @@ export interface components {
       eventsBefore: number;
       /** Format: int64 */
       lastSequence: number;
+      /** Format: int64 */
+      eventCount: number;
     };
     UpdateGroupSettingsRequest: {
       settings: null | components["schemas"]["JsonElement"];

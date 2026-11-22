@@ -86,20 +86,28 @@ async function leaveUnsent(
   });
 }
 
+/** The session that stays open, and who writes it: the other open sessions of its round leave. */
+interface KeptSession {
+  readonly courtSessionId: string;
+  readonly roundId: string;
+  readonly deviceId: string;
+  readonly batch: number;
+}
+
 /** The other open sessions of the round: their unsent points leave, and they are closed (D5, item 4). */
 async function closeOtherSessionsOfRound(
   transaction: SqlExecutor,
-  stream: ServerStreamImport,
+  kept: KeptSession,
 ): Promise<CourtLogResult<void>> {
   const rows = await transaction.getAll(SELECT_OPEN_SESSIONS_OF_ROUND, [
     OPEN_STATUS,
-    stream.origin.roundId,
-    stream.courtSessionId,
+    kept.roundId,
+    kept.courtSessionId,
   ]);
   for (const row of rows) {
     const id = readTextColumn(row, "court_session_id");
     if (id === null) return err({ code: "corrupted-log" });
-    const left = await leaveUnsent(transaction, id, stream.deviceId, stream.batch);
+    const left = await leaveUnsent(transaction, id, kept.deviceId, kept.batch);
     if (!left.ok) return left;
     await transaction.run(UPDATE_SESSION_STATUS, [CLOSED_STATUS, id]);
   }
@@ -118,7 +126,12 @@ export async function replaceWithServerStream(
 ): Promise<CourtLogResult<void>> {
   if (!isWholeStream(stream)) return err({ code: "sequence-conflict" });
   const { courtSessionId, origin, batch, lastSequence, events } = stream;
-  const closed = await closeOtherSessionsOfRound(transaction, stream);
+  const closed = await closeOtherSessionsOfRound(transaction, {
+    courtSessionId,
+    roundId: origin.roundId,
+    deviceId: stream.deviceId,
+    batch,
+  });
   if (!closed.ok) return closed;
   await transaction.run(DELETE_REFUSED_OF_SESSION, [courtSessionId]);
   await transaction.run(DELETE_EVENTS_OF_SESSION, [courtSessionId]);
@@ -144,5 +157,31 @@ export async function replaceWithServerStream(
   for (const [index, envelope] of events.entries()) {
     await transaction.run(INSERT_EVENT, toEventParams(index + 1, envelope));
   }
+  return ok(undefined);
+}
+
+/**
+ * One transaction (R98): the pair the server kept as the writer opens its own session again, with
+ * every event it holds, sent or not. The other open sessions of the round close as on an import.
+ */
+export async function reopenSession(
+  transaction: SqlExecutor,
+  courtSessionId: string,
+  deviceId: string,
+): Promise<CourtLogResult<void>> {
+  const [row] = await transaction.getAll(SELECT_SESSION, [courtSessionId]);
+  const batch = readIntegerColumn(row, "batch");
+  const roundId = readTextColumn(row, "round_id");
+  if (row === undefined || batch === null) return err({ code: "session-not-found" });
+  if (readIntegerColumn(row, "taken_over_batch") !== null) return err({ code: "taken-over" });
+  if (roundId === null) return err({ code: "corrupted-log" });
+  const closed = await closeOtherSessionsOfRound(transaction, {
+    courtSessionId,
+    roundId,
+    deviceId,
+    batch,
+  });
+  if (!closed.ok) return closed;
+  await transaction.run(UPDATE_SESSION_STATUS, [OPEN_STATUS, courtSessionId]);
   return ok(undefined);
 }
