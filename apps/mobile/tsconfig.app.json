@@ -1,5 +1,9 @@
 {
   "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "target": "ES2022"
+  },
   "include": ["src", "expo-env.d.ts", ".expo/types/**/*.ts"],
   "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.test.fixture.ts"]
 }
