@@ -120,3 +120,129 @@ Aba **Eu** da conta A antes de jogar: Levantador, 0 partidas, "—" de vitórias
 
 ![Cartinha inicial](18-cartinha-org-inicial.jpg)
 
+
+## Passo 14 · Nova rodada (organizadora)
+
+Aba **Grupo → Criar rodada**. A tela "Nova rodada" vem com o padrão do grupo (Dia, Horário, Local, Vagas, chips "6x6 · 25 pontos · 1 set · Perde sai · Saída parcial · Livre / 6x0") e o bloco **Personalizar esta rodada**.
+
+![Nova rodada](24-nova-rodada.jpg)
+
+Em **Personalizar esta rodada** dá para mudar Sets, **Pontos por set** (abre uma folha com campo numérico e **Confirmar**) e **Rotação** (Livre / 6x0, 5x1, 4x2, 6x2). O que difere do grupo vira chip com ponto laranja ("só nesta rodada") e o contador "2 mudanças", com **Voltar ao padrão** em cada linha. Aqui a rodada 1 foi criada com 5 pontos e rotação 5x1.
+
+![Personalizar a rodada](25-nova-rodada-personalizada.jpg)
+
+- **Observação:** na rodada, **Pontos por set** SALVA (chip "5 pontos"); o que não salva é o mesmo campo em **Como jogamos** do grupo (Passo 8). Quem sabe o campo do grupo e o da rodada usam telas/rotas diferentes.
+- **Defeito (a investigar):** ao digitar o valor, se o teclado for fechado antes de **Confirmar**, a folha pula e o toque cai fora; o valor volta a 25.
+
+## Passo 15 · Rodada publicada, visão do admin
+
+Depois de **Publicar e compartilhar no WhatsApp** a rodada abre com "Você é admin", **Copiar lista**, os chips do jogo, "Cinza vem do grupo. Ponto laranja vale só nesta rodada.", o contador 0/12 confirmados / 0 na espera, **Adicionar quem confirmou no WhatsApp** e **Sortear times**.
+
+![Rodada, visão do admin](26-rodada-admin.jpg)
+
+## Passo 16 · Adicionar confirmados
+
+**Adicionar quem confirmou no WhatsApp** abre uma folha com busca de membros ("Ainda não confirmaram": Beto Teste e Você, cada um com **Adicionar**) e a área **Convidado sem conta** (nome, entra como Avulso). Com o nome digitado o formulário abre **Adicionar convidado** com Posição opcional e **Nota do sorteio** (padrão 3,0 · definir). Foram adicionados a organizadora, o Beto e convidados avulsos até 11 de 12.
+
+![Adicionar confirmados](27-adicionar-confirmados.jpg)
+![Convidado sem conta](29-convidado-sem-conta.jpg)
+![Início com a rodada](28-inicio-com-rodada.jpg)
+![11 confirmados](30-rodada-11-confirmados.jpg)
+
+## Passo 17 · Conta do jogador confirma presença
+
+Na conta B (Beto), o card da rodada mostra "Vai? Falta 1 vaga · 11/12" com **VOU** e **Não vou**. Após **VOU**: "Você vai · 12º da lista · 12/12" e **Não vou mais**.
+
+![Jogador, Vou](31-jogador-vou.jpg)
+![Jogador confirmado](32-jogador-confirmado.jpg)
+
+## Passo 18 · Retomada no dia seguinte (Metro novo)
+
+O app em desenvolvimento abre no seletor do Development Build; digite `http://localhost:8081` e **Connect** (o `adb reverse` precisa estar ativo). O primeiro bundle levou ~100 s.
+
+- **Defeito:** a rodada 1 (Dom 22/11 · 0h30, 12/12 confirmados) ficou parada de um dia para o outro e agora o card da Início mostra **Ver resumo**; o resumo diz "Grupo Fluxo · 0 partidas — Nenhuma partida terminou nesta rodada." A rodada foi encerrada sem que ninguém jogasse (provavelmente encerramento automático pelo horário). Não houve aviso e a aba Grupo passou a mostrar "Nenhuma rodada marcada". O sorteio da rodada 1 nunca aconteceu; recomeçamos com uma rodada nova.
+
+![Resumo de rodada sem partidas](33-resumo-rodada-inesperado.jpg)
+
+- **Defeito:** em Notificações o título "Notificações" quebra em duas linhas ("Notificaçõe / s") por falta de largura ao lado do botão **Marcar como lidas**. Lista vazia: "Nenhuma notificação por enquanto."
+
+![Notificações](34-notificacoes.jpg)
+
+## Passo 19 · Rodada 2 (Seg 23/11 · 20h)
+
+Mesmo caminho do Passo 14, com 5 pontos e rotação 5x1.
+
+![Nova rodada 2](35-nova-rodada-2.jpg)
+
+- **Defeito:** ao **Publicar e compartilhar no WhatsApp** aparece a faixa "Muitas tentativas em pouco tempo. Espere um pouco e tente de novo." mesmo com o limite do ambiente de teste já ×10 e poucas chamadas nesta sessão (3 tentativas seguidas).
+
+![Faixa de limite ao publicar](36-rodada-2-publicada.jpg)
+
+- **Defeito (causa: laço do push, em correção):** a faixa "Muitas tentativas em pouco tempo" reapareceu ao adicionar confirmados: só 1 em cada ~3 toques passava, mesmo com 20–45 s de espera. A causa apontada é o app registrando o aparelho para push em laço (PUT `/v1/me/push-devices`, 10–20 por segundo), que esgota a cota do usuário. Isso explica também os "Muitas tentativas" dos Passos 4, 8, 9 e 10.
+
+![Limite ao adicionar confirmados](38-adicionar-limite.jpg)
+
+## Passo 20 · Sortear times (rodada 2, 10 confirmados)
+
+Passa-se a rodada 2 com 10 de 12 confirmados (os 2 últimos não passaram pelo limite). Toque em **Sortear times**.
+
+Com 10 confirmados (a rodada 2 não chegou a 12 por causa do limite), o sorteio faz **2 times de 5** (Laranja e Azul), mostra "Diferença 0,0 · ótimo" (média de nota A 3,0 · B 3,0) e os botões **Trocar**, **Travar dupla**, **Sortear de novo** e **Confirmar e compartilhar**.
+
+![Sorteio](39-sorteio.jpg)
+
+- **Observação:** a organizadora não entrou no sorteio (não foi adicionada: limite). Mesmo assim o sorteio não avisa que faltam 2 para 12.
+- **Defeito/Lacuna:** a rotação 5x1 escolhida na criação da rodada não aparece como chip na tela da rodada (Passos 15 e 20), nem no sorteio.
+
+## Passo 21 · Confirmar e compartilhar o sorteio
+
+**Confirmar e compartilhar** abre o seletor de compartilhamento do Android com o texto "Grupo Fluxo · Seg 23/11 / Laranja: Beto, Caio, Hugo, Ivo, Juca / Azul: Davi, Edu, Fabi, Gabi, Leo". Fechar o seletor (Voltar) leva à folha **Partida 1**.
+
+![Compartilhar o sorteio](40-confirmar-sorteio.jpg)
+
+## Passo 22 · Preparar a partida e escolher a rotação
+
+A folha **Partida 1** mostra Laranja x Azul, **Pontos por set** (−/+ , aqui já 5, herdado da rodada), **Sets** (1 set, Melhor de 3, Melhor de 5), **Saca primeiro** (A · Laranja / B · Azul / **Sortear**) e **Rotação de cada time**.
+
+![Partida 1](41-times-confirmados.jpg)
+
+- **Não desenvolvido / limitação:** a rotação de cada time diz "Laranja tem 5: sem rotação." Com 5 jogadores por time o 5x1 da rodada não pode ser usado, então a seleção de rotação fica sem efeito neste teste (precisaria de 6 por time = 12 confirmados).
+
+## Passo 23 · Jogo (placar)
+
+**Começar partida** muda o botão para "Abrindo a quadra…" e a tela fica presa nele por mais de 3 minutos antes de abrir (o limite do laço de push pode estar travando a chamada; sem mensagem de erro, e o log do app não mostra nada).
+
+- **Defeito (causa provável: laço do push, em correção):** "Abrindo a quadra…" demorou mais de 3 minutos, sem aviso.
+
+A quadra abre na horizontal: "1º set", "Posições no momento do saque", "Salvo no celular", **Menu**; Laranja à esquerda (0, "Sacando"), Azul à direita (0, "Em recepção"), **Desfazer** e **Corrigir** no meio. Tocar no lado de um time marca o ponto para ele ("Mais um ponto e o Laranja fecha o set" em 4–1, com "Set point").
+
+![Placar](42-placar.jpg)
+![Placar em andamento](43-placar-andamento.jpg)
+
+- **Lacuna:** a quadra não mostra jogadores nem formação: com 5 por time não há rotação, então as meias-quadras ficam vazias (só as linhas).
+
+No 5º ponto: "Fim do set 1? Laranja 5, Azul 1 · Laranja vence o set e faz 1–0 · Laranja vence a partida 1–0", com **Desfazer último ponto** e **Confirmar fim da partida**.
+
+![Fim do set](44-fim-do-set.jpg)
+
+Depois de confirmar: "Fim do set 1 · partida encerrada — Laranja venceu 5–1, sets 1–0". Próxima: Laranja x Azul ("Ninguém esperando. Os mesmos times."), com **Confirmar e ir para a próxima partida**, **Encerrar rodada** e **Voltar ao início**.
+
+![Partida encerrada](45-pos-partida.jpg)
+
+## Passo 24 · Encerrar a rodada e resumo
+
+**Encerrar rodada** abre o **Resumo da rodada**.
+
+- **Defeito (causa: laço do push, em correção):** na primeira abertura "Não deu para abrir o resumo. Muitas tentativas em pouco tempo..." com **Tentar de novo** (print 46-encerrar). Na segunda: "Grupo Fluxo · 0 partidas — Ainda faltam 6 pontos para enviar. O resumo pode mudar. — Nenhuma partida terminou nesta rodada." Os 6 pontos do placar ficam na fila do celular sem chegar ao servidor.
+
+![Resumo com pontos pendentes](46-resumo-pendente.jpg)
+
+## Passo 25 · Cartinha, fonte máxima e push (não concluídos)
+
+- **Cartinha pós-jogo: não verificada.** A aba **Eu** abriu "Não deu para abrir seus números. Muitas tentativas em pouco tempo..." (defeito, causa: laço do push, em correção), e nenhum resumo/cartinha chegou a ser gerado porque os 6 pontos da partida não foram enviados (Passo 24). A segunda rodada completa também não foi feita por isso.
+- **Fonte do sistema 1.3:** só a tela Início foi conferida. Os cards da rodada, o título "Fala, Org Teste." e a barra de navegação cabem sem cortar; nenhum texto foi truncado. O título "Notificações" já quebra mal em 1.0 (Passo 18).
+
+![Início com fonte 1.3](47-inicio-fonte-1-3.jpg)
+
+- **Defeito (só em desenvolvimento):** um aviso do React Navigation ("Looks like you have configured linking in multiple places...") aparece como toast na parte de baixo e cobre a barra de navegação; fica preso e não some com toque nem deslize, bloqueando as abas Grupo e Eu.
+- **Push:** em **Eu → Configurações** há a linha **Notificações — "Lista, espera, times"**; abre a lista de notificações (vazia). Não há pedido de permissão de notificação nem tela de ajustes de push. O aparelho está em laço de registro (PUT `/v1/me/push-devices`), então o registro "funciona" só em excesso.
+- **Defeito:** a rodada 1 (Dom 22/11) nunca foi sorteada e acabou sozinha sem partida (Passo 18); a rodada 2 foi sorteada e jogada (5–1), mas o resultado não chegou ao servidor.
