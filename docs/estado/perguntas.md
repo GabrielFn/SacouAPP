@@ -242,4 +242,4 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 - **Nota:** com P3 = tela de rodadas, o cartão da aba Grupos passa a abrir a lista; a 06 fica a dois toques ali (no Início continua a um). ADR 0075.
 
 ## 22/11/2026: defeitos do percurso (R98)
-- **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. "Avulso" com conta: em esclarecimento (o rótulo já distingue "Sem conta" de "Avulso"/"Mensalista").
+- **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. rótulo "Avulso" **mantido** (o app já distingue: "Sem conta" para convidado sem conta; "Mensalista" ou "Avulso" para quem tem conta).
