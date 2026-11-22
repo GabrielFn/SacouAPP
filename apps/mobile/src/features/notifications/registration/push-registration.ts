@@ -10,7 +10,13 @@ import type { PushToken, PushTokenSource } from "../ports/push-token-source";
 export const DEREGISTER_TIMEOUT_MS = 2_000;
 
 export type PushSyncOutcome =
-  "registered" | "no-session" | "no-permission" | "no-token" | "closing" | "failed";
+  | "registered"
+  | "already-registered"
+  | "no-session"
+  | "no-permission"
+  | "no-token"
+  | "closing"
+  | "failed";
 
 export interface PushRegistrationDeps {
   readonly api: Pick<SacouApi, "registerPushDevice" | "removePushDevice">;
@@ -29,7 +35,10 @@ export interface PushRegistration {
    * silent and never tried again in a loop: the next opening or the next token change tries again.
    */
   sync(): Promise<PushSyncOutcome>;
-  /** Listens to the token changes of the system; the returned function stops listening. */
+  /**
+   * Listens to the token changes of the system; the returned function stops listening. A change to the
+   * token this session already registered (or is registering) for this install sends nothing.
+   */
   start(): () => void;
 }
 
@@ -38,19 +47,40 @@ export type PushDevices = PushRegistration & PushDeviceDeregistrar;
 /**
  * The register and the exit share one state: no registration starts once the exit began, and one on the
  * way is followed by a second removal when it lands inside the 2 s, so it cannot put the old account
- * back on the phone. The token is never logged nor kept here: it goes from the system straight into
- * the body of the `PUT`.
+ * back on the phone. The token is never logged nor persisted: it goes from the system straight into
+ * the body of the `PUT`, and the last one sent stays only in memory, to skip a repeated change.
  */
+interface SentDevice {
+  readonly session: SessionIdentity;
+  readonly installationId: string;
+  readonly token: string;
+}
+
+function sameDevice(a: SentDevice | null, b: SentDevice): boolean {
+  return (
+    a !== null &&
+    a.session === b.session &&
+    a.installationId === b.installationId &&
+    a.token === b.token
+  );
+}
+
 export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
   const timeoutMs = deps.timeoutMs ?? DEREGISTER_TIMEOUT_MS;
   const inFlight: { current: readonly Promise<PushSyncOutcome>[] } = { current: [] };
   const closed: { current: SessionIdentity | null } = { current: null };
+  /** The device of the last `PUT` that succeeded or is on the way; `null` after a failure. */
+  const sent: { current: SentDevice | null } = { current: null };
 
   function isClosing(session: SessionIdentity): boolean {
     return closed.current === session;
   }
 
-  async function send(session: SessionIdentity, token: PushToken | null): Promise<PushSyncOutcome> {
+  async function send(
+    session: SessionIdentity,
+    token: PushToken | null,
+    skipRepeated: boolean,
+  ): Promise<PushSyncOutcome> {
     if ((await deps.permission.status()) !== "granted") return "no-permission";
     const pushToken = token ?? (await deps.tokens.getToken());
     if (pushToken === null) return "no-token";
@@ -58,19 +88,22 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     // The session may have ended or changed while the system answered.
     if (deps.session.currentSession() !== session) return "no-session";
     if (isClosing(session)) return "closing";
-    const result = await deps.api.registerPushDevice({
-      installationId,
-      token: pushToken.token,
-      platform: pushToken.platform,
-    });
-    return result.ok ? "registered" : "failed";
+    const device: SentDevice = { session, installationId, token: pushToken.token };
+    if (skipRepeated && sameDevice(sent.current, device)) return "already-registered";
+    sent.current = device;
+    const result = await deps.api
+      .registerPushDevice({ installationId, token: pushToken.token, platform: pushToken.platform })
+      .catch(() => null);
+    if (result?.ok === true) return "registered";
+    if (sent.current === device) sent.current = null;
+    return "failed";
   }
 
-  function register(token: PushToken | null): Promise<PushSyncOutcome> {
+  function register(token: PushToken | null, skipRepeated: boolean): Promise<PushSyncOutcome> {
     const session = deps.session.currentSession();
     if (session === null) return Promise.resolve("no-session");
     if (isClosing(session)) return Promise.resolve("closing");
-    const running = send(session, token).catch((): PushSyncOutcome => "failed");
+    const running = send(session, token, skipRepeated).catch((): PushSyncOutcome => "failed");
     inFlight.current = [...inFlight.current, running];
     void running.finally(() => {
       inFlight.current = inFlight.current.filter((other) => other !== running);
@@ -126,13 +159,14 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
   }
 
   return {
-    sync: () => register(null),
+    sync: () => register(null, false),
     start: () =>
       deps.tokens.onTokenChange((token) => {
-        void register(token);
+        void register(token, true);
       }),
     async deregister() {
       closed.current = deps.session.currentSession();
+      sent.current = null;
       await bounded(removeOnServer);
       await forgetLocally();
     },

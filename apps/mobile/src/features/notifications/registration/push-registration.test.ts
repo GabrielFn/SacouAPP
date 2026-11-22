@@ -45,6 +45,9 @@ function setup(
   return { fake, permission, tokens, installationIds, current, scheduler, deps };
 }
 
+/** Lets the pending promises of the fakes settle. */
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 const registers = (fake: ReturnType<typeof createFakeSacouApi>) =>
   fake.calls().filter((call) => call.operation === "registerPushDevice");
 
@@ -80,6 +83,68 @@ describe("M2 push-registration with fake ports", () => {
     harness.tokens.change(FAKE_PUSH_TOKEN);
     await Promise.resolve();
     expect(registers(harness.fake)).toHaveLength(1);
+  });
+
+  test("the same token again sends no second PUT; a new token does", async () => {
+    const harness = setup();
+    const devices = createPushDevices(harness.deps);
+    devices.start();
+    harness.tokens.change(NEW_TOKEN);
+    harness.tokens.change(NEW_TOKEN);
+    await vi.waitFor(() => {
+      expect(registers(harness.fake)).toHaveLength(1);
+    });
+    harness.tokens.change(NEW_TOKEN);
+    await flush();
+    expect(registers(harness.fake)).toHaveLength(1);
+    harness.tokens.change(FAKE_PUSH_TOKEN);
+    await vi.waitFor(() => {
+      expect(registers(harness.fake)).toHaveLength(2);
+    });
+    expect(registers(harness.fake)[1]?.args[0]).toMatchObject({ token: FAKE_PUSH_TOKEN.token });
+  });
+
+  test("a change to the token the opening registered sends nothing", async () => {
+    const harness = setup();
+    const devices = createPushDevices(harness.deps);
+    devices.start();
+    expect(await devices.sync()).toBe("registered");
+    harness.tokens.change(FAKE_PUSH_TOKEN);
+    await flush();
+    expect(registers(harness.fake)).toHaveLength(1);
+  });
+
+  test("each opening still sends one PUT, even with the same token", async () => {
+    const harness = setup();
+    const devices = createPushDevices(harness.deps);
+    expect(await devices.sync()).toBe("registered");
+    expect(await devices.sync()).toBe("registered");
+    expect(registers(harness.fake)).toHaveLength(2);
+  });
+
+  test("after a failed PUT the same token is sent again on the next change", async () => {
+    const harness = setup();
+    harness.fake.respond("registerPushDevice", apiErr({ kind: "unavailable", retryAfterMs: 0 }));
+    const devices = createPushDevices(harness.deps);
+    expect(await devices.sync()).toBe("failed");
+    harness.fake.respond("registerPushDevice", apiOk(null));
+    devices.start();
+    harness.tokens.change(FAKE_PUSH_TOKEN);
+    await vi.waitFor(() => {
+      expect(registers(harness.fake)).toHaveLength(2);
+    });
+  });
+
+  test("a new session registers the same token again", async () => {
+    const harness = setup();
+    const devices = createPushDevices(harness.deps);
+    devices.start();
+    expect(await devices.sync()).toBe("registered");
+    harness.current.session = { opaque: Symbol("bia") };
+    harness.tokens.change(FAKE_PUSH_TOKEN);
+    await vi.waitFor(() => {
+      expect(registers(harness.fake)).toHaveLength(2);
+    });
   });
 
   test("no session: nothing is asked of the system nor sent", async () => {
