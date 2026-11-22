@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import type { RoundSummary } from "../../../services/api/sacou-api";
-import { liveRoundOf, nextRoundOf, recentRoundOf, SUMMARY_CARD_WINDOW_MS } from "./round-cards";
+import {
+  liveRoundOf,
+  nextRoundOf,
+  recentRoundOf,
+  roundCardsOf,
+  roundsThisWeek,
+  SUMMARY_CARD_WINDOW_MS,
+  upcomingRoundsOf,
+} from "./round-cards";
 
 const START = Date.parse("2026-11-19T20:00:00Z");
 const HOUR_MS = 3_600_000;
@@ -68,5 +76,49 @@ describe("liveRoundOf: the round 'rolando agora' (R97, D3), exact edges", () => 
   it("of two rounds being played, the latest start is the live one", () => {
     const earlier = round({ roundId: "early", startsAt: new Date(START - HOUR_MS).toISOString() });
     expect(liveRoundOf([earlier, round()], START + 1)?.roundId).toBe("r1");
+  });
+});
+
+describe("upcomingRoundsOf: every round of the week (R97 part 2, D6)", () => {
+  // Thursday 19/11/2026 at 12:00 local time: the week runs until Monday 23/11 at 00:00.
+  const NOW = new Date(2026, 10, 19, 12, 0).getTime();
+  const at = (id: string, date: Date, extra: Partial<RoundSummary> = {}) =>
+    round({
+      roundId: id,
+      startsAt: date.toISOString(),
+      endsAt: new Date(date.getTime() + HOUR_MS).toISOString(),
+      ...extra,
+    });
+
+  it("gives two rounds of the same week, the soonest first", () => {
+    const rounds = [at("b", new Date(2026, 10, 21, 20)), at("a", new Date(2026, 10, 20, 20))];
+    expect(upcomingRoundsOf(rounds, NOW).map((item) => item.roundId)).toEqual(["a", "b"]);
+  });
+
+  it("Sunday 23:59 is this week, Monday 00:00 is not", () => {
+    const sunday = at("sun", new Date(2026, 10, 22, 23, 59));
+    const monday = at("mon", new Date(2026, 10, 23, 0, 0));
+    expect(upcomingRoundsOf([sunday, monday], NOW).map((item) => item.roundId)).toEqual(["sun"]);
+  });
+
+  it("with none this week, the next round stays so the group still shows up", () => {
+    const monday = at("mon", new Date(2026, 10, 23, 0, 0));
+    const later = at("later", new Date(2026, 10, 30, 20));
+    expect(upcomingRoundsOf([later, monday], NOW).map((item) => item.roundId)).toEqual(["mon"]);
+  });
+
+  it("a canceled or a started round is not upcoming", () => {
+    const canceled = at("c", new Date(2026, 10, 20, 20), { status: "canceled" });
+    const started = at("s", new Date(2026, 10, 19, 10));
+    expect(upcomingRoundsOf([canceled, started], NOW)).toEqual([]);
+  });
+
+  it("the home count equals the number of week cards, and round is still the next one", () => {
+    const list = [at("a", new Date(2026, 10, 20, 20)), at("b", new Date(2026, 10, 21, 20))];
+    const group = { groupId: "g", name: "Racha", role: "admin", memberType: "regular" } as const;
+    const cards = roundCardsOf([group], [list], NOW);
+    expect(cards.groups[0]?.upcoming).toHaveLength(roundsThisWeek([list], NOW));
+    expect(cards.groups[0]?.round?.roundId).toBe("a");
+    expect(cards.weekText).toBe("2 rodadas essa semana.");
   });
 });

@@ -113,3 +113,14 @@ Rotas do link (E3.12), **sem** `{groupId}`, com o código no corpo e `Cache-Cont
 | `POST /v1/round-links/attendance` `{ code, response }` | logado e registrado | 200 `{ groupId, roundId, memberId, joined, status, position }`; entra como avulso se preciso |
 
 Notas de comportamento: `Sequence` pode ter buracos (um "não vou" sem linha anterior grava a linha com o valor atual do contador, sem gastá-lo: só entra na ordem quem fica com vaga ou na espera, e o índice único de `(round_id, sequence)` ignora linhas `not_going`); `Source` guarda de onde a linha **veio** e não muda quando a pessoa desiste ou é tirada (ADR 0043, D6); a posição na espera é calculada, nunca gravada.
+
+## Tela de rodadas do grupo (R97 Parte 2, ADR 0075)
+
+Rota `groups/[groupId]/rounds`; lê só `GET /rounds` (a API não mudou) e o papel em `GET /groups`.
+
+- **Estados** (a partir de `status`, `startsAt` e `endsAt`, no relógio do aparelho): `canceled`; `live` (`startsAt ≤ agora < endsAt`); `ended` (`endsAt ≤ agora`); `open` (antes do início). O texto de cada um: "Aberta", "Rolando agora", "Encerrada · Ver resumo", "Cancelada".
+- **Seções:** "Próximas" = `open`, `live` e canceladas que ainda não começaram, da mais cedo para a mais tarde (a "Rolando agora" fica em primeiro). "Recentes" = `ended` e canceladas que já começaram, da mais nova para a mais velha; some quando vazia.
+- **Destino do toque:** a rodada encerrada abre o resumo (12); as outras abrem a 06 (que escolhe a visão de admin ou de jogador).
+- **Janela de "Recentes":** só o que a API devolve, ou seja, até 24 h depois do fim (a mesma do cartão "Ver resumo" do Início). Histórico maior pede `?pastDays` na API (pergunta P4).
+- **"Nova rodada":** só admin e co-admin veem o botão; a API é quem recusa. A 20 sugere o próximo dia fixo do grupo que ainda não tem rodada `scheduled`; dois rachas no mesmo dia continuam válidos.
+- **Início:** um cartão por rodada futura da semana (até domingo 23:59), de todos os grupos, por horário; sem rodada na semana, a próxima.

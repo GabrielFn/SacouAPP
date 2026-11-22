@@ -15,15 +15,15 @@ export interface GroupCardListProps {
   readonly groups: readonly MyGroup[];
   readonly onAction: (action: Exclude<GroupCardAction, "editRound">, groupId: string) => void;
   readonly onEditRound: (groupId: string, roundId: string) => void;
-  readonly onOpenRound: (groupId: string, roundId: string) => void;
+  readonly onOpenGroup: (groupId: string) => void;
 }
 
 /**
  * The cards of screen 17, the soonest next round first and the groups without a round at the end. A
- * round being played takes the place of the next one on the card, so touching it opens screen 06 (R97,
- * D3); "Editar rodada" still edits the next one.
+ * round being played takes the place of the next one on the card, and touching the card opens the list
+ * of the rounds of the group (R97 part 2, D3); "Editar rodada" still edits the next one.
  */
-export function GroupCardList({ groups, onAction, onEditRound, onOpenRound }: GroupCardListProps) {
+export function GroupCardList({ groups, onAction, onEditRound, onOpenGroup }: GroupCardListProps) {
   const { tokens } = useTheme();
   const cards = useRoundCards(groups);
   return (
@@ -38,7 +38,7 @@ export function GroupCardList({ groups, onAction, onEditRound, onOpenRound }: Gr
             if (action !== "editRound") onAction(action, groupId);
             else if (round !== null) onEditRound(groupId, round.roundId);
           }}
-          onOpenRound={onOpenRound}
+          onOpenGroup={onOpenGroup}
         />
       ))}
     </View>

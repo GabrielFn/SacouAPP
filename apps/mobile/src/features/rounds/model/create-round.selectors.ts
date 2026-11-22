@@ -19,9 +19,10 @@ import {
   isBeforeToday,
   isoWeekdayOf,
   isTooFar,
-  nextRoundDate,
+  nextFreeRoundDate,
   parseIsoDate,
   parseTime,
+  pickableDates,
   startOf,
 } from "./round-dates";
 
@@ -39,11 +40,21 @@ export function normalizeVenue(text: string): string {
   return text.trim().normalize("NFC");
 }
 
-/** The first of the 14 dates the sheet offers: the day the group plays next. */
-export function firstRoundDate(group: GroupSettings, now: Date): string {
+/** The first of the 14 dates the sheet offers: the next day the group plays that has no round yet. */
+export function firstRoundDate(
+  group: GroupSettings,
+  now: Date,
+  takenDates: readonly string[] = [],
+): string {
   const fixedDay = group.schedule.enabled;
   const time = fixedDay ? group.schedule.startTime : DEFAULT_ROUND_TIME;
-  return nextRoundDate(now, fixedDay ? group.schedule.weekday : null, time);
+  return nextFreeRoundDate(now, fixedDay ? group.schedule.weekday : null, time, takenDates);
+}
+
+/** The first date of the sheet: the next day of the group, unless the selected date falls outside the 14 days from it (then it starts at the selected one, so it always shows). */
+export function sheetFirstDate(firstDate: string, selected: string): string {
+  const shown = pickableDates(firstDate).some((option) => option.date === selected);
+  return shown ? firstDate : selected;
 }
 
 /** The first state of screen 20, from the group's settings and the clock (never copied again). */
@@ -51,11 +62,12 @@ export function initialCreateRoundState(
   group: GroupSettings,
   now: Date,
   hasSeries: boolean,
+  takenDates: readonly string[] = [],
 ): CreateRoundState {
   const fixedDay = group.schedule.enabled;
   const capacityShown = group.attendance.enabled && group.attendance.capacityLimited;
   return {
-    localDate: firstRoundDate(group, now),
+    localDate: firstRoundDate(group, now, takenDates),
     localTime: fixedDay ? group.schedule.startTime : DEFAULT_ROUND_TIME,
     venue: group.schedule.venue,
     capacityText: capacityShown ? String(group.attendance.capacity) : "",

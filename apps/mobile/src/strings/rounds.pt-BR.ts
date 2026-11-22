@@ -244,6 +244,30 @@ export const roundsStrings = {
     createRound: "Criar rodada",
     stripLabel: (day: string, hour: string) => `${day}, ${hour}`,
   },
+  /** The "Rodadas do grupo" screen (R97 part 2, D6; ADR 0075). */
+  groupRounds: {
+    title: "Rodadas",
+    newRound: "Nova rodada",
+    upcoming: "Próximas",
+    recent: "Recentes",
+    state: {
+      open: "Aberta",
+      live: "Rolando agora",
+      ended: "Encerrada · Ver resumo",
+      canceled: "Cancelada",
+    },
+    rowTitle: (date: string, state: string) => `${date} · ${state}`,
+    rowLabel: (date: string, state: string, venue: string) => `${date}, ${state}, ${venue}`,
+    noUpcoming: "Nenhuma rodada marcada.",
+    recentHint: "Rodadas encerradas recentemente.",
+    emptyTitle: "Nenhuma rodada por aqui",
+    emptyOrganizer: "Marque a próxima em Nova rodada.",
+    emptyPlayer: "Quando a organização marcar uma rodada, ela aparece aqui.",
+    loading: "Carregando as rodadas",
+    errorTitle: "Não deu para carregar as rodadas",
+    errorBody: "Confira a conexão e tente de novo.",
+    retry: "Tentar de novo",
+  },
   /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */
   copyList: {
     header: (group: string, when: string) => `${group} · ${when}`,

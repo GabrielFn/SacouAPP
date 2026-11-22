@@ -35,3 +35,8 @@ export function summaryHref(groupId: string, roundId: string): Href {
 export function mvpVoteHref(groupId: string, roundId: string): Href {
   return { pathname: "/groups/[groupId]/rounds/[roundId]/mvp-vote", params: { groupId, roundId } };
 }
+
+/** The list of the rounds of a group (R97 part 2, D6; ADR 0075). */
+export function groupRoundsHref(groupId: string): Href {
+  return { pathname: "/groups/[groupId]/rounds", params: { groupId } };
+}

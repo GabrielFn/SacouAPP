@@ -21,7 +21,7 @@ export function nextRoundOf(rounds: readonly RoundSummary[], now: number): Round
 }
 
 /** Whether a scheduled round is being played now: from its start, until its real end (`endsAt`, a early close included). */
-function isLive(round: RoundSummary, now: number): boolean {
+export function isLive(round: RoundSummary, now: number): boolean {
   return (
     round.status === "scheduled" &&
     Date.parse(round.startsAt) <= now &&
@@ -59,6 +59,26 @@ function endOfWeek(now: number): number {
   const today = new Date(now);
   const daysToMonday = DAYS_PER_WEEK - isoWeekdayOf(today) + MONDAY_ISO;
   return new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysToMonday).getTime();
+}
+
+/**
+ * Every scheduled round that starts between now and the end of the week, the soonest first; with none,
+ * the next one (so a group that plays only next week still shows up). R97 part 2, D6.
+ */
+export function upcomingRoundsOf(
+  rounds: readonly RoundSummary[],
+  now: number,
+): readonly RoundSummary[] {
+  const limit = endOfWeek(now);
+  const thisWeek = rounds
+    .filter((round) => {
+      const start = Date.parse(round.startsAt);
+      return round.status === "scheduled" && start > now && start < limit;
+    })
+    .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt));
+  if (thisWeek.length > 0) return thisWeek;
+  const next = nextRoundOf(rounds, now);
+  return next === null ? [] : [next];
 }
 
 /** How many scheduled rounds, of all the groups, start between now and the end of this week. */
@@ -170,6 +190,8 @@ export interface RoundCardModel {
   readonly kind: RoundCardKind;
   readonly groupId: string;
   readonly roundId: string;
+  /** The start in epoch milliseconds, to order the cards of different groups. */
+  readonly startsAt: number;
   readonly strip: DayStripText;
   readonly venue: string;
   readonly nextText: string;
@@ -187,6 +209,7 @@ export function roundCardModel(
     kind,
     groupId,
     roundId: round.roundId,
+    startsAt: Date.parse(round.startsAt),
     strip: dayStripText(round),
     venue: round.venue,
     nextText: kind === "live" ? cards.live : nextRoundText(round),
@@ -199,6 +222,8 @@ export function roundCardModel(
 export interface GroupRoundCard {
   readonly group: MyGroup;
   readonly round: RoundCardModel | null;
+  /** Every round of the week (or the next one, with none), the soonest first: the home shows one card each. */
+  readonly upcoming: readonly RoundCardModel[];
   /** The round being played now, that opens screen 06 (R97, D3), or `null`. */
   readonly live: RoundCardModel | null;
   /** The round that offers "Ver resumo" (question 153), or `null`. */
@@ -225,14 +250,16 @@ export function roundCardsOf(
       group,
       next: nextRoundOf(list ?? [], now),
       live: liveRoundOf(list ?? [], now),
+      upcoming: upcomingRoundsOf(list ?? [], now),
       recent: recentRoundOf(list ?? [], now),
       known: list !== undefined,
     };
   });
   return {
-    groups: orderByNextRound(entries).map(({ group, next, live, recent, known }) => ({
+    groups: orderByNextRound(entries).map(({ group, next, live, recent, upcoming, known }) => ({
       group,
       round: next === null ? null : roundCardModel(group.groupId, next),
+      upcoming: upcoming.map((item) => roundCardModel(group.groupId, item)),
       live: live === null ? null : roundCardModel(group.groupId, live, "live"),
       recent: recent === null ? null : roundCardModel(group.groupId, recent, "recent"),
       hasNextRound: known ? next !== null : null,

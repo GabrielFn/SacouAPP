@@ -25,6 +25,7 @@ import {
   createRoundErrors,
   createRoundRequest,
   firstRoundDate,
+  sheetFirstDate,
   initialCreateRoundState,
   layerChangeCount,
   repeatSummary,
@@ -35,7 +36,15 @@ import {
 import { attendanceRound } from "./attendance.test.fixture";
 import { editRoundState, updateRoundRequest } from "./edit-round";
 import { roundChips, sourceReader } from "./round-chips";
-import { dateLabel, isoDateOf, nextRoundDate, pickableDates, startOf } from "./round-dates";
+import {
+  dateLabel,
+  isoDateOf,
+  nextFreeRoundDate,
+  nextRoundDate,
+  pickableDates,
+  startOf,
+} from "./round-dates";
+import { takenRoundDates } from "./round-series";
 
 const TUESDAY = 2;
 
@@ -76,6 +85,34 @@ function initial(hasSeries = false): CreateRoundState {
 function run(state: CreateRoundState, ...actions: CreateRoundAction[]): CreateRoundState {
   return actions.reduce(createRoundReducer, state);
 }
+
+describe("nextFreeRoundDate: the suggestion skips dates that have a round (R97 part 2, D4)", () => {
+  const monday = new Date(2026, 10, 2, 10, 0);
+  const onDate = (localDate: string, status: "scheduled" | "canceled" = "scheduled") =>
+    ({ localDate, status }) as Parameters<typeof takenRoundDates>[0][number];
+
+  test("a free date is kept", () => {
+    expect(nextFreeRoundDate(monday, TUESDAY, "20:30", [])).toBe(TUESDAY_DATE);
+  });
+
+  test("one taken week skips a week, two skip two", () => {
+    expect(nextFreeRoundDate(monday, TUESDAY, "20:30", [TUESDAY_DATE])).toBe("2026-11-10");
+    expect(nextFreeRoundDate(monday, TUESDAY, "20:30", [TUESDAY_DATE, "2026-11-10"])).toBe(
+      "2026-11-17",
+    );
+  });
+
+  test("without a fixed day it skips a taken tomorrow", () => {
+    expect(nextFreeRoundDate(monday, null, "20:30", [TUESDAY_DATE])).toBe("2026-11-04");
+  });
+
+  test("the initial state of screen 20 uses the taken dates; a canceled round does not occupy", () => {
+    const taken = takenRoundDates([onDate(TUESDAY_DATE), onDate("2026-11-10", "canceled")]);
+    expect(initialCreateRoundState(rachaDeTerca(), MONDAY_MORNING, false, taken).localDate).toBe(
+      "2026-11-10",
+    );
+  });
+});
 
 describe("nextRoundDate", () => {
   const at = (day: number, hour: number, minute: number) => new Date(2026, 10, day, hour, minute);
@@ -419,5 +456,25 @@ describe("Editar rodada (screen 20 with roundId)", () => {
     });
     const body = updateRoundRequest(group, plain, { ...state, capacityText: "14" });
     expect(body.settings).toEqual({});
+  });
+});
+
+describe("sheetFirstDate: the selected date always shows in the sheet (R97 part 2)", () => {
+  test("a selected date inside the 14 days keeps the next day first", () => {
+    expect(sheetFirstDate("2026-11-03", "2026-11-10")).toBe("2026-11-03");
+  });
+
+  test("a selected date before the first one starts the sheet there", () => {
+    expect(sheetFirstDate("2026-11-10", "2026-11-03")).toBe("2026-11-03");
+  });
+
+  test("the suggestion that skips 14+ days of taken dates still shows", () => {
+    const taken = Array.from({ length: 3 }, (_unused, week) =>
+      isoDateOf(new Date(2026, 10, 3 + week * 7)),
+    );
+    const first = firstRoundDate(rachaDeTerca(), MONDAY_MORNING);
+    const suggested = nextFreeRoundDate(MONDAY_MORNING, TUESDAY, "20:30", taken);
+    const dates = pickableDates(sheetFirstDate(first, suggested)).map((option) => option.date);
+    expect(dates).toContain(suggested);
   });
 });

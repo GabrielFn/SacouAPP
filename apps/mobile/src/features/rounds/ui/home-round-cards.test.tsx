@@ -70,3 +70,40 @@ describe("HomeRoundCards: where each card leads (R97, D3)", () => {
     expect(onOpenSummary).toHaveBeenCalledTimes(1);
   });
 });
+
+function keysIn(node: ReactNode): readonly string[] {
+  if (Array.isArray(node)) return node.flatMap((child: ReactNode) => keysIn(child));
+  if (node === null || typeof node !== "object" || !("props" in node)) return [];
+  const element = node as ReactElement<{ round?: RoundCardModel; children?: ReactNode }>;
+  const own = element.props.round !== undefined && element.key !== null ? [element.key] : [];
+  return [...own, ...keysIn(element.props.children)];
+}
+
+describe("HomeRoundCards: every round of the week (R97 part 2, D6)", () => {
+  test("two rounds of the same group are two cards with different keys, the soonest first", () => {
+    cards.now = START - HOUR_MS;
+    cards.lists = [[round("b", START + HOUR_MS), round("a", START)]];
+    const tree = HomeRoundCards({
+      groups: [GROUP],
+      emptyActions: [],
+      onOpenRound: vi.fn(),
+      onOpenSummary: vi.fn(),
+    });
+    expect(keysIn(tree)).toEqual(["next-a", "next-b"]);
+  });
+
+  test("cards of different groups come in order of start, not of group", () => {
+    const other: MyGroup = { groupId: "g2", name: "Outro", role: "player", memberType: "regular" };
+    cards.now = START - HOUR_MS;
+    cards.lists = [[round("a", START + 2 * HOUR_MS)], [round("b", START)]];
+    const found = cardsIn(
+      HomeRoundCards({
+        groups: [GROUP, other],
+        emptyActions: [],
+        onOpenRound: vi.fn(),
+        onOpenSummary: vi.fn(),
+      }),
+    );
+    expect(found.map((card) => card.round.roundId)).toEqual(["b", "a"]);
+  });
+});

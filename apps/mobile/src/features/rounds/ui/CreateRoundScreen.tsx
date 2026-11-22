@@ -17,11 +17,11 @@ import { formatTime } from "../../groups/model/schedule-text";
 import { useGroup, useGroupSettings } from "../../groups/queries/use-group-queries";
 import { useCreateRound, type CreateRoundModel } from "../hooks/use-create-round";
 import { useEditRound } from "../hooks/use-edit-round";
-import { firstRoundDate } from "../model/create-round.selectors";
+import { firstRoundDate, sheetFirstDate } from "../model/create-round.selectors";
 import { dateLabel } from "../model/round-dates";
 import { roundChips, sourceReader } from "../model/round-chips";
 import { managesRounds, roundSettingsOf, type RoundSettingsView } from "../model/round-detail";
-import { hasUpcomingSeries } from "../model/round-series";
+import { hasUpcomingSeries, takenRoundDates } from "../model/round-series";
 import { roundHref } from "../navigation";
 import { useRound, useRounds } from "../queries/use-round-queries";
 import { DatePickerSheet } from "./DatePickerSheet";
@@ -117,7 +117,10 @@ function RoundForm({ groupName, settings, model, editing }: RoundFormProps) {
       <RepeatRow model={model} enabled={!editing && settings.schedule.enabled} />
       <DatePickerSheet
         visible={state.sheet.kind === "date"}
-        firstDate={firstRoundDate(settings, new Date(wallClockNow()))}
+        firstDate={sheetFirstDate(
+          firstRoundDate(settings, new Date(wallClockNow())),
+          state.localDate,
+        )}
         selected={state.localDate}
         onPick={(localDate) => {
           dispatch({ type: "date-picked", localDate });
@@ -136,14 +139,18 @@ export interface NewRoundFormProps {
   readonly groupName: string;
   readonly settings: GroupSettings;
   readonly hasSeries: boolean;
+  readonly takenDates: readonly string[];
 }
 
 /** Screen 20 once the group's settings are known: the state starts from them, never copies them again. */
-function NewRoundForm({ groupId, groupName, settings, hasSeries }: NewRoundFormProps) {
+function NewRoundForm({ groupId, groupName, settings, hasSeries, takenDates }: NewRoundFormProps) {
   const router = useRouter();
-  const model = useCreateRound({ groupId, groupName, settings, hasSeries }, (roundId) => {
-    router.replace(roundHref(groupId, roundId));
-  });
+  const model = useCreateRound(
+    { groupId, groupName, settings, hasSeries, takenDates },
+    (roundId) => {
+      router.replace(roundHref(groupId, roundId));
+    },
+  );
   return <RoundForm groupName={groupName} settings={settings} model={model} editing={false} />;
 }
 
@@ -186,6 +193,7 @@ export function CreateRoundScreen({ groupId }: CreateRoundScreenProps) {
       groupName={group.data.name}
       settings={settings.data.settings}
       hasSeries={hasUpcomingSeries(rounds.data, wallClockNow())}
+      takenDates={takenRoundDates(rounds.data)}
     />
   );
 }
