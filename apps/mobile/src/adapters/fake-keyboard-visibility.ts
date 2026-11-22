@@ -10,27 +10,25 @@ export interface FakeKeyboardVisibility extends KeyboardVisibility {
 }
 
 export function createFakeKeyboardVisibility(): FakeKeyboardVisibility {
-  const state: { visible: boolean; dismissed: number; listeners: readonly Listener[] } = {
-    visible: false,
-    dismissed: 0,
-    listeners: [],
-  };
-  const set = (visible: boolean) => {
-    state.visible = visible;
-    state.listeners.forEach((listener) => {
-      listener(visible);
+  const visible = { value: false };
+  const dismissed = { value: 0 };
+  const listeners: { value: readonly Listener[] } = { value: [] };
+  const set = (next: boolean) => {
+    visible.value = next;
+    listeners.value.forEach((listener) => {
+      listener(next);
     });
   };
   return {
-    isVisible: () => state.visible,
+    isVisible: () => visible.value,
     subscribe: (listener) => {
-      state.listeners = [...state.listeners, listener];
+      listeners.value = [...listeners.value, listener];
       return () => {
-        state.listeners = state.listeners.filter((item) => item !== listener);
+        listeners.value = listeners.value.filter((item) => item !== listener);
       };
     },
     dismiss: () => {
-      state.dismissed += 1;
+      dismissed.value += 1;
       set(false);
     },
     show: () => {
@@ -39,6 +37,6 @@ export function createFakeKeyboardVisibility(): FakeKeyboardVisibility {
     hide: () => {
       set(false);
     },
-    dismissCount: () => state.dismissed,
+    dismissCount: () => dismissed.value,
   };
 }
