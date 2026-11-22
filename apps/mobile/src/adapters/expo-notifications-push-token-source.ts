@@ -52,6 +52,7 @@ function createExpoNotificationsPushTokenSource(): PushTokenSource {
     try {
       await ensureWaitlistChannel();
       const devicePushToken = await Notifications.getDevicePushTokenAsync();
+      // Marked before the Expo read, which emits the event again; undone below if the read fails.
       seen.current = deviceTokenKey(devicePushToken);
       const { data } = await Notifications.getExpoPushTokenAsync({
         projectId: id,
@@ -59,6 +60,7 @@ function createExpoNotificationsPushTokenSource(): PushTokenSource {
       });
       return { token: data, platform: os };
     } catch {
+      seen.current = null;
       return null;
     }
   }
@@ -78,7 +80,9 @@ function createExpoNotificationsPushTokenSource(): PushTokenSource {
           while (isNew()) {
             pending.current = null;
             const token = await readToken();
-            if (token !== null && active.current) listener(token);
+            // A failed read stops here: its own event must not start a retry loop.
+            if (token === null) break;
+            if (active.current) listener(token);
           }
         } finally {
           pending.current = null;

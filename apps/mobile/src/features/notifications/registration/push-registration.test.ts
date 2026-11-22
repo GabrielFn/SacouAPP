@@ -218,6 +218,18 @@ describe("the exit of the account (deregister)", () => {
     expect(harness.tokens.unregistered()).toBe(1);
   });
 
+  test("a new sign-in with the same token after the exit sends the PUT", async () => {
+    const harness = setup();
+    const devices = createPushDevices(harness.deps);
+    devices.start();
+    await devices.sync();
+    await devices.deregister();
+    harness.current.session = { opaque: Symbol("bia") };
+    harness.tokens.change(FAKE_PUSH_TOKEN);
+    await flush();
+    expect(registers(harness.fake)).toHaveLength(2);
+  });
+
   test("an install that never registered sends no DELETE but still unregisters", async () => {
     const harness = setup();
     await createPushDevices(harness.deps).deregister();

@@ -89,6 +89,8 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     if (deps.session.currentSession() !== session) return "no-session";
     if (isClosing(session)) return "closing";
     const device: SentDevice = { session, installationId, token: pushToken.token };
+    // A PUT skipped because an equal one is on the way is not resent if that one fails: the next
+    // opening (`sync`, never skipped) tries again.
     if (skipRepeated && sameDevice(sent.current, device)) return "already-registered";
     return put(device, pushToken.platform);
   }
