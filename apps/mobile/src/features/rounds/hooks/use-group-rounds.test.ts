@@ -4,7 +4,7 @@ import { useGroupRounds } from "./use-group-rounds";
 
 const cache = vi.hoisted(() => ({
   rounds: { data: [], isError: false, refetch: vi.fn(), dataUpdatedAt: 0 },
-  groups: { data: undefined },
+  groups: { data: undefined } as { data: unknown },
 }));
 
 vi.mock("../../../services/api/use-online", () => ({ useOnline: () => true }));
