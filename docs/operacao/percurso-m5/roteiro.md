@@ -246,3 +246,32 @@ Depois de confirmar: "Fim do set 1 · partida encerrada — Laranja venceu 5–1
 - **Defeito (só em desenvolvimento):** um aviso do React Navigation ("Looks like you have configured linking in multiple places...") aparece como toast na parte de baixo e cobre a barra de navegação; fica preso e não some com toque nem deslize, bloqueando as abas Grupo e Eu.
 - **Push:** em **Eu → Configurações** há a linha **Notificações — "Lista, espera, times"**; abre a lista de notificações (vazia). Não há pedido de permissão de notificação nem tela de ajustes de push. O aparelho está em laço de registro (PUT `/v1/me/push-devices`), então o registro "funciona" só em excesso.
 - **Defeito:** a rodada 1 (Dom 22/11) nunca foi sorteada e acabou sozinha sem partida (Passo 18); a rodada 2 foi sorteada e jogada (5–1), mas o resultado não chegou ao servidor.
+
+## Segunda tentativa (22/11, push corrigido)
+
+Data: 22/11/2026, a partir das 14h40. Mesmo aparelho (Galaxy 1080×2340), Metro na `main` com o PR #209, API de teste (Cloud Run). Conta A (Org Teste) já logada. Notas escritas durante o percurso.
+
+### Passo 26 · Como jogamos do grupo: Pontos por set e Votação da galera
+
+Aba **Grupo → Gerenciar Grupo Fluxo → Como jogamos**.
+
+- **Primeira abertura (14h39): Defeito.** Logo após abrir o app, a tela mostrou "Não deu para carregar as regras. Muitas tentativas em pouco tempo." (**Tentar de novo** só funcionou depois de ~1 minuto).
+- **Pontos por set: SALVA.** Seção **Jogo → Pontos por set: 25 → Mudar**, apagar o valor, digitar 21, **Confirmar**. O texto passou a "Pontos por set: 21" e o resumo a "21 pontos · 1 set · tie-break 15 · vantagem de 2". Saí da tela (Voltar até Seus grupos), reabri **Como jogamos** e o valor continuava 21. O defeito antigo "voltam sozinhos" não se repetiu. (O problema da folha que pula quando o teclado fecha antes de **Confirmar** se repetiu: o toque cai fora, precisa tocar de novo em **Confirmar** depois que a folha desce.)
+- **Votação da galera: SALVA.** Seção **MVP do dia → Votação da galera** (estava desligada) → ligar. Saí da tela, reabri, e continuou ligada. Não se repetiu o defeito de voltar sozinha.
+- Observação: no grupo, 5x1, 4x2 e 6x2 aparecem com selo **Pro** (bloqueados); só Livre / 6x0 está livre.
+
+![Pontos por set](49-pontos-por-set-folha.jpg)
+![Votação ligada](52-votacao-ligada.jpg)
+![Votação depois de reabrir](53-votacao-reentrada.jpg)
+
+### Passo 27 · Rodada já existente (Seg 23/11) e lentidão
+
+A rodada da tentativa anterior (Seg 23/11 · 20h, 5 pontos, 5x1, 10/12) continua aberta: não existe como cancelá-la pelo app (Editar rodada só altera dados).
+
+- **Defeito:** a página da rodada não mostra a rotação escolhida (5x1) nos chips; só em **Editar rodada** aparece "5x1, só nesta rodada" (repetiu o defeito do Passo 20).
+- **Defeito:** **Abrir quadra** mostra "Outro celular está marcando — Org Teste está marcando esta quadra... Último ponto que chegou, há 162 min. Nenhuma partida aberta agora" (a quadra da tentativa anterior ficou reservada). **Assumir o placar** fica em "Carregando o placar…" / "Lendo a quadra…" por mais de 3 minutos e acaba em "Não deu para assumir a quadra. Tente de novo." (duas vezes).
+- **Defeito:** **Adicionar quem confirmou no WhatsApp**: o toque em **Adicionar** demora mais de 1 minuto para responder ("Mano entrou na lista" apareceu só depois); o seguinte terminou em "Muitas tentativas em pouco tempo" às 15h05, depois de mais de 2 minutos.
+- A rede do aparelho está boa (ping de 15 ms ao servidor, `/health` do servidor responde "Healthy" em menos de 1 s pelo computador). Ou seja, o "Muitas tentativas" (HTTP 429) continua vindo do servidor de teste mesmo com o PR #209, e o app demora minutos para mostrar o erro (provável repetição com espera).
+
+![Adicionar, sem resposta](58-adicionar-falha.jpg)
+![Outro celular marcando](56-outro-celular.jpg)
