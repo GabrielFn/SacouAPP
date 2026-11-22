@@ -108,7 +108,9 @@ export function HomeRoundCards({
     .flatMap(({ group, upcoming }, index) =>
       upcoming.map((round) => ({ name: group.name, round, index })),
     )
-    .sort((first, second) => first.round.startsAt - second.round.startsAt || first.index - second.index);
+    .toSorted(
+      (first, second) => first.round.startsAt - second.round.startsAt || first.index - second.index,
+    );
   const withSummary = cards.groups.flatMap(({ group, recent }) =>
     recent === null ? [] : [{ name: group.name, recent }],
   );

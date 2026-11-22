@@ -93,11 +93,10 @@ export function nextFreeRoundDate(
   const step = weekday === null ? 1 : DAYS_PER_WEEK;
   const start = parseIsoDate(first);
   if (start === null) return first;
-  for (let skips = 0; skips <= MAX_SKIPS; skips += 1) {
-    const candidate = isoDateOf(addDays(start, skips * step));
-    if (!taken.includes(candidate)) return candidate;
-  }
-  return first;
+  const candidates = Array.from({ length: MAX_SKIPS + 1 }, (_unused, skips) =>
+    isoDateOf(addDays(start, skips * step)),
+  );
+  return candidates.find((candidate) => !taken.includes(candidate)) ?? first;
 }
 
 /** "Ter, 3/11". */

@@ -11,7 +11,7 @@ import { GroupRoundsContent, GroupRoundsScreen } from "./GroupRoundsScreen";
 
 const screen = vi.hoisted(() => ({
   push: vi.fn(),
-  model: { kind: "loading" } as unknown,
+  model: { kind: "loading" },
 }));
 
 vi.mock("expo-router", () => ({ useRouter: () => ({ push: screen.push }) }));
@@ -75,7 +75,9 @@ function expand(node: ReactNode): readonly Found[] {
 
 const named = (found: readonly Found[], name: string) => found.filter((item) => item.name === name);
 const texts = (found: readonly Found[]) =>
-  named(found, "Text").flatMap((item) => (typeof item.props.children === "string" ? [item.props.children] : []));
+  named(found, "Text").flatMap((item) =>
+    typeof item.props.children === "string" ? [item.props.children] : [],
+  );
 
 const START = Date.parse("2026-11-19T20:00:00Z");
 const HOUR_MS = 3_600_000;
@@ -187,8 +189,12 @@ describe("the states of the screen", () => {
   });
 
   test("the section titles are headers", () => {
-    const found = render(listOf([round("a", START + DAY_MS), round("b", START - DAY_MS)], false, START));
-    const headers = named(found, "Text").filter((item) => item.props.accessibilityRole === "header");
+    const found = render(
+      listOf([round("a", START + DAY_MS), round("b", START - DAY_MS)], false, START),
+    );
+    const headers = named(found, "Text").filter(
+      (item) => item.props.accessibilityRole === "header",
+    );
     expect(headers.map((item) => item.props.children)).toEqual(["Próximas", "Recentes"]);
   });
 
@@ -198,7 +204,12 @@ describe("the states of the screen", () => {
   });
 
   test("GroupRoundsContent is a plain switch over the model", () => {
-    expect(named(expand(GroupRoundsContent({ model: { kind: "loading" }, onOpen: vi.fn() })), "LoadingState")).toHaveLength(1);
+    expect(
+      named(
+        expand(GroupRoundsContent({ model: { kind: "loading" }, onOpen: vi.fn() })),
+        "LoadingState",
+      ),
+    ).toHaveLength(1);
   });
 });
 

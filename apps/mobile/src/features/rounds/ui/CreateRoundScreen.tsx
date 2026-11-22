@@ -142,9 +142,12 @@ export interface NewRoundFormProps {
 /** Screen 20 once the group's settings are known: the state starts from them, never copies them again. */
 function NewRoundForm({ groupId, groupName, settings, hasSeries, takenDates }: NewRoundFormProps) {
   const router = useRouter();
-  const model = useCreateRound({ groupId, groupName, settings, hasSeries, takenDates }, (roundId) => {
-    router.replace(roundHref(groupId, roundId));
-  });
+  const model = useCreateRound(
+    { groupId, groupName, settings, hasSeries, takenDates },
+    (roundId) => {
+      router.replace(roundHref(groupId, roundId));
+    },
+  );
   return <RoundForm groupName={groupName} settings={settings} model={model} editing={false} />;
 }
 

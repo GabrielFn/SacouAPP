@@ -89,12 +89,7 @@ export function useCreateRound(
   const client = useQueryClient();
   const { settings } = input;
   const form = useRoundForm(settings, () =>
-    initialCreateRoundState(
-      settings,
-      new Date(wallClockNow()),
-      input.hasSeries,
-      input.takenDates,
-    ),
+    initialCreateRoundState(settings, new Date(wallClockNow()), input.hasSeries, input.takenDates),
   );
   const mutation = useMutation(createRoundMutation(sacouApi, client, input.groupId));
   return {

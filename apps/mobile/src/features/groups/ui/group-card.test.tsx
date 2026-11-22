@@ -6,7 +6,10 @@ import { GroupCard } from "./GroupCard";
 
 vi.mock("react-native", () => ({ View: "View", Pressable: "Pressable" }));
 vi.mock("../../../theme/theme-context", () => ({
-  useTheme: () => ({ colors: {}, tokens: { sizes: {}, spacing: {}, borderWidths: {}, radii: {} } }),
+  useTheme: () => ({
+    colors: {},
+    tokens: { sizes: {}, spacing: {}, borderWidths: {}, radii: {}, fontSizes: {} },
+  }),
 }));
 vi.mock("../../../ui/RoleBadge", () => ({ RoleBadge: () => null }));
 vi.mock("../../../ui/Text", () => ({ Text: () => null }));
