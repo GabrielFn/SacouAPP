@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { useGroupRounds } from "./use-group-rounds";
 
-const cache = vi.hoisted(() => ({
+const cache = vi.hoisted<{ rounds: object; groups: { data: unknown } }>(() => ({
   rounds: { data: [], isError: false, refetch: vi.fn(), dataUpdatedAt: 0 },
-  groups: { data: undefined } as { data: unknown },
+  groups: { data: undefined },
 }));
 
 vi.mock("../../../services/api/use-online", () => ({ useOnline: () => true }));
