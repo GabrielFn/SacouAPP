@@ -90,9 +90,17 @@ export function createPushDevices(deps: PushRegistrationDeps): PushDevices {
     if (isClosing(session)) return "closing";
     const device: SentDevice = { session, installationId, token: pushToken.token };
     if (skipRepeated && sameDevice(sent.current, device)) return "already-registered";
+    return put(device, pushToken.platform);
+  }
+
+  /** The `PUT` of this install; a failure forgets the device, so the next change sends it again. */
+  async function put(
+    device: SentDevice,
+    platform: PushToken["platform"],
+  ): Promise<PushSyncOutcome> {
     sent.current = device;
     const result = await deps.api
-      .registerPushDevice({ installationId, token: pushToken.token, platform: pushToken.platform })
+      .registerPushDevice({ installationId: device.installationId, token: device.token, platform })
       .catch(() => null);
     if (result?.ok === true) return "registered";
     if (sent.current === device) sent.current = null;

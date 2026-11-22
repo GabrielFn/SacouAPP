@@ -39,7 +39,7 @@ function deviceTokenKey(deviceToken: Notifications.DevicePushToken): string {
  * way: otherwise each read fires the next one, a loop of `PUT /v1/me/push-devices`.
  */
 function createExpoNotificationsPushTokenSource(): PushTokenSource {
-  const seen: { deviceToken: string | null } = { deviceToken: null };
+  const seen: { current: string | null } = { current: null };
 
   /**
    * The Expo push token. It never reaches a log, an error nor the cache: a failure of the system (an
@@ -52,8 +52,11 @@ function createExpoNotificationsPushTokenSource(): PushTokenSource {
     try {
       await ensureWaitlistChannel();
       const devicePushToken = await Notifications.getDevicePushTokenAsync();
-      seen.deviceToken = deviceTokenKey(devicePushToken);
-      const { data } = await Notifications.getExpoPushTokenAsync({ projectId: id, devicePushToken });
+      seen.current = deviceTokenKey(devicePushToken);
+      const { data } = await Notifications.getExpoPushTokenAsync({
+        projectId: id,
+        devicePushToken,
+      });
       return { token: data, platform: os };
     } catch {
       return null;
@@ -63,32 +66,33 @@ function createExpoNotificationsPushTokenSource(): PushTokenSource {
   return {
     getToken: readToken,
     onTokenChange(listener) {
-      const state: { reading: boolean; pending: string | null; active: boolean } = {
-        reading: false,
-        pending: null,
-        active: true,
-      };
+      const reading: { current: boolean } = { current: false };
+      const pending: { current: string | null } = { current: null };
+      const active: { current: boolean } = { current: true };
+
+      const isNew = (): boolean => pending.current !== null && pending.current !== seen.current;
 
       async function readWhileNew(): Promise<void> {
-        state.reading = true;
+        reading.current = true;
         try {
-          while (state.active && state.pending !== null && state.pending !== seen.deviceToken) {
-            state.pending = null;
+          while (isNew()) {
+            pending.current = null;
             const token = await readToken();
-            if (token !== null && state.active) listener(token);
+            if (token !== null && active.current) listener(token);
           }
         } finally {
-          state.pending = null;
-          state.reading = false;
+          pending.current = null;
+          reading.current = false;
         }
       }
 
       const subscription = Notifications.addPushTokenListener((deviceToken) => {
-        state.pending = deviceTokenKey(deviceToken);
-        if (!state.reading) void readWhileNew();
+        pending.current = deviceTokenKey(deviceToken);
+        if (!reading.current) void readWhileNew();
       });
       return () => {
-        state.active = false;
+        active.current = false;
+        pending.current = null;
         subscription.remove();
       };
     },
