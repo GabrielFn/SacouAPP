@@ -51,7 +51,11 @@ import { expoNotificationsPermission } from "../adapters/expo-notifications-perm
 import { expoNotificationsPushTokenSource } from "../adapters/expo-notifications-push-token-source";
 import { expoNotificationsTaps } from "../adapters/expo-notifications-taps";
 import { secureStoreInstallationIdStore } from "../adapters/secure-store-installation-id-store";
+import { createDevPushOutcomeLog } from "../adapters/dev-push-outcome-log";
+import { quietKnownDevWarnings } from "../adapters/react-native-dev-warnings";
+import { createStoredPushPromptMemory } from "../adapters/stored-push-prompt-memory";
 import { usePushSession } from "../features/notifications/hooks/use-push-session";
+import { PushPromptHost } from "../features/notifications/ui/PushPromptHost";
 import { createPushDevices } from "../features/notifications/registration/push-registration";
 import { buildApiBaseUrl } from "../config/api-url";
 import { buildGoogleWebClientId } from "../config/google-sign-in";
@@ -112,6 +116,7 @@ const sacouApi = createHttpSacouApi({
   idTokens: sessionIdTokens(authSession, sessionEnder),
 });
 showPushesInForeground();
+quietKnownDevWarnings(__DEV__);
 bindAppStateFocus();
 void removeExportLeftovers(expoFileShare);
 
@@ -163,6 +168,8 @@ const realServices: Services = {
   notificationPermission: expoNotificationsPermission,
   notificationTaps: expoNotificationsTaps,
   pushDevices,
+  pushOutcomeLog: createDevPushOutcomeLog(__DEV__),
+  pushPromptMemory: createStoredPushPromptMemory(cacheStore),
 };
 
 /**
@@ -178,7 +185,8 @@ function SessionStack() {
   const onboarding = useOnboardingGate(signedIn) === "show";
   if (session.status === "unknown") return null;
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <PushPromptHost>
+      <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={signedIn && !onboarding}>
         {SIGNED_IN_ROUTES.map((name) => (
           <Stack.Screen key={name} name={name} />
@@ -194,7 +202,8 @@ function SessionStack() {
           <Stack.Screen key={name} name={name} />
         ))}
       </Stack.Protected>
-    </Stack>
+      </Stack>
+    </PushPromptHost>
   );
 }
 

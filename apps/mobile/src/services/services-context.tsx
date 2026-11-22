@@ -27,6 +27,8 @@ import type { OnboardingSkip } from "../features/profile/ports/onboarding-skip";
 import type { NotificationPermission } from "../features/notifications/ports/notification-permission";
 import type { NotificationTaps } from "../features/notifications/ports/notification-taps";
 import type { PushRegistration } from "../features/notifications/registration/push-registration";
+import type { PushOutcomeLog } from "../features/notifications/ports/push-outcome-log";
+import type { PushPromptMemory } from "../features/notifications/ports/push-prompt-memory";
 import type { NetworkStatus } from "./api/network-status";
 import type { AuthSession } from "./auth/auth-session";
 import type { SacouApi } from "./api/sacou-api";
@@ -121,6 +123,10 @@ export interface Services {
   readonly notificationTaps: NotificationTaps;
   /** The push device of this install, registered only while signed in (E3.11). */
   readonly pushDevices: PushRegistration;
+  /** The outcome of each registration, in the Metro log in development only (R98, item 9). */
+  readonly pushOutcomeLog: PushOutcomeLog;
+  /** Whether the notifications were already offered on this phone (R98, item 9). */
+  readonly pushPromptMemory: PushPromptMemory;
 }
 
 const ServicesContext = createContext<Services | null>(null);

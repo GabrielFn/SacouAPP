@@ -22,6 +22,9 @@ vi.mock("../../groups/queries/use-group-queries", () => ({
   useGroup: () => ({ data: undefined }),
   useGroupMembers: () => ({ data: undefined }),
 }));
+vi.mock("../../notifications/hooks/push-prompt-context", () => ({
+  useOfferPushPrompt: () => () => undefined,
+}));
 vi.mock("../queries/use-round-queries", () => ({ useRound: () => ({ data: undefined }) }));
 vi.mock("../queries/round-mutations", () => ({
   respondAttendanceMutation: () => ({}),

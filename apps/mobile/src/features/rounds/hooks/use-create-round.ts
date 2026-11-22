@@ -6,6 +6,7 @@ import { errorTextOf } from "../../../services/api/api-error-text";
 import { wallClockNow } from "../../../services/api/wall-clock";
 import { useServices } from "../../../services/services-context";
 import { formatTime } from "../../groups/model/schedule-text";
+import { useOfferPushPrompt } from "../../notifications/hooks/push-prompt-context";
 import {
   createRoundReducer,
   type CreateRoundAction,
@@ -92,6 +93,7 @@ export function useCreateRound(
     initialCreateRoundState(settings, new Date(wallClockNow()), input.hasSeries, input.takenDates),
   );
   const mutation = useMutation(createRoundMutation(sacouApi, client, input.groupId));
+  const offerPushPrompt = useOfferPushPrompt();
   return {
     ...form,
     publishDisabled: isPublishDisabled(
@@ -109,6 +111,7 @@ export function useCreateRound(
         onSuccess: (round) => {
           onPublished(round.roundId);
           const capacity = round.capacity;
+          // After the share sheet, the round created offers the notifications (R98, item 9).
           void shareSheet.share(
             shareTextOf(
               input.groupName,
@@ -118,7 +121,7 @@ export function useCreateRound(
               capacity,
               round.shareUrl ?? null,
             ),
-          );
+          ).then(offerPushPrompt, offerPushPrompt);
         },
       });
     },

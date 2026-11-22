@@ -37,6 +37,13 @@ export const notificationsStrings = {
     blockedBody:
       "As notificações estão desligadas nos ajustes do celular. Ligue por lá pra saber quando sair da espera.",
   },
+  /** The sentence before the system question, after a first "VOU" or a first round (R98, item 9). */
+  prompt: {
+    title: "Quer saber quando sair da espera?",
+    body: "Ative as notificações e a gente avisa quando você sair da espera, quando a lista abrir e quando os times saírem.",
+    enable: "Ativar notificações",
+    later: "Agora não",
+  },
   bell: "Notificações",
   bellUnread: "Notificações, há não lidas",
   /** The Android channel of the waitlist pushes (high importance): the name shows in the phone settings. */

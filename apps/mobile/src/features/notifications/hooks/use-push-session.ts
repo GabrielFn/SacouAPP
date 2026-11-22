@@ -7,6 +7,7 @@ import { homeHref } from "../../groups/navigation";
 import { roundHref } from "../../rounds/navigation";
 import { hasUnread, notificationsQuery } from "../queries/notification-queries";
 import { handleNotificationTap, handlePushReceived } from "../queries/tap-handling";
+import { syncWithOneRetry } from "../registration/sync-with-one-retry";
 
 /**
  * While signed in: the phone registers on every opening and on every token change, and the touches on
@@ -14,15 +15,20 @@ import { handleNotificationTap, handlePushReceived } from "../queries/tap-handli
  * ever leaves without a session.
  */
 export function usePushSession(signedIn: boolean): void {
-  const { sacouApi, pushDevices, notificationTaps } = useServices();
+  const { sacouApi, pushDevices, notificationTaps, scheduler, pushOutcomeLog } = useServices();
   const client = useQueryClient();
   const router = useRouter();
 
   useEffect(() => {
     if (!signedIn) return undefined;
-    void pushDevices.sync();
-    return pushDevices.start();
-  }, [signedIn, pushDevices]);
+    // With the permission already given, the opening registers the phone (R98, item 9).
+    const cancelRetry = syncWithOneRetry({ devices: pushDevices, scheduler, log: pushOutcomeLog });
+    const stop = pushDevices.start();
+    return () => {
+      cancelRetry();
+      stop();
+    };
+  }, [signedIn, pushDevices, scheduler, pushOutcomeLog]);
 
   useEffect(() => {
     if (!signedIn) return undefined;
