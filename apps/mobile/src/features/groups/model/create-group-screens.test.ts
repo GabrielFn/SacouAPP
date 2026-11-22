@@ -110,11 +110,11 @@ describe("screen 04a", () => {
 
 describe("screen 05", () => {
   test("it asks two questions and none is about money", () => {
-    const { step2, errors, partial } = strings.createGroup;
+    const { step2, errors } = strings.createGroup;
     expect(step2.title).toBe("Duas perguntas e pronto");
     expect(Object.keys(step2).filter((key) => /charge|fee/i.test(key))).toEqual([]);
     expect(Object.keys(errors)).not.toContain("money");
-    expect(partial.title).toBe("Grupo criado, mas não salvamos tudo.");
+    expect(Object.keys(strings.createGroup)).not.toContain("partial");
   });
 });
 

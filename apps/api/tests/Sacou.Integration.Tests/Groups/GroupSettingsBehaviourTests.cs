@@ -73,6 +73,28 @@ public sealed class GroupSettingsBehaviourTests(IntegrationDatabase database) : 
         Assert.Empty(await SettingsCalls.ListAsync(world, world.GroupPath));
     }
 
+    /// <summary>R98 part 4: the rules typed with the name are saved in the same call; a bad layer creates no group.</summary>
+    [Fact]
+    public async Task CreateGroup_WithASettingsLayerSavesItAtOnce_AndABadLayerCreatesNothing()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var user = world.Users[A.NonMember];
+        var groups = await CountGroupsAsync(user);
+
+        using var bad = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Camada ruim","settings":{"schemaVersion":1,"scoring":{"bestOf":2}}}""");
+        var afterBad = await CountGroupsAsync(user);
+        using var good = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Camada boa","templateKey":"racha-organizado","settings":{"schemaVersion":1,"scoring":{"bestOf":3}}}""");
+        var path = $"{GroupWorld.GroupsPath}/{(await SettingsCalls.JsonAsync(good))["groupId"]!.GetValue<Guid>()}";
+        var settings = await SettingsCalls.GetAsync(world, path, A.NonMember);
+
+        Assert.Equal(HttpStatusCode.BadRequest, bad.StatusCode);
+        Assert.Equal(groups, afterBad);
+        Assert.Equal(HttpStatusCode.Created, good.StatusCode);
+        Assert.Equal(3, settings["settings"]!["scoring"]!["bestOf"]!.GetValue<int>());
+        Assert.Equal("racha-organizado", settings["templateKey"]!.GetValue<string>());
+    }
+
     /// <summary>M7: without a key the group is "Do zero"; an unknown key is a 400 and no group is created.</summary>
     [Fact]
     public async Task CreateGroup_WithoutKeyIsDoZero_AndWithAnUnknownKeyCreatesNothing()

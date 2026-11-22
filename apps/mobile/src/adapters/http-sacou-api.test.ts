@@ -54,6 +54,19 @@ const OPERATIONS: readonly Operation[] = [
     { name: "Racha", templateKey: "racha-organizado" },
   ],
   [
+    "createGroup with rules",
+    (a) =>
+      a.createGroup("Racha", "do-zero", { schemaVersion: 1, schedule: { venue: "Quadra Fluxo" } }),
+    "POST",
+    "/v1/groups",
+    "/v1/groups",
+    {
+      name: "Racha",
+      templateKey: "do-zero",
+      settings: { schemaVersion: 1, schedule: { venue: "Quadra Fluxo" } },
+    },
+  ],
+  [
     "getGroupSettings",
     (a) => a.getGroupSettings(GROUP),
     "GET",

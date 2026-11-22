@@ -129,6 +129,8 @@ export interface SacouApi {
   createGroup(
     name: string,
     templateKey: SettingsTemplateKey,
+    /** The rules typed with the name (day, time, venue...), saved in the same call; `null` for none. */
+    settings?: SettingsLayer | null,
   ): Promise<ApiResult<Schemas["CreateGroupResponse"]>>;
   getGroup(groupId: string): Promise<ApiResult<Group>>;
   renameGroup(groupId: string, name: string): Promise<ApiResult<Schemas["RenameGroupResponse"]>>;

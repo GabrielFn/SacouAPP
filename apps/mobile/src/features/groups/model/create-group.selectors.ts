@@ -120,11 +120,6 @@ export function isSubmitDisabled(
   return pending || !canSubmit(state, origin);
 }
 
-/** "Tentar de novo" is off while its call is on the way, or when there is nothing to retry. */
-export function isRetryDisabled(state: CreateGroupState, pending: boolean): boolean {
-  return pending || state.submit.kind !== "created-without-settings";
-}
-
 export function isScheduleChosen(state: CreateGroupState): boolean {
   return state.scheduleWeekday !== null && state.scheduleTime !== null;
 }

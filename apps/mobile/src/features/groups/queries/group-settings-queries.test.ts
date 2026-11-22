@@ -20,7 +20,6 @@ import {
   applyTemplateMutation,
   createGroupFlow,
   deleteTemplateMutation,
-  saveCreatedGroupSettings,
   saveTemplateMutation,
   settingsScope,
   updateSettingsMutation,
@@ -212,61 +211,32 @@ describe("creating a group", () => {
     patch: layer(21),
   } as const;
 
-  test("POST and then PATCH, and the list of groups is stale", async () => {
+  test("one POST carries the template and the rules, and the list of groups is stale", async () => {
     const { client, fake } = setup();
     client.setQueryData(queryKeys.groups(), []);
     fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
-    fake.respond("updateGroupSettings", apiOk(document(racha)));
-    expect(await createGroupFlow(fake.api, client, input)).toEqual({
-      kind: "done",
-      groupId: GROUP,
-    });
-    expect(fake.calls().map((call) => call.operation)).toEqual([
-      "createGroup",
-      "updateGroupSettings",
-    ]);
-    expect(fake.calls()[0]?.args).toEqual(["Racha de terça", "racha-organizado"]);
+    expect(await createGroupFlow(fake.api, client, input)).toBe(GROUP);
+    expect(fake.calls().map((call) => call.operation)).toEqual(["createGroup"]);
+    expect(fake.calls()[0]?.args).toEqual(["Racha de terça", "racha-organizado", layer(21)]);
     expect(client.getQueryState(queryKeys.groups())?.isInvalidated).toBe(true);
   });
 
-  test("from scratch sends the key 'do-zero' and then the switches of screen 04a", async () => {
+  test("with nothing to save the call carries no rules", async () => {
     const { client, fake } = setup();
     fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
-    fake.respond("updateGroupSettings", apiOk(document(racha)));
-    const patch = {
-      schemaVersion: 1,
-      attendance: { enabled: true },
-      queue: { enabled: true },
-    } as const;
-    await createGroupFlow(fake.api, client, { name: "Racha", templateKey: "do-zero", patch });
-    expect(fake.calls()[0]?.args).toEqual(["Racha", "do-zero"]);
-    expect(fake.calls()[1]?.args[1]).toEqual(patch);
-  });
-
-  test("with nothing to save there is no PATCH", async () => {
-    const { client, fake } = setup();
-    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
-    const outcome = await createGroupFlow(fake.api, client, { ...input, patch: null });
-    expect(outcome.kind).toBe("done");
+    await createGroupFlow(fake.api, client, { ...input, patch: null });
     expect(fake.calls()).toHaveLength(1);
+    expect(fake.calls()[0]?.args).toEqual(["Racha de terça", "racha-organizado", null]);
   });
 
-  test("if the PATCH fails the group exists and only the PATCH is repeated", async () => {
+  test("a refusal of the rules throws and the screen can send the same form again", async () => {
     const { client, fake } = setup();
-    fake.respond("createGroup", apiOk({ groupId: GROUP, memberId: MEMBER }));
-    fake.respond("updateGroupSettings", apiErr({ kind: "offline" }));
-    expect(await createGroupFlow(fake.api, client, input)).toEqual({
-      kind: "created-without-settings",
-      groupId: GROUP,
-    });
-    fake.respond("updateGroupSettings", apiOk(document(racha)));
-    await saveCreatedGroupSettings(fake.api, client, GROUP, layer(21));
-    expect(fake.calls().map((call) => call.operation)).toEqual([
-      "createGroup",
-      "updateGroupSettings",
-      "updateGroupSettings",
-    ]);
-    expect(fake.calls()[2]?.args[0]).toBe(GROUP);
+    fake.respond("createGroup", apiErr(problem(400, "groups.settings-invalid")));
+    const error: unknown = await createGroupFlow(fake.api, client, input).catch(
+      (thrown: unknown) => thrown,
+    );
+    expect(apiErrorOf(error)).toEqual(problem(400, "groups.settings-invalid"));
+    expect(fake.calls()).toHaveLength(1);
   });
 
   test("a 409 membership-limit throws its code and calls nothing else", async () => {

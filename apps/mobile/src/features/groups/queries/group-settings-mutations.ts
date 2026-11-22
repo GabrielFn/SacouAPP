@@ -85,37 +85,16 @@ export interface CreateGroupInput {
   readonly patch: SettingsLayer | null;
 }
 
-export type CreateGroupOutcome =
-  | { readonly kind: "done"; readonly groupId: string }
-  | { readonly kind: "created-without-settings"; readonly groupId: string };
-
-/** The second step alone: the group exists already, and "Tentar de novo" repeats only this one. */
-export async function saveCreatedGroupSettings(
-  api: SacouApi,
-  client: QueryClient,
-  groupId: string,
-  patch: SettingsLayer,
-): Promise<void> {
-  const view = viewOrThrow(await unwrap(api.updateGroupSettings(groupId, patch)));
-  applyCacheEffects(client, cacheEffectsOf({ type: "settingsReplaced", groupId, view }));
-}
-
 /**
- * The two calls of "Criar grupo": POST and then PATCH. If the PATCH fails the group is there anyway, so
- * the outcome says so and the screen offers to repeat only the PATCH (D3). A failure of the POST throws.
+ * The one call of "Criar grupo": the name, the template and the rules go together and the server saves
+ * them in a single transaction, so a refusal creates nothing and the screen can simply try again.
  */
 export async function createGroupFlow(
   api: SacouApi,
   client: QueryClient,
   input: CreateGroupInput,
-): Promise<CreateGroupOutcome> {
-  const created = await unwrap(api.createGroup(input.name, input.templateKey));
+): Promise<string> {
+  const created = await unwrap(api.createGroup(input.name, input.templateKey, input.patch));
   applyCacheEffects(client, cacheEffectsOf({ type: "createGroup" }));
-  if (input.patch === null) return { kind: "done", groupId: created.groupId };
-  try {
-    await saveCreatedGroupSettings(api, client, created.groupId, input.patch);
-    return { kind: "done", groupId: created.groupId };
-  } catch {
-    return { kind: "created-without-settings", groupId: created.groupId };
-  }
+  return created.groupId;
 }

@@ -95,7 +95,8 @@ export function createFakeSacouApi(): FakeSacouApi {
   const api: SacouApi = {
     signIn: () => answer("signIn", []),
     listMyGroups: () => answer("listMyGroups", []),
-    createGroup: (name, templateKey) => answer("createGroup", [name, templateKey]),
+    createGroup: (name, templateKey, settings) =>
+      answer("createGroup", [name, templateKey, settings ?? null]),
     getGroup: (groupId) => answer("getGroup", [groupId]),
     renameGroup: (groupId, name) => answer("renameGroup", [groupId, name]),
     getGroupSettings: (groupId) => answer("getGroupSettings", [groupId]),

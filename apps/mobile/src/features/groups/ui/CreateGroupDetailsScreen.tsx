@@ -19,7 +19,7 @@ import { SHEET_START, WhenAndWhereQuestion, YES_NO } from "./CreateGroupQuestion
 import { QuestionSection } from "./QuestionSection";
 import { ScheduleSheet } from "./ScheduleSheet";
 
-const { step2, partial } = strings.createGroup;
+const { step2 } = strings.createGroup;
 const FINAL_STEP_PROGRESS = 1;
 
 export interface CreateGroupDetailsScreenProps {
@@ -28,39 +28,19 @@ export interface CreateGroupDetailsScreenProps {
 
 export interface CreateGroupFooterProps {
   readonly model: CreateGroupModel;
-  readonly onKeep: (groupId: string) => void;
 }
 
-/** The main button, or the choice offered when the group exists but its settings were not saved. */
-function CreateGroupFooter({ model, onKeep }: CreateGroupFooterProps) {
-  const { submit } = model.state;
+/** The main button, with the refusal of the server above it when there is one. */
+function CreateGroupFooter({ model }: CreateGroupFooterProps) {
   return (
     <>
       {model.errorText !== null ? <ErrorStrip text={model.errorText} /> : null}
-      {submit.kind === "created-without-settings" ? (
-        <>
-          <ErrorStrip text={partial.title} />
-          <Button
-            label={partial.retry}
-            disabled={model.retryDisabled}
-            onPress={model.retrySettings}
-          />
-          <Button
-            label={partial.keep}
-            variant="link"
-            onPress={() => {
-              onKeep(submit.groupId);
-            }}
-          />
-        </>
-      ) : (
-        <Button label={step2.submit} disabled={model.submitDisabled} onPress={model.submit} />
-      )}
+      <Button label={step2.submit} disabled={model.submitDisabled} onPress={model.submit} />
     </>
   );
 }
 
-/** Screen 05: the two questions. The reducer holds the answers; the hook makes the two calls. */
+/** Screen 05: the two questions. The reducer holds the answers; the hook makes the one call. */
 export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenProps) {
   const router = useRouter();
   const { tokens } = useTheme();
@@ -72,12 +52,7 @@ export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenPro
   return (
     <Screen
       footer={
-        <CreateGroupFooter
-          model={model}
-          onKeep={(groupId) => {
-            leaveWizardForNewRound(router, groupId);
-          }}
-        />
+        <CreateGroupFooter model={model} />
       }
     >
       <StepHeader

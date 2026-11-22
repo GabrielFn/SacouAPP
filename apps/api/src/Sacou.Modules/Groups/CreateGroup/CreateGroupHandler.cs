@@ -1,16 +1,18 @@
+using System.Text.Json;
 using Sacou.Modules.Groups.Domain;
 using Sacou.Modules.Groups.Domain.Groups;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Settings;
 using Sacou.Modules.Groups.Infrastructure;
 using Sacou.Modules.Groups.Infrastructure.Settings;
+using Sacou.Modules.Groups.UpdateGroupSettings;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Groups.CreateGroup;
 
 /// <summary>
-/// Registered user first, then the name, then the template, then, atomically in the store under the person's lock,
+/// Registered user first, then the name, then the template and the optional settings layer (a bad one creates nothing), then, atomically in the store under the person's lock,
 /// that the account still exists (ADR 0056, D7) and the per-person ceiling.
 /// </summary>
 internal sealed class CreateGroupHandler(ICurrentUser currentUser, IRegisteredUsers registeredUsers, IGroupStore store, TimeProvider time)
@@ -20,10 +22,10 @@ internal sealed class CreateGroupHandler(ICurrentUser currentUser, IRegisteredUs
     public Task<Result<CreateGroupResponse>> HandleAsync(CreateGroupRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return HandleAsync(request.Name, request.TemplateKey, cancellationToken);
+        return HandleAsync(request.Name, request.TemplateKey, request.Settings, cancellationToken);
     }
 
-    private async Task<Result<CreateGroupResponse>> HandleAsync(string? name, string? templateKey, CancellationToken cancellationToken)
+    private async Task<Result<CreateGroupResponse>> HandleAsync(string? name, string? templateKey, JsonElement? layer, CancellationToken cancellationToken)
     {
         var user = await currentUser.GetAsync(cancellationToken).ConfigureAwait(false);
         if (user.IsFailure)
@@ -37,7 +39,7 @@ internal sealed class CreateGroupHandler(ICurrentUser currentUser, IRegisteredUs
             return Result.Failure<CreateGroupResponse>(groupName.Error);
         }
 
-        var settings = InitialSettings(templateKey);
+        var settings = InitialSettings(templateKey, layer);
         if (settings.IsFailure)
         {
             return Result.Failure<CreateGroupResponse>(settings.Error);
@@ -58,14 +60,25 @@ internal sealed class CreateGroupHandler(ICurrentUser currentUser, IRegisteredUs
     }
 
     /// <summary>The group starts as "Do zero" with the template on top; a key the catalog does not know creates nothing.</summary>
-    private Result<StoredSettings> InitialSettings(string? templateKey)
+    private Result<StoredSettings> InitialSettings(string? templateKey, JsonElement? layer)
     {
         var catalog = SettingsCatalogReader.Catalog;
         var key = templateKey ?? DefaultTemplateKey;
         var template = catalog.TemplateOf(key);
-        return template is null
-            ? Result.Failure<StoredSettings>(GroupErrors.UnknownTemplateKey)
-            : Result.Success(new StoredSettings(
-                SettingsResolver.ApplyTemplate(catalog, SettingsResolver.Defaults(catalog), template), key, SavedTemplateId: null, time.GetUtcNow()));
+        if (template is null)
+        {
+            return Result.Failure<StoredSettings>(GroupErrors.UnknownTemplateKey);
+        }
+
+        var resolved = SettingsResolver.ApplyTemplate(catalog, SettingsResolver.Defaults(catalog), template);
+        if (layer is null)
+        {
+            return Result.Success(new StoredSettings(resolved, key, SavedTemplateId: null, time.GetUtcNow()));
+        }
+
+        var patch = UpdateGroupSettingsHandler.ParsePatch(layer);
+        return patch.IsFailure
+            ? Result.Failure<StoredSettings>(patch.Error)
+            : Result.Success(new StoredSettings(SettingsResolver.ApplyPatch(resolved, patch.Value), key, SavedTemplateId: null, time.GetUtcNow()));
     }
 }
