@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import type { MyGroup } from "../../../services/api/sacou-api";
 import { useTheme } from "../../../theme/theme-context";
@@ -7,9 +7,9 @@ import { strings } from "../../../strings/pt-BR";
 import type { ScreenAction } from "../../../ui/ActionButtons";
 import { EmptyState } from "../../../ui/EmptyState";
 import { Text } from "../../../ui/Text";
-import { DayStrip } from "../../groups/ui/DayStrip";
 import { useRoundCards } from "../hooks/use-round-cards";
 import type { RoundCardModel } from "../model/round-cards";
+import { RoundCardFrame } from "./RoundCardFrame";
 import { RoundCardStatus } from "./RoundCardStatus";
 
 const { home } = strings.groups;
@@ -30,35 +30,23 @@ export interface HomeRoundCardProps {
 }
 
 function HomeRoundCard({ groupName, round, footer, onOpen }: HomeRoundCardProps) {
-  const { colors, tokens } = useTheme();
   return (
-    <Pressable
-      accessibilityRole="link"
+    <RoundCardFrame
+      groupId={round.groupId}
+      strip={round.strip}
       accessibilityLabel={groupName}
       onPress={() => {
         onOpen(round.groupId, round.roundId);
       }}
-      style={{
-        flexDirection: "row",
-        minHeight: tokens.sizes.groupCardMin,
-        backgroundColor: colors.surface,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        borderRadius: tokens.radii.card,
-        overflow: "hidden",
-      }}
     >
-      <DayStrip strip={round.strip} groupId={round.groupId} />
-      <View style={{ flex: 1, padding: tokens.spacing.m, gap: tokens.spacing.xs }}>
-        <Text variant="title" numberOfLines={1}>
-          {groupName}
-        </Text>
-        <Text variant="muted" numberOfLines={1}>
-          {round.venue}
-        </Text>
-        {footer}
-      </View>
-    </Pressable>
+      <Text variant="title" numberOfLines={1}>
+        {groupName}
+      </Text>
+      <Text variant="muted" numberOfLines={1}>
+        {round.venue}
+      </Text>
+      {footer}
+    </RoundCardFrame>
   );
 }
 
