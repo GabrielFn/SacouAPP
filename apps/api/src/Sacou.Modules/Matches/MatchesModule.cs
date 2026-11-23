@@ -12,6 +12,7 @@ using Sacou.Modules.Matches.GetCourtSession;
 using Sacou.Modules.Matches.Infrastructure;
 using Sacou.Modules.Matches.ListCourtEvents;
 using Sacou.Modules.Matches.TakeOverCourt;
+using Sacou.Modules.Sessions.Contracts;
 
 namespace Sacou.Modules.Matches;
 
@@ -30,6 +31,7 @@ public static class MatchesModule
         services.AddScoped<TakeOverCourtHandler>();
         // The after-game of the streams, for the projections of the Stats (E3.9, ADR 0071).
         services.AddScoped<ICourtSessionResults, StoreCourtSessionResults>();
+        services.AddScoped<IRoundPlayedMatches, StoreRoundPlayedMatches>();
         // The court batches the person wrote, for the export of the Identity (ADR 0060, D16).
         services.AddScoped<IAccountExportSection, MatchesExportSection>();
         return services;

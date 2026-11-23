@@ -51,6 +51,7 @@ internal sealed record RoundPageView(
     {
         PublicRoundState.Canceled => WebTexts.Canceled,
         PublicRoundState.Started => WebTexts.Started,
+        PublicRoundState.Ended => WebTexts.Ended,
         PublicRoundState.Open or PublicRoundState.Full => null,
         _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unknown round state."),
     };

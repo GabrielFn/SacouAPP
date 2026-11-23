@@ -16,7 +16,7 @@ public sealed class RoundCloseTests
         var round = NewRound();
         var tap = round.Slot.StartsAt.AddMinutes(90);
 
-        var closed = round.Close(tap).Value;
+        var closed = round.Close(tap, hasFinishedMatch: false).Value;
 
         Assert.Equal(tap, closed.Round.ClosedAt);
         Assert.Equal(tap, closed.Round.EndsAt);
@@ -41,7 +41,7 @@ public sealed class RoundCloseTests
         var round = NewRound();
         var late = round.Slot.StartsAt.AddHours(SessionLimits.RoundAutoEndHours + 2);
 
-        var closed = round.Close(late).Value.Round;
+        var closed = round.Close(late, hasFinishedMatch: false).Value.Round;
 
         Assert.Equal(late, closed.ClosedAt);
         Assert.Equal(round.Slot.StartsAt.AddHours(SessionLimits.RoundAutoEndHours), closed.EndsAt);
@@ -52,9 +52,9 @@ public sealed class RoundCloseTests
     public void J6_ClosingAgain_KeepsTheFirstInstant()
     {
         var round = NewRound();
-        var first = round.Close(round.Slot.StartsAt.AddHours(1)).Value.Round;
+        var first = round.Close(round.Slot.StartsAt.AddHours(1), hasFinishedMatch: false).Value.Round;
 
-        var again = first.Close(round.Slot.StartsAt.AddHours(2)).Value;
+        var again = first.Close(round.Slot.StartsAt.AddHours(2), hasFinishedMatch: false).Value;
 
         Assert.True(again.IsEmpty);
         Assert.Equal(first.ClosedAt, again.Round.ClosedAt);
@@ -67,7 +67,7 @@ public sealed class RoundCloseTests
         var round = NewRound();
         var tap = round.Slot.StartsAt.AddHours(1).AddTicks(7);
 
-        Assert.Equal(round.Slot.StartsAt.AddHours(1), round.Close(tap).Value.Round.ClosedAt);
+        Assert.Equal(round.Slot.StartsAt.AddHours(1), round.Close(tap, hasFinishedMatch: false).Value.Round.ClosedAt);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public sealed class RoundCloseTests
     {
         var canceled = NewRound().Cancel().Round;
 
-        Assert.Equal(RoundErrors.RoundCanceled, canceled.Close(Now).Error);
+        Assert.Equal(RoundErrors.RoundCanceled, canceled.Close(Now, hasFinishedMatch: false).Error);
     }
 
     /// <summary>J6: the end is counted in instants, so the night the offset changes still has six hours.</summary>
@@ -96,6 +96,6 @@ public sealed class RoundCloseTests
         var rules = new Groups.Contracts.SummaryRules(Groups.Contracts.GameModality.Indoor6x6, true, true, false);
         var facts = new RoundFacts(round.Id.Value, RoundState.Scheduled, round.Slot.StartsAt, round.Slot.Date, rules) { ClosedAt = tap };
 
-        Assert.Equal(round.Close(tap).Value.Round.EndsAt, facts.EndsAt);
+        Assert.Equal(round.Close(tap, hasFinishedMatch: false).Value.Round.EndsAt, facts.EndsAt);
     }
 }

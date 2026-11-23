@@ -46,5 +46,6 @@ public enum PublicRoundState
     Open,
     Full,
     Started,
+    Ended,
     Canceled,
 }

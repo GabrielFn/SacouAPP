@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
 using Sacou.Modules.Groups.Contracts;
+using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Application;
 using Sacou.Modules.Sessions.Domain.Rounds;
@@ -17,7 +18,7 @@ internal sealed record CloseRoundResponse(DateTimeOffset ClosedAt, DateTimeOffse
 /// <summary>
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/close</c> (<c>WriteCourt</c>): "Encerrar rodada", which opens the MVP
 /// vote (ADR 0072, D1). Closing again answers the same <c>closedAt</c>; before the start it is 409
-/// <c>sessions.round-not-started</c>; a cancelled round is 409
+/// <c>sessions.round-not-started</c> unless a match was already finished (ADR 0076); a cancelled round is 409
 /// <c>sessions.round-canceled</c>. Court events that arrive later still count. <c>no-store</c>.
 /// </summary>
 internal static class CloseRoundEndpoint
@@ -40,16 +41,30 @@ internal static class CloseRoundEndpoint
 }
 
 /// <summary>The close is decided under the round's lock (ADR 0043), so two taps at once store one instant.</summary>
-internal sealed class CloseRoundHandler(RoundWriter writer)
+internal sealed class CloseRoundHandler(RoundWriter writer, IRoundFacts rounds, IRoundPlayedMatches playedMatches, TimeProvider time)
 {
     public async Task<Result<CloseRoundResponse>> HandleAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(access);
+        var hasFinishedMatch = await HasFinishedMatchBeforeTheStartAsync(access, id, cancellationToken).ConfigureAwait(false);
         var written = await writer.ExecuteAsync(
-            access, id, GroupCapability.WriteCourt, context => context.Round.Close(context.Now), cancellationToken).ConfigureAwait(false);
+            access, id, GroupCapability.WriteCourt, context => context.Round.Close(context.Now, hasFinishedMatch), cancellationToken)
+            .ConfigureAwait(false);
         return written.IsSuccess
             ? Result.Success(ToResponse(written.Value.Change.Round))
             : Result.Failure<CloseRoundResponse>(written.Error);
+    }
+
+    /// <summary>Asked only before the start, the one case that needs it: the court says if a match was finished (ADR 0076).</summary>
+    private async Task<bool> HasFinishedMatchBeforeTheStartAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
+    {
+        var facts = await rounds.FindAsync(access.GroupId.Value, id.Value, cancellationToken).ConfigureAwait(false);
+        if (facts is null || time.GetUtcNow() >= facts.StartsAt)
+        {
+            return false;
+        }
+
+        return await playedMatches.HasFinishedMatchAsync(access.GroupId.Value, id.Value, facts.Summary, cancellationToken).ConfigureAwait(false);
     }
 
     private static CloseRoundResponse ToResponse(Round round) =>

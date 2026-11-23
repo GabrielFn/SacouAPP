@@ -37,10 +37,10 @@ internal sealed partial record Round(
     public DateTimeOffset EndsAt => RoundEnd.Of(Slot.StartsAt, ClosedAt);
 
     /// <summary>
-    /// Whether the round's link still lets someone in and answer: not cancelled, and not started. At the very instant
+    /// Whether the round's link still lets someone in and answer: not cancelled, not ended early, and not started. At the very instant
     /// of the start it is already closed (ADR 0070, D2).
     /// </summary>
-    public bool IsOpenForLinkAt(DateTimeOffset now) => !IsCanceled && now < Slot.StartsAt;
+    public bool IsOpenForLinkAt(DateTimeOffset now) => !IsCanceled && ClosedAt is null && now < Slot.StartsAt;
 
     /// <summary>A round with no attendance yet. The mensalistas come in with <c>AttendanceRules.SeedRegulars</c>.</summary>
     public static RoundChange Create(
@@ -56,17 +56,18 @@ internal sealed partial record Round(
         : new RoundChange(this with { Status = RoundStatus.Canceled }, [], [new RoundCanceled(Id, GroupId)]) { RoundRowChanged = true };
 
     /// <summary>
-    /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled or before the start; closing again keeps the first
-    /// instant. A tap after the automatic end is stored but does not move the end (the earlier one wins).
+    /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled; before the start it is refused too, unless a match
+    /// was already finished (<paramref name="hasFinishedMatch"/>, ADR 0076), and then the end is the tap. Closing again
+    /// keeps the first instant. A tap after the automatic end is stored but does not move the end (the earlier one wins).
     /// </summary>
-    public Result<RoundChange> Close(DateTimeOffset now)
+    public Result<RoundChange> Close(DateTimeOffset now, bool hasFinishedMatch)
     {
         if (IsCanceled)
         {
             return Result.Failure<RoundChange>(RoundErrors.RoundCanceled);
         }
 
-        if (now < Slot.StartsAt)
+        if (now < Slot.StartsAt && !hasFinishedMatch)
         {
             return Result.Failure<RoundChange>(RoundErrors.RoundNotStarted);
         }
@@ -77,12 +78,12 @@ internal sealed partial record Round(
     }
 
     /// <summary>
-    /// The admin's edit (date, time, venue, layer): refused once cancelled or started. A new date or time
+    /// The admin's edit (date, time, venue, layer): refused once cancelled, ended early or started. A new date or time
     /// recalculates the instant; the layer, when given, replaces the whole one.
     /// </summary>
     public Result<RoundChange> Edit(RequestedSlot? slot, Venue? venue, LayerEdit layer, DateTimeOffset now)
     {
-        if (IsCanceled || Slot.StartsAt <= now)
+        if (IsCanceled || ClosedAt is not null || Slot.StartsAt <= now)
         {
             return Result.Failure<RoundChange>(RoundErrors.RoundClosed);
         }

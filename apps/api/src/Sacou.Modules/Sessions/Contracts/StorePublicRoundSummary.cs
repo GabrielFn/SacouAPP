@@ -73,6 +73,11 @@ internal sealed class StorePublicRoundSummary(
             return PublicRoundState.Canceled;
         }
 
+        if (round.ClosedAt is not null)
+        {
+            return PublicRoundState.Ended;
+        }
+
         if (!round.IsOpenForLinkAt(now))
         {
             return PublicRoundState.Started;
