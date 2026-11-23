@@ -149,6 +149,20 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
     },
     closeSession: (courtSessionId) =>
       update(courtSessionId, (session) => ({ ...session, status: "closed" })),
+    reopenSession(courtSessionId) {
+      const kept = sessions.value[courtSessionId];
+      if (kept === undefined) return Promise.resolve(NOT_FOUND);
+      if (kept.takenOverBatch !== null) return Promise.resolve(err({ code: "taken-over" }));
+      // The other open sessions of the round close; their unsent points are not modeled here.
+      Object.entries(sessions.value).forEach(([id, session]) => {
+        const sameRound = kept.origin !== null && session.origin?.roundId === kept.origin.roundId;
+        if (id !== courtSessionId && sameRound && session.status === "open") {
+          put(id, { ...session, status: "closed" });
+        }
+      });
+      put(courtSessionId, { ...kept, status: "open" });
+      return Promise.resolve(ok(undefined));
+    },
     load(courtSessionId) {
       const session = sessions.value[courtSessionId];
       return Promise.resolve(

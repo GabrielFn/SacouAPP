@@ -93,7 +93,7 @@ public sealed class CourtTakeoverConcurrencyTests(IntegrationDatabase database) 
 
         var taken = await Task.WhenAll(Enumerable.Range(0, Resends).Select(_ => CourtCalls.TakenOverAsync(world, A.CoAdmin, round, other, 1, 1)));
 
-        Assert.All(taken, answer => Assert.Equal((2L, 1L, 0L), answer));
+        Assert.All(taken, answer => Assert.Equal((2L, 1L, 0L, 1L), answer));
         Assert.Equal(2, await WritersAsync(phone.CourtSessionId));
     }
 

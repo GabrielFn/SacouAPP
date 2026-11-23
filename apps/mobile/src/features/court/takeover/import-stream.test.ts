@@ -13,8 +13,8 @@ const ACCOUNT: SessionIdentity = Object.freeze({ opaque: Symbol("account") });
 /** "é" is one character and two UTF-8 bytes. */
 const TWO_BYTE_CHAR = "é";
 
-function request(eventsBefore: number) {
-  return { ref: REF, eventsBefore, account: ACCOUNT, onProgress: () => undefined };
+function request(eventsToRead: number) {
+  return { ref: REF, eventsToRead, account: ACCOUNT, onProgress: () => undefined };
 }
 
 function deps() {

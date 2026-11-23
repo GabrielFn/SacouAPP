@@ -220,7 +220,13 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
     }
     const lastSequence = highest(body.deviceId);
     if (current.deviceId === body.deviceId && current.account === account) {
-      return apiOk({ batch: current.batch, eventsBefore: current.eventsBefore, lastSequence });
+      // As the server (R98): the pair already writing gets its batch again, with the whole stream.
+      return apiOk({
+        batch: current.batch,
+        eventsBefore: current.eventsBefore,
+        lastSequence,
+        eventCount: stream.value.length,
+      });
     }
     if (body.expectedBatch !== current.batch || body.expectedEventCount !== stream.value.length) {
       return apiErr(problem(HTTP_CONFLICT, "matches.stream-changed"));
@@ -232,7 +238,12 @@ export function createFakeCourtStreamServer(): FakeCourtStreamServer {
       eventsBefore: stream.value.length,
     };
     writers.value = [...writers.value, next];
-    return apiOk({ batch: next.batch, eventsBefore: next.eventsBefore, lastSequence });
+    return apiOk({
+      batch: next.batch,
+      eventsBefore: next.eventsBefore,
+      lastSequence,
+      eventCount: stream.value.length,
+    });
   }
 
   async function listEvents(after: number): Promise<ApiResult<CourtEventsPage>> {

@@ -19,7 +19,12 @@ import {
   readSyncColumns,
 } from "./court-sync-statements";
 import { FIRST_BATCH } from "./migrations.data";
-import { loadRefused, markRefusedSeen, replaceWithServerStream } from "./server-stream-statements";
+import {
+  loadRefused,
+  markRefusedSeen,
+  reopenSession,
+  replaceWithServerStream,
+} from "./server-stream-statements";
 import {
   CLOSED_STATUS,
   INSERT_DEVICE_ID,
@@ -241,6 +246,13 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       }),
     closeSession: (courtSessionId) =>
       guarded(() => atomically(database, (tx) => setStatus(tx, courtSessionId, CLOSED_STATUS))),
+    reopenSession: (courtSessionId) =>
+      guarded(() =>
+        atomically(database, async (tx) => {
+          const device = await readOrCreateDeviceId(tx, ids);
+          return device.ok ? reopenSession(tx, courtSessionId, device.value) : device;
+        }),
+      ),
     load: (courtSessionId) =>
       guarded(() => atomically(database, (tx) => loadSession(tx, courtSessionId))),
     append: (courtSessionId, envelopes) =>

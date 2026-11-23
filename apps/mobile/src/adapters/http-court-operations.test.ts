@@ -128,7 +128,7 @@ describe("taking the court over over HTTP (E4.11, D9)", () => {
 
   test("takes over with the token of the account and the expected stream", async () => {
     const { api, http, tokens } = setup();
-    http.enqueue(jsonAnswer(200, { batch: 2, eventsBefore: 3, lastSequence: 0 }));
+    http.enqueue(jsonAnswer(200, { batch: 2, eventsBefore: 3, lastSequence: 0, eventCount: 3 }));
     const body = {
       deviceId: "d0000000-0000-4000-8000-000000000001",
       expectedBatch: 1,
@@ -137,7 +137,7 @@ describe("taking the court over over HTTP (E4.11, D9)", () => {
 
     expect(await api.takeOverCourt(REF, body, sessionOf(tokens))).toEqual({
       ok: true,
-      value: { batch: 2, eventsBefore: 3, lastSequence: 0 },
+      value: { batch: 2, eventsBefore: 3, lastSequence: 0, eventCount: 3 },
     });
     const request = only(http);
     expect(request.method).toBe("POST");

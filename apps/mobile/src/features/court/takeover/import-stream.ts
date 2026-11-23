@@ -22,8 +22,8 @@ export interface ImportDeps {
 
 export interface ImportRequest {
   readonly ref: CourtStreamRef;
-  /** The events the stream had when this device took it over: exactly these are read. */
-  readonly eventsBefore: number;
+  /** The events the stream held at the take-over (`eventCount`, R98): exactly these are read. */
+  readonly eventsToRead: number;
   /** The account that took the court over: every page is read only with its token (ADR 0067, D8). */
   readonly account: SessionIdentity;
   readonly onProgress: (imported: number) => void;
@@ -69,7 +69,7 @@ async function readPages(
   collected: Collected,
 ): Promise<Read<readonly unknown[]>> {
   const after = collected.raw.length;
-  if (after >= request.eventsBefore) return ok(collected.raw.slice(0, request.eventsBefore));
+  if (after >= request.eventsToRead) return ok(collected.raw.slice(0, request.eventsToRead));
   const answer = await withRetryAfter(
     () => deps.api.listCourtEvents(request.ref, after, request.account),
     deps.wait,
@@ -81,7 +81,7 @@ async function readPages(
   const bytes = collected.bytes + page.events.reduce<number>((sum, raw) => sum + sizeOf(raw), 0);
   if (bytes > MAX_IMPORTED_BYTES) return INVALID;
   const raw = [...collected.raw, ...page.events];
-  request.onProgress(Math.min(raw.length, request.eventsBefore));
+  request.onProgress(Math.min(raw.length, request.eventsToRead));
   return readPages(deps, request, { raw, bytes });
 }
 
@@ -109,8 +109,8 @@ export async function readServerStream(
   deps: ImportDeps,
   request: ImportRequest,
 ): Promise<Read<readonly EventEnvelope[]>> {
-  const { eventsBefore } = request;
-  if (!isCount(eventsBefore) || eventsBefore > MAX_IMPORTED_EVENTS) return INVALID;
+  const { eventsToRead } = request;
+  if (!isCount(eventsToRead) || eventsToRead > MAX_IMPORTED_EVENTS) return INVALID;
   const raw = await readPages(deps, request, { raw: [], bytes: 0 });
   return raw.ok ? proveStream(deps, request.ref.courtSessionId, raw.value) : raw;
 }

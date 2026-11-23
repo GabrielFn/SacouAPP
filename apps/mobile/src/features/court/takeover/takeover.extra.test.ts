@@ -63,7 +63,7 @@ describe("take-over gaps (E4.11 part 2, tester)", () => {
 
     const read = await readServerStream(deps, {
       ref: { ...ROUND, courtSessionId: SESSION_A },
-      eventsBefore: 1,
+      eventsToRead: 1,
       account: ACCOUNT,
       onProgress: () => undefined,
     });
@@ -88,7 +88,7 @@ describe("take-over gaps (E4.11 part 2, tester)", () => {
 
     const read = await readServerStream(deps, {
       ref: { ...ROUND, courtSessionId: SESSION_A },
-      eventsBefore: MAX_IMPORTED_EVENTS,
+      eventsToRead: MAX_IMPORTED_EVENTS,
       account: ACCOUNT,
       onProgress: () => undefined,
     });

@@ -68,6 +68,7 @@ public sealed class CourtTakeoverTests
 
         Assert.True(decision.OpensBatch);
         Assert.Equal(new CourtWriter(4, OtherDevice, OtherCaller, EventsBefore: 6), decision.Writer);
+        Assert.Equal(6, decision.EventCount);
     }
 
     [Fact]
@@ -104,6 +105,42 @@ public sealed class CourtTakeoverTests
         Assert.False(decision.OpensBatch);
         Assert.Equal(FirstWriter, decision.Writer);
         Assert.Equal(6, decision.LastSequence);
+        Assert.Equal(6, decision.EventCount);
+    }
+
+    /// <summary>
+    /// R98: the pair already writing batch 1 gets <c>EventsBefore</c> 0 with its sequence at 5; reading only those
+    /// would import nothing that matches <c>LastSequence</c>. The event count is the whole stream under the lock.
+    /// </summary>
+    [Fact]
+    public void T3_ThePairAlreadyWriting_GetsTheEventCountOfTheWholeStream_NotTheStartOfItsBatch()
+    {
+        var fiveEvents = Events(
+            1,
+            (ScoreEventTypes.MatchStarted, MatchStarted(points: 25)),
+            (Pt, Point("a")),
+            (Pt, Point("b")),
+            (Pt, Point("a")),
+            (Pt, Point("a")));
+
+        var decision = Taken(TakeOver(Stored(fiveEvents), Device, Caller, expectedBatch: 1, expectedEventCount: 5));
+
+        Assert.False(decision.OpensBatch);
+        Assert.Equal(0, decision.Writer.EventsBefore);
+        Assert.Equal(5, decision.LastSequence);
+        Assert.Equal(5, decision.EventCount);
+    }
+
+    [Fact]
+    public void T3_ThePairWritingALaterBatch_GetsTheEventCountOfTheWholeStream()
+    {
+        var stored = WithWriters(SixEvents, [.. ThreeBatches]);
+
+        var decision = Taken(TakeOver(stored, ThirdDevice, Caller, expectedBatch: 3, expectedEventCount: 6));
+
+        Assert.False(decision.OpensBatch);
+        Assert.Equal(4, decision.Writer.EventsBefore);
+        Assert.Equal(6, decision.EventCount);
     }
 
     [Theory]
@@ -115,6 +152,7 @@ public sealed class CourtTakeoverTests
 
         Assert.True(decision.OpensBatch);
         Assert.Equal(new CourtWriter(2, device, caller, EventsBefore: 6), decision.Writer);
+        Assert.Equal(6, decision.EventCount);
     }
 
     [Fact]

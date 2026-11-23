@@ -35,3 +35,5 @@ Um celular escreve por vez o stream da quadra (ADR 0046). A E3.7 (ADR 0060) guar
 - A troca chama o `IGroupMembership` (conexão do Groups) com a trava do stream segura: uma conexão a mais do pool durante a troca, só nesta rota.
 - Efeito bom da resposta 74: sem a regra, não há falso positivo que trave a quadra de um Placar honesto, e a E4.11 não precisa bloquear o "Desfazer".
 - Desvio do plano: `refusedPoints` recebe a linha do tempo já reproduzida e o `deviceId`, em vez do log cru: o app já tem a linha do tempo, e o aparelho é preciso para ignorar o stream importado do novo escritor. `CourtTakeover.Decide` recebe o `MemberId` de quem chama, sem um objeto de contexto: é o único dado de fora.
+
+**Emenda (R98, 22/11/2026):** a resposta da troca passa a ter `eventCount`, os eventos do stream lidos sob a trava junto com o `lastSequence`. Para o par que já escreve, `eventsBefore` é o começo do lote dele e não serve de foto para importar. Campo aditivo; detalhes na emenda do [ADR 0067](0067-sincronizacao-da-quadra-no-app.md).

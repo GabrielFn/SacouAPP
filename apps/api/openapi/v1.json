@@ -9255,7 +9255,8 @@
         "required": [
           "batch",
           "eventsBefore",
-          "lastSequence"
+          "lastSequence",
+          "eventCount"
         ],
         "type": "object",
         "properties": {
@@ -9268,6 +9269,10 @@
             "format": "int64"
           },
           "lastSequence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "eventCount": {
             "type": "integer",
             "format": "int64"
           }

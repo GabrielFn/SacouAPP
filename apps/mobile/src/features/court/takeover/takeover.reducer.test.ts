@@ -19,7 +19,7 @@ describe("takeoverReducer (screen 09a, D5)", () => {
   test("confirm, take over, import page by page, done", () => {
     const importing = run([
       { type: "confirmed" },
-      { type: "taken-over", eventsBefore: TOTAL },
+      { type: "taken-over", eventsToRead: TOTAL },
       { type: "page-imported", imported: 5 },
     ]);
     expect(importing).toEqual({ status: "importing", imported: 5, total: TOTAL });
@@ -34,7 +34,7 @@ describe("takeoverReducer (screen 09a, D5)", () => {
     expect(
       run([
         { type: "confirmed" },
-        { type: "taken-over", eventsBefore: TOTAL },
+        { type: "taken-over", eventsToRead: TOTAL },
         { type: "page-imported", imported: TOTAL + 1 },
       ]),
     ).toMatchObject({ imported: TOTAL });
@@ -50,7 +50,7 @@ describe("takeoverReducer (screen 09a, D5)", () => {
   test("a failure while importing waits for 'Tentar de novo', which starts over", () => {
     const failed = run([
       { type: "confirmed" },
-      { type: "taken-over", eventsBefore: TOTAL },
+      { type: "taken-over", eventsToRead: TOTAL },
       { type: "failed", reason: "import-invalid" },
     ]);
     expect(failed).toEqual({ status: "failed", reason: "import-invalid" });

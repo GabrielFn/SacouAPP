@@ -46,9 +46,11 @@ internal sealed class CourtTakeoverRequest
 
 /// <summary>
 /// An accepted takeover: the writer of the current batch, new or already the caller, whether a batch
-/// was opened, and the largest sequence the device has in the stream (0 when it never wrote).
+/// was opened, the largest sequence the device has in the stream (0 when it never wrote), and the
+/// events stored under the lock, the same read as <c>LastSequence</c> (R98): the snapshot the
+/// app imports, even when the pair already writing gets its batch again and the batch began earlier.
 /// </summary>
-internal sealed record CourtTakeoverDecision(CourtWriter Writer, bool OpensBatch, long LastSequence)
+internal sealed record CourtTakeoverDecision(CourtWriter Writer, bool OpensBatch, long LastSequence, long EventCount)
 {
     public override string ToString() => nameof(CourtTakeoverDecision);
 }
@@ -75,9 +77,10 @@ internal static class CourtTakeover
         }
 
         var lastSequence = stored.LastSequenceOf(request.DeviceId);
+        var eventCount = stored.Events.Length;
         if (stored.IsCurrentWriter(request.DeviceId, callerMemberId))
         {
-            return Accept(new CourtTakeoverDecision(writer, OpensBatch: false, lastSequence));
+            return Accept(new CourtTakeoverDecision(writer, OpensBatch: false, lastSequence, eventCount));
         }
 
         if (writer.Batch >= CourtStreamLimits.MaxWritersPerStream)
@@ -85,14 +88,13 @@ internal static class CourtTakeover
             return Refuse(new CourtWriteError(CourtWriteErrorCode.LimitReached, Limit: StreamLimitNames.WritersPerStream));
         }
 
-        var eventCount = stored.Events.Length;
         if (request.ExpectedBatch != writer.Batch || request.ExpectedEventCount != eventCount)
         {
             return Refuse(new CourtWriteError(CourtWriteErrorCode.StreamChanged));
         }
 
         var next = new CourtWriter(writer.Batch + OneBatch, request.DeviceId, callerMemberId, eventCount);
-        return Accept(new CourtTakeoverDecision(next, OpensBatch: true, lastSequence));
+        return Accept(new CourtTakeoverDecision(next, OpensBatch: true, lastSequence, eventCount));
     }
 
     private static Result<CourtTakeoverDecision, CourtWriteError> Accept(CourtTakeoverDecision decision) =>

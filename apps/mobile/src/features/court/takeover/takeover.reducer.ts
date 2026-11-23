@@ -31,7 +31,7 @@ export type TakeoverState =
 export type TakeoverAction =
   | { readonly type: "confirmed" }
   | { readonly type: "stream-changed" }
-  | { readonly type: "taken-over"; readonly eventsBefore: number }
+  | { readonly type: "taken-over"; readonly eventsToRead: number }
   | { readonly type: "page-imported"; readonly imported: number }
   | { readonly type: "imported"; readonly courtSessionId: string }
   | { readonly type: "failed"; readonly reason: TakeoverFailure }
@@ -63,7 +63,7 @@ export function takeoverReducer(state: TakeoverState, action: TakeoverAction): T
       return from(state, ["taking-over"], () => ({
         status: "importing",
         imported: 0,
-        total: action.eventsBefore,
+        total: action.eventsToRead,
       }));
     case "page-imported":
       return progressed(state, action.imported);

@@ -122,6 +122,12 @@ export interface CourtEventLog {
   /** The open session that came from this round, or `null`. */
   findOpenSessionOfRound(roundId: string): Promise<CourtLogResult<string | null>>;
   closeSession(courtSessionId: string): Promise<CourtLogResult<void>>;
+  /**
+   * In one transaction (R98): the other open sessions of the round close, their unsent points leaving
+   * as on an import, and this one opens again with every event it holds. A session taken over refuses
+   * with `taken-over`: only the server stream can bring it back.
+   */
+  reopenSession(courtSessionId: string): Promise<CourtLogResult<void>>;
   /** Events by position. A row the parser refuses fails the whole load. */
   load(courtSessionId: string): Promise<CourtLogResult<StoredCourtLog>>;
   /**

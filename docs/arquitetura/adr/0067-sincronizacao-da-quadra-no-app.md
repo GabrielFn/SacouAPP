@@ -42,3 +42,12 @@ O celular da quadra grava o log no `sacou.db` (ADR 0038) e o servidor aceita o s
 - **Lacuna aceita:** uma sessão de outra conta ou sem dono cujo stream não existe no servidor (nunca enviada) não tem como ser assumida: a 09a diz "Esta rodada não tem quadra aberta no servidor." Resta "Sair da quadra": a de outra conta volta quando a conta dona entra de novo; a sem dono (de antes da Parte 1) segura a rodada neste aparelho, já que `ensureRoundCourtSession` não abre outra. Raro no piloto (instalações novas não têm sessão sem dono).
 - O laço não registra nada em log: nem ID, nem payload, nem resposta.
 - A sessão de amostra da tela de desenvolvimento não tem origem e nunca é enviada.
+
+## Emenda (R98, 22/11/2026): o mesmo celular e a mesma conta voltam à própria quadra
+
+**Causa.** "Encerrar rodada" fecha a sessão no celular mesmo quando o servidor falha (pergunta 150, mantido). Com a sessão fechada, a 06 abre a 09a, e o "Assumir" do mesmo par (`deviceId` e `MemberId`) recebia o próprio lote de volta com `eventsBefore` 0 e `lastSequence` N. O app lia 0 eventos e o `replaceWithServerStream` recusava (`sequence-conflict`), que a 09a mostrava como "O placar do servidor veio com defeito".
+
+**Decisão.**
+1. A resposta da troca ganha `eventCount`: os eventos guardados sob a trava, a mesma leitura do `lastSequence` (aditivo, ADR 0063). A importação lê `eventCount` eventos, não `eventsBefore`. A resposta é recusada (`import-invalid`) sem `eventCount`, com `eventCount < eventsBefore` ou acima de 20.000.
+2. Quando a resposta mantém o lote da 09a (`batch === currentBatch`) e o celular ainda tem a sessão, fechada, do mesmo lote, sem troca, sem parada de envio, da mesma conta (`ownerKey`) e com sequência local maior ou igual ao `lastSequence`, a sessão **reabre** (`CourtEventLog.reopenSession`, uma transação que também fecha as outras sessões abertas da rodada). O log local é um superconjunto do servidor: os pontos ainda não enviados ficam e são enviados depois. Em qualquer outro caso, importa.
+3. As quadras que já ficaram presas destravam pelo mesmo caminho: "Assumir o placar" na 09a reabre a sessão.
