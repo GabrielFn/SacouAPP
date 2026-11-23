@@ -68,6 +68,8 @@
 
 ## Em andamento
 
+- 22/11/2026, noite: **R98 inteira na `main`** (#218, #219, #220, #222, #224) e **R97 Parte 2** (#210). Falta o percurso completo no celular e o relatório do M5. Próximo passo no [diário de 22/11](sessoes/2026-11-22.md).
+
 - 22/11/2026: mergeados #204 (**R97 Parte 1**: barra EM QUADRA, partida esquecida, retomada até o fim da rodada; verificador Opus e testador Sonnet aprovaram), #208 (percurso passos 14–25) e #209 (**laço do registro do push**: ~153 mil `PUT /v1/me/push-devices` com 429 em 3 dias esgotavam a cota do usuário e causavam os "Muitas tentativas"; revisor Opus, correção, verificador Opus). Em andamento: **R97 Parte 2** (tela de rodadas, ADR 0075; desenvolvedor Sonnet, worktree `SacouAPP-R97b`). Próximo passo no [diário de 22/11](sessoes/2026-11-22.md).
 
 - 21/11/2026, tarde: **pausa pedida pelo Gabriel (celular desligado).** Mergeados #202 (push ligado no deploy do teste), #203 (link da rodada no host autorizado), #205 (limites ×10 só no teste) e #206 (cartinha: rodapé, posição e nome do arquivo; ciclo 2 aprovado). Em andamento: **R97 Parte 1** (#204, aprovada pelo revisor; correção dos achados 1 e 2 por desenvolvedor Opus na worktree `SacouAPP-R97`). Percurso feliz do app parado no passo 14 (`docs/operacao/percurso-m5/roteiro.md`). Próximo passo exato no [diário de 21/11](sessoes/2026-11-21.md).
