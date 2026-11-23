@@ -6,6 +6,7 @@ import type { AttendanceResponse, Member, Round } from "../../../services/api/sa
 import { wallClockNow } from "../../../services/api/wall-clock";
 import { useServices } from "../../../services/services-context";
 import { useGroup, useGroupMembers } from "../../groups/queries/use-group-queries";
+import { useOfferPushPrompt } from "../../notifications/hooks/push-prompt-context";
 import {
   initialRoundScreenState,
   roundScreenReducer,
@@ -56,6 +57,7 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
   const [state, dispatch] = useReducer(roundScreenReducer, initialRoundScreenState);
   const respond = useMutation(respondAttendanceMutation(sacouApi, client, groupId, roundId));
   const remove = useMutation(setMemberAttendanceMutation(sacouApi, client, groupId, roundId));
+  const offerPushPrompt = useOfferPushPrompt();
   const failure = respond.error ?? remove.error;
   return {
     group,
@@ -66,7 +68,13 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
     now: wallClockNow(),
     respond: (response) => {
       dispatch({ type: "sheet-closed" });
-      if (!respond.isPending) respond.mutate(response);
+      if (respond.isPending) return;
+      // A "VOU" that went through is when the waitlist pushes start to matter (R98, item 9).
+      respond.mutate(response, {
+        onSuccess: () => {
+          if (response === "going") offerPushPrompt();
+        },
+      });
     },
     responding: respond.isPending,
     removeMember: (memberId) => {

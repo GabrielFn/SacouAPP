@@ -1,5 +1,7 @@
 import { builtinModules } from "node:module";
 
+import { HERMES_MISSING_PROPERTIES } from "./eslint-hermes-rules.mjs";
+
 // Rules of docs/padroes/frontend.md that ESLint can check (ADR 0035), used by eslint.config.mjs.
 const TS_EXTENSIONS = "{ts,tsx,mts,cts}";
 const MOBILE_SOURCE_FILES = [`apps/mobile/src/**/*.${TS_EXTENSIONS}`];
@@ -265,6 +267,13 @@ function courtBlocks({ testFiles, dataRestrictions }) {
     {
       files: COURT_FILES,
       rules: { "no-restricted-properties": ["error", ...NETWORK_PROPERTIES] },
+    },
+    {
+      files: COURT_FILES,
+      ignores: testFiles,
+      rules: {
+        "no-restricted-properties": ["error", ...NETWORK_PROPERTIES, ...HERMES_MISSING_PROPERTIES],
+      },
     },
     {
       files: COURT_FILES,

@@ -7,6 +7,7 @@ import functional from "eslint-plugin-functional";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
+import { hermesBlocks } from "./scripts/lib/eslint-hermes-rules.mjs";
 import { mobileFrontendBlocks } from "./scripts/lib/eslint-mobile-rules.mjs";
 import { webPageBlocks } from "./scripts/lib/eslint-web-rules.mjs";
 import { exceptedPaths, loadQualityExceptions } from "./scripts/lib/quality-exceptions.mjs";
@@ -277,6 +278,18 @@ export default defineConfig([
   },
   ...exceptionBlock("complexity", { complexity: "off" }),
   ...exceptionBlock("max-lines", { "max-lines": "off" }),
+
+  // The Metro config is CommonJS run by Node.
+  {
+    files: ["apps/mobile/metro.config.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { require: "readonly", module: "writable", __dirname: "readonly" },
+    },
+  },
+
+  // No ES2023+ built-ins in the app: the Hermes of the phone lacks them (R98, item 10).
+  ...hermesBlocks({ files: MOBILE_FILES, testFiles: TEST_FILES }),
 
   // docs/padroes/frontend.md made automatic, in its own module.
   ...mobileFrontendBlocks({ testFiles: TEST_FILES, dataRestrictions: DATA_RESTRICTIONS }),

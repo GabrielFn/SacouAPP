@@ -18,3 +18,9 @@ export const notificationTargets = [
   notificationSizes.rowMin,
   notificationSizes.headerButton,
 ] as const;
+
+/** How far "Notificações" may shrink to stay on one line beside "Marcar como lidas" (R98, item 8). */
+export const NOTIFICATIONS_TITLE_MIN_FONT_SCALE = 0.7;
+
+/** From this font scale the header wraps and "Marcar como lidas" goes under the title (R98, item 8). */
+export const NOTIFICATIONS_HEADER_WRAP_FONT_SCALE = 1.3;

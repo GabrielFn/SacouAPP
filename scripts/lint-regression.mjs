@@ -7,6 +7,7 @@ import { dirname, resolve } from "node:path";
 import { ESLint } from "eslint";
 
 import { courtLintCases } from "./lib/court-regression.mjs";
+import { hermesLintCases } from "./lib/hermes-regression.mjs";
 import {
   qualityLintCases,
   runComplexityProbe,
@@ -139,6 +140,7 @@ const CASES = [
   [`${MOBILE}react.tsx`, 'export { useState } from "react";\n', CLEAN],
   ...qualityLintCases(PREFIX),
   ...courtLintCases(PREFIX),
+  ...hermesLintCases(PREFIX),
 ].map(([file, code, expected, messagePart]) => ({
   path: resolve(ROOT, file),
   code,
