@@ -1,7 +1,7 @@
 import type { RoundSummary } from "../../../services/api/sacou-api";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { dateLabel } from "./round-dates";
-import { isLive, roundCardModel, type RoundCardModel } from "./round-cards";
+import { hasEnded, isLive, roundCardModel, type RoundCardModel } from "./round-cards";
 
 const { groupRounds } = roundsStrings;
 
@@ -31,7 +31,7 @@ export interface GroupRoundsView {
 export function groupRoundState(round: RoundSummary, now: number): GroupRoundState {
   if (round.status === "canceled") return "canceled";
   if (isLive(round, now)) return "live";
-  return Date.parse(round.endsAt) <= now ? "ended" : "open";
+  return hasEnded(round, now) ? "ended" : "open";
 }
 
 function stateTextOf(state: GroupRoundState): string {
