@@ -59,3 +59,34 @@ describe("drawTeams (screen 07)", () => {
     });
   });
 });
+
+describe("confirmTeams (R100)", () => {
+  test("puts the teams and the reserves, IDs only, and gives the round back", async () => {
+    const { api, http } = setup();
+    const round = { roundId: ROUND };
+    http.enqueue(jsonAnswer(200, round));
+
+    const result = await api.confirmTeams(GROUP, ROUND, { teams: [[ANA], [JOAO]], reserves: [] });
+
+    const request = only(http);
+    expect(request.method).toBe("PUT");
+    expect(request.url).toBe(`${BASE}/v1/groups/${GROUP}/rounds/${ROUND}/teams`);
+    expect(JSON.parse(request.body ?? "null")).toEqual({ teams: [[ANA], [JOAO]], reserves: [] });
+    expect(request.body).not.toMatch(/level/i);
+    expect(result).toEqual({ ok: true, value: round });
+  });
+
+  test.each([
+    [400, "sessions.round-teams-invalid"],
+    [409, "sessions.round-closed"],
+    [403, "groups.forbidden"],
+  ] as const)("a %s with %s is the problem of its code", async (status, code) => {
+    const { api, http } = setup();
+    http.enqueue(problem(status, code));
+
+    expect(await api.confirmTeams(GROUP, ROUND, { teams: [], reserves: [] })).toEqual({
+      ok: false,
+      error: { kind: "problem", status, code },
+    });
+  });
+});
