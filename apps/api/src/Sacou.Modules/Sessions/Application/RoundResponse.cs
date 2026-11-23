@@ -29,7 +29,8 @@ internal sealed record RoundResponse(
     int WaitlistCount,
     IReadOnlyList<GoingEntry> Going,
     IReadOnlyList<WaitlistEntry> Waitlist,
-    MeResponse Me)
+    MeResponse Me,
+    RoundTeamsResponse? Teams)
 {
     /// <summary>The public link to share (ADR 0070, D1): only for Admin and Co-admin, null for everyone else.</summary>
     public string? ShareUrl { get; init; }
@@ -59,7 +60,8 @@ internal sealed record RoundResponse(
             [.. round.Occupants.Select((attendance, index) => new GoingEntry(
                 attendance.Member.Value, TypeOf(group, attendance.Member), attendance.Source, index + 1, attendance.Status == AttendanceStatus.Promoted))],
             [.. round.Waitlist.Select((attendance, index) => new WaitlistEntry(attendance.Member.Value, TypeOf(group, attendance.Member), index + 1))],
-            MeResponse.From(round, me));
+            MeResponse.From(round, me),
+            RoundTeamsResponse.From(round));
     }
 
     /// <summary>Whoever left the group is dropped by the reconcile that runs before this; the fallback only keeps a race from failing the read.</summary>
@@ -83,6 +85,28 @@ internal sealed record RoundSettingsResponse(
             settings.Sources);
     }
 }
+
+/// <summary>
+/// The published teams (ADR 0078), as every member reads them: only ids, in order. <c>number</c> starts at 1 (1 is
+/// Laranja, 2 is Azul); the reserves in the order of the queue. Never a level, an average or a seed. Null with no
+/// teams, and in a cancelled round.
+/// </summary>
+internal sealed record RoundTeamsResponse(DateTimeOffset ConfirmedAt, IReadOnlyList<RoundTeamResponse> Teams, IReadOnlyList<Guid> Reserves)
+{
+    public static RoundTeamsResponse? From(Round round)
+    {
+        ArgumentNullException.ThrowIfNull(round);
+        return round.IsCanceled || round.Teams is not { } teams
+            ? null
+            : new RoundTeamsResponse(
+                teams.ConfirmedAt,
+                [.. teams.Teams.Select((team, index) => new RoundTeamResponse(index + 1, [.. team.Select(member => member.Value)]))],
+                [.. teams.Reserves.Select(member => member.Value)]);
+    }
+}
+
+/// <summary>One published team: its number (from 1) and its members, in order.</summary>
+internal sealed record RoundTeamResponse(int Number, IReadOnlyList<Guid> MemberIds);
 
 internal sealed record GoingEntry(Guid MemberId, MemberType MemberType, AttendanceSource Source, int Position, bool Promoted);
 

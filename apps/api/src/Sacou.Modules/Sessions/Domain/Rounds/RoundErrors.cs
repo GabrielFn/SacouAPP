@@ -38,5 +38,11 @@ internal static class RoundErrors
     /// <summary>A round link code that is malformed or found no round: the same answer for both (ADR 0070, D1).</summary>
     public static readonly Error RoundLinkInvalid = new("sessions.round-link-invalid", ErrorKind.NotFound);
 
+    /// <summary>
+    /// Teams that break the rule of <c>RoundTeams.Create</c>: fewer than two, of different sizes, beyond the modality's team,
+    /// someone twice, or someone not confirmed in the round (ADR 0078).
+    /// </summary>
+    public static readonly Error RoundTeamsInvalid = new("sessions.round-teams-invalid", ErrorKind.Validation);
+
     public static readonly Error AttendanceDisabled = new("sessions.attendance-disabled", ErrorKind.Conflict);
 }
