@@ -240,8 +240,10 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         await using var connection = await MemberRows.OpenAsync(api.ConnectionString);
         var tables = await ScalarAsync(connection, "SELECT string_agg(table_name, ',' ORDER BY table_name) FROM information_schema.tables WHERE table_schema = 'sessions' AND table_name <> '__ef_migrations_history'");
         var indexes = await ScalarAsync(connection, "SELECT string_agg(indexname, ',' ORDER BY indexname) FROM pg_indexes WHERE schemaname = 'sessions'");
-        Assert.Equal("attendances,outbox_messages,round_series,rounds", tables);
+        Assert.Equal("attendances,outbox_messages,round_series,round_teams,rounds", tables);
         Assert.Contains("ux_rounds_series_date", indexes, StringComparison.Ordinal);
+        Assert.Contains("pk_round_teams", indexes, StringComparison.Ordinal);
+        Assert.Contains("ix_round_teams_member", indexes, StringComparison.Ordinal);
         Assert.Contains("ux_attendances_round_sequence", indexes, StringComparison.Ordinal);
         Assert.Contains("pk_attendances", indexes, StringComparison.Ordinal);
         Assert.Contains("ix_attendances_member", indexes, StringComparison.Ordinal);
