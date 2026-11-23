@@ -243,3 +243,11 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 
 ## 22/11/2026: defeitos do percurso (R98)
 - **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. rótulo "Avulso" **mantido** (o app já distingue: "Sem conta" para convidado sem conta; "Mensalista" ou "Avulso" para quem tem conta).
+
+## 23/11/2026: R101 (clareza do fluxo), perguntas 183 a 187 (padrões adotados; nenhuma trava a P1 nem a P2)
+Detalhes em `docs/estado/tarefas/R101.md`, seção 5.
+183. Janela dos avulsos num grupo sem mensalista: hoje vale e, antes dela, ninguém confirma, porque todo membro é avulso. (1) manter a regra e só explicar ("A lista abre na terça, 24/11, às 20h, 24 h antes da rodada."); (2) o servidor ignora a janela enquanto o grupo não tiver mensalista ativo, e a palavra "avulso" some da tela 26 nesse caso (parte própria, ~250 linhas). **Recomendação: 2. Padrão adotado até a resposta: 1.**
+184. Onde o admin pega de novo o link de uma rodada publicada: (1) botão "Mandar no WhatsApp" na tela 06 **e** a linha "Confirma aqui: <link>" no fim do "Copiar lista"; (2) só o botão; (3) só o link no "Copiar lista". Em todos, só Admin e Co-admin e só antes do início. **Recomendação e padrão adotado: 1.**
+185. "Não vou mais" com confirmação também na página web `/r`: (1) sim, app e web iguais; (2) só no app. **Recomendação e padrão adotado: 1.**
+186. Texto do "Mandar pro grupo" do resumo com a votação aberta: (1) "Na frente pelo placar: Leo (+7 de saldo). A galera decide o MVP até amanhã, 12h44."; (2) manter "MVP do dia: Leo". **Recomendação e padrão adotado: 1** (o texto do WhatsApp fica, e o provisório viraria definitivo no grupo).
+187. Na tela 11 (fim de partida), "Encerrar rodada" desce para baixo de "Voltar ao início", longe do botão principal (desvio de `FimPartida.dc.html`): (1) sim; (2) manter entre os dois, agora com confirmação. **Recomendação e padrão adotado: 1.**
