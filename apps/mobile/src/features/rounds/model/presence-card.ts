@@ -2,6 +2,7 @@ import type { GroupSettings } from "@sacou/match-engine";
 
 import type { MemberType, Round } from "../../../services/api/sacou-api";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
+import { hasEnded } from "./round-cards";
 import { dropInOpensLabel, hasArrived } from "./round-clock";
 import { isCanceled } from "./round-detail";
 import type { RosterEntry } from "./roster";
@@ -53,6 +54,12 @@ export function holdsSpot(round: Round): boolean {
 function titleOf(round: Round): string {
   if (holdsSpot(round)) return presence.going;
   return round.me.status === "waitlisted" ? presence.waitlisted : presence.ask;
+}
+
+/** Who never answered has no question to see once the round is over: the title says it ended. */
+function endedTitleOf(round: Round): string {
+  const answered = holdsSpot(round) || round.me.status === "waitlisted";
+  return answered ? titleOf(round) : roundsStrings.detail.ended;
 }
 
 function goingLine(round: Round): string | null {
@@ -120,6 +127,9 @@ function answerCard(input: PresenceInput): PresenceCardView {
 export function presenceCard(input: PresenceInput): PresenceCardView {
   const { round } = input;
   if (isCanceled(round)) return { title: presence.canceled, line: null, actions: NONE };
+  if (hasEnded(round, input.now)) {
+    return { title: endedTitleOf(round), line: roundsStrings.detail.ended, actions: NONE };
+  }
   if (hasArrived(round.startsAt, input.now)) {
     return { title: titleOf(round), line: presence.started, actions: NONE };
   }

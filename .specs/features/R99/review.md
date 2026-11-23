@@ -1,0 +1,18 @@
+# R99 · Revisão (commits 868ddb5f..9f898e1b contra 4a3c102e)
+
+**Veredito: REPROVADO**
+
+Verificado: leitura do diff, das capturas 106/122 e de `Perfil.dc.html`; Vitest de `src/features/rounds`, `src/features/profile` e `src/services` (49 arquivos, 614 testes verdes); `tsc --noEmit` e ESLint `--max-warnings 0` nas pastas tocadas, limpos. Nenhum dado do app alterado; estados encerrados conferidos só pelos testes unitários e pela leitura do código.
+
+## Achados (por gravidade)
+
+1. **Tela 26 continua perguntando "Vai?" numa rodada encerrada** (`apps/mobile/src/features/rounds/model/presence-card.ts:121-128`, usada por `PlayerRoundScreen.tsx:78`). `presenceCard` só olha `hasArrived(round.startsAt)`. Numa rodada encerrada antes do início, o jogador que não respondeu vê o selo "Encerrada" junto de "Vai?" e "Faltam N vagas", e quem confirmou vê "Vou" com "Não vou mais". Isso contradiz "a página dela diz que acabou" (plano, Problem; critério 7 no espírito). O teste `ended-round-screens.test.tsx` simula `PresenceCard` com `() => null`, então não pega o caso. Correção: em `presenceCard`, tratar `hasEnded(round, now)` como o caso já iniciado (card sem ações, com um texto de encerrada) e testar no modelo.
+2. **Rodada encerrada ainda deixa o admin "Tirar" jogadores** (`AdminRoundScreen.tsx`, `RemoveSheets`: `onRemove` é nulo só quando `isCanceled`). O plano tira "Adicionar" por ser uma ação de rodada aberta, mas a remoção continua e altera a presença de uma rodada fechada. Correção: `onRemove = null` quando `canceled || ended`, com teste.
+3. **Lacunas de teste nas regras de tela** (DoD 2). (a) Critério 6: se o `&& !ended` de "Adicionar quem confirmou" (`AdminRoundScreen.tsx:81`) for removido, nenhum teste falha, porque `Button` é simulado como `null` e nada confere o rótulo. A guarda `!canceled && !ended` de `useRoundCourtEntry` também não é testada. (b) Critério 8: nenhum teste confere que "Ver resumo" (`EndedRound.tsx:24`) abre `summaryHref(groupId, roundId)`. (c) Critério 15: `profile-texts-fit.test.tsx` testa `ProfileActions` isolado. Se ele voltar para a coluna estreita ao lado da cartinha em `LoadedBody`, o teste continua passando. Correção: verificar os rótulos e os `onPress` dos botões, e que `LoadedBody` coloca `ProfileActions` fora da linha da cartinha.
+4. **Baixo: o selo "Encerrada" usa o estilo `confirmed`** (`EndedRound.tsx:12`), a mesma pílula verde de "Vou" nos cartões, e pode parecer uma confirmação de presença. Correção: usar um estilo neutro do design system, ou registrar a escolha na ADR 0077.
+5. **Baixo: o arranjo da aba Eu diverge do canvas.** `Perfil.dc.html:70-77` põe os botões na coluna ao lado da cartinha; agora eles ocupam a largura toda embaixo dela. O critério 15 permite essa troca, mas a ADR 0077 e as "Differences from the source" do plano não a registram. Correção: uma linha na ADR ou no plano.
+
+## Conferido e correto
+- Critérios 1, 2 e 4 (`hasEnded`/`isUpcoming` em `round-cards.ts`): os testes de `round-cards.ended.test.ts` falhariam sem o `!hasEnded`, inclusive no limite `endsAt == now`. Critério 3: `roundCardsOf` mostra só o cartão `recent`.
+- Critério 9: `summary-available.test.ts` falharia com a regra antiga. Critérios 12 e 13: `use-round-closed.test.ts` e `summary-invalidation.test.ts` falhariam sem `myStats`. Critérios 5, 10 e 14 decorrem da invalidação mais `wallClockNow()` lido a cada renderização.
+- Critério 16: `numberOfLines` 2 nos rótulos, o que resolve o "vitórias · .." de 122. Critério 17: só tokens e unidades relativas, sem estado novo fora de reducer. Textos em `strings/`. Domínio e eventos não foram tocados.

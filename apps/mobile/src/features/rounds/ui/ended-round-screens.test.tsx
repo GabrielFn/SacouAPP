@@ -6,12 +6,14 @@ import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { attendanceRound, ME, memberOf } from "../model/attendance.test.fixture";
 import { roundSettingsOf } from "../model/round-detail";
 import { AdminRoundScreen } from "./AdminRoundScreen";
+import { summaryHref } from "../navigation";
 import { EndedBadge, EndedFooter } from "./EndedRound";
 import { PlayerRoundScreen } from "./PlayerRoundScreen";
 import { Screen } from "../../../ui/Screen";
 
 vi.mock("react-native", () => ({ View: "View", Pressable: "Pressable", Text: "Text" }));
-vi.mock("expo-router", () => ({ useRouter: () => ({ push: () => undefined }) }));
+const push = vi.hoisted(() => vi.fn());
+vi.mock("expo-router", () => ({ useRouter: () => ({ push }) }));
 vi.mock("../../../theme/theme-context", () => ({ useTheme: () => ({ tokens: {} }) }));
 vi.mock("../../court/hooks/use-round-court-entry", () => ({
   useRoundCourtEntry: () => ({ available: true, open: () => undefined }),
@@ -124,5 +126,15 @@ describe("a round closed before its start (R99 S2)", () => {
   test("a canceled round never shows the ended seal", () => {
     const canceled: Round = { ...ended, status: "canceled" };
     expect(has(admin(canceled, NOW), EndedBadge)).toBe(false);
+  });
+});
+
+describe("'Ver resumo' (R99)", () => {
+  test("opens the summary of its own round", () => {
+    const footer = EndedFooter({ groupId: "g-1", roundId: "r-9" }) as ReactElement<{
+      onPress: () => void;
+    }>;
+    footer.props.onPress();
+    expect(push).toHaveBeenCalledWith(summaryHref("g-1", "r-9"));
   });
 });

@@ -9,7 +9,7 @@ const { detail, cards } = strings.rounds;
 
 /** The "Encerrada" seal under the title of screens 06 and 26 once the round is over (R99, ADR 0077). */
 export function EndedBadge() {
-  return <StatusPill label={detail.ended} status="confirmed" />;
+  return <StatusPill label={detail.ended} status="waiting" />;
 }
 
 export interface EndedFooterProps {

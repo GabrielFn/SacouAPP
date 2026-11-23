@@ -105,6 +105,22 @@ export function isEnded(round: Round, now: number): boolean {
   return hasEnded(round, now);
 }
 
+/** What the admin screen (06) offers for a round: all of it only while the round is open (R99). */
+export interface AdminRoundOffers {
+  readonly canAdd: boolean;
+  readonly canRemove: boolean;
+  readonly courtEntryEnabled: boolean;
+}
+
+export function adminRoundOffers(
+  round: Round,
+  now: number,
+  attendanceEnabled: boolean,
+): AdminRoundOffers {
+  const open = !isCanceled(round) && !isEnded(round, now);
+  return { canAdd: attendanceEnabled && open, canRemove: open, courtEntryEnabled: open };
+}
+
 /**
  * The entry to the summary (screen 12) from the round: after it started or ended, never for a canceled
  * one (question 152). A round closed before its start has ended, so it has a summary too (R99).
