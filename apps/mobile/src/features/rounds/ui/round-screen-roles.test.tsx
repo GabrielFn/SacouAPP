@@ -140,7 +140,7 @@ describe("Tirar only for who manages the rounds", () => {
 
 describe("the rotation chip shows on screens 06 and 26 (R98 part 3)", () => {
   const round = attendanceRound();
-  const base = roundSettingsOf(round);
+  const base = roundSettingsOf(round) as NonNullable<ReturnType<typeof roundSettingsOf>>;
   const settings = {
     ...base,
     values: { ...base.values, rotation: { enabled: true, system: "5x1" } },
