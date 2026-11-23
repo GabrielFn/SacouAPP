@@ -68,6 +68,8 @@
 
 ## Em andamento
 
+- 23/11/2026: **percurso no celular, 5ª tentativa** (PR #226): o fluxo completo passou, inclusive encerrar, resumo, cartinha e a quadra destravada. Três defeitos novos em `pendencias.md` (candidatos a R99). Próximo passo no [diário de 23/11](sessoes/2026-11-23.md).
+
 - 22/11/2026, noite: **R98 inteira na `main`** (#218, #219, #220, #222, #224) e **R97 Parte 2** (#210). Falta o percurso completo no celular e o relatório do M5. Próximo passo no [diário de 22/11](sessoes/2026-11-22.md).
 
 - 22/11/2026: mergeados #204 (**R97 Parte 1**: barra EM QUADRA, partida esquecida, retomada até o fim da rodada; verificador Opus e testador Sonnet aprovaram), #208 (percurso passos 14–25) e #209 (**laço do registro do push**: ~153 mil `PUT /v1/me/push-devices` com 429 em 3 dias esgotavam a cota do usuário e causavam os "Muitas tentativas"; revisor Opus, correção, verificador Opus). Em andamento: **R97 Parte 2** (tela de rodadas, ADR 0075; desenvolvedor Sonnet, worktree `SacouAPP-R97b`). Próximo passo no [diário de 22/11](sessoes/2026-11-22.md).
