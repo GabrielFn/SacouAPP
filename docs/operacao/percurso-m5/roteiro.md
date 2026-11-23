@@ -450,3 +450,85 @@ A permissão `POST_NOTIFICATIONS` já estava concedida (`granted=true`) e a cont
 30 s em modo avião (`cmd connectivity airplane-mode enable`) com o app na Início: faixa amarela **Sem conexão**, cartões mantidos. Ao desligar, a faixa some em segundos e a Início volta ao normal.
 
 ![Sem conexão](128-modo-aviao.jpg)
+
+## Sexta tentativa (23/11, percurso do jogador)
+
+Data: 23/11/2026, das 16h28 às 16h50. Mesmo aparelho (`RQGL50AMKPX`), Metro da worktree R99 (app direto na API de teste), contas Org Teste, Beto Teste e Caio Push. Prints a partir de 129 (nenhum com QR legível, contato, e-mail ou senha). O Chrome do aparelho ficou logado como Beto Teste.
+
+### Passo 46 · Desativar o convite exposto (M5-B1) — Passou, com lacuna
+- Antes, o link antigo (`/c#...`) no Chrome mostrava "Grupo Fluxo · Você já está nesse grupo" (print 130). Em Grupo → Membros → aba **Convites** havia "Criado em 21 nov · 2 entradas · Revogar". **Revogar** abre a folha "Revogar este convite? Quem tiver este link não entra mais por ele."; confirmei e a aba passou a dizer "Nenhum convite valendo." (print 131). O mesmo link no Chrome agora mostra **"Link inválido ou desativado."** (print 132). **Passou:** o convite exposto está morto.
+- **Lacuna (ambiente):** a tela Membros **não mostrou "Convidar por link" nem "QR do grupo"**, então não deu para usar "Desativar este link e gerar outro" nem gerar o link novo. O rodapé só aparece com `EXPO_PUBLIC_INVITE_BASE_URL` (`MembersScreen`, `buildInviteBaseUrl`), e o `.env` desta worktree só tem a URL da API e o Google. Sem essa variável o admin de um build de produção ficaria sem convite e sem aviso. O link novo **não foi gerado**; a linha `Convite:` do arquivo de contas diz "revogado".
+
+![Antes](130-convite-antes-revogar.jpg)
+![Convites vazio](131-convite-revogado.jpg)
+![Link morto](132-convite-antigo-depois.jpg)
+
+### Passo 47 · Link da rodada de hoje (Seg 23/11, 20h) — Lacuna
+Na página da rodada, "Copiar lista" copia só o texto da lista ("Grupo Fluxo · Seg 23/11 · 20h · Quadra Fluxo, Confirmados (1/12) 1. Caio Push"), **sem o link** (print 133). O link só aparece na folha de compartilhar **ao publicar a rodada** (`share.textWithLink`). Quem fecha a folha, ou quer reenviar o link na semana seguinte, **não tem como pegar o link de uma rodada já publicada**. Para ter um link, publiquei uma rodada nova (**Sex 27/11, 20h**, 12 vagas, "Copiar" na folha) e usei esse link no resto do percurso; o link de hoje não foi obtido. **Lacuna.**
+
+![Página da rodada do admin](133-org-rodada-hoje.jpg)
+
+### Passo 48 · Link da rodada no navegador, sem o app — Passou
+A página `/r/...` abre sem app e sem conta: "Grupo Fluxo · Sex, 27/11 · 20h · Quadra Fluxo · 6x6 · 21 pts · quem perde sai", contador 0/12 ("Faltam 12. Chama o pessoal!"), 12 "vaga aberta" e **VOU / NÃO VOU** (print 134). **Passou.** Observações: o canto superior diz "Convite do grupo" numa página de rodada; "Chama o pessoal!" é fala de organizador, não de jogador. O Chrome já vinha com sessão (link "Sair" no rodapé).
+
+![Página web](134-web-rodada-sem-login.jpg)
+
+### Passo 49 · VOU anônimo e login pela web — Passou
+Com sessão (Chrome logado), o VOU de avulso já mostra o aviso (print 135). Depois de **Sair** (print 137), o toque em **VOU** abre a folha "Entrar pra confirmar · É só uma vez…" com Google e e-mail e senha (print 138). Entrei com o Beto por e-mail e senha e voltei para a mesma rodada (print 139). **Passou.**
+
+![VOU com sessão](135-web-vou-sem-login.jpg)
+![Anônimo](138-web-vou-anonimo.jpg)
+
+### Passo 50 · VOU de avulso e de mensalista pela web — Defeito
+- **Avulso (Beto ainda avulso):** a página mostra "A lista dos avulsos ainda não abriu." **sem dia nem hora**, e VOU / NÃO VOU continuam laranja e ativos (print 140). **Confirma o achado 2 na web.** O toque no VOU não faz nada visível.
+- **Mensalista (Beto promovido pelo admin):** VOU respondeu "Você vai. Sua vaga é a 1ª." com "NÃO VOU MAIS" (print 142). **Defeito:** logo depois do VOU o cabeçalho continua "0/12" e a lista continua com 12 "vaga aberta"; só depois de **Atualizar** mostra "1/12 · Mensalistas: Beto Teste · Avulsos 0 de 11 vagas" (print 143). Para reproduzir: promover o jogador a mensalista, abrir `/r/...`, entrar e tocar em VOU.
+
+![Avulso](140-web-vou-avulso-beto.jpg)
+![Mensalista](142-web-vou-mensalista.jpg)
+![Depois de atualizar](143-web-apos-reload.jpg)
+
+### Passo 51 · A mesma rodada no app (Beto) — Passou
+A Início do Beto lista Seg, Qua, Qui e **Sex 20h** com "Vou · 1/12 confirmados". Na página da Sex o app mostra "Você vai · 1º da lista · 1/12", "Confirmados: você" e "Não vou mais" (print 146). Bate com a web. **Passou.**
+- Observação: o selo **"Vou" no cartão da Início é estado, mas parece botão**, e os cartões sem o selo não têm botão: para confirmar é preciso abrir a rodada (prints 144 e 145).
+- Observação: "Não vou mais" desfaz a presença com um toque, sem confirmação (um toque meu caiu nele sem querer); refazer exige "VOU".
+
+![Início](144-beto-inicio.jpg)
+![Início fim](145-beto-inicio-fim.jpg)
+![Rodada no app](146-beto-app-rodada-sex.jpg)
+
+### Passo 52 · O que o jogador vê dos times — Lacuna (confirma o achado 6)
+Em nenhuma tela do jogador há os times: nem na página da rodada, nem no resumo. A única lista com times é a de **votar no MVP** (cada linha diz "Laranja · 1 partida · +7"), que só existe depois de encerrada. Sem o texto do WhatsApp, o jogador não sabe em que time caiu antes do jogo. **Lacuna.**
+
+### Passo 53 · Resumo e voto no MVP (Ter 24/11, encerrada) — Passou
+- Início → "Ver resumo": "MVP do dia · Beto Teste · Laranja · +7 de saldo · 1 vitória em 1 · **Calculado pelo placar** · **Votação da galera aberta**", botão "Votar no MVP · fecha em 22 h", "Time que mais venceu: A Laranja", "Maior sequência", "Mandar pro grupo · WhatsApp" (print 147). O Beto, que não pode votar em si, vê o próprio nome como MVP provisório com o título "MVP do dia": **confirma o achado 7**.
+- "Votar no MVP": "Quem foi o MVP? · Voto secreto · fecha em 22 h", lista dos outros jogadores (o Beto não aparece), botão "Escolha quem foi o MVP" desligado até marcar alguém (print 148). Marquei Fabi → "Você votou em Fabi. Seu voto é secreto. O resultado sai quando a votação fechar, em 22 h." (print 149). No resumo, "Você já votou · resultado em 22 h" no lugar do botão (print 150). **Passou.**
+- **Achado 11 (parcial):** a entrada é só "Ver resumo" ou o cartão da Início; nada avisa o jogador. Tocar numa rodada encerrada abre direto o resumo (R99).
+
+![Resumo](147-beto-resumo-ter.jpg)
+![Votar](148-beto-votar-mvp.jpg)
+![Voto enviado](149-beto-voto-enviado.jpg)
+![Pós-voto](150-beto-resumo-pos-voto.jpg)
+
+### Passo 54 · Cartinha do Beto — Passou
+Aba Eu: Ponteiro, **4 partidas, 100% de vitórias, +20 de saldo, maior sequência 4, 3 vezes MVP, presença 100%** (print 153). "Compartilhar" cabe em uma linha na fonte 1.0. **Passou.**
+
+![Cartinha](153-beto-cartinha.jpg)
+
+### Passo 55 · Avulso (Caio Push) com o VOU desligado — Defeito (confirma o achado 2)
+Em rodada de **quarta** e de **sexta**, o card diz "**Vai?** · Avulsos confirmam a partir de **ter, 20h**" (quarta) e "a partir de **qui, 20h**" (sexta); o botão VOU fica claro (desligado) e "Não vou" continua ativo (prints 154 e 155). O jogador não aprende que existe uma janela dos avulsos nem recebe "Me avisa quando abrir". Na lista de confirmados o Beto aparece sem marca de mensalista. **Defeito de texto (achado 2).**
+
+![Sexta](154-caio-avulso-rodada-sex.jpg)
+![Quarta](155-caio-avulso-rodada-qua.jpg)
+
+### Passo 56 · Página de sucesso do convite ("Baixe o app") — Não verificado
+Sem convite válido (passo 46) e sem o botão "Convidar por link" (ambiente), não deu para entrar como convidado e ver a página de sucesso.
+
+### Estado final
+App logado como **Org Teste**; Beto voltou a Avulso; **Sex 27/11 20h** ficou publicada com 1/12 (Beto); o Chrome do aparelho segue logado como Beto Teste.
+
+### Achados da análise de UX
+- **1 (caminho web do jogador):** em parte **desmentido**: `/r/...` abre sem o app, mostra a lista, aceita login e VOU (mensalista). Continuam valendo o convite do grupo (passo 56, não verificado) e a falta de como pegar o link de uma rodada já publicada (passo 47).
+- **2 (VOU desligado do avulso):** **confirmado** na web (sem data) e no app (sem motivo e sem aviso).
+- **4 (cancelar rodada):** não verificado.
+- **6 (jogador não vê os times):** **confirmado**.
+- **7 (MVP provisório como definitivo):** **confirmado**. **5:** o texto "Notificações · Lista, espera, times" segue nas configurações.
