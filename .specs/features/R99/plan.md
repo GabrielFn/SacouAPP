@@ -2,7 +2,7 @@
 
 **Approved**: 2026-11-23 - user: "aprovado, pode seguir"
 **Settled mid-build:** none
-**Review:** <pending>
+**Review:** sent at 8a2d8b46
 **Fix pass:** <pending>
 
 ## Problem
