@@ -12,6 +12,7 @@ import {
   type RoundTeamView,
   type RoundTeamsView,
 } from "../model/round-teams";
+import { RoundSectionCard } from "./RoundSectionCard";
 
 const { teams: texts } = strings.rounds;
 const { share } = strings.draw;
@@ -84,22 +85,11 @@ function TeamRow({ team }: TeamRowProps) {
  * the teams and the queue. No button and no level.
  */
 export function RoundTeamsCard({ view, listChangedText }: RoundTeamsCardProps) {
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
   const placement = placementText(view.me);
   const mine = view.me.kind === "team" ? view.me.team : null;
   return (
-    <View
-      accessibilityRole="summary"
-      accessibilityLabel={texts.title}
-      style={{
-        gap: tokens.spacing.s,
-        padding: tokens.spacing.m,
-        borderRadius: tokens.radii.card,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        backgroundColor: colors.surface,
-      }}
-    >
+    <RoundSectionCard label={texts.title}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.spacing.s }}>
         <Text variant="bodyStrong" accessibilityRole="header" style={{ flex: 1 }}>
           {texts.title}
@@ -123,6 +113,6 @@ export function RoundTeamsCard({ view, listChangedText }: RoundTeamsCardProps) {
         <Text variant="muted">{share.reserves(view.reserves)}</Text>
       )}
       {listChangedText === null ? null : <Text variant="muted">{listChangedText}</Text>}
-    </View>
+    </RoundSectionCard>
   );
 }
