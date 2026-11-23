@@ -1,6 +1,7 @@
-import type { Member, Round } from "../../../services/api/sacou-api";
+import type { GroupRole, Member, Round } from "../../../services/api/sacou-api";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { drawNamesOf } from "../../draw/model/draw-names";
+import { canDraw } from "../../draw/model/can-draw";
 import { teamIdentity, type TeamIdentity } from "../../draw/model/team-identity";
 import { formatTime } from "../../groups/model/schedule-text";
 import { localWallTime } from "./round-clock";
@@ -70,7 +71,7 @@ function hasChanged(teams: PublishedTeams, going: ReadonlySet<string>): boolean 
  */
 export function roundTeamsView(round: Round, members: readonly Member[]): RoundTeamsView | null {
   const teams = round.teams;
-  if (teams === undefined || teams === null || isCanceled(round)) return null;
+  if (teams === null || isCanceled(round)) return null;
   const meId = round.me.memberId;
   const going = new Set(round.going.map((entry) => entry.memberId));
   const nameOf = drawNamesOf(members);
@@ -104,6 +105,40 @@ export function placementText(me: MyPlacement): string | null {
     case "none":
       return null;
   }
+}
+
+export interface AdminTeamsInput {
+  readonly role: GroupRole;
+  readonly ended: boolean;
+  /** With the draw off the 07 builds the teams by hand: "Monte de novo" (question 72). */
+  readonly drawOff: boolean;
+}
+
+/**
+ * "A lista mudou depois dos times..." of screen 06 (question 180): only to who draws, while the round is on, and only
+ * when the list moved since the teams.
+ */
+export function listChangedLine(
+  view: RoundTeamsView | null,
+  input: AdminTeamsInput,
+): string | null {
+  if (view === null || !view.listChanged || input.ended || !canDraw(input.role)) return null;
+  return input.drawOff ? texts.listChangedBuild : texts.listChangedDraw;
+}
+
+export interface AdminTeams {
+  readonly view: RoundTeamsView;
+  readonly listChangedText: string | null;
+}
+
+/** The card of screen 06: the teams and, for who draws, the line of question 180; `null` with no teams. */
+export function adminTeams(
+  round: Round,
+  members: readonly Member[],
+  input: AdminTeamsInput,
+): AdminTeams | null {
+  const view = roundTeamsView(round, members);
+  return view === null ? null : { view, listChangedText: listChangedLine(view, input) };
 }
 
 /** "Laranja: Ana, João e você": one text per team for the screen reader. */

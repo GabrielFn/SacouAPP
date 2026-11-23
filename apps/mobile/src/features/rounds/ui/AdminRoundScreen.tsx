@@ -25,7 +25,7 @@ import {
   type RoundSettingsView,
 } from "../model/round-detail";
 import { canCopyList, removalName, rosterView, type RosterView } from "../model/round-screen-view";
-import { roundTeamsView, type RoundTeamsView } from "../model/round-teams";
+import { adminTeams } from "../model/round-teams";
 import type { CopyNote } from "../model/round-screen.reducer";
 import { canDraw } from "../../draw/model/can-draw";
 import { useRoundCourtEntry } from "../../court/hooks/use-round-court-entry";
@@ -40,10 +40,10 @@ import { EndedBadge, EndedFooter } from "./EndedRound";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 import { RoundStatsPanel } from "./RoundStatsPanel";
-import { RoundTeamsCard } from "./RoundTeamsCard";
+import { RoundTeamsCard, type RoundTeamsCardProps } from "./RoundTeamsCard";
 import { SummaryLink } from "./SummaryLink";
 
-const { detail, confirmed, teams: teamsTexts } = strings.rounds;
+const { detail, confirmed } = strings.rounds;
 
 export interface RoundBodyProps {
   readonly round: Round;
@@ -54,18 +54,7 @@ export interface RoundBodyProps {
   /** A round that is over keeps its list but offers no "Adicionar" (R99). */
   readonly canAdd: boolean;
   /** The published teams (R100), `null` with none. */
-  readonly teams: RoundTeamsView | null;
-  readonly listChangedText: string | null;
-}
-
-/** "A lista mudou depois dos times..." only to who draws, while the round is on (question 180). */
-function listChangedText(
-  view: RoundTeamsView | null,
-  mayDraw: boolean,
-  drawOff: boolean,
-): string | null {
-  if (view === null || !view.listChanged || !mayDraw) return null;
-  return drawOff ? teamsTexts.listChangedBuild : teamsTexts.listChangedDraw;
+  readonly teams: RoundTeamsCardProps | null;
 }
 
 /** Everything under the title of screen 06: pills, panel, waitlist, "Adicionar…" or the canceled strip. */
@@ -77,7 +66,6 @@ function RoundBody({
   onAdd,
   canAdd,
   teams,
-  listChangedText: changedText,
 }: RoundBodyProps) {
   const { tokens } = useTheme();
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
@@ -102,7 +90,7 @@ function RoundBody({
               </Text>
             </View>
           )}
-          {teams === null ? null : <RoundTeamsCard view={teams} listChangedText={changedText} />}
+          {teams === null ? null : <RoundTeamsCard {...teams} />}
           {canAdd ? (
             <Button
               label={detail.addFromWhatsApp}
@@ -246,7 +234,7 @@ export function AdminRoundScreen({
     court.available,
   );
   const drawOff = settings?.values.draw.enabled === false;
-  const teams = roundTeamsView(round, members);
+  const teams = adminTeams(round, members, { role: group.role, ended, drawOff });
   const footer = (
     <RoundFooter
       actions={actions}
@@ -292,7 +280,6 @@ export function AdminRoundScreen({
           waitlist={roster.waitlist}
           canAdd={offers.canAdd}
           teams={teams}
-          listChangedText={listChangedText(teams, canDraw(group.role) && !ended, drawOff)}
           onOpenConfirmed={() => {
             model.dispatch({ type: "confirmed-opened" });
           }}
