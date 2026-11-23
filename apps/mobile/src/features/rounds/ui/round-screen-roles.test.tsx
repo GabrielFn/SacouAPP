@@ -8,6 +8,7 @@ import { roundSettingsOf } from "../model/round-detail";
 import { AdminRoundScreen } from "./AdminRoundScreen";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { PlayerRoundScreen } from "./PlayerRoundScreen";
+import { RoundChips } from "./RoundChips";
 import { RoundScreen } from "./RoundScreen";
 
 const roleState = vi.hoisted(() => ({ role: "player", round: {} }));
@@ -134,5 +135,33 @@ describe("Tirar only for who manages the rounds", () => {
     roleState.role = role;
     const tree = RoundScreen({ groupId: "g", roundId: "r" }) as ReactElement;
     expect(tree.type).toBe(screen);
+  });
+});
+
+describe("the rotation chip shows on screens 06 and 26 (R98 part 3)", () => {
+  const round = attendanceRound();
+  const base = roundSettingsOf(round);
+  const settings = {
+    ...base,
+    values: { ...base.values, rotation: { enabled: true, system: "5x1" } },
+  } as typeof base;
+  const chipKinds = (tree: ReactNode, body: string) => {
+    const [element] = findNamed(tree, body);
+    const inner = (element?.type as (props: unknown) => ReactNode)(element?.props);
+    return find(inner, RoundChips).flatMap((el) =>
+      (el.props.chips as { key: string }[]).map((chip) => chip.key),
+    );
+  };
+
+  test("the player screen shows the rotation chip", () => {
+    const group = { name: "Racha", role: "player" } as Group;
+    const tree = PlayerRoundScreen({ group, round, settings, members: [], model });
+    expect(chipKinds(tree, "PlayerBody")).toContain("rotation");
+  });
+
+  test("the admin screen shows the rotation chip", () => {
+    const group = { name: "Racha", role: "admin" } as Group;
+    const tree = AdminRoundScreen({ groupId: "g", group, round, settings, members: [], model });
+    expect(chipKinds(tree, "RoundBody")).toContain("rotation");
   });
 });
