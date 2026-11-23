@@ -5,9 +5,17 @@ import { createFakeKeyboardVisibility } from "../adapters/fake-keyboard-visibili
 import { BACKDROP_GRACE_MS } from "./backdrop-dismiss";
 import { useBackdropPress } from "./use-backdrop-press";
 
-const services = vi.hoisted((): { current: unknown } => ({ current: null }));
+const services = vi.hoisted(() => {
+  const held: { value: unknown } = { value: null };
+  return {
+    provide: (value: unknown) => {
+      held.value = value;
+    },
+    get: () => held.value,
+  };
+});
 
-vi.mock("../services/services-context", () => ({ useServices: () => services.current }));
+vi.mock("../services/services-context", () => ({ useServices: () => services.get() }));
 // No renderer here: one ref that lives on and effects that run at once.
 vi.mock("react", () => {
   const ref = { current: Number.NEGATIVE_INFINITY };
@@ -22,7 +30,7 @@ vi.mock("react", () => {
 function useSetup() {
   const keyboard = createFakeKeyboardVisibility();
   const clock = createFakeClock(10_000);
-  services.current = { keyboard, clock };
+  services.provide({ keyboard, clock });
   const onClose = vi.fn();
   const press = useBackdropPress(onClose);
   return { keyboard, clock, onClose, press };
