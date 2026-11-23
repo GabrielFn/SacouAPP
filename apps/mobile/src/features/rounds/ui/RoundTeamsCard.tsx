@@ -22,7 +22,7 @@ export interface RoundTeamsCardProps {
   readonly listChangedText: string | null;
 }
 
-interface TeamLetterProps {
+export interface TeamLetterProps {
   readonly identity: TeamIdentity;
 }
 
@@ -50,7 +50,7 @@ function TeamLetter({ identity }: TeamLetterProps) {
   );
 }
 
-interface TeamRowProps {
+export interface TeamRowProps {
   readonly team: RoundTeamView;
 }
 

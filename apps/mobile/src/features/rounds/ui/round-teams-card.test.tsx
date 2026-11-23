@@ -188,7 +188,10 @@ describe("the Times card on screen 26 (R100)", () => {
 
 describe("the Times card on screen 06 (R100)", () => {
   test("shows 'A lista mudou' to who draws when someone left (question 180)", () => {
-    const left = g1({}, G1_ORDER.filter((id) => id !== "duda"));
+    const left = g1(
+      {},
+      G1_ORDER.filter((id) => id !== "duda"),
+    );
     const texts = strings(admin(left));
     expect(texts).toContain("A lista mudou depois dos times. Sorteie de novo.");
   });
@@ -218,7 +221,10 @@ describe("the Times card fits (R100, case 20)", () => {
     if (view === null) throw new Error("no view");
     const found = expand(RoundTeamsCard({ view, listChangedText: null }));
     const nameLines = found.filter(
-      (item) => item.name === "Text" && item.props.variant === "muted" && Array.isArray(item.props.children),
+      (item) =>
+        item.name === "Text" &&
+        item.props.variant === "muted" &&
+        Array.isArray(item.props.children),
     );
     expect(nameLines).toHaveLength(2);
     for (const line of nameLines) {

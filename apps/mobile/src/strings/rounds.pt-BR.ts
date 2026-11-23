@@ -202,9 +202,7 @@ export const roundsStrings = {
     left: (name: string) => `${name} (saiu)`,
     /** "Ana, João e você": the members of a team, for the card and for the screen reader. */
     members: (names: readonly string[]) =>
-      names
-        .map((name, index) => `${roundsTeamSeparator(index, names.length)}${name}`)
-        .join(""),
+      names.map((name, index) => `${roundsTeamSeparator(index, names.length)}${name}`).join(""),
     separator: roundsTeamSeparator,
     team: (team: string, members: string) => `${team}: ${members}`,
     listChangedDraw: "A lista mudou depois dos times. Sorteie de novo.",

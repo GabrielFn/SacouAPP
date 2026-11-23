@@ -7074,10 +7074,7 @@
         "type": "object",
         "properties": {
           "teams": {
-            "type": [
-              "null",
-              "array"
-            ],
+            "type": "array",
             "items": {
               "type": "array",
               "items": {
@@ -7087,10 +7084,7 @@
             }
           },
           "reserves": {
-            "type": [
-              "null",
-              "array"
-            ],
+            "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"

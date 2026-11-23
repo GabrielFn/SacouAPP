@@ -32,7 +32,7 @@ public sealed class ConfirmTeamsTests(IntegrationDatabase database) : IAsyncLife
 
     /// <summary>G1: 14 confirmed, Laranja the first six, Azul the next six, the last two in the queue.</summary>
     private static string G1Body(IReadOnlyList<Guid> members) => Body(
-        [members.Take(TeamOfSix), members.Skip(TeamOfSix).Take(TeamOfSix)], members.Skip(TeamOfSix * 2));
+        [members.Take(TeamOfSix), members.Take(TeamOfSix..(TeamOfSix * 2))], members.Take((TeamOfSix * 2)..));
 
     private static string Body(IEnumerable<IEnumerable<Guid>> teams, IEnumerable<Guid> reserves) =>
         new JsonObject
@@ -90,7 +90,7 @@ public sealed class ConfirmTeamsTests(IntegrationDatabase database) : IAsyncLife
             var read = await RoundCalls.GetAsync(world, round, reader);
             Assert.Equal(TeamsOf(written), TeamsOf(read));
             Assert.Equal([1, 2], read["teams"]!["teams"]!.AsArray().Select(team => team!["number"]!.GetValue<int>()));
-            Assert.Equal(members.Skip(TeamOfSix * 2), read["teams"]!["reserves"]!.AsArray().Select(id => id!.GetValue<Guid>()));
+            Assert.Equal(members.Take((TeamOfSix * 2)..), read["teams"]!["reserves"]!.AsArray().Select(id => id!.GetValue<Guid>()));
             Assert.Equal(["confirmedAt", "teams", "reserves"], read["teams"]!.AsObject().Select(field => field.Key));
         }
     }
@@ -104,7 +104,7 @@ public sealed class ConfirmTeamsTests(IntegrationDatabase database) : IAsyncLife
         using var first = await PutAsync(world, round, G1Body(members));
         var swapped = members.Reverse().ToList();
 
-        using var second = await PutAsync(world, round, Body([swapped.Take(TeamOfSix), swapped.Skip(TeamOfSix).Take(TeamOfSix)], []));
+        using var second = await PutAsync(world, round, Body([swapped.Take(TeamOfSix), swapped.Take(TeamOfSix..(TeamOfSix * 2))], []));
 
         Assert.Equal(HttpStatusCode.OK, second.StatusCode);
         var read = await RoundCalls.GetAsync(world, round, A.Player);
@@ -212,7 +212,7 @@ public sealed class ConfirmTeamsTests(IntegrationDatabase database) : IAsyncLife
         using var client = api.CreateClient();
         var (world, round, members) = await G1Async(client);
 
-        using var response = await PutAsync(world, round, Body([members.Take(TeamOfSix), members.Skip(TeamOfSix).Take(TeamOfSix - 1)], []));
+        using var response = await PutAsync(world, round, Body([members.Take(TeamOfSix), members.Take(TeamOfSix..((TeamOfSix * 2) - 1))], []));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(TeamsInvalid, await RoundCalls.CodeAsync(response));

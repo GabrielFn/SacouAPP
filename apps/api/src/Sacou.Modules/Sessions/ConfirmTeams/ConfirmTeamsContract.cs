@@ -10,13 +10,16 @@ namespace Sacou.Modules.Sessions.ConfirmTeams;
 /// does not declare, such as a level, is a 400 (ADR 0039).
 /// </summary>
 internal sealed record ConfirmTeamsRequest(
-    [property: JsonRequired] IReadOnlyList<IReadOnlyList<Guid>?>? Teams,
-    [property: JsonRequired] IReadOnlyList<Guid>? Reserves)
+    [property: JsonRequired] IReadOnlyList<IReadOnlyList<Guid>> Teams,
+    [property: JsonRequired] IReadOnlyList<Guid> Reserves)
 {
-    /// <summary>A null where a list was expected becomes the default array, which the domain refuses as invalid.</summary>
+    /// <summary>
+    /// A JSON <c>null</c> where a list was expected (the reader lets it through despite the annotation) becomes the default
+    /// array, which the domain refuses as invalid.
+    /// </summary>
     public ImmutableArray<ImmutableArray<MemberId>> ToTeams() => Teams is null || Teams.Any(team => team is null)
         ? default
-        : [.. Teams.OfType<IReadOnlyList<Guid>>().Select(team => team.Select(member => new MemberId(member)).ToImmutableArray())];
+        : [.. Teams.Select(team => team.Select(member => new MemberId(member)).ToImmutableArray())];
 
     public ImmutableArray<MemberId> ToReserves() => Reserves is null ? default : [.. Reserves.Select(member => new MemberId(member))];
 

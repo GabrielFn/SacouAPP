@@ -45,7 +45,10 @@ describe("roundTeamsView (R100, case 16)", () => {
       "Você está no Azul",
     );
     const three = g1("davi", {
-      teams: published([TEAM_A.slice(0, 4), TEAM_B.slice(0, 4), ["davi", "sofia", "bia", "gabi"]], []),
+      teams: published(
+        [TEAM_A.slice(0, 4), TEAM_B.slice(0, 4), ["davi", "sofia", "bia", "gabi"]],
+        [],
+      ),
     });
     const view = roundTeamsView(three, g1Members());
     expect(placementText(view?.me ?? { kind: "none" })).toBe("Você está no Time 3");
@@ -82,7 +85,14 @@ describe("roundTeamsView (R100, case 16)", () => {
 
 describe("roundTeamsView when the list moved (R100, case 17)", () => {
   it("marks who left the round and turns listChanged on", () => {
-    const view = roundTeamsView(g1("ana", {}, G1_ORDER.filter((id) => id !== "duda")), g1Members());
+    const view = roundTeamsView(
+      g1(
+        "ana",
+        {},
+        G1_ORDER.filter((id) => id !== "duda"),
+      ),
+      g1Members(),
+    );
 
     expect(view?.teams[1]?.names[1]).toEqual({ text: "Duda (saiu)", me: false });
     expect(view?.listChanged).toBe(true);
@@ -90,7 +100,7 @@ describe("roundTeamsView when the list moved (R100, case 17)", () => {
 
   it("calls an unknown member 'Sem apelido' and two Anas by the short names of the court", () => {
     const members = [
-      ...g1Members().filter((member) => member.memberId !== "joao"),
+      ...g1Members().filter((member) => !["joao", "pedro", "ana"].includes(member.memberId)),
       memberOf("pedro", "Ana Clara"),
       memberOf("ana", "Ana Beatriz"),
     ];
@@ -106,8 +116,13 @@ describe("roundTeamsView when the list moved (R100, case 17)", () => {
   it("reads each team as one text", () => {
     const view = roundTeamsView(g1("bia"), g1Members());
 
-    expect(teamLabel(view?.teams[0] ?? { identity: { number: 1, letter: "A", name: "", color: "orange" }, names: [] })).toBe(
-      "Laranja: Ana, João, Pedro, Lia, Marcos e você",
-    );
+    expect(
+      teamLabel(
+        view?.teams[0] ?? {
+          identity: { number: 1, letter: "A", name: "", color: "orange" },
+          names: [],
+        },
+      ),
+    ).toBe("Laranja: Ana, João, Pedro, Lia, Marcos e você");
   });
 });

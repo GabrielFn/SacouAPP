@@ -45,7 +45,9 @@ describe("the publication of the teams (R100)", () => {
     await observer.mutate(BODY);
 
     expect(fake.calls()).toEqual([{ operation: "confirmTeams", args: [GROUP, ROUND, BODY] }]);
-    expect(client.getQueryData<Round>(queryKeys.round(GROUP, ROUND))?.teams).toEqual(answered.teams);
+    expect(client.getQueryData<Round>(queryKeys.round(GROUP, ROUND))?.teams).toEqual(
+      answered.teams,
+    );
   });
 
   test("a failure is only the status of the mutation: the cached round stays", async () => {

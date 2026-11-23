@@ -16,6 +16,8 @@ describe("confirmTeamsBody (R100, case 15)", () => {
     const arrangement = arrangementOf(G1_ANSWER);
 
     expect(arrangement.levels.size).toBeGreaterThan(0);
-    expect(JSON.stringify(confirmTeamsBody(arrangement))).not.toMatch(/level|average|difference|seed/i);
+    expect(JSON.stringify(confirmTeamsBody(arrangement))).not.toMatch(
+      /level|average|difference|seed/i,
+    );
   });
 });
