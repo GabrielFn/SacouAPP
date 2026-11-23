@@ -18,6 +18,7 @@ import {
   footerActions,
   roundFooterActions,
   isCanceled,
+  isEnded,
   roleHeader,
   statsCells,
   type RoundSettingsView,
@@ -33,6 +34,7 @@ import {
   type PendingRoundScreen,
 } from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
+import { EndedBadge, EndedFooter } from "./EndedRound";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 import { RoundStatsPanel } from "./RoundStatsPanel";
@@ -46,10 +48,12 @@ export interface RoundBodyProps {
   readonly waitlist: string;
   readonly onOpenConfirmed: () => void;
   readonly onAdd: () => void;
+  /** A round that is over keeps its list but offers no "Adicionar" (R99). */
+  readonly ended: boolean;
 }
 
 /** Everything under the title of screen 06: pills, panel, waitlist, "Adicionar…" or the canceled strip. */
-function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundBodyProps) {
+function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd, ended }: RoundBodyProps) {
   const { tokens } = useTheme();
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
     withRotation: true,
@@ -74,7 +78,7 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
               </Text>
             </View>
           )}
-          {attendance ? (
+          {attendance && !ended ? (
             <Button
               label={detail.addFromWhatsApp}
               variant="outline"
@@ -207,9 +211,10 @@ export function AdminRoundScreen({
   const router = useRouter();
   const roster = rosterView(round, settings, members);
   const canceled = isCanceled(round);
-  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, !canceled);
+  const ended = isEnded(round, model.now);
+  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, !canceled && !ended);
   const actions = roundFooterActions(
-    footerActions(PENDING_ROUND_SCREENS, canceled),
+    footerActions(PENDING_ROUND_SCREENS, canceled || ended),
     canDraw(group.role),
     court.available,
   );
@@ -224,7 +229,15 @@ export function AdminRoundScreen({
     />
   );
   return (
-    <Screen footer={actions.length === 0 ? undefined : footer}>
+    <Screen
+      footer={
+        ended ? (
+          <EndedFooter groupId={groupId} roundId={round.roundId} />
+        ) : actions.length === 0 ? undefined : (
+          footer
+        )
+      }
+    >
       <AdminHeader
         role={group.role}
         canCopy={canCopyList(round, settings)}
@@ -239,6 +252,7 @@ export function AdminRoundScreen({
         }}
       />
       <RoundHeading groupName={group.name} round={round} />
+      {ended ? <EndedBadge /> : null}
       <SummaryLink groupId={groupId} round={round} now={model.now} />
       {settings === null ? (
         <ErrorStrip text={detail.loadError} />
@@ -247,6 +261,7 @@ export function AdminRoundScreen({
           round={round}
           settings={settings}
           waitlist={roster.waitlist}
+          ended={ended}
           onOpenConfirmed={() => {
             model.dispatch({ type: "confirmed-opened" });
           }}

@@ -5,6 +5,7 @@ import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { formatTime } from "../../groups/model/schedule-text";
 import type { PendingRoundScreen } from "../navigation";
 import { dateSubtitle } from "./round-dates";
+import { hasEnded } from "./round-cards";
 
 const { detail } = roundsStrings;
 const MANAGER_ROLES: ReadonlySet<GroupRole> = new Set(["admin", "coAdmin"]);
@@ -99,7 +100,15 @@ export function isCanceled(round: Round): boolean {
   return round.status === "canceled";
 }
 
-/** The entry to the summary (screen 12) from the round: after it started, never for a canceled one (question 152). */
+/** Whether the round is over (`endsAt` passed, an early close included); a canceled one never (R99). */
+export function isEnded(round: Round, now: number): boolean {
+  return hasEnded(round, now);
+}
+
+/**
+ * The entry to the summary (screen 12) from the round: after it started or ended, never for a canceled
+ * one (question 152). A round closed before its start has ended, so it has a summary too (R99).
+ */
 export function summaryAvailable(round: Round, now: number): boolean {
-  return !isCanceled(round) && Date.parse(round.startsAt) <= now;
+  return !isCanceled(round) && (Date.parse(round.startsAt) <= now || isEnded(round, now));
 }

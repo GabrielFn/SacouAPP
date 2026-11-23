@@ -8,10 +8,11 @@ import { groupsHref } from "../../groups/navigation";
 import type { RoundScreenModel } from "../hooks/use-round-screen";
 import { holdsSpot, presenceCounts, type PresenceCardView } from "../model/presence-card";
 import { roundChips, sourceReader } from "../model/round-chips";
-import { roleHeader, type RoundSettingsView } from "../model/round-detail";
+import { isEnded, roleHeader, type RoundSettingsView } from "../model/round-detail";
 import { playerPresence, rosterView, type RosterView } from "../model/round-screen-view";
 import { ConfirmedBlock } from "./ConfirmedBlock";
 import { ConfirmedSheet } from "./ConfirmedSheet";
+import { EndedBadge, EndedFooter } from "./EndedRound";
 import { PresenceCard } from "./PresenceCard";
 import { PresenceFooter } from "./PresenceFooter";
 import { RoundChips } from "./RoundChips";
@@ -75,13 +76,16 @@ export function PlayerRoundScreen({
   const { state, dispatch } = model;
   const roster = rosterView(round, settings, members);
   const card = playerPresence(round, settings, members, model.now);
+  const ended = isEnded(round, model.now);
   const close = () => {
     dispatch({ type: "sheet-closed" });
   };
   return (
     <Screen
       footer={
-        card === null ? undefined : (
+        ended ? (
+          <EndedFooter groupId={group.groupId} roundId={round.roundId} />
+        ) : card === null ? undefined : (
           <PresenceFooter
             actions={card.actions}
             pending={model.responding}
@@ -95,6 +99,7 @@ export function PlayerRoundScreen({
     >
       <BackBar title={roleHeader(group.role)} fallbackHref={groupsHref} />
       <RoundHeading groupName={group.name} round={round} />
+      {ended ? <EndedBadge /> : null}
       <SummaryLink groupId={group.groupId} round={round} now={model.now} />
       <PlayerBody
         round={round}
