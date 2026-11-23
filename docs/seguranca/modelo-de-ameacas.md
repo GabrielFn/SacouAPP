@@ -2,6 +2,8 @@
 
 STRIDE por componente: **S**poofing, **T**ampering, **R**epudiation, **I**nformation disclosure, **D**enial of service, **E**levation of privilege.
 
+**Atualização da revisão do M5 (23/11/2026, [parecer](revisoes/M5-2026-11-23.md)):** além das seções listadas no parágrafo abaixo, têm código as seções 3 e 4 (quadra, E3.7, E3.8 e E4.11), 8 (página web, E3.12), 9a (push, E3.11), 14 (deploy, E5.1), 15 (estatísticas, E3.9) e 16 (votação, E3.18).
+
 Já têm código a CI (seção 11), o login (E3.1, seção 1), a autorização por grupo e o convite (E3.2, seção 2), o gerador puro do Pix (E1.4, seção 6) e o motor da partida (M2, seção 3): em TS, o parser do envelope, o replay, os parsers por tipo, os aplicadores, os comandos e as estatísticas (E2.1 a E2.9 e E2.11), e o porte para C# do leitor, dos parsers e do replay (E2.10, ADR 0033), ainda sem endpoint nem app que os use; os demais componentes não têm código. Fora das seções com código (1, 2, 11, 12, 13 e as linhas de configuração, convidado e perfil das E3.3, E3.5 e E3.6, dentro da seção 2), "Mitigação" é o que os documentos **decidiram**, não o que já existe; o que está implementado é conferido no [checklist](checklist.md). Sem decisão, consta "a definir na E\<ID\>". Cada tarefa da lista atualiza sua seção.
 
 ## 1. Login (Firebase Auth, E3.1)
@@ -223,6 +225,7 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | T   | Script de terceiros na página (CDN, Google Fonts) | SDK do Firebase empacotado e servido do próprio host; fontes próprias em `woff2`; CSP com só as origens do Google e do Firebase da configuração (`WebSecurity`, sem curinga, conferidas na partida), a confirmar no spike (ADR 0070, D5) |
 | S   | Login do Google no navegador embutido do WhatsApp | O Google recusa (`disallowed_useragent`): a folha detecta e pede para abrir no navegador, com o e-mail disponível; o popup bloqueado vai para o redirect, com a intenção só no `sessionStorage` (ADR 0070, D4). A conferir no spike |
 | I   | Token do convite na página `/c` (Parte 3, ADR 0070, D8) | Só no fragmento, que o navegador não envia; o script o lê e chama `history.replaceState` antes do Firebase e de qualquer requisição (teste); depois só na memória do controlador, nunca no estado, no `sessionStorage` nem na URL; vai só no corpo da prévia e do aceite (teste com espião no `fetch`); casca sem dado do servidor, query não refletida, mesmos cabeçalhos e CSP da `/r` com `no-store`; escrita só por `textContent` (lint); sem `signInWithRedirect`, para não guardar o token entre a ida e a volta |
+| I   | Apelidos na página pública para sempre (M5-B2) | O código não expira e a página lista os apelidos em qualquer estado, inclusive "já terminou" (`RoundPageView.cs`). **Aberto:** retenção na E6.2 (esconder as listas depois do fim ou de N dias) |
 | I   | Página do convite revelando o grupo a quem não tem o token | A casca não sabe o grupo; o nome e a contagem só vêm da prévia (login e token válido); revogado, expirado, inexistente e malformado dão o mesmo texto; a prévia do WhatsApp é a genérica do Sacou |
 
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
@@ -270,6 +273,8 @@ A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do 
 | Rating calculado (E3.6, E3.9)            | I: jogador lê o próprio rating             | No piloto, o rating não sai da API (ADR 0047). A nota do admin já tem a mitigação e os testes na seção 2 (E3.17)  |
 | Nota do admin (E3.6)                     | I: nota na imagem compartilhada do sorteio | Nunca na imagem (`decisoes.md:16`); a imagem é da E4.7. A rota do sorteio já tem as mitigações na seção 2         |
 | Votação do MVP (E3.18)                   | S/E, T e I: votar sem ter jogado, em si, duas vezes, fora do prazo, ou ver o voto de outro | Seção 16 |
+| Cartinha como imagem (E4.13, ADR 0073)   | I: a imagem leva mais do que a pessoa quis mostrar, ou fica no aparelho | PNG gerado da própria tela (sem EXIF nem localização), só da própria pessoa, sem nível nem rating; os números só com o interruptor; arquivo no cache privado, apagado depois da folha do sistema; galeria só de escrita, sem permissão de leitura (`dados-pessoais.md`, linha da imagem da cartinha) |
+| Capturas do percurso no repositório público (M5) | I: captura com token de convite, link, senha ou dado real | 131 JPG sem EXIF; senhas mascaradas; contas `@example.com`; credenciais das contas de teste fora do repositório. **Aberto (M5-B1):** a captura 17 tem o QR legível de um convite ativo do `sacou-api-test`; desativar o link e borrar QR, links e tokens antes do commit |
 | Resumo com IA (E3.13, pós-piloto)        | I: dados enviados ao provedor              | Provedor ainda não definido ([`perguntas.md`](../estado/perguntas.md), item 4); dados enviados a definir na E3.13 |
 | Resumo com IA (E3.13, pós-piloto)        | T: texto de usuário alterando o resumo     | A definir na E3.13. Falha usa texto padrão (aceite da E3.13)                                                      |
 | Resumo com IA (E3.13, pós-piloto)        | D: custo por uso abusivo                   | Cota por grupo (`revisao-mvp.md:116`)                                                                             |
@@ -388,7 +393,7 @@ Implementado na E4.11 ([ADR 0067](../arquitetura/adr/0067-sincronizacao-da-quadr
 | R | Assumir a quadra de outra conta e perder, sem saber, os pontos que ela não enviou | "Assumir a quadra" diz antes quantos pontos deste celular não chegaram ao servidor ("N pontos não enviados vão ficar de fora", com "Assumir mesmo assim"; S4 da revisão do #156) |
 | I | Quem marca a quadra (o `memberId` do resumo) gravado no aparelho | O resumo fica só na memória do TanStack Query (`["groups", g, "rounds", r, "court-session"]`, `gcTime` de 30 s), fora da lista do cache persistido (`isPersistedKey`, teste em `policies.test.ts`); o nome vem do cache de membros só na tela |
 
-### 12.4 Trocar jogador e ponto individual no app (E4.10, Parte 3)
+### 12.5 Trocar jogador e ponto individual no app (E4.10, Parte 3)
 
 Telas 23a e 31, e o autor nas 24 e 25 ([ADR 0066](../arquitetura/adr/0066-controles-da-quadra-no-app.md), itens 19 a 23). O autor de cada ponto é dado de desempenho da pessoa (ADR 0031).
 
@@ -446,6 +451,9 @@ A API fica pública em `*.run.app` (Cloud Run, `us-east4`), com o banco no Neon 
 | API pública | D: enxurrada de pedidos sem token, que passam antes do limitador | Limite por usuário da E5.3a; `maxScale` 1 limita a CPU paga; concorrência 80 | Limite por IP só na E5.3 (`ForwardLimit=1`, último item do `X-Forwarded-For`) |
 | Custo | D financeiro: alguém martela a API até o teto de gasto, que **pausa a produção** até o mês seguinte | `maxScale` 1, faixa grátis, alerta de US$ 1 em 50, 90 e 100% | Aceito no piloto (resposta 94); o limite por IP da E5.3 entra antes dos jogadores reais |
 | Console do Google e do Neon | E: conta do Gabriel comprometida dá tudo | Fora do repositório: 2FA nas contas Google e Neon | Não verificável pelo repositório |
+| Rotas da quadra | D: uma conta grátis enche um stream e o replay sob o `FOR UPDATE` segura as conexões do pool (M4-A1) | `court-sync` por usuário, tetos de 20 mil eventos e 8 MiB | **Aberto, bloqueia o piloto:** E5.3b (snapshot, concorrência por usuário, `lock_timeout`, recusa antes do replay), com a reconstrução das estatísticas (E3.9 4b) e o `close` (M5-M2) |
+| Serviço de teste | D financeiro: abuso do `sacou-api-test`, público, gasta o mesmo teto e pausa a produção (M4-M1); os limites do teste são 10 vezes os da produção (`appsettings.Staging.json`, #205, M5-M1) | Teto do Cloud Run por limite de gastos (`deploy.md:70-74`) | **Aberto:** antes de jogadores na produção, voltar aos limites da produção ou separar o teste em outro projeto |
+| Firebase compartilhado | I/LGPD: o token vale nos dois ambientes; excluir a conta no teste apaga o usuário do Firebase e deixa a conta da produção órfã (M4-B1) | — | **Aberto:** antes do piloto, regra "só contas de teste no `sacou-api-test`" em `deploy.md` ou um Firebase para o teste |
 | Transporte | I: tráfego em claro | O Cloud Run termina o TLS em `*.run.app`; a API não serve HTTP fora do contêiner; banco com `VerifyFull` | — |
 
 ## 15. Estatísticas, MVP e rating escondido (E3.9, [ADR 0071](../arquitetura/adr/0071-projecoes-de-estatisticas-mvp-e-rating.md))
@@ -474,7 +482,8 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 | S/E: quem não jogou vota, ou vota em si | Conferido no servidor, no domínio (`MvpBallot`): quem vota e o candidato com partida terminada na projeção fresca da rodada; auto-voto recusado no domínio e por `CHECK` na tabela | Feito (Parte 1) |
 | T: voto duplicado, inclusive em corrida | PK `(round_id, voter_member_id)` e `INSERT ... ON CONFLICT DO NOTHING`: o segundo é `409`; voto final, sem rota de troca | Feito (Parte 1); teste de corrida I2 na integração |
 | T: voto fora do prazo | Janela calculada a cada pedido com o relógio do servidor (`TimeProvider`), intervalo semiaberto; nada depende de job | Feito (Parte 1) |
-| T: abrir a votação cedo ou adiar o fim | Só `WriteCourt` encerra a rodada (Admin, Co-admin, Placar), sob a trava; antes do início o `close` é recusado (`409 sessions.round-not-started`); fechar de novo não muda o instante; um toque depois do fim automático não adia | Feito (Parte 1). Risco aceito: quem tem `WriteCourt` pode encerrar logo depois do início e abrir a votação cedo (o grupo vê pelo prazo) |
+| T: abrir a votação cedo ou adiar o fim | Só `WriteCourt` encerra a rodada (Admin, Co-admin, Placar), sob a trava; antes do início o `close` é recusado (`409 sessions.round-not-started`), **salvo se a quadra já tem partida terminada** (ADR 0076: o fim vira o toque, o link e a página fecham, a edição é recusada); fechar de novo não muda o instante; um toque depois do fim automático não adia | Feito (Parte 1; ADR 0076 na R98). Risco aceito: quem tem `WriteCourt` pode encerrar logo depois do início, ou antes dele depois de uma partida, e abrir a votação cedo (o grupo vê pelo prazo) |
+| D: `close` antes do início refaz o replay (ADR 0076) | O handler pergunta à quadra (`SummarizeAsync`) se há partida terminada a cada `close` antes do início, mesmo com a rodada já fechada, e a rota só tem o limite global | **Aberto** (M5-M2): `court-sync` na rota, ler `ClosedAt` antes da quadra e o snapshot da E5.3b; antes do piloto |
 | I: ver em quem cada um votou | Nenhuma rota devolve voto de outro, nem ao admin; a cédula só traz o próprio voto, sem contagem nem lista de votantes; erros não ecoam o candidato | Feito (Partes 1 e 2) |
 | I: voto no log | `MvpVotingLog` só com `roundId` e o resultado; `MvpVote` e `MvpVoteRow` não se imprimem; teste de captura do log | Feito (Parte 1) |
 | I: inferir o voto pelo resultado | Num grupo de dois votantes com vencedor único dá para deduzir; o Resumo não traz `voters` | Aceito |

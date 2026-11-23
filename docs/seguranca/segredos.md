@@ -37,3 +37,4 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 - **Token de placar:** `SACOU_SCOREKEEPER_TOKEN_SIGNING_KEY` saiu da lista: a E3.8 virou "Placar assume a quadra", com o login normal (ADR 0046).
 - **Credenciais das lojas no EAS Submit:** quais e onde ficam (E5.4).
 - **Rotação de segredos e resposta a vazamento:** o procedimento de vazamento está em [`varredura-ci.md`](varredura-ci.md), seção "Resposta a vazamento"; a rotação de cada segredo é da tarefa que o integra.
+- **Contas de teste do percurso no celular** (Org Teste, Beto Teste, Caio Push, só no ambiente de teste): e-mails `@example.com` e senhas geradas, guardados só em `D:\tmp\contas-teste.txt`, na máquina do Gabriel, fora do repositório (conferido na revisão do M5: nem no histórico). Nunca em documento, print sem máscara ou relatório.
