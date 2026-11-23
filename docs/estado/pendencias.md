@@ -133,3 +133,10 @@
   - #222: o resultado real do registro do push precisa ser conferido no celular (linha `[push] registration:` no log do Metro). `ParsePatch` de outra fatia usado pelo `POST` de grupo (#224): mover para `Infrastructure/Settings`. `settings` como `unknown` no contrato (POST e PATCH).
   - #224: tirar o `errorText` de `use-create-group.ts` não reprova teste (sem `renderHook` no app).
   - ES2023: `with`, `union`, `difference` etc. ficam só pelo `lib` do tsconfig (nomes próprios do app colidem com a regra do ESLint).
+- Percurso no celular, 5ª tentativa (23/11, PR #226, passos 38 a 45 de `docs/operacao/percurso-m5/roteiro.md`), defeitos sem dono ainda, candidatos a uma **R99** antes do relatório do M5:
+  1. Início duplica rodadas encerradas: o mesmo card aparece como "Ver resumo" e como aberta, e o contador não bate com os cards (print 116). O card do grupo diz "Próxima: seg 23/11" para uma rodada encerrada.
+  2. Depois de "Encerrar rodada", a página da rodada (print 104) e a cartinha da aba Eu (print 119) ficam desatualizadas até recarregar o app: falta invalidar as consultas da rodada e de `/v1/me/stats`.
+  3. Cartinha: o botão "Compartilhar" quebra no meio da palavra mesmo com fonte 1.0 (print 106); com fonte 1.3, "vitórias" e "vezes MVP" ficam cortados (print 122).
+  4. Menores: o Local da nova rodada não vem do grupo; nomes sobrepostos junto à rede no placar; o horário só aceita "21:00"; o aviso LogBox cobre a barra de abas depois de trocar a fonte (só em desenvolvimento).
+  - Não verificados: o pedido de permissão do push depois do 1º VOU (permissão já concedida e sem conta nova; o log mostra `[push] registration: registered`) e o rótulo "Mensalista" em "Ainda não confirmaram" (o mensalista já nasce confirmado).
+  - Ambiente: o `apps/mobile/.env` local aponta a API para `localhost:5080`; o percurso contra a API de teste precisou de um proxy local para o Cloud Run e de `adb reverse tcp:5080 tcp:5080`. Registrar em `docs/operacao/teste-no-celular.md`. O servidor de teste ficou com as rodadas Qua 25/11 e Qui 26/11 abertas (1/12).
