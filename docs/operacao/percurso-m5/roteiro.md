@@ -376,3 +376,77 @@ Conta A (organizadora). **Grupo → Gerenciar Grupo Fluxo → Membros**, tocar n
 - Abrir uma rodada aberta e conferir que, em "Ainda não confirmaram", o Beto aparece como **Mensalista** (antes: "Avulso") e no topo da lista.
 - Voltar o Beto para **Avulso** e conferir o caminho inverso.
 - Conferir que um convidado **Sem conta** não pode virar mensalista (opção bloqueada).
+
+## Quinta tentativa (23/11, main com a R98)
+
+Data: 23/11/2026, das 12h30 às 13h05. Mesmo aparelho (`RQGL50AMKPX`), `main` em `7a6f5e43` (R98 inteira), conta A (Org Teste). Prints a partir de 99.
+
+- **Ambiente (não é defeito do app):** o `apps/mobile/.env` aponta `EXPO_PUBLIC_API_URL` para `http://localhost:5080`, então a primeira carga mostrou "Não deu para carregar seus grupos · Sem conexão" e o `metro.log` registrou `[push] registration: failed` duas vezes. Para seguir, subi um proxy local na porta 5080 do computador, repassando para a API de teste do Cloud Run, com `adb reverse tcp:5080 tcp:5080`. Daí em diante tudo funcionou.
+- Na primeira abertura o dev client mostrou o seletor de servidor (digitei `http://localhost:8081`); a sessão da conta A estava mantida.
+
+### Passo 38 · Início (item 1) — Passou, com defeitos novos
+- Início abre logada, sem erro, com "2 rodadas nos próximos 7 dias": **Seg 20h** (11/12) e **Ter 20h** (10/12). A de Ter 24/11 agora aparece. **Passou.**
+- **Defeito (novo):** depois de encerrar rodadas de hoje, a Início mostra a mesma rodada duas vezes: uma como "Rodada de seg, 23/11 · Ver resumo" e outra como aberta ("11/12 confirmados", ou "Vou · 12/12"). O contador "N rodadas nos próximos 7 dias" não bate com os cartões (3 contados, 4 vistos; depois 6). "Rodadas do grupo" mostra o estado certo (Encerrada). Persiste depois de **Reload**. Para reproduzir: encerrar uma rodada de hoje e voltar à Início.
+- **Defeito (novo):** o cartão do grupo (aba **Grupo**) continua com "Próxima: seg, 23/11 · 11/12 confirmados" mesmo com a rodada encerrada.
+
+![Início](99-inicio-ok.jpg)
+![Início duplicada](116-inicio-duplicado.jpg)
+
+### Passo 39 · Quadra da rodada de Seg 23/11 (item 3) — Passou
+Página da rodada mostra o chip **5x1** (print 100). **Abrir quadra** mostra "Outro celular está marcando — Org Teste... há 1467 min"; **Assumir o placar** respondeu em poucos segundos, sem "O placar do servidor veio com defeito", e abriu o placar já no fim da partida (Laranja 5–1). **Encerrar rodada** antes das 20h funcionou (R98 P2) e abriu o resumo (Beto Teste MVP, +4 de saldo). **Passou.** O aviso "Outro celular está marcando" ainda aparece com a própria conta (esperado: a quadra ficou reservada pela tentativa anterior).
+- **Defeito:** depois de **Encerrar rodada**, a página da rodada continua com 11/12, **Abrir quadra** e **Sortear times** (estado antigo em cache; a lista "Rodadas" mostra Encerrada).
+
+![Chip 5x1](100-rodada-seg-chip-5x1.jpg)
+![Outro celular](101-seg-outro-celular.jpg)
+![Assumida](102-seg-assumida.jpg)
+![Resumo](103-seg-resumo.jpg)
+![Página após encerrar](104-seg-pagina-pos-encerrar.jpg)
+
+### Passo 40 · Rodada A, hoje, com rotação 5x1 (item 2) — Passou
+Nova rodada **Seg 23/11 · 20h** (hoje já é selecionável; o padrão sugerido é Qua 25/11), Local digitado, **Rotação 5x1** em "Personalizar" (chip laranja "só nesta rodada"). O chip **5x1 aparece na página da rodada** (defeito dos passos 20/27/35 corrigido). Adicionar: 11 toques seguidos, ~4 s cada, sem "Muitas tentativas"; 12/12. Sorteio 2 times de 6, diferença 0,0 (Laranja: Leo, Beto, Davi, Edu, Ivo, Juca; Azul: Caio, Fabi, Gabi, Hugo, Mano, Org). Preparação com "Rotação de cada time: 5x1" e "Levantador do Laranja: Leo". Reduzi os pontos para 5 (16 toques no −). Quadra na horizontal com as posições e "5x1 · rotação N" por time; ponto do Azul gira o time (sideout). Laranja 5–1 → **Confirmar fim da partida** → **Encerrar rodada** (12h44, antes das 20h) → resumo (Leo MVP, "Votar no MVP · fecha em 23 h").
+- **Cartinha (Eu):** logo depois, continuava **zerada** ("Seus números aparecem depois da primeira partida"). Só depois de **Reload** do app mostrou os números reais: **1 partida, 0 vitórias, saldo −4, presença 33%, 1 rodada** (o Org estava no Azul). **Defeito:** a aba Eu não é atualizada depois de encerrar a rodada (cache), sem recarregar.
+- Observação: no placar, bolinhas e nomes de jogadores do mesmo time se sobrepõem junto à rede (ex.: "Caio/Org", "Fabi/Gabi/Org").
+- **Defeito de layout:** o botão **Compartilhar** da cartinha quebra a palavra ("Compartilh/ar") já com a fonte 1.0.
+
+![Nova rodada](108-nova-rodada-hoje.jpg)
+![Presença](109-presenca-12.jpg)
+![Sorteio](110-sorteio.jpg)
+![Preparar](111-preparar-partida.jpg)
+![Placar 5x1](112-quadra-rotacao.jpg)
+![Fim](113-fim-partida.jpg)
+![Resumo A](114-resumo-rodada-a.jpg)
+![Cartinha com números reais](115-cartinha-real-rodada-a.jpg)
+
+### Passo 41 · Rodada B, hoje, sem rotação (item 2) — Passou
+Nova rodada **Seg 23/11 · 21h** (horário digitado como `21:00`; "2100" é recusado com "Use o formato 20:30"), 12 presenças, sorteio, preparação (Livre), Laranja 5–0, **Encerrar rodada**, resumo (Beto Teste MVP, +5). Org no Laranja. Cartinha **sem Reload**: ainda 1 partida (desatualizada, print 119). **Depois de Reload:** **2 partidas, 50% de vitórias (1), saldo +1, maior sequência 1, presença 50%, 2 rodadas**, "Grupo Fluxo · 2 partidas · 50%". Os números batem. **Passou** (com o defeito de atualização do Passo 40).
+
+![Sorteio B](117-sorteio-b.jpg)
+![Resumo B](118-resumo-rodada-b.jpg)
+![Cartinha desatualizada](119-cartinha-desatualizada.jpg)
+![Cartinha real](120-cartinha-real-rodada-b.jpg)
+
+### Passo 42 · Mensalista (item 4) — Passou, com observações
+**Grupo → Membros** (abas "Mensalistas (0)", "Avulsos (12)"). Toque nos três pontos do Beto Teste → folha com **Tipo: Mensalista | Avulso**, disponível mesmo com o grupo criado com "mensalistas fixos: Não". **Mensalista**: o Beto passa para a aba **Mensalistas (1)** (Avulsos 11). Voltar para **Avulso**: retorna (Mensalistas 0, Avulsos 12). **Convidado Sem conta (Davi):** o seletor **Mensalista** fica bloqueado, com o texto "Precisa ter conta" (o toque não faz nada). **Passou.**
+- **Observação / Não verificado:** com o Beto mensalista, as rodadas novas (Qua 25/11 e Qui 26/11) já nasceram com **1/12 confirmados** e o Beto fora de "Ainda não confirmaram". Ou seja, o mensalista entra sozinho na rodada, em vez de aparecer como "Mensalista" no topo da lista de quem falta. O rótulo "Mensalista" na lista de quem falta **não foi verificado**, porque o Beto já vinha confirmado (a rodada de Ter 24/11 também o tinha). Se a intenção é o rótulo, vale confirmar com o Gabriel. Por consequência, as rodadas Qua 25/11 e Qui 26/11 ficaram abertas no servidor de teste (1/12).
+- Observação: o rótulo da aba ativa fica truncado ("Mensalistas (...").
+
+![Mensalistas vazio](123-membros-mensalistas-vazio.jpg)
+![Opções do Beto](124-beto-opcoes.jpg)
+![Beto mensalista](125-beto-mensalista.jpg)
+![Convidado bloqueado](126-convidado-bloqueado.jpg)
+![Rodada nova com o Beto](127-rodada-nova-beto-ja-confirmado.jpg)
+
+### Passo 43 · Fonte 1.3 na cartinha (item 5) — Passou, com defeitos de layout
+`adb shell settings put system font_scale 1.3` funcionou (sem negação) e o app reiniciou na Início. A Início cabe (print 121). Na cartinha (aba Eu) o cartão e os números cabem. **Defeitos:** "Compartilhar" quebra no meio da palavra ("Comparti/lhar"); nas estatísticas os rótulos ficam cortados ("vitórias · ..", "vezes M..."). Fonte devolvida a 1.0 (`settings get` = 1.0).
+- **Defeito (repete):** o aviso de desenvolvimento "Looks like you have multiple navigation containers..." volta a cobrir a barra de abas e o botão de publicar depois de trocar a fonte; foi preciso dispensá-lo pelo log (tocar, **Dismiss**).
+
+![Início 1.3](121-inicio-fonte-1-3.jpg)
+![Cartinha 1.3](122-cartinha-fonte-1-3.jpg)
+
+### Passo 44 · Push depois do 1º VOU (item 6) — Não verificado
+A permissão `POST_NOTIFICATIONS` já estava concedida (`granted=true`) e a conta A já tinha confirmado presença (por **Adicionar**), então o app não pediu permissão. Não há como ver o pedido depois do 1º VOU sem uma conta nova e sem limpar os dados do app (o que desloga); nenhuma conta B (Beto) estava logada. O `metro.log` mostra `[push] registration: failed` (2x, enquanto a API estava inalcançável por causa do `.env`) e depois `[push] registration: registered` (4x, nas cargas seguintes): o registro funciona quando a API responde e não gera laço.
+
+### Passo 45 · Modo avião (item 7) — Passou
+30 s em modo avião (`cmd connectivity airplane-mode enable`) com o app na Início: faixa amarela **Sem conexão**, cartões mantidos. Ao desligar, a faixa some em segundos e a Início volta ao normal.
+
+![Sem conexão](128-modo-aviao.jpg)
