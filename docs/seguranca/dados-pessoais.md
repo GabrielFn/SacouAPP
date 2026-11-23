@@ -8,7 +8,7 @@ Registra o que os documentos preveem. Desde a E3.1, a API guarda o UID do Fireba
 - **Encarregado de dados: a definir** (item 3). `produto.md:372` exige o canal, mas não diz quem é nem o contato.
 - **Provedor de IA do resumo: a definir** (item 4), só depois do piloto (ADR 0046).
 - **Fora do piloto** (ADR 0046): foto e denúncia, resumo com IA, Pix e "já paguei", assinatura dos planos e PostHog. As linhas ficam abaixo para quando voltarem.
-- **Região de armazenamento de cada serviço e transferência internacional:** nenhum documento define; a definir na E6.2.
+- **Região de armazenamento e transferência internacional:** API no Cloud Run em `us-east4` e banco no Neon em `us-east-1` (ADR 0068, resposta 91): os dados pessoais e os logs de requisição (IP e user agent, 30 dias) ficam nos EUA (LGPD art. 33), risco aceito no piloto e citado na política de privacidade (E6.1). Firebase Auth e Expo Push: regiões dos próprios provedores, a registrar na E6.2.
 
 ## Conta e perfil
 
