@@ -32,7 +32,9 @@ internal sealed class SessionsExportSection(IGroupMembership membership, IAccoun
         ToExport(attendance.Status),
         ToExport(attendance.Source),
         attendance.RespondedAt,
-        attendance.PromotedAt);
+        attendance.PromotedAt,
+        attendance.TeamNumber,
+        attendance.ReservePosition);
 
     private static ExportedAttendanceStatus ToExport(AttendanceStatus status) => status switch
     {
@@ -52,7 +54,10 @@ internal sealed class SessionsExportSection(IGroupMembership membership, IAccoun
     };
 }
 
-/// <summary>One attendance in the export: the round it belongs to, the person's member id there, and the answer.</summary>
+/// <summary>
+/// One attendance in the export: the round it belongs to, the person's member id there, and the answer; with the
+/// person's place in the published teams (ADR 0078), the team's number or the place in the queue of reserves.
+/// </summary>
 internal sealed record AttendanceExportEntry(
     Guid RoundId,
     Guid GroupId,
@@ -63,7 +68,9 @@ internal sealed record AttendanceExportEntry(
     ExportedAttendanceStatus Status,
     ExportedAttendanceSource Source,
     DateTimeOffset RespondedAt,
-    DateTimeOffset? PromotedAt);
+    DateTimeOffset? PromotedAt,
+    int? TeamNumber,
+    int? ReservePosition);
 
 /// <summary>The attendance status as the export writes it, converted by hand so the domain enum stays free to change.</summary>
 internal enum ExportedAttendanceStatus
