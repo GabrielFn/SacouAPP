@@ -18,6 +18,8 @@ import {
   footerActions,
   roundFooterActions,
   isCanceled,
+  isEnded,
+  adminRoundOffers,
   roleHeader,
   statsCells,
   type RoundSettingsView,
@@ -33,6 +35,7 @@ import {
   type PendingRoundScreen,
 } from "../navigation";
 import { ConfirmedSheet } from "./ConfirmedSheet";
+import { EndedBadge, EndedFooter } from "./EndedRound";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 import { RoundStatsPanel } from "./RoundStatsPanel";
@@ -46,15 +49,16 @@ export interface RoundBodyProps {
   readonly waitlist: string;
   readonly onOpenConfirmed: () => void;
   readonly onAdd: () => void;
+  /** A round that is over keeps its list but offers no "Adicionar" (R99). */
+  readonly canAdd: boolean;
 }
 
 /** Everything under the title of screen 06: pills, panel, waitlist, "Adicionar…" or the canceled strip. */
-function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundBodyProps) {
+function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd, canAdd }: RoundBodyProps) {
   const { tokens } = useTheme();
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
     withRotation: true,
   });
-  const attendance = settings.values.attendance.enabled;
   return (
     <>
       <RoundChips chips={chips} legend={hasRoundLayer(settings.sources)} />
@@ -74,7 +78,7 @@ function RoundBody({ round, settings, waitlist, onOpenConfirmed, onAdd }: RoundB
               </Text>
             </View>
           )}
-          {attendance ? (
+          {canAdd ? (
             <Button
               label={detail.addFromWhatsApp}
               variant="outline"
@@ -154,10 +158,11 @@ export interface RemoveSheetsProps {
   readonly round: Round;
   readonly roster: RosterView;
   readonly model: RoundScreenModel;
+  readonly canRemove: boolean;
 }
 
 /** The list with "Tirar" and its confirmation, one sheet at a time (question 47). */
-function RemoveSheets({ round, roster, model }: RemoveSheetsProps) {
+function RemoveSheets({ round, roster, model, canRemove }: RemoveSheetsProps) {
   const { state, dispatch } = model;
   const removing = state.sheet.kind === "remove" ? state.sheet.memberId : null;
   const close = () => {
@@ -172,11 +177,11 @@ function RemoveSheets({ round, roster, model }: RemoveSheetsProps) {
         meId={round.me.memberId}
         removing={model.removing}
         onRemove={
-          isCanceled(round)
-            ? null
-            : (memberId) => {
+          canRemove
+            ? (memberId) => {
                 dispatch({ type: "remove-asked", memberId });
               }
+            : null
         }
         onClose={close}
       />
@@ -207,9 +212,11 @@ export function AdminRoundScreen({
   const router = useRouter();
   const roster = rosterView(round, settings, members);
   const canceled = isCanceled(round);
-  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, !canceled);
+  const ended = isEnded(round, model.now);
+  const offers = adminRoundOffers(round, model.now, settings?.values.attendance.enabled ?? false);
+  const court = useRoundCourtEntry({ groupId, roundId: round.roundId }, offers.courtEntryEnabled);
   const actions = roundFooterActions(
-    footerActions(PENDING_ROUND_SCREENS, canceled),
+    footerActions(PENDING_ROUND_SCREENS, canceled || ended),
     canDraw(group.role),
     court.available,
   );
@@ -224,7 +231,15 @@ export function AdminRoundScreen({
     />
   );
   return (
-    <Screen footer={actions.length === 0 ? undefined : footer}>
+    <Screen
+      footer={
+        ended ? (
+          <EndedFooter groupId={groupId} roundId={round.roundId} />
+        ) : actions.length === 0 ? undefined : (
+          footer
+        )
+      }
+    >
       <AdminHeader
         role={group.role}
         canCopy={canCopyList(round, settings)}
@@ -239,6 +254,7 @@ export function AdminRoundScreen({
         }}
       />
       <RoundHeading groupName={group.name} round={round} />
+      {ended ? <EndedBadge /> : null}
       <SummaryLink groupId={groupId} round={round} now={model.now} />
       {settings === null ? (
         <ErrorStrip text={detail.loadError} />
@@ -247,6 +263,7 @@ export function AdminRoundScreen({
           round={round}
           settings={settings}
           waitlist={roster.waitlist}
+          canAdd={offers.canAdd}
           onOpenConfirmed={() => {
             model.dispatch({ type: "confirmed-opened" });
           }}
@@ -256,7 +273,7 @@ export function AdminRoundScreen({
         />
       )}
       {model.errorText === null ? null : <ErrorStrip text={model.errorText} />}
-      <RemoveSheets round={round} roster={roster} model={model} />
+      <RemoveSheets round={round} roster={roster} model={model} canRemove={offers.canRemove} />
     </Screen>
   );
 }

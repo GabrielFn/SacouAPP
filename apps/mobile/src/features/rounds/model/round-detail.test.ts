@@ -21,6 +21,7 @@ import { createRoundHref, PENDING_ROUND_SCREENS, roundHref } from "../navigation
 import { createRoundMutation, roundScope } from "../queries/round-mutations";
 import { hasRoundLayer, roundChips, sourceReader } from "./round-chips";
 import {
+  adminRoundOffers,
   footerActions,
   roundFooterActions,
   managesRounds,
@@ -356,5 +357,37 @@ describe("publishing with the fake API", () => {
 
   test("the queue of a round is named by its id", () => {
     expect(roundScope("r1")).toEqual({ id: "round:r1" });
+  });
+});
+
+describe("adminRoundOffers (R99)", () => {
+  const NOW = Date.parse("2026-11-23T22:00:00Z");
+  const ended = roundOf({ endsAt: new Date(NOW - 1).toISOString() });
+  const open = roundOf({ endsAt: new Date(NOW + 1).toISOString() });
+
+  test("an open round offers add, remove and the court", () => {
+    expect(adminRoundOffers(open, NOW, true)).toEqual({
+      canAdd: true,
+      canRemove: true,
+      courtEntryEnabled: true,
+    });
+  });
+
+  test("an ended round offers none of them", () => {
+    expect(adminRoundOffers(ended, NOW, true)).toEqual({
+      canAdd: false,
+      canRemove: false,
+      courtEntryEnabled: false,
+    });
+  });
+
+  test("a canceled round offers none of them", () => {
+    const canceled = { ...open, status: "canceled" as const };
+    expect(adminRoundOffers(canceled, NOW, true).canRemove).toBe(false);
+    expect(adminRoundOffers(canceled, NOW, true).courtEntryEnabled).toBe(false);
+  });
+
+  test("with attendance off there is no add", () => {
+    expect(adminRoundOffers(open, NOW, false).canAdd).toBe(false);
   });
 });

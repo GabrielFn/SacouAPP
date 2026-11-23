@@ -21,4 +21,13 @@ describe("summaryAvailable (question 152)", () => {
   test("never for a canceled round", () => {
     expect(summaryAvailable(round("canceled"), START_MS + HOUR_MS)).toBe(false);
   });
+
+  test("a round closed before its start has a summary too (R99)", () => {
+    const early = (endsAt: number, status: Round["status"] = "scheduled") =>
+      ({ startsAt: STARTS_AT, endsAt: new Date(endsAt).toISOString(), status }) as Round;
+    const now = START_MS - HOUR_MS;
+    expect(summaryAvailable(early(now), now)).toBe(true);
+    expect(summaryAvailable(early(now + 1), now)).toBe(false);
+    expect(summaryAvailable(early(now - 1, "canceled"), now)).toBe(false);
+  });
 });

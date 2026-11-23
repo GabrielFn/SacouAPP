@@ -368,3 +368,22 @@ describe("roundScreenReducer", () => {
     ]);
   });
 });
+
+describe("presenceCard of a round that is over (R99)", () => {
+  const endedRound = (patch: Parameters<typeof attendanceRound>[0] = {}) =>
+    attendanceRound({ endsAt: new Date(BEFORE - MINUTE).toISOString(), ...patch });
+
+  test("no answer: no 'Vai?', no spots line and no actions", () => {
+    const card = presenceCard(input({ round: endedRound({ goingCount: 10 }) }));
+    expect(card.title).toBe("Encerrada");
+    expect(card.line).toBe("Encerrada");
+    expect(card.actions).toEqual({ kind: "none" });
+  });
+
+  test("going: keeps 'Você vai' but offers no 'Não vou mais'", () => {
+    const me = { memberId: ME, status: "going" as const, position: 2, regularPosition: 2 };
+    const card = presenceCard(input({ round: endedRound({ me }) }));
+    expect(card.title).toBe("Você vai");
+    expect(card.actions).toEqual({ kind: "none" });
+  });
+});

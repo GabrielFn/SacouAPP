@@ -12,10 +12,23 @@ const SUMMARY_WINDOW_HOURS = 24;
 /** The home offers "Ver resumo" until 24 h after the real end of the round (`endsAt`, a early `close` included): the window of the votation (question 153). */
 export const SUMMARY_CARD_WINDOW_MS = SUMMARY_WINDOW_HOURS * HOUR_MS;
 
-/** The round a group card shows: the first scheduled one that has not started yet. */
+/**
+ * Whether a round is over: not canceled and past its real end (`endsAt`, an early close included).
+ * The one rule behind "Encerrada" on the home, the group rounds list and screens 06 and 26 (R99).
+ */
+export function hasEnded(round: Pick<RoundSummary, "status" | "endsAt">, now: number): boolean {
+  return round.status !== "canceled" && Date.parse(round.endsAt) <= now;
+}
+
+/** Whether a scheduled round is still to come: it starts after `now` and was not closed early (R99). */
+function isUpcoming(round: RoundSummary, now: number): boolean {
+  return round.status === "scheduled" && Date.parse(round.startsAt) > now && !hasEnded(round, now);
+}
+
+/** The round a group card shows: the first scheduled one that has not started yet and is not over. */
 export function nextRoundOf(rounds: readonly RoundSummary[], now: number): RoundSummary | null {
   const upcoming = rounds
-    .filter((round) => round.status === "scheduled" && Date.parse(round.startsAt) > now)
+    .filter((round) => isUpcoming(round, now))
     .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt));
   return upcoming[0] ?? null;
 }
@@ -72,10 +85,7 @@ export function upcomingRoundsOf(
 ): readonly RoundSummary[] {
   const limit = endOfWindow(now);
   const inWindow = rounds
-    .filter((round) => {
-      const start = Date.parse(round.startsAt);
-      return round.status === "scheduled" && start > now && start <= limit;
-    })
+    .filter((round) => isUpcoming(round, now) && Date.parse(round.startsAt) <= limit)
     .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt));
   if (inWindow.length > 0) return inWindow;
   const next = nextRoundOf(rounds, now);
@@ -85,10 +95,9 @@ export function upcomingRoundsOf(
 /** How many scheduled rounds, of all the groups, start within the next 7 days. */
 export function roundsInWindow(roundsByGroup: readonly (readonly RoundSummary[])[], now: number) {
   const limit = endOfWindow(now);
-  return roundsByGroup.flat().filter((round) => {
-    const start = Date.parse(round.startsAt);
-    return round.status === "scheduled" && start > now && start <= limit;
-  }).length;
+  return roundsByGroup
+    .flat()
+    .filter((round) => isUpcoming(round, now) && Date.parse(round.startsAt) <= limit).length;
 }
 
 /** "2 rodadas nos próximos 7 dias.", or `null` with none (the home then speaks with its empty state). */

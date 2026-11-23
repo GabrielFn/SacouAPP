@@ -118,6 +118,8 @@ export const roundsStrings = {
     waitlistTitle: "Espera",
     noName: "Sem apelido",
     summaryLink: "Resumo da rodada",
+    /** The seal of a round that is over (R99, ADR 0077): screens 06 and 26 offer only "Ver resumo" then. */
+    ended: "Encerrada",
     canceled: "Rodada cancelada",
     loading: "Carregando a rodada",
     retry: "Tentar de novo",

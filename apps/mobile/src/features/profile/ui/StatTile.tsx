@@ -4,6 +4,9 @@ import { useTheme } from "../../../theme/theme-context";
 import { Text } from "../../../ui/Text";
 import type { StatTileModel } from "../model/player-card";
 
+/** "vitórias · 50%" and "vezes MVP" break between words at a large system font instead of being cut (R99). */
+export const STAT_LABEL_LINES = 2;
+
 export interface StatTileProps {
   readonly tile: StatTileModel;
 }
@@ -29,7 +32,7 @@ export function StatTile({ tile }: StatTileProps) {
       <Text variant="display" tabular numberOfLines={1} style={{ fontSize: tokens.statTileValue }}>
         {tile.value}
       </Text>
-      <Text variant="caption" numberOfLines={1}>
+      <Text variant="caption" numberOfLines={STAT_LABEL_LINES}>
         {tile.label}
       </Text>
     </View>

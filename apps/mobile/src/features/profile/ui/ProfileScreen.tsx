@@ -123,11 +123,34 @@ function ProfileBody({ view, onRetry, ...rest }: ProfileBodyProps) {
   }
 }
 
+export interface ProfileActionsProps {
+  readonly onShare: () => void;
+  readonly onEditProfile: () => void;
+}
+
+/**
+ * "Compartilhar" and "Editar perfil" take the full width under the card: in the column beside it the
+ * label broke in the middle of the word at 360 dp (R99).
+ */
+export function ProfileActions({ onShare, onEditProfile }: ProfileActionsProps) {
+  const { tokens } = useTheme();
+  return (
+    <View style={{ gap: tokens.spacing.s }}>
+      <Button
+        label={me.share}
+        onPress={onShare}
+        renderIcon={(color) => <ShareIcon color={color} />}
+      />
+      <Button label={me.editProfile} onPress={onEditProfile} variant="outline" />
+    </View>
+  );
+}
+
 export interface LoadedBodyProps extends BodyActions {
   readonly view: LoadedView;
 }
 
-function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyProps) {
+export function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyProps) {
   const { tokens } = useTheme();
   const card = playerCardOf(view.profile, view.stats);
   const positionLine = positionLineOf(view.profile);
@@ -151,15 +174,9 @@ function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyPro
               {me.numbersFromScore}
             </Text>
           </View>
-          <View style={{ flex: 1 }} />
-          <Button
-            label={me.share}
-            onPress={onShare}
-            renderIcon={(color) => <ShareIcon color={color} />}
-          />
-          <Button label={me.editProfile} onPress={onEditProfile} variant="outline" />
         </View>
       </View>
+      <ProfileActions onShare={onShare} onEditProfile={onEditProfile} />
       {view.kind === "empty" ? (
         <Text variant="muted">{me.emptyStats}</Text>
       ) : (
