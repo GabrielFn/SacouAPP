@@ -17,6 +17,8 @@ Com o encerramento antes do horário (ADR 0076), `endsAt` fica no passado e `sta
   (abre a 12). Somem Abrir quadra, Sortear/Montar times, Adicionar quem confirmou, o rodapé de presença (VOU / Não vou)
   e o link "Resumo da rodada" (o botão o substitui).
 - `summaryAvailable` vale para rodada não cancelada com `startsAt <= now` ou `endsAt <= now`.
+- Na 06, "Tirar" também some na rodada encerrada (`adminRoundOffers`); na 26 o card de presença fica sem ações, com a linha "Encerrada". O selo usa a pílula `waiting` (não há estilo neutro; a `confirmed` verde lembrava "Vou").
+- **Aba Eu, diferença do canvas (Gabriel, 23/11):** "Compartilhar" e "Editar perfil" saem da coluna ao lado da cartinha (`Perfil.dc.html:70-77`) e ocupam a largura toda embaixo dela, porque na coluna o rótulo quebrava no meio da palavra em 360 dp. Pergunta: "Como deve ficar?"; resposta: "Manter embaixo da cartinha (Recomendado)". Um teste em `profile-texts-fit.test.tsx` trava o arranjo.
 
 ## Consequências
 

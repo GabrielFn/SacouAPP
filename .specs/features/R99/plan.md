@@ -1,9 +1,9 @@
 # R99 · Defeitos do percurso de 23/11 (Início, rodada encerrada, cartinha)
 
 **Approved**: 2026-11-23 - user: "aprovado, pode seguir"
-**Settled mid-build:** none
+**Settled mid-build:** botões da aba Eu - user: "Manter embaixo da cartinha (Recomendado)" (23/11, ADR 0077)
 **Review:** sent at 8a2d8b46
-**Fix pass:** <pending>
+**Fix pass:** done - 06 sem "Tirar" e 26 sem presença na rodada encerrada (`adminRoundOffers`, `presenceCard`), testes das ações da 06 e do "Ver resumo", selo fora do verde (`79577d5f`); arranjo da aba Eu registrado no ADR 0077 e travado por teste
 
 ## Problem
 
@@ -131,7 +131,11 @@ O organizador encerra a rodada antes do horário e o Início mostra só o cartã
 
 ## Differences from the source
 
-None - the product matches the source. `Rodada.dc.html` não desenha a rodada encerrada; a R99 acrescenta esse estado (decisão de 23/11, registrada num ADR curto na construção) sem mudar nada do que o canvas desenha.
+| Source shows | Product shows | Confirmed |
+| --- | --- | --- |
+| `Perfil.dc.html`: "Compartilhar" e "Editar perfil" na coluna ao lado da cartinha | os dois botões em largura total embaixo da cartinha | y - AD-001 (ADR 0077) |
+
+`Rodada.dc.html` não desenha a rodada encerrada; a R99 acrescenta esse estado (ADR 0077) sem mudar o que o canvas desenha.
 
 ## Sources
 

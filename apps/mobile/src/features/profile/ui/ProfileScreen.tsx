@@ -150,7 +150,7 @@ export interface LoadedBodyProps extends BodyActions {
   readonly view: LoadedView;
 }
 
-function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyProps) {
+export function LoadedBody({ view, accountName, onShare, onEditProfile }: LoadedBodyProps) {
   const { tokens } = useTheme();
   const card = playerCardOf(view.profile, view.stats);
   const positionLine = positionLineOf(view.profile);

@@ -2,7 +2,7 @@ import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, test, vi } from "vitest";
 
 import { strings } from "../../../strings/pt-BR";
-import { ProfileActions } from "./ProfileScreen";
+import { LoadedBody, ProfileActions } from "./ProfileScreen";
 import { STAT_LABEL_LINES, StatTile } from "./StatTile";
 
 const BUTTON = vi.hoisted(() => function Button() {});
@@ -23,9 +23,16 @@ vi.mock("../../../ui/Screen", () => ({ Screen: () => null }));
 vi.mock("../hooks/use-profile-view", () => ({ useProfileView: () => ({}) }));
 vi.mock("./PlayerCardView", () => ({ PlayerCardView: () => null }));
 vi.mock("./GroupStatsRow", () => ({ GroupStatsRow: () => null }));
+vi.mock("../model/player-card", () => ({
+  playerCardOf: () => ({ nickname: "Org" }),
+  positionLineOf: () => null,
+  statTilesOf: () => [],
+}));
+vi.mock("../model/group-stats", () => ({ groupRowsOf: () => [] }));
 
 type Props = {
   readonly children?: ReactNode;
+  readonly style?: { readonly flexDirection?: string };
   readonly label?: string;
   readonly numberOfLines?: number;
 };
@@ -61,4 +68,26 @@ describe("the texts of the card tab fit (R99 S4, criteria 15 and 16)", () => {
     ]);
     expect(strings.profile.me.share).toBe("Compartilhar");
   });
+
+  test("the buttons sit under the card, not in the narrow column beside it (Gabriel, 23/11, ADR 0077)", () => {
+    const view = { kind: "empty", stale: false, profile: {}, stats: {} } as never;
+    const tree = LoadedBody({
+      view,
+      accountName: "Org",
+      onShare: () => undefined,
+      onEditProfile: () => undefined,
+    });
+    expect(insideRow(tree, ProfileActions, false)).toBe(false);
+    expect(propsOf(tree, ProfileActions)).toHaveLength(1);
+  });
 });
+
+/** Whether `type` is rendered inside a View laid out as a row (the card and its side column). */
+function insideRow(node: ReactNode, type: unknown, inRow: boolean): boolean {
+  if (Array.isArray(node)) return node.some((child: ReactNode) => insideRow(child, type, inRow));
+  if (!isValidElement(node)) return false;
+  const element = node as ReactElement<Props>;
+  if (element.type === type) return inRow;
+  const row = inRow || element.props.style?.flexDirection === "row";
+  return insideRow(element.props.children, type, row);
+}
