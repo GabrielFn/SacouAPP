@@ -68,6 +68,8 @@
 
 ## Em andamento
 
+- 23/11/2026, tarde: **R99 feita** (PR #227, ADR 0077): rodada encerrada uma vez só no Início, telas 06 e 26 com "Encerrada" + "Ver resumo", cartinha relida depois de encerrar, aba Eu sem quebra. Conferida no celular como organizadora e como jogador. Próximo passo no [diário de 23/11](sessoes/2026-11-23.md).
+
 - 23/11/2026: **percurso no celular, 5ª tentativa** (PR #226): o fluxo completo passou, inclusive encerrar, resumo, cartinha e a quadra destravada. Três defeitos novos em `pendencias.md` (candidatos a R99). Próximo passo no [diário de 23/11](sessoes/2026-11-23.md).
 
 - 22/11/2026, noite: **R98 inteira na `main`** (#218, #219, #220, #222, #224) e **R97 Parte 2** (#210). Falta o percurso completo no celular e o relatório do M5. Próximo passo no [diário de 22/11](sessoes/2026-11-22.md).
