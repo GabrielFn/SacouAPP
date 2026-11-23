@@ -5,11 +5,19 @@ import { round, type Client, type Execute } from "./http-path-params";
 export function createDrawOperations(
   client: Client,
   execute: Execute,
-): Pick<SacouApi, "drawTeams"> {
+): Pick<SacouApi, "drawTeams" | "confirmTeams"> {
   return {
     drawTeams: (groupId, roundId, body) =>
       execute((init) =>
         client.POST("/v1/groups/{groupId}/rounds/{roundId}/draw", {
+          ...init,
+          ...round(groupId, roundId),
+          body,
+        }),
+      ),
+    confirmTeams: (groupId, roundId, body) =>
+      execute((init) =>
+        client.PUT("/v1/groups/{groupId}/rounds/{roundId}/teams", {
           ...init,
           ...round(groupId, roundId),
           body,

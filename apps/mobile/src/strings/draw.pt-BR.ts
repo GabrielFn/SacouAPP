@@ -96,6 +96,8 @@ export const drawStrings = {
     offline: "Sem conexão. O sorteio precisa de internet.",
     title: "Sorteio dos times",
   },
+  /** The teams did not reach the server (R100, question 182): the flow goes on, the WhatsApp text still went. */
+  publishFailed: "Os times não chegaram ao app dos jogadores. Eles recebem pelo WhatsApp.",
   back: "Voltar",
   backToRound: "Voltar à rodada",
   retry: "Tentar de novo",
