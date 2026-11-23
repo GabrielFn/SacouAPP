@@ -77,6 +77,7 @@ import { createSacouQueryClient } from "../services/query/query-client";
 import { QueryProvider } from "../services/query/query-provider";
 import { ServicesProvider, useServices, type Services } from "../services/services-context";
 import { ThemeProvider } from "../theme/theme-context";
+import { createReactNativeKeyboardVisibility } from "../adapters/react-native-keyboard-visibility";
 
 const queryClient = createSacouQueryClient();
 const cacheStore = createExpoCacheStore();
@@ -138,6 +139,7 @@ const realServices: Services = {
   backGuard: reactNativeBackGuard,
   reducedMotion: createReactNativeReducedMotion(),
   clock: performanceClock,
+  keyboard: createReactNativeKeyboardVisibility(),
   benchmarkRuntimeOpener: expoBenchmarkRuntimeOpener,
   sacouApi,
   networkStatus,

@@ -26,6 +26,7 @@ import {
   createRoundRequest,
   firstRoundDate,
   sheetFirstDate,
+  confirmableNumber,
   initialCreateRoundState,
   layerChangeCount,
   repeatSummary,
@@ -291,6 +292,10 @@ describe("what is refused", () => {
     expect(errors(edit({ localDate: "2026-11-02", localTime: "09:00" })).time).not.toBeNull();
   });
 
+  test("today at 23:00 still passes in the morning", () => {
+    expect(errors(edit({ localDate: "2026-11-02", localTime: "23:00" })).time).toBeNull();
+  });
+
   test("a venue of 80 characters passes and one of 81 does not", () => {
     expect(errors(edit({ venue: "a".repeat(80) })).venue).toBeNull();
     expect(errors(edit({ venue: "a".repeat(81) })).venue).not.toBeNull();
@@ -456,6 +461,38 @@ describe("Editar rodada (screen 20 with roundId)", () => {
     });
     const body = updateRoundRequest(group, plain, { ...state, capacityText: "14" });
     expect(body.settings).toEqual({});
+  });
+});
+
+describe("confirmableNumber: the 'done' key of the points sheet (R98 part 3)", () => {
+  test("a whole number confirms, with or without spaces", () => {
+    expect(confirmableNumber("21")).toBe(21);
+    expect(confirmableNumber(" 21 ")).toBe(21);
+  });
+
+  test("empty, zero, decimal and text do not confirm", () => {
+    expect(["", "0", "2.5", "abc", "-3"].map(confirmableNumber)).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+});
+
+describe("the sheet starts today (R98 part 3)", () => {
+  test("today is the first of the 14 dates, and the 14th is 13 days ahead", () => {
+    const dates = pickableDates(sheetFirstDate(isoDateOf(MONDAY_MORNING), "2026-11-03"));
+    expect(dates[0]?.date).toBe("2026-11-02");
+    expect(dates).toHaveLength(14);
+    expect(dates[13]?.date).toBe("2026-11-15");
+  });
+
+  test("the day the clocks change does not skip or repeat a date", () => {
+    const dates = pickableDates("2026-02-14").map((option) => option.date);
+    expect(new Set(dates).size).toBe(14);
+    expect(dates[4]).toBe("2026-02-18");
   });
 });
 

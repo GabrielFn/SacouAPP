@@ -32,7 +32,7 @@ export interface PlayerBodyProps {
 function PlayerBody({ round, settings, card, roster, onSeeAll }: PlayerBodyProps) {
   if (settings === null) return <ErrorStrip text={detail.loadError} />;
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
-    withRotation: false,
+    withRotation: true,
   });
   return (
     <>

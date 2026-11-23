@@ -81,7 +81,7 @@ function LiveRoundFooter({ round }: LiveRoundFooterProps) {
 }
 
 /**
- * The home (03): "N rodadas essa semana.", the rounds being played (they open screen 06, R97 D3), the
+ * The home (03): "N rodadas nos próximos 7 dias.", the rounds being played (they open screen 06, R97 D3), the
  * ones that took place ("Ver resumo") and the next round of each group, the soonest first.
  */
 export function HomeRoundCards({

@@ -5,9 +5,9 @@ import { dateLabel, isoWeekdayOf, parseIsoDate } from "./round-dates";
 
 const { cards } = roundsStrings;
 
-const DAYS_PER_WEEK = 7;
-const MONDAY_ISO = 1;
 const HOUR_MS = 3_600_000;
+const HOURS_PER_DAY = 24;
+const DAY_MS = HOURS_PER_DAY * HOUR_MS;
 const SUMMARY_WINDOW_HOURS = 24;
 /** The home offers "Ver resumo" until 24 h after the real end of the round (`endsAt`, a early `close` included): the window of the votation (question 153). */
 export const SUMMARY_CARD_WINDOW_MS = SUMMARY_WINDOW_HOURS * HOUR_MS;
@@ -54,46 +54,49 @@ export function recentRoundOf(rounds: readonly RoundSummary[], now: number): Rou
   return recent[0] ?? null;
 }
 
-/** The start of the next Monday, local time: "essa semana" runs from now to the end of Sunday. */
-function endOfWeek(now: number): number {
-  const today = new Date(now);
-  const daysToMonday = DAYS_PER_WEEK - isoWeekdayOf(today) + MONDAY_ISO;
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysToMonday).getTime();
+/** The home looks this many days ahead (R98 part 3: a sliding window, not the calendar week). */
+export const HOME_WINDOW_DAYS = 7;
+
+/** The end of the home window: `HOME_WINDOW_DAYS` days after `now`. */
+function endOfWindow(now: number): number {
+  return now + HOME_WINDOW_DAYS * DAY_MS;
 }
 
 /**
- * Every scheduled round that starts between now and the end of the week, the soonest first; with none,
+ * Every scheduled round that starts within the next 7 days, the soonest first; with none,
  * the next one (so a group that plays only next week still shows up). R97 part 2, D6.
  */
 export function upcomingRoundsOf(
   rounds: readonly RoundSummary[],
   now: number,
 ): readonly RoundSummary[] {
-  const limit = endOfWeek(now);
-  const thisWeek = rounds
+  const limit = endOfWindow(now);
+  const inWindow = rounds
     .filter((round) => {
       const start = Date.parse(round.startsAt);
-      return round.status === "scheduled" && start > now && start < limit;
+      return round.status === "scheduled" && start > now && start <= limit;
     })
     .sort((first, second) => Date.parse(first.startsAt) - Date.parse(second.startsAt));
-  if (thisWeek.length > 0) return thisWeek;
+  if (inWindow.length > 0) return inWindow;
   const next = nextRoundOf(rounds, now);
   return next === null ? [] : [next];
 }
 
-/** How many scheduled rounds, of all the groups, start between now and the end of this week. */
-export function roundsThisWeek(roundsByGroup: readonly (readonly RoundSummary[])[], now: number) {
-  const limit = endOfWeek(now);
+/** How many scheduled rounds, of all the groups, start within the next 7 days. */
+export function roundsInWindow(roundsByGroup: readonly (readonly RoundSummary[])[], now: number) {
+  const limit = endOfWindow(now);
   return roundsByGroup.flat().filter((round) => {
     const start = Date.parse(round.startsAt);
-    return round.status === "scheduled" && start > now && start < limit;
+    return round.status === "scheduled" && start > now && start <= limit;
   }).length;
 }
 
-/** "2 rodadas essa semana.", or `null` with none (the home then speaks with its empty state). */
+/** "2 rodadas nos próximos 7 dias.", or `null` with none (the home then speaks with its empty state). */
 export function weekSummaryText(count: number): string | null {
   if (count === 0) return null;
-  return count === 1 ? cards.oneThisWeek : cards.manyThisWeek(count);
+  return count === 1
+    ? cards.oneInWindow(HOME_WINDOW_DAYS)
+    : cards.manyInWindow(count, HOME_WINDOW_DAYS);
 }
 
 export interface GroupWithNextRound {
@@ -265,7 +268,7 @@ export function roundCardsOf(
       hasNextRound: known ? next !== null : null,
     })),
     weekText: weekSummaryText(
-      roundsThisWeek(
+      roundsInWindow(
         lists.map((list) => list ?? []),
         now,
       ),

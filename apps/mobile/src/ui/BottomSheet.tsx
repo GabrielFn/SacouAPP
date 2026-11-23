@@ -6,11 +6,12 @@ import { strings } from "../strings/pt-BR";
 import { useTheme } from "../theme/theme-context";
 import { CloseIcon } from "./Icons";
 import { Text } from "./Text";
+import { useBackdropPress } from "./use-backdrop-press";
 
 export interface BottomSheetProps {
   readonly visible: boolean;
   readonly title: string;
-  /** Back button, tap outside and the dismiss of the screen reader. */
+  /** Back button, tap outside (not while the keyboard is up, or just closed) and the dismiss of the screen reader. */
   readonly onClose: () => void;
   readonly children: ReactNode;
   /** A cross beside the title that closes the sheet, with this label ("Fechar" of PreJogo.dc.html). */
@@ -59,6 +60,7 @@ const KEYBOARD_BEHAVIOR = "padding";
 export function BottomSheet({ visible, title, onClose, children, closeLabel }: BottomSheetProps) {
   const { colors, tokens } = useTheme();
   const insets = useSafeAreaInsets();
+  const onBackdropPress = useBackdropPress(onClose);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -68,7 +70,7 @@ export function BottomSheet({ visible, title, onClose, children, closeLabel }: B
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={strings.settings.sheets.dismiss}
-          onPress={onClose}
+          onPress={onBackdropPress}
           style={{ flex: 1, backgroundColor: colors.badgeSurface }}
         />
         <View
