@@ -8,7 +8,10 @@ export interface ClosedRound {
   readonly roundId: string;
 }
 
-/** The server closed the round: its detail (the new `endsAt`), its summary and the list are read again. */
+/**
+ * The server closed the round: its detail (the new `endsAt`), its summary, the list and the person's own
+ * numbers (the card of screen 14) are read again.
+ */
 export function useRoundClosed(): (round: ClosedRound) => void {
   const client = useQueryClient();
   return useCallback(
@@ -16,6 +19,7 @@ export function useRoundClosed(): (round: ClosedRound) => void {
       void client.invalidateQueries({ queryKey: queryKeys.round(groupId, roundId) });
       void client.invalidateQueries({ queryKey: queryKeys.roundSummary(groupId, roundId) });
       void client.invalidateQueries({ queryKey: queryKeys.rounds(groupId) });
+      void client.invalidateQueries({ queryKey: queryKeys.myStats() });
     },
     [client],
   );
