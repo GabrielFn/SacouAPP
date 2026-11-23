@@ -8,7 +8,7 @@ using Sacou.Modules.Groups.Access;
 
 namespace Sacou.Modules.Groups.CreateGroup;
 
-/// <summary><c>POST /v1/groups</c> <c>{ name, templateKey? }</c>: 201 with the new group and the caller's member id.</summary>
+/// <summary><c>POST /v1/groups</c> <c>{ name, templateKey?, settings? }</c>: 201 with the new group and the caller's member id.</summary>
 internal static class CreateGroupEndpoint
 {
     public const string Name = "CreateGroup";

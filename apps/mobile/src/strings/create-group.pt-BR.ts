@@ -70,9 +70,4 @@ export const createGroupStrings = {
     nameTooLong: "Use até 60 letras no nome.",
     nameInvalid: "Escolha um nome com letras ou números.",
   },
-  partial: {
-    title: "Grupo criado, mas não salvamos tudo.",
-    retry: "Tentar de novo",
-    keep: "Seguir assim",
-  },
 } as const;

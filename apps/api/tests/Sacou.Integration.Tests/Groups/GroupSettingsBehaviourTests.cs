@@ -73,6 +73,61 @@ public sealed class GroupSettingsBehaviourTests(IntegrationDatabase database) : 
         Assert.Empty(await SettingsCalls.ListAsync(world, world.GroupPath));
     }
 
+    /// <summary>R98 part 4: the rules typed with the name are saved in the same call; a bad layer creates no group.</summary>
+    [Fact]
+    public async Task CreateGroup_WithASettingsLayerSavesItAtOnce_AndABadLayerCreatesNothing()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        var user = world.Users[A.NonMember];
+        var groups = await CountGroupsAsync(user);
+
+        using var bad = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Camada ruim","settings":{"schemaVersion":1,"scoring":{"bestOf":2}}}""");
+        var afterBad = await CountGroupsAsync(user);
+        using var good = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Camada boa","templateKey":"racha-organizado","settings":{"schemaVersion":1,"scoring":{"bestOf":3}}}""");
+        var path = $"{GroupWorld.GroupsPath}/{(await SettingsCalls.JsonAsync(good))["groupId"]!.GetValue<Guid>()}";
+        var settings = await SettingsCalls.GetAsync(world, path, A.NonMember);
+
+        Assert.Equal(HttpStatusCode.BadRequest, bad.StatusCode);
+        Assert.Equal(groups, afterBad);
+        Assert.Equal(HttpStatusCode.Created, good.StatusCode);
+        Assert.Equal(3, settings["settings"]!["scoring"]!["bestOf"]!.GetValue<int>());
+        Assert.Equal("racha-organizado", settings["templateKey"]!.GetValue<string>());
+    }
+
+    /// <summary>R98 part 4: an explicit null layer is the same as no layer (the model alone).</summary>
+    [Fact]
+    public async Task CreateGroup_WithAnExplicitNullSettingsCreatesTheGroupWithTheModel()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+
+        using var created = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, """{"name":"Camada nula","settings":null}""");
+        var path = $"{GroupWorld.GroupsPath}/{(await SettingsCalls.JsonAsync(created))["groupId"]!.GetValue<Guid>()}";
+        var settings = await SettingsCalls.GetAsync(world, path, A.NonMember);
+
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal("do-zero", settings["templateKey"]!.GetValue<string>());
+    }
+
+    /// <summary>R98 part 4: the same layer gets the same answer on POST and on PATCH (money included).</summary>
+    [Fact]
+    public async Task CreateGroup_AndPatchAnswerTheSameForTheSameLayer()
+    {
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        const string layer = """{"schemaVersion":1,"money":{"monthlyFeeCents":2500}}""";
+        const string badLayer = """{"schemaVersion":1,"money":{"monthlyFeeCents":-1}}""";
+
+        using var post = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, $$"""{"name":"Com dinheiro","settings":{{layer}}}""");
+        using var badPost = await world.SendAsync(A.NonMember, HttpMethod.Post, GroupWorld.GroupsPath, $$"""{"name":"Dinheiro ruim","settings":{{badLayer}}}""");
+        using var patch = await world.SendAsync(A.Admin, HttpMethod.Patch, $"{world.GroupPath}/settings", $$"""{"settings":{{layer}}}""");
+        using var badPatch = await world.SendAsync(A.Admin, HttpMethod.Patch, $"{world.GroupPath}/settings", $$"""{"settings":{{badLayer}}}""");
+
+        Assert.Equal(patch.IsSuccessStatusCode, post.IsSuccessStatusCode);
+        Assert.Equal(badPatch.StatusCode, badPost.StatusCode);
+    }
+
     /// <summary>M7: without a key the group is "Do zero"; an unknown key is a 400 and no group is created.</summary>
     [Fact]
     public async Task CreateGroup_WithoutKeyIsDoZero_AndWithAnUnknownKeyCreatesNothing()

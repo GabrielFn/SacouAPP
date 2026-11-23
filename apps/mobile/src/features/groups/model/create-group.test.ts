@@ -18,7 +18,6 @@ import {
   createGroupErrors,
   createGroupPatch,
   hasPatch,
-  isRetryDisabled,
   isSubmitDisabled,
   visibleCreateGroupErrors,
   normalizeText,
@@ -113,10 +112,8 @@ describe("the reducer of screen 05", () => {
     expect(createGroupReducer(start, { type: "schedule-confirmed" })).toBe(start);
   });
 
-  test("the group created is remembered with its id", () => {
-    const created = typed(RACHA, { type: "group-created", groupId: "g1" });
-    expect(created.submit).toEqual({ kind: "created-without-settings", groupId: "g1" });
-    const saved = createGroupReducer(created, { type: "settings-saved", groupId: "g1" });
+  test("the group saved is remembered with its id", () => {
+    const saved = typed(RACHA, { type: "settings-saved", groupId: "g1" });
     expect(saved.submit).toEqual({ kind: "done", groupId: "g1" });
   });
 });
@@ -203,7 +200,7 @@ describe("createGroupErrors", () => {
   });
 
   test("once submitted it cannot be submitted again", () => {
-    const created = createGroupReducer(canvas(), { type: "group-created", groupId: "g" });
+    const created = createGroupReducer(canvas(), { type: "settings-saved", groupId: "g" });
     expect(canSubmit(created, RACHA)).toBe(false);
   });
 
@@ -212,13 +209,6 @@ describe("createGroupErrors", () => {
     expect(isSubmitDisabled(canvas(), RACHA, false)).toBe(false);
     expect(isSubmitDisabled(canvas(), RACHA, true)).toBe(true);
     expect(isSubmitDisabled(empty, RACHA, false)).toBe(true);
-  });
-
-  test("'Tentar de novo' is off while pending or when no group waits for its settings", () => {
-    const created = createGroupReducer(canvas(), { type: "group-created", groupId: "g" });
-    expect(isRetryDisabled(created, false)).toBe(false);
-    expect(isRetryDisabled(created, true)).toBe(true);
-    expect(isRetryDisabled(canvas(), false)).toBe(true);
   });
 });
 

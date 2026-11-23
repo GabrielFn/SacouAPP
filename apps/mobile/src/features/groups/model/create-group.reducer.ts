@@ -8,9 +8,7 @@ export interface ScheduleDraft {
 }
 
 export type SubmitState =
-  | { readonly kind: "idle" }
-  | { readonly kind: "created-without-settings"; readonly groupId: string }
-  | { readonly kind: "done"; readonly groupId: string };
+  { readonly kind: "idle" } | { readonly kind: "done"; readonly groupId: string };
 
 /** What the person typed or touched in screen 05, and nothing that can be derived from it. */
 export interface CreateGroupState {
@@ -44,7 +42,6 @@ export type AnswerAction =
 
 export type LifecycleAction =
   | { readonly type: "init"; readonly origin: GroupOrigin }
-  | { readonly type: "group-created"; readonly groupId: string }
   | { readonly type: "settings-saved"; readonly groupId: string };
 
 export type CreateGroupAction = ScheduleAction | AnswerAction | LifecycleAction;
@@ -73,9 +70,7 @@ function isScheduleAction(action: CreateGroupAction): action is ScheduleAction {
 }
 
 function isLifecycleAction(action: CreateGroupAction): action is LifecycleAction {
-  return (
-    action.type === "init" || action.type === "group-created" || action.type === "settings-saved"
-  );
+  return action.type === "init" || action.type === "settings-saved";
 }
 
 function scheduleReducer(state: CreateGroupState, action: ScheduleAction): CreateGroupState {
@@ -118,8 +113,6 @@ function lifecycleReducer(state: CreateGroupState, action: LifecycleAction): Cre
   switch (action.type) {
     case "init":
       return createInitialState(action.origin);
-    case "group-created":
-      return { ...state, submit: { kind: "created-without-settings", groupId: action.groupId } };
     case "settings-saved":
       return { ...state, submit: { kind: "done", groupId: action.groupId } };
   }

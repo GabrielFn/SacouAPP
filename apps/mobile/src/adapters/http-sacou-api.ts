@@ -187,8 +187,13 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   return {
     signIn: () => execute((init) => client.POST("/v1/me", init)),
     listMyGroups: () => execute((init) => client.GET("/v1/groups", init)),
-    createGroup: (name, templateKey) =>
-      execute((init) => client.POST("/v1/groups", { ...init, body: { name, templateKey } })),
+    createGroup: (name, templateKey, settings) =>
+      execute((init) =>
+        client.POST("/v1/groups", {
+          ...init,
+          body: settings ? { name, templateKey, settings } : { name, templateKey },
+        }),
+      ),
     getGroup: (groupId) =>
       execute((init) => client.GET("/v1/groups/{groupId}", { ...init, ...group(groupId) })),
     renameGroup: (groupId, name) =>

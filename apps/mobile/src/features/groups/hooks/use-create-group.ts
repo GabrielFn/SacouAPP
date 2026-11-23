@@ -13,7 +13,6 @@ import {
 } from "../model/create-group.reducer";
 import {
   canSubmit,
-  isRetryDisabled,
   isSubmitDisabled,
   visibleCreateGroupErrors,
   createGroupPatch,
@@ -21,7 +20,7 @@ import {
   normalizeText,
   type CreateGroupErrors,
 } from "../model/create-group.selectors";
-import { createGroupFlow, saveCreatedGroupSettings } from "../queries/group-settings-mutations";
+import { createGroupFlow } from "../queries/group-settings-mutations";
 
 export interface CreateGroupModel {
   readonly state: CreateGroupState;
@@ -29,16 +28,14 @@ export interface CreateGroupModel {
   readonly errors: CreateGroupErrors;
   readonly canSubmit: boolean;
   readonly submitDisabled: boolean;
-  readonly retryDisabled: boolean;
   /** True while a call is on the way: the button is off, against a double tap. */
   readonly pending: boolean;
   /** The text of the last refusal of the server, or `null`. */
   readonly errorText: string | null;
   readonly submit: () => void;
-  readonly retrySettings: () => void;
 }
 
-/** Runs the reducer of screen 05 and the two calls of "Criar grupo"; the screen only draws (D3). */
+/** Runs the reducer of screen 05 and the call of "Criar grupo"; the screen only draws (D3). */
 export function useCreateGroup(
   origin: GroupOrigin,
   onDone: (groupId: string) => void,
@@ -56,40 +53,23 @@ export function useCreateGroup(
         patch: hasPatch(patch) ? patch : null,
       });
     },
-    onSuccess: (outcome) => {
-      if (outcome.kind === "done") {
-        dispatch({ type: "settings-saved", groupId: outcome.groupId });
-        onDone(outcome.groupId);
-      } else {
-        dispatch({ type: "group-created", groupId: outcome.groupId });
-      }
-    },
-  });
-
-  const retry = useMutation({
-    mutationFn: (groupId: string) =>
-      saveCreatedGroupSettings(sacouApi, client, groupId, createGroupPatch(state, origin)),
-    onSuccess: (_result, groupId) => {
+    onSuccess: (groupId) => {
       dispatch({ type: "settings-saved", groupId });
       onDone(groupId);
     },
   });
 
-  const pending = create.isPending || retry.isPending;
+  const pending = create.isPending;
   return {
     state,
     dispatch,
     errors: visibleCreateGroupErrors(state, origin),
     canSubmit: canSubmit(state, origin),
     submitDisabled: isSubmitDisabled(state, origin, pending),
-    retryDisabled: isRetryDisabled(state, pending),
     pending,
-    errorText: create.isError || retry.isError ? errorTextOf(retry.error ?? create.error) : null,
+    errorText: create.isError ? errorTextOf(create.error) : null,
     submit: () => {
       create.mutate();
-    },
-    retrySettings: () => {
-      if (state.submit.kind === "created-without-settings") retry.mutate(state.submit.groupId);
     },
   };
 }
