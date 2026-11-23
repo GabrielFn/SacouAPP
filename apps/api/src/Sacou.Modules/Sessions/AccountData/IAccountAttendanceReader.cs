@@ -9,7 +9,10 @@ internal interface IAccountAttendanceReader
     Task<IReadOnlyList<AccountAttendance>> ListOfMembersAsync(IReadOnlyCollection<Guid> members, CancellationToken cancellationToken);
 }
 
-/// <summary>One attendance of the person, with the round it belongs to, as the store reads it.</summary>
+/// <summary>
+/// One attendance of the person, with the round it belongs to, as the store reads it. <c>TeamNumber</c> and
+/// <c>ReservePosition</c> are the person's place in the round's published teams (ADR 0078), null when not there.
+/// </summary>
 internal sealed record AccountAttendance(
     Guid RoundId,
     Guid GroupId,
@@ -20,4 +23,6 @@ internal sealed record AccountAttendance(
     AttendanceStatus Status,
     AttendanceSource Source,
     DateTimeOffset RespondedAt,
-    DateTimeOffset? PromotedAt);
+    DateTimeOffset? PromotedAt,
+    int? TeamNumber = null,
+    int? ReservePosition = null);

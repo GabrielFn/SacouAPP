@@ -69,6 +69,7 @@ export function attendanceRound(patch: Partial<Round> = {}): Round {
     going: [],
     waitlist: [],
     me: { memberId: ME, status: null, position: null, regularPosition: null },
+    teams: null,
     ...patch,
   };
 }

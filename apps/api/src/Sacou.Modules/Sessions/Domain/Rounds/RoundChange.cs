@@ -12,7 +12,10 @@ internal sealed record RoundChange(Round Round, ImmutableArray<Attendance> Chang
 {
     public bool RoundRowChanged { get; init; }
 
-    public bool IsEmpty => !RoundRowChanged && ChangedAttendances.IsEmpty && Events.IsEmpty;
+    /// <summary>The published teams were replaced (ADR 0078): the store rewrites their rows whole.</summary>
+    public bool TeamsChanged { get; init; }
+
+    public bool IsEmpty => !RoundRowChanged && !TeamsChanged && ChangedAttendances.IsEmpty && Events.IsEmpty;
 
     public static RoundChange Unchanged(Round round) => new(round, [], []);
 
@@ -27,6 +30,7 @@ internal sealed record RoundChange(Round Round, ImmutableArray<Attendance> Chang
             [.. Events, .. following.Events])
         {
             RoundRowChanged = RoundRowChanged || following.RoundRowChanged,
+            TeamsChanged = TeamsChanged || following.TeamsChanged,
         };
     }
 }

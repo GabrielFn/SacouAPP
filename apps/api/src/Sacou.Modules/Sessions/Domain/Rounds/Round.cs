@@ -31,6 +31,9 @@ internal sealed partial record Round(
     /// <summary>When someone tapped "Encerrar rodada" (ADR 0072, D1); null while nobody did.</summary>
     public DateTimeOffset? ClosedAt { get; init; }
 
+    /// <summary>The teams of the last "Confirmar e compartilhar" (ADR 0078); null until the first.</summary>
+    public RoundTeams? Teams { get; init; }
+
     public bool IsCanceled => Status == RoundStatus.Canceled;
 
     /// <summary>When the round ended: the tap, or the automatic end, whichever comes first (ADR 0072, D1).</summary>
@@ -95,6 +98,34 @@ internal sealed partial record Round(
             SettingsLayerJson = layer.Replaces ? layer.Json : SettingsLayerJson,
         };
         return Result.Success(new RoundChange(edited, [], []) { RoundRowChanged = edited != this });
+    }
+
+    /// <summary>
+    /// "Confirmar e compartilhar" on screen 07 (ADR 0078): the teams replace the earlier ones whole. Refused once cancelled
+    /// or ended (the instant of the end included); accepted after the start, as the draw happens at the court. Who may play
+    /// is decided here: the round's occupants still active in the group (<paramref name="active"/>).
+    /// </summary>
+    public Result<RoundChange> ConfirmTeams(
+        ImmutableArray<ImmutableArray<MemberId>> teams,
+        ImmutableArray<MemberId> reserves,
+        IReadOnlySet<MemberId> active,
+        int playersPerTeam,
+        DateTimeOffset now)
+    {
+        if (IsCanceled || EndsAt <= now)
+        {
+            return Result.Failure<RoundChange>(RoundErrors.RoundClosed);
+        }
+
+        var confirmed = Occupants.Select(attendance => attendance.Member).ToHashSet();
+        var created = RoundTeams.Create(teams, reserves, new TeamsEligibility(confirmed, active, playersPerTeam), StoredInstant.Of(now));
+        return created.IsFailure
+            ? Result.Failure<RoundChange>(created.Error)
+            : Result.Success(new RoundChange(this with { Teams = created.Value }, [], [new RoundTeamsConfirmed(Id, GroupId)])
+            {
+                RoundRowChanged = true,
+                TeamsChanged = true,
+            });
     }
 
     /// <summary>The round with its link code: a new round before it is stored, or an older one that has none yet.</summary>

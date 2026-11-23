@@ -53,6 +53,24 @@ internal sealed class RoundRow
 
     /// <summary>When someone tapped "Encerrar rodada" (ADR 0072, D1); null while nobody did.</summary>
     public DateTimeOffset? ClosedAt { get; init; }
+
+    /// <summary>When the published teams were confirmed (ADR 0078); null while there are none. Their rows are in <c>round_teams</c>.</summary>
+    public DateTimeOffset? TeamsConfirmedAt { get; init; }
+}
+
+/// <summary>
+/// A row of <c>sessions.round_teams</c>: one member in the published teams (ADR 0078). <see cref="TeamNumber"/> starts at 1;
+/// null is the queue of reserves. <see cref="Position"/> starts at 1 inside the team or the queue. Only ids: no level.
+/// </summary>
+internal sealed class RoundTeamSlotRow
+{
+    public required Guid RoundId { get; init; }
+
+    public required Guid MemberId { get; init; }
+
+    public short? TeamNumber { get; init; }
+
+    public required short Position { get; init; }
 }
 
 /// <summary>A row of <c>sessions.attendances</c>: by <c>MemberId</c> only, no name, e-mail or user.</summary>
