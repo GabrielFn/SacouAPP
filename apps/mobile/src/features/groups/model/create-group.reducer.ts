@@ -8,8 +8,7 @@ export interface ScheduleDraft {
 }
 
 export type SubmitState =
-  | { readonly kind: "idle" }
-  | { readonly kind: "done"; readonly groupId: string };
+  { readonly kind: "idle" } | { readonly kind: "done"; readonly groupId: string };
 
 /** What the person typed or touched in screen 05, and nothing that can be derived from it. */
 export interface CreateGroupState {
@@ -71,9 +70,7 @@ function isScheduleAction(action: CreateGroupAction): action is ScheduleAction {
 }
 
 function isLifecycleAction(action: CreateGroupAction): action is LifecycleAction {
-  return (
-    action.type === "init" || action.type === "settings-saved"
-  );
+  return action.type === "init" || action.type === "settings-saved";
 }
 
 function scheduleReducer(state: CreateGroupState, action: ScheduleAction): CreateGroupState {

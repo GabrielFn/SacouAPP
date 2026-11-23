@@ -210,7 +210,6 @@ describe("createGroupErrors", () => {
     expect(isSubmitDisabled(canvas(), RACHA, true)).toBe(true);
     expect(isSubmitDisabled(empty, RACHA, false)).toBe(true);
   });
-
 });
 
 describe("createGroupPatch", () => {

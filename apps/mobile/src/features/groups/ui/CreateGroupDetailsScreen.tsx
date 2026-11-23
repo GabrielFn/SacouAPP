@@ -50,11 +50,7 @@ export function CreateGroupDetailsScreen({ origin }: CreateGroupDetailsScreenPro
   const { state, dispatch, errors } = model;
   const sheet = state.scheduleSheet;
   return (
-    <Screen
-      footer={
-        <CreateGroupFooter model={model} />
-      }
-    >
+    <Screen footer={<CreateGroupFooter model={model} />}>
       <StepHeader
         title={strings.settings.templates[origin.templateKey].name}
         progressLabel={step2.progress}
