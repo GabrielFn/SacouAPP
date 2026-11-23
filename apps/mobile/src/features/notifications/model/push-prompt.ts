@@ -32,3 +32,34 @@ export async function askForPush(deps: PushPromptAskDeps, send: Send): Promise<v
   send({ type: "answered" });
   if (answer === "granted") deps.register();
 }
+
+export interface PromptLifetime {
+  /** The `send` that goes quiet once the session is over: a late answer changes nothing. */
+  readonly guarded: (send: Send) => Send;
+  /** Keeps the cancel of a registration still waiting; run at once when the session is already over. */
+  readonly hold: (cancel: () => void) => void;
+  /** The session ended or changed: late answers are ignored and the held registrations are cancelled. */
+  readonly stop: () => void;
+}
+
+/** What belongs to one signed-in session of the offer: its answers and its pending registration. */
+export function createPromptLifetime(): PromptLifetime {
+  const stopped = { value: false };
+  const held = { value: [] as readonly (() => void)[] };
+  return {
+    guarded: (send) => (action) => {
+      if (!stopped.value) send(action);
+    },
+    hold: (cancel) => {
+      if (stopped.value) cancel();
+      else held.value = [...held.value, cancel];
+    },
+    stop: () => {
+      stopped.value = true;
+      held.value.forEach((cancel) => {
+        cancel();
+      });
+      held.value = [];
+    },
+  };
+}

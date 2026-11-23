@@ -11,14 +11,16 @@ const { prompt } = strings.notifications;
 
 export interface PushPromptHostProps {
   readonly children: ReactNode;
+  /** Without a session nothing is checked, asked or registered. */
+  readonly signedIn: boolean;
 }
 
 /**
  * The signed-in app under the offer of the notifications: the screens call it after a first "VOU" or
  * a first round, and the sentence comes before the system question (R98, item 9, question 1).
  */
-export function PushPromptHost({ children }: PushPromptHostProps) {
-  const { offer, visible, accept, decline } = usePushPrompt();
+export function PushPromptHost({ children, signedIn }: PushPromptHostProps) {
+  const { offer, visible, accept, decline } = usePushPrompt(signedIn);
   return (
     <PushPromptContext.Provider value={offer}>
       {children}

@@ -185,7 +185,7 @@ function SessionStack() {
   const onboarding = useOnboardingGate(signedIn) === "show";
   if (session.status === "unknown") return null;
   return (
-    <PushPromptHost>
+    <PushPromptHost signedIn={signedIn}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={signedIn && !onboarding}>
           {SIGNED_IN_ROUTES.map((name) => (
