@@ -77,7 +77,7 @@ describe("table 3.2, each state of the voting against the source of the MVP", ()
 
   test("open with stats: the card carries the open note; the entry follows the ballot", () => {
     const report = { ...E2_9_ROUND, mvpVoting: OPEN };
-    expect(ready(report, BALLOT).mvp?.notes).toContain(summaryStrings.votingOpenNote);
+    expect(ready(report, BALLOT).mvp?.notes[0]).toMatch(/^A galera decide até /u);
     expect(ready(report, BALLOT).voting).toEqual({
       kind: "vote",
       label: "Votar no MVP · fecha em 24 h",
