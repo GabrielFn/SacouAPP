@@ -43,6 +43,7 @@ Uma por membro por rodada.
 - **Mensalista que disse "não vou" e volta** (pergunta 25): um "vou" como qualquer outro, no fim da espera; sem fura-fila.
 - **Reduzir as vagas** (pergunta 26) não tira ninguém: só fecha a porta para os próximos.
 - **Janela dos avulsos** (`attendance.dropInWindowEnabled`, `dropInOpensHoursBefore`): antes de `início − horas` o "vou" do avulso é `sessions.drop-in-window-closed`; a contagem é de instante. O "não vou" passa sempre. Mensalista e admin não têm janela. A página `/r` mostra a linha "A lista dos avulsos abre hoje, às 20h." enquanto a rodada está aberta ou lotada e a janela não abriu (frase no fuso da rodada, [ADR 0079](../arquitetura/adr/0079-clareza-do-fluxo.md)); o VOU da web fica ativo até a recusa, e depois dela fica desligado dizendo o dia. Convidado é avulso.
+- **Janela só com mensalista** (pergunta 183, opção 2, [ADR 0079](../arquitetura/adr/0079-clareza-do-fluxo.md), P3): enquanto o grupo não tem nenhum membro ativo do tipo mensalista, a janela não vale, mesmo ligada: o "vou" do avulso passa a qualquer hora antes do início e `dropInOpensAt` vem nulo no `GET` da rodada e no resumo público. Conta só quem está ativo, lido do Groups a cada resposta e leitura: um mensalista removido, que saiu ou virou avulso deixa de contar na hora, e a janela volta assim que alguém vira mensalista. O ajuste da rodada (`attendance.dropInWindowEnabled`) não muda: a tela de ajustes mostra o que o admin escolheu.
 - **O tipo vem do Groups na hora da resposta**, nunca da presença.
 
 ## Recorrência
