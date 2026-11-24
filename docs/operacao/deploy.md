@@ -76,4 +76,6 @@ Esperado: US$ 0 (faixa grátis do Cloud Run na `us-east4`, 0,5 GB do Artifact Re
 
 ## Backup
 
-Até a E5.3, só a restauração do Neon Free (6 h de histórico): Neon → projeto → Restore. A produção só recebe jogadores reais depois da E5.3 (condição 2 da revisão do M3).
+Até 6 h atrás, a restauração do Neon Free: Neon → projeto → Restore. De 6 h a 30 dias, o dump diário de cada banco no Cloud Storage (E5.3, [ADR 0082](../arquitetura/adr/0082-backup-diario-do-banco.md)): configuração, ensaio mensal de restauração e restauração de verdade em [`backup.md`](backup.md). A produção só recebe jogadores reais depois da E5.3 (condição 2 da revisão do M3) e do primeiro ensaio de restauração.
+
+O job de backup não passa pelo deploy da API: muda só quando o Gabriel roda de novo `scripts/gcp/setup-backups.sh` (por exemplo, depois de um PR que mexe em `scripts/backup/backup.sh` ou em `deploy/backup/`). Migração nova não pede nada: o dump e a conferência leem as tabelas e as migrações que existirem.

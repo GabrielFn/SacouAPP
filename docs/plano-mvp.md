@@ -54,7 +54,7 @@ Só o repositório bloqueia o início; as outras contas só são necessárias no
 | Projeto no Firebase | Login com Google, Apple e e-mail | M2 | Grátis |
 | Conta Expo (EAS) | Builds do app e atualizações | M3 | Grátis no início |
 | Google Cloud (Cloud Run) + Neon | API e banco de testes e produção (ADR 0068; era Railway até 18/11/2026) | M4 | US$ 0 na faixa grátis, teto de US$ 1 |
-| Cloudflare (R2 e DNS) | Backups (E5.3) e domínio; fotos da cartinha só depois do piloto (ADR 0046) | M5 | Grátis no início |
+| Cloudflare (R2 e DNS) | Domínio; fotos da cartinha só depois do piloto (ADR 0046). Os backups (E5.3) ficam no Cloud Storage do Google (ADR 0082) | M5 | Grátis no início |
 | Chave de API de um provedor de IA | Texto do resumo da rodada: **pós-piloto** (ADR 0046) | Depois do M7 | Centavos por resumo |
 | Apple Developer (com Small Business Program) | TestFlight e App Store | M6 | US$ 99/ano |
 | Google Play Console | Teste interno e Play Store | M6 | US$ 25 uma vez |

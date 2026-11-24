@@ -295,7 +295,7 @@ A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do 
 | Resumo com IA (E3.13, pós-piloto)        | T: texto de usuário alterando o resumo     | A definir na E3.13. Falha usa texto padrão (aceite da E3.13)                                                      |
 | Resumo com IA (E3.13, pós-piloto)        | D: custo por uso abusivo                   | Cota por grupo (`revisao-mvp.md:116`)                                                                             |
 | Sentry e logs (E5.2; PostHog pós-piloto) | I: dado pessoal enviado a terceiros        | Logs sem e-mails nem tokens (`produto.md:375`); o que vai para Sentry e PostHog a definir na E5.2                 |
-| Backups no R2 (E5.3)                     | I: cópia do banco exposta                  | Criptografia e acesso a definir na E5.3; retenção em `perguntas.md`, item 2                                       |
+| Backups no Cloud Storage (E5.3, ADR 0082) | I: cópia do banco exposta                  | Bucket por ambiente, acesso uniforme, prevenção de acesso público, criptografia padrão; só a conta do job do ambiente lê e grava (`storage.objectUser` só no seu bucket); nenhuma conta de deploy, build ou da API tem papel; 30 dias (pergunta 195)                                       |
 | CI e repositório                         | I: segredo em commit                       | Varredura de segurança na CI (`varredura-ci.md`)                                                                  |
 
 ## 11. CI e cadeia de suprimentos (E0.4, E0.6, E0.9)
@@ -514,3 +514,18 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 
 `stored-next-match-drafts.ts`: uma leitura que falha vale "sem rascunho", e a tela 11 sorteia de novo quem sai (critério `draw`). Quem abrir o app depois de uma falha de leitura pode ver outro sorteio, e a escolha já feita some. Impacto: só a ordem de saída, sem dado pessoal e sem perda de partida. Aceito no piloto; o rascunho é local e o motor valida o plano na confirmação.
+
+## Backup diário do banco (E5.3 Parte 1, [ADR 0082](../arquitetura/adr/0082-backup-diario-do-banco.md))
+
+Superfície nova: os jobs `sacou-backup-test` e `sacou-backup` (sem porta nem entrada da internet), os buckets `sacou-api-backups-*`, a conta `sacou-backup-trigger` e o papel `sacou_backup` do Neon.
+
+| STRIDE | Ameaça | Barreira | Resta |
+|---|---|---|---|
+| I | URL do banco num log, no manifesto ou na configuração do job | Segredo por `secretKeyRef`; o script nunca imprime a URL e tira das mensagens de erro qualquer linha com a senha; `set -eu` sem `set -x` (`test:tooling`); o teste de integração procura a senha na saída, inclusive no caminho de erro | A URL vai nos argumentos de `psql` e `pg_dump` dentro do contêiner, que só roda o script |
+| I, S | Conexão sem TLS ou com servidor falso | Fora de `localhost`, `sslmode=verify-full&sslrootcert=system` à força (teste com `sslmode=disable`) | CAs da imagem fixada por digest |
+| T, E | Job comprometido escreve no banco | Papel `sacou_backup` só com `pg_read_all_data` | Se o Neon recusar o `GRANT`, fallback com o papel dono (decisão do Gabriel, D6) |
+| T, D | Apagar ou trocar backups (conta comprometida, erro) | Retenção de 30 dias no bucket: ninguém apaga nem sobrescreve antes; a conta do job só tem `objectUser` no próprio bucket | Retenção sem trava: o dono do projeto pode removê-la (travar é irreversível) |
+| E | Teste lê ou grava a produção | Uma conta, um segredo e um bucket por ambiente; conferido no passo 5 de [`backup.md`](../operacao/backup.md) | `sacou-backup-trigger` inicia os dois jobs (só `run.invoker`, sem segredo nem bucket) e tem `workflows.invoker` no projeto (o Workflows não tem papel por workflow) |
+| T | Imagem trocada no Docker Hub | Imagem por digest, a mesma do teste de integração (`test:tooling`) | A cota anônima do Docker Hub pode falhar o job (R3; alerta) |
+| D, R | Backup quebrado sem ninguém saber | Alerta por e-mail quando o job ou o workflow falha; ensaio de restauração mensal | Agendamento apagado não dispara alerta: o ensaio mensal confere a data do último dump |
+| I | Restauração ressuscita conta excluída | Marca `identity.deleted_accounts` no banco atual; o roteiro reaplica antes de devolver o banco | Sem comando de reexclusão ainda (pendência antes do piloto) |
