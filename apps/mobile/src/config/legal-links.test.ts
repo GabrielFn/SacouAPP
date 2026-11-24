@@ -3,7 +3,11 @@ import { describe, expect, test } from "vitest";
 import { httpsOrigin, type LegalLinkInputs, resolveLegalLinks } from "./legal-links";
 
 const BASE = "https://sacou-api-abc.a.run.app";
-const NONE: LegalLinkInputs = { termsUrl: undefined, privacyUrl: undefined, inviteBaseUrl: undefined };
+const NONE: LegalLinkInputs = {
+  termsUrl: undefined,
+  privacyUrl: undefined,
+  inviteBaseUrl: undefined,
+};
 
 describe("resolveLegalLinks (E6.1)", () => {
   test("explicit https addresses win over the derived ones", () => {
@@ -13,15 +17,21 @@ describe("resolveLegalLinks (E6.1)", () => {
         privacyUrl: "https://sacou.app/privacidade-v1",
         inviteBaseUrl: BASE,
       }),
-    ).toEqual({ terms: "https://sacou.app/termos-v1", privacy: "https://sacou.app/privacidade-v1" });
-  });
-
-  test.each([BASE, `${BASE}/`])("without them, the pages of the invite origin %j, no double slash", (base) => {
-    expect(resolveLegalLinks({ ...NONE, inviteBaseUrl: base })).toEqual({
-      terms: `${BASE}/termos`,
-      privacy: `${BASE}/privacidade`,
+    ).toEqual({
+      terms: "https://sacou.app/termos-v1",
+      privacy: "https://sacou.app/privacidade-v1",
     });
   });
+
+  test.each([BASE, `${BASE}/`])(
+    "without them, the pages of the invite origin %j, no double slash",
+    (base) => {
+      expect(resolveLegalLinks({ ...NONE, inviteBaseUrl: base })).toEqual({
+        terms: `${BASE}/termos`,
+        privacy: `${BASE}/privacidade`,
+      });
+    },
+  );
 
   test("an explicit link for one document only: the other is derived", () => {
     expect(
@@ -55,7 +65,11 @@ describe("resolveLegalLinks (E6.1)", () => {
 
   test("a bad explicit address falls back to the derived page, never to the bad one", () => {
     expect(
-      resolveLegalLinks({ termsUrl: "javascript:alert(1)", privacyUrl: "http://x", inviteBaseUrl: BASE }),
+      resolveLegalLinks({
+        termsUrl: "javascript:alert(1)",
+        privacyUrl: "http://x",
+        inviteBaseUrl: BASE,
+      }),
     ).toEqual({ terms: `${BASE}/termos`, privacy: `${BASE}/privacidade` });
   });
 });
@@ -65,7 +79,10 @@ describe("httpsOrigin", () => {
     expect(httpsOrigin("https://sacou.test:8443/r/abc")).toBe("https://sacou.test:8443");
   });
 
-  test.each(["https://evil.com@sacou.app", "https://sacou.app.", "ftp://sacou.app"])("%j has no origin", (raw) => {
-    expect(httpsOrigin(raw)).toBeNull();
-  });
+  test.each(["https://evil.com@sacou.app", "https://sacou.app.", "ftp://sacou.app"])(
+    "%j has no origin",
+    (raw) => {
+      expect(httpsOrigin(raw)).toBeNull();
+    },
+  );
 });

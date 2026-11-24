@@ -42,7 +42,11 @@ const BASE = "https://sacou-api-abc.a.run.app";
 describe("screen 02: the legal line (E6.1)", () => {
   test("with only the invite origin, Termos and Política de Privacidade open the API's pages", () => {
     const onOpen = vi.fn();
-    const links = resolveLegalLinks({ termsUrl: undefined, privacyUrl: undefined, inviteBaseUrl: BASE });
+    const links = resolveLegalLinks({
+      termsUrl: undefined,
+      privacyUrl: undefined,
+      inviteBaseUrl: BASE,
+    });
 
     const words = documentWords(LegalLine({ links, onOpen }));
     for (const word of words) {
@@ -59,7 +63,11 @@ describe("screen 02: the legal line (E6.1)", () => {
   });
 
   test("without any address the words stay plain text, never a link", () => {
-    const links = resolveLegalLinks({ termsUrl: undefined, privacyUrl: undefined, inviteBaseUrl: undefined });
+    const links = resolveLegalLinks({
+      termsUrl: undefined,
+      privacyUrl: undefined,
+      inviteBaseUrl: undefined,
+    });
 
     const words = documentWords(LegalLine({ links, onOpen: vi.fn() }));
     const drawn = words.flatMap((word) => elementsOf(word.type(word.props)));

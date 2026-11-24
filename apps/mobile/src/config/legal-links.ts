@@ -1,7 +1,8 @@
 /** An `https:` address with a host and no spaces; anything else is not offered (question 62). */
 const HTTPS_URL = /^https:\/\/[^\s/?#]+(?:[/?#]\S*)?$/i;
 /** The `https:` origin at the start of an address (scheme, host, optional port); its path, query and fragment are dropped. */
-const HTTPS_ORIGIN = /^https:\/\/[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?(?=$|[/?#])(?!\S*\s)/i;
+const HTTPS_ORIGIN =
+  /^https:\/\/[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?(?=$|[/?#])(?!\S*\s)/i;
 
 /** The API's own pages (E6.1, ADR 0083), on the origin of the invite page. */
 export const TERMS_PATH = "/termos";
