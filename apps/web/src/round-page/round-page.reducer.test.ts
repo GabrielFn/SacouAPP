@@ -162,6 +162,7 @@ describe("roundPageReducer (case 31)", () => {
     const limited = run(
       [
         { type: "answerTapped", intent: "notGoing" },
+        { type: "leaveConfirmed" },
         { type: "answerFailed", failure: { kind: "rateLimited", retryAfterSeconds: 7 } },
       ],
       idle,
@@ -229,4 +230,64 @@ describe("roundPageReducer (case 31)", () => {
     const answering: RoundPageState = { step: "answering", intent: "going", standing: going };
     expect(run([{ type: "signedOut" }], answering)).toEqual(signedOutIdle);
   });
+});
+
+describe("roundPageReducer, leaving the list (R101, item 3b)", () => {
+  const holding: RoundPageState = {
+    step: "idle",
+    signedIn: true,
+    nicknameSuggestion: null,
+    standing: going,
+    failure: null,
+  };
+
+  it("NÃO VOU MAIS asks first, and only a confirmation sends the answer", () => {
+    const asking = run([{ type: "answerTapped", intent: "notGoing" }], holding);
+    expect(asking).toEqual({ step: "confirmingLeave", standing: going });
+    expect(run([{ type: "leaveConfirmed" }], asking)).toEqual({
+      step: "answering",
+      intent: "notGoing",
+      standing: going,
+    });
+  });
+
+  it("CONTINUAR NA LISTA goes back to where the person stood", () => {
+    const state = run(
+      [{ type: "answerTapped", intent: "notGoing" }, { type: "leaveCancelled" }],
+      holding,
+    );
+    expect(state).toEqual(holding);
+  });
+
+  it("a second confirmation, or one out of the question, changes nothing", () => {
+    const answering = run(
+      [{ type: "answerTapped", intent: "notGoing" }, { type: "leaveConfirmed" }],
+      holding,
+    );
+    expect(run([{ type: "leaveConfirmed" }, { type: "leaveCancelled" }], answering)).toEqual(
+      answering,
+    );
+    expect(run([{ type: "leaveConfirmed" }], holding)).toEqual(holding);
+  });
+
+  it("VOU, and NÃO VOU without a place, answer at once", () => {
+    expect(run([{ type: "answerTapped", intent: "going" }], holding).step).toBe("answering");
+    const none = { ...holding, standing: { status: "notGoing", position: null } } as const;
+    expect(run([{ type: "answerTapped", intent: "notGoing" }], none).step).toBe("answering");
+  });
+});
+
+describe("NÃO VOU MAIS after a sign-in (R101 P2, reviewer finding 1)", () => {
+  // Known gap, documented on purpose: the question only guards the signed-in tap.
+  it("characterization: a signed-out NÃO VOU answers right after the sign-in, without the question", () => {
+    const state = run([
+      { type: "sessionChecked", signedIn: true, pendingIntent: "notGoing" },
+      { type: "registered", hasProfile: true, suggestion: "Ana" },
+    ]);
+    expect(state.step).toBe("answering");
+  });
+
+  it.todo(
+    "a signed-out NÃO VOU of someone who holds a place asks 'Sair da lista?' after the sign-in",
+  );
 });

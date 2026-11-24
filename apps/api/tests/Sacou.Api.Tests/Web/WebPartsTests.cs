@@ -11,6 +11,8 @@ namespace Sacou.Api.Tests.Web;
 /// <summary>The parts of the round page without the HTML: the screen's lists, the CSP, the manifest and the files' headers.</summary>
 public sealed class WebPartsTests(SacouApiFactory factory) : IClassFixture<SacouApiFactory>
 {
+    private static readonly DateTimeOffset Now = new(2026, 11, 4, 15, 0, 0, TimeSpan.Zero);
+
     [Fact]
     public void WithoutMensalistas_OneListOfConfirmed_WithTheOpenSpots()
     {
@@ -20,7 +22,7 @@ public sealed class WebPartsTests(SacouApiFactory factory) : IClassFixture<Sacou
             Going = [new PublicListEntry("Ana", false), new PublicListEntry(null, false)],
         };
 
-        var view = RoundPageView.From(summary);
+        var view = RoundPageView.From(summary, Now);
 
         var list = Assert.Single(view.Lists);
         Assert.Equal(("Confirmados", "2 de 12"), (list.Title, list.Count));
@@ -32,7 +34,7 @@ public sealed class WebPartsTests(SacouApiFactory factory) : IClassFixture<Sacou
     [Fact]
     public void WithoutALimit_NoOpenSpots_AndThePreviewSaysOnlyTheCount()
     {
-        var view = RoundPageView.From(RoundPageFixture.NineOfTwelve() with { Capacity = null });
+        var view = RoundPageView.From(RoundPageFixture.NineOfTwelve() with { Capacity = null }, Now);
 
         Assert.DoesNotContain(view.Lists.SelectMany(list => list.Lines), line => line.IsVacant);
         Assert.Equal("Qui, 5/11 · 19h · Arena Beira-Mar · 9 confirmados", view.PreviewDescription);
@@ -43,7 +45,7 @@ public sealed class WebPartsTests(SacouApiFactory factory) : IClassFixture<Sacou
     [Fact]
     public void FullWithAWaitlist_SaysHowManyWait()
     {
-        var view = RoundPageView.From(RoundPageFixture.NineOfTwelve() with { State = PublicRoundState.Full, GoingCount = 12, WaitlistCount = 2 });
+        var view = RoundPageView.From(RoundPageFixture.NineOfTwelve() with { State = PublicRoundState.Full, GoingCount = 12, WaitlistCount = 2 }, Now);
 
         Assert.Equal(("Lotou. Se você for, entra na espera.", "2 na espera"), (view.Hint, view.Notice));
     }

@@ -42,7 +42,7 @@ Uma por membro por rodada.
 - **Mais mensalistas que vagas** (padrão da pergunta 24): os que sobram vão para a espera, na mesma ordem, **à frente** de qualquer avulso.
 - **Mensalista que disse "não vou" e volta** (pergunta 25): um "vou" como qualquer outro, no fim da espera; sem fura-fila.
 - **Reduzir as vagas** (pergunta 26) não tira ninguém: só fecha a porta para os próximos.
-- **Janela dos avulsos** (`attendance.dropInWindowEnabled`, `dropInOpensHoursBefore`): antes de `início − horas` o "vou" do avulso é `sessions.drop-in-window-closed`; a contagem é de instante. O "não vou" passa sempre. Mensalista e admin não têm janela. Convidado é avulso.
+- **Janela dos avulsos** (`attendance.dropInWindowEnabled`, `dropInOpensHoursBefore`): antes de `início − horas` o "vou" do avulso é `sessions.drop-in-window-closed`; a contagem é de instante. O "não vou" passa sempre. Mensalista e admin não têm janela. A página `/r` mostra a linha "A lista dos avulsos abre hoje, às 20h." enquanto a rodada está aberta ou lotada e a janela não abriu (frase no fuso da rodada, [ADR 0079](../arquitetura/adr/0079-clareza-do-fluxo.md)); o VOU da web fica ativo até a recusa, e depois dela fica desligado dizendo o dia. Convidado é avulso.
 - **O tipo vem do Groups na hora da resposta**, nunca da presença.
 
 ## Recorrência
