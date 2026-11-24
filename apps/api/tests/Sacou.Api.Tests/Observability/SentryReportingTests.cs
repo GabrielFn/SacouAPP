@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sacou.Api.Observability;
+using Sacou.Modules.Identity.Contracts;
+using Sacou.Shared.Results;
 using Xunit;
 
 namespace Sacou.Api.Tests.Observability;
@@ -19,6 +21,9 @@ public sealed partial class SentryReportingTests
     private const string EmailMarker = "marcador@example.com";
     private const string NicknameMarker = "MarcadorApelido";
     private const string CookieMarker = "CookieMarcador";
+    private const string MyGroupsRoute = "/v1/groups";
+
+    private static readonly Dictionary<string, string?> NoSettings = [];
 
     /// <summary>Case 1: without the DSN the API starts, says so by the variable's name, and has no Sentry hub.</summary>
     [Fact]
@@ -115,7 +120,7 @@ public sealed partial class SentryReportingTests
         Assert.False(sentryEvent.GetProperty("request").TryGetProperty("cookies", out _));
     }
 
-    /// <summary>Case 7: a 404 of a filled path (it carries a code) is no event.</summary>
+    /// <summary>Case 7: a 404 of a filled path (it carries a code) and a 400 of validation are no event.</summary>
     [Fact]
     public async Task ClientErrors_AreNoEvent()
     {
@@ -127,6 +132,60 @@ public sealed partial class SentryReportingTests
 
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
+        await api.FlushAsync();
+        Assert.Empty(api.Transport.Events);
+    }
+
+    /// <summary>Case 7: a business refusal of a <c>Result</c>, through the real endpoint and its ProblemDetails, is no event.</summary>
+    [Theory]
+    [InlineData(ErrorKind.Conflict, HttpStatusCode.Conflict)]
+    [InlineData(ErrorKind.Unprocessable, HttpStatusCode.UnprocessableEntity)]
+    [InlineData(ErrorKind.Forbidden, HttpStatusCode.Forbidden)]
+    public async Task BusinessRefusal_IsNoEvent(ErrorKind kind, HttpStatusCode expected)
+    {
+        await using var api = new SentryTestApi(Staging, NoSettings, new RefusingCurrentUser(kind));
+        using var client = api.Factory.CreateClient();
+
+        using var response = await client.GetAsync(MyGroupsRoute, TestContext.Current.CancellationToken);
+
+        Assert.Equal(expected, response.StatusCode);
+        await api.FlushAsync();
+        Assert.Empty(api.Transport.Events);
+    }
+
+    /// <summary>Case 7: the global limit's 429 is no event.</summary>
+    [Fact]
+    public async Task RateLimited_IsNoEvent()
+    {
+        var oneRequest = new Dictionary<string, string?> { ["RateLimiting:Global:PermitLimit"] = "1" };
+        await using var api = new SentryTestApi(Staging, oneRequest, new RefusingCurrentUser(ErrorKind.Conflict));
+        using var client = api.Factory.CreateClient();
+
+        using var first = await client.GetAsync(MyGroupsRoute, TestContext.Current.CancellationToken);
+        using var limited = await client.GetAsync(MyGroupsRoute, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Conflict, first.StatusCode);
+        Assert.Equal(HttpStatusCode.TooManyRequests, limited.StatusCode);
+        await api.FlushAsync();
+        Assert.Empty(api.Transport.Events);
+    }
+
+    /// <summary>Case 7: the <see cref="OperationCanceledException"/> of a client that gave up is no event.</summary>
+    [Fact]
+    public async Task ClientThatGaveUp_IsNoEvent()
+    {
+        var waiting = new WaitingCurrentUser();
+        await using var api = new SentryTestApi(Staging, NoSettings, waiting);
+        using var client = api.Factory.CreateClient();
+        using var giveUp = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        var request = client.GetAsync(MyGroupsRoute, giveUp.Token);
+        await waiting.Started.Task.WaitAsync(TestContext.Current.CancellationToken);
+        await giveUp.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => request);
+        await api.RequestCompleted.Task.WaitAsync(TestContext.Current.CancellationToken);
+        Assert.True(waiting.Canceled);
         await api.FlushAsync();
         Assert.Empty(api.Transport.Events);
     }
@@ -174,6 +233,37 @@ public sealed partial class SentryReportingTests
         Assert.True(header >= 0, "The envelope has no event item.");
         using var document = JsonDocument.Parse(lines[header + 1]);
         return document.RootElement.Clone();
+    }
+
+    /// <summary>The Identity's answer to every request: the business error of <paramref name="kind"/>.</summary>
+    private sealed class RefusingCurrentUser(ErrorKind kind) : ICurrentUser
+    {
+        public Task<Result<CurrentUser>> GetAsync(CancellationToken cancellationToken) =>
+            Task.FromResult(Result.Failure<CurrentUser>(new Error("sentry.test.refusal", kind)));
+    }
+
+    /// <summary>Never answers: waits for the request to be aborted, as a slow query would.</summary>
+    private sealed class WaitingCurrentUser : ICurrentUser
+    {
+        internal TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        internal bool Canceled { get; private set; }
+
+        public async Task<Result<CurrentUser>> GetAsync(CancellationToken cancellationToken)
+        {
+            Started.TrySetResult();
+            try
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                Canceled = true;
+                throw;
+            }
+
+            throw new InvalidOperationException("Unreachable: the delay never ends.");
+        }
     }
 
     [LoggerMessage(EventId = 9001, Level = LogLevel.Warning, Message = "Aviso de teste para {Email}")]

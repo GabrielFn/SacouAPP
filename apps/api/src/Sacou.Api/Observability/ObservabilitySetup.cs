@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
 
 namespace Sacou.Api.Observability;
 
@@ -26,7 +27,13 @@ internal static partial class ObservabilitySetup
     private const string OwnCategoryPrefix = "Sacou.";
     private const string HttpCategory = "http";
 
-    private const double EveryEvent = 1.0;
+    /// <summary>
+    /// R2 and case 12: the data access loggers write the SQL of a failing command, at <c>Error</c>. They would be a second
+    /// event beside the 500's, with that text; the 500 already carries the exception.
+    /// </summary>
+    private static readonly string[] DatabaseCategoryPrefixes = ["Microsoft.EntityFrameworkCore", "Npgsql"];
+
+    private const float EveryEvent = 1.0f;
     private const double NoTrace = 0.0;
 
     /// <summary>Wires Sentry when the DSN is set, and the JSON console outside Development (D5).</summary>
@@ -79,6 +86,11 @@ internal static partial class ObservabilitySetup
         category is not null
         && (category.StartsWith(OwnCategoryPrefix, StringComparison.Ordinal) || category == HttpCategory);
 
+    /// <summary>Whether a log comes from the data access, whose entries never reach Sentry, as event or breadcrumb.</summary>
+    internal static bool IsDatabaseCategory(string? category) =>
+        category is not null
+        && DatabaseCategoryPrefixes.Any(prefix => category.StartsWith(prefix, StringComparison.Ordinal));
+
     private static void Configure(SentryAspNetCoreOptions options, string dsn, string environment, string? release)
     {
         options.Dsn = dsn;
@@ -91,9 +103,10 @@ internal static partial class ObservabilitySetup
         options.SendDefaultPii = false;
         options.MaxRequestBodySize = RequestSize.None;
         options.AttachStacktrace = true;
-        options.SampleRate = (float)EveryEvent;
+        options.SampleRate = EveryEvent;
         options.TracesSampleRate = NoTrace;
         options.MinimumEventLevel = LogLevel.Error;
+        options.AddLogEntryFilter((category, _, _, _) => IsDatabaseCategory(category));
         options.MinimumBreadcrumbLevel = LogLevel.Information;
         options.ServerName = string.Empty;
         options.SetBeforeSend(SentryEventScrubber.Scrub);

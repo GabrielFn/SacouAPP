@@ -11,6 +11,8 @@ internal static partial class SensitiveText
 {
     internal const string Redacted = "[filtrado]";
 
+    internal const string RedactedId = "[id]";
+
     private const int PatternTimeoutMilliseconds = 100;
 
     internal static string? Redact(string? text)
@@ -25,6 +27,13 @@ internal static partial class SensitiveText
         var withoutPix = PixPattern().Replace(withoutJwt, Redacted);
         return EmailPattern().Replace(withoutPix, Redacted);
     }
+
+    /// <summary>Every GUID becomes <see cref="RedactedId"/>: in a breadcrumb it may be a <c>MemberId</c> (ADR 0080, D4).</summary>
+    internal static string? RedactIds(string? text) =>
+        string.IsNullOrEmpty(text) ? text : GuidPattern().Replace(text, RedactedId);
+
+    [GeneratedRegex(@"\b[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\b", RegexOptions.CultureInvariant, PatternTimeoutMilliseconds)]
+    private static partial Regex GuidPattern();
 
     [GeneratedRegex(@"\bBearer\s+\S+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, PatternTimeoutMilliseconds)]
     private static partial Regex BearerPattern();

@@ -115,7 +115,7 @@ internal static class SentryEventScrubber
             scrubbed.Remove(field);
             if (text is not null)
             {
-                scrubbed[field] = new JsonObject { [Formatted] = SensitiveText.Redact(text) };
+                scrubbed[field] = new JsonObject { [Formatted] = SensitiveText.RedactIds(SensitiveText.Redact(text)) };
             }
         }
 
@@ -157,12 +157,13 @@ internal static class SentryEventScrubber
     private static JsonObject ScrubBreadcrumb(JsonObject breadcrumb)
     {
         var scrubbed = Keep(breadcrumb, BreadcrumbFields);
-        scrubbed[Message] = SensitiveText.Redact(Text(scrubbed, Message));
+        // The ids too: a breadcrumb of a log names the member it was about, and Sentry never gets a MemberId (ADR 0080).
+        scrubbed[Message] = SensitiveText.RedactIds(SensitiveText.Redact(Text(scrubbed, Message)));
         var data = Keep(scrubbed[Data] as JsonObject, BreadcrumbDataKeys);
         foreach (var key in data.Select(entry => entry.Key).ToList())
         {
             var text = Text(data, key) ?? string.Empty;
-            data[key] = key == Url ? WithoutQuery(text) : SensitiveText.Redact(text);
+            data[key] = SensitiveText.RedactIds(key == Url ? WithoutQuery(text) : SensitiveText.Redact(text));
         }
 
         scrubbed[Data] = data;

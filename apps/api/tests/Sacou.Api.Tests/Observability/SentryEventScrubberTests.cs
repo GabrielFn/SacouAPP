@@ -103,6 +103,45 @@ public sealed class SentryEventScrubberTests
         Assert.Equal(allowed, ObservabilitySetup.IsAllowedBreadcrumb(category));
 
     [Theory]
+    [InlineData("Microsoft.EntityFrameworkCore.Database.Command", true)]
+    [InlineData("Microsoft.EntityFrameworkCore.Query", true)]
+    [InlineData("Microsoft.EntityFrameworkCore.Update", true)]
+    [InlineData("Npgsql.Command", true)]
+    [InlineData("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", false)]
+    [InlineData("Sacou.Modules.Sessions.Application.RoundLog", false)]
+    [InlineData(null, false)]
+    public void IsDatabaseCategory_OnlyTheDataAccessLoggers(string? category, bool database) =>
+        Assert.Equal(database, ObservabilitySetup.IsDatabaseCategory(category));
+
+    [Fact]
+    public void ScrubBreadcrumb_DropsTheIds()
+    {
+        const string memberId = "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b";
+        var breadcrumb = new Breadcrumb(
+            $"Waitlist promotion in round {Guid.NewGuid()} for member {memberId}.",
+            "default",
+            new Dictionary<string, string>(StringComparer.Ordinal) { ["url"] = $"https://exp.host/members/{memberId.ToUpperInvariant()}?x=1", ["eventId"] = memberId },
+            "Sacou.Modules.Sessions.Application.RoundLog",
+            BreadcrumbLevel.Info);
+
+        var scrubbed = SentryEventScrubber.Scrub(breadcrumb);
+
+        Assert.Equal($"Waitlist promotion in round {SensitiveText.RedactedId} for member {SensitiveText.RedactedId}.", scrubbed.Message);
+        Assert.Equal($"https://exp.host/members/{SensitiveText.RedactedId}", scrubbed.Data!["url"]);
+        Assert.Equal(SensitiveText.RedactedId, scrubbed.Data["eventId"]);
+    }
+
+    [Fact]
+    public void Scrub_DropsTheIdsOfTheLogMessage()
+    {
+        var sentryEvent = new SentryEvent { Message = $"Member {Guid.NewGuid()} failed." };
+
+        using var document = JsonDocument.Parse(Json(SentryEventScrubber.Scrub(sentryEvent)));
+
+        Assert.Equal($"Member {SensitiveText.RedactedId} failed.", document.RootElement.GetProperty("logentry").GetProperty("formatted").GetString());
+    }
+
+    [Theory]
     [InlineData("https://publickey@o1.ingest.us.sentry.io/123", true)]
     [InlineData("http://publickey@o1.ingest.us.sentry.io/123", false)]
     [InlineData("https://o1.ingest.us.sentry.io/123", false)]
