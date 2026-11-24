@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.AppConfig;
 using Sacou.Modules.Stats.Access;
 using Sacou.Modules.Stats.Domain.MvpVoting;
 using Sacou.Modules.Stats.MvpVoting;
@@ -35,7 +36,7 @@ internal static class GetMvpVotingResultEndpoint
     public const string Name = "GetMvpVotingResult";
     public const string Route = "/rounds/{roundId:guid}/mvp-voting/result";
 
-    public static RouteGroupBuilder MapGetMvpVotingResult(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync);
+    public static RouteGroupBuilder MapGetMvpVotingResult(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync, AppFeature.MvpVote);
 
     private static async Task<Results<Ok<MvpVotingResultResponse>, ProblemHttpResult>> HandleAsync(
         Guid roundId, HttpContext context, GetMvpVotingResultHandler handler, CancellationToken cancellationToken)

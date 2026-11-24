@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.AppConfig;
 using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Stats.Access;
 using Sacou.Modules.Stats.Domain.MvpVoting;
@@ -55,7 +56,7 @@ internal static class GetMvpVotingEndpoint
     public static string LocationOf(Guid groupId, Guid roundId) =>
         string.Create(CultureInfo.InvariantCulture, $"/v1/groups/{groupId}/rounds/{roundId}/mvp-voting");
 
-    public static RouteGroupBuilder MapGetMvpVoting(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync);
+    public static RouteGroupBuilder MapGetMvpVoting(this RouteGroupBuilder group) => group.MapRoundRead(Route, Name, HandleAsync, AppFeature.MvpVote);
 
     private static async Task<Results<Ok<MvpBallotResponse>, ProblemHttpResult>> HandleAsync(
         Guid roundId, HttpContext context, GetMvpVotingHandler handler, CancellationToken cancellationToken)

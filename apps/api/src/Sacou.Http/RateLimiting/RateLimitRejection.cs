@@ -32,7 +32,7 @@ internal static partial class RateLimitRejection
         LogRefused(logger, policy);
         http.Response.Headers[HeaderNames.RetryAfter] = RetryAfterSeconds(context.Lease).ToString(CultureInfo.InvariantCulture);
         http.Response.Headers[HeaderNames.CacheControl] = NoStore.Value;
-        if (RateLimitPolicies.PerClientAddress.Contains(policy) && http.RequestServices.GetService<IRateLimitedPage>() is { } page)
+        if (RateLimitPolicies.AnswerWithPage.Contains(policy) && http.RequestServices.GetService<IRateLimitedPage>() is { } page)
         {
             http.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             await page.WriteAsync(http, cancellationToken).ConfigureAwait(false);

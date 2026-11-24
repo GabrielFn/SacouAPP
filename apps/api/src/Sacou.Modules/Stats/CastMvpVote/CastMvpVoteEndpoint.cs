@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Sacou.Http;
+using Sacou.Http.AppConfig;
 using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Stats.Access;
@@ -34,7 +35,7 @@ internal static class CastMvpVoteEndpoint
 
     public static RouteGroupBuilder MapCastMvpVote(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireCapability(GroupCapability.ViewGroup).WithNoStore()
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireFeature(AppFeature.MvpVote).RequireCapability(GroupCapability.ViewGroup).WithNoStore()
             .RequireRateLimiting(RateLimitPolicies.CourtSync)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status409Conflict)

@@ -48,6 +48,9 @@ public sealed class RateLimitingOptions
     /// <summary>Per client address, not per user: the round page is anonymous (ADR 0070, D6).</summary>
     public WindowLimitOptions? RoundPage { get; init; }
 
+    /// <summary>Per client address: the app config is anonymous (ADR 0084).</summary>
+    public WindowLimitOptions? AppConfig { get; init; }
+
     /// <summary>How many requests of the two-connection routes run at once, for everyone together.</summary>
     public int DualConnectionConcurrency { get; init; }
 
@@ -85,5 +88,6 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.RoundLink] = RoundLink,
         [RateLimitPolicies.PushDevice] = PushDevice,
         [RateLimitPolicies.RoundPage] = RoundPage,
+        [RateLimitPolicies.AppConfig] = AppConfig,
     };
 }
