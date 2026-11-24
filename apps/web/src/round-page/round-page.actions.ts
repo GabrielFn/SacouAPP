@@ -25,7 +25,10 @@ export type AnswerAction =
   | { readonly type: "nicknameSaved" }
   | { readonly type: "nicknameRejected"; readonly failure: Failure }
   | { readonly type: "answered"; readonly standing: Standing }
-  | { readonly type: "answerFailed"; readonly failure: Failure };
+  | { readonly type: "answerFailed"; readonly failure: Failure }
+  /** "NÃO VOU MAIS" was confirmed or given up on (R101, item 3b). */
+  | { readonly type: "leaveConfirmed" }
+  | { readonly type: "leaveCancelled" };
 
 /** Everything that moves the page's flow: unions on `type`, so each reducer's switch is exhaustive. */
 export type RoundPageAction = SessionAction | SheetAction | AnswerAction;
@@ -44,6 +47,8 @@ const ANSWER_TYPES: ReadonlySet<string> = new Set<AnswerAction["type"]>([
   "nicknameRejected",
   "answered",
   "answerFailed",
+  "leaveConfirmed",
+  "leaveCancelled",
 ]);
 
 export function isSessionAction(action: RoundPageAction): action is SessionAction {

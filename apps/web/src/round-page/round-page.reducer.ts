@@ -15,6 +15,7 @@ import type {
   SigningIn,
   Standing,
 } from "./round-page.types";
+import { holdsPlace } from "./standing";
 
 export const initialRoundPageState: RoundPageState = { step: "starting" };
 
@@ -93,6 +94,9 @@ function afterTap(state: RoundPageState, intent: Intent): RoundPageState {
   if (!state.signedIn) return sheet(intent, "choice");
   if (state.nicknameSuggestion !== null) {
     return { step: "nickname", intent, suggestion: state.nicknameSuggestion, failure: null };
+  }
+  if (intent === "notGoing" && state.standing !== null && holdsPlace(state.standing)) {
+    return { step: "confirmingLeave", standing: state.standing };
   }
   return { step: "answering", intent, standing: state.standing };
 }
@@ -180,6 +184,14 @@ function answerReducer(state: RoundPageState, action: AnswerAction): RoundPageSt
       return when(state, "answering", () => signedInIdle(action.standing, null));
     case "answerFailed":
       return when(state, "answering", (step) => signedInIdle(step.standing, action.failure));
+    case "leaveConfirmed":
+      return when(state, "confirmingLeave", (step) => ({
+        step: "answering",
+        intent: "notGoing",
+        standing: step.standing,
+      }));
+    case "leaveCancelled":
+      return when(state, "confirmingLeave", (step) => signedInIdle(step.standing, null));
   }
 }
 

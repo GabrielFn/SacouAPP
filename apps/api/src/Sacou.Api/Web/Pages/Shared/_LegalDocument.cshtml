@@ -1,0 +1,56 @@
+@model LegalPageView
+@* The terms and the privacy policy (E6.1, ADR 0083): plain text from the reader, every value encoded by Razor, no script. *@
+@{
+    var document = Model.Document;
+}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="strict-origin">
+    <title>@document.Title</title>
+    @if (Model.Style is { } style)
+    {
+        <link rel="stylesheet" href="@style">
+    }
+</head>
+<body>
+<main class="legal-page">
+    <article>
+        <header class="legal-header">
+            <p class="legal-brand">@WebTexts.Brand</p>
+            <h1>@document.Title</h1>
+            <p class="legal-version">@Model.VersionLine</p>
+        </header>
+        @foreach (var block in document.Blocks)
+        {
+            switch (block)
+            {
+                case LegalBlock.Heading { Level: LegalDocumentParser.SectionLevel } heading:
+                    <h2>@heading.Text</h2>
+                    break;
+                case LegalBlock.Heading heading:
+                    <h3>@heading.Text</h3>
+                    break;
+                case LegalBlock.Paragraph paragraph:
+                    <p>@paragraph.Text</p>
+                    break;
+                case LegalBlock.BulletList list:
+                    <ul>
+                        @foreach (var item in list.Items)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                    break;
+            }
+        }
+    </article>
+    <footer class="legal-footer">
+        <p>@WebTexts.SeeAlso<a href="@Model.OtherPath">@Model.OtherTitle</a></p>
+    </footer>
+</main>
+</body>
+</html>

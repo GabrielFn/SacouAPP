@@ -75,7 +75,9 @@ export type RoundPageState =
       readonly failure: Failure | null;
     }
   | { readonly step: "savingNickname"; readonly intent: Intent; readonly nickname: string }
-  | { readonly step: "answering"; readonly intent: Intent; readonly standing: Standing | null };
+  | { readonly step: "answering"; readonly intent: Intent; readonly standing: Standing | null }
+  /** "NÃO VOU MAIS" asked "Sair da lista?" and waits for the answer; nothing was sent (R101, item 3b). */
+  | { readonly step: "confirmingLeave"; readonly standing: Standing };
 
 export type Step = RoundPageState["step"];
 

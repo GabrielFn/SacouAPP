@@ -24,15 +24,11 @@ internal sealed class FirebaseWebOptions
 
 /// <summary>
 /// What the page reads of <c>RoundPage</c>: the public origin (validated on start by the Sessions module, ADR 0070, D1)
-/// for the absolute <c>og:url</c> and <c>og:image</c>, and the legal links of screen 02, optional until E6.1 publishes them.
+/// for the absolute <c>og:url</c> and <c>og:image</c>. The legal links are this host's own pages (E6.1, ADR 0083).
 /// </summary>
 internal sealed class WebPageOptions
 {
     public const string SectionName = "RoundPage";
 
     public string? PublicBaseUrl { get; init; }
-
-    public string? TermsUrl { get; init; }
-
-    public string? PrivacyUrl { get; init; }
 }

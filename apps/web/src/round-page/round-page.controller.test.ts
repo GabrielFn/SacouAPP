@@ -156,6 +156,43 @@ describe("createRoundPage", () => {
     );
     await page.start();
     expect(page.state()).toMatchObject({ step: "idle", signedIn: true, standing });
+    await page.tapAnswer("going");
+    expect(calls.log).toEqual(["register", `standing:${CODE}`, `answer:${CODE}:going`]);
+  });
+
+  it("NÃO VOU MAIS asks first, sends nothing until confirmed, and a second tap sends once (R101, item 3b)", async () => {
+    const calls: Calls = { log: [] };
+    const standing: Standing = { status: "going", position: 3 };
+    const { page } = setUp(
+      fakeAuth(calls, { user: { displayName: null } }),
+      fakeApi(calls, { standing }),
+    );
+    await page.start();
+    await page.tapAnswer("notGoing");
+    expect(page.state()).toEqual({ step: "confirmingLeave", standing });
+    expect(calls.log).toEqual(["register", `standing:${CODE}`]);
+    await Promise.all([page.confirmLeave(), page.confirmLeave()]);
+    expect(calls.log).toEqual(["register", `standing:${CODE}`, `answer:${CODE}:notGoing`]);
+  });
+
+  it("CONTINUAR NA LISTA goes back to the standing and sends nothing", async () => {
+    const calls: Calls = { log: [] };
+    const standing: Standing = { status: "waitlisted", position: 2 };
+    const { page } = setUp(
+      fakeAuth(calls, { user: { displayName: null } }),
+      fakeApi(calls, { standing }),
+    );
+    await page.start();
+    await page.tapAnswer("notGoing");
+    await page.keepPlace();
+    expect(page.state()).toMatchObject({ step: "idle", signedIn: true, standing, failure: null });
+    expect(calls.log).toEqual(["register", `standing:${CODE}`]);
+  });
+
+  it("whoever holds no place leaves without a question", async () => {
+    const calls: Calls = { log: [] };
+    const { page } = setUp(fakeAuth(calls, { user: { displayName: null } }), fakeApi(calls));
+    await page.start();
     await page.tapAnswer("notGoing");
     expect(calls.log).toEqual(["register", `standing:${CODE}`, `answer:${CODE}:notGoing`]);
   });

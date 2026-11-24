@@ -20,6 +20,7 @@ function elements(): PageElements {
   return {
     going: control(),
     notGoing: control(),
+    leaveConfirm: shown(),
     status: slot(),
     signOut: control(),
     sheet: shown(),
@@ -41,7 +42,7 @@ function elements(): PageElements {
   };
 }
 
-const browser = { embedded: false };
+const browser = { embedded: false, dropIn: { phrase: "", hasRegulars: true } };
 
 function idle(over: Partial<Extract<RoundPageState, { step: "idle" }>> = {}): RoundPageState {
   return {
@@ -116,7 +117,7 @@ describe("renderRoundPage", () => {
     renderRoundPage(
       page,
       { step: "signIn", intent: "going", form: "choice", failure: null, notice: null },
-      { embedded: true },
+      { ...browser, embedded: true },
     );
     expect([
       page.sheet.hidden,
@@ -176,5 +177,63 @@ describe("renderRoundPage", () => {
     const page = { ...elements(), going: null, notGoing: null };
     renderRoundPage(page, idle({ failure: { kind: "roundClosed" } }), browser);
     expect(page.status.textContent).toBe("Essa rodada já fechou.");
+  });
+
+  it("the window refusal says the day, disables VOU and leaves NÃO VOU on (R101, item 2)", () => {
+    const page = elements();
+    const dropIn = { phrase: "na terça, 24/11, às 20h", hasRegulars: true };
+    renderRoundPage(page, idle({ failure: { kind: "dropInWindowClosed", joined: true } }), {
+      ...browser,
+      dropIn,
+    });
+    expect(page.status.textContent).toBe(
+      "Você entrou no grupo. A lista abre para você na terça, 24/11, às 20h. Até lá, só os mensalistas confirmam.",
+    );
+    expect([page.going?.disabled, page.notGoing?.disabled]).toEqual([true, false]);
+  });
+
+  it("a group of avulsos only is told the day without the mensalistas", () => {
+    const page = elements();
+    const dropIn = { phrase: "amanhã, às 20h", hasRegulars: false };
+    renderRoundPage(page, idle({ failure: { kind: "dropInWindowClosed", joined: false } }), {
+      ...browser,
+      dropIn,
+    });
+    expect(page.status.textContent).toBe("A lista abre amanhã, às 20h.");
+  });
+
+  it("without the day, the refusal keeps the plain sentence", () => {
+    const page = elements();
+    renderRoundPage(
+      page,
+      idle({ failure: { kind: "dropInWindowClosed", joined: false } }),
+      browser,
+    );
+    expect(page.status.textContent).toBe("A lista dos avulsos ainda não abriu.");
+  });
+
+  it("VOU stays on before any refusal, for everyone", () => {
+    const page = elements();
+    renderRoundPage(page, idle({ signedIn: false }), {
+      ...browser,
+      dropIn: { phrase: "hoje, às 20h", hasRegulars: false },
+    });
+    expect(page.going?.disabled).toBe(false);
+  });
+
+  it("the leave question hides the answers and shows only itself", () => {
+    const page = elements();
+    renderRoundPage(
+      page,
+      { step: "confirmingLeave", standing: { status: "going", position: 4 } },
+      browser,
+    );
+    expect([page.leaveConfirm?.hidden, page.going?.hidden, page.notGoing?.hidden]).toEqual([
+      false,
+      true,
+      true,
+    ]);
+    renderRoundPage(page, idle({ standing: { status: "going", position: 4 } }), browser);
+    expect([page.leaveConfirm?.hidden, page.notGoing?.hidden]).toEqual([true, false]);
   });
 });

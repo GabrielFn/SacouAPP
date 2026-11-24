@@ -478,3 +478,24 @@ button:disabled {
   color: var(--navy);
   font-weight: 600;
 }
+
+.leave {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leave[hidden] {
+  display: none;
+}
+
+.leave-title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.375rem;
+}
+
+.leave-body {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+}

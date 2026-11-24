@@ -18,13 +18,11 @@ internal sealed class InviteModel(IWebAssets assets, IOptions<FirebaseWebOptions
     /// <summary>The Firebase Web config when complete; without it the page cannot sign in and says so.</summary>
     public FirebaseWebOptions? Firebase => firebase.Value.IsComplete ? firebase.Value : null;
 
-    public SignInSheetView SignInSheet => new(
+    public SignInSheetView SignInSheet { get; } = new(
         Context: null,
         WebTexts.InviteSheetTitle,
         WebTexts.InviteSheetBody,
-        Privacy: null,
-        SignInSheetView.HttpsOrNull(page.Value.TermsUrl),
-        SignInSheetView.HttpsOrNull(page.Value.PrivacyUrl));
+        Privacy: null);
 
     /// <summary>The page's own address, never with the token (the server never has it).</summary>
     public string PageUrl => Origin + PagePath;

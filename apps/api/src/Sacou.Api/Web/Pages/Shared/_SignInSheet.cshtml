@@ -42,12 +42,6 @@
         {
             <p>@privacy</p>
         }
-        <p class="legal">@WebTexts.LegalBefore@if (Model.TermsUrl is { } terms)
-            {<a href="@terms" rel="noopener noreferrer" target="_blank">@WebTexts.Terms</a>}
-            else
-            {@WebTexts.Terms}@WebTexts.LegalBetween@if (Model.PrivacyUrl is { } privacyUrl)
-            {<a href="@privacyUrl" rel="noopener noreferrer" target="_blank">@WebTexts.PrivacyPolicy</a>}
-            else
-            {@WebTexts.PrivacyPolicy}@WebTexts.LegalAfter</p>
+        <p class="legal">@WebTexts.LegalBefore<a href="@SignInSheetView.TermsPath" rel="noopener noreferrer" target="_blank">@WebTexts.Terms</a>@WebTexts.LegalBetween<a href="@SignInSheetView.PrivacyPath" rel="noopener noreferrer" target="_blank">@WebTexts.PrivacyPolicy</a>@WebTexts.LegalAfter</p>
     </section>
 </div>
