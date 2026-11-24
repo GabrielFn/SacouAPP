@@ -170,3 +170,9 @@
   4. `use-draw-screen.ts:174`: o aviso J só aparece na 07, e a 08 abre logo depois; conferir no emulador se o admin vê.
   5. `PlayerRoundScreen.tsx:491`: com presença desligada na rodada, o bloco Times some na 26 (caso raro): tirar o bloco de dentro do `card === null`.
   6. `RoundTeamsCard.tsx:612`: título do time com `teamTitle` (22, o da 07) pode ficar grande no cartão da 26: conferir com `RodadaJogador.dc.html` no emulador.
+- R101 P2 (#239), achados baixos do revisor (Opus, código e segurança, 24/11):
+  1. `apps/web/src/round-page/round-page.reducer.ts:66-67`: quem não está logado, tem lugar e toca "NÃO VOU" passa pelo login e sai sem a pergunta. Depois de `registered` com intenção `notGoing`, carregar a posição e ir para `confirmingLeave` se tiver lugar.
+  2. `apps/web/src/main.ts:21-23`: o foco se perde ao sair de `confirmingLeave`; pôr o foco no botão visível ou no status.
+  3. `WebTexts.cs:86-101`: conta de fuso dentro da classe de textos e `FindSystemTimeZoneById` a cada pedido; fuso inválido daria 500 na página pública. Mover para `RoundPageView` com o fuso em cache.
+  4. `IPublicRoundSummary.cs:41`: `DropInOpensAt = null` como padrão deixa outro construtor esquecer o campo; tornar obrigatório.
+  5. `RoundPageView.cs:51`: `HasRegulars` olha só quem tem vaga; rever com a R101 P3 (pergunta 183).
