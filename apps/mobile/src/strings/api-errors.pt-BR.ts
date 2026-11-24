@@ -47,7 +47,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "identity.user-not-registered": "Estamos terminando de preparar sua conta. Tente de novo.",
   "matches.batch-invalid": "Os pontos chegaram fora de ordem. O app vai enviar de novo.",
   "matches.batch-mismatch": "Este celular não está mais com a quadra.",
-  "matches.court-busy": "O servidor está ocupado com esta quadra. O app vai enviar de novo em instantes.",
+  "matches.court-busy": "O servidor está ocupado. O app vai enviar de novo em instantes.",
   "matches.court-session-not-found": "Essa quadra não existe nesta rodada.",
   "matches.event-id-conflict": "Um ponto chegou diferente do que já estava salvo.",
   "matches.event-implausible": "Um ponto não confere com o placar e não foi salvo.",
