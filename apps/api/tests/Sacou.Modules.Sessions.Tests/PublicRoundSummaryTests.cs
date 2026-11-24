@@ -18,6 +18,7 @@ public sealed class PublicRoundSummaryTests
     private const int PointsPerSet = 21;
     private const int IndoorPlayers = 6;
     private const string AnyCode = "AAAAAAAAAAAAAAAAAAAAAA";
+    private const bool WithRegular = true;
 
     private static readonly IReadOnlyDictionary<Guid, ListName> NoNames = new Dictionary<Guid, ListName>();
 
@@ -29,7 +30,7 @@ public sealed class PublicRoundSummaryTests
     {
         var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
 
-        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames);
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal(
             summary with { Going = [] },
@@ -57,7 +58,7 @@ public sealed class PublicRoundSummaryTests
     {
         var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: Capacity + 1);
 
-        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames);
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal((PublicRoundState.Full, Capacity, 1), (summary.State, summary.GoingCount, summary.WaitlistCount));
     }
@@ -68,7 +69,7 @@ public sealed class PublicRoundSummaryTests
         var unlimited = LimitedWithWaitlist with { CapacityLimited = false };
         var round = Going(RoundFixture.NewRound(), unlimited, count: Capacity + 1);
 
-        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(unlimited), RoundFixture.Now, NoNames);
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(unlimited), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal((PublicRoundState.Open, (int?)null, Capacity + 1), (summary.State, summary.Capacity, summary.GoingCount));
     }
@@ -79,18 +80,31 @@ public sealed class PublicRoundSummaryTests
         var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
         var withWindow = LimitedWithWaitlist with { RegularsEnabled = true, DropInWindowEnabled = true, DropInOpensHoursBefore = 12 };
 
-        var on = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(withWindow), RoundFixture.Now, NoNames);
-        var off = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames);
+        var on = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(withWindow), RoundFixture.Now, NoNames, WithRegular);
+        var off = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal(round.Slot.StartsAt.AddHours(-12), on.DropInOpensAt);
         Assert.Null(off.DropInOpensAt);
+    }
+
+    /// <summary>Without an active mensalista the window does not hold, so the page says nothing of it (ADR 0079, P3).</summary>
+    [Fact]
+    public void DropInWindow_IsNull_WhileTheGroupHasNoActiveMensalista()
+    {
+        var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var withWindow = LimitedWithWaitlist with { RegularsEnabled = true, DropInWindowEnabled = true, DropInOpensHoursBefore = 12 };
+
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(withWindow), RoundFixture.Now, NoNames, hasActiveRegular: false);
+
+        Assert.Null(summary.DropInOpensAt);
+        Assert.Equal(PublicRoundState.Open, summary.State);
     }
 
     [Fact]
     public void NoScoreAndNoQueue_HasNoPoints_AndNobodyLeaves()
     {
         var summary = StorePublicRoundSummary.ToSummary(
-            RoundFixture.NewRound(), GroupName, Settings(LimitedWithWaitlist, new FormatRules(false, PointsPerSet, false)), RoundFixture.Now, NoNames);
+            RoundFixture.NewRound(), GroupName, Settings(LimitedWithWaitlist, new FormatRules(false, PointsPerSet, false)), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal(((int?)null, false), (summary.PointsPerSet, summary.LoserLeaves));
     }
@@ -144,7 +158,7 @@ public sealed class PublicRoundSummaryTests
             [RoundFixture.Member(3).Value] = new("Espera", Regular: false),
         };
 
-        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, names);
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, names, WithRegular);
 
         Assert.Equal([new PublicListEntry("Ana", true), new PublicListEntry("Rafa", false)], summary.Going.ToArray());
     }
@@ -154,7 +168,7 @@ public sealed class PublicRoundSummaryTests
     {
         var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
 
-        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames);
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames, WithRegular);
 
         Assert.Equal([new PublicListEntry(Nickname: null, Regular: false)], summary.Going.ToArray());
     }

@@ -53,7 +53,7 @@ internal sealed class StorePublicRoundSummary(
         RoundSettings resolved,
         DateTimeOffset now,
         IReadOnlyDictionary<Guid, ListName> names,
-        bool hasActiveRegular = true)
+        bool hasActiveRegular)
     {
         var rules = RoundGroupState.ForGroup(resolved.Attendance, hasActiveRegular);
         return new PublicRoundSummary(
