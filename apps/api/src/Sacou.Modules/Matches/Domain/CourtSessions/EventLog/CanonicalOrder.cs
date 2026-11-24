@@ -20,6 +20,15 @@ internal sealed class CanonicalOrder : IComparer<EventEnvelope>
             return Comparer<object>.Default.Compare(x, y);
         }
 
+        var byKey = CompareOrderKeys(x, y);
+        return byKey != 0 ? byKey : string.CompareOrdinal(x.EventId, y.EventId);
+    }
+
+    /// <summary>Batch, then sequence, then device: the order key two events of one stream never share (ADR 0060, D3).</summary>
+    public static int CompareOrderKeys(EventEnvelope x, EventEnvelope y)
+    {
+        ArgumentNullException.ThrowIfNull(x);
+        ArgumentNullException.ThrowIfNull(y);
         var byBatch = x.Batch.CompareTo(y.Batch);
         if (byBatch != 0)
         {
@@ -27,12 +36,6 @@ internal sealed class CanonicalOrder : IComparer<EventEnvelope>
         }
 
         var bySequence = x.Sequence.CompareTo(y.Sequence);
-        if (bySequence != 0)
-        {
-            return bySequence;
-        }
-
-        var byDevice = string.CompareOrdinal(x.DeviceId, y.DeviceId);
-        return byDevice != 0 ? byDevice : string.CompareOrdinal(x.EventId, y.EventId);
+        return bySequence != 0 ? bySequence : string.CompareOrdinal(x.DeviceId, y.DeviceId);
     }
 }

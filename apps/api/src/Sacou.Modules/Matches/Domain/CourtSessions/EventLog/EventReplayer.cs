@@ -75,9 +75,64 @@ internal static class EventReplayer
             return normalized.Forward<ReplayedSteps<TState>>();
         }
 
-        var head = Timeline<TState>.Empty;
+        return StepsFrom(Timeline<TState>.Empty, normalized.Value, config, isTracked);
+    }
+
+    /// <summary>
+    /// Continues the replay of a stored stream with new events, from the timeline <paramref name="checkpoint"/>
+    /// already holds, with the same outcome as <see cref="ReplaySteps{TState}"/> over the stored events and the new
+    /// ones (ADR 0081). Only the new events are normalized, which is equivalent when every new event comes after every
+    /// stored one by order key, names none of their ids, and is of the same stream: then the stored events are a prefix
+    /// of the canonical order and add no error of the normalizer. Otherwise, or when the stored events do not replay,
+    /// it fails closed into the replay of the whole stream. <paramref name="isTracked"/> is meant for new events.
+    /// </summary>
+    public static Result<ReplayedSteps<TState>, ReplayError> ContinueSteps<TState>(
+        ReplayConfig<TState> config,
+        IReplayCheckpoint<TState> checkpoint,
+        IEnumerable<EventEnvelope> newEvents,
+        Func<EventEnvelope, bool> isTracked)
+        where TState : notnull
+    {
+        ArgumentNullException.ThrowIfNull(checkpoint);
+        ImmutableArray<EventEnvelope> news = [.. newEvents];
+        if (checkpoint.Head is not { } head || !FollowsTheStoredEvents(config, checkpoint, news))
+        {
+            return ReplaySteps(config, checkpoint.StoredEvents.Concat(news), isTracked);
+        }
+
+        var normalized = EventLogNormalizer.Normalize(news, config.CourtSessionId);
+        return normalized.IsFailure
+            ? normalized.Forward<ReplayedSteps<TState>>()
+            : StepsFrom(head, normalized.Value, config, isTracked);
+    }
+
+    /// <summary>The precondition of <see cref="ContinueSteps{TState}"/>; trivially true over a stream with no event.</summary>
+    private static bool FollowsTheStoredEvents<TState>(
+        ReplayConfig<TState> config,
+        IReplayCheckpoint<TState> checkpoint,
+        ImmutableArray<EventEnvelope> news)
+        where TState : notnull
+    {
+        if (checkpoint.LastEvent is not { } last || news.IsEmpty)
+        {
+            return true;
+        }
+
+        var first = news.Min(CanonicalOrder.Instance)!;
+        return string.Equals(last.CourtSessionId, config.CourtSessionId, StringComparison.Ordinal)
+            && CanonicalOrder.CompareOrderKeys(last, first) < 0
+            && !news.Any(envelope => checkpoint.IsStored(envelope.EventId));
+    }
+
+    private static Result<ReplayedSteps<TState>, ReplayError> StepsFrom<TState>(
+        Timeline<TState> head,
+        ImmutableArray<EventEnvelope> normalized,
+        ReplayConfig<TState> config,
+        Func<EventEnvelope, bool> isTracked)
+        where TState : notnull
+    {
         var steps = ImmutableArray.CreateBuilder<ReplayStep<TState>>();
-        foreach (var envelope in normalized.Value)
+        foreach (var envelope in normalized)
         {
             if (isTracked(envelope))
             {
