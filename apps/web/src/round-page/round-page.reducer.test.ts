@@ -287,5 +287,7 @@ describe("NÃO VOU MAIS after a sign-in (R101 P2, reviewer finding 1)", () => {
     expect(state.step).toBe("answering");
   });
 
-  it.todo("a signed-out NÃO VOU of someone who holds a place asks 'Sair da lista?' after the sign-in");
+  it.todo(
+    "a signed-out NÃO VOU of someone who holds a place asks 'Sair da lista?' after the sign-in",
+  );
 });
