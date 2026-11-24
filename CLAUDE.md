@@ -57,6 +57,13 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 
 Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees).
 
+### Skills nas próximas tarefas (pedido do Gabriel, 24/11/2026)
+
+Valem para as tarefas **novas** a partir de 24/11/2026; as que já tinham plano seguem o ciclo acima. Os subagentes não chamam skills: o brief manda ler o `SKILL.md` e as referências pelo caminho (`~/.claude/skills/<nome>/`).
+
+- **`tlc-spec-lean`** no plano, na construção e na revisão de cada tarefa nova. O analista escreve o plano no formato dela em `.specs/features/<ID>/plan.md` (critérios EARS, caminho, entidades, interface, decisões difíceis de reverter, pedido literal em `request.md`), com as perguntas de produto ao Gabriel antes de apresentar o plano. O desenvolvedor constrói fatia por fatia, um commit por fatia (`references/build.md`). O revisor novo segue `references/review.md`. `docs/estado/tarefas/<ID>.md` passa a apontar para o plano em `.specs/`.
+- **`react-composition-patterns`** em toda tarefa que cria ou muda componente do app (`apps/mobile`, `apps/web`): o desenvolvedor lê as regras de `rules/` (evitar props booleanas, componentes compostos, variantes explícitas, `children` em vez de render props) e o revisor as confere, junto com `docs/padroes/frontend.md`, que continua prevalecendo em caso de conflito.
+
 ### Economia de tokens (pedido do Gabriel, 09/11/2026)
 
 1. **Leitura dirigida.** O brief de cada agente lista exatamente os arquivos e as seções a ler. Ninguém lê a base inteira "por garantia". As pendências herdadas ficam em `docs/estado/pendencias.md`, que só o orquestrador lê inteiro; o agente recebe só as linhas da tarefa.
