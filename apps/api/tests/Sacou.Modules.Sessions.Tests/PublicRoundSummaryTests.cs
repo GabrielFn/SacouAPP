@@ -74,6 +74,19 @@ public sealed class PublicRoundSummaryTests
     }
 
     [Fact]
+    public void DropInWindow_CarriesTheInstantItOpens_AndNullWhenOff()
+    {
+        var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var withWindow = LimitedWithWaitlist with { RegularsEnabled = true, DropInWindowEnabled = true, DropInOpensHoursBefore = 12 };
+
+        var on = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(withWindow), RoundFixture.Now, NoNames);
+        var off = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), RoundFixture.Now, NoNames);
+
+        Assert.Equal(round.Slot.StartsAt.AddHours(-12), on.DropInOpensAt);
+        Assert.Null(off.DropInOpensAt);
+    }
+
+    [Fact]
     public void NoScoreAndNoQueue_HasNoPoints_AndNobodyLeaves()
     {
         var summary = StorePublicRoundSummary.ToSummary(
@@ -149,7 +162,8 @@ public sealed class PublicRoundSummaryTests
     /// <summary>
     /// A closed list: a new field is a decision about what the anonymous page shows, never a side effect. The first names
     /// (<see cref="PublicRoundSummary.Going"/>) are there by the decision of 19/11/2026 (question 126, option 2: the first
-    /// names for everyone, as on screen 01); still no id, position, level or money.
+    /// names for everyone, as on screen 01); still no id, position, level or money. <see cref="PublicRoundSummary.DropInOpensAt"/>
+    /// came with R101 (ADR 0079): a rule of the group (the instant the avulsos' list opens), not data of a member.
     /// </summary>
     [Fact]
     public void Summary_HasOnlyThePublicFields_AndNoneOfAMember()
@@ -157,7 +171,7 @@ public sealed class PublicRoundSummaryTests
         string[] expected =
         [
             "GroupName", "LocalDate", "LocalTime", "TimeZone", "StartsAt", "Venue", "State", "Capacity", "GoingCount",
-            "WaitlistCount", "WaitlistEnabled", "PlayersPerTeam", "PointsPerSet", "LoserLeaves", "Going",
+            "WaitlistCount", "WaitlistEnabled", "PlayersPerTeam", "PointsPerSet", "LoserLeaves", "Going", "DropInOpensAt",
         ];
 
         Assert.Equal(expected.Order(StringComparer.Ordinal), PropertiesOf(typeof(PublicRoundSummary)));

@@ -5,7 +5,7 @@ import { createFirebaseAuth } from "./adapters/firebase-auth";
 import { createSessionIntentStore } from "./adapters/session-intent-store";
 import { readPageConfig } from "./config/page-config";
 import { ELEMENT_IDS, findPageElements, type PageNodes } from "./dom/page-elements";
-import { renderRoundPage, type ViewEnvironment } from "./dom/round-view";
+import { renderRoundPage, type RoundViewEnvironment } from "./dom/round-view";
 import { listenToSheet } from "./dom/sheet-listeners";
 import { isEmbeddedBrowser } from "./round-page/browser";
 import { createRoundPage, type RoundPage } from "./round-page/round-page.controller";
@@ -18,7 +18,10 @@ function onStepChange(
   after: RoundPageState,
 ): void {
   if (after.step === before) return;
-  if (after.step === "nickname") {
+  if (after.step === "confirmingLeave") {
+    // The answers vanish with the question: the focus goes to the safe answer, "CONTINUAR NA LISTA".
+    nodes.leaveKeep?.focus();
+  } else if (after.step === "nickname") {
     nodes.nickname.value = after.suggestion;
     nodes.nickname.focus();
   } else if (after.step === "signIn" && before !== "signingIn") {
@@ -29,6 +32,8 @@ function onStepChange(
 function listen(nodes: PageNodes, page: RoundPage): void {
   nodes.going?.addEventListener("click", () => void page.tapAnswer("going"));
   nodes.notGoing?.addEventListener("click", () => void page.tapAnswer("notGoing"));
+  nodes.leaveYes?.addEventListener("click", () => void page.confirmLeave());
+  nodes.leaveKeep?.addEventListener("click", () => void page.keepPlace());
   listenToSheet(nodes, page);
   nodes.nicknameForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -43,7 +48,10 @@ function boot(): void {
   // Without the config (a machine without the Firebase Web config) the page stays as the server drew it: read-only.
   if (config === null) return;
   const nodes = findPageElements(document);
-  const environment: ViewEnvironment = { embedded: isEmbeddedBrowser(navigator.userAgent) };
+  const environment: RoundViewEnvironment = {
+    embedded: isEmbeddedBrowser(navigator.userAgent),
+    dropIn: config.dropIn,
+  };
   const auth = createFirebaseAuth(config.firebase);
   const previous = { current: "starting" as RoundPageState["step"] };
   const page = createRoundPage({

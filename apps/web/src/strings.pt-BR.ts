@@ -1,5 +1,15 @@
 import type { Failure, FailureKind, Standing } from "./round-page/round-page.types";
 
+/** What the page knows of the avulsos' window, read from the server's `data-` attributes; the invite page has none. */
+export interface DropInContext {
+  /** "hoje, às 20h", "amanhã, às 20h" or "na terça, 24/11, às 20h"; empty when the server found nothing to wait for. */
+  readonly phrase: string;
+  /** Whether the round's list has a mensalista: the sentence differs for a group of avulsos only. */
+  readonly hasRegulars: boolean;
+}
+
+export const NO_DROP_IN_CONTEXT: DropInContext = { phrase: "", hasRegulars: true };
+
 /**
  * The texts the script writes on the round page and on the invite page. The texts the server renders (screen 01 and the sheet of
  * screen 02) live in `Sacou.Api/Web/WebTexts.cs`; both are pt-BR and centralized.
@@ -37,6 +47,7 @@ export const webStrings = {
     groupFull: "Não deu para entrar: o grupo ou a sua conta chegou ao limite.",
     accountDeleted: "Sua conta foi excluída.",
     nicknameInvalid: "Use letras, números ou emojis, até 20, sem símbolos invisíveis.",
+    /** Without the phrase (a race at the edge of the window) the server's refusal has no day to show. */
     dropInWindowClosed: "A lista dos avulsos ainda não abriu.",
     roundFull: "A rodada lotou e não tem espera.",
     invalidCredentials: "E-mail ou senha incorretos.",
@@ -58,13 +69,24 @@ export const webStrings = {
     joined: "Você entrou. Baixe o app para ver as rodadas.",
     alreadyMember: "Você já está nesse grupo. Abra o app para ver as rodadas.",
   },
+  /** The window refusal with the day: the avulso waits, the mensalistas already confirm. */
+  dropInWindowClosedWhen: (phrase: string, hasRegulars: boolean) =>
+    hasRegulars
+      ? `A lista abre para você ${phrase}. Até lá, só os mensalistas confirmam.`
+      : `A lista abre ${phrase}.`,
   retryIn: (seconds: number) => `Muitas tentativas. Tente de novo em ${String(seconds)} s.`,
 } as const;
 
 /** The sentence of a failure; the refusals after the group step say that the person came in anyway (ADR 0070, D2). */
-export function failureText(failure: Failure): string {
+export function failureText(
+  failure: Failure,
+  dropIn: DropInContext = NO_DROP_IN_CONTEXT,
+): string {
   if (failure.kind === "rateLimited") return webStrings.retryIn(failure.retryAfterSeconds);
-  const text = webStrings.failures[failure.kind];
+  const text =
+    failure.kind === "dropInWindowClosed" && dropIn.phrase !== ""
+      ? webStrings.dropInWindowClosedWhen(dropIn.phrase, dropIn.hasRegulars)
+      : webStrings.failures[failure.kind];
   const joined =
     (failure.kind === "dropInWindowClosed" || failure.kind === "roundFull") && failure.joined;
   return joined ? webStrings.joinedPrefix + text : text;

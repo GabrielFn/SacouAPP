@@ -15,7 +15,8 @@ internal sealed class RoundModel(
     IPublicRoundSummary summaries,
     IWebAssets assets,
     IOptions<FirebaseWebOptions> firebase,
-    IOptions<WebPageOptions> page) : PageModel
+    IOptions<WebPageOptions> page,
+    TimeProvider time) : PageModel
 {
     public const string PagePath = "/r/";
     public const string PreviewImagePath = "/brand/og-image.png";
@@ -57,7 +58,7 @@ internal sealed class RoundModel(
             return Page();
         }
 
-        Round = RoundPageView.From(summary);
+        Round = RoundPageView.From(summary, time.GetUtcNow());
         Code = code;
         return Page();
     }

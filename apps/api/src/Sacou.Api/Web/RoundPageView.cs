@@ -18,14 +18,17 @@ internal sealed record RoundPageView(
     IReadOnlyList<PageList> Lists,
     string? Notice,
     IReadOnlyList<bool> Court,
-    string PreviewDescription)
+    string PreviewDescription,
+    string? DropInWindow,
+    string DropInPhrase,
+    bool HasRegulars)
 {
     private const string DateFormat = "yyyy-MM-dd";
     private const string TimeFormat = "HH:mm";
 
     public bool IsOpen => ClosedMessage is null;
 
-    public static RoundPageView From(PublicRoundSummary summary)
+    public static RoundPageView From(PublicRoundSummary summary, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(summary);
         var date = DateOnly.ParseExact(summary.LocalDate, DateFormat, CultureInfo.InvariantCulture);
@@ -44,8 +47,23 @@ internal sealed record RoundPageView(
             ListsOf(summary),
             NoticeOf(summary, missing),
             CourtOf(summary),
-            PreviewOf(summary, day, hour));
+            PreviewOf(summary, day, hour),
+            WindowLineOf(summary, now),
+            WindowPhraseOf(summary, now),
+            summary.Going.Any(entry => entry.Regular));
     }
+
+    /// <summary>The line under the count, only while the round takes answers and the avulsos' list has not opened.</summary>
+    private static string? WindowLineOf(PublicRoundSummary summary, DateTimeOffset now) =>
+        WindowPhraseOf(summary, now) is { Length: > 0 } phrase ? WebTexts.DropInWindow(phrase) : null;
+
+    /// <summary>The phrase of the day the window opens; empty when there is nothing to wait for.</summary>
+    private static string WindowPhraseOf(PublicRoundSummary summary, DateTimeOffset now) =>
+        summary.State is PublicRoundState.Open or PublicRoundState.Full
+        && summary.DropInOpensAt is { } opensAt
+        && now < opensAt
+            ? WebTexts.DropInPhrase(opensAt, summary.TimeZone, now)
+            : string.Empty;
 
     private static string? ClosedMessageOf(PublicRoundState state) => state switch
     {

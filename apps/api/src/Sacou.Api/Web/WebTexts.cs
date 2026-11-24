@@ -17,6 +17,10 @@ internal static class WebTexts
     public const string Vacant = "vaga aberta";
     public const string NoNickname = "Sem apelido";
     public const string Going = "VOU";
+    public const string LeaveTitle = "Sair da lista?";
+    public const string LeaveBody = "Se mudar de ideia, é só tocar em VOU de novo enquanto houver vaga.";
+    public const string LeaveConfirm = "NÃO VOU MAIS";
+    public const string LeaveKeep = "CONTINUAR NA LISTA";
     public const string NotGoing = "NÃO VOU";
     public const string SignOut = "Sair";
     public const string NoScript = "Ative o JavaScript para confirmar.";
@@ -67,7 +71,34 @@ internal static class WebTexts
 
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
+    private static readonly string[] WeekdaysWithArticle =
+        ["no domingo", "na segunda", "na terça", "na quarta", "na quinta", "na sexta", "no sábado"];
+
     private static readonly string[] Weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+    /// <summary>"A lista dos avulsos abre hoje, às 20h." (the line under the count).</summary>
+    public static string DropInWindow(string phrase) => "A lista dos avulsos abre " + phrase + ".";
+
+    /// <summary>
+    /// "hoje, às 20h", "amanhã, às 20h" or "na terça, 24/11, às 20h": the day in the round's own time zone, "today" by
+    /// the server's clock (the page is no-store). The date always follows the weekday: the window can be a week away.
+    /// </summary>
+    public static string DropInPhrase(DateTimeOffset opensAt, string timeZoneId, DateTimeOffset now)
+    {
+        var zone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        var opens = TimeZoneInfo.ConvertTime(opensAt, zone);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var day = DateOnly.FromDateTime(opens.DateTime);
+        var hour = Hour(TimeOnly.FromDateTime(opens.DateTime));
+        if (day == today)
+        {
+            return $"hoje, às {hour}";
+        }
+
+        return day == today.AddDays(1)
+            ? $"amanhã, às {hour}"
+            : string.Create(Invariant, $"{WeekdaysWithArticle[(int)day.DayOfWeek]}, {day.Day}/{day.Month}, às {hour}");
+    }
 
     public static string Missing(int count) => string.Create(Invariant, $"Faltam {count}. Chama o pessoal!");
 
