@@ -13,7 +13,7 @@ internal static class RowMapping
 {
     private const int IsoSunday = 7;
 
-    public static Round ToRound(RoundRow row, IEnumerable<AttendanceRow> attendances) => new(
+    public static Round ToRound(RoundRow row, IEnumerable<AttendanceRow> attendances, IEnumerable<RoundTeamSlotRow> teamSlots) => new(
         new RoundId(row.Id),
         new GroupId(row.GroupId),
         row.SeriesId is { } series ? new SeriesId(series) : null,
@@ -26,7 +26,41 @@ internal static class RowMapping
     {
         LinkCode = row.LinkCode is { } code ? RoundLinkCode.FromStored(code) : null,
         ClosedAt = row.ClosedAt,
+        Teams = row.TeamsConfirmedAt is { } confirmedAt ? ToTeams(teamSlots, confirmedAt) : null,
     };
+
+    /// <summary>The stored teams, trusted as written under the round's lock: in the order of the team and of the position.</summary>
+    private static RoundTeams ToTeams(IEnumerable<RoundTeamSlotRow> slots, DateTimeOffset confirmedAt)
+    {
+        var ordered = slots.OrderBy(slot => slot.TeamNumber ?? short.MaxValue).ThenBy(slot => slot.Position).ToImmutableArray();
+        var teams = ordered.Where(slot => slot.TeamNumber is not null)
+            .GroupBy(slot => slot.TeamNumber)
+            .Select(team => team.Select(slot => new MemberId(slot.MemberId)).ToImmutableArray())
+            .ToImmutableArray();
+        var reserves = ordered.Where(slot => slot.TeamNumber is null).Select(slot => new MemberId(slot.MemberId)).ToImmutableArray();
+        return new RoundTeams(teams, reserves, confirmedAt);
+    }
+
+    /// <summary>One row per member of the teams, numbered from 1; the reserves with no team.</summary>
+    public static IEnumerable<RoundTeamSlotRow> ToTeamRows(RoundId round, RoundTeams teams)
+    {
+        ArgumentNullException.ThrowIfNull(teams);
+        var players = teams.Teams.SelectMany((team, teamIndex) => team.Select((member, index) => new RoundTeamSlotRow
+        {
+            RoundId = round.Value,
+            MemberId = member.Value,
+            TeamNumber = checked((short)(teamIndex + 1)),
+            Position = checked((short)(index + 1)),
+        }));
+        var reserves = teams.Reserves.Select((member, index) => new RoundTeamSlotRow
+        {
+            RoundId = round.Value,
+            MemberId = member.Value,
+            TeamNumber = null,
+            Position = checked((short)(index + 1)),
+        });
+        return players.Concat(reserves);
+    }
 
     public static RoundRow ToRow(Round round, DateTimeOffset createdAt) => new()
     {
@@ -44,6 +78,7 @@ internal static class RowMapping
         CreatedAt = createdAt,
         LinkCode = round.LinkCode?.Value,
         ClosedAt = round.ClosedAt?.ToUniversalTime(),
+        TeamsConfirmedAt = round.Teams?.ConfirmedAt.ToUniversalTime(),
     };
 
     public static Attendance ToAttendance(AttendanceRow row) => new(

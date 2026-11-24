@@ -66,6 +66,8 @@ export type AddedGuest = Schemas["AddGuestResponse"];
 export type DrawTeamsBody = Schemas["DrawTeamsRequest"];
 /** Carries the admin's level of everyone confirmed: never cached, persisted nor logged (ADR 0047, 0061). */
 export type DrawTeamsAnswer = Schemas["DrawTeamsResponse"];
+/** The teams of "Confirmar e compartilhar" (R100, ADR 0078): member IDs only, never a level. */
+export type ConfirmTeamsBody = Schemas["ConfirmTeamsRequest"];
 
 /** A line of screen 28 (E3.11): the server renders the title and the subtitle from the ids, on reading. */
 export type NotificationItem = Schemas["NotificationItem"];
@@ -221,6 +223,11 @@ export interface SacouApi {
     roundId: string,
     body: DrawTeamsBody,
   ): Promise<ApiResult<DrawTeamsAnswer>>;
+  /**
+   * Admin and co-admin only (`DrawTeams`): publishes the teams to every member, in the round's `teams`; the
+   * answer is the round as the caller reads it. Replaces the earlier teams whole (ADR 0078).
+   */
+  confirmTeams(groupId: string, roundId: string, body: ConfirmTeamsBody): Promise<ApiResult<Round>>;
   /** Screen 28: the newest page and the count of unread ones; `no-store` on the server. */
   listNotifications(): Promise<ApiResult<NotificationList>>;
   /** 204, again 204; 404 for a notification of someone else. */

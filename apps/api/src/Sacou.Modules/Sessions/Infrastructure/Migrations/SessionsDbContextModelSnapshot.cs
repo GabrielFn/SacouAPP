@@ -196,6 +196,10 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("status");
 
+                    b.Property<DateTimeOffset?>("TeamsConfirmedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("teams_confirmed_at");
+
                     b.Property<string>("TimeZone")
                         .IsRequired()
                         .HasColumnType("text")
@@ -234,6 +238,38 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                             t.HasCheckConstraint("ck_rounds_time_zone", "time_zone IN ('America/Sao_Paulo')");
 
                             t.HasCheckConstraint("ck_rounds_venue", "char_length(venue) <= 320");
+                        });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Sessions.Infrastructure.RoundTeamSlotRow", b =>
+                {
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_id");
+
+                    b.Property<short>("Position")
+                        .HasColumnType("smallint")
+                        .HasColumnName("position");
+
+                    b.Property<short?>("TeamNumber")
+                        .HasColumnType("smallint")
+                        .HasColumnName("team_number");
+
+                    b.HasKey("RoundId", "MemberId")
+                        .HasName("pk_round_teams");
+
+                    b.HasIndex("MemberId")
+                        .HasDatabaseName("ix_round_teams_member");
+
+                    b.ToTable("round_teams", "sessions", t =>
+                        {
+                            t.HasCheckConstraint("ck_round_teams_position", "position >= 1");
+
+                            t.HasCheckConstraint("ck_round_teams_team_number", "team_number IS NULL OR team_number >= 1");
                         });
                 });
 
@@ -306,6 +342,16 @@ namespace Sacou.Modules.Sessions.Infrastructure.Migrations
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_rounds_round_series");
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Sessions.Infrastructure.RoundTeamSlotRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Sessions.Infrastructure.RoundRow", null)
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_round_teams_rounds");
                 });
 #pragma warning restore 612, 618
         }

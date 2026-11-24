@@ -13,6 +13,9 @@ internal sealed record RoundCanceled(RoundId RoundId, GroupId GroupId) : RoundEv
 /// <summary>Someone tapped "Encerrar rodada" (named apart from the error <c>sessions.round-closed</c>): the MVP vote opens (E3.11 pushes it; only ids).</summary>
 internal sealed record RoundEnded(RoundId RoundId, GroupId GroupId) : RoundEvent(RoundId);
 
+/// <summary>The admin confirmed the teams (ADR 0078). Only the ids of the round and the group: the push "os times saíram" hangs here later.</summary>
+internal sealed record RoundTeamsConfirmed(RoundId RoundId, GroupId GroupId) : RoundEvent(RoundId);
+
 internal sealed record AttendanceChanged(RoundId RoundId, MemberId MemberId, AttendanceStatus Status) : RoundEvent(RoundId);
 
 /// <summary>

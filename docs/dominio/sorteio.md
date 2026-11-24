@@ -110,6 +110,23 @@ Os dois campos são opcionais; numa trava os três são obrigatórios (`kind` é
 - Recusas: rodada de outro grupo ou inexistente → 404 `sessions.round-not-found`; cancelada → 409 `sessions.round-closed`; `draw.enabled = false` → 409 `sessions.draw-disabled`; os erros do domínio acima.
 - **Orçamento de passos por sorteio** (`DrawLimits.MaxPlacementSteps`, `PlacementBudget`): o posicionamento com travas "separar" põe primeiro os blocos com mais travas, e todas as partidas da busca dividem 100.000 passos. Acabando antes da primeira divisão, `sessions.draw-locks-unsatisfiable`; acabando depois, vale a melhor divisão já achada. O pior sorteio medido gastou 3.155 passos (ADR 0055).
 
+## Times publicados (R100, ADR 0078)
+
+O sorteio não grava nada; o "Confirmar e compartilhar" grava. `PUT /v1/groups/{groupId}/rounds/{roundId}/teams`
+`{ teams: [[memberId…]…], reserves: [memberId…] }` (Admin e Co-admin, `DrawTeams`) publica os times a todo membro,
+em `RoundResponse.teams` (`{ confirmedAt, teams: [{ number, memberIds }], reserves }`, `null` sem times e na rodada
+cancelada). Um novo "Confirmar" substitui por inteiro. Vale com o sorteio ligado ou desligado ("Montar times").
+
+Regra (`sessions.round-teams-invalid`, 400): pelo menos 2 times, todos do mesmo tamanho, de 2 até o time da modalidade;
+ninguém repetido; todos confirmados na rodada e ativos no grupo. Rodada cancelada ou encerrada: `sessions.round-closed`.
+Depois do início aceita (o sorteio é na quadra).
+
+No app, o bloco "Times" das telas 26 e 06 é a foto do sorteio ("Saíram 19h42"): "Você está no Laranja" (Azul, Time 3),
+"Você está na reserva · 1º da fila", ou "Você confirmou depois dos times. Fale com quem organiza."; quem não confirmou
+não tem linha. Quem saiu da rodada fica no time com "(saiu)", e na 06 quem sorteia lê "A lista mudou depois dos times.
+Sorteie de novo." ("Monte de novo." com o sorteio desligado). Na rodada encerrada o bloco fica; na cancelada some. Se a
+gravação falha, a 07 segue (folha e 08) e avisa "Os times não chegaram ao app dos jogadores. Eles recebem pelo WhatsApp.".
+
 ## Fora do escopo
 
 Equilibrar por posição e "evitar repetir times" (`produto.md:66`), pergunta 56. Sorteio sem internet (pergunta 54): exige conexão no piloto.

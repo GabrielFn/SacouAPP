@@ -80,6 +80,7 @@ function roundOf(patch: Partial<Round> = {}): Round {
       { memberId: "m-igor", memberType: "dropIn", position: 2 },
     ],
     me: { memberId: "m-me", status: null, position: null, regularPosition: null },
+    teams: null,
     ...patch,
   };
 }
