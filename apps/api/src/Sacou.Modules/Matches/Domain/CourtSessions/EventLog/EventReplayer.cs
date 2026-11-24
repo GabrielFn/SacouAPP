@@ -95,7 +95,7 @@ internal static class EventReplayer
     {
         ArgumentNullException.ThrowIfNull(checkpoint);
         ImmutableArray<EventEnvelope> news = [.. newEvents];
-        if (checkpoint.Head is not { } head || !FollowsTheStoredEvents(config, checkpoint, news))
+        if (checkpoint.Head is not { } head || !Follows(config.CourtSessionId, checkpoint, news))
         {
             return ReplaySteps(config, checkpoint.StoredEvents.Concat(news), isTracked);
         }
@@ -106,20 +106,21 @@ internal static class EventReplayer
             : StepsFrom(head, normalized.Value, config, isTracked);
     }
 
-    /// <summary>The precondition of <see cref="ContinueSteps{TState}"/>; trivially true over a stream with no event.</summary>
-    private static bool FollowsTheStoredEvents<TState>(
-        ReplayConfig<TState> config,
-        IReplayCheckpoint<TState> checkpoint,
-        ImmutableArray<EventEnvelope> news)
+    /// <summary>
+    /// The precondition of <see cref="ContinueSteps{TState}"/> on order, ids and stream, whatever the head holds;
+    /// trivially true over a stream with no event, and with no new event.
+    /// </summary>
+    public static bool Follows<TState>(string courtSessionId, IReplayCheckpoint<TState> checkpoint, ImmutableArray<EventEnvelope> news)
         where TState : notnull
     {
+        ArgumentNullException.ThrowIfNull(checkpoint);
         if (checkpoint.LastEvent is not { } last || news.IsEmpty)
         {
             return true;
         }
 
         var first = news.Min(CanonicalOrder.Instance)!;
-        return string.Equals(last.CourtSessionId, config.CourtSessionId, StringComparison.Ordinal)
+        return string.Equals(last.CourtSessionId, courtSessionId, StringComparison.Ordinal)
             && CanonicalOrder.CompareOrderKeys(last, first) < 0
             && !news.Any(envelope => checkpoint.IsStored(envelope.EventId));
     }

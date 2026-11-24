@@ -37,7 +37,9 @@ internal sealed record CourtWriteContext(
 /// An accepted write: the events to store, in order, the largest sequence of the device after it, how
 /// many were exact resends, the writer of the batch, new when the write creates the stream, and the
 /// scoreboard of the stream after the new events (ADR 0063, D6). The scoreboard is null with no open
-/// match, and on a pure resend, which stores nothing and so leaves the stored scoreboard as it is.
+/// match, and on a pure resend, which stores nothing and so leaves the stored scoreboard as it is. The snapshot
+/// is the one of the stream after the write (ADR 0081), null when the write replayed the whole stream: the store
+/// then drops its copy, and the next write builds it again.
 /// </summary>
 internal sealed record CourtWriteDecision(
     ImmutableArray<StreamEvent> NewEvents,
@@ -45,7 +47,8 @@ internal sealed record CourtWriteDecision(
     int Duplicates,
     CourtWriter Writer,
     bool CreatesStream,
-    CourtScoreboard? Scoreboard)
+    CourtScoreboard? Scoreboard,
+    StreamSnapshot? Snapshot)
 {
     public override string ToString() => nameof(CourtWriteDecision);
 }
