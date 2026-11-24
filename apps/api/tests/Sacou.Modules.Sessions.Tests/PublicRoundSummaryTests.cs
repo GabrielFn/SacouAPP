@@ -119,7 +119,7 @@ public sealed class PublicRoundSummaryTests
     public async Task GroupThatDoesNotExist_GivesNoSummary()
     {
         var summaries = new StorePublicRoundSummary(
-            new RoundLinkReader(new OneRoundStore(RoundFixture.NewRound())), new NoGroups(), new NoSettings(), new NoListNames(), TimeProvider.System);
+            new RoundLinkReader(new OneRoundStore(RoundFixture.NewRound())), new NoGroups(), new NoSettings(), new NoListNames(), new NoMembers(), TimeProvider.System);
 
         Assert.Null(await summaries.FindByCodeAsync(AnyCode, TestContext.Current.CancellationToken));
     }
@@ -128,7 +128,7 @@ public sealed class PublicRoundSummaryTests
     public async Task CodeOfNoRound_GivesNoSummary()
     {
         var summaries = new StorePublicRoundSummary(
-            new RoundLinkReader(new OneRoundStore(null)), new NoGroups(), new NoSettings(), new NoListNames(), TimeProvider.System);
+            new RoundLinkReader(new OneRoundStore(null)), new NoGroups(), new NoSettings(), new NoListNames(), new NoMembers(), TimeProvider.System);
 
         Assert.Null(await summaries.FindByCodeAsync(AnyCode, TestContext.Current.CancellationToken));
     }
@@ -225,5 +225,23 @@ public sealed class PublicRoundSummaryTests
             Task.FromResult<GroupSettingsSnapshot?>(null);
 
         public Result<RoundSettings> ResolveRound(GroupSettingsSnapshot group, string? roundLayerJson) => throw new NotSupportedException();
+    }
+
+    /// <summary>Never reached: these summaries stop before the members are read.</summary>
+    private sealed class NoMembers : IGroupMembership
+    {
+        public Task<GroupMembership?> FindActiveAsync(Guid groupId, Guid userId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<IReadOnlyList<GroupMembership>> ListActiveAsync(Guid groupId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<IReadOnlyList<Guid>> ListMemberIdsOfUserAsync(Guid userId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<IReadOnlySet<Guid>> FindMembersOfGroupAsync(
+            Guid groupId, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public bool Allows(GroupRole role, GroupCapability capability) => throw new NotSupportedException();
     }
 }

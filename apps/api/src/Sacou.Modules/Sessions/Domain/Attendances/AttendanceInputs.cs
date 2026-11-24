@@ -44,4 +44,12 @@ internal sealed record AttendanceSettings(
 
     /// <summary>How many more people fit; unbounded without a limit.</summary>
     public int FreeSpots(int spotsHeld) => CapacityLimited ? Math.Max(0, Capacity - spotsHeld) : int.MaxValue;
+
+    /// <summary>
+    /// The rules as they hold for the group right now. Without an active mensalista every member is an avulso, so the
+    /// avulsos' window would keep everyone out until it opens: it does not hold (question 183, option 2; ADR 0079, P3).
+    /// It holds again as soon as the group has a mensalista, since the members are read at every answer and every read.
+    /// </summary>
+    public AttendanceSettings ForGroup(bool hasActiveRegular) =>
+        hasActiveRegular || !DropInWindowEnabled ? this : this with { DropInWindowEnabled = false };
 }
