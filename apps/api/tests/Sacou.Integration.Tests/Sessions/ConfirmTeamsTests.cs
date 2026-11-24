@@ -232,7 +232,9 @@ public sealed class ConfirmTeamsTests(IntegrationDatabase database) : IAsyncLife
 
         Assert.Equal(HttpStatusCode.OK, list.StatusCode);
         Assert.All(await RoundCalls.JsonAsyncArray(list), item => Assert.Null(item!["teams"]));
-        Assert.DoesNotContain("Laranja", await page.Content.ReadAsStringAsync(TestContext.Current.CancellationToken), StringComparison.Ordinal);
+        var html = await page.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        Assert.All(members, member => Assert.DoesNotContain(member.ToString(), html, StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain("Laranja", html, StringComparison.Ordinal);
     }
 
     /// <summary>Case 13: a member removed after the teams stays in them, by id; nothing changes the teams on its own.</summary>
