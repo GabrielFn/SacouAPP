@@ -1,4 +1,4 @@
-import type { GroupSettings } from "@sacou/match-engine";
+import type { GroupSettings, SettingsBlock, SettingsPath } from "@sacou/match-engine";
 
 import type { ShownPath } from "../../../strings/settings.pt-BR";
 
@@ -26,10 +26,13 @@ export interface RowEntry {
   readonly visibleWhen?: (settings: GroupSettings) => boolean;
 }
 
-export type LayoutBlock = "attendance" | "scoring" | "queue" | "draw" | "rotation" | "mvp";
+/** The blocks of the screen: the ones of the catalog and "Mensalistas", apart from "Presença e vagas" (R101). */
+export type LayoutBlock = SettingsBlock | "regulars";
 
 export interface BlockSpec {
   readonly block: LayoutBlock;
+  /** The switch in the header; without it, the `<block>.enabled` of the catalog. */
+  readonly enabledPath?: SettingsPath;
   /** An accordion shows a summary and hides its lines until opened. */
   readonly accordion: boolean;
   readonly rows: readonly RowEntry[];
@@ -53,15 +56,25 @@ export const SETTINGS_SCREEN: readonly BlockSpec[] = [
         visibleWhen: (s) => s.attendance.capacityLimited,
       },
       { row: { kind: "switch", path: "attendance.waitlistEnabled" } },
-      { row: { kind: "switch", path: "attendance.regularsEnabled" } },
-      { row: { kind: "switch", path: "attendance.dropInWindowEnabled" } },
-      {
-        row: { kind: "field", path: "attendance.dropInOpensHoursBefore" },
-        visibleWhen: (s) => s.attendance.dropInWindowEnabled,
-      },
       { row: { kind: "switch", path: "schedule.enabled" } },
       { row: { kind: "schedule" }, visibleWhen: (s) => s.schedule.enabled },
       { row: { kind: "field", path: "schedule.venue" }, visibleWhen: (s) => s.schedule.enabled },
+    ],
+  },
+  /** Regulars and the window of the drop-ins are not part of confirming presence (R101 item 5). */
+  {
+    block: "regulars",
+    enabledPath: "attendance.regularsEnabled",
+    accordion: true,
+    rows: [
+      {
+        row: { kind: "switch", path: "attendance.dropInWindowEnabled" },
+        visibleWhen: (s) => s.attendance.enabled,
+      },
+      {
+        row: { kind: "field", path: "attendance.dropInOpensHoursBefore" },
+        visibleWhen: (s) => s.attendance.enabled && s.attendance.dropInWindowEnabled,
+      },
     ],
   },
   {
@@ -117,4 +130,9 @@ export function visibleRows(spec: BlockSpec, settings: GroupSettings): readonly 
   return spec.rows
     .filter(({ visibleWhen }) => visibleWhen === undefined || visibleWhen(settings))
     .map(({ row }) => row);
+}
+
+/** The leaf of the switch in the header of a block. */
+export function enabledPathOf(spec: BlockSpec): SettingsPath {
+  return spec.enabledPath ?? (`${spec.block}.enabled` as SettingsPath);
 }
