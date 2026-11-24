@@ -163,3 +163,10 @@
   4. `docs/seguranca/checklist.md` sem o PUT dos times (ASVS V4 e V8): **orquestrador, no relatório do M5**.
   5. `SessionsModule.cs:17`: `using` fora da ordem alfabética.
   - Fechados pelo testador (Sonnet) no próprio PR: testes da exportação (`teamNumber`, `reservePosition`), da rodada encerrada pela HTTP (409) e da página `/r` sem nenhum `memberId` publicado.
+- R100 P2 (#237), achados baixos do revisor (Opus, código e segurança, 24/11), sem dono até nova tarefa salvo nota:
+  1. `round-teams.ts:273`: sem rede, a lista de membros em cache mostra um ex-membro com o nome antigo até a próxima leitura (igual aos "Confirmados"): tratar quem não está ativo como "Sem apelido".
+  2. Quem não tem nome lê "Sem apelido" (`drawStrings.noName`), não "Jogador" como o plano 3.2.5: alinhar o ADR 0078.
+  3. `confirm-teams-mutation.ts:162`: sem `onError` que releia a rodada num 409 (encerrada ou cancelada), como o `drawMutation` faz (`roundRefusedEffects`).
+  4. `use-draw-screen.ts:174`: o aviso J só aparece na 07, e a 08 abre logo depois; conferir no emulador se o admin vê.
+  5. `PlayerRoundScreen.tsx:491`: com presença desligada na rodada, o bloco Times some na 26 (caso raro): tirar o bloco de dentro do `card === null`.
+  6. `RoundTeamsCard.tsx:612`: título do time com `teamTitle` (22, o da 07) pode ficar grande no cartão da 26: conferir com `RodadaJogador.dc.html` no emulador.
