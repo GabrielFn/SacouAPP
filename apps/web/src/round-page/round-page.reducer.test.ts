@@ -276,3 +276,16 @@ describe("roundPageReducer, leaving the list (R101, item 3b)", () => {
     expect(run([{ type: "answerTapped", intent: "notGoing" }], none).step).toBe("answering");
   });
 });
+
+describe("NÃO VOU MAIS after a sign-in (R101 P2, reviewer finding 1)", () => {
+  // Known gap, documented on purpose: the question only guards the signed-in tap.
+  it("characterization: a signed-out NÃO VOU answers right after the sign-in, without the question", () => {
+    const state = run([
+      { type: "sessionChecked", signedIn: true, pendingIntent: "notGoing" },
+      { type: "registered", hasProfile: true, suggestion: "Ana" },
+    ]);
+    expect(state.step).toBe("answering");
+  });
+
+  it.todo("a signed-out NÃO VOU of someone who holds a place asks 'Sair da lista?' after the sign-in");
+});
