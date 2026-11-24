@@ -58,13 +58,15 @@
 | E5.1 | Feita (produção adiada) | PR #159 mergeado (`2883b65`), ADR 0068: Cloud Run (`sacou-api-test` e `sacou-api`, `us-east4`) e Neon, deploy por federação com contas por job, teto de R$ 5. Primeiro deploy do teste falhou por permissão de leitura da imagem (diário de 18/11); produção adiada pelo Gabriel em 19/11 até perto do piloto (M7): o app ainda vai mudar muito. A E5.1 fica feita com o teste no ar. |
 | E4.11 | Feita | PRs #147, #156 e #158, ADR 0067 (envio a cada ponto, assumir a quadra com importação do stream, pontos recusados, telas 09a a 09c). Parte 2: correção por desenvolvedor Opus novo (corpo nulo, `Err` com commit). Parte 3: revisão e segurança num Opus (C1: a 09c era pulada pela 06 e 08), correção por desenvolvedor Opus novo, verificador Opus aprovou, testador Sonnet passou (5 de 6; a sobrevivente, o `refresh` do `stream-changed` no hook, sem render de componente). |
 | E3.9 | Feita | PRs #173, #176, #178, #180 e #183 (estatísticas, rating TS e C#, projeções e rotas). |
-| E3.12 | Feita no código | PRs #171, #177 e #179, ADR 0070 (link da rodada, página `/r`, convite `/c`). Falta o teste no celular com uma segunda conta Google. |
+| E3.12 | Feita | PRs #171, #177 e #179, ADR 0070 (link da rodada, página `/r`, convite `/c`). Testada no celular na 6ª tentativa do percurso (23/11, PR #232): página `/r` com e sem login, VOU, convite revogado. |
 | E3.18 | Feita | PRs #184 e #190 (fim da rodada, voto secreto do MVP, resultado congelado, exportação). |
 | E4.12 | Feita | PRs #188 e #191 (tela 12, "Encerrar rodada", card do resumo no Início) e #195 (janela do card até 24 h depois do fim). |
-| E4.13 | Feita no código | PRs #187 e #193, ADR 0073 (cartinha na aba Eu e compartilhar a imagem). Falta o teste no celular (build novo). |
+| E4.13 | Feita | PRs #187 e #193, ADR 0073 (cartinha na aba Eu e compartilhar a imagem). Testada no celular no percurso de 23/11 (5ª e 6ª tentativas, R99). |
 | E4.18 | Feita | PRs #194 e #196 (tela 12a, voto secreto, ranking da areia e voto no resumo). |
 | R96 | Feita | PR #197, plano em `docs/estado/tarefas/R96.md` (reservas no banco do time no pré-jogo; motor sem mudança). |
 | E3.11 | Feita no código | PRs #182, #199, #200 e #198 (outbox e aparelhos; envio pelo Expo com recibos e Cloud Tasks; uma conta invocadora por ambiente; permissão, registro do aparelho, tela de notificações e sino no app). Falta o Gabriel criar as contas e os segredos, ligar no `service.yaml` e o teste no celular. |
+| R97, R98, R99 | Feitas | Correções do percurso no celular (21 a 23/11): partida esquecida e tela de rodadas (ADR 0075), defeitos do percurso, rodada encerrada no app (ADR 0077). |
+| R100 | Feita | PRs #234 e #237, ADR 0078 (times confirmados gravados na rodada e mostrados a todos os membros nas telas 26 e 06). P1 com revisor e segurança Opus separados e testador Sonnet (7 de 8 sabotagens); P2 com revisão única Opus e testador Sonnet (5 de 6, a sobrevivente coberta). Baixos em `pendencias.md`. |
 
 ## Em andamento
 
