@@ -6,6 +6,7 @@ import { Button } from "../../../ui/Button";
 import { Text } from "../../../ui/Text";
 import { confirmedSummary, summaryText } from "../model/confirmed-summary";
 import type { RosterEntry } from "../model/roster";
+import { RoundSectionCard } from "./RoundSectionCard";
 
 const { confirmed } = strings.rounds;
 
@@ -21,16 +22,7 @@ export function ConfirmedBlock({ going, meId, waitlist, onSeeAll }: ConfirmedBlo
   const { colors, tokens } = useTheme();
   const summary = confirmedSummary(going, meId);
   return (
-    <View
-      style={{
-        gap: tokens.spacing.s,
-        padding: tokens.spacing.m,
-        borderRadius: tokens.radii.card,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        backgroundColor: colors.surface,
-      }}
-    >
+    <RoundSectionCard>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Text variant="bodyStrong" accessibilityRole="header" style={{ flex: 1 }}>
           {confirmed.title}
@@ -74,6 +66,6 @@ export function ConfirmedBlock({ going, meId, waitlist, onSeeAll }: ConfirmedBlo
         </Text>
       </View>
       {waitlist === "" ? null : <Text variant="muted">{confirmed.waitlist(waitlist)}</Text>}
-    </View>
+    </RoundSectionCard>
   );
 }

@@ -10,11 +10,13 @@ import { holdsSpot, presenceCounts, type PresenceCardView } from "../model/prese
 import { roundChips, sourceReader } from "../model/round-chips";
 import { isEnded, roleHeader, type RoundSettingsView } from "../model/round-detail";
 import { playerPresence, rosterView, type RosterView } from "../model/round-screen-view";
+import { roundTeamsView, type RoundTeamsView } from "../model/round-teams";
 import { ConfirmedBlock } from "./ConfirmedBlock";
 import { ConfirmedSheet } from "./ConfirmedSheet";
 import { EndedBadge, EndedFooter } from "./EndedRound";
 import { PresenceCard } from "./PresenceCard";
 import { PresenceFooter } from "./PresenceFooter";
+import { RoundTeamsCard } from "./RoundTeamsCard";
 import { RoundChips } from "./RoundChips";
 import { RoundHeading } from "./RoundHeading";
 import { SummaryLink } from "./SummaryLink";
@@ -26,11 +28,13 @@ export interface PlayerBodyProps {
   readonly settings: RoundSettingsView | null;
   readonly card: PresenceCardView | null;
   readonly roster: RosterView;
+  /** The published teams (R100), `null` with none. */
+  readonly teams: RoundTeamsView | null;
   readonly onSeeAll: () => void;
 }
 
 /** The pills, the "Sua presença" card and the confirmed of screen 26. */
-function PlayerBody({ round, settings, card, roster, onSeeAll }: PlayerBodyProps) {
+function PlayerBody({ round, settings, card, roster, teams, onSeeAll }: PlayerBodyProps) {
   if (settings === null) return <ErrorStrip text={detail.loadError} />;
   const chips = roundChips(settings.values, sourceReader(settings.sources), {
     withRotation: true,
@@ -45,6 +49,7 @@ function PlayerBody({ round, settings, card, roster, onSeeAll }: PlayerBodyProps
             counts={presenceCounts(round, settings.values)}
             going={holdsSpot(round)}
           />
+          {teams === null ? null : <RoundTeamsCard view={teams} listChangedText={null} />}
           <ConfirmedBlock
             going={roster.going}
             meId={round.me.memberId}
@@ -106,6 +111,7 @@ export function PlayerRoundScreen({
         settings={settings}
         card={card}
         roster={roster}
+        teams={roundTeamsView(round, members)}
         onSeeAll={() => {
           dispatch({ type: "confirmed-opened" });
         }}

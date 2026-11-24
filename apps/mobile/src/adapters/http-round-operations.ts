@@ -17,6 +17,7 @@ export function createRoundOperations(
   | "setMemberAttendance"
   | "addGuest"
   | "drawTeams"
+  | "confirmTeams"
 > {
   return {
     ...createDrawOperations(client, execute),

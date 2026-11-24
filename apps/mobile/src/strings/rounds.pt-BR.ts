@@ -1,3 +1,5 @@
+import { roundTeamsStrings } from "./round-teams.pt-BR";
+
 /** Texts of the round screens (20 and 06). Dinheiro, "Pro" and the "Avulso" field are not here (ADR 0046). */
 const weekdayShort: Readonly<Record<number, string>> = {
   1: "Seg",
@@ -183,6 +185,7 @@ export const roundsStrings = {
     close: "Fechar",
     position: (position: number) => `${String(position)}º`,
   },
+  teams: roundTeamsStrings,
   /** Screen 21. */
   add: {
     title: "Adicionar quem confirmou no WhatsApp",
