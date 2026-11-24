@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { resolveLegalLinks } from "../../../config/legal-links";
 import type { MyProfile } from "../../../services/api/sacou-api";
 import type { AccountView } from "../../../services/auth/auth-session";
 import { strings } from "../../../strings/pt-BR";
@@ -52,6 +53,17 @@ describe("screen 30 (question 60)", () => {
     expect(view.nicknameA11y).toBe(texts.setNickname);
     expect(view.termsUrl).toBeNull();
     expect(view.privacyUrl).toBeNull();
+  });
+
+  test("E6.1: with only the invite origin, the two rows open the API's own pages", () => {
+    const legalLinks = resolveLegalLinks({
+      termsUrl: undefined,
+      privacyUrl: undefined,
+      inviteBaseUrl: "https://sacou-api-abc.a.run.app",
+    });
+    const view = accountScreenView({ account: GOOGLE, profile: PROFILE, legalLinks });
+    expect(view.termsUrl).toBe("https://sacou-api-abc.a.run.app/termos");
+    expect(view.privacyUrl).toBe("https://sacou-api-abc.a.run.app/privacidade");
   });
 
   test("while the profile loads the value is empty, never a guess", () => {

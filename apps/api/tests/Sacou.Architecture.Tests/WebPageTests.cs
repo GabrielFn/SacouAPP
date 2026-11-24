@@ -70,6 +70,17 @@ public sealed class WebPageTests
     [InlineData("RUN pnpm --filter @sacou/web build\nRUN dotnet publish\nCOPY --from=web /source/apps/api/src/Sacou.Api/wwwroot/web/ x")]
     public void PlantedDockerfile_WithoutTheWebInOrder_IsAViolation(string dockerfile)
     {
-        Assert.NotEmpty(WebPageRules.DockerfileViolations(dockerfile));
+        Assert.Single(WebPageRules.DockerfileViolations(WebPageRules.LegalCopy + "\n" + dockerfile));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("RUN dotnet publish\n" + WebPageRules.LegalCopy)]
+    public void PlantedDockerfile_WithoutTheLegalTextsBeforeThePublish_IsAViolation(string legal)
+    {
+        const string Web = "RUN pnpm --filter @sacou/web build\nCOPY --from=web /source/apps/api/src/Sacou.Api/wwwroot/web/ x\n";
+        var dockerfile = legal.Length == 0 ? Web + "RUN dotnet publish" : Web + legal;
+
+        Assert.Single(WebPageRules.DockerfileViolations(dockerfile));
     }
 }

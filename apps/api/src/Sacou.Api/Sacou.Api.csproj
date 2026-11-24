@@ -8,6 +8,10 @@
         <InternalsVisibleTo Include="Sacou.Api.Tests" />
     </ItemGroup>
     <ItemGroup>
+        <!-- The terms of use and the privacy policy (E6.1, ADR 0083): one source of truth, published at /termos and /privacidade. -->
+        <EmbeddedResource Include="../../../../docs/legal/*.md" LogicalName="Sacou.Api.Legal.%(Filename)%(Extension)" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="../Sacou.Modules/Identity/Sacou.Modules.Identity.csproj" />
         <ProjectReference Include="../Sacou.Modules/Groups/Sacou.Modules.Groups.csproj" />
         <ProjectReference Include="../Sacou.Modules/Sessions/Sacou.Modules.Sessions.csproj" />

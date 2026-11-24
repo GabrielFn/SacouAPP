@@ -36,9 +36,7 @@ internal sealed class RoundModel(
         Round?.When,
         WebTexts.SheetTitle,
         WebTexts.SheetBody,
-        WebTexts.Privacy,
-        SignInSheetView.HttpsOrNull(page.Value.TermsUrl),
-        SignInSheetView.HttpsOrNull(page.Value.PrivacyUrl));
+        WebTexts.Privacy);
 
     public string PageUrl => Origin + PagePath + Code;
 
