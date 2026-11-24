@@ -61,7 +61,7 @@ snapshot fora da trava) e o 20.000º pela rota (quente). Cinco streams novos dep
 | Onde | Quente (20.000º) | Frio (19.999º) | Trava no frio | Memória retida por stream cheio |
 |---|---|---|---|---|
 | Máquina de desenvolvimento, Release (24/11) | mediana **21 a 27 ms** (6 a 17 ms com a trava) | 505 a 1.083 ms | **9 a 30 ms** | **~25,6 MiB** |
-| CI (GitHub Actions) | no passo "Measure the court stream at its ceiling" do PR | | | |
+| CI (GitHub Actions, PR #241) | mediana **12 ms** (3 a 5 ms com a trava) | 371 a 754 ms | **5 a 7 ms** | ~25,6 MiB |
 
 Sem snapshot (a primeira medição, com o cache recusando a entrada), o frio sob a trava ficou em 405 a 926 ms de trava e
 o 20.000º em 887 ms de mediana: o mesmo caminho de antes, que o snapshot tira da trava. Com ~25,6 MiB por stream cheio
