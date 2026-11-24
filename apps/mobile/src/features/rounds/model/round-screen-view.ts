@@ -42,6 +42,11 @@ export function removalName(going: readonly RosterEntry[], memberId: string, meI
   return going.find((entry) => entry.memberId === memberId)?.name ?? roundsStrings.detail.noName;
 }
 
+/** Some member of the group is a regular: the window of the drop-ins then keeps only the regulars company. */
+export function groupHasRegulars(members: readonly Member[]): boolean {
+  return members.some((member) => member.memberType === "regular");
+}
+
 /** The card of screen 26, or `null` with the attendance off or settings that do not parse. */
 export function playerPresence(
   round: Round,
@@ -52,7 +57,15 @@ export function playerPresence(
   if (settings === null || !settings.values.attendance.enabled) return null;
   const { waitlistRoster } = rosterView(round, settings, members);
   const myType = members.find((member) => member.isMe)?.memberType ?? null;
-  return presenceCard({ round, values: settings.values, waitlist: waitlistRoster, myType, now });
+  return presenceCard({
+    round,
+    values: settings.values,
+    waitlist: waitlistRoster,
+    myType,
+    groupHasRegulars: groupHasRegulars(members),
+    dropInHours: settings.values.attendance.dropInOpensHoursBefore,
+    now,
+  });
 }
 
 export interface AddPlayerView {

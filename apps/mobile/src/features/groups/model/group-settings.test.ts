@@ -26,7 +26,7 @@ import {
   visibleSettings,
 } from "./group-settings.selectors";
 import { settingsStrings } from "../../../strings/settings.pt-BR";
-import { SETTINGS_SCREEN, visibleRows } from "./settings-layout";
+import { SETTINGS_SCREEN, visibleRows, type BlockSpec } from "./settings-layout";
 import { leafLayer, settingsPatch, withLeaf } from "./settings-patch";
 import { templateLabel, toSettingsView } from "./settings-document";
 
@@ -143,7 +143,10 @@ describe("visibleSettings and settingsPatch", () => {
 describe("blockSummary", () => {
   test("the group of the canvas reads as the canvas", () => {
     expect(blockSummary("attendance", canvasGroup)).toBe(
-      "Limite 14 · mensalistas com prioridade · avulsos abrem 24h antes · toda terça 20h30",
+      "Limite 14 · lista de espera · toda terça 20h30",
+    );
+    expect(blockSummary("regulars", canvasGroup)).toBe(
+      "Entram sozinhos · avulsos a partir de 24h antes",
     );
     expect(blockSummary("scoring", canvasGroup)).toBe(
       "25 pontos · 1 set · tie-break 15 · vantagem de 2",
@@ -237,9 +240,45 @@ describe("the layout of the screen", () => {
     expect(kinds(off)).not.toContain("attendance.capacity");
   });
 
+  test("R101 item 5: regulars and the window of the drop-ins are not in 'Presença e vagas'", () => {
+    const attendance = SETTINGS_SCREEN.find((spec) => spec.block === "attendance");
+    const regulars = SETTINGS_SCREEN.find((spec) => spec.block === "regulars");
+    if (attendance === undefined || regulars === undefined) throw new Error("no block");
+    const pathsOf = (spec: BlockSpec) =>
+      spec.rows.flatMap(({ row }) => ("path" in row ? [row.path] : []));
+    expect(pathsOf(attendance).filter((path) => /regulars|dropIn/u.test(path))).toEqual([]);
+    expect(regulars.enabledPath).toBe("attendance.regularsEnabled");
+    expect(pathsOf(regulars)).toEqual([
+      "attendance.dropInWindowEnabled",
+      "attendance.dropInOpensHoursBefore",
+    ]);
+  });
+
+  test("the window shows only with regulars on, presence on and the window on", () => {
+    const regulars = SETTINGS_SCREEN.find((spec) => spec.block === "regulars");
+    if (regulars === undefined) throw new Error("no block");
+    const kinds = (settings: GroupSettings) =>
+      visibleRows(regulars, settings).map((row) => ("path" in row ? row.path : row.kind));
+    expect(kinds(canvasGroup)).toEqual([
+      "attendance.dropInWindowEnabled",
+      "attendance.dropInOpensHoursBefore",
+    ]);
+    expect(kinds(withLeaf(canvasGroup, "attendance.dropInWindowEnabled", false))).toEqual([
+      "attendance.dropInWindowEnabled",
+    ]);
+    expect(kinds(withLeaf(canvasGroup, "attendance.enabled", false))).toEqual([]);
+  });
+
+  test("a group without regulars says so, and the window leaves the summary", () => {
+    const none = withLeaf(canvasGroup, "attendance.regularsEnabled", false);
+    expect(blockSummary("regulars", none)).toBe("Sem mensalistas");
+    expect(blockSummary("attendance", none)).not.toMatch(/mensalista|avulso/u);
+  });
+
   test("the pilot has no money block and no money line (ADR 0046)", () => {
     expect(SETTINGS_SCREEN.map((spec) => spec.block)).toEqual([
       "attendance",
+      "regulars",
       "scoring",
       "queue",
       "draw",

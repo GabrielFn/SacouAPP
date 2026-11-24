@@ -6,6 +6,7 @@ import { formatTime } from "../../groups/model/schedule-text";
 import type { PendingRoundScreen } from "../navigation";
 import { dateSubtitle } from "./round-dates";
 import { hasEnded } from "./round-cards";
+import { dropInOpensPhrase } from "./round-clock";
 
 const { detail } = roundsStrings;
 const MANAGER_ROLES: ReadonlySet<GroupRole> = new Set(["admin", "coAdmin"]);
@@ -119,6 +120,23 @@ export function adminRoundOffers(
 ): AdminRoundOffers {
   const open = !isCanceled(round) && !isEnded(round, now);
   return { canAdd: attendanceEnabled && open, canRemove: open, courtEntryEnabled: open };
+}
+
+/** The line of screen 06 about the window of the drop-ins, or `null` when there is none to tell. */
+export interface AdminDropInWindow {
+  readonly phrase: string;
+}
+
+/**
+ * "A lista dos avulsos abre amanhã, às 20h." for the admin of an open round, until the window opens;
+ * nothing with the window off (`dropInOpensAt` null), once it is open, or after the round started, ended
+ * or was canceled.
+ */
+export function adminDropInWindow(round: Round, now: number): AdminDropInWindow | null {
+  const opensAt = round.dropInOpensAt;
+  const open = !isCanceled(round) && !isEnded(round, now) && Date.parse(round.startsAt) > now;
+  if (opensAt === null || !open || Date.parse(opensAt) <= now) return null;
+  return { phrase: dropInOpensPhrase(round, opensAt, now) };
 }
 
 /**

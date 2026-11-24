@@ -42,8 +42,8 @@ const fields: Readonly<Record<ShownPath, string>> = {
   "attendance.capacityLimited": "Limite de vagas",
   "attendance.capacity": "Vagas",
   "attendance.waitlistEnabled": "Lista de espera",
-  "attendance.regularsEnabled": "Mensalistas com prioridade",
-  "attendance.dropInWindowEnabled": "Avulsos abrem antes",
+  "attendance.regularsEnabled": "Tem mensalistas fixos",
+  "attendance.dropInWindowEnabled": "Avulsos confirmam mais tarde",
   "attendance.dropInOpensHoursBefore": "Horas antes da rodada",
   "schedule.enabled": "Dia fixo",
   "schedule.weekday": "Dia",
@@ -137,6 +137,7 @@ export const settingsStrings = {
   },
   blocks: {
     attendance: { title: "Presença e vagas" },
+    regulars: { title: "Mensalistas" },
     scoring: { title: "Jogo" },
     queue: { title: "Fila", caption: "quem joga a próxima" },
     draw: { title: "Sorteio", caption: "times na hora" },
@@ -185,6 +186,8 @@ export const settingsStrings = {
     saving: "Salvando",
     readOnly: "Só admins e co-admins mudam a regra da fila.",
   },
+  /** The line under the title of "Mensalistas" while it is open. */
+  regularsHelp: "Mensalistas entram sozinhos na lista toda rodada.",
   rotationHelp: {
     libero: "Líbero só vale nos sistemas 5x1 e 6x2.",
     now: (note: string) => `Agora: ${note}.`,
@@ -192,8 +195,10 @@ export const settingsStrings = {
   summary: {
     limit: (capacity: number) => `Limite ${String(capacity)}`,
     noLimit: "sem limite",
-    regulars: "mensalistas com prioridade",
-    dropIn: (hours: number) => `avulsos abrem ${String(hours)}h antes`,
+    waitlist: "lista de espera",
+    regularsOn: "Entram sozinhos",
+    regularsOff: "Sem mensalistas",
+    dropIn: (hours: number) => `avulsos a partir de ${String(hours)}h antes`,
     points: (points: number) => `${String(points)} pontos`,
     sets: (sets: number) => (sets === 1 ? "1 set" : `${String(sets)} sets`),
     tieBreak: (points: number) => `tie-break ${String(points)}`,
