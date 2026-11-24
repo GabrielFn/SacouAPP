@@ -2,19 +2,15 @@ import createClient from "openapi-fetch";
 
 import type { paths } from "../api/generated/schema";
 import type { ApiError } from "../services/api/api-error";
-import { isApiUrl } from "../services/api/api-config";
 import {
-  classifyFailure,
   finalError,
   isAccountDeleted,
-  isJson,
-  isSuccess,
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
-import { appBuildHeaders } from "../features/app-config/model/app-build-headers";
 import type { AppBuild } from "../features/app-config/app-build";
 import { createGuardedFetch, NetworkFailure, refuseEverything } from "./http-guarded-fetch";
+import { authInit, NOT_SENT, readOutcome, type Call } from "./http-outcome";
 import { createAccountOperations } from "./http-account-operations";
 import { createCourtOperations } from "./http-court-operations";
 import { createLevelOperations } from "./http-level-operations";
@@ -43,41 +39,9 @@ export interface HttpSacouApiOptions {
   readonly appBuild?: AppBuild;
 }
 
-// A type and not an interface: openapi-fetch takes an init with an index signature.
-type AuthInit = { readonly headers: Readonly<Record<string, string>> };
+export type { Call };
 
-interface FetchOutcome<T> {
-  readonly data?: T;
-  readonly error?: unknown;
-  readonly response: Response;
-}
-
-export type Call<T> = (init: AuthInit) => Promise<FetchOutcome<T>>;
-
-const NOT_SENT: ApiError = { kind: "unexpected", status: 0 };
 const ACCOUNT_CHANGED: ApiError = { kind: "account-changed" };
-
-function readOutcome<T>(baseUrl: string, outcome: FetchOutcome<T>, nowMs: number): ApiResult<T> {
-  const { response } = outcome;
-  const contentType = response.headers.get("content-type");
-  // A transport that followed a redirect anyway: what came back is not the API's answer (D7).
-  const moved = response.url !== "" && !isApiUrl(baseUrl, response.url);
-  if (moved || response.type === "opaqueredirect") return apiErr(NOT_SENT);
-  if (!isSuccess(response.status)) {
-    const retryAfter = response.headers.get("retry-after");
-    const raw = { status: response.status, contentType, retryAfter, body: outcome.error };
-    return apiErr(classifyFailure(raw, nowMs));
-  }
-  if (outcome.data !== undefined && !isJson(contentType)) {
-    return apiErr({ kind: "unexpected", status: response.status });
-  }
-  // The body was read by openapi-fetch for this operation's success status: its type is the contract's.
-  return apiOk(outcome.data as T);
-}
-
-function authInit(token: string): AuthInit {
-  return { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } };
-}
 
 /**
  * The real `SacouApi` over `openapi-fetch`, typed by the generated `paths` (E4.2, D4 and D7). It builds the
@@ -96,7 +60,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
             baseUrl,
             transport,
             options.timeoutMs ?? REQUEST_TIMEOUT_MS,
-            options.appBuild === undefined ? {} : appBuildHeaders(options.appBuild),
+            options.appBuild,
           ),
   });
   // Calls refused at the same time share one renewal (D5).
@@ -109,7 +73,8 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     return renewal.current;
   }
 
-  async function attempt<T>(call: Call<T>, token: string): Promise<ApiResult<T>> {
+  /** `token` is `null` only for the anonymous app config (ADR 0084): no Authorization header. */
+  async function attempt<T>(call: Call<T>, token: string | null): Promise<ApiResult<T>> {
     try {
       return readOutcome(baseUrl ?? "", await call(authInit(token)), now());
     } catch (error) {
@@ -179,16 +144,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     }
   }
 
-  /** A call without a token: the app config, asked before the sign-in (ADR 0084). Never repeated. */
-  async function executeAnonymous<T>(call: Call<T>): Promise<ApiResult<T>> {
-    if (baseUrl === null) return apiErr(NOT_SENT);
-    try {
-      return readOutcome(baseUrl, await call({ headers: { Accept: "application/json" } }), now());
-    } catch (error) {
-      return apiErr(error instanceof NetworkFailure ? { kind: "offline" } : NOT_SENT);
-    }
-  }
-
   function executeAs<T>(call: Call<T>, account: SessionIdentity | null): Promise<ApiResult<T>> {
     if (baseUrl === null) return Promise.resolve(apiErr(NOT_SENT));
     return run(call, { renewedToken: false, signedIn: false }, account);
@@ -204,7 +159,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   }
 
   return {
-    getAppConfig: () => executeAnonymous((init) => client.GET("/v1/app-config", init)),
+    getAppConfig: () => attempt((init) => client.GET("/v1/app-config", init), null),
     signIn: () => execute((init) => client.POST("/v1/me", init)),
     listMyGroups: () => execute((init) => client.GET("/v1/groups", init)),
     createGroup: (name, templateKey, settings) =>
@@ -309,7 +264,6 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     ...createRoundOperations(client, execute),
     ...createStatsOperations(client, execute),
     ...createProfileOperations(client, execute),
-    ...createStatsOperations(client, execute),
     ...createAccountOperations(client, execute),
     ...createCourtOperations(client, executeAs),
     ...createNotificationOperations(client, execute),

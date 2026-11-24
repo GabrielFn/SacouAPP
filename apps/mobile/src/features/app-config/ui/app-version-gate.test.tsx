@@ -4,11 +4,20 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { appUpdateStrings } from "../../../strings/app-update.pt-BR";
 import type { AppConfig } from "../../../services/api/sacou-api";
 import type { AppBuild } from "../app-build";
+import { AppVersionGate } from "./AppVersionGate";
+import { UpdateRequiredScreen } from "./UpdateRequiredScreen";
 
-const state = vi.hoisted(() => ({
-  config: undefined as AppConfig | undefined,
-  appBuild: { platform: "android", build: 10 } as AppBuild,
-  opened: [] as string[],
+interface GateState {
+  config: AppConfig | undefined;
+  appBuild: AppBuild;
+  opened: string[];
+  blocks: number;
+}
+
+const state = vi.hoisted<GateState>(() => ({
+  config: undefined,
+  appBuild: { platform: "android", build: 10 },
+  opened: [],
   blocks: 0,
 }));
 
@@ -35,9 +44,6 @@ vi.mock("../../../services/services-context", () => ({
   }),
 }));
 vi.mock("../../../ui/ErrorScreen", () => ({ ErrorScreen: "ErrorScreen" }));
-
-import { AppVersionGate } from "./AppVersionGate";
-import { UpdateRequiredScreen } from "./UpdateRequiredScreen";
 
 const STORE = "https://play.google.com/store/apps/details?id=com.sacou.app";
 

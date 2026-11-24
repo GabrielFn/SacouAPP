@@ -1,3 +1,5 @@
+import type { AppBuild } from "../features/app-config/app-build";
+import { appBuildHeaders } from "../features/app-config/model/app-build-headers";
 import { isApiUrl } from "../services/api/api-config";
 import type { HttpRequest, HttpTransport } from "../services/api/http-transport";
 
@@ -14,7 +16,7 @@ async function bodyOf(request: Request): Promise<string | null> {
   return text === "" ? null : text;
 }
 
-/** `ambientHeaders` go on every request, whatever the call (the app's build, ADR 0084). */
+/** The headers of the call plus the ones every request carries (the app's build, ADR 0084). */
 function withHeaders(headers: Headers, extra: Readonly<Record<string, string>>): Headers {
   const merged = new Headers(headers);
   Object.entries(extra).forEach(([name, value]) => {
@@ -23,12 +25,14 @@ function withHeaders(headers: Headers, extra: Readonly<Record<string, string>>):
   return merged;
 }
 
+/** `appBuild` goes in two headers of every request; without a build (or without `appBuild`), in none. */
 export function createGuardedFetch(
   baseUrl: string,
   transport: HttpTransport,
   timeoutMs: number,
-  ambientHeaders: Readonly<Record<string, string>> = {},
+  appBuild?: AppBuild,
 ) {
+  const ambientHeaders = appBuild === undefined ? {} : appBuildHeaders(appBuild);
   return async (request: Request): Promise<Response> => {
     if (!isApiUrl(baseUrl, request.url)) throw new OtherOriginRefused();
     const controller = new AbortController();
