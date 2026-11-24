@@ -228,6 +228,18 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | I   | Apelidos na página pública para sempre (M5-B2) | O código não expira e a página lista os apelidos em qualquer estado, inclusive "já terminou" (`RoundPageView.cs`). **Aberto:** retenção na E6.2 (esconder as listas depois do fim ou de N dias) |
 | I   | Página do convite revelando o grupo a quem não tem o token | A casca não sabe o grupo; o nome e a contagem só vêm da prévia (login e token válido); revogado, expirado, inexistente e malformado dão o mesmo texto; a prévia do WhatsApp é a genérica do Sacou |
 
+## 8a. Termos e política de privacidade (E6.1, [ADR 0083](../arquitetura/adr/0083-documentos-legais-publicados-pela-api.md))
+
+Duas páginas anônimas (`/termos`, `/privacidade`), sem script, sem dado de ninguém e sem entrada além do caminho.
+
+|     | Ameaça | Mitigação |
+| --- | ------ | --------- |
+| T   | Texto alterado para injetar HTML ou script | O texto só muda por PR em `docs/legal/` (embutido no build, sem disco nem banco); o leitor recusa HTML, links, imagens, tabelas e ênfase e a API não sobe com documento recusado; o Razor codifica tudo, sem `Html.Raw` (teste); CSP com `script-src 'none'` e `default-src 'none'`; teste com texto hostil num `ILegalDocuments` falso |
+| I   | Nota de revisão (lacunas, pontos do advogado) publicada | Só o trecho entre os marcadores vai à página, nunca as linhas `>` (testes no leitor e no HTML real) |
+| I   | Política prometendo menos do que o código faz (LGPD) | Tabela de rastreio no fim da política; quem muda `dados-pessoais.md` confere a política e sobe a versão; a 1.0 não sai com "a definir" (teste) |
+| T   | Página em moldura de outro site ou com o caminho refletido | `frame-ancestors 'none'`, `X-Frame-Options: DENY`; a query nunca é refletida (teste) |
+| D   | Abuso das páginas públicas | Política `round-page` por endereço (60 / 60 s), como a `/r` (teste do 61º pedido) |
+
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 
 |     | Ameaça                                  | Mitigação                                                                             |
