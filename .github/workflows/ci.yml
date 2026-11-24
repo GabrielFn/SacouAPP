@@ -161,6 +161,13 @@ jobs:
       - name: Test API integration
         run: dotnet test --project apps/api/tests/Sacou.Integration.Tests
 
+      # The 20,000th event of a full stream under 500 ms, and the lock of a cold one too (ADR 0081). Release, as the
+      # budget is; the times go to the output of the step.
+      - name: Measure the court stream at its ceiling
+        env:
+          SACOU_PERF_GATE: "1"
+        run: dotnet test --project apps/api/tests/Sacou.Integration.Tests -c Release --filter-class "*CourtVolumeTests" --output Detailed
+
       # The Ryuk digest comes from the Testcontainers package (pinned at [4.16.0]); a different one means
       # the package or the configuration changed it. Raising the package is a deliberate review.
       - name: Check Ryuk image digest

@@ -26,8 +26,6 @@ public sealed partial class CourtVolumeTests(IntegrationDatabase database) : IAs
     private const int GatedRounds = 5;
     private const int UngatedRounds = 1;
     private const double BytesPerMebibyte = 1024.0 * 1024.0;
-    private const string GateVariable = "SACOU_PERF_GATE";
-    private const string GateOn = "1";
 
     /// <summary>The acceptance of E5.3b: the 20,000th event, and the lock of a cold one, under half a second in Release.</summary>
     private static readonly TimeSpan Budget = TimeSpan.FromMilliseconds(500);
@@ -41,15 +39,15 @@ public sealed partial class CourtVolumeTests(IntegrationDatabase database) : IAs
 
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
-#if DEBUG
-    private const bool InRelease = false;
+    /// <summary>
+    /// Only a Release build with <c>SACOU_PERF_GATE=1</c> in its environment measures the budget (the project defines
+    /// the constant): Debug is many times slower and only checks the shape.
+    /// </summary>
+#if SACOU_PERF_GATE
+    private static bool Gated() => true;
 #else
-    private const bool InRelease = true;
+    private static bool Gated() => false;
 #endif
-
-    /// <summary>Only Release measures the budget: Debug is many times slower and only checks the shape.</summary>
-    private static bool Gated =>
-        InRelease && string.Equals(Environment.GetEnvironmentVariable(GateVariable), GateOn, StringComparison.Ordinal);
 
     [Fact]
     public async Task TheLastEventOfAFullStream_IsDecidedInTime()
@@ -59,7 +57,7 @@ public sealed partial class CourtVolumeTests(IntegrationDatabase database) : IAs
         await WarmAsync(world);
 
         var rounds = new List<Measure>();
-        for (var round = 0; round < (Gated ? GatedRounds : UngatedRounds); round++)
+        for (var round = 0; round < (Gated() ? GatedRounds : UngatedRounds); round++)
         {
             rounds.Add(await MeasureAsync(world, checkTheCeiling: round == 0));
         }
@@ -73,10 +71,10 @@ public sealed partial class CourtVolumeTests(IntegrationDatabase database) : IAs
         }
 
         TestContext.Current.TestOutputHelper?.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"A10: median hot {medianHotMs} ms over {rounds.Count} streams; gate {(Gated ? "on" : "off")}."));
+            $"A10: median hot {medianHotMs} ms over {rounds.Count} streams; gate {(Gated() ? "on" : "off")}."));
         Assert.All(rounds, measure => Assert.Equal(("built", "hit"), (measure.ColdSnapshot, measure.HotSnapshot)));
         Assert.True(TimeSpan.FromMilliseconds(medianHotMs) < Generous, $"{medianHotMs} ms");
-        if (Gated)
+        if (Gated())
         {
             Assert.True(TimeSpan.FromMilliseconds(medianHotMs) < Budget, $"median hot {medianHotMs} ms");
             Assert.All(rounds, measure => Assert.True(TimeSpan.FromMilliseconds(measure.ColdLockedMs) < Budget, $"cold locked {measure.ColdLockedMs} ms"));
