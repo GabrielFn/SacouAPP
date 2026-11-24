@@ -161,7 +161,11 @@ export const roundsStrings = {
     takesYourPlace: (name: string) => `${name} (1º da espera) entra no seu lugar.`,
     waitlistCount: (count: number) => `${String(count)} na espera`,
     leaveTitle: "Sair da lista?",
-    leaveBody: "Se mudar de ideia, você volta pelo fim da espera.",
+    /** Full list with a waitlist: the first of the waitlist takes the place, coming back is at the end. */
+    leaveBodyFullWithWaitlist: (name: string) =>
+      `${name} (1º da espera) entra no seu lugar. Se mudar de ideia, você volta pelo fim da espera.`,
+    leaveBodyFull: "Se mudar de ideia, só volta se abrir vaga.",
+    leaveBodyOpen: "Se mudar de ideia, é só tocar em VOU de novo enquanto houver vaga.",
     leaveConfirm: "Não vou mais",
     keep: "Continuar na lista",
   },

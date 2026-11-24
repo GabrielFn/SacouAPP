@@ -20,8 +20,10 @@ export type PresenceActions =
       readonly label: string;
       /** "Clara (1º da espera) entra no seu lugar.", only for who holds a spot. */
       readonly warning: string | null;
-      /** A full list asks first: coming back goes to the end of the waitlist (question 25). */
+      /** "Não vou mais" always asks first (R101 3b); "Sair da espera" does not take a spot from anyone. */
       readonly needsConfirm: boolean;
+      /** What the confirmation says about coming back; `null` when it does not ask. */
+      readonly leaveBody: string | null;
     };
 
 export interface PresenceCardView {
@@ -68,6 +70,13 @@ function goingLine(round: Round): string | null {
   return position === null ? null : presence.listPosition(position);
 }
 
+function leaveBodyOf(round: Round, waitlist: readonly RosterEntry[]): string {
+  if (!isFull(round)) return presence.leaveBodyOpen;
+  const first = waitlist[0];
+  if (first === undefined) return presence.leaveBodyFull;
+  return presence.leaveBodyFullWithWaitlist(first.name ?? roundsStrings.detail.noName);
+}
+
 function leaveWarning(waitlist: readonly RosterEntry[]): string | null {
   const first = waitlist[0];
   return first === undefined
@@ -85,7 +94,8 @@ function goingCard(input: PresenceInput): PresenceCardView {
       kind: "leave",
       label: presence.notGoingAnymore,
       warning: leaveWarning(waitlist),
-      needsConfirm: isFull(round),
+      needsConfirm: true,
+      leaveBody: leaveBodyOf(round, waitlist),
     },
   };
 }
@@ -95,7 +105,13 @@ function waitlistedCard(round: Round): PresenceCardView {
   return {
     title: presence.waitlisted,
     line: position === null ? null : presence.waitlistPosition(position),
-    actions: { kind: "leave", label: presence.leaveWaitlist, warning: null, needsConfirm: false },
+    actions: {
+      kind: "leave",
+      label: presence.leaveWaitlist,
+      warning: null,
+      needsConfirm: false,
+      leaveBody: null,
+    },
   };
 }
 

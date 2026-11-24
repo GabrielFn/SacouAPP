@@ -13,6 +13,7 @@ import {
 import { capacityHint } from "./capacity-hint";
 import { confirmedSummary, summaryText } from "./confirmed-summary";
 import { presenceCard, presenceCounts, type PresenceInput } from "./presence-card";
+import type { Round } from "../../../services/api/sacou-api";
 import { dropInOpensLabel } from "./round-clock";
 import { roundListText } from "./round-list-text";
 import {
@@ -52,7 +53,8 @@ describe("presenceCard, one case per row of D7", () => {
       kind: "leave",
       label: "Não vou mais",
       warning: null,
-      needsConfirm: false,
+      needsConfirm: true,
+      leaveBody: "Se mudar de ideia, é só tocar em VOU de novo enquanto houver vaga.",
     });
   });
 
@@ -71,6 +73,7 @@ describe("presenceCard, one case per row of D7", () => {
       label: "Sair da espera",
       warning: null,
       needsConfirm: false,
+      leaveBody: null,
     });
   });
 
@@ -159,13 +162,34 @@ describe("presenceCard, one case per row of D7", () => {
       label: "Não vou mais",
       warning: "Clara (1º da espera) entra no seu lugar.",
       needsConfirm: true,
+      leaveBody:
+        "Clara (1º da espera) entra no seu lugar. Se mudar de ideia, você volta pelo fim da espera.",
     });
     const notFull = presenceCard(input({ round: attendanceRound({ me, goingCount: 5 }) }));
-    expect(notFull.actions).toMatchObject({ warning: null, needsConfirm: false });
+    expect(notFull.actions).toMatchObject({ warning: null, needsConfirm: true });
     const waiting = { ...me, status: "waitlisted" as const };
     expect(
       presenceCard(input({ round: full({ me: waiting }), waitlist: [CLARA] })).actions,
     ).toMatchObject({ warning: null });
+  });
+
+  test("R101 3b: Não vou mais always asks, with the body of the three cases; Sair da espera never asks", () => {
+    const me = { memberId: ME, status: "going" as const, position: 5, regularPosition: null };
+    const bodyOf = (round: Round, waitlist: readonly RosterEntry[]) => {
+      const { actions } = presenceCard(input({ round, waitlist }));
+      return actions.kind === "leave" ? [actions.needsConfirm, actions.leaveBody] : null;
+    };
+    expect(bodyOf(full({ me }), [CLARA])).toEqual([
+      true,
+      "Clara (1º da espera) entra no seu lugar. Se mudar de ideia, você volta pelo fim da espera.",
+    ]);
+    expect(bodyOf(full({ me }), [])).toEqual([true, "Se mudar de ideia, só volta se abrir vaga."]);
+    expect(bodyOf(attendanceRound({ me, goingCount: 5 }), [])).toEqual([
+      true,
+      "Se mudar de ideia, é só tocar em VOU de novo enquanto houver vaga.",
+    ]);
+    const waiting = { ...me, status: "waitlisted" as const };
+    expect(bodyOf(full({ me: waiting }), [CLARA])).toEqual([false, null]);
   });
 
   test("the counts: 12/12 and 1 na espera; the waitlist hides when empty or off", () => {
