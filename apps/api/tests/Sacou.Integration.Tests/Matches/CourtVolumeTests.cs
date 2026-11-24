@@ -41,12 +41,15 @@ public sealed partial class CourtVolumeTests(IntegrationDatabase database) : IAs
 
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
-    private static bool Gated =>
 #if DEBUG
-        false;
+    private const bool InRelease = false;
 #else
-        string.Equals(Environment.GetEnvironmentVariable(GateVariable), GateOn, StringComparison.Ordinal);
+    private const bool InRelease = true;
 #endif
+
+    /// <summary>Only Release measures the budget: Debug is many times slower and only checks the shape.</summary>
+    private static bool Gated =>
+        InRelease && string.Equals(Environment.GetEnvironmentVariable(GateVariable), GateOn, StringComparison.Ordinal);
 
     [Fact]
     public async Task TheLastEventOfAFullStream_IsDecidedInTime()
