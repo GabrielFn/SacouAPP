@@ -116,3 +116,8 @@ export function endMatchSentence(summary: EndMatchSummary): string {
       return endMatchDialog.noWinner;
   }
 }
+
+/** How many matches of this court are over (the one in play does not count): said before ending the round. */
+export function finishedMatchCount(timeline: CourtSessionTimeline): number {
+  return stateOfTimeline(timeline).finishedMatches.length;
+}

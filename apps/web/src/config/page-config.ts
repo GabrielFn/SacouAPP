@@ -1,3 +1,5 @@
+import type { DropInContext } from "../strings.pt-BR";
+
 /** The public Web config of the Firebase project (not a secret: it identifies the project to the browser). */
 export interface FirebaseWebConfig {
   readonly apiKey: string;
@@ -11,6 +13,8 @@ export interface PageConfig {
   readonly code: string;
   readonly firebase: FirebaseWebConfig;
   readonly nicknameMaxCodePoints: number;
+  /** The avulsos' window (R101): the phrase of the day it opens, and whether the list has mensalistas. */
+  readonly dropIn: DropInContext;
 }
 
 export type DatasetLike = Readonly<Record<string, string | undefined>>;
@@ -44,5 +48,10 @@ export function readPageConfig(dataset: DatasetLike): PageConfig | null {
   )
     return null;
   const firebase = readFirebaseConfig(dataset);
-  return firebase === null ? null : { code, firebase, nicknameMaxCodePoints: nicknameMax };
+  if (firebase === null) return null;
+  const dropIn = {
+    phrase: text(dataset, "dropInPhrase") ?? "",
+    hasRegulars: dataset.hasRegulars === "true",
+  };
+  return { code, firebase, nicknameMaxCodePoints: nicknameMax, dropIn };
 }

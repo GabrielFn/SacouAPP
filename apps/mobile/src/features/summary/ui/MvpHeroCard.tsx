@@ -1,11 +1,8 @@
 import { StyleSheet, View } from "react-native";
 import Svg, { Line, Path } from "react-native-svg";
 
-import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
 import { Text } from "../../../ui/Text";
-
-const { summary } = strings;
 
 const COURT_VIEW_BOX = "0 0 358 178";
 const STAR_VIEW_BOX = "0 0 24 24";
@@ -19,21 +16,25 @@ const COURT_STROKE = 2;
 const NET_STROKE = 3;
 
 export interface MvpHeroCardProps {
+  /** "MVP do dia" or, while the voting decides, "Na frente pelo placar". */
+  readonly title: string;
+  /** The label read aloud: the same title and the name. */
+  readonly accessibility: string;
   /** Already assembled: "Bia", and "Bia e Gabi" for a pair of the sand (E4.18). */
   readonly name: string;
   /** "Laranja · +2 de saldo · 2 vitórias em 3"; `null` for a tie of votes. */
   readonly line: string | null;
-  /** The small print: "Calculado pelo placar", "Escolhido pela galera", "Votação da galera aberta". */
+  /** The small print: "Calculado pelo placar", "Escolhido pela galera", "A galera decide até amanhã, 12h44". */
   readonly notes: readonly string[];
 }
 
 /** The dark card of the MVP of the day (Resumo.dc.html): grows with the name, never a fixed height. */
-export function MvpHeroCard({ name, line, notes }: MvpHeroCardProps) {
+export function MvpHeroCard({ title, accessibility, name, line, notes }: MvpHeroCardProps) {
   const { colors, tokens } = useTheme();
   return (
     <View
       accessible
-      accessibilityLabel={[summary.mvpAccessibility(name), line, ...notes]
+      accessibilityLabel={[accessibility, line, ...notes]
         .filter((part) => part !== null)
         .join(". ")}
       style={{
@@ -76,7 +77,7 @@ export function MvpHeroCard({ name, line, notes }: MvpHeroCardProps) {
           variant="bodyStrong"
           style={{ color: colors.panelAccent, fontSize: tokens.fontSizes.small }}
         >
-          {summary.mvpTitle}
+          {title}
         </Text>
       </View>
       <Text

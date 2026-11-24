@@ -15,6 +15,7 @@ internal static partial class DeploySetupRules
     internal const string ServicePath = "deploy/cloud-run/service.yaml";
     internal const string DatabaseUrlVariable = "SACOU_DATABASE_URL";
     internal const string ExpoTokenVariable = "SACOU_EXPO_ACCESS_TOKEN";
+    internal const string SentryDsnVariable = "SACOU_SENTRY_DSN";
 
     private const string AllFiles = "*";
     private const string EnvFiles = "**/.env*";
@@ -161,6 +162,7 @@ internal static partial class DeploySetupRules
             .. code.Contains(@"/sacou/api@sha256:[0-9a-f]{64}$", StringComparison.Ordinal) ? Array.Empty<string>() : ["The deploy action must refuse an image without a digest"],
             .. code.Contains(DatabaseUrlVariable, StringComparison.Ordinal) ? ["The deploy action must not name the database URL"] : Array.Empty<string>(),
             .. code.Contains(ExpoTokenVariable, StringComparison.Ordinal) ? ["The deploy action must not name the Expo access token"] : Array.Empty<string>(),
+            .. code.Contains(SentryDsnVariable, StringComparison.Ordinal) ? ["The deploy action must not name the Sentry DSN"] : Array.Empty<string>(),
         ];
     }
 
@@ -173,13 +175,19 @@ internal static partial class DeploySetupRules
         [
             .. maxScales.Count == 1 && maxScales[0] == OneInstance ? Array.Empty<string>() : [$"{MaxScaleKey} must be {OneInstance} once, found [{string.Join(", ", maxScales)}]"],
             .. probePath.Success && probePath.Groups["path"].Value == healthPath ? Array.Empty<string>() : [$"The startup probe must call {healthPath}"],
-            .. SecretReferencePattern().IsMatch(code) ? Array.Empty<string>() : [$"{DatabaseUrlVariable} must come from secretKeyRef"],
-            .. PlainDatabaseUrlPattern().IsMatch(code) ? [$"{DatabaseUrlVariable} must never have a plain value"] : Array.Empty<string>(),
-            .. ExpoSecretReferencePattern().IsMatch(code) ? Array.Empty<string>() : [$"{ExpoTokenVariable} must come from secretKeyRef"],
-            .. PlainExpoTokenPattern().IsMatch(code) ? [$"{ExpoTokenVariable} must never have a plain value"] : Array.Empty<string>(),
+            .. SecretViolations(code, DatabaseUrlVariable, SecretReferencePattern(), PlainDatabaseUrlPattern()),
+            .. SecretViolations(code, ExpoTokenVariable, ExpoSecretReferencePattern(), PlainExpoTokenPattern()),
+            .. SecretViolations(code, SentryDsnVariable, SentrySecretReferencePattern(), PlainSentryDsnPattern()),
             .. code.Contains("run.googleapis.com/cpu-throttling: \"true\"", StringComparison.Ordinal) ? Array.Empty<string>() : ["The service must bill by request (cpu-throttling)"],
         ];
     }
+
+    /// <summary>A secret of the service comes from secretKeyRef and never has a plain value.</summary>
+    private static IEnumerable<string> SecretViolations(string code, string variable, Regex reference, Regex plain) =>
+    [
+        .. reference.IsMatch(code) ? Array.Empty<string>() : [$"{variable} must come from secretKeyRef"],
+        .. plain.IsMatch(code) ? [$"{variable} must never have a plain value"] : Array.Empty<string>(),
+    ];
 
     internal static IReadOnlyList<string> AppSettingsViolations(string fileName, string json) =>
         [.. ForbiddenSettings
@@ -277,6 +285,12 @@ internal static partial class DeploySetupRules
 
     [GeneratedRegex(@"SACOU_EXPO_ACCESS_TOKEN\s*\n\s+value:|SACOU_EXPO_ACCESS_TOKEN\s*[=:]\s*\S")]
     private static partial Regex PlainExpoTokenPattern();
+
+    [GeneratedRegex(@"-\s+name:\s*SACOU_SENTRY_DSN\s*\n\s+valueFrom:\s*\n\s+secretKeyRef:\s*\n")]
+    private static partial Regex SentrySecretReferencePattern();
+
+    [GeneratedRegex(@"SACOU_SENTRY_DSN\s*\n\s+value:|SACOU_SENTRY_DSN\s*[=:]\s*\S")]
+    private static partial Regex PlainSentryDsnPattern();
 
     [GeneratedRegex(@"\bAddHostedService\b|\bIHostedService\b|\bBackgroundService\b")]
     private static partial Regex HostedServiceCallPattern();

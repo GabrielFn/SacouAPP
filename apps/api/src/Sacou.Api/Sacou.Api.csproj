@@ -2,10 +2,15 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.OpenApi" />
+        <PackageReference Include="Sentry.AspNetCore" />
     </ItemGroup>
     <ItemGroup>
         <!-- The OpenAPI transformers are internal; their tests read them (ADR 0042). -->
         <InternalsVisibleTo Include="Sacou.Api.Tests" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- The terms of use and the privacy policy (E6.1, ADR 0083): one source of truth, published at /termos and /privacidade. -->
+        <EmbeddedResource Include="../../../../docs/legal/*.md" LogicalName="Sacou.Api.Legal.%(Filename)%(Extension)" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../Sacou.Modules/Identity/Sacou.Modules.Identity.csproj" />

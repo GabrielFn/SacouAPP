@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Sacou.Api.Configuration;
+using Sacou.Api.Observability;
 using Sacou.Api.OpenApi;
 using Sacou.Api.Web;
 using Sacou.Http;
@@ -27,6 +28,8 @@ if (database.IsFailure)
 
 builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromSeconds(ShutdownTimeoutSeconds));
 
+// Errors to Sentry when its DSN is set, and the JSON logs of Cloud Logging outside Development (ADR 0080).
+builder.AddSacouObservability();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
 // Request bodies: unknown fields and numeric enums are a 400 (ADR 0039).
@@ -51,6 +54,11 @@ builder.Services.AddSacouOpenApi();
 builder.Services.AddSacouWeb(builder.Configuration);
 
 var app = builder.Build();
+// Says by name when Sentry is off (ADR 0080, D1).
+app.LogObservabilityState();
+
+// The terms and the privacy policy are read now: an invalid text stops the start, never a page (E6.1, ADR 0083).
+app.ReadSacouLegalDocuments();
 
 // The headers of the round page and its files, on their paths only (ADR 0070, D5).
 app.UseSacouWebHeaders();
@@ -74,6 +82,12 @@ app.MapStatsEndpoints();
 app.MapNotificationsEndpoints();
 // GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
 app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);
+// A deliberate 500, the acceptance test of Sentry: never in Production (ADR 0080, D8).
+if (DeliberateFailureEndpoint.IsMappedIn(app.Environment))
+{
+    app.MapDeliberateFailure();
+}
+
 // The contract lists every route, field and error code: only on a developer machine, never published (ADR 0042, D2).
 if (app.Environment.IsDevelopment())
 {

@@ -14,12 +14,20 @@ internal static partial class WebPageRules
     [
         "Invite.cshtml",
         "Invite.cshtml.cs",
+        "Privacy.cshtml",
+        "Privacy.cshtml.cs",
         "Round.cshtml",
         "Round.cshtml.cs",
+        "Shared/_LegalDocument.cshtml",
         "Shared/_OpenGraph.cshtml",
         "Shared/_SignInSheet.cshtml",
+        "Terms.cshtml",
+        "Terms.cshtml.cs",
         "_ViewImports.cshtml",
     ];
+
+    /// <summary>The line of the .NET stage that brings the legal texts the API embeds (E6.1, ADR 0083).</summary>
+    internal const string LegalCopy = "COPY docs/legal/ docs/legal/";
 
     internal static string PagesDirectory => Path.Combine(RepositoryFiles.ApiDirectory, "src", "Sacou.Api", "Web", "Pages");
 
@@ -45,9 +53,16 @@ internal static partial class WebPageRules
         var build = dockerfile.IndexOf("pnpm --filter @sacou/web build", StringComparison.Ordinal);
         var copy = dockerfile.IndexOf("COPY --from=web /source/apps/api/src/Sacou.Api/wwwroot/web/", StringComparison.Ordinal);
         var publish = dockerfile.IndexOf("dotnet publish", StringComparison.Ordinal);
-        return build >= 0 && copy > build && publish > copy
-            ? []
-            : ["the Dockerfile must build @sacou/web and copy wwwroot/web before dotnet publish"];
+        var legal = dockerfile.IndexOf(LegalCopy, StringComparison.Ordinal);
+        return
+        [
+            .. build >= 0 && copy > build && publish > copy
+                ? Array.Empty<string>()
+                : ["the Dockerfile must build @sacou/web and copy wwwroot/web before dotnet publish"],
+            .. legal >= 0 && publish > legal
+                ? Array.Empty<string>()
+                : ["the Dockerfile must copy docs/legal/ before dotnet publish: the API embeds the legal texts"],
+        ];
     }
 
     internal static IEnumerable<string> FilesUnder(string directory, params string[] patterns) =>

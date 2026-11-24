@@ -19,6 +19,8 @@ public interface IPublicRoundSummary
 /// limit, and <see cref="PointsPerSet"/> without the score. The counts are those of the stored lists, as
 /// the page reads them without the reconcile of the signed-in read (ADR 0043, D7). <see cref="Going"/> is the list of
 /// who holds a spot, by order of arrival, with no id: a member who left the group is still a line without a name.
+/// <see cref="DropInOpensAt"/> is the instant the avulsos list opens, null with the window off: a rule of the group, not
+/// data of a member (R101, ADR 0079).
 /// </summary>
 public sealed record PublicRoundSummary(
     string GroupName,
@@ -35,7 +37,8 @@ public sealed record PublicRoundSummary(
     int PlayersPerTeam,
     int? PointsPerSet,
     bool LoserLeaves,
-    ImmutableArray<PublicListEntry> Going);
+    ImmutableArray<PublicListEntry> Going,
+    DateTimeOffset? DropInOpensAt = null);
 
 /// <summary>One line of the public list: the first name (null without a profile) and whether it is a mensalista.</summary>
 public sealed record PublicListEntry(string? Nickname, bool Regular);

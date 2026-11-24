@@ -164,10 +164,10 @@ describe("the MVP of a team and of the votes (M1 to M3)", () => {
   });
 
   test("an open voting adds its note to the MVP by the stats", () => {
-    expect(ready({ ...E2_9_ROUND, mvpVoting: OPEN_VOTING }).mvp?.notes).toEqual([
-      summaryStrings.mvpNote,
-      summaryStrings.votingOpenNote,
-    ]);
+    const mvp = ready({ ...E2_9_ROUND, mvpVoting: OPEN_VOTING }).mvp;
+    expect(mvp?.title).toBe(summaryStrings.provisionalTitle);
+    expect(mvp?.notes).toHaveLength(1);
+    expect(mvp?.notes[0]).toMatch(/^A galera decide até (hoje|amanhã), \d{2}h\d{2}$/u);
   });
 });
 
@@ -184,12 +184,15 @@ describe("the shared text of the sand and of the votes (S5)", () => {
     expect(text.match(/\d+\. /g)).toHaveLength(SHARE_RANKING_LINES);
   });
 
-  test("S5: the winner of the votes is named; an open voting leaves no trace in the text", () => {
+  test("S5: the winner of the votes is named; an open voting says who leads and until when, never a vote", () => {
     expect(summaryShareText(ready(withVotes({})))).toContain(
       "MVP do dia (escolhido pela galera): Bia.",
     );
     const open = summaryShareText(ready({ ...E2_9_ROUND, mvpVoting: OPEN_VOTING }));
-    for (const word of ["votou", "voto", "galera", "fecha", "resultado"]) {
+    expect(open).toMatch(
+      /Na frente pelo placar: .* A galera decide o MVP até (hoje|amanhã), \d{2}h\d{2}\./u,
+    );
+    for (const word of ["votou", "voto", "resultado"]) {
       expect(open.toLowerCase()).not.toContain(word);
     }
   });

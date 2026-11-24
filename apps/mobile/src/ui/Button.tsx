@@ -17,6 +17,8 @@ export interface ButtonProps {
   readonly variant?: ButtonVariant;
   readonly fill?: boolean;
   readonly accessibilityLabel?: string;
+  /** What a screen reader adds after the label, e.g. why the button is off. */
+  readonly accessibilityHint?: string;
   /** Looks off, tells the screen reader and never calls `onPress`. */
   readonly disabled?: boolean;
   /** Working on it ("Carregando o placar..."): off like `disabled`, and the screen reader says busy. */
@@ -86,6 +88,7 @@ export function Button({
   variant = "primary",
   fill = false,
   accessibilityLabel,
+  accessibilityHint,
   disabled = false,
   busy = false,
   renderIcon,
@@ -98,6 +101,7 @@ export function Button({
     <Pressable
       accessibilityRole={isLink ? "link" : "button"}
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: off, busy }}
       disabled={off}
       onPress={off ? undefined : onPress}

@@ -60,7 +60,8 @@ internal sealed class StorePublicRoundSummary(
             resolved.Draw.PlayersPerTeam,
             resolved.Format.ScoringEnabled ? resolved.Format.PointsPerSet : null,
             resolved.Format.QueueEnabled,
-            [.. round.Occupants.Select(attendance => EntryOf(names.GetValueOrDefault(attendance.Member.Value)))]);
+            [.. round.Occupants.Select(attendance => EntryOf(names.GetValueOrDefault(attendance.Member.Value)))],
+            rules.DropInWindowEnabled ? round.Slot.DropInOpensAt(rules.DropInOpensHoursBefore) : null);
     }
 
     /// <summary>A line without a name when the member left the group after answering: the spot still counts.</summary>

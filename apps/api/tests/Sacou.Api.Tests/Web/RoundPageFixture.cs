@@ -18,6 +18,7 @@ internal static class RoundPageFixture
     public const string Script = "/web/assets/round-HASH.js";
     public const string Style = "/web/assets/round-HASH.css";
     public const string InviteScript = "/web/assets/invite-HASH.js";
+    public const string LegalStyle = "/web/assets/legal-HASH.css";
     public const string AuthDomain = "sacou-test.firebaseapp.com";
 
     /// <summary>"9 de 12, 1 na espera" of screen 01: six mensalistas and three avulsos, names as markers.</summary>
@@ -79,5 +80,7 @@ internal static class RoundPageFixture
         public WebEntry? Round { get; } = new(Script, ImmutableArray.Create(Style));
 
         public WebEntry? Invite { get; } = new(InviteScript, ImmutableArray.Create(Style));
+
+        public string? LegalStyle => RoundPageFixture.LegalStyle;
     }
 }

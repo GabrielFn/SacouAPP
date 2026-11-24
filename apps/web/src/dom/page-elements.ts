@@ -5,6 +5,9 @@ export const ELEMENT_IDS = {
   root: "round-page",
   going: "answer-going",
   notGoing: "answer-not-going",
+  leaveConfirm: "leave-confirm",
+  leaveYes: "leave-yes",
+  leaveKeep: "leave-keep",
   status: "page-status",
   signOut: "sign-out",
   sheet: "sheet",
@@ -60,6 +63,10 @@ function optional(document: DocumentLike, key: ElementKey): HTMLButtonElement | 
   return element instanceof HTMLButtonElement ? element : null;
 }
 
+function optionalElement(document: DocumentLike, key: ElementKey): HTMLElement | null {
+  return document.getElementById(ELEMENT_IDS[key]);
+}
+
 /** The nodes of the sheet of screen 02 (`Shared/_SignInSheet.cshtml`) the view draws and the script listens to. */
 export interface SheetNodes extends SheetElements {
   readonly sheetClose: HTMLButtonElement;
@@ -80,6 +87,9 @@ export interface SheetNodes extends SheetElements {
 export interface PageNodes extends SheetNodes {
   readonly going: HTMLButtonElement | null;
   readonly notGoing: HTMLButtonElement | null;
+  readonly leaveConfirm: HTMLElement | null;
+  readonly leaveYes: HTMLButtonElement | null;
+  readonly leaveKeep: HTMLButtonElement | null;
   readonly status: HTMLElement;
   readonly signOut: HTMLButtonElement;
 }
@@ -117,6 +127,9 @@ export function findPageElements(document: DocumentLike): PageNodes {
     ...findSheetNodes(document),
     going: optional(document, "going"),
     notGoing: optional(document, "notGoing"),
+    leaveConfirm: optionalElement(document, "leaveConfirm"),
+    leaveYes: optional(document, "leaveYes"),
+    leaveKeep: optional(document, "leaveKeep"),
     status: required(document, "status", HTMLElement),
     signOut: required(document, "signOut", HTMLButtonElement),
   };

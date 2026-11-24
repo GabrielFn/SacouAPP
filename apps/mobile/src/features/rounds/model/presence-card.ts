@@ -3,7 +3,7 @@ import type { GroupSettings } from "@sacou/match-engine";
 import type { MemberType, Round } from "../../../services/api/sacou-api";
 import { roundsStrings } from "../../../strings/rounds.pt-BR";
 import { hasEnded } from "./round-cards";
-import { dropInOpensLabel, hasArrived } from "./round-clock";
+import { dropInOpensPhrase, hasArrived } from "./round-clock";
 import { isCanceled } from "./round-detail";
 import type { RosterEntry } from "./roster";
 
@@ -13,15 +13,22 @@ const { presence } = roundsStrings;
 export type PresenceActions =
   | { readonly kind: "none" }
   /** "VOU" and "Não vou"; `canGo` is off for a full list without waitlist or a closed window. */
-  | { readonly kind: "answer"; readonly canGo: boolean }
+  | {
+      readonly kind: "answer";
+      readonly canGo: boolean;
+      /** Why "VOU" is off while the window of the drop-ins is shut (R101); `null` otherwise. */
+      readonly lockedHint: string | null;
+    }
   /** "Não vou mais" or "Sair da espera". */
   | {
       readonly kind: "leave";
       readonly label: string;
       /** "Clara (1º da espera) entra no seu lugar.", only for who holds a spot. */
       readonly warning: string | null;
-      /** A full list asks first: coming back goes to the end of the waitlist (question 25). */
+      /** "Não vou mais" always asks first (R101 3b); "Sair da espera" does not take a spot from anyone. */
       readonly needsConfirm: boolean;
+      /** What the confirmation says about coming back; `null` when it does not ask. */
+      readonly leaveBody: string | null;
     };
 
 export interface PresenceCardView {
@@ -37,6 +44,10 @@ export interface PresenceInput {
   readonly waitlist: readonly RosterEntry[];
   /** `null` while the member list is not here: no window is applied, the server decides. */
   readonly myType: MemberType | null;
+  /** Some active member is a regular: the line of the window says "só os mensalistas confirmam". */
+  readonly groupHasRegulars: boolean;
+  /** Hours before the round when the window of the drop-ins opens. */
+  readonly dropInHours: number;
   readonly now: number;
 }
 
@@ -68,6 +79,13 @@ function goingLine(round: Round): string | null {
   return position === null ? null : presence.listPosition(position);
 }
 
+function leaveBodyOf(round: Round, waitlist: readonly RosterEntry[]): string {
+  if (!isFull(round)) return presence.leaveBodyOpen;
+  const first = waitlist[0];
+  if (first === undefined) return presence.leaveBodyFull;
+  return presence.leaveBodyFullWithWaitlist(first.name ?? roundsStrings.detail.noName);
+}
+
 function leaveWarning(waitlist: readonly RosterEntry[]): string | null {
   const first = waitlist[0];
   return first === undefined
@@ -85,7 +103,8 @@ function goingCard(input: PresenceInput): PresenceCardView {
       kind: "leave",
       label: presence.notGoingAnymore,
       warning: leaveWarning(waitlist),
-      needsConfirm: isFull(round),
+      needsConfirm: true,
+      leaveBody: leaveBodyOf(round, waitlist),
     },
   };
 }
@@ -95,7 +114,13 @@ function waitlistedCard(round: Round): PresenceCardView {
   return {
     title: presence.waitlisted,
     line: position === null ? null : presence.waitlistPosition(position),
-    actions: { kind: "leave", label: presence.leaveWaitlist, warning: null, needsConfirm: false },
+    actions: {
+      kind: "leave",
+      label: presence.leaveWaitlist,
+      warning: null,
+      needsConfirm: false,
+      leaveBody: null,
+    },
   };
 }
 
@@ -105,21 +130,28 @@ function spotsLine(round: Round, waitlistEnabled: boolean): string | null {
   return waitlistEnabled ? presence.fullToWaitlist : presence.full;
 }
 
+function dropInLine(input: PresenceInput, opensAt: string): string {
+  const phrase = dropInOpensPhrase(input.round, opensAt, input.now);
+  return input.groupHasRegulars
+    ? presence.dropInOpensWithRegulars(phrase)
+    : presence.dropInOpensNoRegulars(phrase, input.dropInHours);
+}
+
 function answerCard(input: PresenceInput): PresenceCardView {
   const { round, values } = input;
   const opensAt = round.dropInOpensAt;
   if (input.myType === "dropIn" && opensAt !== null && !hasArrived(opensAt, input.now)) {
     return {
       title: presence.ask,
-      line: presence.dropInOpens(dropInOpensLabel(round, opensAt)),
-      actions: { kind: "answer", canGo: false },
+      line: dropInLine(input, opensAt),
+      actions: { kind: "answer", canGo: false, lockedHint: presence.dropInLockedHint },
     };
   }
   const waitlistEnabled = values.attendance.waitlistEnabled;
   return {
     title: presence.ask,
     line: spotsLine(round, waitlistEnabled),
-    actions: { kind: "answer", canGo: !isFull(round) || waitlistEnabled },
+    actions: { kind: "answer", canGo: !isFull(round) || waitlistEnabled, lockedHint: null },
   };
 }
 

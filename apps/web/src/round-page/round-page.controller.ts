@@ -20,6 +20,9 @@ export interface RoundPage {
   readonly state: () => RoundPageState;
   start(): Promise<void>;
   tapAnswer(intent: Intent): Promise<void>;
+  /** The answer to "Sair da lista?": send the "NÃO VOU MAIS", or stay on the list. */
+  confirmLeave(): Promise<void>;
+  keepPlace(): Promise<void>;
   closeSheet(): void;
   chooseForm(form: SheetForm): void;
   signInWithGoogle(): Promise<void>;
@@ -119,6 +122,8 @@ export function createRoundPage(deps: RoundPageDependencies): RoundPage {
       });
     },
     tapAnswer: (intent) => dispatch({ type: "answerTapped", intent }),
+    confirmLeave: () => dispatch({ type: "leaveConfirmed" }),
+    keepPlace: () => dispatch({ type: "leaveCancelled" }),
     closeSheet: () => void dispatch({ type: "sheetClosed" }),
     chooseForm: (form) => void dispatch({ type: "formChosen", form }),
     signInWithGoogle,

@@ -1,20 +1,29 @@
 /** Why "Encerrar rodada" did not go through: the one the server refuses, and the phone's own storage. */
 export type EndRoundFailure = "round-not-started" | "storage";
 
+/** What the confirmation says before the round is closed (R101): all of it known when the user asks. */
+export interface EndRoundRequest {
+  /** "12 × 10" with a match in play (it stays out of the summary, question 151), else `null`. */
+  readonly openMatchScore: string | null;
+  /** Matches finished on this court so far. */
+  readonly finishedMatches: number;
+  /** The MVP voting opens for 24 h when the round ends. */
+  readonly votingEnabled: boolean;
+}
+
 /**
- * What the flow of "Encerrar rodada" keeps (frontend.md, rule 4): only the phase and, while asking, the
- * score of the match that stays out. The session lives in the log and the end of the round on the server.
+ * What the flow of "Encerrar rodada" keeps (frontend.md, rule 4): only the phase and, while asking, what
+ * the dialog says. The session lives in the log and the end of the round on the server.
  */
 export type EndRoundState =
   | { readonly phase: "idle" }
-  /** A match is in play: it stays out of the summary (question 151), so the user confirms first. */
-  | { readonly phase: "confirming"; readonly openMatchScore: string }
+  /** Always asked first (R101, 3a): ending the round has no way back. */
+  | ({ readonly phase: "confirming" } & EndRoundRequest)
   | { readonly phase: "closing" }
   | { readonly phase: "failed"; readonly failure: EndRoundFailure };
 
 export type EndRoundAction =
-  /** The user asked to end the round; `openMatchScore` is "12 × 10" with a match in play, else `null`. */
-  | { readonly type: "requested"; readonly openMatchScore: string | null }
+  | ({ readonly type: "requested" } & EndRoundRequest)
   | { readonly type: "confirmed" }
   | { readonly type: "cancelled" }
   | { readonly type: "closed" }
@@ -24,9 +33,14 @@ export const INITIAL_END_ROUND: EndRoundState = { phase: "idle" };
 
 const CLOSING: EndRoundState = { phase: "closing" };
 
-function requested(state: EndRoundState, openMatchScore: string | null): EndRoundState {
+function requested(state: EndRoundState, request: EndRoundRequest): EndRoundState {
   if (state.phase === "closing" || state.phase === "confirming") return state;
-  return openMatchScore === null ? CLOSING : { phase: "confirming", openMatchScore };
+  return {
+    phase: "confirming",
+    openMatchScore: request.openMatchScore,
+    finishedMatches: request.finishedMatches,
+    votingEnabled: request.votingEnabled,
+  };
 }
 
 function cancelled(state: EndRoundState): EndRoundState {
@@ -36,7 +50,7 @@ function cancelled(state: EndRoundState): EndRoundState {
 export function endRoundReducer(state: EndRoundState, action: EndRoundAction): EndRoundState {
   switch (action.type) {
     case "requested":
-      return requested(state, action.openMatchScore);
+      return requested(state, action);
     case "confirmed":
       return state.phase === "confirming" ? CLOSING : state;
     case "cancelled":

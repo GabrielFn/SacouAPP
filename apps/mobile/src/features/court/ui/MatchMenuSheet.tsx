@@ -209,7 +209,7 @@ export function MatchMenuSheet({
       </ScrollView>
       {endRound === null ? null : (
         <EndRoundDialog
-          score={endRound.view.confirmingScore}
+          body={endRound.view.confirmingBody}
           onConfirm={endRound.onConfirm}
           onCancel={endRound.onCancel}
         />
