@@ -17,6 +17,15 @@
         "resolved": "2.12.2",
         "contentHash": "ZkT7qiJe0Kj0+DTZOZo+xrDy1kNmdsWFQVPIQLNx9ZJ0T9cB2LG7r+Bi60so8/+yg1nkS7QCPadrzsTG4VPKrA=="
       },
+      "Sentry.AspNetCore": {
+        "type": "Direct",
+        "requested": "[7.0.1, 7.0.1]",
+        "resolved": "7.0.1",
+        "contentHash": "FxYSrr9HileJYWR0hWCX3rOdIBYwJpcngOT1oK+TcNenh5Z8m2Sp6kPMUxlminLhnnU4XlTP6RGKEmlfw3AS7Q==",
+        "dependencies": {
+          "Sentry.Extensions.Logging": "7.0.1"
+        }
+      },
       "Microsoft.Bcl.Cryptography": {
         "type": "Transitive",
         "resolved": "10.0.2",
@@ -61,6 +70,19 @@
         "dependencies": {
           "Microsoft.Bcl.Cryptography": "10.0.2",
           "Microsoft.IdentityModel.Logging": "8.23.0"
+        }
+      },
+      "Sentry": {
+        "type": "Transitive",
+        "resolved": "7.0.1",
+        "contentHash": "4hyExeUWArJdiO6VlmwCUHgWPosvasauNpgB6pVP7swuwyahWHRqgWHKwj3t5h18wFezIMte6BmI4dqEzl1TYw=="
+      },
+      "Sentry.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "7.0.1",
+        "contentHash": "id2zlzODGIjoU3jqwl/TJ1awJGvAXyI280FdmIMMsPu5lpEN2PbMzBjujDbu8tsLHmDu+sLHDCPbIy8AdGXJOA==",
+        "dependencies": {
+          "Sentry": "7.0.1"
         }
       },
       "sacou.http": {
