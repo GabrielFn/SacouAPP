@@ -34,6 +34,7 @@ export const apiErrorCodes = [
   "identity.user-not-registered",
   "matches.batch-invalid",
   "matches.batch-mismatch",
+  "matches.court-busy",
   "matches.court-session-not-found",
   "matches.event-id-conflict",
   "matches.event-implausible",
