@@ -22,9 +22,7 @@ internal sealed class InviteModel(IWebAssets assets, IOptions<FirebaseWebOptions
         Context: null,
         WebTexts.InviteSheetTitle,
         WebTexts.InviteSheetBody,
-        Privacy: null,
-        SignInSheetView.HttpsOrNull(page.Value.TermsUrl),
-        SignInSheetView.HttpsOrNull(page.Value.PrivacyUrl));
+        Privacy: null);
 
     /// <summary>The page's own address, never with the token (the server never has it).</summary>
     public string PageUrl => Origin + PagePath;

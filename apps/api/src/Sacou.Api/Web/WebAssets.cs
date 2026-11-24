@@ -14,6 +14,9 @@ internal interface IWebAssets
 
     /// <summary>The entry of the invite page (<c>/c</c>), or null without the build.</summary>
     WebEntry? Invite { get; }
+
+    /// <summary>The style of the legal pages (E6.1, ADR 0083), or null without the build (the page is then plain HTML).</summary>
+    string? LegalStyle { get; }
 }
 
 /// <summary>
@@ -26,6 +29,7 @@ internal sealed class ManifestWebAssets : IWebAssets
     public const string ManifestPath = "web/manifest.json";
     public const string EntryKey = "src/main.ts";
     public const string InviteEntryKey = "src/invite-main.ts";
+    public const string LegalEntryKey = "src/styles/legal.css";
     public const string PublicPrefix = "/web/";
 
     public ManifestWebAssets(IWebHostEnvironment environment)
@@ -34,11 +38,14 @@ internal sealed class ManifestWebAssets : IWebAssets
         using var manifest = Read(environment.WebRootFileProvider.GetFileInfo(ManifestPath));
         Round = manifest is null ? null : Parse(manifest.RootElement, EntryKey);
         Invite = manifest is null ? null : Parse(manifest.RootElement, InviteEntryKey);
+        LegalStyle = manifest is null ? null : ParseFile(manifest.RootElement, LegalEntryKey);
     }
 
     public WebEntry? Round { get; }
 
     public WebEntry? Invite { get; }
+
+    public string? LegalStyle { get; }
 
     internal static JsonDocument? Read(IFileInfo manifest)
     {
@@ -66,6 +73,12 @@ internal sealed class ManifestWebAssets : IWebAssets
         CollectStyles(root, entryKey, styles, new HashSet<string>(StringComparer.Ordinal));
         return new WebEntry(PublicPrefix + script, styles);
     }
+
+    /// <summary>A CSS-only entry: its one built file, or null.</summary>
+    internal static string? ParseFile(JsonElement root, string entryKey) =>
+        root.TryGetProperty(entryKey, out var entry) && entry.TryGetProperty("file", out var file) && file.GetString() is { } path
+            ? PublicPrefix + path
+            : null;
 
     private static void CollectStyles(JsonElement root, string key, List<string> styles, HashSet<string> seen)
     {
