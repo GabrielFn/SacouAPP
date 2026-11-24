@@ -64,7 +64,7 @@ describe("the publication of the teams (R100)", () => {
     const { fake, client, observer } = setup();
     fake.respond(
       "confirmTeams",
-      apiErr({ kind: "problem", status: 409, code: "rounds.round-not-open" }),
+      apiErr({ kind: "problem", status: 409, code: "sessions.round-closed" }),
     );
 
     await observer.mutate(BODY).catch(() => undefined);
