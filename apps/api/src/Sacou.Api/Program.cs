@@ -52,6 +52,9 @@ builder.Services.AddSacouWeb(builder.Configuration);
 
 var app = builder.Build();
 
+// The terms and the privacy policy are read now: an invalid text stops the start, never a page (E6.1, ADR 0083).
+app.ReadSacouLegalDocuments();
+
 // The headers of the round page and its files, on their paths only (ADR 0070, D5).
 app.UseSacouWebHeaders();
 // Cache-Control: no-store on the routes that ask for it, their errors too (ADR 0055).

@@ -36,8 +36,18 @@ internal static partial class WebSetup
         // The terms and the privacy policy (E6.1, ADR 0083): read once, and an invalid text stops the start.
         services.AddSingleton<ILegalDocumentSource, EmbeddedLegalDocumentSource>();
         services.AddSingleton<ILegalDocuments, LegalDocuments>();
-        services.AddHostedService<LegalDocumentsCheck>();
         return services;
+    }
+
+    /// <summary>
+    /// Builds the legal texts while the host starts, no background work (ADR 0068, D2): a text the reader refuses throws with
+    /// the file and the line, so a deploy with it never answers.
+    /// </summary>
+    public static IApplicationBuilder ReadSacouLegalDocuments(this IApplicationBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        _ = app.ApplicationServices.GetRequiredService<ILegalDocuments>();
+        return app;
     }
 
     /// <summary>Before the rate limiter and the static files, so every answer of the page and its files has the headers.</summary>

@@ -33,7 +33,7 @@ internal sealed class EmbeddedLegalDocumentSource : ILegalDocumentSource
 }
 
 /// <summary>
-/// Both texts read once, on the first use: an invalid one stops the start (<see cref="LegalDocumentsCheck"/>), with
+/// Both texts read once, while the host starts: an invalid one stops the start (<c>WebSetup.ReadSacouLegalDocuments</c>), with
 /// the file and the line, never the content.
 /// </summary>
 internal sealed class LegalDocuments : ILegalDocuments
@@ -59,16 +59,4 @@ internal sealed class LegalDocuments : ILegalDocuments
             ? result.Document
             : throw new InvalidOperationException($"docs/legal/{fileName}, line {result.Error.Line}: {result.Error.Reason}.");
     }
-}
-
-/// <summary>Reads the texts while the host starts, so a document the reader refuses never reaches a deploy that answers.</summary>
-internal sealed class LegalDocumentsCheck(ILegalDocuments documents) : IHostedService
-{
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        _ = documents.Terms;
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
