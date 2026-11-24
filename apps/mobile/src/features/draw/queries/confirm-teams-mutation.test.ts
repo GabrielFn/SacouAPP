@@ -89,3 +89,17 @@ describe("the publication of the teams (R100)", () => {
     );
   });
 });
+
+describe("the retry of the publication (R100, question 182)", () => {
+  test("retries once after a blip of the network, and no more", async () => {
+    const { fake, client } = setup();
+    fake.respond("confirmTeams", apiErr({ kind: "offline" }));
+    const options = confirmTeamsMutation(fake.api, client, GROUP, ROUND);
+    const observer = new MutationObserver(client, { ...options, retryDelay: 0 });
+
+    await observer.mutate(BODY).catch(() => undefined);
+
+    expect(fake.calls()).toHaveLength(2);
+    expect(observer.getCurrentResult().isError).toBe(true);
+  });
+});
