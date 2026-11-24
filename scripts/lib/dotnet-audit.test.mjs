@@ -86,6 +86,17 @@ describe("findAuditFailures", () => {
     assert.notDeepEqual(failuresOf(reportWith("High"), [other]), []);
   });
 
+  it("rejects an exception valid for more than 90 days, even on a clean report", () => {
+    assert.deepEqual(failuresOf(CLEAN_REPORT, [exceptionUntil("2027-01-28")]), []);
+    const [failure] = failuresOf(CLEAN_REPORT, [exceptionUntil("2027-01-29")]);
+    assert.match(failure, /over 90 days from today/);
+  });
+
+  it("rejects an impossible expiry date", () => {
+    assert.notDeepEqual(failuresOf(CLEAN_REPORT, [exceptionUntil("2026-02-30")]), []);
+    assert.notDeepEqual(failuresOf(CLEAN_REPORT, [exceptionUntil("2026-13-01")]), []);
+  });
+
   it("rejects a malformed exceptions file", () => {
     assert.notDeepEqual(failuresOf(CLEAN_REPORT, "not json"), []);
     assert.notDeepEqual(failuresOf(CLEAN_REPORT, [{ advisory: ADVISORY }]), []);
