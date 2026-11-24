@@ -1,0 +1,58 @@
+# The daily backup job of one environment (E5.3, ADR 0082). scripts/gcp/setup-backups.sh fills the ${...} names with
+# envsubst, puts scripts/backup/backup.sh in the BACKUP_SCRIPT line (never copied by hand) and runs
+# `gcloud run jobs replace`. Only names here, never a secret value.
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  labels:
+    cloud.googleapis.com/location: us-east4
+spec:
+  template:
+    metadata:
+      annotations:
+        # The Cloud Storage volume needs the second generation.
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      taskCount: 1
+      parallelism: 1
+      template:
+        spec:
+          serviceAccountName: ${RUNTIME_ACCOUNT}
+          # One more try (a Docker Hub pull limit or a Neon waking up, R3); a second failure raises the alert.
+          maxRetries: 1
+          timeoutSeconds: "600"
+          containers:
+            # The Postgres 18 client tools and the system CAs for sslrootcert=system. By digest, from Docker Hub: it
+            # stays out of the Artifact Registry's free 0.5 GB.
+            - image: ${IMAGE}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  ${BACKUP_SCRIPT}
+                - backup.sh
+                - dump
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: 512Mi
+              env:
+                - name: SACOU_BACKUP_ENVIRONMENT
+                  value: ${BACKUP_ENVIRONMENT}
+                - name: SACOU_BACKUP_DIR
+                  value: /backups
+                # The read-only role's URL, by reference: the value never shows in the job's configuration.
+                - name: SACOU_BACKUP_DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${DATABASE_SECRET}
+                      key: latest
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: backups
+              csi:
+                driver: gcsfuse.run.googleapis.com
+                volumeAttributes:
+                  bucketName: ${BUCKET}

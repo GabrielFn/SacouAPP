@@ -1,0 +1,30 @@
+{
+  "displayName": "Sacou backups failed",
+  "documentation": {
+    "content": "A backup job or the daily workflow failed. Runbook: docs/operacao/backup.md (ADR 0082).",
+    "mimeType": "text/markdown"
+  },
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "A backup job execution failed",
+      "conditionThreshold": {
+        "filter": "resource.type = \"cloud_run_job\" AND resource.labels.job_name = monitoring.regex.full_match(\"sacou-backup(-test)?\") AND metric.type = \"run.googleapis.com/job/completed_execution_count\" AND metric.labels.result = \"failed\"",
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s",
+        "aggregations": [{ "alignmentPeriod": "3600s", "perSeriesAligner": "ALIGN_SUM" }]
+      }
+    },
+    {
+      "displayName": "The daily backup workflow failed",
+      "conditionThreshold": {
+        "filter": "resource.type = \"workflows.googleapis.com/Workflow\" AND resource.labels.workflow_id = \"sacou-backups\" AND metric.type = \"workflows.googleapis.com/finished_execution_count\" AND metric.labels.status = \"FAILED\"",
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s",
+        "aggregations": [{ "alignmentPeriod": "3600s", "perSeriesAligner": "ALIGN_SUM" }]
+      }
+    }
+  ]
+}
