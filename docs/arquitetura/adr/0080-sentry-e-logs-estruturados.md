@@ -23,7 +23,9 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   `SampleRate = 1`, `TracesSampleRate = 0` (pergunta 210), `MinimumEventLevel = Error`,
   `MinimumBreadcrumbLevel = Information`, `ServerName` vazio, sem usuário no escopo (pergunta 209). Breadcrumbs só das
   categorias `Sacou.*` e `http`; o logger de hosting (`Microsoft.AspNetCore.Hosting.Diagnostics`, que escreve o caminho
-  preenchido) e o do EF ficam fora.
+  preenchido) e o do EF ficam fora. Os logs do acesso a dados (`Microsoft.EntityFrameworkCore.*` e `Npgsql.*`) não
+  viram nem evento nem breadcrumb (`AddLogEntryFilter`): o `Error` do comando traz o SQL e seria um segundo evento ao
+  lado do 500, que já leva a exceção (R2, caso 12; teste de integração `SentryDatabaseErrorTests`).
 - **D4 · Filtro por lista permitida (`SentryEventScrubber`).** No `BeforeSend` o evento vira JSON e só passam campos
   conhecidos: id, horário, nível, logger, release, ambiente, SDK, módulos, pilha, `transaction`, mensagem, exceção,
   tags `trace_id` e `route`, contextos `trace`, `runtime` e `os`, e o pedido só com método, `Content-Type`/`Accept` e
@@ -31,7 +33,9 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   `server_name`, `extra`, corpo, cookies, query, demais cabeçalhos, `data` do mecanismo e os parâmetros do modelo de
   log. Mensagem, `logentry`, valor da exceção e breadcrumbs passam por `SensitiveText` (e-mail, `Bearer ...`, JWT
   `eyJ...`, Pix `000201...` viram `[filtrado]`). O mesmo filtro corre no `BeforeBreadcrumb` (URL sem query, só `url`,
-  `method`, `status_code` e `eventId` nos dados). O evento original não é alterado.
+  `method`, `status_code` e `eventId` nos dados), e na mensagem do log e nos breadcrumbs todo GUID vira `[id]`: um log `Sacou.*` em
+  `Information` pode nomear o `MemberId` (ex.: `RoundLog.Promoted`), e o Sentry nunca recebe `MemberId`. O id segue
+  na linha do Cloud Logging, achada pelo `trace_id`. O evento original não é alterado.
 - **D5 · Logs do Cloud Run.** Fora de Development, um `ConsoleFormatter` próprio (`CloudRunJsonFormatter`, sem pacote
   novo) escreve uma linha JSON por log: `severity` (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`), `time` em UTC,
   `message`, `category`, `eventId`, `logging.googleapis.com/trace` (`projects/<NotificationTasks:Project>/traces/<id>`,

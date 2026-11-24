@@ -109,8 +109,10 @@ runs:
           echo "The Sentry secret is not a Secret Manager name: $SENTRY_SECRET"
           exit 1
         fi
+        # The release is the image digest, shortened as Git shortens a commit: unique enough, still readable.
+        release_digest_length=12
         digest="${IMAGE##*@sha256:}"
-        SENTRY_RELEASE="sacou-api@${digest:0:12}"
+        SENTRY_RELEASE="sacou-api@${digest:0:release_digest_length}"
         export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE SENTRY_SECRET SENTRY_RELEASE
         export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         export INVOKER_EMAIL="${INVOKER_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
