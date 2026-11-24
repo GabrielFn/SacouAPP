@@ -54,8 +54,8 @@ builder.Services.AddSacouOpenApi();
 builder.Services.AddSacouWeb(builder.Configuration);
 
 var app = builder.Build();
-// First: a 500 waits for its Sentry event to leave before the CPU is frozen (ADR 0080, R1).
-app.UseSacouObservability();
+// Says by name when Sentry is off (ADR 0080, D1).
+app.LogObservabilityState();
 
 // The headers of the round page and its files, on their paths only (ADR 0070, D5).
 app.UseSacouWebHeaders();

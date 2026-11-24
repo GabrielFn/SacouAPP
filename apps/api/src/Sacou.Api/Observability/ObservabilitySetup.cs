@@ -50,33 +50,21 @@ internal static partial class ObservabilitySetup
         var release = builder.Configuration[SentryReleaseVariable];
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<ISentryEventProcessor, RequestTagsProcessor>();
+        // Before UseSentry: the first startup filter is the outermost middleware (R1).
+        builder.Services.AddTransient<IStartupFilter, FlushOnFailureStartupFilter>();
         builder.WebHost.UseSentry(options => Configure(options, dsn, environment, release));
         return builder;
     }
 
-    /// <summary>
-    /// The first middleware. Sentry off: a warning with the variable's name, never a value (D1). Sentry on: a failed
-    /// request (500 and up) waits for its event to leave before it completes, because Cloud Run freezes the CPU once
-    /// the request is over (R1; the SDK's own flush before completion is not public in this version).
-    /// </summary>
-    internal static WebApplication UseSacouObservability(this WebApplication app)
+    /// <summary>A warning with the variable's name, never a value, when Sentry is off (D1).</summary>
+    internal static WebApplication LogObservabilityState(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
         if (string.IsNullOrWhiteSpace(app.Configuration[SentryDsnVariable]))
         {
             SentryOff(app.Logger, SentryDsnVariable);
-            return app;
         }
 
-        var hub = app.Services.GetRequiredService<IHub>();
-        app.Use(async (context, next) =>
-        {
-            await next(context);
-            if (context.Response.StatusCode >= StatusCodes.Status500InternalServerError)
-            {
-                await hub.FlushAsync(FlushTimeout);
-            }
-        });
         return app;
     }
 

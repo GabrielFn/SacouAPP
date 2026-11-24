@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Diagnostics;
+
 namespace Sacou.Api.Observability;
 
 /// <summary>
@@ -8,9 +10,11 @@ internal static class RouteTemplateUrl
 {
     internal const string Unmatched = "[unmatched]";
 
+    /// <summary>The exception handler clears the endpoint before it logs: its feature still names the failed one.</summary>
     internal static string For(HttpContext? context)
     {
-        var template = (context?.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
+        var endpoint = context?.GetEndpoint() ?? context?.Features.Get<IExceptionHandlerFeature>()?.Endpoint;
+        var template = (endpoint as RouteEndpoint)?.RoutePattern.RawText;
         if (string.IsNullOrEmpty(template))
         {
             return Unmatched;
