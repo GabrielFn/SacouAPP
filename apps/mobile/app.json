@@ -24,6 +24,13 @@
         }
       ],
       [
+        "@sentry/react-native/expo",
+        {
+          "project": "sacou-mobile",
+          "url": "https://sentry.io/"
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

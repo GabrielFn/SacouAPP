@@ -46,6 +46,7 @@ import type { ShareSheet } from "./share/share-sheet";
 
 import type { CacheSession } from "./query/cache-persister";
 import type { SessionEnder } from "./session/end-session";
+import type { ErrorReporter } from "./error-reporting/error-reporter";
 
 export interface Services {
   readonly fontLoader: FontLoader;
@@ -130,6 +131,8 @@ export interface Services {
   readonly pushOutcomeLog: PushOutcomeLog;
   /** Whether the notifications were already offered on this phone (R98, item 9). */
   readonly pushPromptMemory: PushPromptMemory;
+  /** The errors the app did not expect, cleaned of personal data, to Sentry (E5.2, ADR 0080). */
+  readonly errorReporter: ErrorReporter;
 }
 
 const ServicesContext = createContext<Services | null>(null);

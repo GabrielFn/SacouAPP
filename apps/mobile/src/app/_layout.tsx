@@ -78,6 +78,12 @@ import { QueryProvider } from "../services/query/query-provider";
 import { ServicesProvider, useServices, type Services } from "../services/services-context";
 import { ThemeProvider } from "../theme/theme-context";
 import { createReactNativeKeyboardVisibility } from "../adapters/react-native-keyboard-visibility";
+import { startErrorReporter, withErrorReporting } from "../adapters/sentry-error-reporter";
+import { buildSentryConfig } from "../config/sentry";
+
+// First, so an error while the rest starts is already reported (E5.2, ADR 0080); off without a DSN.
+const sentryConfig = buildSentryConfig();
+const errorReporter = startErrorReporter(sentryConfig);
 
 const queryClient = createSacouQueryClient();
 const cacheStore = createExpoCacheStore();
@@ -172,6 +178,7 @@ const realServices: Services = {
   pushDevices,
   pushOutcomeLog: createDevPushOutcomeLog(__DEV__),
   pushPromptMemory: createStoredPushPromptMemory(cacheStore),
+  errorReporter,
 };
 
 /**
@@ -219,7 +226,7 @@ function FontGate() {
   ) : null;
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <SafeAreaProvider>
       <ServicesProvider services={realServices}>
@@ -237,3 +244,5 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+export default withErrorReporting(RootLayout, sentryConfig);
