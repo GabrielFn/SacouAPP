@@ -156,3 +156,10 @@
   4. "Não vou mais" desfaz a presença sem pedir confirmação; o selo "Vou" do cartão da Início parece um botão.
   5. Ambiente: o Metro local roda sem `EXPO_PUBLIC_INVITE_BASE_URL`, então Membros não mostra "Convidar por link" nem "QR do grupo"; o convite do Grupo Fluxo (teste) foi revogado (M5-B1 resolvido) e não há link novo. Acrescentar a variável ao `.env.example` e a `docs/operacao/teste-no-celular.md`.
   - Confirmados no celular: achados 2, 6 (times, em curso na R100) e 7 (MVP provisório apresentado como definitivo) da análise de UX. Não verificados: a página de sucesso do convite e o cancelamento de rodada.
+- R100 P1 (#234), achados baixos de revisor e segurança (Opus, 24/11), sem dono até nova tarefa salvo nota:
+  1. Confirmar os times gasta do mesmo limite `draw` (10/min) que o sorteio (`DrawRouteExtensions.cs:16`): quem sorteia 10 vezes e confirma leva 429 e cai no aviso "Os times não chegaram...". Aceitar e registrar no ADR 0078, ou balde próprio com o mesmo teto.
+  2. Quem saiu do grupo continua nos times pelo `MemberId` (coerente com o "Ex-jogador"); **R100 P2:** o app mostra "Ex-jogador", nunca um nome que ficou no cache.
+  3. A exportação (30a) traz `teamNumber` também de rodada cancelada, cujos times o GET esconde (`PostgresAccountAttendanceReader.cs:35-40`): documentar ou filtrar pelo status. Ali também são duas subconsultas por presença na mesma tabela: um `left join` só.
+  4. `docs/seguranca/checklist.md` sem o PUT dos times (ASVS V4 e V8): **orquestrador, no relatório do M5**.
+  5. `SessionsModule.cs:17`: `using` fora da ordem alfabética.
+  - Fechados pelo testador (Sonnet) no próprio PR: testes da exportação (`teamNumber`, `reservePosition`), da rodada encerrada pela HTTP (409) e da página `/r` sem nenhum `memberId` publicado.
