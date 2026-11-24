@@ -59,4 +59,33 @@ describe("the publication of the teams (R100)", () => {
     expect(observer.getCurrentResult().isError).toBe(true);
     expect(client.getQueryData<Round>(queryKeys.round(GROUP, ROUND))?.teams).toBeNull();
   });
+
+  test("a 409 of an ended or cancelled round is only isError and the queue is not stuck (R100, finding 3)", async () => {
+    const { fake, client, observer } = setup();
+    fake.respond(
+      "confirmTeams",
+      apiErr({ kind: "problem", status: 409, code: "rounds.round-not-open" }),
+    );
+
+    await observer.mutate(BODY).catch(() => undefined);
+
+    expect(observer.getCurrentResult().isError).toBe(true);
+    expect(client.getQueryData<Round>(queryKeys.round(GROUP, ROUND))?.teams).toBeNull();
+
+    const answered: Round = g1Round(undefined, {
+      teams: {
+        confirmedAt: "2026-11-05T22:42:00Z",
+        teams: [{ number: 1, memberIds: [...TEAM_A] }],
+        reserves: [],
+      },
+    });
+    fake.respond("confirmTeams", apiOk(answered));
+    await observer.mutate(BODY);
+
+    expect(observer.getCurrentResult().isError).toBe(false);
+    expect(fake.calls()).toHaveLength(2);
+    expect(client.getQueryData<Round>(queryKeys.round(GROUP, ROUND))?.teams).toEqual(
+      answered.teams,
+    );
+  });
 });

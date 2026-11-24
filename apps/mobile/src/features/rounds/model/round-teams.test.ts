@@ -126,3 +126,14 @@ describe("roundTeamsView when the list moved (R100, case 17)", () => {
     ).toBe("Laranja: Ana, João, Pedro, Lia, Marcos e você");
   });
 });
+
+describe("roundTeamsView with the attendance off (R100, finding 5)", () => {
+  it("documents it: with an empty list everyone but the reader reads '(saiu)', the list counts as changed and the reader has no line", () => {
+    const view = roundTeamsView(g1("ana", { goingCount: 0, going: [] }, []), g1Members());
+
+    expect(view?.me).toEqual({ kind: "none" });
+    expect(view?.listChanged).toBe(true);
+    expect(view?.teams[0]?.names[0]?.text).toBe("você");
+    expect(view?.teams[0]?.names[1]?.text).toMatch(/\(saiu\)$/);
+  });
+});
