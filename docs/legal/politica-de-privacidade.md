@@ -10,6 +10,8 @@ Versão: 0.1 (rascunho)
 
 Atualizada em: 24/11/2026
 
+Este texto é um rascunho, ainda sem revisão jurídica. Alguns pontos, como quem responde pelos dados e o canal de contato, ainda podem mudar antes da versão 1.0.
+
 ## Resumo
 
 - O Sacou usa o mínimo de dados para organizar o racha: sua conta de login, o apelido e as posições que você escolhe, os grupos de que participa, sua presença nas rodadas e o que acontece nas partidas.
@@ -21,7 +23,7 @@ Atualizada em: 24/11/2026
 
 ## 1. Quem cuida dos seus dados
 
-O Sacou é um projeto pessoal, mantido por Gabriel, pessoa física, no Brasil, que decide como os dados são usados e responde por eles (controlador, na Lei Geral de Proteção de Dados, Lei 13.709/2018).
+O Sacou é um projeto pessoal, mantido por Gabriel, pessoa física, no Brasil (dado provisório deste rascunho), que decide como os dados são usados e responde por eles (controlador, na Lei Geral de Proteção de Dados, Lei 13.709/2018).
 
 > LACUNA (pergunta 198): identificação do controlador. Padrão adotado: Gabriel, pessoa física, só com o primeiro nome. A LGPD (art. 9º, III) pede a identificação do controlador; o advogado deve dizer se basta o primeiro nome ou se é preciso nome completo, CPF ou CNPJ (MEI). Atenção: o repositório é público, e este arquivo também.
 
@@ -31,7 +33,7 @@ O canal para falar sobre privacidade está na seção 13.
 
 ### Conta
 
-Para entrar, você usa uma conta Google ou um e-mail e senha. O login é feito pelo Firebase Authentication, do Google, que guarda seu e-mail, o identificador da conta Google e a senha protegida. O Sacou nunca vê sua senha. No nosso banco de dados guardamos só um identificador interno, o identificador da sua conta no Firebase e a data de criação.
+Para entrar, você usa uma conta Google ou um e-mail e senha. O login é feito pelo Firebase Authentication, do Google, que guarda seu e-mail, seu nome na conta Google, o identificador da conta Google e a senha protegida. A tela Conta do app mostra seu nome e e-mail, e a sessão fica guardada no próprio aparelho até você sair. O Sacou nunca vê sua senha. No nosso banco de dados guardamos só um identificador interno, o identificador da sua conta no Firebase e a data de criação.
 
 ### Perfil
 
@@ -73,7 +75,7 @@ O app guarda no celular uma cópia dos dados dos seus grupos para funcionar sem 
 
 ### Registros técnicos e segurança
 
-Quando o app ou o navegador acessa nossos servidores, o Google Cloud registra o endereço IP, o tipo de navegador ou aparelho e o endereço da página acessada. Usamos isso para manter o serviço funcionando e para evitar abuso. Para limitar abusos, também usamos versões embaralhadas e irreversíveis do seu identificador e do seu IP, só na memória do servidor, por no máximo 1 hora. Os pontos enviados por cada celular são ligados a um código aleatório da instalação do app, que não é o número do aparelho.
+Quando o app ou o navegador acessa nossos servidores, o Google Cloud registra o endereço IP, o tipo de navegador ou aparelho e o endereço da página acessada. Usamos isso para manter o serviço funcionando e para evitar abuso. Para limitar abusos, também usamos versões embaralhadas e irreversíveis do seu identificador e do seu IP, só na memória do servidor, por no máximo 1 hora. Os pontos enviados por cada celular são ligados a um código aleatório da instalação do app, que não é o número do aparelho. O servidor guarda esse código ligado a você enquanto a partida existir, e o organizador, o co-organizador e quem marca o placar do grupo conseguem ver de qual aparelho veio cada ponto.
 
 > CONFERIR antes da versão 1.0: se o Sentry (erros) e o Resend (e-mail) já estiverem ativos (E5.2), acrescentar aqui e na seção 5. Hoje o inventário marca os dois como "a definir". O PostHog, a foto da cartinha, o Pix, o resumo com IA e a assinatura ficaram fora do piloto e não entram nesta versão.
 
@@ -113,13 +115,14 @@ Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na r
 ## 7. Por quanto tempo guardamos
 
 - Conta, perfil e notas de nível sobre você: enquanto sua conta existir. Ao excluir a conta, são apagados na hora.
-- Histórico das rodadas e partidas, estatísticas e votos: enquanto o grupo existir. Depois que você exclui a conta, esse histórico deixa de estar ligado a você e aparece como Ex-jogador.
+- Histórico das rodadas e partidas, estatísticas e votos: enquanto o grupo existir. Depois que você exclui a conta, esse histórico deixa de mostrar seu apelido e aparece como Ex-jogador.
 - Nome de convidado sem conta: até o organizador removê-lo, ou até o grupo ficar sem nenhum membro com conta.
+- Página da rodada no navegador: nesta versão, os apelidos continuam visíveis para quem tem o link, mesmo depois de a rodada terminar.
 - Notificações: 30 dias.
 - Registros técnicos de acesso: 30 dias.
 - Cópia no celular: até 7 dias, e é apagada quando você sai da conta.
 - Cópias de segurança do banco: o banco guarda um histórico de restauração de 6 horas.
-- Depois da exclusão, guardamos só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano nos minutos seguintes.
+- Depois da exclusão, guardamos só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano. Nesta versão, esse código é guardado sem prazo definido.
 
 > LACUNA (pergunta 200): prazos. Os itens acima descrevem o que o código já faz. Faltam: prazo da cópia diária no Cloudflare R2, se ativa (padrão proposto: 30 dias); prazo do código de exclusão (hoje sem prazo; padrão proposto: 90 dias, com uma limpeza a criar); prazo do convidado que nunca mais jogou e do grupo abandonado (padrão proposto: manter no piloto e reavaliar na E6.2); e se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos.
 
@@ -142,7 +145,7 @@ Você pode, a qualquer momento:
 - Desligar as notificações nas configurações do celular.
 - Pedir informações, revisão de uma decisão, correção ou eliminação de dados, ou reclamar, pelo canal da seção 13. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
 
-Respondemos aos pedidos pelo canal em até 15 dias.
+Respondemos aos pedidos em até 15 dias, assim que o canal de contato da seção 12 estiver publicado.
 
 ## 10. Segurança
 
@@ -160,7 +163,7 @@ Quando esta política mudar, atualizamos a versão e a data no topo. Se a mudan�
 
 ## 13. Contato e encarregado
 
-Para qualquer assunto de privacidade, escreva para o encarregado de dados do Sacou: Gabriel, pelo e-mail (endereço a definir antes da versão 1.0).
+Para qualquer assunto de privacidade, escreva para o encarregado de dados do Sacou: Gabriel, pelo e-mail (endereço a definir antes da versão 1.0). Enquanto o endereço não estiver aqui, o canal de contato ainda não existe.
 
 > LACUNA (pergunta 199): canal do encarregado. Sem domínio no piloto (resposta 125), não existe e-mail `@sacou.com.br`. Padrão recomendado: um e-mail dedicado em provedor gratuito, criado pelo Gabriel (conta nova é decisão dele). A Resolução CD/ANPD 2/2022 dispensa agente de pequeno porte de indicar encarregado, mas exige um canal de comunicação; o advogado confirma se o Sacou se enquadra.
 
