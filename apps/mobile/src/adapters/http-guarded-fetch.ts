@@ -14,7 +14,21 @@ async function bodyOf(request: Request): Promise<string | null> {
   return text === "" ? null : text;
 }
 
-export function createGuardedFetch(baseUrl: string, transport: HttpTransport, timeoutMs: number) {
+/** `ambientHeaders` go on every request, whatever the call (the app's build, ADR 0084). */
+function withHeaders(headers: Headers, extra: Readonly<Record<string, string>>): Headers {
+  const merged = new Headers(headers);
+  Object.entries(extra).forEach(([name, value]) => {
+    merged.set(name, value);
+  });
+  return merged;
+}
+
+export function createGuardedFetch(
+  baseUrl: string,
+  transport: HttpTransport,
+  timeoutMs: number,
+  ambientHeaders: Readonly<Record<string, string>> = {},
+) {
   return async (request: Request): Promise<Response> => {
     if (!isApiUrl(baseUrl, request.url)) throw new OtherOriginRefused();
     const controller = new AbortController();
@@ -25,7 +39,7 @@ export function createGuardedFetch(baseUrl: string, transport: HttpTransport, ti
       const sent: HttpRequest = {
         url: request.url,
         method: request.method,
-        headers: request.headers,
+        headers: withHeaders(request.headers, ambientHeaders),
         body: await bodyOf(request),
         signal: controller.signal,
       };

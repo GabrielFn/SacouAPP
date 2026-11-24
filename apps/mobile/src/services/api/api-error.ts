@@ -27,6 +27,8 @@ export type ApiError =
   | { readonly kind: "too-large" }
   | { readonly kind: "rate-limited"; readonly retryAfterMs: number }
   | { readonly kind: "unavailable"; readonly retryAfterMs: number }
+  /** The 426: this build is below the API's minimum (ADR 0084); the app config says it is read again. */
+  | { readonly kind: "app-outdated" }
   | { readonly kind: "offline" }
   /** The account signed in changed before the call left: nothing was sent (ADR 0067, D8). */
   | { readonly kind: "account-changed" }

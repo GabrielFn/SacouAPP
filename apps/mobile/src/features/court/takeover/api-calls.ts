@@ -36,6 +36,7 @@ const PLAIN_FAILURES: Readonly<Record<PlainKind, TakeoverFailure>> = {
   "session-expired": "no-account",
   "not-registered": "no-account",
   "too-large": "failed",
+  "app-outdated": "failed",
   "rate-limited": "failed",
   unavailable: "failed",
   unexpected: "failed",

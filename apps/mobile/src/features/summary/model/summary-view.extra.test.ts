@@ -63,3 +63,25 @@ describe("extra cases of the summary view (tester, E4.12 part 1)", () => {
     expect(teamsOf(a).mostWins?.figure).toBe("2 vitórias");
   });
 });
+
+describe("the mvpVote flag (ADR 0084)", () => {
+  const notOpen = {
+    state: "notOpen",
+    opensAt: "2026-11-21T00:00:00Z",
+    closesAt: "2026-11-22T00:00:00Z",
+  } as const;
+  const view = (mvpVoteOn: boolean) =>
+    summaryView({
+      ...INPUT,
+      mvpVoteOn,
+      query: { status: "success", data: { ...E2_9_ROUND, mvpVoting: notOpen }, error: null },
+    });
+
+  test("off, the entry to the vote disappears; on, it is there", () => {
+    const off = view(false);
+    const on = view(true);
+
+    expect(off.kind === "ready" && off.voting.kind).toBe("hidden");
+    expect(on.kind === "ready" && on.voting.kind).toBe("not-open");
+  });
+});

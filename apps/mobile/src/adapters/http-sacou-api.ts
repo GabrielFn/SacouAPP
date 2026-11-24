@@ -12,6 +12,8 @@ import {
   nextStep,
   type AttemptState,
 } from "../services/api/api-policy";
+import { appBuildHeaders } from "../features/app-config/model/app-build-headers";
+import type { AppBuild } from "../features/app-config/app-build";
 import { createGuardedFetch, NetworkFailure, refuseEverything } from "./http-guarded-fetch";
 import { createAccountOperations } from "./http-account-operations";
 import { createCourtOperations } from "./http-court-operations";
@@ -37,6 +39,8 @@ export interface HttpSacouApiOptions {
   readonly idTokens: IdTokenProvider;
   readonly now?: () => number;
   readonly timeoutMs?: number;
+  /** The native build, sent in two headers on every request; without one, none is sent (ADR 0084). */
+  readonly appBuild?: AppBuild;
 }
 
 // A type and not an interface: openapi-fetch takes an init with an index signature.
@@ -88,7 +92,12 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     fetch:
       baseUrl === null
         ? refuseEverything
-        : createGuardedFetch(baseUrl, transport, options.timeoutMs ?? REQUEST_TIMEOUT_MS),
+        : createGuardedFetch(
+            baseUrl,
+            transport,
+            options.timeoutMs ?? REQUEST_TIMEOUT_MS,
+            options.appBuild === undefined ? {} : appBuildHeaders(options.appBuild),
+          ),
   });
   // Calls refused at the same time share one renewal (D5).
   const renewal: { current: Promise<string | null> | null } = { current: null };
@@ -170,6 +179,16 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
     }
   }
 
+  /** A call without a token: the app config, asked before the sign-in (ADR 0084). Never repeated. */
+  async function executeAnonymous<T>(call: Call<T>): Promise<ApiResult<T>> {
+    if (baseUrl === null) return apiErr(NOT_SENT);
+    try {
+      return readOutcome(baseUrl, await call({ headers: { Accept: "application/json" } }), now());
+    } catch (error) {
+      return apiErr(error instanceof NetworkFailure ? { kind: "offline" } : NOT_SENT);
+    }
+  }
+
   function executeAs<T>(call: Call<T>, account: SessionIdentity | null): Promise<ApiResult<T>> {
     if (baseUrl === null) return Promise.resolve(apiErr(NOT_SENT));
     return run(call, { renewedToken: false, signedIn: false }, account);
@@ -185,6 +204,7 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
   }
 
   return {
+    getAppConfig: () => executeAnonymous((init) => client.GET("/v1/app-config", init)),
     signIn: () => execute((init) => client.POST("/v1/me", init)),
     listMyGroups: () => execute((init) => client.GET("/v1/groups", init)),
     createGroup: (name, templateKey, settings) =>

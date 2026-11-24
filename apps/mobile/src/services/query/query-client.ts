@@ -1,7 +1,7 @@
-import { onlineManager, QueryCache, QueryClient } from "@tanstack/react-query";
+import { MutationCache, onlineManager, QueryCache, QueryClient } from "@tanstack/react-query";
 
 import type { NetworkStatus } from "../api/network-status";
-import { applyCacheEffects, groupGoneEffects } from "./invalidation";
+import { appOutdatedEffects, applyCacheEffects, groupGoneEffects } from "./invalidation";
 import { PERSISTED_CACHE_MAX_AGE_MS } from "./persist-policy";
 import { queryRetryDelay, shouldRetryQuery } from "./retry-policy";
 
@@ -15,6 +15,12 @@ export function createSacouQueryClient(): QueryClient {
     queryCache: new QueryCache({
       onError: (error, query) => {
         applyCacheEffects(client, groupGoneEffects(query.queryKey, error));
+        applyCacheEffects(client, appOutdatedEffects(error));
+      },
+    }),
+    mutationCache: new MutationCache({
+      onError: (error) => {
+        applyCacheEffects(client, appOutdatedEffects(error));
       },
     }),
     defaultOptions: {

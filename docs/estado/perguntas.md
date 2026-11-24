@@ -258,3 +258,8 @@ Detalhes em `docs/estado/tarefas/R101.md`, seção 5.
 185. "Não vou mais" com confirmação também na página web `/r`: (1) sim, app e web iguais; (2) só no app. **Recomendação e padrão adotado: 1.**
 186. Texto do "Mandar pro grupo" do resumo com a votação aberta: (1) "Na frente pelo placar: Leo (+7 de saldo). A galera decide o MVP até amanhã, 12h44."; (2) manter "MVP do dia: Leo". **Recomendação e padrão adotado: 1** (o texto do WhatsApp fica, e o provisório viraria definitivo no grupo).
 187. Na tela 11 (fim de partida), "Encerrar rodada" desce para baixo de "Voltar ao início", longe do botão principal (desvio de `FimPartida.dc.html`): (1) sim; (2) manter entre os dois, agora com confirmação. **Recomendação e padrão adotado: 1.**
+
+## 24/11/2026: E5.3 Parte 2 (feature flags e versão mínima), perguntas 196 e 197 (padrões adotados)
+Detalhes no ADR 0084 e em `docs/estado/tarefas/E5.3.md`.
+196. **Tela "Atualize o Sacou"** (não está no design): tela cheia sem saída, "Esta versão não funciona mais. Baixe a nova para continuar.", botão "Baixar a versão nova" com o link da loja da plataforma vindo da API; sem link, sem botão e o texto manda falar com quem organiza o grupo. **Padrão adotado: assim.** Em aberto: qual link usar no piloto (página do teste interno da Play Store e do TestFlight, da E5.4); até lá `UpdateUrl` fica vazio.
+197. **Primeira feature flag:** `MvpVote` (E3.18), ligada nos dois ambientes. **Padrão adotado: só ela.** Outra função que você queira poder desligar entra com uma linha no catálogo e uma no app.

@@ -20,6 +20,8 @@ export function apiErrorText(error: ApiError): string {
       return apiErrorKindTexts.offline;
     case "account-changed":
       return apiErrorKindTexts.accountChanged;
+    case "app-outdated":
+      return apiErrorKindTexts.appOutdated;
     case "unexpected":
       return apiErrorKindTexts.unexpected;
   }
