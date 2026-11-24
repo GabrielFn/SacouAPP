@@ -15,6 +15,8 @@ internal sealed class SessionsDbContext(DbContextOptions<SessionsDbContext> opti
 
     public DbSet<AttendanceRow> Attendances => Set<AttendanceRow>();
 
+    public DbSet<RoundTeamSlotRow> RoundTeams => Set<RoundTeamSlotRow>();
+
     public DbSet<OutboxMessageRow> OutboxMessages => Set<OutboxMessageRow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,6 +25,7 @@ internal sealed class SessionsDbContext(DbContextOptions<SessionsDbContext> opti
         modelBuilder.ApplyConfiguration(new SeriesConfiguration());
         modelBuilder.ApplyConfiguration(new RoundConfiguration());
         modelBuilder.ApplyConfiguration(new AttendanceConfiguration());
+        modelBuilder.ApplyConfiguration(new RoundTeamSlotConfiguration());
         modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
     }
 }

@@ -21,7 +21,9 @@ import {
   type DrawScreenInput,
   type DrawScreenState,
 } from "../model/draw-screen-state";
+import { confirmTeamsBody } from "../model/confirm-teams-body";
 import { drawShareText } from "../model/draw-share-text";
+import { confirmTeamsMutation } from "../queries/confirm-teams-mutation";
 import { drawMutation } from "../queries/draw-mutation";
 import { redraw, runDraw, tapPlayer, type DrawActionDeps } from "./draw-actions";
 
@@ -40,6 +42,8 @@ export interface DrawScreenModel {
   readonly pending: boolean;
   /** The refusal of the last draw, `null` when it went through. */
   readonly error: unknown;
+  /** The last "Confirmar e compartilhar" did not publish the teams (R100, question 182): the flow went on. */
+  readonly publishFailed: boolean;
   readonly dispatch: (action: DrawFlowAction) => void;
   readonly tap: (memberId: MemberId) => void;
   /** "Sortear de novo"; with the draw off, "Montar de novo" (back to the order of arrival). */
@@ -47,8 +51,9 @@ export interface DrawScreenModel {
   /** "Tentar de novo" of the first draw. */
   readonly retry: () => void;
   /**
-   * "Confirmar e compartilhar": the text of the teams to the share sheet, then sheet 08 (D11), shared
-   * or not; with the score off in the round there is no court, so the 08 does not open (D6).
+   * "Confirmar e compartilhar": publishes the teams to the players (R100, without waiting), the text of the
+   * teams to the share sheet, then sheet 08 (D11), shared or not; with the score off in the round there is
+   * no court, so the 08 does not open (D6).
    */
   readonly share: () => void;
 }
@@ -79,6 +84,7 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
   const online = useOnline();
   const [state, dispatch] = useReducer(drawFlowReducer, initialDrawFlowState);
   const draw = useMutation(drawMutation(sacouApi, client, groupId, roundId));
+  const confirmTeams = useMutation(confirmTeamsMutation(sacouApi, client, groupId, roundId));
   const inFlight = useRef(false);
   const askedFirst = useRef(false);
   const input = inputOf(
@@ -146,6 +152,7 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
     online,
     pending: draw.isPending,
     error: draw.error,
+    publishFailed: confirmTeams.isError,
     dispatch,
     tap: (memberId) => {
       if (!manual) {
@@ -167,6 +174,8 @@ export function useDrawScreen(groupId: string, roundId: string): DrawScreenModel
       if (shown === null || groupName === undefined || round.data === undefined) return;
       if (!deps.claim()) return;
       keepBuilt();
+      // Before the sheet, never after (A of R100): closing it without sharing keeps the teams published.
+      confirmTeams.mutate(confirmTeamsBody(shown));
       void shareSheet
         .share(drawShareText(groupName, round.data, shown, nameOf))
         .catch(() => undefined)

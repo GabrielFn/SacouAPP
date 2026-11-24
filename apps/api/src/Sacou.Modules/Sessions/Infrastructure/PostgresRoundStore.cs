@@ -30,8 +30,8 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
             return null;
         }
 
-        var attendances = await AttendancesOfAsync([row.Id], cancellationToken).ConfigureAwait(false);
-        return RowMapping.ToRound(row, attendances[row.Id]);
+        var rounds = await RoundsOfAsync([row], cancellationToken).ConfigureAwait(false);
+        return rounds[0];
     }
 
     public async Task<IReadOnlyList<Round>> ListFromAsync(GroupId group, DateTimeOffset from, CancellationToken cancellationToken)
@@ -40,8 +40,31 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
             .Where(round => round.GroupId == group.Value && round.StartsAt >= from)
             .OrderBy(round => round.StartsAt).ThenBy(round => round.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        var attendances = await AttendancesOfAsync([.. rows.Select(row => row.Id)], cancellationToken).ConfigureAwait(false);
-        return [.. rows.Select(row => RowMapping.ToRound(row, attendances[row.Id]))];
+        return await RoundsOfAsync(rows, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>The rounds of rows already read, with their attendances and published teams (two queries in all).</summary>
+    private async Task<IReadOnlyList<Round>> RoundsOfAsync(IReadOnlyList<RoundRow> rows, CancellationToken cancellationToken)
+    {
+        Guid[] ids = [.. rows.Select(row => row.Id)];
+        var attendances = await AttendancesOfAsync(ids, cancellationToken).ConfigureAwait(false);
+        var teams = await TeamSlotsOfAsync(rows, cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(row => RowMapping.ToRound(row, attendances[row.Id], teams[row.Id]))];
+    }
+
+    /// <summary>Only the rounds with published teams are asked for: most have none.</summary>
+    private async Task<ILookup<Guid, RoundTeamSlotRow>> TeamSlotsOfAsync(IReadOnlyList<RoundRow> rows, CancellationToken cancellationToken)
+    {
+        Guid[] withTeams = [.. rows.Where(row => row.TeamsConfirmedAt is not null).Select(row => row.Id)];
+        if (withTeams.Length == 0)
+        {
+            return Array.Empty<RoundTeamSlotRow>().ToLookup(slot => slot.RoundId);
+        }
+
+        var slots = await database.RoundTeams.AsNoTracking()
+            .Where(slot => withTeams.Contains(slot.RoundId))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return slots.ToLookup(slot => slot.RoundId);
     }
 
     public async Task<Result<RoundChange>> ExecuteInRoundLockAsync(
@@ -78,6 +101,13 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
             return changed;
         }
 
+        if (changed.Value.TeamsChanged)
+        {
+            // The teams are replaced whole (ADR 0078): the old rows go first, in the same transaction.
+            _ = await database.RoundTeams.Where(slot => slot.RoundId == round.Value)
+                .ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         Write(loaded.Value.Round, loaded.Value.CreatedAt, changed.Value);
         try
         {
@@ -106,6 +136,11 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         {
             var row = RowMapping.ToRow(before.Id, attendance);
             _ = before.AttendanceOf(attendance.Member) is null ? database.Attendances.Add(row) : database.Attendances.Update(row);
+        }
+
+        if (change.TeamsChanged && change.Round.Teams is { } teams)
+        {
+            database.RoundTeams.AddRange(RowMapping.ToTeamRows(before.Id, teams));
         }
 
         if (change.RoundRowChanged || change.Round.NextSequence != before.NextSequence)
@@ -145,8 +180,8 @@ internal sealed partial class PostgresRoundStore(SessionsDbContext database) : I
         }
 
         var row = await database.Rounds.AsNoTracking().SingleAsync(candidate => candidate.Id == round.Value, cancellationToken).ConfigureAwait(false);
-        var attendances = await AttendancesOfAsync([row.Id], cancellationToken).ConfigureAwait(false);
-        return (RowMapping.ToRound(row, attendances[row.Id]), row.CreatedAt);
+        var rounds = await RoundsOfAsync([row], cancellationToken).ConfigureAwait(false);
+        return (rounds[0], row.CreatedAt);
     }
 
     private async Task<Dictionary<Guid, List<AttendanceRow>>> AttendancesOfAsync(

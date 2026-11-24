@@ -32,6 +32,12 @@ internal sealed class PostgresAccountAttendanceReader(SessionsDbContext database
                 pair.attendance.Source,
                 pair.attendance.RespondedAt,
                 pair.attendance.PromotedAt,
+                TeamNumber = database.RoundTeams
+                    .Where(slot => slot.RoundId == pair.round.Id && slot.MemberId == pair.attendance.MemberId)
+                    .Select(slot => slot.TeamNumber).FirstOrDefault(),
+                ReservePosition = database.RoundTeams
+                    .Where(slot => slot.RoundId == pair.round.Id && slot.MemberId == pair.attendance.MemberId && slot.TeamNumber == null)
+                    .Select(slot => (short?)slot.Position).FirstOrDefault(),
             })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         return [.. rows.Select(row => new AccountAttendance(
@@ -44,6 +50,8 @@ internal sealed class PostgresAccountAttendanceReader(SessionsDbContext database
             EnumColumns.Parse(ColumnValues.AttendanceStatuses, row.Status),
             EnumColumns.Parse(ColumnValues.AttendanceSources, row.Source),
             row.RespondedAt,
-            row.PromotedAt))];
+            row.PromotedAt,
+            row.TeamNumber,
+            row.ReservePosition))];
     }
 }

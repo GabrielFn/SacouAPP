@@ -90,6 +90,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "sessions.round-canceled": "Esta rodada foi cancelada e não pode ser encerrada.",
   "sessions.round-not-started": "A rodada ainda não começou e não pode ser encerrada.",
   "sessions.round-closed": "Esta rodada não aceita mais mudanças.",
+  "sessions.round-teams-invalid": "Os times mudaram desde o sorteio. Sorteie de novo e confirme.",
   "sessions.round-date-taken": "Essa repetição já tem uma rodada nesse dia. Escolha outra data.",
   "sessions.round-full": "A rodada está cheia e a lista de espera está desligada.",
   "sessions.round-invalid": "Confira a data, a hora e o local da rodada.",

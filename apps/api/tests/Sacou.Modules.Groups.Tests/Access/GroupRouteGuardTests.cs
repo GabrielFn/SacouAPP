@@ -23,8 +23,8 @@ public sealed class GroupRouteGuardTests
     /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
     /// </summary>
     private const int GroupRoutes = 21;
-    /// <summary>The nine of the rounds and their close (E3.18, ADR 0072).</summary>
-    private const int RoundRoutes = 10;
+    /// <summary>The nine of the rounds, their close (E3.18, ADR 0072) and the publication of the teams (R100, ADR 0078).</summary>
+    private const int RoundRoutes = 11;
 
     /// <summary>The court stream's write (E3.7, ADR 0060), its takeover, summary and read (E3.8, ADR 0063), behind the Matches' filter.</summary>
     private const int CourtRoutes = 4;

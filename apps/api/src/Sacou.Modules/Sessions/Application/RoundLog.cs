@@ -29,6 +29,11 @@ internal static partial class RoundLog
         Message = "Group {GroupId}: draw of round {RoundId}: {Result}, {Players} players, {Teams} teams, {Locks} locks, {ElapsedMs} ms.")]
     public static partial void Drew(ILogger logger, Guid groupId, Guid roundId, string result, int players, int teams, int locks, long elapsedMs);
 
+    /// <summary>One line per confirmation of the teams: ids and counts, never who is in which team (ADR 0078).</summary>
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "Group {GroupId}: teams of round {RoundId}: {Result}, {Teams} teams, {Reserves} reserves.")]
+    public static partial void TeamsConfirmed(ILogger logger, Guid groupId, Guid roundId, string result, int teams, int reserves);
+
     /// <summary>One line per write: the result code and the promotions, by member id.</summary>
     public static void LogChange(ILogger logger, RoundId round, string result, RoundChange? change)
     {

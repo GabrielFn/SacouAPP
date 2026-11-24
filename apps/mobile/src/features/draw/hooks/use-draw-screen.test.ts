@@ -7,6 +7,7 @@ import {
 } from "../model/draw-flow.reducer";
 import { withLeaf } from "../../groups/model/settings-patch";
 import { drawnG1, drawSettings, g1Members, g1Round, G1_ANSWER } from "../model/draw.test.fixture";
+import type { ConfirmTeamsBody } from "../../../services/api/sacou-api";
 import type { DrawVariables } from "../queries/draw-mutation";
 import { useDrawScreen } from "./use-draw-screen";
 
@@ -24,6 +25,8 @@ const world = vi.hoisted(() => ({
   scoring: true,
   drawOn: true,
   mutate: vi.fn<(variables: DrawVariables, options?: RunOptions) => void>(),
+  confirm: vi.fn<(body: ConfirmTeamsBody) => void>(),
+  confirmFailed: false,
   dispatch: vi.fn(),
   share: vi.fn<(text: string) => Promise<void>>(),
 }));
@@ -45,7 +48,11 @@ vi.mock("react", async (importOriginal) => ({
   },
 }));
 vi.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ isPending: false, error: null, mutate: world.mutate }),
+  // The publication of the teams is the only mutation with an `onSuccess` (R100).
+  useMutation: (options: object) =>
+    "onSuccess" in options
+      ? { isPending: false, isError: world.confirmFailed, error: null, mutate: world.confirm }
+      : { isPending: false, isError: false, error: null, mutate: world.mutate },
   useQueryClient: () => ({}),
 }));
 vi.mock("../../../services/services-context", () => ({
@@ -86,6 +93,8 @@ beforeEach(() => {
   world.scoring = true;
   world.drawOn = true;
   world.mutate.mockReset();
+  world.confirm.mockReset();
+  world.confirmFailed = false;
   world.dispatch.mockReset();
   world.share.mockReset().mockResolvedValue(undefined);
 });
@@ -208,6 +217,46 @@ describe("Confirmar e compartilhar (D11)", () => {
     expect(world.dispatch).not.toHaveBeenCalledWith({ type: "pre-game-opened" });
   });
 
+  test("publishes the teams, IDs only, before the share sheet opens (R100, A)", () => {
+    render(drawnG1()).share();
+    expect(world.confirm).toHaveBeenCalledTimes(1);
+    expect(world.confirm.mock.calls[0]?.[0]).toEqual({
+      teams: [
+        ["ana", "joao", "pedro", "lia", "marcos", "bia"],
+        ["rafa", "duda", "caio", "nina", "leo", "gabi"],
+      ],
+      reserves: ["davi", "sofia"],
+    });
+    expect(JSON.stringify(world.confirm.mock.calls[0]?.[0])).not.toMatch(/level/i);
+    const published = world.confirm.mock.invocationCallOrder[0] ?? Infinity;
+    const shared = world.share.mock.invocationCallOrder[0] ?? -Infinity;
+    expect(published).toBeLessThan(shared);
+  });
+
+  test("a double tap publishes once (R100, case 18)", () => {
+    world.share.mockReturnValue(new Promise<void>(() => undefined));
+    const model = render(drawnG1());
+    model.share();
+    model.share();
+    expect(world.confirm).toHaveBeenCalledTimes(1);
+  });
+
+  test("a failed publication changes nothing in the flow and shows the notice (question 182)", async () => {
+    world.confirmFailed = true;
+    const model = render(drawnG1());
+    model.share();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(model.publishFailed).toBe(true);
+    expect(world.share).toHaveBeenCalledTimes(1);
+    expect(world.dispatch).toHaveBeenCalledWith({ type: "pre-game-opened" });
+  });
+
+  test("redrawing publishes nothing (R100, A)", () => {
+    render(drawnG1()).redraw();
+    expect(world.confirm).not.toHaveBeenCalled();
+    expect(render(drawnG1()).publishFailed).toBe(false);
+  });
+
   test("nothing is shared before the draw, nor while rendering", () => {
     render();
     render(drawnG1());
@@ -261,7 +310,12 @@ describe("Montar times, with the draw off (question 72)", () => {
   });
 
   test("Confirmar shares the teams by arrival and opens the 08 over them", async () => {
+    world.online = false;
     render().share();
+    expect(world.confirm).toHaveBeenCalledWith({
+      teams: BY_ARRIVAL.teams,
+      reserves: BY_ARRIVAL.reserves,
+    });
     expect(world.dispatch).toHaveBeenCalledWith({ type: "teams-built", arrangement: BY_ARRIVAL });
     expect(world.share.mock.calls[0]?.[0]).toContain("Laranja: Ana, João, Pedro, Lia, Marcos, Bia");
     await new Promise((resolve) => setTimeout(resolve, 0));

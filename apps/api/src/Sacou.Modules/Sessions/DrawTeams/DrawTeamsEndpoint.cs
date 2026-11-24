@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
-using Sacou.Http.RateLimiting;
-using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Access;
 using Sacou.Modules.Sessions.Domain.Rounds;
 
@@ -24,11 +22,7 @@ internal static class DrawTeamsEndpoint
 
     public static RouteGroupBuilder MapDrawTeams(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireRateLimiting(RateLimitPolicies.Draw)
-            .RequireCapability(GroupCapability.DrawTeams)
-            .WithNoStore()
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireDrawer();
         return group;
     }
 
