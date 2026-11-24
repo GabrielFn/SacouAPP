@@ -78,10 +78,7 @@ export const webStrings = {
 } as const;
 
 /** The sentence of a failure; the refusals after the group step say that the person came in anyway (ADR 0070, D2). */
-export function failureText(
-  failure: Failure,
-  dropIn: DropInContext = NO_DROP_IN_CONTEXT,
-): string {
+export function failureText(failure: Failure, dropIn: DropInContext = NO_DROP_IN_CONTEXT): string {
   if (failure.kind === "rateLimited") return webStrings.retryIn(failure.retryAfterSeconds);
   const text =
     failure.kind === "dropInWindowClosed" && dropIn.phrase !== ""

@@ -162,6 +162,7 @@ describe("roundPageReducer (case 31)", () => {
     const limited = run(
       [
         { type: "answerTapped", intent: "notGoing" },
+        { type: "leaveConfirmed" },
         { type: "answerFailed", failure: { kind: "rateLimited", retryAfterSeconds: 7 } },
       ],
       idle,
@@ -228,5 +229,50 @@ describe("roundPageReducer (case 31)", () => {
   it("signing out from anywhere idles signed out", () => {
     const answering: RoundPageState = { step: "answering", intent: "going", standing: going };
     expect(run([{ type: "signedOut" }], answering)).toEqual(signedOutIdle);
+  });
+});
+
+describe("roundPageReducer, leaving the list (R101, item 3b)", () => {
+  const holding: RoundPageState = {
+    step: "idle",
+    signedIn: true,
+    nicknameSuggestion: null,
+    standing: going,
+    failure: null,
+  };
+
+  it("NÃO VOU MAIS asks first, and only a confirmation sends the answer", () => {
+    const asking = run([{ type: "answerTapped", intent: "notGoing" }], holding);
+    expect(asking).toEqual({ step: "confirmingLeave", standing: going });
+    expect(run([{ type: "leaveConfirmed" }], asking)).toEqual({
+      step: "answering",
+      intent: "notGoing",
+      standing: going,
+    });
+  });
+
+  it("CONTINUAR NA LISTA goes back to where the person stood", () => {
+    const state = run(
+      [{ type: "answerTapped", intent: "notGoing" }, { type: "leaveCancelled" }],
+      holding,
+    );
+    expect(state).toEqual(holding);
+  });
+
+  it("a second confirmation, or one out of the question, changes nothing", () => {
+    const answering = run(
+      [{ type: "answerTapped", intent: "notGoing" }, { type: "leaveConfirmed" }],
+      holding,
+    );
+    expect(run([{ type: "leaveConfirmed" }, { type: "leaveCancelled" }], answering)).toEqual(
+      answering,
+    );
+    expect(run([{ type: "leaveConfirmed" }], holding)).toEqual(holding);
+  });
+
+  it("VOU, and NÃO VOU without a place, answer at once", () => {
+    expect(run([{ type: "answerTapped", intent: "going" }], holding).step).toBe("answering");
+    const none = { ...holding, standing: { status: "notGoing", position: null } } as const;
+    expect(run([{ type: "answerTapped", intent: "notGoing" }], none).step).toBe("answering");
   });
 });

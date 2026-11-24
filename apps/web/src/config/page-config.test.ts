@@ -22,7 +22,17 @@ describe("readPageConfig", () => {
         appId: "1:2:web:3",
       },
       nicknameMaxCodePoints: 20,
+      dropIn: { phrase: "", hasRegulars: false },
     });
+  });
+
+  it("reads the avulsos window phrase and whether the list has mensalistas", () => {
+    const config = readPageConfig({
+      ...complete,
+      dropInPhrase: " hoje, às 20h ",
+      hasRegulars: "true",
+    });
+    expect(config?.dropIn).toEqual({ phrase: "hoje, às 20h", hasRegulars: true });
   });
 
   it.each([

@@ -49,6 +49,9 @@ export function readPageConfig(dataset: DatasetLike): PageConfig | null {
     return null;
   const firebase = readFirebaseConfig(dataset);
   if (firebase === null) return null;
-  const dropIn = { phrase: text(dataset, "dropInPhrase") ?? "", hasRegulars: dataset.hasRegulars === "true" };
+  const dropIn = {
+    phrase: text(dataset, "dropInPhrase") ?? "",
+    hasRegulars: dataset.hasRegulars === "true",
+  };
   return { code, firebase, nicknameMaxCodePoints: nicknameMax, dropIn };
 }

@@ -1,5 +1,5 @@
 import { failureText, standingText, webStrings, type DropInContext } from "../strings.pt-BR";
-import type { RoundPageState, SheetForm } from "../round-page/round-page.types";
+import type { RoundPageState, SheetForm, Standing } from "../round-page/round-page.types";
 import { holdsPlace } from "../round-page/standing";
 
 import {
@@ -43,21 +43,12 @@ const BUSY_STEPS = new Set<RoundPageState["step"]>([
   "answering",
 ]);
 
+const NICKNAME_STEPS = new Set<RoundPageState["step"]>(["nickname", "savingNickname"]);
+
 function formOf(state: RoundPageState): SheetForm | "nickname" | null {
-  switch (state.step) {
-    case "signIn":
-      return state.form;
-    case "signingIn":
-      return state.attempt === "google" ? "choice" : state.attempt;
-    case "nickname":
-    case "savingNickname":
-      return "nickname";
-    case "starting":
-    case "idle":
-    case "registering":
-    case "answering":
-      return null;
-  }
+  if (state.step === "signIn") return state.form;
+  if (state.step === "signingIn") return state.attempt === "google" ? "choice" : state.attempt;
+  return NICKNAME_STEPS.has(state.step) ? "nickname" : null;
 }
 
 function statusText(state: RoundPageState, dropIn: DropInContext): string | null {
@@ -84,11 +75,16 @@ function windowRefused(state: RoundPageState): boolean {
   return state.step === "idle" && state.failure?.kind === "dropInWindowClosed";
 }
 
+const STANDING_STEPS = new Set<RoundPageState["step"]>(["idle", "answering", "confirmingLeave"]);
+
+function standingOf(state: RoundPageState): Standing | null {
+  return STANDING_STEPS.has(state.step) && "standing" in state ? state.standing : null;
+}
+
 function renderAnswers(elements: PageElements, state: RoundPageState): void {
   const busy = BUSY_STEPS.has(state.step);
   const confirming = state.step === "confirmingLeave";
-  const standing =
-    state.step === "idle" || state.step === "answering" || confirming ? state.standing : null;
+  const standing = standingOf(state);
   const placed = holdsPlace(standing);
   if (elements.going !== null) {
     elements.going.disabled = busy || windowRefused(state);
