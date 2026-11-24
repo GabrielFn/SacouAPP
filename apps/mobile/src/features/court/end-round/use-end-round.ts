@@ -35,9 +35,8 @@ export function useEndRound(
   onServerClosed: (round: CourtSessionOrigin) => void,
 ): EndRoundFlow {
   const router = useRouter();
-  const { sacouApi } = useServices();
+  const { sacouApi, courtRounds } = useServices();
   const runtime = useCourtRuntime();
-  const { courtRounds } = useServices();
   const [state, send] = useReducer(endRoundReducer, INITIAL_END_ROUND);
 
   const run = useCallback(async () => {
@@ -73,9 +72,11 @@ export function useEndRound(
     state,
     request: (about) => {
       if (state.phase === "closing" || state.phase === "confirming") return;
-      void votingEnabledOf().then((votingEnabled) => {
-        send({ type: "requested", ...about, votingEnabled });
-      });
+      void votingEnabledOf()
+        .catch(() => false)
+        .then((votingEnabled) => {
+          send({ type: "requested", ...about, votingEnabled });
+        });
     },
     confirm: () => {
       if (state.phase !== "confirming") return;
