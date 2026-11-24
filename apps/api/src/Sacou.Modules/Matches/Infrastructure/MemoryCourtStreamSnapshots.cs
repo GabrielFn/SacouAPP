@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
@@ -35,45 +34,83 @@ internal interface ICourtStreamSnapshots
     Task<SnapshotWarmth> EnsureAsync(Guid courtSessionId, int eventCount, CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// The snapshots by stream, measured in stored events: a new one always goes in, and the least recently used go out
+/// until the total fits <see cref="CourtStreamCacheOptions.MaxEvents"/>. Not <c>MemoryCache</c>, which refuses an entry
+/// that does not fit instead of making room, so a full cache would keep no new stream. A snapshot unused for the
+/// sliding time, or kept for the absolute one, is gone.
+/// </summary>
 internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDisposable
 {
     private const int SmallestSize = 1;
 
-    private readonly MemoryCache _cache;
     private readonly IServiceScopeFactory _scopes;
+    private readonly TimeProvider _time;
     private readonly CourtStreamCacheOptions _options;
+    private readonly TimeSpan _sliding;
+    private readonly TimeSpan _absolute;
     private readonly SemaphoreSlim _builds;
     private readonly Lock _sync = new();
+    private readonly Dictionary<Guid, Entry> _entries = [];
     private readonly Dictionary<Guid, Task<StreamSnapshot?>> _building = [];
+    private long _heldEvents;
 
-    public MemoryCourtStreamSnapshots(IServiceScopeFactory scopes, IOptions<CourtStreamCacheOptions> options)
+    public MemoryCourtStreamSnapshots(IServiceScopeFactory scopes, TimeProvider time, IOptions<CourtStreamCacheOptions> options)
     {
         ArgumentNullException.ThrowIfNull(scopes);
+        ArgumentNullException.ThrowIfNull(time);
         ArgumentNullException.ThrowIfNull(options);
         _scopes = scopes;
+        _time = time;
         _options = options.Value;
-        _cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = _options.MaxEvents });
+        _sliding = TimeSpan.FromMinutes(_options.SlidingExpirationMinutes);
+        _absolute = TimeSpan.FromHours(_options.AbsoluteExpirationHours);
         _builds = new SemaphoreSlim(_options.MaxConcurrentBuilds, _options.MaxConcurrentBuilds);
     }
 
-    public StreamSnapshot? TryGet(Guid courtSessionId) => _cache.TryGetValue(courtSessionId, out StreamSnapshot? snapshot) ? snapshot : null;
+    /// <summary>The stored events all kept snapshots hold together.</summary>
+    public long HeldEvents
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _heldEvents;
+            }
+        }
+    }
+
+    public StreamSnapshot? TryGet(Guid courtSessionId)
+    {
+        lock (_sync)
+        {
+            var now = _time.GetUtcNow();
+            if (!_entries.TryGetValue(courtSessionId, out var entry) || IsExpired(entry, now))
+            {
+                Remove(courtSessionId);
+                return null;
+            }
+
+            _entries[courtSessionId] = entry with { LastUsed = now };
+            return entry.Snapshot;
+        }
+    }
 
     public void Publish(Guid courtSessionId, StreamSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         lock (_sync)
         {
-            if (TryGet(courtSessionId) is { } kept && kept.Version >= snapshot.Version)
+            var now = _time.GetUtcNow();
+            if (_entries.TryGetValue(courtSessionId, out var kept) && !IsExpired(kept, now) && kept.Snapshot.Version >= snapshot.Version)
             {
                 return;
             }
 
-            _ = _cache.Set(courtSessionId, snapshot, new MemoryCacheEntryOptions
-            {
-                Size = Math.Max(SmallestSize, snapshot.Version),
-                SlidingExpiration = TimeSpan.FromMinutes(_options.SlidingExpirationMinutes),
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_options.AbsoluteExpirationHours),
-            });
+            Remove(courtSessionId);
+            _entries[courtSessionId] = new Entry(snapshot, Kept: now, LastUsed: now);
+            _heldEvents += SizeOf(snapshot);
+            MakeRoom(now);
         }
     }
 
@@ -81,7 +118,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
     {
         lock (_sync)
         {
-            _cache.Remove(courtSessionId);
+            Remove(courtSessionId);
         }
     }
 
@@ -111,7 +148,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
 
     /// <summary>
     /// In a scope of its own and with no token of a request: the requests that wait for it may go away, the build
-    /// does not. A stream changed outside the API is thrown away and built again by the reader.
+    /// does not. A stream changed outside the API is thrown away and built again by the source.
     /// </summary>
     private async Task<StreamSnapshot?> BuildAsync(Guid courtSessionId)
     {
@@ -127,8 +164,8 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
                 var scope = _scopes.CreateAsyncScope();
                 await using (scope.ConfigureAwait(false))
                 {
-                    var reader = scope.ServiceProvider.GetRequiredService<ICourtSnapshotSource>();
-                    var read = await reader.ReadAsync(courtSessionId, TryGet(courtSessionId), CancellationToken.None).ConfigureAwait(false);
+                    var source = scope.ServiceProvider.GetRequiredService<ICourtSnapshotSource>();
+                    var read = await source.ReadAsync(courtSessionId, TryGet(courtSessionId), CancellationToken.None).ConfigureAwait(false);
                     Keep(courtSessionId, read);
                     return read.Snapshot;
                 }
@@ -150,17 +187,45 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
     /// <summary>A snapshot built from the whole stream replaces the one kept, which may be of a stream changed outside the API.</summary>
     private void Keep(Guid courtSessionId, ReadSnapshot read)
     {
-        if (read.Use == SnapshotUse.Built)
+        lock (_sync)
         {
-            Evict(courtSessionId);
+            if (read.Use == SnapshotUse.Built)
+            {
+                Remove(courtSessionId);
+            }
+
+            Publish(courtSessionId, read.Snapshot);
+        }
+    }
+
+    /// <summary>Under the lock: the expired first, then the least recently used, until the total fits.</summary>
+    private void MakeRoom(DateTimeOffset now)
+    {
+        foreach (var expired in _entries.Where(pair => IsExpired(pair.Value, now)).Select(pair => pair.Key).ToList())
+        {
+            Remove(expired);
         }
 
-        Publish(courtSessionId, read.Snapshot);
+        while (_heldEvents > _options.MaxEvents && _entries.Count > 0)
+        {
+            Remove(_entries.MinBy(pair => pair.Value.LastUsed).Key);
+        }
     }
 
-    public void Dispose()
+    /// <summary>Under the lock.</summary>
+    private void Remove(Guid courtSessionId)
     {
-        _cache.Dispose();
-        _builds.Dispose();
+        if (_entries.Remove(courtSessionId, out var entry))
+        {
+            _heldEvents -= SizeOf(entry.Snapshot);
+        }
     }
+
+    private bool IsExpired(Entry entry, DateTimeOffset now) => now - entry.LastUsed >= _sliding || now - entry.Kept >= _absolute;
+
+    private static long SizeOf(StreamSnapshot snapshot) => Math.Max(SmallestSize, snapshot.Version);
+
+    public void Dispose() => _builds.Dispose();
+
+    private sealed record Entry(StreamSnapshot Snapshot, DateTimeOffset Kept, DateTimeOffset LastUsed);
 }

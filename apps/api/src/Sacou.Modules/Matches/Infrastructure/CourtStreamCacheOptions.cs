@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
 namespace Sacou.Modules.Matches.Infrastructure;
 
@@ -40,7 +41,7 @@ internal sealed class CourtStreamCacheOptionsValidator : IValidateOptions<CourtS
         ArgumentNullException.ThrowIfNull(options);
         List<string> failures =
         [
-            .. Failure(nameof(options.MaxEvents), options.MaxEvents),
+            .. Failure(nameof(options.MaxEvents), options.MaxEvents, CourtStreamLimits.MaxStreamEvents),
             .. Failure(nameof(options.MaxConcurrentBuilds), options.MaxConcurrentBuilds),
             .. Failure(nameof(options.BuildWaitMilliseconds), options.BuildWaitMilliseconds),
             .. Failure(nameof(options.SlidingExpirationMinutes), options.SlidingExpirationMinutes),
@@ -49,6 +50,7 @@ internal sealed class CourtStreamCacheOptionsValidator : IValidateOptions<CourtS
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }
 
-    private static IEnumerable<string> Failure(string setting, int value) =>
-        value < Minimum ? [$"{CourtStreamCacheOptions.SectionName}:{setting} must be at least {Minimum}."] : [];
+    /// <summary>The size must hold one stream at its ceiling, or a full stream would never be kept.</summary>
+    private static IEnumerable<string> Failure(string setting, int value, int minimum = Minimum) =>
+        value < minimum ? [$"{CourtStreamCacheOptions.SectionName}:{setting} must be at least {minimum}."] : [];
 }
