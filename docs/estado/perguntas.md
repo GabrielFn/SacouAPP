@@ -243,3 +243,10 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 
 ## 22/11/2026: defeitos do percurso (R98)
 - **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. rótulo "Avulso" **mantido** (o app já distingue: "Sem conta" para convidado sem conta; "Mensalista" ou "Avulso" para quem tem conta).
+
+## 23/11/2026: R100 (times na tela do jogador), perguntas 179 a 182 (padrões adotados; nenhuma trava o começo)
+Opções completas na seção 7 de [`docs/estado/tarefas/R100.md`](tarefas/R100.md). O Gabriel aceitou o bloco "Times" (achado 6 da análise do percurso); estas são as decisões que a tela 26 não desenha.
+179. Onde aparecem os times: (1) na 26 e na 06, para todos os membros do grupo, inclusive quem não vai; a página web `/r/…` e o cartão do Início ficam sem times no piloto; (2) também na página web; (3) só para quem confirmou. **Recomendação e padrão: 1.**
+180. A lista muda depois de publicados os times: (1) o bloco mostra os times gravados, quem saiu aparece com "saiu", quem confirmou depois lê "Você confirmou depois dos times. Fale com quem organiza." e o admin vê na 06 "A lista mudou depois dos times. Sorteie de novo."; (2) o servidor apaga os times e o bloco some até o novo sorteio; (3) nada muda e ninguém é avisado. **Recomendação e padrão: 1.**
+181. Rodada encerrada: (1) o bloco continua, só leitura; (2) o bloco some e o resumo conta o resto. **Recomendação e padrão: 1** (explica as cores do resumo).
+182. Falha ao gravar os times (sem rede no "Montar times" ou erro do servidor): (1) o fluxo segue e a 07 avisa "Os times não chegaram ao app dos jogadores. Eles recebem pelo WhatsApp."; (2) esperar a gravação e perguntar "Seguir sem publicar?"; (3) guardar no aparelho e mandar quando a rede voltar. **Recomendação e padrão: 1** no piloto.

@@ -59,6 +59,7 @@ public sealed class OpenApiContractTests
         "put /v1/groups/{groupId}/rounds/{roundId}/attendance/me RespondAttendance",
         "put /v1/groups/{groupId}/rounds/{roundId}/attendance/{memberId} SetMemberAttendance",
         "post /v1/groups/{groupId}/rounds/{roundId}/draw DrawTeams",
+        "put /v1/groups/{groupId}/rounds/{roundId}/teams ConfirmTeams",
         "post /v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events AppendCourtEvents",
         "get /v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events ListCourtEvents",
         "post /v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/takeover TakeOverCourt",

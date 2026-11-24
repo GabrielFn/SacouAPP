@@ -32,6 +32,7 @@ function roundWith(resolved: unknown): Round {
     going: [...GOING],
     waitlist: [],
     me: { memberId: "m-1", status: null, position: null, regularPosition: null },
+    teams: null,
   };
 }
 

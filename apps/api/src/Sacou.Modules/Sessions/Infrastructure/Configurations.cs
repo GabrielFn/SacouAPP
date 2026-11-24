@@ -86,6 +86,7 @@ internal sealed class RoundConfiguration : IEntityTypeConfiguration<RoundRow>
         // text with the CHECK, not character(22): a text parameter against a bpchar column would skip the unique index.
         builder.Property(round => round.LinkCode).HasColumnName("link_code").HasColumnType("text");
         builder.Property(round => round.ClosedAt).HasColumnName("closed_at").HasColumnType(TimestampType);
+        builder.Property(round => round.TeamsConfirmedAt).HasColumnName("teams_confirmed_at").HasColumnType(TimestampType);
 
         builder.HasOne<SeriesRow>().WithMany().HasForeignKey(round => round.SeriesId)
             .HasConstraintName("fk_rounds_round_series").OnDelete(DeleteBehavior.Restrict);
@@ -136,5 +137,33 @@ internal sealed class AttendanceConfiguration : IEntityTypeConfiguration<Attenda
             .HasFilter($"status <> '{ColumnValues.NotGoingStatus}'");
         // The personal data export reads by member, across rounds (E3.16); the primary key starts with the round.
         builder.HasIndex(attendance => attendance.MemberId).HasDatabaseName(MemberIndex);
+    }
+}
+
+/// <summary>
+/// <c>sessions.round_teams</c>: the published teams of a round (ADR 0078), one row per member. The primary key puts each
+/// member in one place only; a team number of null is the queue of reserves. Deleting a round takes its teams along.
+/// </summary>
+internal sealed class RoundTeamSlotConfiguration : IEntityTypeConfiguration<RoundTeamSlotRow>
+{
+    public const string Table = "round_teams";
+
+    public void Configure(EntityTypeBuilder<RoundTeamSlotRow> builder)
+    {
+        builder.ToTable(Table, table =>
+        {
+            table.HasCheckConstraint("ck_round_teams_team_number", "team_number IS NULL OR team_number >= 1");
+            table.HasCheckConstraint("ck_round_teams_position", "position >= 1");
+        });
+        builder.HasKey(slot => new { slot.RoundId, slot.MemberId }).HasName("pk_round_teams");
+        builder.Property(slot => slot.RoundId).HasColumnName("round_id");
+        builder.Property(slot => slot.MemberId).HasColumnName("member_id");
+        builder.Property(slot => slot.TeamNumber).HasColumnName("team_number");
+        builder.Property(slot => slot.Position).HasColumnName("position");
+
+        builder.HasOne<RoundRow>().WithMany().HasForeignKey(slot => slot.RoundId)
+            .HasConstraintName("fk_round_teams_rounds").OnDelete(DeleteBehavior.Cascade);
+        // The personal data export reads by member, across rounds, like the attendances.
+        builder.HasIndex(slot => slot.MemberId).HasDatabaseName("ix_round_teams_member");
     }
 }

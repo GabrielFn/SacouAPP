@@ -30,6 +30,7 @@ public sealed class RateLimitedRoutesTests(SacouApiFactory factory) : IClassFixt
         { "POST", "/v1/groups", RateLimitPolicies.GroupCreate },
         { "POST", GroupRoute + "/invites", RateLimitPolicies.InviteCreate },
         { "POST", GroupRoute + "/rounds/{roundId:guid}/draw", RateLimitPolicies.Draw },
+        { "PUT", GroupRoute + "/rounds/{roundId:guid}/teams", RateLimitPolicies.Draw },
         { "POST", GroupRoute + "/rounds/{roundId:guid}/court-sessions/{courtSessionId:guid}/events", RateLimitPolicies.CourtSync },
         { "GET", GroupRoute + "/rounds/{roundId:guid}/court-sessions/{courtSessionId:guid}/events", RateLimitPolicies.CourtSync },
         { "POST", GroupRoute + "/rounds/{roundId:guid}/court-sessions/{courtSessionId:guid}/takeover", RateLimitPolicies.CourtSync },

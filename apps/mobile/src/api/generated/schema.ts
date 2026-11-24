@@ -625,6 +625,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/groups/{groupId}/rounds/{roundId}/teams": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["ConfirmTeams"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events": {
     parameters: {
       query?: never;
@@ -822,6 +838,10 @@ export interface components {
       closedAt: string;
       /** Format: date-time */
       endsAt: string;
+    };
+    ConfirmTeamsRequest: {
+      teams: string[][];
+      reserves: string[];
     };
     CorrectGuestRequest: {
       name: null | string;
@@ -1258,6 +1278,7 @@ export interface components {
       going: components["schemas"]["GoingEntry"][];
       waitlist: components["schemas"]["WaitlistEntry"][];
       me: components["schemas"]["MeResponse"];
+      teams: null | components["schemas"]["RoundTeamsResponse"];
       shareUrl?: null | string;
     };
     RoundSettingsResponse: {
@@ -1305,6 +1326,17 @@ export interface components {
       /** Format: int32 */
       waitlistCount: number;
       me: components["schemas"]["SummaryMe"];
+    };
+    RoundTeamResponse: {
+      /** Format: int32 */
+      number: number;
+      memberIds: string[];
+    };
+    RoundTeamsResponse: {
+      /** Format: date-time */
+      confirmedAt: string;
+      teams: components["schemas"]["RoundTeamResponse"][];
+      reserves: string[];
     };
     SavedTemplateResponse: {
       /** Format: uuid */
@@ -5509,6 +5541,107 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DrawTeamsResponse"];
+        };
+      };
+      /** @description A body that does not bind (no code), or a rule refusal (with code). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Not signed in, or the ID token was refused. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ApiProblem"];
+        };
+      };
+      /** @description The body is over the route's limit. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests from this user (code api.rate-limited): try again after Retry-After seconds. */
+      429: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+      /** @description The ID token cannot be checked now: try again after Retry-After seconds. */
+      503: {
+        headers: {
+          /** @description Seconds to wait before trying again. */
+          "Retry-After": number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/problem+json": components["schemas"]["ProblemDetails"];
+        };
+      };
+    };
+  };
+  ConfirmTeams: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        roundId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConfirmTeamsRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RoundResponse"];
         };
       };
       /** @description A body that does not bind (no code), or a rule refusal (with code). */
