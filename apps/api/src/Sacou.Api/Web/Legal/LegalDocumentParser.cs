@@ -173,6 +173,11 @@ internal static partial class LegalDocumentParser
                     : NoTitle;
             }
 
+            return ReadBodyLine(trimmed);
+        }
+
+        private string? ReadBodyLine(string trimmed)
+        {
             if (trimmed.StartsWith('#'))
             {
                 return ReadHeading(trimmed);

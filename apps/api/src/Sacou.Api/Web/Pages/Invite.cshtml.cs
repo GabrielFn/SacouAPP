@@ -18,7 +18,7 @@ internal sealed class InviteModel(IWebAssets assets, IOptions<FirebaseWebOptions
     /// <summary>The Firebase Web config when complete; without it the page cannot sign in and says so.</summary>
     public FirebaseWebOptions? Firebase => firebase.Value.IsComplete ? firebase.Value : null;
 
-    public SignInSheetView SignInSheet => new(
+    public SignInSheetView SignInSheet { get; } = new(
         Context: null,
         WebTexts.InviteSheetTitle,
         WebTexts.InviteSheetBody,

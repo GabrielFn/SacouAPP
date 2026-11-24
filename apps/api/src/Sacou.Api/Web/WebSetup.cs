@@ -3,12 +3,14 @@ using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using Microsoft.Extensions.WebEncoders;
 using Microsoft.Extensions.Options;
+using Sacou.Api.Web.Legal;
 using Sacou.Http.RateLimiting;
 
 namespace Sacou.Api.Web;
 
 /// <summary>
-/// The round's public page (E3.12, ADR 0070, D4 to D7): Razor Pages for <c>/r/{code}</c> only, its files from
+/// The round's public page (E3.12, ADR 0070, D4 to D7), the invite page <c>/c</c> and the legal pages <c>/termos</c>
+/// and <c>/privacidade</c> (E6.1, ADR 0083): Razor Pages for those paths only, their files from
 /// <c>wwwroot</c>, its headers, and the 429 written for a person. Nothing here makes a session or a cookie.
 /// </summary>
 internal static partial class WebSetup
@@ -31,6 +33,10 @@ internal static partial class WebSetup
         services.AddSingleton<ContentSecurityPolicy>();
         services.AddSingleton<IWebAssets, ManifestWebAssets>();
         services.AddSingleton<IRateLimitedPage, RateLimitedPage>();
+        // The terms and the privacy policy (E6.1, ADR 0083): read once, and an invalid text stops the start.
+        services.AddSingleton<ILegalDocumentSource, EmbeddedLegalDocumentSource>();
+        services.AddSingleton<ILegalDocuments, LegalDocuments>();
+        services.AddHostedService<LegalDocumentsCheck>();
         return services;
     }
 
