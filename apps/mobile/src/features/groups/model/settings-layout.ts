@@ -1,4 +1,4 @@
-import type { GroupSettings, SettingsBlock, SettingsPath } from "@sacou/match-engine";
+import type { GroupSettings, SettingsPath } from "@sacou/match-engine";
 
 import type { ShownPath } from "../../../strings/settings.pt-BR";
 
@@ -27,7 +27,8 @@ export interface RowEntry {
 }
 
 /** The blocks of the screen: the ones of the catalog and "Mensalistas", apart from "Presença e vagas" (R101). */
-export type LayoutBlock = SettingsBlock | "regulars";
+export type LayoutBlock =
+  "attendance" | "regulars" | "scoring" | "queue" | "draw" | "rotation" | "mvp";
 
 export interface BlockSpec {
   readonly block: LayoutBlock;

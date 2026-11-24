@@ -1,3 +1,4 @@
+import { copyListStrings, roundWhenStrings } from "./rounds-when.pt-BR";
 import { roundTeamsStrings } from "./round-teams.pt-BR";
 
 /** Texts of the round screens (20 and 06). Dinheiro, "Pro" and the "Avulso" field are not here (ADR 0046). */
@@ -36,6 +37,7 @@ function shareHeadline(title: string, when: string, venue: string, capacity: str
 
 export const roundsStrings = {
   weekdayShort,
+  when: roundWhenStrings,
   chips: {
     modalities,
     rotationSystems,
@@ -132,8 +134,15 @@ export const roundsStrings = {
     buildTeams: "Montar times",
     openCourt: "Abrir quadra",
     back: "Voltar",
+    /** Under the count on 06, until the window of the drop-ins opens: "A lista dos avulsos abre amanhã, às 20h." */
+    dropInWindow: (phrase: string) => `A lista dos avulsos abre ${phrase}.`,
+    changeDropInWindow: "Mudar",
     copyList: "Copiar lista",
     listCopied: "Lista copiada.",
+    listAndLinkCopied: "Lista e link copiados.",
+    shareOnWhatsApp: "Mandar no WhatsApp",
+    shareOnWhatsAppAccessibility: "Mandar o link da rodada no WhatsApp",
+    shareFailed: "Não deu para abrir o compartilhar. Use Copiar lista.",
     copyFailed: "Não deu para copiar a lista. Tente de novo.",
     addFromWhatsApp: "Adicionar quem confirmou no WhatsApp",
     openConfirmed: (count: string, amount: number) =>
@@ -152,7 +161,13 @@ export const roundsStrings = {
     spotsLeft: (left: number) => (left === 1 ? "Falta 1 vaga" : `Faltam ${String(left)} vagas`),
     fullToWaitlist: "Lista cheia: você entra na espera",
     full: "Lista cheia",
-    dropInOpens: (when: string) => `Avulsos confirmam a partir de ${when}`,
+    /** Screen 26, a drop-in before the window, in a group with regulars. */
+    dropInOpensWithRegulars: (phrase: string) =>
+      `A lista abre para você ${phrase}. Até lá, só os mensalistas confirmam.`,
+    /** Screen 26, a drop-in before the window, in a group without regulars. */
+    dropInOpensNoRegulars: (phrase: string, hours: number) =>
+      `A lista abre ${phrase}, ${String(hours)} h antes da rodada.`,
+    dropInLockedHint: "A lista ainda não abriu para você",
     started: "A rodada já começou. Fale com o admin.",
     goingAction: "VOU",
     notGoingAction: "Não vou",
@@ -278,12 +293,5 @@ export const roundsStrings = {
     errorBody: "Confira a conexão e tente de novo.",
     retry: "Tentar de novo",
   },
-  /** The text "Copiar lista" puts on the clipboard: only nicknames (ADR 0054). */
-  copyList: {
-    header: (group: string, when: string) => `${group} · ${when}`,
-    confirmed: (count: string) => `Confirmados (${count})`,
-    line: (index: number, name: string) => `${String(index)}. ${name}`,
-    nobody: "Ninguém confirmou ainda.",
-    waitlist: "Espera",
-  },
+  copyList: copyListStrings,
 } as const;

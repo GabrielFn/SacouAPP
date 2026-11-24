@@ -32,6 +32,7 @@ vi.mock("../../../ui/ErrorStrip", () => ({ ErrorStrip: function ErrorStrip() {} 
 vi.mock("../../../ui/Screen", () => ({ Screen: function Screen() {} }));
 vi.mock("../../../ui/Text", () => ({ Text: function Text() {} }));
 vi.mock("../../../ui/Icons", () => ({ PlusIcon: function PlusIcon() {} }));
+vi.mock("../../../ui/MenuIcons", () => ({ ShareIcon: () => null }));
 vi.mock("./RoundChips", () => ({ RoundChips: function RoundChips() {} }));
 vi.mock("./RoundHeading", () => ({ RoundHeading: function RoundHeading() {} }));
 vi.mock("./RoundStatsPanel", () => ({ RoundStatsPanel: function RoundStatsPanel() {} }));

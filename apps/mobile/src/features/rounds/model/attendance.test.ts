@@ -14,14 +14,13 @@ import { capacityHint } from "./capacity-hint";
 import { confirmedSummary, summaryText } from "./confirmed-summary";
 import { presenceCard, presenceCounts, type PresenceInput } from "./presence-card";
 import type { Round } from "../../../services/api/sacou-api";
-import { dropInOpensLabel } from "./round-clock";
 import { roundListText } from "./round-list-text";
 import {
   initialRoundScreenState,
   roundScreenReducer,
   type RoundScreenAction,
 } from "./round-screen.reducer";
-import { rosterOf } from "./roster";
+import { rosterOf, type RosterEntry } from "./roster";
 
 const MINUTE = 60_000;
 const CLARA = { memberId: "m-clara", position: 1, name: "Clara" };
@@ -32,6 +31,8 @@ function input(patch: Partial<PresenceInput> = {}): PresenceInput {
     values: attendanceSettings(),
     waitlist: [],
     myType: "regular",
+    groupHasRegulars: true,
+    dropInHours: 24,
     now: BEFORE,
     ...patch,
   };
@@ -80,7 +81,7 @@ describe("presenceCard, one case per row of D7", () => {
   test("no answer with 2 spots left: Faltam 2 vagas and VOU on", () => {
     const card = presenceCard(input({ round: attendanceRound({ goingCount: 10 }) }));
     expect([card.title, card.line]).toEqual(["Vai?", "Faltam 2 vagas"]);
-    expect(card.actions).toEqual({ kind: "answer", canGo: true });
+    expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
   });
 
   test("notGoing answers again like no answer", () => {
@@ -93,13 +94,13 @@ describe("presenceCard, one case per row of D7", () => {
   test("full with waitlist: você entra na espera, VOU on", () => {
     const card = presenceCard(input({ round: full() }));
     expect(card.line).toBe("Lista cheia: você entra na espera");
-    expect(card.actions).toEqual({ kind: "answer", canGo: true });
+    expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
   });
 
   test("full without waitlist: Lista cheia, VOU off", () => {
     const card = presenceCard(input({ round: full(), values: attendanceSettings(false) }));
     expect(card.line).toBe("Lista cheia");
-    expect(card.actions).toEqual({ kind: "answer", canGo: false });
+    expect(card.actions).toEqual({ kind: "answer", canGo: false, lockedHint: null });
   });
 
   test("no limit: no line", () => {
@@ -119,22 +120,43 @@ describe("presenceCard, one case per row of D7", () => {
 
     test("one minute before: VOU off with the time, in the zone of the round", () => {
       const card = presenceCard(input({ round, myType: "dropIn", now: opens - MINUTE }));
-      expect(card.line).toBe("Avulsos confirmam a partir de sex, 19h");
-      expect(card.actions).toEqual({ kind: "answer", canGo: false });
+      expect(card.line).toBe(
+        "A lista abre para você hoje, às 19h. Até lá, só os mensalistas confirmam.",
+      );
+      expect(card.actions).toEqual({
+        kind: "answer",
+        canGo: false,
+        lockedHint: "A lista ainda não abriu para você",
+      });
+    });
+
+    test("in a group without regulars the line gives the hours and no 'mensalistas'", () => {
+      const card = presenceCard(
+        input({ round, myType: "dropIn", groupHasRegulars: false, now: opens - MINUTE }),
+      );
+      expect(card.line).toBe("A lista abre hoje, às 19h, 24 h antes da rodada.");
+    });
+
+    test("with the window off (dropInOpensAt null) the card says nothing of it", () => {
+      const open = { ...round, dropInOpensAt: null };
+      const card = presenceCard(input({ round: open, myType: "dropIn", now: opens - MINUTE }));
+      expect(card.line).not.toMatch(/lista abre/u);
+      expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
+    });
+
+    test("without the member list (myType null) nothing changes: the server decides", () => {
+      const card = presenceCard(input({ round, myType: null, now: opens - MINUTE }));
+      expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
     });
 
     test("one minute after: VOU on", () => {
       const card = presenceCard(input({ round, myType: "dropIn", now: opens + MINUTE }));
-      expect(card.actions).toEqual({ kind: "answer", canGo: true });
+      expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
     });
 
     test("a regular has no window", () => {
       const card = presenceCard(input({ round, myType: "regular", now: opens - MINUTE }));
-      expect(card.actions).toEqual({ kind: "answer", canGo: true });
-    });
-
-    test("the label keeps the minutes", () => {
-      expect(dropInOpensLabel(round, "2026-11-06T21:30:00Z")).toBe("sex, 18h30");
+      expect(card.actions).toEqual({ kind: "answer", canGo: true, lockedHint: null });
     });
   });
 

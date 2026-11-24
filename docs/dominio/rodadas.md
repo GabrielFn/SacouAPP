@@ -42,7 +42,7 @@ Uma por membro por rodada.
 - **Mais mensalistas que vagas** (padrão da pergunta 24): os que sobram vão para a espera, na mesma ordem, **à frente** de qualquer avulso.
 - **Mensalista que disse "não vou" e volta** (pergunta 25): um "vou" como qualquer outro, no fim da espera; sem fura-fila.
 - **Reduzir as vagas** (pergunta 26) não tira ninguém: só fecha a porta para os próximos.
-- **Janela dos avulsos** (`attendance.dropInWindowEnabled`, `dropInOpensHoursBefore`): antes de `início − horas` o "vou" do avulso é `sessions.drop-in-window-closed`; a contagem é de instante. O "não vou" passa sempre. Mensalista e admin não têm janela. Convidado é avulso.
+- **Janela dos avulsos** (`attendance.dropInWindowEnabled`, `dropInOpensHoursBefore`): antes de `início − horas` o "vou" do avulso é `sessions.drop-in-window-closed`; a contagem é de instante. O "não vou" passa sempre. Mensalista e admin não têm janela. Convidado é avulso. **O que cada um vê (R101, ADR 0079):** o avulso antes da janela lê "A lista abre para você {frase}. Até lá, só os mensalistas confirmam." (grupo com mensalista) ou "A lista abre {frase}, {N} h antes da rodada." (sem), com o VOU desligado; o mensalista não vê a janela; Admin e Co-admin veem "A lista dos avulsos abre {frase}." e "Mudar" na tela 06, só antes da janela. A frase é "hoje, às 20h", "amanhã, às 20h" ou "na terça, 24/11, às 20h", no fuso da rodada. Com `dropInOpensAt` nulo a frase não aparece.
 - **O tipo vem do Groups na hora da resposta**, nunca da presença.
 
 ## Recorrência
