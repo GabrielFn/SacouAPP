@@ -147,6 +147,7 @@ public sealed partial class SentryReportingTests
         await hub.FlushAsync(TimeSpan.FromSeconds(5));
 
         var envelope = Assert.Single(api.Transport.Events);
+        Assert.Contains("Erro de teste", envelope, StringComparison.Ordinal);
         Assert.Contains("Aviso de teste para [filtrado]", envelope, StringComparison.Ordinal);
         Assert.DoesNotContain(EmailMarker, envelope, StringComparison.Ordinal);
     }

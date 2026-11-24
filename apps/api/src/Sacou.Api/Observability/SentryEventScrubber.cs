@@ -22,6 +22,7 @@ internal static class SentryEventScrubber
     private const string Contexts = "contexts";
     private const string Message = "message";
     private const string Formatted = "formatted";
+    private const string LogEntry = "logentry";
     private const string Exception = "exception";
     private const string Values = "values";
     private const string Value = "value";
@@ -33,7 +34,7 @@ internal static class SentryEventScrubber
     private static readonly FrozenSet<string> EventFields = FrozenSet.Create(
         StringComparer.Ordinal,
         "event_id", "timestamp", "platform", "level", "logger", "release", "dist", "environment", "sdk", "modules",
-        "fingerprint", "transaction", "debug_meta", "threads", Message, "logentry", Exception, Tags, Contexts, Request, Breadcrumbs);
+        "fingerprint", "transaction", "debug_meta", "threads", Message, LogEntry, Exception, Tags, Contexts, Request, Breadcrumbs);
 
     private static readonly FrozenSet<string> RequestFields = FrozenSet.Create(StringComparer.Ordinal, "method", Url, Headers);
 
@@ -102,12 +103,22 @@ internal static class SentryEventScrubber
 
         scrubbed[Tags] = Keep(scrubbed[Tags] as JsonObject, TagNames);
         scrubbed[Contexts] = Keep(scrubbed[Contexts] as JsonObject, ContextNames);
-        if (scrubbed[Message] is JsonObject message)
+        foreach (var field in new[] { Message, LogEntry })
         {
-            scrubbed[Message] = new JsonObject { [Formatted] = SensitiveText.Redact(Text(message, Formatted) ?? Text(message, Message)) };
+            // Only the formatted text, filtered: the template's parameters are dropped (they hold the values).
+            var text = scrubbed[field] switch
+            {
+                JsonObject message => Text(message, Formatted) ?? Text(message, Message),
+                JsonValue plain when plain.TryGetValue<string>(out var value) => value,
+                _ => null,
+            };
+            scrubbed.Remove(field);
+            if (text is not null)
+            {
+                scrubbed[field] = new JsonObject { [Formatted] = SensitiveText.Redact(text) };
+            }
         }
 
-        scrubbed.Remove("logentry");
         if (scrubbed[Exception] is JsonObject exception && exception[Values] is JsonArray values)
         {
             scrubbed[Exception] = new JsonObject { [Values] = new JsonArray([.. values.OfType<JsonObject>().Select(ScrubException)]) };
