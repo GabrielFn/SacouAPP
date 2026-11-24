@@ -20,7 +20,7 @@ internal static class MatchesDatabase
         services.AddOptions<CourtStreamCacheOptions>().Bind(configuration.GetSection(CourtStreamCacheOptions.SectionName)).ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<CourtStreamCacheOptions>, CourtStreamCacheOptionsValidator>());
         services.AddSingleton<ICourtStreamSnapshots, MemoryCourtStreamSnapshots>();
-        services.AddScoped<CourtSnapshotReader>();
+        services.AddScoped<ICourtSnapshotSource, CourtSnapshotReader>();
         services.AddScoped<ICourtStreamStore, PostgresCourtStreamStore>();
         services.AddScoped<ICourtEventStore, PostgresCourtStreamStore>();
         services.AddScoped<ICourtWriterReader, PostgresCourtStreamStore>();

@@ -127,7 +127,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
                 var scope = _scopes.CreateAsyncScope();
                 await using (scope.ConfigureAwait(false))
                 {
-                    var reader = scope.ServiceProvider.GetRequiredService<CourtSnapshotReader>();
+                    var reader = scope.ServiceProvider.GetRequiredService<ICourtSnapshotSource>();
                     var read = await reader.ReadAsync(courtSessionId, TryGet(courtSessionId), CancellationToken.None).ConfigureAwait(false);
                     Keep(courtSessionId, read);
                     return read.Snapshot;

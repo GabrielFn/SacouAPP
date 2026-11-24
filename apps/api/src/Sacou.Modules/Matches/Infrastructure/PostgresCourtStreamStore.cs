@@ -17,7 +17,7 @@ namespace Sacou.Modules.Matches.Infrastructure;
 internal sealed class PostgresCourtStreamStore(
     MatchesDbContext database,
     ICourtStreamSnapshots snapshots,
-    CourtSnapshotReader snapshotReader) : ICourtStreamStore, ICourtEventStore, ICourtWriterReader
+    ICourtSnapshotSource snapshotReader) : ICourtStreamStore, ICourtEventStore, ICourtWriterReader
 {
     private const int FirstPosition = 1;
     private const long NoSequence = 0;

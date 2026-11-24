@@ -16,6 +16,13 @@ internal enum SnapshotUse
     Built,
 }
 
+/// <summary>Where a snapshot is brought up to the stored stream; scoped, like the database it reads.</summary>
+internal interface ICourtSnapshotSource
+{
+    /// <summary>The snapshot of the stream from <paramref name="from"/>, or from nothing when null.</summary>
+    Task<ReadSnapshot> ReadAsync(Guid courtSessionId, StreamSnapshot? from, CancellationToken cancellationToken);
+}
+
 /// <summary>A snapshot read from the database, and how (ADR 0081).</summary>
 internal sealed record ReadSnapshot(StreamSnapshot Snapshot, SnapshotUse Use)
 {
@@ -28,7 +35,7 @@ internal sealed record ReadSnapshot(StreamSnapshot Snapshot, SnapshotUse Use)
 /// any more (the database was rebuilt, or changed outside the API) is thrown away and the whole stream read again. In
 /// the transaction of the context when there is one, so under the stream's lock it reads what the lock holds.
 /// </summary>
-internal sealed class CourtSnapshotReader(MatchesDbContext database)
+internal sealed class CourtSnapshotReader(MatchesDbContext database) : ICourtSnapshotSource
 {
     private const int NoVersion = 0;
     private const int TheCheckedOne = 1;
