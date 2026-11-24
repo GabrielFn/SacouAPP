@@ -1,0 +1,129 @@
+/*
+ * The terms of use and the privacy policy (/termos and /privacidade, E6.1, ADR 0083). Style only: the pages have no
+ * script. Only relative units (rem, em, %, vw); links with a 2.75rem target; colours of the app's theme, contrast AA
+ * (navy and muted on sand). Fonts served from this host, like the round page: no Google Fonts.
+ */
+
+@font-face {
+  font-family: "Barlow Condensed";
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/BarlowCondensed-ExtraBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/Inter-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Inter-Bold.woff2") format("woff2");
+}
+
+:root {
+  --navy: #0f1b2d;
+  --sand: #f6f1e7;
+  --muted: #4a5566;
+  --line: rgba(15, 27, 45, 0.12);
+  --target: 2.75rem;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --text: Inter, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--sand);
+  color: var(--navy);
+  font-family: var(--text);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 0.1875rem solid #1f5bff;
+  outline-offset: 0.125rem;
+}
+
+.legal-page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1.5rem 5vw 3rem;
+}
+
+.legal-header {
+  border-bottom: 0.0625rem solid var(--line);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.legal-brand {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.legal-page h1 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.legal-version {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.legal-page h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.legal-page h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.legal-page p,
+.legal-page li {
+  margin: 0 0 0.75rem;
+}
+
+.legal-page ul {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.legal-footer {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 0.0625rem solid var(--line);
+}
+
+.legal-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  color: var(--navy);
+  font-weight: 600;
+}

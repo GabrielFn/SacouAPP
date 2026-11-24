@@ -55,6 +55,10 @@ internal static class GroupRouteGuard
 
         // The invite page (E3.12 Part 3, ADR 0070, D8): a shell without data of the server, GET and HEAD only.
         "GET,HEAD c",
+
+        // The terms and the privacy policy (E6.1, ADR 0083): anonymous public text, no data, GET and HEAD only.
+        "GET,HEAD termos",
+        "GET,HEAD privacidade",
     };
 
     /// <summary>The OpenAPI document, mapped only in Development (ADR 0042, D2): in Production the list above is all.</summary>

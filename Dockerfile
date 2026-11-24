@@ -27,6 +27,8 @@ COPY apps/api/src/ apps/api/src/
 COPY packages/volley-rules/src/formations/formations.json packages/volley-rules/src/formations/
 COPY packages/match-engine/src/settings/settings-catalog.json packages/match-engine/src/settings/
 COPY packages/rating/src/rating-params.json packages/rating/src/
+# The API embeds the terms of use and the privacy policy it publishes at /termos and /privacidade (E6.1, ADR 0083).
+COPY docs/legal/ docs/legal/
 # The manifest the round page reads: without it the page would have no script (ManifestWebAssets).
 COPY --from=web /source/apps/api/src/Sacou.Api/wwwroot/web/ apps/api/src/Sacou.Api/wwwroot/web/
 ENV CI=true

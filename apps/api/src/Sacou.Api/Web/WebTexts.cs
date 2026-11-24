@@ -69,10 +69,18 @@ internal static class WebTexts
     public const string InviteSheetTitle = "Entrar pra ver o convite";
     public const string InviteSheetBody = "É só uma vez. Depois você confirma as rodadas do grupo com um toque.";
 
+    // The legal pages (E6.1, ADR 0083): their own text comes from docs/legal/, only the frame is here.
+    public const string TermsOfUse = "Termos de Uso";
+    public const string SeeAlso = "Veja também: ";
+
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
     private static readonly string[] WeekdaysWithArticle =
         ["no domingo", "na segunda", "na terça", "na quarta", "na quinta", "na sexta", "no sábado"];
+
+    /// <summary>"Versão 0.1 (rascunho) · atualizada em 24/11/2026".</summary>
+    public static string LegalVersion(string version, DateOnly updatedOn) =>
+        string.Create(Invariant, $"Versão {version} · atualizada em {updatedOn:dd/MM/yyyy}");
 
     private static readonly string[] Weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 

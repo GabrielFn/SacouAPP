@@ -68,7 +68,7 @@ APK novo: a Parte 1 traz módulos nativos (Firebase, Google Sign-In). O teste re
 1. Firebase `sacou-79493` → Authentication → Provedores: **Google** e **E-mail/senha** ligados, e a **proteção contra enumeração de e-mails** ligada.
 2. SHA-1 e SHA-256 do certificado do APK de teste: `npx eas-cli@27.5.0 credentials --platform android` (perfil `preview`, "Keystore"), e cadastrar os dois no app Android `com.sacou.app` do Firebase.
 3. Baixar o `google-services.json` de novo e restringir a chave de API do Android ao pacote `com.sacou.app` e ao SHA-1 no Google Cloud → Credenciais. Só então o arquivo entra no repositório, em `apps/mobile/google-services.json`, com a exceção do gitleaks (ADR 0057).
-4. `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (o "client ID web" do Firebase, em Authentication → Google) no `apps/mobile/.env` local (fora do Git) e nas variáveis do EAS do perfil `preview`. Opcional: `EXPO_PUBLIC_TERMS_URL` e `EXPO_PUBLIC_PRIVACY_URL` (`https:`); sem elas a frase de Termos fica sem link.
+4. `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (o "client ID web" do Firebase, em Authentication → Google) no `apps/mobile/.env` local (fora do Git) e nas variáveis do EAS do perfil `preview`. Os links de Termos e Política saem de `EXPO_PUBLIC_INVITE_BASE_URL` (`{origem}/termos` e `/privacidade`, ADR 0083); `EXPO_PUBLIC_TERMS_URL` e `EXPO_PUBLIC_PRIVACY_URL` (`https:`) são só sobreposição opcional. Sem nenhuma delas, a frase fica sem link.
 
 **Roteiro (10 minutos):**
 

@@ -65,6 +65,7 @@ function DrawStrips({ model, arrangement, manual, round }: DrawStripsProps) {
       {stale.arrived === 0 ? null : <ErrorStrip text={texts.arrived(stale.arrived)} />}
       {refusal === null ? null : <ErrorStrip text={refusal} />}
       {notice === null ? null : <ErrorStrip text={notice} />}
+      {model.publishFailed ? <ErrorStrip text={draw.publishFailed} /> : null}
       {model.pending ? (
         <Text variant="muted" accessibilityLiveRegion="polite">
           {draw.redrawing}
