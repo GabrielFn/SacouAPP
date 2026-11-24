@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Sentry;
 using Sentry.Extensibility;
 
 namespace Sacou.Api.Observability;

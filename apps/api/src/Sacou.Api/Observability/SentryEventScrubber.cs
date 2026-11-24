@@ -1,7 +1,6 @@
 using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Sentry;
 
 namespace Sacou.Api.Observability;
 
@@ -69,16 +68,9 @@ internal static class SentryEventScrubber
     internal static Breadcrumb Scrub(Breadcrumb breadcrumb)
     {
         ArgumentNullException.ThrowIfNull(breadcrumb);
-        var data = breadcrumb.Data?
-            .Where(entry => BreadcrumbDataKeys.Contains(entry.Key))
-            .ToDictionary(entry => entry.Key, entry => entry.Key == Url ? WithoutQuery(entry.Value) : SensitiveText.Redact(entry.Value) ?? string.Empty, StringComparer.Ordinal);
-        return new Breadcrumb(
-            breadcrumb.Timestamp,
-            SensitiveText.Redact(breadcrumb.Message),
-            breadcrumb.Type,
-            data,
-            breadcrumb.Category,
-            breadcrumb.Level);
+        var json = JsonNode.Parse(Serialize(breadcrumb))!.AsObject();
+        using var document = JsonDocument.Parse(ScrubBreadcrumb(json).ToJsonString());
+        return Breadcrumb.FromJson(document.RootElement);
     }
 
     /// <summary>The path and nothing after <c>?</c> or <c>#</c>.</summary>
@@ -89,12 +81,12 @@ internal static class SentryEventScrubber
         return end < 0 ? url : url[..end];
     }
 
-    private static string Serialize(SentryEvent sentryEvent)
+    private static string Serialize(ISentryJsonSerializable payload)
     {
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
         {
-            sentryEvent.WriteTo(writer, logger: null);
+            payload.WriteTo(writer, logger: null);
         }
 
         return System.Text.Encoding.UTF8.GetString(stream.ToArray());
