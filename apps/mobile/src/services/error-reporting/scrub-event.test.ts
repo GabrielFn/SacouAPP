@@ -33,6 +33,7 @@ describe("the text filter of what goes to Sentry (E5.2, ADR 0080, D10)", () => {
       "open https://sacou.app/c",
     ],
     ["a query", "GET https://api.sacou.app/v1/x?email=a now", "GET https://api.sacou.app/v1/x now"],
+    ["a member id", `member ${GUID} not found`, `member ${REDACTED_ID} not found`],
   ])("%s becomes filtered", (_, text, expected) => {
     expect(redactText(text)).toBe(expected);
   });

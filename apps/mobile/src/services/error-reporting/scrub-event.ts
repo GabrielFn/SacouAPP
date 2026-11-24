@@ -62,20 +62,24 @@ const NAVIGATION_URL_KEYS: readonly string[] = ["from", "to", "url"];
 const CONSOLE_CATEGORY = "console";
 const TOUCH_CATEGORY = "touch";
 
-/** E-mails, tokens, Pix codes, codes in links and the query of a link become `[filtrado]` or a route. */
+/**
+ * E-mails, tokens, Pix codes, codes in links and the query of a link become `[filtrado]` or a route;
+ * every GUID becomes `[id]`, as in the API, so no `MemberId` leaves.
+ */
 export function redactText(text: string): string {
   const withoutTails = text.replace(URL_TAIL_PATTERN, "$1");
   const withoutCodes = withoutTails.replace(CODE_PATH_PATTERN, `/$1/${CODE_SEGMENT}`);
+  const withoutIds = withoutCodes.replace(GUID_PATTERN, REDACTED_ID);
   return SENSITIVE_PATTERNS.reduce(
     (current, pattern) => current.replace(pattern, REDACTED),
-    withoutCodes,
+    withoutIds,
   );
 }
 
 /** The route of a URL: no query, no fragment, codes as `{code}` and ids as `[id]`. */
 export function scrubUrl(url: string): string {
   const [path = ""] = url.split(QUERY_OR_FRAGMENT);
-  return redactText(path).replace(GUID_PATTERN, REDACTED_ID);
+  return redactText(path);
 }
 
 function redactOptional(text: string | undefined): string | undefined {

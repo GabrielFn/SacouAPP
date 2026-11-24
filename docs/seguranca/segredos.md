@@ -10,6 +10,8 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 
 **Também não são segredos** (E4.3, [ADR 0057](../arquitetura/adr/0057-login-e-sessao-no-app.md)): `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (client ID web do Firebase, vai dentro do APK; fica no `.env` local e nas variáveis do EAS), `EXPO_PUBLIC_TERMS_URL` e `EXPO_PUBLIC_PRIVACY_URL` (opcionais desde a E6.1: sem elas, os links saem da origem do convite, ADR 0083). O `google-services.json` também é público (vai dentro do APK) e **vai ser versionado** em `apps/mobile/google-services.json` (decisão de 15/11, que substitui a pergunta 8), só depois de restringir a chave de API ao pacote `com.sacou.app` e ao SHA-1 e com exceção do gitleaks só para esse arquivo.
 
+**Também não são segredos** (E5.2 Parte 2, [ADR 0080](../arquitetura/adr/0080-sentry-e-logs-estruturados.md), D9 e D11): `EXPO_PUBLIC_SENTRY_DSN` (DSN do projeto `sacou-mobile`: todo DSN de cliente vai dentro do APK, e o abuso fica limitado pela cota por chave do painel; variável do EAS com visibilidade "Plain text", nunca no repositório; sem ela o Sentry do app fica desligado), `EXPO_PUBLIC_SENTRY_ENVIRONMENT` (no `eas.json`, por perfil), `SENTRY_ORG` (slug da organização, variável comum do EAS, lida no build) e as chaves de build `SENTRY_DISABLE_AUTO_UPLOAD` e `SENTRY_ALLOW_FAILURE` (no `eas.json`).
+
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
 | `POSTGRES_PASSWORD` | Postgres local do `docker-compose.yml`, só desenvolvimento; sem segredo no GitHub Actions (a CI usa o marcador de `.env.example`) | `.env` | E0.6 |
@@ -21,7 +23,7 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 | `SACOU_REVENUECAT_API_KEY` | RevenueCat | Secret Manager; `.env` | E3.15 (pós-piloto) |
 | `SACOU_REVENUECAT_WEBHOOK_AUTH` | RevenueCat; só se a E3.15 usar webhook | Secret Manager; `.env` | E3.15 (pós-piloto) |
 | `SACOU_SENTRY_DSN` | Sentry, DSN do projeto `sacou-api` (erros da API, [ADR 0080](../arquitetura/adr/0080-sentry-e-logs-estruturados.md)). Entra no contêiner por `secretKeyRef`, nunca como valor; sem ele, o Sentry fica desligado e a API avisa só com o nome. Um DSN fora do formato para a subida sem mostrar o valor | Secret Manager: `sacou-sentry-dsn-api` (um segredo, lido por `sacou-api-test-run` e `sacou-api-run`); `.env` local opcional (deixe vazio: nada de enviar do computador) | E5.2 Parte 1. `SENTRY_RELEASE` (`sacou-api@<digest>`) é variável comum do deploy, **não é segredo** |
-| `SENTRY_AUTH_TOKEN` | Sentry (envio do mapa de fontes do app no build) | Variável **secreta do EAS** (o build roda no EAS, não no GitHub Actions; plano da E5.2, D11) | E5.2 Parte 2 |
+| `SENTRY_AUTH_TOKEN` | Sentry (envio do mapa de fontes do app no build; token de organização só com o escopo de upload de mapas de fontes) | Variável **secreta do EAS** (visibilidade "Secret"; o build roda no EAS, não no GitHub Actions; ADR 0080, D11). Nunca no `app.json` (o plugin avisa se aparecer) nem no repositório | E5.2 Parte 2 |
 | `SACOU_POSTHOG_API_KEY` | PostHog | Secret Manager; `.env` | Pós-piloto (ADR 0046) |
 | `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | A definir (nenhuma tela do piloto manda e-mail; a E3.11 não usa) |
 | `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |
