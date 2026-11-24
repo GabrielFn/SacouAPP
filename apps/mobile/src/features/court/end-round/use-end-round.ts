@@ -4,14 +4,22 @@ import { useCallback, useReducer } from "react";
 import { useServices } from "../../../services/services-context";
 import { summaryHref } from "../../rounds/navigation";
 import { useCourtRuntime } from "../hooks/court-runtime-context";
-import { endRoundReducer, INITIAL_END_ROUND, type EndRoundState } from "./end-round.reducer";
+import {
+  endRoundReducer,
+  INITIAL_END_ROUND,
+  type EndRoundRequest,
+  type EndRoundState,
+} from "./end-round.reducer";
 import type { CourtSessionOrigin } from "../ports/court-event-log";
 import { runEndRound } from "./run-end-round";
 
+/** What the screen knows of the court when the user asks; the voting switch the hook reads itself. */
+export type EndRoundAbout = Pick<EndRoundRequest, "openMatchScore" | "finishedMatches">;
+
 export interface EndRoundFlow {
   readonly state: EndRoundState;
-  /** With `openMatchScore` ("12 × 10") a match is in play: the user confirms first (question 151). */
-  readonly request: (openMatchScore: string | null) => void;
+  /** Always opens the confirmation (R101): only `confirm` closes the round. */
+  readonly request: (about: EndRoundAbout) => void;
   readonly confirm: () => void;
   readonly cancel: () => void;
 }
@@ -29,6 +37,7 @@ export function useEndRound(
   const router = useRouter();
   const { sacouApi } = useServices();
   const runtime = useCourtRuntime();
+  const { courtRounds } = useServices();
   const [state, send] = useReducer(endRoundReducer, INITIAL_END_ROUND);
 
   const run = useCallback(async () => {
@@ -53,12 +62,20 @@ export function useEndRound(
     router.replace(summaryHref(groupId, roundId));
   }, [runtime, sacouApi, onServerClosed, router, courtSessionId]);
 
+  /** The MVP voting opens with the end of the round; without the round on the phone the sentence is left out. */
+  const votingEnabledOf = useCallback(async (): Promise<boolean> => {
+    const origin = await runtime.log.findOrigin(courtSessionId);
+    if (!origin.ok || origin.value === null) return false;
+    return courtRounds.read(origin.value).settings?.mvp.voting ?? false;
+  }, [runtime, courtRounds, courtSessionId]);
+
   return {
     state,
-    request: (openMatchScore) => {
+    request: (about) => {
       if (state.phase === "closing" || state.phase === "confirming") return;
-      send({ type: "requested", openMatchScore });
-      if (openMatchScore === null) void run();
+      void votingEnabledOf().then((votingEnabled) => {
+        send({ type: "requested", ...about, votingEnabled });
+      });
     },
     confirm: () => {
       if (state.phase !== "confirming") return;

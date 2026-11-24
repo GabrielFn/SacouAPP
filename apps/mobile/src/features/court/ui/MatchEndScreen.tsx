@@ -9,6 +9,7 @@ import { Text } from "../../../ui/Text";
 import type { EndRoundView } from "../end-round/end-round-view";
 import type { ExitRows, ManualPick, ResultView } from "../next-match/match-end-selectors";
 import { CourtPage } from "./CourtPage";
+import { EndRoundDialog } from "./EndRoundDialog";
 import { ExitList, PickList } from "./ExitList";
 import { SIDE_LETTERS, TeamTag } from "./TeamTag";
 
@@ -40,6 +41,8 @@ export interface MatchEndScreenProps {
   /** "Encerrar rodada" under "Confirmar": ends the whole night (E4.12). */
   readonly endRound: EndRoundView;
   readonly onEndRound: () => void;
+  readonly onConfirmEndRound: () => void;
+  readonly onCancelEndRound: () => void;
 }
 
 export interface ResultColumnProps {
@@ -160,6 +163,7 @@ function NextColumn(props: MatchEndScreenProps) {
           {props.failure}
         </Text>
       )}
+      <Button label={matchEnd.home} variant="outline" onPress={props.onLeave} />
       <Button
         label={matchEnd.endRound}
         variant="link"
@@ -171,7 +175,6 @@ function NextColumn(props: MatchEndScreenProps) {
           {props.endRound.failure}
         </Text>
       )}
-      <Button label={matchEnd.home} variant="outline" onPress={props.onLeave} />
     </ScrollView>
   );
 }
@@ -190,6 +193,11 @@ export function MatchEndScreen(props: MatchEndScreenProps) {
         <ResultColumn result={props.result} />
         <NextColumn {...props} />
       </View>
+      <EndRoundDialog
+        body={props.endRound.confirmingBody}
+        onConfirm={props.onConfirmEndRound}
+        onCancel={props.onCancelEndRound}
+      />
     </CourtPage>
   );
 }

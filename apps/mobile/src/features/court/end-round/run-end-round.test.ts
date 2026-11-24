@@ -117,13 +117,19 @@ describe("runEndRound (E4.12, question 150)", () => {
 describe("endRoundView", () => {
   test("derives what the screens show from the phase", () => {
     expect(endRoundView({ phase: "idle" })).toEqual({
-      confirmingScore: null,
+      confirming: false,
+      confirmingBody: null,
       busy: false,
       failure: null,
     });
-    expect(endRoundView({ phase: "confirming", openMatchScore: "12 × 10" }).confirmingScore).toBe(
-      "12 × 10",
-    );
+    const asking = endRoundView({
+      phase: "confirming",
+      openMatchScore: "12 × 10",
+      finishedMatches: 3,
+      votingEnabled: false,
+    });
+    expect(asking.confirming).toBe(true);
+    expect(asking.confirmingBody).toContain("12 × 10");
     expect(endRoundView({ phase: "closing" }).busy).toBe(true);
   });
 
