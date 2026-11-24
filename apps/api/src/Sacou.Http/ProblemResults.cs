@@ -43,6 +43,7 @@ public static class ProblemResults
         ErrorKind.Conflict => new(StatusCodes.Status409Conflict, "Conflict", "15.5.10"),
         ErrorKind.Gone => new(StatusCodes.Status410Gone, "Gone", "15.5.11"),
         ErrorKind.Unprocessable => new(StatusCodes.Status422UnprocessableEntity, "Unprocessable content", "15.5.21"),
+        ErrorKind.Unavailable => new(StatusCodes.Status503ServiceUnavailable, "Service unavailable", "15.6.4"),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Every error kind needs a status."),
     };
 
