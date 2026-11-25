@@ -84,3 +84,15 @@ APK novo: a Parte 1 traz módulos nativos (Firebase, Google Sign-In). O teste re
 8. (Opcional, com o ambiente local) API apontada para um servidor que responde 302 para outra origem: a chamada falha com o texto genérico e o destino **não** recebe o cabeçalho `Authorization` (pendência da E4.2).
 
 Anote modelo do celular e versão do Android. O que falhar vai para o `progresso.md`.
+
+## Sentry no app (E5.2 Parte 2, ~10 min)
+
+APK novo: `@sentry/react-native` é dependência nativa ([ADR 0080](../arquitetura/adr/0080-sentry-e-logs-estruturados.md), D9 a D13). Antes, o passo do Gabriel da seção 6 do [plano da E5.2](../estado/tarefas/E5.2.md): conta e projeto `sacou-mobile` (região EUA), filtros do painel e limite de 300 eventos/hora na chave, e no expo.dev as variáveis `EXPO_PUBLIC_SENTRY_DSN` ("Plain text", preview e production), `SENTRY_ORG` ("Plain text", o slug da organização) e `SENTRY_AUTH_TOKEN` ("Secret"). Depois, `eas build --profile preview --platform android`.
+
+1. No log do build no EAS, a etapa do Sentry diz que enviou o bundle e o mapa de fontes (sem erro do `sentry-cli`; o token aparece como `***`).
+2. Instalar o APK, entrar, abrir Início → "Catálogo de componentes (desenvolvimento)". No topo, "Erros (Sentry)" com dois botões.
+3. Tocar "Enviar erro de teste" → aparece "Erro de teste enviado. Confira no painel do Sentry." Em até 1 minuto, no `sacou-mobile`: um evento `DeliberateFailure`, ambiente `staging`, tag `area = dev-catalog`, pilha **simbolizada** (arquivo `ErrorTestSection.tsx` e linha do TS).
+4. Abrir o evento e conferir: sem usuário, sem IP, sem captura de tela, sem hierarquia de views, sem nome do aparelho; breadcrumbs sem linhas de `console`, sem apelidos e sem códigos (`/r/{code}`, `[id]`).
+5. Tocar "Travar o app (teste)" → o app fecha. Abrir de novo (o evento nativo sai na abertura seguinte) → no painel, um evento nativo no ambiente `staging`, com as mesmas ausências do passo 4.
+6. Em "Releases", a versão `com.sacou.app@<versão>+<versionCode>` com sessões (saúde da versão).
+7. Um APK `development` ou sem `EXPO_PUBLIC_SENTRY_DSN` não manda nada: os botões não dão erro e o painel não recebe evento.

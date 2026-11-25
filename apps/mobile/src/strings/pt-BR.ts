@@ -55,5 +55,11 @@ export const strings = {
     themeApp: "Tema Areia (app)",
     themeCourtSun: "Tema Sol (quadra)",
     themeCourtNight: "Tema Noite (quadra)",
+    errorTest: {
+      title: "Erros (Sentry)",
+      sendError: "Enviar erro de teste",
+      crashApp: "Travar o app (teste)",
+      sent: "Erro de teste enviado. Confira no painel do Sentry.",
+    },
   },
 } as const;

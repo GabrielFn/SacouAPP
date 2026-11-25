@@ -73,7 +73,7 @@ const NO_DEFAULT_IN_REDUCER = {
 const FREE_EXPO = "(router|status-bar)";
 const FREE_REACT_NATIVE = "(svg|safe-area-context|reanimated|gesture-handler|screens)";
 const SDK_IMPORTS = {
-  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/|@react-native-firebase/|@react-native-google-signin/|openapi-fetch$)`,
+  regex: `^(expo(/|$)|expo-(?!${FREE_EXPO}(/|$))|react-native-(?!${FREE_REACT_NATIVE}(/|$))|@react-native-community/|@react-native-async-storage/|@react-native-firebase/|@react-native-google-signin/|@sentry/|openapi-fetch$)`,
   message: "Device and service SDKs are used only in src/adapters/, behind an interface.",
 };
 

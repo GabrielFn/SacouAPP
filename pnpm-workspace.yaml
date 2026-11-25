@@ -8,6 +8,9 @@ allowBuilds:
   # Postinstall scripts of the JS Firebase SDK that @react-native-firebase pulls in; not needed (E4.3).
   "@firebase/util": false
   protobufjs: false
+  # The Sentry CLI binary comes in its platform package (an optional dependency); its postinstall
+  # only downloads a fallback copy (E5.2, ADR 0080).
+  "@sentry/cli": false
 
 # Advisory fix, see docs/seguranca/varredura-ci.md.
 overrides:
