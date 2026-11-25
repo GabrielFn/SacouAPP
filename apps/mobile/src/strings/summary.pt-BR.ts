@@ -12,7 +12,14 @@ export const summaryStrings = {
   mvpTitle: "MVP do dia",
   mvpNote: "Calculado pelo placar",
   mvpByVotesNote: "Escolhido pela galera",
-  votingOpenNote: "Votação da galera aberta",
+  /** Title of the card while the MVP is provisional: the voting is open or yet to open (R101 item 4). */
+  provisionalTitle: "Na frente pelo placar",
+  today: "hoje",
+  tomorrow: "amanhã",
+  /** "amanhã, 12h44": the day is "hoje" or "amanhã", the time is the phone's. */
+  deadline: (day: string, time: string) => `${day}, ${time}`,
+  /** "A galera decide até amanhã, 12h44". */
+  votingUntil: (deadline: string) => `A galera decide até ${deadline}`,
   /** "7 vitórias · ficaram 4 seguidas na quadra": the MVP of a team of the sand (screen 12b). */
   teamMvpLine: (wins: number, streak: number) =>
     streak >= MIN_STREAK_TO_SHOW
@@ -31,6 +38,7 @@ export const summaryStrings = {
   rankingAccessibility: (position: number, name: string, record: string) =>
     `${String(position)}º, ${name}, ${record}`,
   mvpAccessibility: (name: string) => `MVP do dia: ${name}`,
+  provisionalAccessibility: (name: string) => `Na frente pelo placar: ${name}`,
   noName: "Jogador",
   /** "Bia", "Bia e Caio", "Bia, Caio e Dani": the MVP shared by votes. */
   names: (names: readonly string[]) => {
@@ -69,6 +77,11 @@ export const summaryStrings = {
     intro: (header: string) => `Resumo do ${header}.`,
     mvp: (name: string, detail: string) => `MVP do dia: ${name} (${detail}).`,
     mvpNoDetail: (name: string) => `MVP do dia: ${name}.`,
+    /** The voting is open or yet to open: the card says who leads, not who won (question 186). */
+    provisional: (name: string, detail: string) => `Na frente pelo placar: ${name} (${detail}).`,
+    provisionalNoDetail: (name: string) => `Na frente pelo placar: ${name}.`,
+    /** "A galera decide o MVP até amanhã, 12h44." */
+    provisionalDeadline: (deadline: string) => `A galera decide o MVP até ${deadline}.`,
     mvpByVotes: (name: string) => `MVP do dia (escolhido pela galera): ${name}.`,
     /** "Ranking do dia: 1. Bia e Gabi, 7-2; 2. Caio e Léo, 5-4." */
     ranking: (lines: readonly string[]) => `Ranking do dia: ${lines.join("; ")}.`,

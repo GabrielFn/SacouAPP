@@ -59,7 +59,15 @@ function SummaryBody({ ready, onShare, onVote }: SummaryBodyProps) {
           {unsentNote}
         </Text>
       )}
-      {mvp === null ? null : <MvpHeroCard name={mvp.name} line={mvp.line} notes={mvp.notes} />}
+      {mvp === null ? null : (
+        <MvpHeroCard
+          title={mvp.title}
+          accessibility={mvp.accessibility}
+          name={mvp.name}
+          line={mvp.line}
+          notes={mvp.notes}
+        />
+      )}
       <VotingEntry entry={ready.voting} onVote={onVote} />
       {highlights.kind === "ranking" ? (
         <RankingList rows={highlights.rows} />

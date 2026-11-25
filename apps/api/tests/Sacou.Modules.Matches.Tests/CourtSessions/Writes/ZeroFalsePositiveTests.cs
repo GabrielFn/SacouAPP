@@ -129,6 +129,27 @@ public sealed class ZeroFalsePositiveTests
         }
     }
 
+    /// <summary>
+    /// As the server runs (ADR 0081): each request over the snapshot the previous write left, never rebuilt, which
+    /// always continues for one writer in order and ends as the snapshot of the whole log built at once.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(Candidates))]
+    public void AcceptedLog_IsAcceptedOneEventPerRequest_OnTheSnapshotOfTheLastWrite(string key)
+    {
+        var events = EventsOf(key);
+        var stream = StoredStream.New;
+        foreach (var item in events)
+        {
+            var decision = CourtWriteFixture.Accepted(Decide(stream, [item], key));
+            Assert.NotNull(decision.Snapshot);
+            stream = StoredStream.Of(decision.Snapshot, [decision.Writer]);
+        }
+
+        StreamSnapshotEquivalenceTests.AssertSameSnapshot(
+            events.IsEmpty ? StreamSnapshot.Empty : StreamSnapshot.Empty.Advance(events[0].Envelope.CourtSessionId, events), stream.Snapshot, key);
+    }
+
     /// <summary>An exclusion that names no accepted case, or that the rules now accept, is stale and must go.</summary>
     [Theory]
     [MemberData(nameof(Excluded))]

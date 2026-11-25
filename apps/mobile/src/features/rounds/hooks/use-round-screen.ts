@@ -14,6 +14,7 @@ import {
   type RoundScreenState,
 } from "../model/round-screen.reducer";
 import { roundListText } from "../model/round-list-text";
+import { roundLinkOffer, roundShareText } from "../model/round-link-offer";
 import { respondAttendanceMutation, setMemberAttendanceMutation } from "../queries/round-mutations";
 import { useRound } from "../queries/use-round-queries";
 
@@ -45,11 +46,13 @@ export interface RoundScreenModel {
   readonly errorText: string | null;
   /** Puts the list on the clipboard: the only way the names get there (ADR 0054). */
   readonly copyList: (list: RoundListInput) => void;
+  /** Opens the share sheet with the round and its link (screen 06, only while the link is on offer). */
+  readonly shareLink: (groupName: string, round: Round) => void;
 }
 
 /** The queries, the sheets and the presence calls of screens 06 and 26; the screens only draw. */
 export function useRoundScreen(groupId: string, roundId: string): RoundScreenModel {
-  const { sacouApi, clipboard } = useServices();
+  const { sacouApi, clipboard, shareSheet } = useServices();
   const client = useQueryClient();
   const group = useGroup(groupId);
   const round = useRound(groupId, roundId);
@@ -84,7 +87,15 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
     removing: remove.isPending,
     errorText: failure === null ? null : errorTextOf(failure),
     copyList: (list) => {
-      const text = roundListText(list.groupName, list.round, list.members, list.waitlistEnabled);
+      const offer = roundLinkOffer(list.round, wallClockNow());
+      const link = offer.kind === "share" ? offer.url : null;
+      const text = roundListText(
+        list.groupName,
+        list.round,
+        list.members,
+        list.waitlistEnabled,
+        link,
+      );
       const clearLater = () => {
         setTimeout(() => {
           dispatch({ type: "copy-note-cleared" });
@@ -92,7 +103,7 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
       };
       void clipboard.setText(text).then(
         () => {
-          dispatch({ type: "list-copied" });
+          dispatch({ type: link === null ? "list-copied" : "list-and-link-copied" });
           clearLater();
         },
         () => {
@@ -100,6 +111,17 @@ export function useRoundScreen(groupId: string, roundId: string): RoundScreenMod
           clearLater();
         },
       );
+    },
+    shareLink: (groupName, shown) => {
+      const offer = roundLinkOffer(shown, wallClockNow());
+      if (offer.kind === "none") return;
+      // The text carries the link: it is handed to the sheet and never logged (ADR 0070, D3).
+      void shareSheet.share(roundShareText(groupName, shown, offer.url)).catch(() => {
+        dispatch({ type: "share-failed" });
+        setTimeout(() => {
+          dispatch({ type: "share-note-cleared" });
+        }, COPY_NOTE_MS);
+      });
     },
   };
 }

@@ -4,6 +4,7 @@ import type { Member, MvpBallot, RoundSummaryReport } from "../../../services/ap
 import { summaryStrings } from "../../../strings/summary.pt-BR";
 import type { TeamColor } from "../../draw/model/team-identity";
 import { rankingHighlights, sandTeamKind, type RankingHighlights } from "./beach-ranking-view";
+import { localTimeText } from "../mvp-vote/model/voting-deadline";
 import { mvpHeroText } from "./mvp-hero-text";
 import { headerLine, sideLook, type SummarySide } from "./summary-texts";
 import { votingEntryView, type VotingEntryView } from "./voting-entry";
@@ -39,6 +40,14 @@ export interface MvpView {
   /** "+2 de saldo, 2 vitórias em 3": the shared text uses it, without the side. */
   readonly detail: string | null;
   readonly source: "stats" | "votes";
+  /** "MVP do dia", or "Na frente pelo placar" while the voting is open or yet to open (R101 item 4). */
+  readonly title: string;
+  /** The label read aloud for the card, with the same title. */
+  readonly accessibility: string;
+  /** The MVP by the stats with the voting not closed: the card says who leads, not who won. */
+  readonly provisional: boolean;
+  /** "amanhã, 12h44" while the voting is open and the MVP provisional; else `null`. */
+  readonly votingDeadline: string | null;
   /** The lines of small print under the card, already in words. */
   readonly notes: readonly string[];
 }
@@ -81,26 +90,62 @@ export function nameOf(memberId: string, members: readonly Member[] | undefined)
   return nickname === null || nickname.trim() === "" ? summaryStrings.noName : nickname;
 }
 
-function mvpNotes(source: MvpView["source"], votingOpen: boolean): readonly string[] {
-  return [
-    source === "votes" ? summaryStrings.mvpByVotesNote : summaryStrings.mvpNote,
-    ...(votingOpen && source === "stats" ? [summaryStrings.votingOpenNote] : []),
-  ];
+function startOfLocalDay(instant: Date): number {
+  return new Date(instant.getFullYear(), instant.getMonth(), instant.getDate()).getTime();
+}
+
+/** "hoje, 12h44" or "amanhã, 12h44" by the calendar and clock of the phone (the voting lasts 24 h at most). */
+function deadlineText(closesAt: string, nowMs: number): string {
+  const closes = new Date(closesAt);
+  const today = startOfLocalDay(closes) <= startOfLocalDay(new Date(nowMs));
+  const day = today ? summaryStrings.today : summaryStrings.tomorrow;
+  return summaryStrings.deadline(day, localTimeText(closes));
+}
+
+/** The MVP by the stats is provisional while the voting is open or yet to open; closed or off, it is final. */
+function isProvisional(
+  source: MvpView["source"],
+  voting: RoundSummaryReport["mvpVoting"],
+): boolean {
+  return source === "stats" && voting !== null && voting.state !== "closed";
+}
+
+function votingDeadlineOf(
+  provisional: boolean,
+  voting: RoundSummaryReport["mvpVoting"],
+  nowMs: number,
+): string | null {
+  return provisional && voting?.state === "open" ? deadlineText(voting.closesAt, nowMs) : null;
+}
+
+function mvpNotes(source: MvpView["source"], deadline: string | null): readonly string[] {
+  if (source === "votes") return [summaryStrings.mvpByVotesNote];
+  return [deadline === null ? summaryStrings.mvpNote : summaryStrings.votingUntil(deadline)];
 }
 
 /** A player, a tie of players (votes) or a team of the sand; `null` when the server sent none. */
 function mvpViewOf(
   report: RoundSummaryReport,
   members: readonly Member[] | undefined,
+  nowMs: number,
 ): MvpView | null {
   const { mvp } = report;
   if (mvp === null || mvp.memberIds.length === 0) return null;
   const source = mvp.source;
+  const name = summaryStrings.names(mvp.memberIds.map((memberId) => nameOf(memberId, members)));
+  const provisional = isProvisional(source, report.mvpVoting);
+  const votingDeadline = votingDeadlineOf(provisional, report.mvpVoting, nowMs);
   return {
-    name: summaryStrings.names(mvp.memberIds.map((memberId) => nameOf(memberId, members))),
+    name,
     ...mvpHeroText(mvp),
     source,
-    notes: mvpNotes(source, report.mvpVoting?.state === "open"),
+    title: provisional ? summaryStrings.provisionalTitle : summaryStrings.mvpTitle,
+    accessibility: (provisional
+      ? summaryStrings.provisionalAccessibility
+      : summaryStrings.mvpAccessibility)(name),
+    provisional,
+    votingDeadline,
+    notes: mvpNotes(source, votingDeadline),
   };
 }
 
@@ -161,7 +206,7 @@ export function summaryView(input: SummaryViewInput): SummaryView {
   return {
     kind: "ready",
     header,
-    mvp: mvpViewOf(report, members),
+    mvp: mvpViewOf(report, members, input.nowMs),
     highlights: highlightsOf(report, members),
     voting:
       input.mvpVoteOn === false

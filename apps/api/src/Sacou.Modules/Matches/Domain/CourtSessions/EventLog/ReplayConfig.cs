@@ -48,3 +48,20 @@ internal sealed record ReplayStep<TState>(EventEnvelope Event, Timeline<TState> 
 /// <summary>The last active timeline and the tracked steps, in canonical order.</summary>
 internal sealed record ReplayedSteps<TState>(Timeline<TState> Head, ImmutableArray<ReplayStep<TState>> Steps)
     where TState : notnull;
+
+/// <summary>
+/// A stored stream already replayed, for <see cref="EventReplayer.ContinueSteps{TState}"/> (ADR 0081): its active
+/// timeline, null when the stored events do not replay; its last event in canonical order, active or not, null with no
+/// event; whether an id is stored; and every stored event, in any order, for the replay of the whole stream.
+/// </summary>
+internal interface IReplayCheckpoint<TState>
+    where TState : notnull
+{
+    Timeline<TState>? Head { get; }
+
+    EventEnvelope? LastEvent { get; }
+
+    IEnumerable<EventEnvelope> StoredEvents { get; }
+
+    bool IsStored(string eventId);
+}

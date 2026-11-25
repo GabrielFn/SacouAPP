@@ -160,6 +160,39 @@ public sealed class RoundFlowTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal(WeekLater(created), next["localDate"]!.GetValue<string>());
     }
 
+    /// <summary>
+    /// F1b: without an active mensalista the avulsos' window does not hold (question 183, option 2; ADR 0079, P3). It holds
+    /// again as soon as someone becomes a mensalista, and goes away when that mensalista is an avulso again.
+    /// </summary>
+    [Fact]
+    public async Task GroupWithoutMensalista_IgnoresTheWindow_UntilItHasOne()
+    {
+        const int WindowHours = 24;
+        using var client = api.CreateClient();
+        var world = await GroupWorld.CreateAsync(api, client);
+        await RoundCalls.ConfigureAttendanceAsync(world, regulars: true, dropInOpensHoursBefore: WindowHours);
+        var round = (await RoundCalls.CreateAsync(world, RoundCalls.CreateBody()))["roundId"]!.GetValue<string>();
+        var typePath = world.MemberPath(world.MemberIds[A.Scorekeeper]) + "/type";
+
+        var early = await RoundCalls.RespondAsync(world, world.Subjects[A.Player], round, going: true);
+        var withoutRegular = await RoundCalls.GetAsync(world, round);
+        using var toRegular = await world.SendAsync(A.Admin, HttpMethod.Put, typePath, """{"memberType":"regular"}""");
+        var withRegular = await RoundCalls.GetAsync(world, round);
+        var closed = await RoundCalls.RespondAsync(world, world.Subjects[A.CoAdmin], round, going: true);
+        using var backToDropIn = await world.SendAsync(A.Admin, HttpMethod.Put, typePath, """{"memberType":"dropIn"}""");
+        var reopened = await RoundCalls.RespondAsync(world, world.Subjects[A.CoAdmin], round, going: true);
+
+        Assert.Equal(HttpStatusCode.OK, early.Status);
+        Assert.Equal("going", early.Body!["status"]!.GetValue<string>());
+        Assert.Null(withoutRegular["dropInOpensAt"]);
+        Assert.Equal(HttpStatusCode.OK, toRegular.StatusCode);
+        Assert.Equal(
+            withRegular["startsAt"]!.GetValue<DateTimeOffset>().AddHours(-WindowHours), withRegular["dropInOpensAt"]!.GetValue<DateTimeOffset>());
+        Assert.Equal("sessions.drop-in-window-closed", closed.Code);
+        Assert.Equal(HttpStatusCode.OK, backToDropIn.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, reopened.Status);
+    }
+
     /// <summary>F2: cancelling the upcoming occurrence makes the next week's on the next read.</summary>
     [Fact]
     public async Task CancelingTheUpcomingOccurrence_MakesTheOneOfTheFollowingWeek()

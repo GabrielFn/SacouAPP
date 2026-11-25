@@ -1,5 +1,6 @@
-import type { SettingsBlock, SettingsPath, SettingsValue } from "@sacou/match-engine";
+import type { SettingsPath, SettingsValue } from "@sacou/match-engine";
 
+import type { LayoutBlock } from "./settings-layout";
 import type { ShownPath } from "../../../strings/settings.pt-BR";
 
 /** The sheet that is open over screen 18, with the draft it is editing. */
@@ -19,7 +20,7 @@ export type PendingLeaves = Readonly<Partial<Record<SettingsPath, SettingsValue>
 export interface GroupSettingsFormState {
   readonly pending: PendingLeaves;
   /** The block whose accordion is open, or `null`. */
-  readonly expanded: SettingsBlock | null;
+  readonly expanded: LayoutBlock | null;
   readonly sheet: SettingsSheet;
   /** The text of the last refusal, shown in the error strip until dismissed or the next change. */
   readonly message: string | null;
@@ -33,7 +34,7 @@ export const initialGroupSettingsFormState: GroupSettingsFormState = {
 };
 
 export type LeafAction =
-  | { readonly type: "block-toggled"; readonly block: SettingsBlock }
+  | { readonly type: "block-toggled"; readonly block: LayoutBlock }
   | { readonly type: "leaf-changed"; readonly path: SettingsPath; readonly value: SettingsValue }
   | { readonly type: "leaf-saved"; readonly path: SettingsPath }
   | { readonly type: "leaf-failed"; readonly path: SettingsPath; readonly message: string }

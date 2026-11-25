@@ -12,6 +12,7 @@ internal sealed class StorePublicRoundSummary(
     IGroupDirectory directory,
     IGroupSettingsReader settings,
     IRoundListNames listNames,
+    IGroupMembership membership,
     TimeProvider time) : IPublicRoundSummary
 {
     public async Task<PublicRoundSummary?> FindByCodeAsync(string? code, CancellationToken cancellationToken)
@@ -38,13 +39,23 @@ internal sealed class StorePublicRoundSummary(
 
         Guid[] occupants = [.. round.Occupants.Select(attendance => attendance.Member.Value)];
         var names = await listNames.FindAsync(round.GroupId.Value, occupants, cancellationToken).ConfigureAwait(false);
-        return ToSummary(round, name, resolved.Value, time.GetUtcNow(), names);
+        var members = await membership.ListActiveAsync(round.GroupId.Value, cancellationToken).ConfigureAwait(false);
+        return ToSummary(round, name, resolved.Value, time.GetUtcNow(), names, RoundGroupState.HasRegular(members));
     }
 
+    /// <summary>
+    /// <paramref name="hasActiveRegular"/> says whether the group has an active mensalista: without one the avulsos'
+    /// window does not hold, here as in the signed-in read (ADR 0079, P3).
+    /// </summary>
     internal static PublicRoundSummary ToSummary(
-        Round round, string groupName, RoundSettings resolved, DateTimeOffset now, IReadOnlyDictionary<Guid, ListName> names)
+        Round round,
+        string groupName,
+        RoundSettings resolved,
+        DateTimeOffset now,
+        IReadOnlyDictionary<Guid, ListName> names,
+        bool hasActiveRegular)
     {
-        var rules = RoundGroupState.ToDomain(resolved.Attendance);
+        var rules = RoundGroupState.ForGroup(resolved.Attendance, hasActiveRegular);
         return new PublicRoundSummary(
             groupName,
             RoundFormat.Date(round.Slot.Date),

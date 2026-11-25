@@ -23,6 +23,7 @@ export function PresenceFooter({ actions, pending, onRespond, onAskLeave }: Pres
         <>
           <Button
             label={presence.goingAction}
+            accessibilityHint={actions.lockedHint ?? undefined}
             disabled={!actions.canGo || pending}
             onPress={() => {
               onRespond("going");
