@@ -37,10 +37,26 @@ internal sealed partial class PostgresCourtStreamStore
     private static string Milliseconds(int value) => value.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
-    /// The lock not had in time, a statement stopped by its timeout, or the transaction ended for idling. A request
-    /// the caller canceled is an <see cref="OperationCanceledException"/> and never lands here.
+    /// The lock not had in time, a statement stopped by its timeout, or the transaction ended for idling, however EF
+    /// wraps it (a <c>DbUpdateException</c> of a save, or the execution strategy's <see cref="InvalidOperationException"/>
+    /// for an error it deems transient). A request the caller canceled is an <see cref="OperationCanceledException"/>
+    /// and is never one: it goes on as it was.
     /// </summary>
-    private static bool IsTimeout(Exception exception) =>
-        (exception as PostgresException ?? exception.InnerException as PostgresException)?.SqlState
-            is PostgresErrorCodes.LockNotAvailable or PostgresErrorCodes.QueryCanceled or IdleInTransactionSessionTimeout;
+    private static bool IsTimeout(Exception exception)
+    {
+        if (exception is OperationCanceledException)
+        {
+            return false;
+        }
+
+        for (Exception? current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is PostgresException postgres)
+            {
+                return postgres.SqlState is PostgresErrorCodes.LockNotAvailable or PostgresErrorCodes.QueryCanceled or IdleInTransactionSessionTimeout;
+            }
+        }
+
+        return false;
+    }
 }

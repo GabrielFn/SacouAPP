@@ -241,7 +241,7 @@ public sealed class MemoryCourtStreamSnapshotsTests
             return new ReadSnapshot(SnapshotOf(points: 1), SnapshotUse.Built);
         }
 
-        public Task<ReadSnapshot?> AdvanceAsync(Guid courtSessionId, StreamSnapshot from, CancellationToken cancellationToken) =>
+        public Task<ReadSnapshot?> AdvanceAsync(Guid courtSessionId, StreamSnapshot from, bool checkLastEvent, CancellationToken cancellationToken) =>
             Task.FromResult<ReadSnapshot?>(null);
 
         private static void InterlockedMax(ref int target, int value)

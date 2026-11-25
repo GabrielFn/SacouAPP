@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Npgsql;
 using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
@@ -45,7 +44,7 @@ internal sealed partial class PostgresCourtStreamStore(
             var transaction = await BeginBoundedTransactionAsync(cancellationToken).ConfigureAwait(false);
             await using (transaction.ConfigureAwait(false))
             {
-                locked = await AppendUnderLockAsync(append, rules, warm?.Snapshot, cancellationToken).ConfigureAwait(false);
+                locked = await AppendUnderLockAsync(append, rules, warm, cancellationToken).ConfigureAwait(false);
                 if (locked.Outcome.Decided is { IsSuccess: true } decided && !decided.Value.NewEvents.IsEmpty)
                 {
                     await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -53,11 +52,7 @@ internal sealed partial class PostgresCourtStreamStore(
                 }
             }
         }
-        catch (NpgsqlException exception) when (IsTimeout(exception))
-        {
-            return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy);
-        }
-        catch (DbUpdateException exception) when (IsTimeout(exception))
+        catch (Exception exception) when (IsTimeout(exception))
         {
             return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy);
         }
@@ -139,7 +134,7 @@ internal sealed partial class PostgresCourtStreamStore(
     }
 
     private async Task<LockedAppend> AppendUnderLockAsync(
-        CourtAppend append, CourtAppendRules rules, StreamSnapshot? warmed, CancellationToken cancellationToken)
+        CourtAppend append, CourtAppendRules rules, WarmSnapshot? warm, CancellationToken cancellationToken)
     {
         var created = append.MayCreate && await TryCreateAsync(append, cancellationToken).ConfigureAwait(false);
         var session = await LockAsync(append.CourtSessionId, cancellationToken).ConfigureAwait(false);
@@ -170,7 +165,7 @@ internal sealed partial class PostgresCourtStreamStore(
             }
         }
 
-        var read = await CatchUpAsync(session, warmed, cancellationToken).ConfigureAwait(false);
+        var read = await CatchUpAsync(session, warm, cancellationToken).ConfigureAwait(false);
         if (read.Snapshot is not { } caughtUp)
         {
             return new LockedAppend(CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy), read);
@@ -196,11 +191,12 @@ internal sealed partial class PostgresCourtStreamStore(
     /// stream under the lock (condition 1 of the review of Part 1). None when there is no such snapshot (the caller
     /// became the writer after the warm-up), when it is ahead of the count (changed outside the API, dropped), when
     /// more than a small build lies after it, or when its last event is not there any more (dropped): the write is a
-    /// 503 and its next try builds outside the lock. One that does not end at the count is used but not kept.
+    /// 503 and its next try builds outside the lock. One built by this very warm-up is checked by position only: it is
+    /// what the database held a moment ago. One that does not end at the count is used but not kept.
     /// </summary>
-    private async Task<LockedRead> CatchUpAsync(CourtSessionRow session, StreamSnapshot? warmed, CancellationToken cancellationToken)
+    private async Task<LockedRead> CatchUpAsync(CourtSessionRow session, WarmSnapshot? warm, CancellationToken cancellationToken)
     {
-        if (warmed is null)
+        if (warm?.Snapshot is not { } warmed)
         {
             return LockedRead.None;
         }
@@ -215,7 +211,8 @@ internal sealed partial class PostgresCourtStreamStore(
             return LockedRead.None;
         }
 
-        var read = await snapshotReader.AdvanceAsync(session.Id, warmed, cancellationToken).ConfigureAwait(false);
+        var read = await snapshotReader.AdvanceAsync(session.Id, warmed, checkLastEvent: warm.Warmth != SnapshotWarmth.Built, cancellationToken)
+            .ConfigureAwait(false);
         return read is null ? LockedRead.Dropped : new LockedRead(read, Consistent: read.Snapshot.Version == session.EventCount);
     }
 

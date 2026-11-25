@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
@@ -43,11 +42,7 @@ internal sealed partial class PostgresCourtStreamStore
                 return outcome;
             }
         }
-        catch (NpgsqlException exception) when (IsTimeout(exception))
-        {
-            return CourtStreamOutcome<CourtTakeoverDecision>.Refused(CourtStreamRefusal.Busy);
-        }
-        catch (DbUpdateException exception) when (IsTimeout(exception))
+        catch (Exception exception) when (IsTimeout(exception))
         {
             return CourtStreamOutcome<CourtTakeoverDecision>.Refused(CourtStreamRefusal.Busy);
         }
