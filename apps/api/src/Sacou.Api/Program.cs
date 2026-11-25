@@ -60,6 +60,14 @@ builder.Services.AddSacouWeb(builder.Configuration);
 builder.Services.AddSacouOperations(builder.Configuration);
 
 var app = builder.Build();
+
+// An operation command (E6.3, door 1): only with an argument on the container's command line, which the Cloud Run
+// service never passes. It runs on the built services and exits: no port, no route, no middleware.
+if (OperationCommands.TryMatch(args) is { } command)
+{
+    return await command.RunAsync(app.Services, Console.Out, CancellationToken.None);
+}
+
 // Says by name when Sentry is off (ADR 0080, D1).
 app.LogObservabilityState();
 
@@ -114,12 +122,8 @@ _ = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoin
 
 if (app.Configuration.GetValue<bool>(DatabaseConnectionSetup.MigrateOnStartupKey))
 {
-    await IdentityModule.MigrateAsync(app.Services);
-    await GroupsModule.MigrateAsync(app.Services);
-    await SessionsModule.MigrateAsync(app.Services);
-    await MatchesModule.MigrateAsync(app.Services);
-    await StatsModule.MigrateAsync(app.Services);
-    await NotificationsModule.MigrateAsync(app.Services);
+    await DatabaseMigrations.ApplyAsync(app.Services, CancellationToken.None);
 }
 
 await app.RunAsync();
+return 0;
