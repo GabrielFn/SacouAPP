@@ -188,19 +188,15 @@ internal sealed partial class PostgresCourtStreamStore(
 
     /// <summary>
     /// The snapshot the warm-up handed over, brought up to the stored stream by the events after it, never the whole
-    /// stream under the lock (condition 1 of the review of Part 1). None when there is no such snapshot (the caller
-    /// became the writer after the warm-up), when it is ahead of the count (changed outside the API, dropped), when
-    /// more than a small build lies after it, or when its last event is not there any more (dropped): the write is a
-    /// 503 and its next try builds outside the lock. One built by this very warm-up is checked by position only: it is
+    /// stream under the lock (condition 1 of the review of Part 1). With no such snapshot (the stream was created, or
+    /// the caller became its writer, after the warm-up) it starts from the empty one. None when it is ahead of the
+    /// count (changed outside the API, dropped), when more than a small build lies after it, or when its last event is
+    /// not there any more (dropped): the write is a 503 and its next try builds outside the lock. One built by this very warm-up is checked by position only: it is
     /// what the database held a moment ago. One that does not end at the count is used but not kept.
     /// </summary>
     private async Task<LockedRead> CatchUpAsync(CourtSessionRow session, WarmSnapshot? warm, CancellationToken cancellationToken)
     {
-        if (warm?.Snapshot is not { } warmed)
-        {
-            return LockedRead.None;
-        }
-
+        var warmed = warm?.Snapshot ?? StreamSnapshot.Empty;
         if (warmed.Version > session.EventCount)
         {
             return LockedRead.Dropped;
@@ -211,7 +207,7 @@ internal sealed partial class PostgresCourtStreamStore(
             return LockedRead.None;
         }
 
-        var read = await snapshotReader.AdvanceAsync(session.Id, warmed, checkLastEvent: warm.Warmth != SnapshotWarmth.Built, cancellationToken)
+        var read = await snapshotReader.AdvanceAsync(session.Id, warmed, checkLastEvent: warm?.Warmth != SnapshotWarmth.Built, cancellationToken)
             .ConfigureAwait(false);
         return read is null ? LockedRead.Dropped : new LockedRead(read, Consistent: read.Snapshot.Version == session.EventCount);
     }
