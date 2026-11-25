@@ -57,7 +57,8 @@ internal static class InternalPumpEndpoint
             await StepAsync("outbox-cleanup", () => source.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
         }
 
-        // The reports of E6.6 live 180 days (question 234): the same daily sweep deletes the older ones.
+        // The reports of E6.6 live 180 days (question 234): this route runs on the daily Cloud Scheduler sweep and on each
+        // Cloud Tasks call, and each run deletes the older ones (ADR 0069, D10).
         await StepAsync("report-cleanup", () => reports.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
         return TypedResults.NoContent();
     }
