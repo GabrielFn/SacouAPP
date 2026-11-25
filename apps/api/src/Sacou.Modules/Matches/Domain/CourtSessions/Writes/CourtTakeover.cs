@@ -66,7 +66,7 @@ internal static class CourtTakeover
 {
     private const long OneBatch = 1;
 
-    public static Result<CourtTakeoverDecision, CourtWriteError> Decide(StoredStream stored, CourtTakeoverRequest request, string callerMemberId)
+    public static Result<CourtTakeoverDecision, CourtWriteError> Decide(IWrittenStream stored, CourtTakeoverRequest request, string callerMemberId)
     {
         ArgumentNullException.ThrowIfNull(stored);
         ArgumentNullException.ThrowIfNull(request);
@@ -77,7 +77,7 @@ internal static class CourtTakeover
         }
 
         var lastSequence = stored.LastSequenceOf(request.DeviceId);
-        var eventCount = stored.Events.Length;
+        var eventCount = stored.EventCount;
         if (stored.IsCurrentWriter(request.DeviceId, callerMemberId))
         {
             return Accept(new CourtTakeoverDecision(writer, OpensBatch: false, lastSequence, eventCount));

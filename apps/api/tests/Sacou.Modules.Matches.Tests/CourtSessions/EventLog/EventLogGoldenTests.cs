@@ -241,7 +241,7 @@ public sealed class EventLogGoldenTests
         [.. goldenCase.GetProperty("events").EnumerateArray().Select(rawEvent => rawEvent.GetRawText())];
 
     /// <summary>Read like an event, through the production reader, so the state holds the same values.</summary>
-    private static FixtureState InitialStateOf(JsonElement initialState)
+    internal static FixtureState InitialStateOf(JsonElement initialState)
     {
         var raw = Assert.IsType<RawObject>(RawValueReader.Parse(initialState.GetRawText()));
         Assert.True(raw.TryGetMember("values", out var values), "initialState: missing values.");

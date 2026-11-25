@@ -22,6 +22,7 @@ public sealed class ProblemResultsTests
         { ErrorKind.Conflict, 409, "Conflict", "https://tools.ietf.org/html/rfc9110#section-15.5.10" },
         { ErrorKind.Gone, 410, "Gone", "https://tools.ietf.org/html/rfc9110#section-15.5.11" },
         { ErrorKind.Unprocessable, 422, "Unprocessable content", "https://tools.ietf.org/html/rfc9110#section-15.5.21" },
+        { ErrorKind.Unavailable, 503, "Service unavailable", "https://tools.ietf.org/html/rfc9110#section-15.6.4" },
     };
 
     [Theory]
@@ -44,7 +45,7 @@ public sealed class ProblemResultsTests
         var kinds = Enum.GetValues<ErrorKind>();
 
         Assert.Equal(kinds.Length, ExpectedShapes.Count);
-        Assert.All(kinds, kind => Assert.InRange(ProblemResults.From(new Error(Code, kind)).StatusCode, 400, 499));
+        Assert.All(kinds, kind => Assert.InRange(ProblemResults.From(new Error(Code, kind)).StatusCode, 400, 599));
     }
 
     [Fact]

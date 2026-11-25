@@ -6,8 +6,8 @@ namespace Sacou.Modules.Matches.AppendCourtEvents;
 internal static partial class CourtLog
 {
     [LoggerMessage(Level = LogLevel.Information,
-        Message = "Court events stored. Stream {CourtSessionId}: {Stored} stored, {Duplicates} duplicates, {ElapsedMs} ms.")]
-    public static partial void Stored(ILogger logger, Guid courtSessionId, int stored, int duplicates, long elapsedMs);
+        Message = "Court events stored. Stream {CourtSessionId}: {Stored} stored, {Duplicates} duplicates, {ElapsedMs} ms, {LockedMs} ms locked, snapshot {Snapshot}.")]
+    public static partial void Stored(ILogger logger, Guid courtSessionId, int stored, int duplicates, long elapsedMs, long lockedMs, string snapshot);
 
     /// <summary>The type of the exception only: its message may carry a value of the database.</summary>
     [LoggerMessage(Level = LogLevel.Warning, Message = "Court projections not refreshed after a write. Stream {CourtSessionId}: {ExceptionType}.")]

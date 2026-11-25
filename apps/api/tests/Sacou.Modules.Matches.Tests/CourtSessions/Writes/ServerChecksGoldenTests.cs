@@ -140,7 +140,7 @@ public sealed class ServerChecksGoldenTests
     /// <summary>The other phone takes over with what the confirmation showed: the current batch and the event count.</summary>
     private static CourtWriter TakeOver(StoredStream stored)
     {
-        var request = CourtTakeoverRequest.Create(CourtWriteFixture.OtherDevice, stored.Writer!.Batch, stored.Events.Length);
+        var request = CourtTakeoverRequest.Create(CourtWriteFixture.OtherDevice, stored.Writer!.Batch, stored.EventCount);
         var decision = CourtTakeover.Decide(stored, request.Value, CourtWriteFixture.OtherCaller);
         Assert.True(decision.IsSuccess, decision.ToString());
         Assert.True(decision.Value.OpensBatch);

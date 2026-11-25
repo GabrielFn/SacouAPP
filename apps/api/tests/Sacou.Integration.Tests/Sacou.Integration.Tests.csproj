@@ -2,6 +2,10 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
+    <!-- The budget of the court stream (ADR 0081): SACOU_PERF_GATE=1 in the environment of a Release build turns it on. -->
+    <PropertyGroup Condition="'$(SACOU_PERF_GATE)' == '1' And '$(Configuration)' == 'Release'">
+        <DefineConstants>$(DefineConstants);SACOU_PERF_GATE</DefineConstants>
+    </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Npgsql" />
