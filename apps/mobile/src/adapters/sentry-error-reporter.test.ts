@@ -46,7 +46,7 @@ describe("the scrubber on the leaks that come in links and exceptions", () => {
     const event = scrubEvent({
       exception: { values: [{ value: "bad sacou://c/ABC123#tok.en and https://x.app/r/XYZ?a=b" }] },
     });
-    const text = event.exception.values[0].value;
+    const text = event.exception?.values?.[0]?.value;
     expect(text).toBe("bad sacou://c/{code} and https://x.app/r/{code}");
   });
 
