@@ -10,8 +10,18 @@ import { endRoundReducer, INITIAL_END_ROUND, type EndRoundState } from "./end-ro
 import { endRoundView } from "./end-round-view";
 import { runEndRound } from "./run-end-round";
 
-const ASK_IDLE = { openMatchScore: null, finishedMatches: 2, votingEnabled: false } as const;
-const ASK_PLAYING = { openMatchScore: "12 × 10", finishedMatches: 1, votingEnabled: true } as const;
+const ASK_IDLE = {
+  openMatchScore: null,
+  finishedMatches: 2,
+  votingEnabled: false,
+  availability: "open",
+} as const;
+const ASK_PLAYING = {
+  openMatchScore: "12 × 10",
+  finishedMatches: 1,
+  votingEnabled: true,
+  availability: "open",
+} as const;
 const SESSION = "c0000000-0000-4000-8000-0000000000c1";
 const TARGET = { courtSessionId: SESSION, groupId: "g1", roundId: "r1" };
 const CLOSED = { closedAt: "2026-11-03T22:00:00Z", endsAt: "2026-11-03T22:00:00Z" };
@@ -79,9 +89,22 @@ describe("end round: extra cases of the acceptance criteria (E4.12 part 2)", () 
 
   test("confirming shows what the dialog says, and cancelling clears it", () => {
     const asking = endRoundReducer(INITIAL_END_ROUND, { type: "requested", ...ASK_PLAYING });
-    expect(endRoundView(asking).confirmingBody).toContain("12 × 10");
-    expect(endRoundView(INITIAL_END_ROUND).confirmingBody).toBeNull();
-    expect(endRoundView(endRoundReducer(asking, { type: "cancelled" })).confirmingBody).toBeNull();
+    expect(endRoundView(asking).sheet?.body).toContain("12 × 10");
+    expect(endRoundView(INITIAL_END_ROUND).sheet).toBeNull();
+    expect(endRoundView(endRoundReducer(asking, { type: "cancelled" })).sheet).toBeNull();
+  });
+
+  test("before the start time with no match finished the sheet only explains, with no end button", () => {
+    const asking = endRoundReducer(INITIAL_END_ROUND, {
+      type: "requested",
+      ...ASK_IDLE,
+      finishedMatches: 0,
+      availability: "not-started",
+    });
+    expect(endRoundView(asking).sheet).toEqual({
+      kind: "not-started",
+      body: "A rodada ainda não começou. Antes do horário, ela só pode ser encerrada depois de terminar uma partida.",
+    });
   });
 
   test("Tentar de novo after a failure asks again, also after a storage failure", () => {

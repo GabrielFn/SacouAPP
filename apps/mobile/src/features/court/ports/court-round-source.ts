@@ -6,6 +6,8 @@ import type { CourtSessionOrigin } from "./court-event-log";
 
 /** What screen 11 needs of the round of the session to plan the next match (E4.10, D7). */
 export interface CourtRound {
+  /** ISO start of the round; `null` when the round is not on the phone. */
+  readonly startsAt: string | null;
   /** The resolved settings of the round; `null` when the round is not on the phone or does not parse. */
   readonly settings: GroupSettings | null;
   /** The confirmed of the round in order of arrival (`going` and `promoted`). */

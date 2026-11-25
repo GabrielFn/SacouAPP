@@ -29,7 +29,7 @@ async function finishedMatch(): Promise<FinishedMatch> {
 describe("the round of the session on screen 11", () => {
   test("a session without origin plays by the defaults", () => {
     const round = roundOf(
-      sourceOf({ settings: null, confirmed: [], positionOf: POSITION_OF }),
+      sourceOf({ startsAt: null, settings: null, confirmed: [], positionOf: POSITION_OF }),
       null,
     );
     expect(round?.settings).toEqual(defaultGroupSettings());
@@ -37,7 +37,7 @@ describe("the round of the session on screen 11", () => {
 
   test("a session with origin and no round on the phone has no plan, not the defaults", () => {
     const round = roundOf(
-      sourceOf({ settings: null, confirmed: [], positionOf: POSITION_OF }),
+      sourceOf({ startsAt: null, settings: null, confirmed: [], positionOf: POSITION_OF }),
       ORIGIN,
     );
     expect(round).toBeNull();
@@ -45,7 +45,10 @@ describe("the round of the session on screen 11", () => {
 
   test("a session with origin and its round uses the settings of the round", () => {
     const settings = defaultGroupSettings();
-    const round = roundOf(sourceOf({ settings, confirmed: [], positionOf: POSITION_OF }), ORIGIN);
+    const round = roundOf(
+      sourceOf({ startsAt: null, settings, confirmed: [], positionOf: POSITION_OF }),
+      ORIGIN,
+    );
     expect(round?.settings).toBe(settings);
   });
 });
