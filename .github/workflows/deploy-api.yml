@@ -123,6 +123,7 @@ jobs:
           runtime-account: sacou-api-test-run
           database-secret: sacou-database-url-test
           expo-secret: sacou-expo-access-token-test
+          sentry-secret: sacou-sentry-dsn-api
           invoker-account: sacou-tasks-invoker-test
           tasks-queue: sacou-notifications-test
           # Who opens /painel (ADR 0085, D1): the variable of the test environment, never in the repository.
@@ -164,6 +165,7 @@ jobs:
           runtime-account: sacou-api-run
           database-secret: sacou-database-url-prod
           expo-secret: sacou-expo-access-token-prod
+          sentry-secret: sacou-sentry-dsn-api
           invoker-account: sacou-tasks-invoker
           tasks-queue: sacou-notifications
           # Who opens /painel (ADR 0085, D1): the variable of the production environment, never in the repository.
