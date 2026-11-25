@@ -547,6 +547,18 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 | T: injeção pelas consultas | SQL interpolado do EF (parâmetros), valores de status e origem de `ColumnValues`, query da rota recusada | Feito |
 | R: quem viu o painel | Só `ops.served` com a duração no Cloud Logging, sem identificar o operador; aceito no piloto (um ou dois operadores, a conta do Gabriel) | Aceito |
 
+## Reexclusão depois de restaurar (E6.3 S2, comando `reapply-deletions`)
+
+O comando lê as marcas do banco atual (`SACOU_DELETIONS_SOURCE_DATABASE_URL`) e as aplica no banco restaurado (`SACOU_DATABASE_URL`). As guardas abaixo recusam antes de qualquer escrita; a saída tem só números e códigos, nunca URL, host, senha, login ou hash.
+
+| STRIDE | Ameaça | Barreira | Resta |
+|---|---|---|---|
+| T, E | A origem com a credencial da API (papel que escreve) | Recusa com 2 se o papel puder `INSERT`, `UPDATE`, `DELETE` ou `TRUNCATE` em `identity.users` ou `identity.deleted_accounts` (superusuário e `pg_write_all_data` contam), for membro do papel dono das tabelas ou tiver `CREATE` no esquema `identity`; a leitura roda numa transação `READ ONLY` | Feito |
+| T | As duas URLs apontam para o mesmo banco | Recusa com 2 antes de conectar (mesmo host sem caixa, porta e banco) e depois de conectar, pela identidade que o próprio servidor dá: nome e oid do banco, porta e início do servidor (`localhost` e `127.0.0.1`, IP e DNS, Host com vários servidores) | Feito |
+| T | As URLs trocadas (a origem é o banco mais velho) | Recusa com 2 se o restaurado tiver uma marca mais nova que a retenção que a origem não tem | **Aceito:** a troca não é detectada quando o restaurado não tem marca recente diferente da origem; nesse caso as marcas dos dois coincidem e reaplicar é benigno (não apaga ninguém a mais) |
+| I, D | Origem ilegível (senha errada, sem tabela, sem rede) | Saída 3 com a linha fixa `source unreadable`, sem a mensagem do driver, que pode ter o host (teste de integração procura host e senha na saída) | Feito |
+| D | Falha do banco no meio | Falha ao copiar marcas, achar contas ou apagar uma conta vira saída 5 (`run again`): cada passo é idempotente e a próxima execução retoma de onde parou; o log só tem o tipo da exceção | Feito |
+
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 
 `stored-next-match-drafts.ts`: uma leitura que falha vale "sem rascunho", e a tela 11 sorteia de novo quem sai (critério `draw`). Quem abrir o app depois de uma falha de leitura pode ver outro sorteio, e a escolha já feita some. Impacto: só a ordem de saída, sem dado pessoal e sem perda de partida. Aceito no piloto; o rascunho é local e o motor valida o plano na confirmação.
