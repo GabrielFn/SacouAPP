@@ -76,7 +76,18 @@ export function createOpsPage(deps: OpsPageDependencies): OpsPage {
     await dispatch(actionOf(outcome));
   }
 
-  const settle = (outcome: AuthOutcome) => settleSignIn(outcome, dispatch, POPUP_BLOCKED);
+  /** The sheet's taps: no request behind them, so nobody waits for them. */
+  function tap(action: OpsPageAction): void {
+    void dispatch(action);
+  }
+
+  /** The Google window, only from the open sheet; a blocked one points to the e-mail. */
+  async function google(): Promise<void> {
+    if (store.current.step !== "signIn") return;
+    await dispatch({ type: "signInStarted", attempt: "google" });
+    const outcome: AuthOutcome = await deps.auth.signInWithGooglePopup();
+    await settleSignIn(outcome, dispatch, POPUP_BLOCKED);
+  }
 
   return {
     state: () => store.current,
@@ -84,14 +95,16 @@ export function createOpsPage(deps: OpsPageDependencies): OpsPage {
       const user = await deps.auth.restore();
       return dispatch({ type: "sessionChecked", signedIn: user !== null });
     },
-    tapSignIn: () => void dispatch({ type: "signInTapped" }),
-    closeSheet: () => void dispatch({ type: "sheetClosed" }),
-    chooseForm: (form) => void dispatch({ type: "formChosen", form }),
-    signInWithGoogle: async () => {
-      if (store.current.step !== "signIn") return;
-      await dispatch({ type: "signInStarted", attempt: "google" });
-      return settle(await deps.auth.signInWithGooglePopup());
+    tapSignIn: () => {
+      tap({ type: "signInTapped" });
     },
+    closeSheet: () => {
+      tap({ type: "sheetClosed" });
+    },
+    chooseForm: (form) => {
+      tap({ type: "formChosen", form });
+    },
+    signInWithGoogle: google,
     submitEmail: (email, password) =>
       submitEmailForm(
         deps.auth,

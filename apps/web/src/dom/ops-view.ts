@@ -70,22 +70,20 @@ function sheetFormOf(state: OpsPageState): SheetForm | null {
   return null;
 }
 
+/** The line of the sheet: "Um instante…" while Firebase answers, then the failure or the reset notice. */
 function sheetMessage(state: OpsPageState): string | null {
-  if (state.step === "signIn") {
-    if (state.failure !== null) return failureText(state.failure);
-    return state.notice === "resetSent" ? webStrings.resetSent : null;
-  }
-  return state.step === "signingIn" ? webStrings.working : null;
+  if (state.step === "signingIn") return webStrings.working;
+  if (state.step !== "signIn") return null;
+  const { failure, notice } = state;
+  if (failure === null) return notice === null ? null : webStrings.resetSent;
+  return failureText(failure);
 }
 
 function sheetView(state: OpsPageState): SheetView {
   const form = sheetFormOf(state);
-  return {
-    form,
-    title: form === null || form === "choice" ? webStrings.ops.sheetTitle : webStrings.sheet[form],
-    busy: BUSY_STEPS.has(state.step),
-    message: sheetMessage(state),
-  };
+  const title =
+    form === null || form === "choice" ? webStrings.ops.sheetTitle : webStrings.sheet[form];
+  return { form, title, busy: BUSY_STEPS.has(state.step), message: sheetMessage(state) };
 }
 
 function failureLine(failure: OpsFailure): string {

@@ -28,9 +28,10 @@ const BY_CODE: Readonly<Record<string, (joined: boolean) => Failure>> = {
   "sessions.round-full": (joined) => ({ kind: "roundFull", joined }),
 };
 
-function retrySeconds(header: string | null): number {
+/** The seconds of `Retry-After`, or `fallback` when the header is missing or off its shape. */
+export function retrySeconds(header: string | null, fallback = DEFAULT_RETRY_SECONDS): number {
   const seconds = header === null ? Number.NaN : Number.parseInt(header, 10);
-  return Number.isInteger(seconds) && seconds > 0 ? seconds : DEFAULT_RETRY_SECONDS;
+  return Number.isInteger(seconds) && seconds > 0 ? seconds : fallback;
 }
 
 /** A refused answer of the API, as the page explains it. */

@@ -1,6 +1,7 @@
 import { opsMetricsOf } from "../ops-page/ops-metrics";
 import type { OpsFailure } from "../ops-page/ops-page.types";
 import type { OpsApiPort, OpsOutcome } from "../ops-page/ports";
+import { retrySeconds } from "../round-page/api-failures";
 
 import { createApiClient, type FetchApiOptions } from "./api-client";
 
@@ -11,15 +12,10 @@ const DEFAULT_RETRY_SECONDS = 60;
 
 const unavailable: OpsOutcome = { kind: "failed", failure: { kind: "unavailable" } };
 
-function retrySeconds(header: string | null): number {
-  const seconds = header === null ? Number.NaN : Number.parseInt(header, 10);
-  return Number.isInteger(seconds) && seconds > 0 ? seconds : DEFAULT_RETRY_SECONDS;
-}
-
 function rateLimited(response: Response): OpsOutcome {
   const failure: OpsFailure = {
     kind: "rateLimited",
-    retryAfterSeconds: retrySeconds(response.headers.get("Retry-After")),
+    retryAfterSeconds: retrySeconds(response.headers.get("Retry-After"), DEFAULT_RETRY_SECONDS),
   };
   return { kind: "failed", failure };
 }
