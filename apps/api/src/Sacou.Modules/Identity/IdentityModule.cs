@@ -11,8 +11,10 @@ using Sacou.Modules.Identity.GetDeletionBlockers;
 using Sacou.Modules.Identity.GetMyProfile;
 using Sacou.Modules.Identity.Infrastructure;
 using Sacou.Modules.Identity.Metrics;
+using Sacou.Modules.Identity.ReapplyDeletions;
 using Sacou.Modules.Identity.SaveMyProfile;
 using Sacou.Modules.Identity.SignIn;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Identity;
 
@@ -49,6 +51,10 @@ public static class IdentityModule
         services.AddScoped<IAccountExportSection, ProfileExportSection>();
         // The operator's counts (E7.2, ADR 0085, D2).
         services.AddScoped<IIdentityMetrics, PostgresIdentityMetrics>();
+        // The deletions reapplied after a restore, run by the API's operation command, never by a route (E6.3).
+        services.AddSingleton<IDeletionMarkSource, PostgresDeletionMarkSource>();
+        services.AddScoped<IRestoredAccounts, PostgresRestoredAccounts>();
+        services.AddScoped<ReapplyDeletionsHandler>();
         return services;
     }
 
@@ -59,4 +65,20 @@ public static class IdentityModule
     /// <summary>Applies the Identity migrations. The API calls it when <c>Database:MigrateOnStartup</c> is true.</summary>
     public static Task MigrateAsync(IServiceProvider services, CancellationToken cancellationToken = default) =>
         IdentityDatabase.MigrateAsync(services, cancellationToken);
+
+    /// <summary>
+    /// Reapplies, to the API's database (a restored backup), the deletions of the database at
+    /// <paramref name="sourceConnectionString"/> (E6.3). Called only by the operation command, before the API serves it.
+    /// Refused, writing nothing, when the dump is older than <see cref="DeletionMarkRetention"/>.
+    /// </summary>
+    public static async Task<Result<ReapplyDeletionsSummary>> ReapplyDeletionsAsync(
+        IServiceProvider services, string sourceConnectionString, DateTimeOffset dumpCreatedAt, CancellationToken cancellationToken = default)
+    {
+        var scope = services.CreateAsyncScope();
+        await using (scope.ConfigureAwait(false))
+        {
+            return await scope.ServiceProvider.GetRequiredService<ReapplyDeletionsHandler>()
+                .HandleAsync(sourceConnectionString, dumpCreatedAt, cancellationToken).ConfigureAwait(false);
+        }
+    }
 }

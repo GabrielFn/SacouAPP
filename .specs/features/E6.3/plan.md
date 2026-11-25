@@ -1,7 +1,11 @@
 # E6.3 · Reaplicar as exclusões de conta depois de restaurar um backup
 
 **Approved**: 2026-11-25 - user: "Aprovo, pode começar" (respostas 228: 1, 229: 1, 230: não, 231: promover o membro ativo mais antigo)
-**Settled mid-build:** none
+**Settled mid-build:** (1) resposta 231 do Gabriel: quando a reexclusão leva o único Admin ativo de um grupo, o membro ativo mais antigo com conta (menor `joined_at`, desempate pelo `MemberId`) vira Admin; sem ninguém com conta, o grupo fica como está e conta em `groups left without admin`. Regra em `docs/dominio/grupos.md`; contrato novo `ErasureMode.AfterRestore` (AD-005). (2) Resposta 230: o comando não roda no Restore do Neon; o critério 18 saiu. (3) A guarda de idade do dump (critério 13) entrou já na S1, no handler e antes das migrações no comando (AD-004). (4) Correção da revisão da S1 (PR #257): o comando descarta o app antes de sair (esvazia o logger e o Sentry) e recebe um token cancelado pelo Ctrl+C (o host não sobe, então o `ConsoleLifetime` não liga o Ctrl+C); só a recusa de dump antigo vira 4, outra falha vira 5 (`failed (<código>); run again`); `--dump-created-at` no futuro é erro de uso (2); `groups left without admin` conta cada grupo uma vez. O teste de processo real (`OperationCommandProcessTests`, em `Sacou.Api.Tests`) roda `dotnet Sacou.Api.dll reapply-deletions` com a porta do servidor ocupada e confere o código (4 e 2), a linha única e que nada escuta; ele cobre as recusas antes de qualquer leitura do banco, e o caminho de sucesso continua no processo do teste de integração (`ReapplyDeletionsTests`), pelo `IOperationCommand`. (5) **Condições da segurança para a S2 (antes da E6.5):** recusar (2) origem igual ao destino (mesmo host, porta e banco) e destino com mais marcas que a origem (a origem provavelmente é o backup, não o banco atual); recusar (2) origem cujo papel pode escrever (`has_table_privilege(current_user, 'identity.users', 'INSERT')` verdadeiro na origem). **Na S3:** o roteiro lê as duas URLs com `read -rs` (nunca na linha de comando nem no histórico) e tira `--dump-created-at` do `createdAt` do manifesto, nunca digitado. (6) **Risco residual da 231:** o herdeiro do Admin é o membro ativo mais antigo com conta **no banco restaurado**, não necessariamente quem recebeu a passagem de Admin no banco atual depois do dump; aceito no piloto (o Admin novo pode passar o papel de novo) e citado em `docs/dominio/grupos.md`.
+
+**Decisões da construção (AD):**
+- **AD-004** · A guarda de idade do dump (critério 13) roda duas vezes: no comando, antes das migrações e de qualquer conexão (nada escrito num destino que vai ser recusado), e no handler, antes de ler a origem (o handler não confia em quem o chama). Ambas usam `DeletionMarkRetention.Covers` (60 dias, resposta 222), a mesma constante da limpeza da E6.5.
+- **AD-005** · Contrato novo `ErasureMode.AfterRestore` em `IAccountErasure`: apaga como o `Sweep` (sem conferir bloqueios, a pessoa já escolheu sair) e, quando o grupo perde o último Admin ativo, promove o membro ativo mais antigo com conta (resposta 231); devolve os grupos que ficaram sem Admin e sem ninguém para promover. Um modo e não um método novo: o Groups mantém um único caminho de apagar, e o `DELETE /v1/me` não muda.
 **Review:** <a escrever quando a revisão for enviada>
 **Fix pass:** <a escrever quando a correção for feita>
 
@@ -20,7 +24,7 @@ Reusa a exclusão que já existe (as `IAccountErasure` do Notifications e do Gro
 1. Gabriel, no Cloud Shell, roda a imagem da API (`sacou-api:restore`, já construída no passo 4 do ensaio) com o argumento `reapply-deletions --dump-created-at <createdAt do manifesto>`, a URL do banco restaurado em `SACOU_DATABASE_URL` e a URL **só leitura** do banco atual (papel `sacou_backup`) em `SACOU_DELETIONS_SOURCE_DATABASE_URL` -> `Program.cs` (exists) desvia para o comando depois de montar os serviços, sem subir o Kestrel (door 1)
 2. `Sacou.Api/Operations/ReapplyDeletionsCommand` (new) - valida argumentos e variáveis (TLS forçado pela mesma regra de `DatabaseConnectionSetup` (exists)), aplica as migrações pendentes do destino (as mesmas `*Module.MigrateAsync` (exists)) e chama o handler
 3. `Identity/ReapplyDeletions/ReapplyDeletionsHandler` (new) - lê todas as marcas da origem numa transação `READ ONLY` (`DeletedAccountSource`, new); recusa se o dump é mais velho que a retenção da marca; grava cada marca no destino (`INSERT ... ON CONFLICT DO NOTHING`, door 2); acha no destino as contas cujo `sha256(firebase_uid)` está nas marcas
-4. para cada conta achada, em ordem de `id`: as `IAccountErasure` (exists) em `ErasureMode.Sweep` e depois `DELETE FROM identity.users` (o perfil cai em cascata), o mesmo passo 3 do ADR 0056, D7
+4. para cada conta achada, em ordem de `id`: as `IAccountErasure` (exists) em `ErasureMode.AfterRestore` (new, AD-005: o `Sweep` mais a promoção da pergunta 231) e depois `DELETE FROM identity.users` (o perfil cai em cascata), o mesmo passo 3 do ADR 0056, D7
 5. out: uma linha na saída padrão e uma no log, só com números (`reapply-deletions: ok, <marcas> marks, <novas> new marks, <contas> accounts erased, <grupos> groups left without admin, <s> s`), código de saída 0; a API depois lê o banco restaurado e responde 410 a quem se excluiu (D5 do ADR 0056, sem mudança)
 
 ```mermaid
@@ -46,10 +50,10 @@ sequenceDiagram
 
 | Front | What changes |
 |---|---|
-| domain | Nenhum termo muda. `ErasureMode.Sweep` passa a ter um segundo chamador (o comando); hoje só o `DeleteMyAccountHandler` |
+| domain | Nenhum termo muda. `ErasureMode.AfterRestore` (AD-005) entra no contrato `IAccountErasure`; o Groups promove o membro ativo mais antigo com conta quando a reexclusão leva o último Admin (pergunta 231, `grupos.md`) |
 | stored data | Nada a migrar: nenhuma tabela nova nem coluna. O destino ganha as marcas que faltam |
 | readers | `POST /v1/me` (410 para quem foi reexcluído) e toda rota (403 `user-not-registered`): sem mudança de código; o teste de integração confere |
-| operação | `docs/operacao/backup.md`: o passo 3 de "Restaurar de verdade" vira o comando; o passo 1 (Restore do Neon) ganha o mesmo comando (pergunta 230); o ensaio mensal ganha o comando contra o `sacou_restore`; o aviso de bloqueio do topo sai |
+| operação | `docs/operacao/backup.md`: o passo 3 de "Restaurar de verdade" vira o comando; o ensaio mensal ganha o comando contra o `sacou_restore`; o aviso de bloqueio do topo sai |
 
 ```mermaid
 erDiagram
@@ -68,7 +72,7 @@ Comando, não rota HTTP (pergunta 228). Imagem da API, `docker run ... sacou-api
 
 | Entrada | Obrigatória | Padrão |
 |---|---|---|
-| `--dump-created-at <ISO 8601>` | sim (o `createdAt` do manifesto; no Restore do Neon, o instante escolhido) | - |
+| `--dump-created-at <ISO 8601>` | sim (o `createdAt` do manifesto) | - |
 | `SACOU_DATABASE_URL` | sim (banco restaurado, papel da API) | - |
 | `SACOU_DELETIONS_SOURCE_DATABASE_URL` | sim (banco atual, papel `sacou_backup`, só leitura) | - |
 
@@ -105,8 +109,8 @@ Ponta a ponta: argumento, host, handler, as duas exclusões existentes, resumo e
 2. WHEN o comando roda de novo sobre o mesmo destino THEN o sistema SHALL sair com 0 e `0 new marks, 0 accounts erased`, sem mudar nenhuma linha
 3. WHEN A pede `POST /v1/me` à API ligada no destino depois do comando THEN o sistema SHALL responder 410 `identity.account-deleted` sem criar linha (ADR 0056, D5); outra rota com o token de A → 403 `identity.user-not-registered`
 4. WHEN o destino já não tem A (A se excluiu antes do dump) THEN o sistema SHALL apenas garantir a marca e contar `0 accounts erased`
-5. IF A era o único Admin ativo de um grupo com outro membro ativo com conta (o bloqueio do ADR 0056, D3, que no banco atual já foi resolvido e no restaurado voltou) THEN o sistema SHALL reexcluir A mesmo assim (modo `Sweep`, sem conferir bloqueio) e contar o grupo em `groups left without admin` (pergunta 231)
-   - 1 grupo assim → `1 groups left without admin`; Co-admin restante não conta como admin
+5. IF A era o único Admin ativo de um grupo (o bloqueio do ADR 0056, D3, que no banco atual já foi resolvido e no restaurado voltou) THEN o sistema SHALL reexcluir A mesmo assim (modo `AfterRestore`, sem conferir bloqueio), promover a Admin o membro ativo mais antigo com conta (menor `joined_at`, depois menor `MemberId`) e, sem ninguém com conta, contar o grupo em `groups left without admin` (pergunta 231)
+   - grupo com Co-admin, Placar e Jogador → o mais antigo deles (o Co-admin, que não conta como admin) vira Admin; grupo só de A → `1 groups left without admin`
 6. The system SHALL escrever no log e na saída só números e códigos: nenhum UID, hash (nem em hexadecimal), `UserId`, `MemberId`, `groupId`, apelido, nome de grupo nem URL de banco ou senha
    - teste L1: a saída e o log capturados de toda a bateria da S1 não contêm o UID de A, o hex do hash de A, o apelido de A, o nome do grupo, o id de A nem a senha das URLs
 7. The system SHALL achar a conta pelo `sha256(convert_to(firebase_uid, 'UTF8'))` do banco igual a `SubjectHash.Of(AuthSubject)`
@@ -136,7 +140,7 @@ O comando nunca deixa o operador achar que deu certo quando não deu.
 **Acceptance Criteria**
 
 17. WHEN o Gabriel segue "Restaurar de verdade" em `docs/operacao/backup.md` THEN o passo 3 SHALL ter o comando literal (`docker run` com `read -rs` das duas URLs, a de origem lida do segredo `sacou-backup-database-url-<env>`, nunca impressa) e o resultado esperado, antes da troca do banco do serviço (passo 4)
-18. WHEN o Gabriel usa o Restore do Neon (passo 1) THEN o roteiro SHALL mandar rodar o mesmo comando com a origem no ramo de antes da restauração que o Neon guarda, e `--dump-created-at` no instante escolhido (pergunta 230)
+18. *(Retirado: resposta 230, o comando não roda no Restore do Neon; o risco das últimas horas fica aceito e registrado na S3.)*
 19. WHEN o Gabriel faz o ensaio mensal THEN o roteiro SHALL incluir o comando contra o `sacou_restore` com a origem no banco atual, com o resultado anotado no diário
 20. The system SHALL ter o aviso "Bloqueado na produção" de `backup.md` e o "Pendente" do ADR 0082, D10, trocados pela referência ao comando, e a linha do piloto com jogadores reais liberada só depois do primeiro ensaio com o comando (anotado no diário)
 21. The system SHALL ter um ADR novo (próximo número livre; 0086 se a E6.2 não o usar) com as portas 1 a 3, a nota no ADR 0056 (segundo chamador do `Sweep`), a linha nova em `docs/seguranca/modelo-de-ameacas.md` (credencial de origem no Cloud Shell; risco residual da pergunta 229) e a nota em `docs/seguranca/dados-pessoais.md` (a marca agora também serve à restauração)
@@ -147,7 +151,6 @@ O comando nunca deixa o operador achar que deu certo quando não deu.
 |---|---|
 | Apagar o resto da marca depois de 60 dias | E6.5 (resposta 222); aqui só a constante compartilhada |
 | Cópia das marcas fora do Neon | Pergunta 229: infraestrutura nova para um risco residual pequeno |
-| Promover um admin automaticamente no grupo que ficou sem | `grupos.md:23` proíbe promoção automática; pergunta 231 |
 | Conta no Firebase | Já apagada pelo app na exclusão original (pergunta 57); o restore não a traz de volta |
 | Avisar os grupos do que se perdeu | Passo 6 do roteiro, manual, sem mudança |
 | Rota no painel do operador | Pergunta 228 |
@@ -158,7 +161,6 @@ O comando nunca deixa o operador achar que deu certo quando não deu.
 |---|---|---|---|
 | `left_at` dos membros reexcluídos | Agora (o `TimeProvider` do `Sweep`), não o `deleted_at` da marca | Reusa o `Sweep` sem mudar a assinatura; a diferença é de horas a dias e não identifica ninguém | n |
 | Marcas copiadas | Todas da origem, não só as mais novas que o dump | Idempotente e independe do relógio do manifesto | n |
-| Neon Restore guarda o estado anterior num ramo | O Restore do Neon cria um ramo de backup com o estado de antes; o roteiro aponta a origem para ele | A conferir no console do Neon no primeiro uso; se não houver, a origem é o dump mais novo (pergunta 229) | n |
 | Ordem das exclusões | A da injeção (Notifications antes do Groups, ADR 0069, D9), como no `DELETE /v1/me` | Mesmo contrato; teste de ordem já existe | n |
 | Retenção da marca | 60 dias (resposta 222, segundo o brief) | Precisa ser maior que os 30 dias do bucket; o texto da resposta está na branch da E6.2 | n |
 

@@ -60,6 +60,34 @@ builder.Services.AddSacouWeb(builder.Configuration);
 builder.Services.AddSacouOperations(builder.Configuration);
 
 var app = builder.Build();
+
+// An operation command (E6.3, door 1): only with an argument on the container's command line, which the Cloud Run
+// service never passes. It runs on the built services and exits: no port, no route, no middleware.
+// The app is disposed before the exit, so the console logger and Sentry flush. The host never starts, so its console
+// lifetime never hooks Ctrl+C: the command gets its own token, cancelled on Ctrl+C.
+if (OperationCommands.TryMatch(args) is { } command)
+{
+    await using (app)
+    {
+        using var interrupted = new CancellationTokenSource();
+        void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs keyPress)
+        {
+            keyPress.Cancel = true;
+            interrupted.Cancel();
+        }
+
+        Console.CancelKeyPress += OnCancelKeyPress;
+        try
+        {
+            return await command.RunAsync(app.Services, Console.Out, interrupted.Token);
+        }
+        finally
+        {
+            Console.CancelKeyPress -= OnCancelKeyPress;
+        }
+    }
+}
+
 // Says by name when Sentry is off (ADR 0080, D1).
 app.LogObservabilityState();
 
@@ -114,12 +142,8 @@ _ = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoin
 
 if (app.Configuration.GetValue<bool>(DatabaseConnectionSetup.MigrateOnStartupKey))
 {
-    await IdentityModule.MigrateAsync(app.Services);
-    await GroupsModule.MigrateAsync(app.Services);
-    await SessionsModule.MigrateAsync(app.Services);
-    await MatchesModule.MigrateAsync(app.Services);
-    await StatsModule.MigrateAsync(app.Services);
-    await NotificationsModule.MigrateAsync(app.Services);
+    await DatabaseMigrations.ApplyAsync(app.Services, CancellationToken.None);
 }
 
 await app.RunAsync();
+return 0;
