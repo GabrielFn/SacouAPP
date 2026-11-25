@@ -1,6 +1,6 @@
 # E6.3 · Reaplicar as exclusões de conta depois de restaurar um backup
 
-**Approved**: <a escrever quando o Gabriel aprovar - AAAA-MM-DD - user: "palavras dele">
+**Approved**: 2026-11-25 - user: "Aprovo, pode começar" (respostas 228: 1, 229: 1, 230: não, 231: promover o membro ativo mais antigo)
 **Settled mid-build:** none
 **Review:** <a escrever quando a revisão for enviada>
 **Fix pass:** <a escrever quando a correção for feita>
