@@ -8,7 +8,7 @@ import { reportTargetOf } from "../hooks/use-members-screen";
 import { reportContentMutation } from "../queries/report-mutations";
 import { initialMembersScreenState, membersScreenReducer } from "./members-screen.reducer";
 import { GROUP, member } from "./members.test.fixture";
-import { reportBody, reportTitle } from "./report";
+import { canReportGroup, reportBody, reportTitle } from "./report";
 
 describe("the body of a report (E6.6)", () => {
   test("a member goes by its id, the group with null; never a name", () => {
@@ -21,6 +21,24 @@ describe("the body of a report (E6.6)", () => {
       reason: "offensiveName",
     });
     expect(reportTitle({ kind: "member", memberId: "m", name: "Bia" })).toBe("Denunciar Bia");
+  });
+});
+
+describe("Denunciar grupo on screen 18 (E6.6, criterion 13)", () => {
+  const admin = member("a", "admin");
+  test.each(["coAdmin", "scorekeeper", "player"] as const)("%s sees the line", (role) => {
+    expect(canReportGroup([admin, member("me", role, { isMe: true })])).toBe(true);
+  });
+
+  test("the only admin does not; an admin with another admin does", () => {
+    const me = member("me", "admin", { isMe: true });
+    expect(canReportGroup([me, member("p", "player")])).toBe(false);
+    expect(canReportGroup([me, admin])).toBe(true);
+  });
+
+  test("hidden until the members are known", () => {
+    expect(canReportGroup(undefined)).toBe(false);
+    expect(canReportGroup([admin])).toBe(false);
   });
 });
 

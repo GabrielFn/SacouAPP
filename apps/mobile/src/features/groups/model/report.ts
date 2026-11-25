@@ -1,4 +1,4 @@
-import type { ContentReportBody, ReportReason } from "../../../services/api/sacou-api";
+import type { ContentReportBody, Member, ReportReason } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
 
 const texts = strings.report;
@@ -25,6 +25,17 @@ export interface ReportFlow {
   /** The last report went through: "Denúncia enviada" shows until the next one starts. */
   readonly sent: boolean;
   readonly send: (reason: ReportReason) => void;
+}
+
+/**
+ * "Denunciar grupo" at the end of screen 18 (E6.6, criterion 13): for every active member but the only admin, who
+ * wrote the name and the venue and changes them instead. Hidden until the members are known.
+ */
+export function canReportGroup(members: readonly Member[] | undefined): boolean {
+  const me = members?.find((member) => member.isMe);
+  if (members === undefined || me === undefined) return false;
+  const admins = members.filter((member) => member.role === "admin").length;
+  return !(me.role === "admin" && admins <= 1);
 }
 
 export function reportTitle(target: ReportTarget): string {
