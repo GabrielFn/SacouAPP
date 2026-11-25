@@ -79,11 +79,26 @@ public sealed class ReapplyDeletionsHandlerTests
     {
         restored.Add("uid-a");
         restored.Add("uid-b");
-        groups.WithoutAdmin = [Guid.NewGuid()];
+        groups.WithoutAdminPerCall = [[Guid.NewGuid()], [Guid.NewGuid()]];
 
         var summary = (await HandleAsync(Now.AddDays(-1), Mark(1))).Value;
 
         Assert.Equal(2, summary.GroupsWithoutAdmin);
+    }
+
+    /// <summary>Two admins of one group both went: the group counts once, in any module that reports it.</summary>
+    [Fact]
+    public async Task OneGroupReportedTwice_CountsOnce()
+    {
+        restored.Add("uid-a");
+        restored.Add("uid-b");
+        var group = Guid.NewGuid();
+        groups.WithoutAdminPerCall = [[group], [group]];
+        notifications.WithoutAdminPerCall = [[group]];
+
+        var summary = (await HandleAsync(Now.AddDays(-1), Mark(1))).Value;
+
+        Assert.Equal(1, summary.GroupsWithoutAdmin);
     }
 
     /// <summary>59 days and 23 hours runs; exactly 60 days runs; 60 days and 1 minute is refused, with nothing written.</summary>
@@ -158,13 +173,15 @@ public sealed class ReapplyDeletionsHandlerTests
     {
         public List<ErasureMode> Modes { get; } = [];
 
-        public IReadOnlyList<Guid> WithoutAdmin { get; set; } = [];
+        /// <summary>What each call returns, in order; empty once the list runs out.</summary>
+        public IReadOnlyList<IReadOnlyList<Guid>> WithoutAdminPerCall { get; set; } = [];
 
         public Task<IReadOnlyList<Guid>> EraseAsync(Guid userId, ErasureMode mode, CancellationToken cancellationToken)
         {
+            var call = Modes.Count;
             Modes.Add(mode);
             steps.Add($"{module} {userId}");
-            return Task.FromResult(WithoutAdmin);
+            return Task.FromResult(call < WithoutAdminPerCall.Count ? WithoutAdminPerCall[call] : (IReadOnlyList<Guid>)[]);
         }
     }
 }
