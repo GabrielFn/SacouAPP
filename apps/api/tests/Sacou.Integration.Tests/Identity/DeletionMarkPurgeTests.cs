@@ -141,6 +141,36 @@ public sealed class DeletionMarkPurgeTests(IntegrationDatabase database) : Metri
             StringComparison.Ordinal);
     }
 
+    /// <summary>Criterion 4: the person back after the purge gets a 201 with only the new id, and no profile (no nickname, no old data).</summary>
+    [Fact]
+    public async Task AfterThePurge_TheSameUidComesBackWithAnEmptyProfile()
+    {
+        await AddMarkAsync("uid-volta-vazio", DateTimeOffset.UtcNow - TimeSpan.FromDays(61));
+        using var client = Api.CreateClient();
+        using var swept = await CallRouteAsync(client, Api.ServiceCallerToken());
+
+        using var back = await SignInAsync(client, "uid-volta-vazio");
+        var body = await back.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var json = System.Text.Json.JsonDocument.Parse(body);
+        var userId = json.RootElement.GetProperty("userId").GetGuid();
+        using var profile = await GetProfileAsync(client, "uid-volta-vazio");
+
+        Assert.Equal(HttpStatusCode.NoContent, swept.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, back.StatusCode);
+        Assert.Single(json.RootElement.EnumerateObject());
+        Assert.NotEqual(Guid.Empty, userId);
+        Assert.Equal(HttpStatusCode.NotFound, profile.StatusCode);
+        Assert.Equal(0, await CountAsync("SELECT count(*) FROM identity.deleted_accounts WHERE subject_hash = @value", HashOf("uid-volta-vazio")));
+    }
+
+    private async Task<HttpResponseMessage> GetProfileAsync(HttpClient client, string subject)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/v1/me/profile");
+        var token = TestIdToken.Valid(Api.Key, FixedTimeProvider.WholeSecondNow()).With("sub", subject).With("user_id", subject).Sign();
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return await client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
+
     private static byte[] HashOf(string subject) => SHA256.HashData(Encoding.UTF8.GetBytes(subject));
 
     private static string HexOf(string subject) => Convert.ToHexString(HashOf(subject));
