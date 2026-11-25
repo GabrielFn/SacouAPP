@@ -13,6 +13,17 @@ internal enum SnapshotWarmth
 }
 
 /// <summary>
+/// What <see cref="ICourtStreamSnapshots.EnsureAsync"/> handed over: the snapshot itself, so the lock that follows works
+/// on this one and never asks the cache again (one evicted in between is still the one the write uses). Null when busy.
+/// </summary>
+internal sealed record WarmSnapshot(SnapshotWarmth Warmth, StreamSnapshot? Snapshot)
+{
+    public static readonly WarmSnapshot Busy = new(SnapshotWarmth.Busy, Snapshot: null);
+
+    public override string ToString() => $"{nameof(WarmSnapshot)}({Warmth})";
+}
+
+/// <summary>
 /// The snapshots of the court streams in the memory of the process (ADR 0081), by stream id. Only content read from the
 /// database or committed goes in; nothing goes to disk nor to a log. A singleton: with one instance (ADR 0068) every
 /// request of a stream finds it, and with more each one checks its copy against the database anyway.
@@ -29,9 +40,11 @@ internal interface ICourtStreamSnapshots
     /// <summary>
     /// Outside any lock: a snapshot of at least <paramref name="eventCount"/> events, from the one kept or read from the
     /// database. One build per stream at a time, the others wait for it; a few builds at a time in all, and a build that
-    /// gets no turn in time answers <see cref="SnapshotWarmth.Busy"/>.
+    /// gets no turn in time answers <see cref="SnapshotWarmth.Busy"/>. A build that reads fewer than
+    /// <see cref="CourtStreamCacheOptions.SmallStreamEvents"/> events takes a turn of a gate of its own: full streams,
+    /// built again and again, never keep the small ones out.
     /// </summary>
-    Task<SnapshotWarmth> EnsureAsync(Guid courtSessionId, int eventCount, CancellationToken cancellationToken);
+    Task<WarmSnapshot> EnsureAsync(Guid courtSessionId, int eventCount, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -43,6 +56,7 @@ internal interface ICourtStreamSnapshots
 internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDisposable
 {
     private const int SmallestSize = 1;
+    private const int NoVersion = 0;
 
     private readonly IServiceScopeFactory _scopes;
     private readonly TimeProvider _time;
@@ -50,6 +64,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
     private readonly TimeSpan _sliding;
     private readonly TimeSpan _absolute;
     private readonly SemaphoreSlim _builds;
+    private readonly SemaphoreSlim _smallBuilds;
     private readonly Lock _sync = new();
     private readonly Dictionary<Guid, Entry> _entries = [];
     private readonly Dictionary<Guid, Task<StreamSnapshot?>> _building = [];
@@ -66,6 +81,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
         _sliding = TimeSpan.FromMinutes(_options.SlidingExpirationMinutes);
         _absolute = TimeSpan.FromHours(_options.AbsoluteExpirationHours);
         _builds = new SemaphoreSlim(_options.MaxConcurrentBuilds, _options.MaxConcurrentBuilds);
+        _smallBuilds = new SemaphoreSlim(_options.MaxConcurrentSmallBuilds, _options.MaxConcurrentSmallBuilds);
     }
 
     /// <summary>The stored events all kept snapshots hold together.</summary>
@@ -122,20 +138,22 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
         }
     }
 
-    public async Task<SnapshotWarmth> EnsureAsync(Guid courtSessionId, int eventCount, CancellationToken cancellationToken)
+    public async Task<WarmSnapshot> EnsureAsync(Guid courtSessionId, int eventCount, CancellationToken cancellationToken)
     {
-        if (TryGet(courtSessionId) is { } kept && kept.Version >= eventCount)
+        var kept = TryGet(courtSessionId);
+        if (kept is not null && kept.Version >= eventCount)
         {
-            return SnapshotWarmth.Hit;
+            return new WarmSnapshot(SnapshotWarmth.Hit, kept);
         }
 
+        var gate = eventCount - (kept?.Version ?? NoVersion) < _options.SmallStreamEvents ? _smallBuilds : _builds;
         Task<StreamSnapshot?> build;
         lock (_sync)
         {
             if (!_building.TryGetValue(courtSessionId, out var running))
             {
                 // On the thread pool, so its end, which forgets it under the same lock, always comes after this line.
-                running = Task.Run(() => BuildAsync(courtSessionId), CancellationToken.None);
+                running = Task.Run(() => BuildAsync(courtSessionId, gate), CancellationToken.None);
                 _building[courtSessionId] = running;
             }
 
@@ -143,18 +161,18 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
         }
 
         var built = await build.WaitAsync(cancellationToken).ConfigureAwait(false);
-        return built is null ? SnapshotWarmth.Busy : SnapshotWarmth.Built;
+        return built is null ? WarmSnapshot.Busy : new WarmSnapshot(SnapshotWarmth.Built, built);
     }
 
     /// <summary>
     /// In a scope of its own and with no token of a request: the requests that wait for it may go away, the build
     /// does not. A stream changed outside the API is thrown away and built again by the source.
     /// </summary>
-    private async Task<StreamSnapshot?> BuildAsync(Guid courtSessionId)
+    private async Task<StreamSnapshot?> BuildAsync(Guid courtSessionId, SemaphoreSlim gate)
     {
         try
         {
-            if (!await _builds.WaitAsync(_options.BuildWaitMilliseconds).ConfigureAwait(false))
+            if (!await gate.WaitAsync(_options.BuildWaitMilliseconds).ConfigureAwait(false))
             {
                 return null;
             }
@@ -172,7 +190,7 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
             }
             finally
             {
-                _builds.Release();
+                gate.Release();
             }
         }
         finally
@@ -225,7 +243,11 @@ internal sealed class MemoryCourtStreamSnapshots : ICourtStreamSnapshots, IDispo
 
     private static long SizeOf(StreamSnapshot snapshot) => Math.Max(SmallestSize, snapshot.Version);
 
-    public void Dispose() => _builds.Dispose();
+    public void Dispose()
+    {
+        _builds.Dispose();
+        _smallBuilds.Dispose();
+    }
 
     private sealed record Entry(StreamSnapshot Snapshot, DateTimeOffset Kept, DateTimeOffset LastUsed);
 }

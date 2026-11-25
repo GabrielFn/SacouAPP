@@ -1,7 +1,8 @@
 using System.Collections.Immutable;
-using System.Data;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Npgsql;
 using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
 
@@ -10,12 +11,15 @@ namespace Sacou.Modules.Matches.Infrastructure;
 /// <summary>
 /// The one lock is the stream's row (ADR 0060, D6). SQL is always parameterized: EF turns the interpolated
 /// values into parameters (ADR 0037). Reads outside the lock use <c>AsNoTracking</c>. The envelopes of a stream are
-/// replayed once into its snapshot, outside the lock (ADR 0081); under the lock a write reads only those after it.
+/// replayed once into its snapshot, outside the lock (ADR 0081); under the lock a write reads only those after it, and
+/// never the whole stream: with no snapshot it can advance, the write is a 503 and the next try builds one outside.
 /// </summary>
 internal sealed partial class PostgresCourtStreamStore(
     MatchesDbContext database,
     ICourtStreamSnapshots snapshots,
-    ICourtSnapshotSource snapshotReader) : ICourtStreamStore, ICourtEventStore, ICourtWriterReader
+    ICourtSnapshotSource snapshotReader,
+    IOptions<CourtStreamCacheOptions> cacheOptions,
+    IOptions<CourtTransactionOptions> transactionOptions) : ICourtStreamStore, ICourtWriterReader
 {
     private const int FirstPosition = 1;
     private const long NoSequence = 0;
@@ -27,8 +31,8 @@ internal sealed partial class PostgresCourtStreamStore(
     {
         ArgumentNullException.ThrowIfNull(append);
         ArgumentNullException.ThrowIfNull(rules);
-        var warmth = await WarmAsync(append, cancellationToken).ConfigureAwait(false);
-        if (warmth == SnapshotWarmth.Busy)
+        var warm = await WarmAsync(append, cancellationToken).ConfigureAwait(false);
+        if (warm?.Warmth == SnapshotWarmth.Busy)
         {
             return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy);
         }
@@ -36,54 +40,63 @@ internal sealed partial class PostgresCourtStreamStore(
         var started = Stopwatch.GetTimestamp();
         LockedAppend locked;
         var committed = false;
-        var transaction = await database.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
-        await using (transaction.ConfigureAwait(false))
+        try
         {
-            locked = await AppendUnderLockAsync(append, rules, cancellationToken).ConfigureAwait(false);
-            if (locked.Outcome.Decided is { IsSuccess: true } decided && !decided.Value.NewEvents.IsEmpty)
+            var transaction = await BeginBoundedTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await using (transaction.ConfigureAwait(false))
             {
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                committed = true;
+                locked = await AppendUnderLockAsync(append, rules, warm?.Snapshot, cancellationToken).ConfigureAwait(false);
+                if (locked.Outcome.Decided is { IsSuccess: true } decided && !decided.Value.NewEvents.IsEmpty)
+                {
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    committed = true;
+                }
             }
+        }
+        catch (NpgsqlException exception) when (IsTimeout(exception))
+        {
+            return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy);
+        }
+        catch (DbUpdateException exception) when (IsTimeout(exception))
+        {
+            return CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy);
         }
 
         var lockedMs = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
         Keep(append.CourtSessionId, locked, committed);
-        var use = warmth == SnapshotWarmth.Built ? SnapshotUse.Built : locked.Use;
+        var use = warm?.Warmth == SnapshotWarmth.Built ? SnapshotUse.Built : locked.Use;
         return locked.Outcome with { Trace = new CourtAppendTrace(lockedMs, use is { } found ? Word(found) : CourtAppendTrace.NoSnapshot) };
     }
 
     /// <summary>
     /// Only after the commit does the snapshot with the new events go in: a rollback, an exception or a refusal keeps
-    /// only what the lock read, all of it committed. A write that replayed the whole stream drops the copy.
+    /// only what the lock read, all of it committed. A write that replayed the whole stream, or a snapshot that does
+    /// not end at the stored count, drops the copy.
     /// </summary>
     private void Keep(Guid courtSessionId, LockedAppend locked, bool committed)
     {
-        if (committed)
+        if (!locked.Consistent)
         {
-            var next = locked.Outcome.Decided!.Value.Snapshot;
-            if (next is null)
-            {
-                snapshots.Evict(courtSessionId);
-                return;
-            }
-
-            if (locked.Use == SnapshotUse.Built)
-            {
-                snapshots.Evict(courtSessionId);
-            }
-
-            snapshots.Publish(courtSessionId, next);
+            snapshots.Evict(courtSessionId);
             return;
         }
 
-        if (locked.Read is { } read && read.Use != SnapshotUse.Hit)
+        if (committed)
         {
-            if (read.Use == SnapshotUse.Built)
+            if (locked.Outcome.Decided!.Value.Snapshot is { } next)
+            {
+                snapshots.Publish(courtSessionId, next);
+            }
+            else
             {
                 snapshots.Evict(courtSessionId);
             }
 
+            return;
+        }
+
+        if (locked.Read is { Use: SnapshotUse.Advanced } read)
+        {
             snapshots.Publish(courtSessionId, read.Snapshot);
         }
     }
@@ -98,9 +111,10 @@ internal sealed partial class PostgresCourtStreamStore(
 
     /// <summary>
     /// Outside the lock, a cheap look at the stream: only its current writer, in its group and round, gets the snapshot
-    /// built or advanced here, so nobody else makes the server replay a stream (ADR 0081). The lock asks it all again.
+    /// built or advanced here, so nobody else makes the server replay a stream (ADR 0081). The lock asks it all again,
+    /// on the snapshot handed over here; null for anybody else.
     /// </summary>
-    private async Task<SnapshotWarmth?> WarmAsync(CourtAppend append, CancellationToken cancellationToken)
+    private async Task<WarmSnapshot?> WarmAsync(CourtAppend append, CancellationToken cancellationToken)
     {
         var session = await database.CourtSessions.AsNoTracking()
             .Where(row => row.Id == append.CourtSessionId)
@@ -124,7 +138,8 @@ internal sealed partial class PostgresCourtStreamStore(
             : null;
     }
 
-    private async Task<LockedAppend> AppendUnderLockAsync(CourtAppend append, CourtAppendRules rules, CancellationToken cancellationToken)
+    private async Task<LockedAppend> AppendUnderLockAsync(
+        CourtAppend append, CourtAppendRules rules, StreamSnapshot? warmed, CancellationToken cancellationToken)
     {
         var created = append.MayCreate && await TryCreateAsync(append, cancellationToken).ConfigureAwait(false);
         var session = await LockAsync(append.CourtSessionId, cancellationToken).ConfigureAwait(false);
@@ -141,7 +156,7 @@ internal sealed partial class PostgresCourtStreamStore(
 
         if (created)
         {
-            return await DecideAsync(append, session, rules.Decide(StoredStream.New), read: null, cancellationToken).ConfigureAwait(false);
+            return await DecideAsync(append, session, rules.Decide(StoredStream.New), LockedRead.None, cancellationToken).ConfigureAwait(false);
         }
 
         var writers = await LoadWritersAsync(session, cancellationToken).ConfigureAwait(false);
@@ -151,17 +166,22 @@ internal sealed partial class PostgresCourtStreamStore(
             var lastSequence = await LastSequenceAsync(session.Id, append.DeviceId, cancellationToken).ConfigureAwait(false);
             if (rules.RefuseWriter(new WrittenStream(history, session.EventCount, append.DeviceId, lastSequence)) is { } refusal)
             {
-                return new LockedAppend(CourtStreamOutcome<CourtWriteDecision>.From(Result<CourtWriteDecision, CourtWriteError>.Failure(refusal)), Read: null);
+                return new LockedAppend(CourtStreamOutcome<CourtWriteDecision>.From(Result<CourtWriteDecision, CourtWriteError>.Failure(refusal)), LockedRead.None);
             }
         }
 
-        var read = await CatchUpAsync(session, cancellationToken).ConfigureAwait(false);
-        var decided = rules.Decide(StoredStream.Of(read.Snapshot, writers));
+        var read = await CatchUpAsync(session, warmed, cancellationToken).ConfigureAwait(false);
+        if (read.Snapshot is not { } caughtUp)
+        {
+            return new LockedAppend(CourtStreamOutcome<CourtWriteDecision>.Refused(CourtStreamRefusal.Busy), read);
+        }
+
+        var decided = rules.Decide(StoredStream.Of(caughtUp.Snapshot, writers));
         return await DecideAsync(append, session, decided, read, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<LockedAppend> DecideAsync(
-        CourtAppend append, CourtSessionRow session, Result<CourtWriteDecision, CourtWriteError> decided, ReadSnapshot? read, CancellationToken cancellationToken)
+        CourtAppend append, CourtSessionRow session, Result<CourtWriteDecision, CourtWriteError> decided, LockedRead read, CancellationToken cancellationToken)
     {
         if (decided.IsSuccess && !decided.Value.NewEvents.IsEmpty)
         {
@@ -172,19 +192,31 @@ internal sealed partial class PostgresCourtStreamStore(
     }
 
     /// <summary>
-    /// The snapshot kept, unless it is ahead of the count under the lock, brought up to the stored stream. Its version
-    /// must be the count: otherwise the counters and the rows disagree, and the write goes on without keeping it.
+    /// The snapshot the warm-up handed over, brought up to the stored stream by the events after it, never the whole
+    /// stream under the lock (condition 1 of the review of Part 1). None when there is no such snapshot (the caller
+    /// became the writer after the warm-up), when it is ahead of the count (changed outside the API, dropped), when
+    /// more than a small build lies after it, or when its last event is not there any more (dropped): the write is a
+    /// 503 and its next try builds outside the lock. One that does not end at the count is used but not kept.
     /// </summary>
-    private async Task<ReadSnapshot> CatchUpAsync(CourtSessionRow session, CancellationToken cancellationToken)
+    private async Task<LockedRead> CatchUpAsync(CourtSessionRow session, StreamSnapshot? warmed, CancellationToken cancellationToken)
     {
-        var kept = snapshots.TryGet(session.Id) is { } snapshot && snapshot.Version <= session.EventCount ? snapshot : null;
-        var read = await snapshotReader.ReadAsync(session.Id, kept, cancellationToken).ConfigureAwait(false);
-        if (read.Snapshot.Version != session.EventCount)
+        if (warmed is null)
         {
-            snapshots.Evict(session.Id);
+            return LockedRead.None;
         }
 
-        return read;
+        if (warmed.Version > session.EventCount)
+        {
+            return LockedRead.Dropped;
+        }
+
+        if (session.EventCount - warmed.Version > cacheOptions.Value.SmallStreamEvents)
+        {
+            return LockedRead.None;
+        }
+
+        var read = await snapshotReader.AdvanceAsync(session.Id, warmed, cancellationToken).ConfigureAwait(false);
+        return read is null ? LockedRead.Dropped : new LockedRead(read, Consistent: read.Snapshot.Version == session.EventCount);
     }
 
     /// <summary>
@@ -246,11 +278,26 @@ internal sealed partial class PostgresCourtStreamStore(
     /// <summary>The lowercase 8-4-4-4-12 form the parser accepts, so stored ids compare with received ones by text.</summary>
     private static string Text(Guid id) => id.ToString("D");
 
-    /// <summary>What happened under the lock, and the snapshot it read, if any; its use null when it read none.</summary>
-    private sealed record LockedAppend(CourtStreamOutcome<CourtWriteDecision> Outcome, ReadSnapshot? Read)
+    /// <summary>
+    /// The snapshot the lock read, if any, and whether it may be kept: false drops the copy of the cache (it does not
+    /// match the stored stream).
+    /// </summary>
+    private sealed record LockedRead(ReadSnapshot? Snapshot, bool Consistent)
     {
+        public static readonly LockedRead None = new(Snapshot: null, Consistent: true);
+
+        public static readonly LockedRead Dropped = new(Snapshot: null, Consistent: false);
+    }
+
+    /// <summary>What happened under the lock, and the snapshot it read; its use null when it read none.</summary>
+    private sealed record LockedAppend(CourtStreamOutcome<CourtWriteDecision> Outcome, LockedRead LockRead)
+    {
+        public ReadSnapshot? Read => LockRead.Snapshot;
+
         public SnapshotUse? Use => Read?.Use;
 
-        public static LockedAppend Refused(CourtStreamRefusal refusal) => new(CourtStreamOutcome<CourtWriteDecision>.Refused(refusal), Read: null);
+        public bool Consistent => LockRead.Consistent;
+
+        public static LockedAppend Refused(CourtStreamRefusal refusal) => new(CourtStreamOutcome<CourtWriteDecision>.Refused(refusal), LockedRead.None);
     }
 }

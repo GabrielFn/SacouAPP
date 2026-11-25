@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Sessions.Contracts;
@@ -232,10 +233,10 @@ public sealed class MvpOutcomesTests
     }
 
     private Task<RoundMvpVote> BallotOutcomeAsync(MvpBallot ballot) =>
-        new MvpOutcomes(votes, results, time).OfBallotAsync(GroupId, RoundId, ballot, TestContext.Current.CancellationToken);
+        new MvpOutcomes(votes, results, new RebuildBudget(Options.Create(new StatsRebuildOptions())), new GroupRebuildGate(Options.Create(new StatsRebuildOptions())), time).OfBallotAsync(GroupId, RoundId, ballot, TestContext.Current.CancellationToken);
 
     private Task<RoundMvpVote?> OutcomeAsync(RoundProjection round) =>
-        new MvpOutcomes(votes, results, time).OfRoundAsync(GroupId, round, TestContext.Current.CancellationToken);
+        new MvpOutcomes(votes, results, new RebuildBudget(Options.Create(new StatsRebuildOptions())), new GroupRebuildGate(Options.Create(new StatsRebuildOptions())), time).OfRoundAsync(GroupId, round, TestContext.Current.CancellationToken);
 
     private async Task<RoundSummaryReport> SummaryAsync(RoundProjection round) =>
         RoundSummaryReport.From(round, await OutcomeAsync(round));

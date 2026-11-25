@@ -17,9 +17,11 @@ public interface ICourtSessionResults
 
     /// <summary>
     /// The summary of the stored stream with the summary leaves of its round, and the count of events it was
-    /// computed from. A stream with no event is an empty summary. Never stored here.
+    /// computed from, from the snapshot of the stream (ADR 0081, Part 2), built outside any lock when there is none. A
+    /// stream with no event is an empty summary. Never stored here. Null when the snapshot cannot be built now (every
+    /// build busy): the caller leaves the round as it was, or answers 503 <c>matches.court-busy</c>.
     /// </summary>
-    Task<CourtSessionResults> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken);
+    Task<CourtSessionResults?> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken);
 }
 
 /// <summary>A stream of a round and how many events it has: with the round's facts, the key of a fresh projection.</summary>

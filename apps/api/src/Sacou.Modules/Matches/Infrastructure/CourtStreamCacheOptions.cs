@@ -13,6 +13,8 @@ internal sealed class CourtStreamCacheOptions
 
     private const int ThreeFullStreams = 60_000;
     private const int TwoBuilds = 2;
+    private const int FourSmallBuilds = 4;
+    private const int AboveARound = 2_000;
     private const int TwoSeconds = 2_000;
     private const int HalfAnHour = 30;
     private const int SixHours = 6;
@@ -20,8 +22,18 @@ internal sealed class CourtStreamCacheOptions
     /// <summary>The stored events all snapshots hold together; the oldest unused go first.</summary>
     public int MaxEvents { get; set; } = ThreeFullStreams;
 
-    /// <summary>How many snapshots are built from the database at once, across all streams.</summary>
+    /// <summary>How many builds of at least <see cref="SmallStreamEvents"/> events run at once, across all streams.</summary>
     public int MaxConcurrentBuilds { get; set; } = TwoBuilds;
+
+    /// <summary>
+    /// Below this many events to read, a build is small: it takes a turn of its own gate, never one of the big builds
+    /// (ADR 0081, Part 2). A typical round has about 1,500 events. Also the most a write advances its snapshot under the
+    /// lock: more than that is a 503 and the next try advances it outside.
+    /// </summary>
+    public int SmallStreamEvents { get; set; } = AboveARound;
+
+    /// <summary>How many small builds run at once, across all streams.</summary>
+    public int MaxConcurrentSmallBuilds { get; set; } = FourSmallBuilds;
 
     /// <summary>How long a build waits for its turn before the write is answered 503 <c>matches.court-busy</c>.</summary>
     public int BuildWaitMilliseconds { get; set; } = TwoSeconds;
@@ -43,6 +55,8 @@ internal sealed class CourtStreamCacheOptionsValidator : IValidateOptions<CourtS
         [
             .. Failure(nameof(options.MaxEvents), options.MaxEvents, CourtStreamLimits.MaxStreamEvents),
             .. Failure(nameof(options.MaxConcurrentBuilds), options.MaxConcurrentBuilds),
+            .. Failure(nameof(options.SmallStreamEvents), options.SmallStreamEvents, CourtStreamLimits.MaxEventsPerRequest),
+            .. Failure(nameof(options.MaxConcurrentSmallBuilds), options.MaxConcurrentSmallBuilds),
             .. Failure(nameof(options.BuildWaitMilliseconds), options.BuildWaitMilliseconds),
             .. Failure(nameof(options.SlidingExpirationMinutes), options.SlidingExpirationMinutes),
             .. Failure(nameof(options.AbsoluteExpirationHours), options.AbsoluteExpirationHours),
@@ -50,7 +64,10 @@ internal sealed class CourtStreamCacheOptionsValidator : IValidateOptions<CourtS
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }
 
-    /// <summary>The size must hold one stream at its ceiling, or a full stream would never be kept.</summary>
+    /// <summary>
+    /// The size must hold one stream at its ceiling, or a full stream would never be kept; a small build must hold one
+    /// request, or a write could never advance its snapshot under the lock.
+    /// </summary>
     private static IEnumerable<string> Failure(string setting, int value, int minimum = Minimum) =>
         value < minimum ? [$"{CourtStreamCacheOptions.SectionName}:{setting} must be at least {minimum}."] : [];
 }

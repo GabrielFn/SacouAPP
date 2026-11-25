@@ -67,7 +67,7 @@ public sealed class DatabaseConnectionSetupTests
         Assert.Null(configuration[DatabaseConnectionSetup.ConnectionStringKey]);
     }
 
-    /// <summary>The pool the URL gives fits the two-connection routes of ADR 0062 (2 × 8 + 4 = 20 ≤ 30).</summary>
+    /// <summary>The pool the URL gives fits the two-connection routes of ADR 0062 and the court-sync routes (2 × (7 + 6) + 4 = 30 ≤ 30).</summary>
     [Fact]
     public void ConvertedPool_PassesTheTwoConnectionCheck()
     {
@@ -77,7 +77,7 @@ public sealed class DatabaseConnectionSetupTests
 
         var options = services.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
 
-        Assert.True(options.DualConnectionPoolNeed <= DatabaseUrl.MaximumPoolSize);
+        Assert.True(options.PoolNeed <= DatabaseUrl.MaximumPoolSize);
     }
 
     [Fact]
