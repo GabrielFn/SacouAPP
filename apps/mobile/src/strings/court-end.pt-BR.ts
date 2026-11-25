@@ -86,6 +86,8 @@ export const courtEndStrings = {
     score: (a: number, b: number) => `${String(a)} × ${String(b)}`,
     confirm: "Encerrar rodada",
     cancel: "Continuar jogando",
+    notStarted:
+      "A rodada ainda não começou. Antes do horário, ela só pode ser encerrada depois de terminar uma partida.",
     closing: "Encerrando a rodada",
     storageFailed: "Não deu para encerrar a rodada. Tente de novo.",
   },

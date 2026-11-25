@@ -7,11 +7,17 @@ import {
   type EndRoundState,
 } from "./end-round.reducer";
 
-const ASK = { openMatchScore: null, finishedMatches: 3, votingEnabled: true } as const;
+const ASK = {
+  openMatchScore: null,
+  finishedMatches: 3,
+  votingEnabled: true,
+  availability: "open",
+} as const;
 const ASK_PLAYING = {
   openMatchScore: "12 × 10",
   finishedMatches: 0,
   votingEnabled: false,
+  availability: "open",
 } as const;
 
 function run(actions: readonly EndRoundAction[], from: EndRoundState = INITIAL_END_ROUND) {

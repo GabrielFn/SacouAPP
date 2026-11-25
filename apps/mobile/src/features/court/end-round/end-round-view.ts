@@ -3,11 +3,17 @@ import { strings } from "../../../strings/pt-BR";
 import type { EndRoundFailure, EndRoundRequest, EndRoundState } from "./end-round.reducer";
 
 /** What the screens show of the flow, derived from the phase and never stored (rule 1). */
+/**
+ * What the open sheet is: "Encerrar rodada" is always asked first (R101) with the matches, the one in
+ * play and the consequence; before the start time with no match finished it only explains (ADR 0076).
+ */
+export type EndRoundSheet =
+  | { readonly kind: "confirm"; readonly body: string }
+  | { readonly kind: "not-started"; readonly body: string };
+
 export interface EndRoundView {
-  /** The dialog is open: "Encerrar rodada" is always asked first (R101). */
-  readonly confirming: boolean;
-  /** What the dialog says: the matches, the one in play, the consequence; `null` while closed. */
-  readonly confirmingBody: string | null;
+  /** The sheet that is open, or `null` while closed. */
+  readonly sheet: EndRoundSheet | null;
   /** The server and the log are being written: the buttons wait. */
   readonly busy: boolean;
   readonly failure: string | null;
@@ -37,14 +43,20 @@ export function endRoundBody(request: EndRoundRequest): string {
   return [matchesSentence(request.finishedMatches), ...inPlay, consequence].join(" ");
 }
 
-const NOT_ASKING = { confirming: false, confirmingBody: null, failure: null } as const;
+const NOT_ASKING = { sheet: null, failure: null } as const;
+
+function sheetOf(request: EndRoundRequest): EndRoundSheet {
+  return request.availability === "not-started"
+    ? { kind: "not-started", body: strings.court.endRound.notStarted }
+    : { kind: "confirm", body: endRoundBody(request) };
+}
 
 export function endRoundView(state: EndRoundState): EndRoundView {
   switch (state.phase) {
     case "idle":
       return { ...NOT_ASKING, busy: false };
     case "confirming":
-      return { ...NOT_ASKING, confirming: true, confirmingBody: endRoundBody(state), busy: false };
+      return { ...NOT_ASKING, sheet: sheetOf(state), busy: false };
     case "closing":
       return { ...NOT_ASKING, busy: true };
     case "failed":

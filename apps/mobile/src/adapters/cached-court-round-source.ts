@@ -16,6 +16,7 @@ export function createCachedCourtRoundSource(client: QueryClient): CourtRoundSou
       const round = client.getQueryData<Round>(queryKeys.round(groupId, roundId));
       const members = client.getQueryData<readonly Member[]>(queryKeys.members(groupId)) ?? [];
       return {
+        startsAt: round?.startsAt ?? null,
         settings: round === undefined ? null : (roundSettingsOf(round)?.values ?? null),
         confirmed: round?.going ?? [],
         positionOf: positionsOf(members),
