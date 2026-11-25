@@ -270,3 +270,10 @@ Detalhes em `docs/estado/tarefas/R101.md`, seção 5.
 Detalhes no ADR 0084 e em `docs/estado/tarefas/E5.3.md`.
 196. **Tela "Atualize o Sacou"** (não está no design): tela cheia sem saída, "Esta versão não funciona mais. Baixe a nova para continuar.", botão "Baixar a versão nova" com o link da loja da plataforma vindo da API; sem link, sem botão e o texto manda falar com quem organiza o grupo. **Padrão adotado: assim.** Em aberto: qual link usar no piloto (página do teste interno da Play Store e do TestFlight, da E5.4); até lá `UpdateUrl` fica vazio.
 197. **Primeira feature flag:** `MvpVote` (E3.18), ligada nos dois ambientes. **Padrão adotado: só ela.** Outra função que você queira poder desligar entra com uma linha no catálogo e uma no app.
+
+## 25/11/2026: E6.3 (reexclusão depois de restaurar o backup), perguntas 228 a 231 (plano esperando aprovação)
+Detalhes em `.specs/features/E6.3/plan.md`. Nenhuma trava a S1.
+228. Forma do comando: (1) modo de comando no executável da API (`OperationCommands`), rodado no Cloud Shell pela imagem do ensaio; (2) rota no painel do operador; (3) script SQL. **Recomendação: 1.**
+229. Origem das marcas se o banco atual se perder de vez: (1) o dump mais novo, com risco residual registrado; (2) cópia diária das marcas noutro lugar. **Recomendação: 1.**
+230. Rodar o comando também no Restore do Neon, com a origem no ramo de antes da restauração? **Recomendação: sim** (falta confirmar no console que o Neon cria esse ramo).
+231. Grupo que fica sem Admin porque a restauração desfez a passagem de admin: reexcluir assim mesmo, contar no resumo, e o Gabriel promove à mão se o grupo pedir. **Recomendação: assim** (promover sozinho contraria `grupos.md`; manter a conta viola a LGPD).
