@@ -24,6 +24,7 @@ using Sacou.Modules.Groups.ListMemberLevels;
 using Sacou.Modules.Groups.ListSavedTemplates;
 using Sacou.Modules.Groups.ListMembers;
 using Sacou.Modules.Groups.ListMyGroups;
+using Sacou.Modules.Groups.Metrics;
 using Sacou.Modules.Groups.PreviewInvite;
 using Sacou.Modules.Groups.RemoveMember;
 using Sacou.Modules.Groups.RenameGroup;
@@ -68,6 +69,8 @@ public static class GroupsModule
         services.AddScoped<IAccountExportSection, GroupsExportSection>();
         services.AddScoped<IAccountDeletionBlockers, GroupsDeletionBlockers>();
         services.AddScoped<IAccountErasure, GroupsAccountErasure>();
+        // The operator's dashboard (E7.2, ADR 0085, D2).
+        services.AddScoped<IGroupsMetrics, PostgresGroupsMetrics>();
         return services;
     }
 

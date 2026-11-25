@@ -63,6 +63,7 @@ function sectionOf(factory: NodeFactory, section: OpsSection): HTMLElement {
     facts.append(item);
   }
   node.append(facts);
+  if (section.note !== null) node.append(element(factory, "p", section.note, "ops-note"));
   if (section.table !== null) node.append(tableOf(factory, section.table));
   return node;
 }

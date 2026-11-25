@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { opsMetricsOf } from "../ops-page/ops-metrics";
-import { metricsBody } from "../ops-page/ops-page.fixtures";
+import { metricsBody } from "../ops-page/ops-page.fixtures.test";
 import type { OpsMetrics } from "../ops-page/ops-page.types";
 
-import { opsView, renderOpsPage, type OpsElements, type OpsSection } from "./ops-view";
+import {
+  opsView,
+  renderOpsPage,
+  usersSection,
+  type OpsElements,
+  type OpsSection,
+} from "./ops-view";
 
 const metrics = opsMetricsOf(metricsBody()) as OpsMetrics;
 
@@ -43,17 +49,17 @@ function elements(shown: OpsSection[][]): OpsElements {
 
 describe("ops view", () => {
   it("criterion 6: the users' section has the totals and the eight weeks, 0 included", () => {
-    const [users] = opsView({ step: "ready", metrics }).sections;
+    const users = usersSection(metrics);
 
-    expect(users?.title).toBe("Usuários");
-    expect(users?.facts).toEqual([
+    expect(users.title).toBe("Usuários");
+    expect(users.facts).toEqual([
       { label: "Cadastrados", value: "31" },
       { label: "Contas excluídas", value: "2" },
     ]);
-    expect(users?.table?.headers).toEqual(["Semana", "Novos", "Excluídas"]);
-    expect(users?.table?.rows).toHaveLength(8);
-    expect(users?.table?.rows[0]).toEqual(["05/10", "0", "0"]);
-    expect(users?.table?.rows[6]).toEqual(["16/11", "12", "1"]);
+    expect(users.table?.headers).toEqual(["Semana", "Novos", "Excluídas"]);
+    expect(users.table?.rows).toHaveLength(8);
+    expect(users.table?.rows[0]).toEqual(["05/10", "0", "0"]);
+    expect(users.table?.rows[6]).toEqual(["16/11", "12", "1"]);
   });
 
   it("criterion 7: the environment and the hour of São Paulo", () => {
@@ -80,7 +86,7 @@ describe("ops view", () => {
     renderOpsPage(nodes, { step: "ready", metrics }, { embedded: false });
     renderOpsPage(nodes, { step: "loading" }, { embedded: false });
 
-    expect(shown[0]).toHaveLength(1);
+    expect(shown[0]).toHaveLength(5);
     expect(shown[1]).toHaveLength(0);
     expect(nodes.status.textContent).toBe("Carregando…");
     expect(nodes.updated.hidden).toBe(true);

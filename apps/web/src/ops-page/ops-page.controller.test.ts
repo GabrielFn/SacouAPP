@@ -4,7 +4,7 @@ import { createOpsFetchApi } from "../adapters/ops-fetch-api";
 import { opsView } from "../dom/ops-view";
 
 import { createOpsPage } from "./ops-page.controller";
-import { fakeAuth, json, metricsBody } from "./ops-page.fixtures";
+import { fakeAuth, json, metricsBody } from "./ops-page.fixtures.test";
 import type { OpsPageState } from "./ops-page.types";
 
 type Answer = () => Promise<Response>;

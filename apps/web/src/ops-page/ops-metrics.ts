@@ -1,26 +1,10 @@
 import { isRecord } from "../adapters/api-client";
 
+import { isCount, isWeekDate, listOf } from "./ops-body-parts";
+import { gateOf, groupsOf, roundsOf } from "./ops-gate-body";
 import type { OpsEnvironment, OpsMetrics, OpsUserWeek, OpsUsers } from "./ops-page.types";
 
-const WEEK_DATE = /^\d{4}-\d{2}-\d{2}$/;
-
 type Body = Readonly<Record<string, unknown>>;
-
-export function isCount(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0;
-}
-
-export function isWeekDate(value: unknown): value is string {
-  return typeof value === "string" && WEEK_DATE.test(value);
-}
-
-/** A list of which every item `parse` accepts, or null. */
-export function listOf<T>(value: unknown, parse: (item: unknown) => T | null): readonly T[] | null {
-  if (!Array.isArray(value)) return null;
-  const items = (value as readonly unknown[]).map(parse);
-  const kept = items.filter((item): item is T => item !== null);
-  return kept.length === items.length ? kept : null;
-}
 
 function userWeekOf(value: unknown): OpsUserWeek | null {
   if (!isRecord(value)) return null;
@@ -52,6 +36,10 @@ export function opsMetricsOf(body: unknown): OpsMetrics | null {
   const environment = environmentOf(fields.environment);
   const generatedAt = instantOf(fields.generatedAt);
   const users = usersOf(fields.users);
+  const groups = groupsOf(fields.groups);
+  const rounds = roundsOf(fields.rounds);
+  const gate = gateOf(fields.gate);
   if (environment === null || generatedAt === null || users === null) return null;
-  return { environment, generatedAt, users };
+  if (groups === null || rounds === null || gate === null) return null;
+  return { environment, generatedAt, users, groups, rounds, gate };
 }

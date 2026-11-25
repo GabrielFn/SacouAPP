@@ -1,4 +1,6 @@
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
+using Sacou.Modules.Sessions.Contracts;
 using Sacou.Shared.Metrics;
 
 namespace Sacou.Api.Operations;
@@ -17,6 +19,25 @@ internal static class OpsMetricsCalculator
             identity.Registered,
             identity.Deleted,
             [.. weeks.Select(week => new OpsUserWeek(week, CountIn(identity.RegisteredByWeek, week), CountIn(identity.DeletedByWeek, week)))]);
+    }
+
+    public static OpsGroups Groups(IReadOnlyList<CountedGroup> groups, SessionsMetrics sessions)
+    {
+        ArgumentNullException.ThrowIfNull(groups);
+        ArgumentNullException.ThrowIfNull(sessions);
+        return new OpsGroups(groups.Count, sessions.ActiveGroups);
+    }
+
+    public static OpsRounds Rounds(SessionsMetrics sessions, IReadOnlyList<DateOnly> weeks)
+    {
+        ArgumentNullException.ThrowIfNull(sessions);
+        ArgumentNullException.ThrowIfNull(weeks);
+        return new OpsRounds(
+            sessions.Created,
+            sessions.Held,
+            sessions.Closed,
+            sessions.Canceled,
+            [.. weeks.Select(week => new OpsRoundWeek(week, CountIn(sessions.CreatedByWeek, week)))]);
     }
 
     /// <summary>The count of one week; 0 when the module had no line for it.</summary>

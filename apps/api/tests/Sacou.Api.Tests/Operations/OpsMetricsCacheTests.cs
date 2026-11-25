@@ -39,7 +39,7 @@ public sealed class OpsMetricsCacheTests
         Task<OpsMetricsResponse> Load(DateTimeOffset now, CancellationToken cancellationToken)
         {
             loads++;
-            return Task.FromResult(new OpsMetricsResponse(OpsEnvironments.Test, now, now + OpsMetricsCache.Lifetime, new OpsUsers(0, 0, [])));
+            return Task.FromResult(OpsAnswers.Empty(now));
         }
     }
 
@@ -62,7 +62,7 @@ public sealed class OpsMetricsCacheTests
         {
             Interlocked.Increment(ref loads);
             await release.Task;
-            return new OpsMetricsResponse(OpsEnvironments.Test, now, now + OpsMetricsCache.Lifetime, new OpsUsers(0, 0, []));
+            return OpsAnswers.Empty(now);
         }
     }
 

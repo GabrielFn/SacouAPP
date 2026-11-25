@@ -1,3 +1,6 @@
+import { describe, expect, it } from "vitest";
+
+import { opsMetricsOf } from "./ops-metrics";
 import type { AuthOutcome, AuthPort, SessionUser } from "../round-page/ports";
 
 /** A body of `GET /v1/ops/metrics` as the API writes it, for the tests. */
@@ -22,7 +25,58 @@ export function metricsBody(
         { weekStart: "2026-11-23", registered: 3, deleted: 0 },
       ],
     },
+    groups: { total: 3, active: 2 },
+    rounds: {
+      created: 14,
+      held: 11,
+      closed: 9,
+      canceled: 1,
+      weeks: WEEKS.map((weekStart, index) => ({ weekStart, created: index % 2 })),
+    },
+    gate: {
+      target: 0.6,
+      requiredWeeks: 4,
+      groupsGoal: 5,
+      groupsMeeting: 1,
+      total: gateCount(11, 60, 40, 30),
+      weeks: WEEKS.map((weekStart, index) => ({
+        weekStart,
+        count: index === 0 ? gateCount(0, 0, 0, 0) : gateCount(1, 6, 4, 3),
+      })),
+      byGroup: [
+        {
+          name: "Vôlei de quinta",
+          count: gateCount(7, 40, 30, 20),
+          longestStreak: 5,
+          meetsGate: true,
+        },
+        { name: "<b>Zé</b>", count: gateCount(0, 0, 0, 0), longestStreak: 0, meetsGate: false },
+      ],
+    },
     ...overrides,
+  };
+}
+
+const WEEKS = [
+  "2026-10-05",
+  "2026-10-12",
+  "2026-10-19",
+  "2026-10-26",
+  "2026-11-02",
+  "2026-11-09",
+  "2026-11-16",
+  "2026-11-23",
+];
+
+/** The answers of some rounds, with the rates the API would compute (null with no confirmed). */
+export function gateCount(rounds: number, confirmed: number, selfAnswered: number, byLink: number) {
+  return {
+    rounds,
+    confirmed,
+    selfAnswered,
+    byLink,
+    rate: confirmed === 0 ? null : selfAnswered / confirmed,
+    linkRate: confirmed === 0 ? null : byLink / confirmed,
   };
 }
 
@@ -65,3 +119,9 @@ export function fakeAuth(
     },
   };
 }
+
+describe("ops page fixtures", () => {
+  it("the body of the tests is one the page reads", () => {
+    expect(opsMetricsOf(metricsBody())).not.toBeNull();
+  });
+});

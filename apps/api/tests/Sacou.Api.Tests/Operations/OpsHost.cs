@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sacou.Modules.Identity;
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
+using Sacou.Modules.Sessions.Contracts;
 using Sacou.Shared.Metrics;
 using Sacou.Tests.TestSupport;
 
@@ -47,6 +49,10 @@ internal sealed class OpsHost : IAsyncDisposable
                 {
                     services.RemoveAll<IIdentityMetrics>();
                     services.AddSingleton<IIdentityMetrics>(Identity);
+                    services.RemoveAll<IGroupsMetrics>();
+                    services.AddSingleton<IGroupsMetrics>(new FixedGroupsMetrics());
+                    services.RemoveAll<ISessionsMetrics>();
+                    services.AddSingleton<ISessionsMetrics>(new FixedSessionsMetrics());
                 }
 
                 services.AddHttpClient(IdentityModule.SigningKeysHttpClientName)

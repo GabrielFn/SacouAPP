@@ -12,6 +12,7 @@ import {
   type TextSlot,
   type ViewEnvironment,
 } from "./sign-in-sheet";
+import { byGroupSection, gateSection, groupsSection, roundsSection } from "./ops-gate-view";
 
 /** One line of a section: a label and its number, already written as text. */
 export interface OpsFact {
@@ -29,6 +30,8 @@ export interface OpsTable {
 export interface OpsSection {
   readonly title: string;
   readonly facts: readonly OpsFact[];
+  /** A sentence under the facts ("Grupos que cumprem o portão: 1 de 5"), or null. */
+  readonly note: string | null;
   readonly table: OpsTable | null;
 }
 
@@ -129,6 +132,7 @@ export function usersSection(metrics: OpsMetrics): OpsSection {
       { label: text.registered, value: countText(users.registered) },
       { label: text.deleted, value: countText(users.deleted) },
     ],
+    note: null,
     table: {
       caption: text.weeksCaption,
       headers: [webStrings.ops.week, text.newColumn, text.deletedColumn],
@@ -143,7 +147,13 @@ export function usersSection(metrics: OpsMetrics): OpsSection {
 
 /** The sections of the numbers, in the page's order. */
 export function sectionsOf(metrics: OpsMetrics): readonly OpsSection[] {
-  return [usersSection(metrics)];
+  return [
+    gateSection(metrics),
+    byGroupSection(metrics),
+    usersSection(metrics),
+    groupsSection(metrics),
+    roundsSection(metrics),
+  ];
 }
 
 /** The whole page from the state: only `ready` has numbers, so no other step can show any. */

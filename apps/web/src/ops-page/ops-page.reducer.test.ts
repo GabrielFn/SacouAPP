@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { opsMetricsOf } from "./ops-metrics";
-import { metricsBody } from "./ops-page.fixtures";
+import { metricsBody } from "./ops-page.fixtures.test";
 import type { OpsPageAction } from "./ops-page.actions";
 import { initialOpsPageState, opsPageReducer } from "./ops-page.reducer";
 import type { OpsMetrics, OpsPageState } from "./ops-page.types";
