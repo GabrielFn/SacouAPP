@@ -110,7 +110,7 @@ Também podemos fornecer dados quando a lei ou uma ordem judicial exigir.
 
 Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na região da Virgínia do Norte e Neon na Amazon Web Services, também na Virgínia do Norte). Os prestadores de login e de notificações também podem tratar dados fora do Brasil. Por isso há transferência internacional de dados, que fazemos com prestadores que adotam medidas de segurança e proteção de dados.
 
-> LACUNA (E6.2, sem pergunta nova): hipótese do art. 33 da LGPD para a transferência internacional. A transferência foi aceita no piloto (resposta 91). O advogado indica a base (cláusulas-padrão da ANPD, Resolução CD/ANPD 19/2024, ou outra) e o texto final desta seção. Região do Firebase Authentication e do Expo: a registrar na E6.2.
+> LACUNA (E6.2, sem pergunta nova): hipótese do art. 33 da LGPD para a transferência internacional. A transferência foi aceita no piloto (resposta 91). O advogado indica a base (cláusulas-padrão da ANPD, Resolução CD/ANPD 19/2024, ou outra) e o texto final desta seção. Região do Firebase Authentication e do Expo: EUA, definida por cada provedor (E6.2, seção 4 de `docs/seguranca/lgpd-checklist.md`).
 
 ## 7. Por quanto tempo guardamos
 
@@ -124,7 +124,7 @@ Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na r
 - Cópias de segurança do banco: o banco guarda um histórico de restauração de 6 horas.
 - Depois da exclusão, guardamos só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano. Nesta versão, esse código é guardado sem prazo definido.
 
-> LACUNA (pergunta 200): prazos. Os itens acima descrevem o que o código já faz. Faltam: prazo da cópia diária no Cloudflare R2, se ativa (padrão proposto: 30 dias); prazo do código de exclusão (hoje sem prazo; padrão proposto: 90 dias, com uma limpeza a criar); prazo do convidado que nunca mais jogou e do grupo abandonado (padrão proposto: manter no piloto e reavaliar na E6.2); e se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos.
+> LACUNA (pergunta 200): prazos. Os itens acima descrevem o que o código já faz. Faltam: prazo da cópia diária no Cloudflare R2, se ativa (padrão proposto: 30 dias); prazo do código de exclusão (hoje sem prazo; padrão proposto: 90 dias, com uma limpeza a criar); prazo do convidado que nunca mais jogou e do grupo abandonado (E6.2: o convidado fica enquanto o grupo existir, pergunta 223; o grupo abandonado fica no piloto); e se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos.
 
 ## 8. Por que podemos usar seus dados
 
