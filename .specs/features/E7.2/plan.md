@@ -1,11 +1,11 @@
 # E7.2 · Painel de métricas do portão (página do operador)
 
-**Approved**: <escrito quando o Gabriel aprovar - AAAA-MM-DD - user: "palavras dele">
+**Approved**: 2026-11-24 - user: "aprovado, pode seguir"
 **Settled mid-build:** none
 **Review:** <escrito quando a revisão for enviada - sent at <hash>>
 **Fix pass:** <escrito quando a correção for feita>
 
-> **Depende do Gabriel antes do código:** perguntas 213 a 217 (produto e acesso) e a 218 (ação de conta dele, só para a página de produção). Sem a linha `**Approved**`, nada é construído enquanto ele está presente.
+> **Aprovado pelo Gabriel em 24/11/2026** (respostas 213 a 216 no plano; 217 no padrão). A 218 (domínio de produção no Firebase e a variável `SACOU_OPERATOR_UIDS` nos dois ambientes) é ação dele e só bloqueia a página de produção.
 
 ## Problem
 
