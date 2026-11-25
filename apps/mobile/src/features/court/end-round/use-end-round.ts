@@ -1,9 +1,11 @@
 import { useRouter } from "expo-router";
 import { useCallback, useReducer } from "react";
 
+import { wallClockNow } from "../../../services/api/wall-clock";
 import { useServices } from "../../../services/services-context";
 import { summaryHref } from "../../rounds/navigation";
 import { useCourtRuntime } from "../hooks/court-runtime-context";
+import { endRoundAvailability } from "./end-round-availability";
 import {
   endRoundReducer,
   INITIAL_END_ROUND,
@@ -15,6 +17,14 @@ import { runEndRound } from "./run-end-round";
 
 /** What the screen knows of the court when the user asks; the voting switch the hook reads itself. */
 export type EndRoundAbout = Pick<EndRoundRequest, "openMatchScore" | "finishedMatches">;
+
+/** What the hook reads of the round on the phone; without it the server decides. */
+interface RoundFacts {
+  readonly votingEnabled: boolean;
+  readonly startsAt: string | null;
+}
+
+const NO_ROUND_FACTS: RoundFacts = { votingEnabled: false, startsAt: null };
 
 export interface EndRoundFlow {
   readonly state: EndRoundState;
@@ -62,20 +72,26 @@ export function useEndRound(
   }, [runtime, sacouApi, onServerClosed, router, courtSessionId]);
 
   /** The MVP voting opens with the end of the round; without the round on the phone the sentence is left out. */
-  const votingEnabledOf = useCallback(async (): Promise<boolean> => {
+  const roundFactsOf = useCallback(async (): Promise<RoundFacts> => {
     const origin = await runtime.log.findOrigin(courtSessionId);
-    if (!origin.ok || origin.value === null) return false;
-    return courtRounds.read(origin.value).settings?.mvp.voting ?? false;
+    if (!origin.ok || origin.value === null) return NO_ROUND_FACTS;
+    const round = courtRounds.read(origin.value);
+    return { votingEnabled: round.settings?.mvp.voting ?? false, startsAt: round.startsAt };
   }, [runtime, courtRounds, courtSessionId]);
 
   return {
     state,
     request: (about) => {
       if (state.phase === "closing" || state.phase === "confirming") return;
-      void votingEnabledOf()
-        .catch(() => false)
-        .then((votingEnabled) => {
-          send({ type: "requested", ...about, votingEnabled });
+      void roundFactsOf()
+        .catch(() => NO_ROUND_FACTS)
+        .then(({ votingEnabled, startsAt }) => {
+          const availability = endRoundAvailability({
+            startsAt,
+            nowMs: wallClockNow(),
+            finishedMatches: about.finishedMatches,
+          });
+          send({ type: "requested", ...about, votingEnabled, availability });
         });
     },
     confirm: () => {

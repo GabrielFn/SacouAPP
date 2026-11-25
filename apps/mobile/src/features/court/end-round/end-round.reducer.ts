@@ -1,3 +1,5 @@
+import type { EndRoundAvailability } from "./end-round-availability";
+
 /** Why "Encerrar rodada" did not go through: the one the server refuses, and the phone's own storage. */
 export type EndRoundFailure = "round-not-started" | "storage";
 
@@ -9,6 +11,8 @@ export interface EndRoundRequest {
   readonly finishedMatches: number;
   /** The MVP voting opens for 24 h when the round ends. */
   readonly votingEnabled: boolean;
+  /** Before the start time with no match finished the server refuses: the sheet only explains (ADR 0076). */
+  readonly availability: EndRoundAvailability;
 }
 
 /**
@@ -40,6 +44,7 @@ function requested(state: EndRoundState, request: EndRoundRequest): EndRoundStat
     openMatchScore: request.openMatchScore,
     finishedMatches: request.finishedMatches,
     votingEnabled: request.votingEnabled,
+    availability: request.availability,
   };
 }
 
