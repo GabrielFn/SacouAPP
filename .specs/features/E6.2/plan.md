@@ -1,7 +1,7 @@
 # E6.2 · Revisão de LGPD e das exigências das lojas
 
 **Approved**: 2026-11-25 - user: "Aprovo com as recomendações" (perguntas 219 a 227 com a recomendação)
-**Settled mid-build:** none
+**Settled mid-build:** (1) G5 não virou tarefa: a resposta 219 (opção 1) manteve a nota do admin e o rating fora do app, sem código. (2) G8 entrou como aceite da E5.4, não como tarefa nova: é conferência, sem código. (3) G1 a G4, G6 e G7 viraram E6.3 a E6.8, na ordem G1, G2, G3, G4, G6, G7. (4) O teste do inventário roda no `node --test` do `test:tooling` (`scripts/lib/privacy-inventory.test.mjs`), não no Vitest: é o executor que o `test:tooling` usa.
 **Review:** <escrito quando a revisão for enviada - sent at <hash>>
 **Fix pass:** <escrito quando a correção for feita>
 
