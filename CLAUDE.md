@@ -55,15 +55,28 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 | `testador` | Sonnet |
 | `desenvolvedor` | Sonnet. **Opus** nas regras do vôlei e do motor (`volley-rules`, `match-engine`) e nas tarefas sensíveis |
 
-Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees).
+Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees). **No máximo 2 desenvolvedores ao mesmo tempo na mesma área** (API, app ou web), para evitar conflitos no merge (Gabriel, 24/11/2026); o limite total de agentes simultâneos é 5.
+
+### Skills nas próximas tarefas (pedido do Gabriel, 24/11/2026)
+
+Valem para as tarefas **novas** a partir de 24/11/2026; as que já tinham plano seguem o ciclo acima. Os subagentes não chamam skills: o brief manda ler o `SKILL.md` e as referências pelo caminho (`~/.claude/skills/<nome>/`).
+
+- **`tlc-spec-lean`**, adaptada ao ciclo de agentes (análise de 24/11/2026):
+  - **Plano:** o analista escreve no formato dela em `.specs/features/<ID>/` (pedido literal em `request.md`; `plan.md` com problema, critérios EARS com valores concretos, caminho, entidades, interface e decisões difíceis de reverter; perguntas de produto com recomendação). `docs/estado/tarefas/<ID>.md` vira um ponteiro para lá. Mudança de menos de 3 arquivos sem decisão difícil fica só no `request.md`.
+  - **Aprovação (resposta do Gabriel: híbrido):** com o Gabriel presente, o código só começa depois da linha `**Approved**` com as palavras dele. Com o Gabriel fora, vale a autonomia deste arquivo: segue com as recomendações, registra em `perguntas.md` e ele aprova ou ajusta depois. Nunca escrever uma aprovação que ele não deu.
+  - **Construção:** fatia por fatia, S1 fina e de ponta a ponta, um commit por fatia (`references/build.md`). O commit e push a cada etapa e o merge automático continuam valendo (a regra 6 da skill, que pede autorização para push, não se aplica aqui).
+  - **Revisão:** o revisor novo usa o prompt de `references/review.md` como complemento, sem tirar o `revisor-seguranca` das tarefas sensíveis nem o `testador` com sabotagens e a CI verde.
+  - **Tela:** "usar a tela no navegador" vira conferir no emulador Android (adb e captura de tela) e, na página web, no navegador.
+  - **Scripts** (`validate_plan.py`, `check_commit.py`): precisam de Python, que esta máquina não tem; sem ele, conferir o plano e os commits à mão contra `references/plan.md` e `references/build.md`.
+- **`react-composition-patterns`** em toda tarefa que cria ou muda componente do app (`apps/mobile`, `apps/web`; React 19.3). O desenvolvedor lê `rules/` e o revisor confere: variantes explícitas e componentes compostos no lugar de prop booleana que troca o **modo** do componente (como `manual`, `pro`, `first`); `children` no lugar de render props; contexto com interface de estado, ações e meta; sem `forwardRef`. Props booleanas de **estado** (`disabled`, `selected`, `visible`) continuam normais. Vale só para componente novo ou mexido, sem refatoração em massa. Em conflito, `docs/padroes/frontend.md` prevalece: registro único (contexto nunca copia dado do servidor nem do log da quadra), reducer pattern e interfaces injetadas.
 
 ### Economia de tokens (pedido do Gabriel, 09/11/2026)
 
 1. **Leitura dirigida.** O brief de cada agente lista exatamente os arquivos e as seções a ler. Ninguém lê a base inteira "por garantia". As pendências herdadas ficam em `docs/estado/pendencias.md`, que só o orquestrador lê inteiro; o agente recebe só as linhas da tarefa.
 2. **Ciclo de correção barato.** Depois de um ciclo reprovado, um único verificador novo confere só o diff da correção e os achados anteriores. O testador só volta se a correção mexer em regra de negócio. Se o histórico do desenvolvedor passar de cerca de 250 mil tokens, a correção vai para um desenvolvedor novo com brief curto, em vez de retomar o antigo.
 3. **Uma revisão por parte depois da primeira.** Em tarefa sensível, a primeira parte tem `revisor` e `revisor-seguranca` separados. Nas partes seguintes, um único agente Opus faz as duas revisões.
-4. **Menos partes.** Só dividir uma tarefa quando o PR passaria de cerca de 1.500 linhas alteradas.
-5. **Entrega completa.** Antes de devolver, o desenvolvedor roda localmente só build, lint, typecheck e os testes das pastas tocadas **depois do último commit**, e espera a CI verde, que roda a bateria completa (Gabriel, 22/11/2026: a bateria completa local levava de 30 a 50 min por agente no HD).
+4. **Partes do tamanho certo.** Dividir quando o PR passaria de cerca de 1.500 linhas alteradas; nas tarefas de motor e de infraestrutura, o corte é de cerca de 800 linhas (Gabriel, 24/11/2026: os desenvolvedores dessas tarefas passavam de 250 mil tokens).
+5. **Entrega no PR aberto, sem esperar a CI** (Gabriel, 24/11/2026). Antes de devolver, o desenvolvedor roda localmente só build, lint, typecheck e os testes das pastas tocadas **depois do último commit**, faz push, abre o PR e **devolve na hora**, sem `gh pr checks --watch` nem espera em segundo plano (cada despertar relia o histórico inteiro do agente). O orquestrador acompanha a CI por um script de shell; se ela falhar, manda o log do erro a um agente **novo** com brief curto (branch, último commit, o erro). A bateria completa continua só na CI (22/11/2026).
 6. **Saídas e relatórios curtos** (skills `bateria` e `sabotagem` em `.claude/skills/`). Comandos com saída resumida (`tail`, modo silencioso); o testador roda só os testes da pasta tocada, os testes novos e as 5 ou 6 sabotagens mais importantes, e deixa a bateria completa para a CI (Gabriel, 18/11/2026); relatórios de até 15 linhas, com achados numerados.
 7. **Retomada sem reler histórico** (pedido do Gabriel, 15/11/2026, depois de ~1 milhão de tokens em 2 minutos). Depois de qualquer pausa (limite do plano, parada pedida, fim de sessão), **nunca retome um agente parado com `SendMessage`**: ele relê o histórico inteiro sem cache. Primeiro veja o estado da branch (`git log`, `gh pr checks`). O passo mecânico (lint, bateria, abrir PR, esperar a CI) o orquestrador faz. O que faltar de trabalho vai para um agente **novo**, com brief curto: branch, último commit e o que falta.
 
@@ -76,7 +89,7 @@ Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use workt
 2. Dinheiro (qualquer gasto novo).
 3. Irreversível: publicar nas lojas, primeiro deploy em produção, apagar dados reais, algo que afete jogadores do piloto.
 4. Produto: decisão que muda o que o usuário vê ou paga e que os docs não cobrem.
-5. Teste no celular (recorte de foto, vibração, push, tela ligada): entregue o build e um roteiro de teste de 10 minutos.
+5. Teste no celular do que o emulador não cobre (recorte de foto, câmera, vibração, push real, tela ligada, desempenho): entregue o build e um roteiro de teste de 10 minutos.
 6. Tarefa travada 3 ciclos seguidos.
 
 ## Regras de código
@@ -103,7 +116,7 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 3. CI verde: build, lint (avisos como erro), testes TS e .NET.
 4. Respeita a arquitetura (DDD enxuto, fatias verticais, domínio sem infraestrutura, eventos sem dado pessoal, glossário).
 5. Clean Code: nomes claros, funções pequenas, sem números soltos, imutabilidade, sem `any`.
-6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados.
+6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados. **As telas mexidas pela tarefa são conferidas no emulador Android antes do merge**, só elas e só o que mudou (Gabriel, 24/11/2026; roteiro em `docs/operacao/teste-no-emulador.md`).
 7. Sem segredos no código nem nos logs.
 8. Base de conhecimento atualizada (progresso, ADR, domínio, segurança quando aplicável).
 

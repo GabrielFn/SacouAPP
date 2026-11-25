@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M5 · Depois do jogo, iniciado em 19/11/2026, **com o código todo na `main` em 21/11/2026** (faltam os passos de contas do Gabriel e o teste no celular). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M6 · Prontidão para o piloto, iniciado em 24/11/2026. M5 fechado em 24/11/2026 ([relatório](relatorios/M5.md)). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -58,15 +58,24 @@
 | E5.1 | Feita (produção adiada) | PR #159 mergeado (`2883b65`), ADR 0068: Cloud Run (`sacou-api-test` e `sacou-api`, `us-east4`) e Neon, deploy por federação com contas por job, teto de R$ 5. Primeiro deploy do teste falhou por permissão de leitura da imagem (diário de 18/11); produção adiada pelo Gabriel em 19/11 até perto do piloto (M7): o app ainda vai mudar muito. A E5.1 fica feita com o teste no ar. |
 | E4.11 | Feita | PRs #147, #156 e #158, ADR 0067 (envio a cada ponto, assumir a quadra com importação do stream, pontos recusados, telas 09a a 09c). Parte 2: correção por desenvolvedor Opus novo (corpo nulo, `Err` com commit). Parte 3: revisão e segurança num Opus (C1: a 09c era pulada pela 06 e 08), correção por desenvolvedor Opus novo, verificador Opus aprovou, testador Sonnet passou (5 de 6; a sobrevivente, o `refresh` do `stream-changed` no hook, sem render de componente). |
 | E3.9 | Feita | PRs #173, #176, #178, #180 e #183 (estatísticas, rating TS e C#, projeções e rotas). |
-| E3.12 | Feita no código | PRs #171, #177 e #179, ADR 0070 (link da rodada, página `/r`, convite `/c`). Falta o teste no celular com uma segunda conta Google. |
+| E3.12 | Feita | PRs #171, #177 e #179, ADR 0070 (link da rodada, página `/r`, convite `/c`). Testada no celular na 6ª tentativa do percurso (23/11, PR #232): página `/r` com e sem login, VOU, convite revogado. |
 | E3.18 | Feita | PRs #184 e #190 (fim da rodada, voto secreto do MVP, resultado congelado, exportação). |
 | E4.12 | Feita | PRs #188 e #191 (tela 12, "Encerrar rodada", card do resumo no Início) e #195 (janela do card até 24 h depois do fim). |
-| E4.13 | Feita no código | PRs #187 e #193, ADR 0073 (cartinha na aba Eu e compartilhar a imagem). Falta o teste no celular (build novo). |
+| E4.13 | Feita | PRs #187 e #193, ADR 0073 (cartinha na aba Eu e compartilhar a imagem). Testada no celular no percurso de 23/11 (5ª e 6ª tentativas, R99). |
 | E4.18 | Feita | PRs #194 e #196 (tela 12a, voto secreto, ranking da areia e voto no resumo). |
 | R96 | Feita | PR #197, plano em `docs/estado/tarefas/R96.md` (reservas no banco do time no pré-jogo; motor sem mudança). |
 | E3.11 | Feita no código | PRs #182, #199, #200 e #198 (outbox e aparelhos; envio pelo Expo com recibos e Cloud Tasks; uma conta invocadora por ambiente; permissão, registro do aparelho, tela de notificações e sino no app). Falta o Gabriel criar as contas e os segredos, ligar no `service.yaml` e o teste no celular. |
+| R97, R98, R99 | Feitas | Correções do percurso no celular (21 a 23/11): partida esquecida e tela de rodadas (ADR 0075), defeitos do percurso, rodada encerrada no app (ADR 0077). |
+| R100 | Feita | PRs #234 e #237, ADR 0078 (times confirmados gravados na rodada e mostrados a todos os membros nas telas 26 e 06). P1 com revisor e segurança Opus separados e testador Sonnet (7 de 8 sabotagens); P2 com revisão única Opus e testador Sonnet (5 de 6, a sobrevivente coberta). Baixos em `pendencias.md`. |
+| R101 | Feita | PRs #242 (app), #239 (página `/r` e API) e #243 (janela só com mensalista ativo, resposta 183), ADR 0079. P1 com revisão única Opus e testador Sonnet (7 de 7 sabotagens); P2 com revisão única Opus e testador (6 de 6); P3 com revisor Opus e testador (5 de 5). Conferida no emulador em 24/11; o defeito D1 (folha de "Encerrar rodada" antes do horário) corrigido no #247. |
+| E6.1 | Feita no código | PR #238, ADR 0083 (`/termos` e `/privacidade` servidos pela API, linkados no login do app e da web). Revisor e segurança Opus aprovaram (condições de texto corrigidas pelo orquestrador); testador Sonnet 5 de 5. Falta o Gabriel: perguntas 198 a 203 e revisão jurídica antes da 1.0. |
+| E5.2 | Parte 1 feita | PR #240, ADR 0080 (Sentry e logs JSON na API; Sentry desligado sem DSN). Revisor e segurança Opus, correção com verificador único, testador Sonnet (7 de 7 depois de 2 testes novos). Parte 2 (app, dependência nativa: APK novo) em andamento. Aceite depende da conta do Sentry (roteiro na seção 6 do plano). |
+| E5.3b | Parte 1 feita | PR #241, ADR 0081 (snapshot em memória do stream da quadra: 20.000º evento em ~12 ms na CI). M4-A1 caiu de alto para médio. Parte 2 (proteções, com as condições da segurança) em andamento; bloqueia o piloto. |
+| E5.3 | Em revisão | P1 backups (#244, ADR 0082): revisor e segurança Opus aprovaram com condições (LGPD: reexclusão de contas num banco restaurado), correção em andamento. P2 flags e versão mínima (#245, ADR 0084): revisão única Opus e testador Sonnet (5 de 5), merge assim que a CI passar. |
 
 ## Em andamento
+
+- 24/11/2026: **M5 fechado** (R100 #234/#237, R101 #239/#242/#243, relatório em `relatorios/M5.md`). **M6 começou**: E6.1 (#238), E5.2 P1 (#240) e E5.3b P1 (#241) na `main`; E5.3 P1 (#244) em correção, E5.3 P2 (#245) indo para o merge, E5.2 P2 e E5.3b P2 em desenvolvimento. Máquina nova com teste no emulador. Próximo passo no [diário de 24/11](sessoes/2026-11-24.md).
 
 - 23/11/2026, tarde: **R99 feita** (PR #227, ADR 0077): rodada encerrada uma vez só no Início, telas 06 e 26 com "Encerrada" + "Ver resumo", cartinha relida depois de encerrar, aba Eu sem quebra. Conferida no celular como organizadora e como jogador. Próximo passo no [diário de 23/11](sessoes/2026-11-23.md).
 
