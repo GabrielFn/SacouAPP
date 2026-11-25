@@ -24,6 +24,10 @@ public sealed class IntegrationDatabase : IAsyncLifetime
     public string ConnectionString =>
         container?.GetConnectionString() ?? throw new InvalidOperationException("The database has not started.");
 
+    /// <summary>The server's container, whose network a tools container joins to reach it on localhost (the backup tests).</summary>
+    internal string ContainerId =>
+        container?.Id ?? throw new InvalidOperationException("The database has not started.");
+
     public async ValueTask InitializeAsync()
     {
         try
