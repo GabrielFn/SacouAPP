@@ -50,8 +50,12 @@ internal static class TakeOverCourtEndpoint
 
         var taken = await handler.HandleAsync(context.CourtAccess(), new CourtRoute(roundId, courtSessionId), body.Value, cancellationToken)
             .ConfigureAwait(false);
-        return taken.IsSuccess
-            ? TypedResults.Ok(taken.Value)
-            : ProblemResults.From(taken.Error.Error, taken.Error.Extensions);
+        if (taken.IsSuccess)
+        {
+            return TypedResults.Ok(taken.Value);
+        }
+
+        UnavailableRetry.Apply(context.Response, taken.Error.Error);
+        return ProblemResults.From(taken.Error.Error, taken.Error.Extensions);
     }
 }

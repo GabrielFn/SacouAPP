@@ -89,7 +89,11 @@ public sealed partial class CourtSnapshotTests(IntegrationDatabase database) : I
         Assert.Equal(4, formerBody["lastSequence"]!.GetValue<long>());
     }
 
-    /// <summary>The snapshot of an event written outside the API is not the one the stream holds: the next write reads the stream again.</summary>
+    /// <summary>
+    /// The snapshot of an event written outside the API is not the one the stream holds: the write that finds it under
+    /// the lock is a 503 (never a replay of the whole stream there, ADR 0081 Part 2), and the next one builds the
+    /// stream again outside the lock.
+    /// </summary>
     [Fact]
     public async Task ARowRewrittenOutsideTheApi_MakesTheNextWriteBuildAgain()
     {
@@ -103,8 +107,13 @@ public sealed partial class CourtSnapshotTests(IntegrationDatabase database) : I
         await CourtCalls.ExecuteAsync(api.ConnectionString,
             "UPDATE matches.court_events SET event_id = @other WHERE court_session_id = @id AND position = 3",
             ("other", Guid.NewGuid()), ("id", phone.CourtSessionId));
+        var point = phone.Point("a");
+        using (var busy = await CourtCalls.SendAsync(world, A.Scorekeeper, round, phone, [point]))
+        {
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, busy.StatusCode);
+        }
 
-        Assert.Equal("built", await SnapshotOfWriteAsync(world, round, phone, phone.Point("a")));
+        Assert.Equal("built", await SnapshotOfWriteAsync(world, round, phone, point));
         Assert.Equal("hit", await SnapshotOfWriteAsync(world, round, phone, phone.Point("b")));
     }
 

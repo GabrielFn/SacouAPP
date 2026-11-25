@@ -34,6 +34,8 @@ internal sealed class StatsProjector(
     ICourtSessionResults courts,
     IStatsStore store,
     RatingProjector ratings,
+    RebuildBudget budget,
+    GroupRebuildGate gate,
     TimeProvider time,
     ILogger<StatsProjector> logger)
 {
@@ -85,6 +87,12 @@ internal sealed class StatsProjector(
     /// The rounds of the group that are fresh after rebuilding the stale ones <paramref name="rebuild"/> allows, and how
     /// many stale ones that would count were left as they are.
     /// </summary>
+    /// <remarks>
+    /// The rebuilds go through the group's gate, one read at a time, which reads the rows again once in (another read
+    /// may have rebuilt them while this one waited), and each takes one of the request's <see cref="RebuildBudget"/>.
+    /// A read with no turn in time, or no budget left, leaves the stale rounds as they are, like the filter does
+    /// (question 189): the next read completes them (ADR 0081, Part 2).
+    /// </remarks>
     private async Task<GroupProjections> LoadAsync(Guid groupId, Func<RoundFacts, bool> rebuild, CancellationToken cancellationToken)
     {
         var facts = await rounds.ListAsync(groupId, cancellationToken).ConfigureAwait(false);
@@ -94,7 +102,40 @@ internal sealed class StatsProjector(
         }
 
         var heads = (await courts.ListOfGroupAsync(groupId, cancellationToken).ConfigureAwait(false)).ToDictionary(head => head.RoundId);
-        var stored = (await store.ListProjectionsAsync(groupId, cancellationToken).ConfigureAwait(false)).ToDictionary(row => row.RoundId);
+        var stored = await StoredRowsAsync(groupId, cancellationToken).ConfigureAwait(false);
+        if (!facts.Any(round => NeedsRebuild(round, heads, stored, rebuild)))
+        {
+            return await ProjectAsync(groupId, facts, heads, stored, _ => false, cancellationToken).ConfigureAwait(false);
+        }
+
+        using var turn = await gate.TryEnterAsync(groupId, cancellationToken).ConfigureAwait(false);
+        if (turn is null)
+        {
+            return await ProjectAsync(groupId, facts, heads, stored, _ => false, cancellationToken).ConfigureAwait(false);
+        }
+
+        stored = await StoredRowsAsync(groupId, cancellationToken).ConfigureAwait(false);
+        return await ProjectAsync(groupId, facts, heads, stored, rebuild, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Dictionary<Guid, RoundProjectionRow>> StoredRowsAsync(Guid groupId, CancellationToken cancellationToken) =>
+        (await store.ListProjectionsAsync(groupId, cancellationToken).ConfigureAwait(false)).ToDictionary(row => row.RoundId);
+
+    private static bool NeedsRebuild(
+        RoundFacts round, Dictionary<Guid, CourtStreamHead> heads, Dictionary<Guid, RoundProjectionRow> stored, Func<RoundFacts, bool> rebuild)
+    {
+        var head = heads.GetValueOrDefault(round.RoundId);
+        return head is not null && rebuild(round) && Stored(round, head, stored.GetValueOrDefault(round.RoundId)) is null;
+    }
+
+    private async Task<GroupProjections> ProjectAsync(
+        Guid groupId,
+        IReadOnlyList<RoundFacts> facts,
+        Dictionary<Guid, CourtStreamHead> heads,
+        Dictionary<Guid, RoundProjectionRow> stored,
+        Func<RoundFacts, bool> rebuild,
+        CancellationToken cancellationToken)
+    {
         var fresh = new List<RoundProjection>(facts.Count);
         var staleCounted = 0;
         foreach (var round in facts)
@@ -102,7 +143,7 @@ internal sealed class StatsProjector(
             var head = heads.GetValueOrDefault(round.RoundId);
             var row = stored.GetValueOrDefault(round.RoundId);
             var projection = Stored(round, head, row);
-            if (projection is null && head is not null && rebuild(round))
+            if (projection is null && head is not null && rebuild(round) && budget.TryTake())
             {
                 projection = await RebuildAsync(groupId, round, head, cancellationToken).ConfigureAwait(false);
             }
@@ -141,11 +182,17 @@ internal sealed class StatsProjector(
         && row.ProjectionVersion == ProjectionKeys.ProjectionVersion
         && string.Equals(row.FactsHash, factsHash, StringComparison.Ordinal);
 
-    private async Task<RoundProjection> RebuildAsync(Guid groupId, RoundFacts facts, CourtStreamHead head, CancellationToken cancellationToken)
+    /// <summary>Null when the court cannot be summarized now (every build of a snapshot busy): the round stays stale.</summary>
+    private async Task<RoundProjection?> RebuildAsync(Guid groupId, RoundFacts facts, CourtStreamHead head, CancellationToken cancellationToken)
     {
         var started = time.GetTimestamp();
         var factsHash = ProjectionKeys.FactsHashOf(facts);
         var results = await courts.SummarizeAsync(head, facts.Summary, cancellationToken).ConfigureAwait(false);
+        if (results is null)
+        {
+            return null;
+        }
+
         var projection = new RoundProjection(facts, head, results.EventCount, factsHash, results.Summary);
         var stored = await store.SaveProjectionAsync(RowOf(groupId, projection), MemberRowsOf(groupId, projection), cancellationToken)
             .ConfigureAwait(false);

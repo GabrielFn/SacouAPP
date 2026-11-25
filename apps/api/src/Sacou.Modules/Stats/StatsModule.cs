@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Stats.Access;
 using Sacou.Modules.Stats.AccountData;
@@ -27,6 +28,11 @@ public static class StatsModule
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton(EmbeddedRatingParams.Load());
         services.AddStatsDatabase(configuration);
+        services.AddOptions<StatsRebuildOptions>().Bind(configuration.GetSection(StatsRebuildOptions.SectionName)).ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<StatsRebuildOptions>, StatsRebuildOptionsValidator>());
+        // One budget per request, one turn per group in the process (ADR 0081, Part 2).
+        services.AddScoped<RebuildBudget>();
+        services.AddSingleton<GroupRebuildGate>();
         services.AddScoped<StatsProjector>();
         services.AddScoped<RatingProjector>();
         services.AddScoped<IMvpVotingRounds, ProjectedMvpVotingRounds>();

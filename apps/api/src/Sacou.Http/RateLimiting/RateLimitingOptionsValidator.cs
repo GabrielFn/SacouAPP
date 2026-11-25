@@ -16,6 +16,10 @@ internal sealed class RateLimitingOptionsValidator : IValidateOptions<RateLimiti
             .Concat(CountFailure(nameof(options.DualConnectionHeadroom), options.DualConnectionHeadroom))
             .Concat(CountFailure(nameof(options.DualConnectionPerUser), options.DualConnectionPerUser))
             .Concat(CountFailure(nameof(options.DualConnectionPerUserQueue), options.DualConnectionPerUserQueue))
+            .Concat(CountFailure(nameof(options.CourtSyncConcurrency), options.CourtSyncConcurrency))
+            .Concat(CountFailure(nameof(options.CourtSyncQueue), options.CourtSyncQueue))
+            .Concat(CountFailure(nameof(options.CourtSyncPerUser), options.CourtSyncPerUser))
+            .Concat(CountFailure(nameof(options.CourtSyncPerUserQueue), options.CourtSyncPerUserQueue))
             .ToList();
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -8,7 +7,6 @@ using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Access;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
-using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Matches.AppendCourtEvents;
 
@@ -52,11 +50,7 @@ internal static class AppendCourtEventsEndpoint
             return TypedResults.Ok(written.Value);
         }
 
-        if (written.Error.Error.Kind == ErrorKind.Unavailable)
-        {
-            context.Response.Headers.RetryAfter = CourtErrors.BusyRetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
-        }
-
+        UnavailableRetry.Apply(context.Response, written.Error.Error);
         return ProblemResults.From(written.Error.Error, written.Error.Extensions);
     }
 }

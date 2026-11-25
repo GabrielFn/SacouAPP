@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Contracts;
 using Sacou.Modules.Sessions.Contracts;
@@ -24,6 +25,7 @@ public sealed class StatsProjectorTests
     private readonly FakeCourts courts = new();
     private readonly FakeStore store = new();
     private readonly FakeLevels levels = new();
+    private readonly GroupRebuildGate gate = new(Options.Create(new StatsRebuildOptions()));
 
     [Fact]
     public async Task RoundWithoutStream_IsAnEmptySummary_AndNothingIsReplayedNorStored()
@@ -258,7 +260,7 @@ public sealed class StatsProjectorTests
         levels.Grade(Bia, 45, LevelSource.Admin);
         var sink = new List<string>();
         var ratings = new RatingProjector(levels, store, EmbeddedRatingParams.Load(), TimeProvider.System, new CapturingLogger<RatingProjector>(sink));
-        var projector = new StatsProjector(rounds, courts, store, ratings, TimeProvider.System, new CapturingLogger<StatsProjector>(sink));
+        var projector = new StatsProjector(rounds, courts, store, ratings, Budget(), gate, TimeProvider.System, new CapturingLogger<StatsProjector>(sink));
 
         _ = await projector.GetGroupAsync(GroupId, TestContext.Current.CancellationToken);
 
@@ -284,11 +286,88 @@ public sealed class StatsProjectorTests
             Exception? exception, Func<TState, Exception?, string> formatter) => sink.Add(formatter(state, exception));
     }
 
-    private StatsProjector Projector()
+    /// <summary>25 stale rounds: one request rebuilds 20 and leaves 5 out of its read; the next request rebuilds those 5 (question 189).</summary>
+    [Fact]
+    public async Task PastTheBudgetOfARequest_TheRestStayStale_AndTheNextRequestRebuildsThem()
+    {
+        const int StaleRounds = 25;
+        var budget = new StatsRebuildOptions().MaxRebuildsPerRequest;
+        foreach (var index in Enumerable.Range(0, StaleRounds))
+        {
+            var roundId = Guid.NewGuid();
+            rounds.Add(Round() with { RoundId = roundId, StartsAt = StartsAt.AddDays(index) });
+            courts.Stream(roundId, Guid.NewGuid(), eventCount: 4);
+        }
+
+        var first = await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(budget, first.Count);
+        Assert.Equal(budget, courts.Summaries);
+
+        var second = await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        Assert.Equal(StaleRounds, second.Count);
+        Assert.Equal(StaleRounds, courts.Summaries);
+    }
+
+    /// <summary>A court that cannot be summarized now leaves the round stale, with nothing stored; the next read rebuilds it.</summary>
+    [Fact]
+    public async Task ABusyCourt_LeavesTheRoundStale_AndTheNextReadRebuildsIt()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        courts.Busy = true;
+
+        Assert.Empty(await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken));
+        Assert.Empty(store.Projections);
+
+        courts.Busy = false;
+        Assert.Single(await Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken));
+        Assert.Single(store.Projections);
+    }
+
+    /// <summary>Two reads of a stale group at once: the second waits for the first's turn, then reads the row it stored: one rebuild.</summary>
+    [Fact]
+    public async Task TwoReadsOfAGroupAtOnce_RebuildEachRoundOnce()
+    {
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        courts.Hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var first = Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        await courts.Started.Task.WaitAsync(TestContext.Current.CancellationToken);
+        var second = Projector().ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        courts.Hold.SetResult();
+
+        Assert.All(await Task.WhenAll(first, second), read => Assert.Single(read));
+        Assert.Equal(1, courts.Summaries);
+        Assert.Equal(0, gate.GroupsInUse);
+    }
+
+    /// <summary>A read with no turn of the group in time rebuilds nothing and reads what is stored.</summary>
+    [Fact]
+    public async Task NoTurnOfTheGroupInTime_ReadsWithoutRebuilding()
+    {
+        var shortGate = new GroupRebuildGate(Options.Create(new StatsRebuildOptions { GroupWaitMilliseconds = 1 }));
+        rounds.Add(Round());
+        courts.Stream(StreamId, eventCount: 4);
+        courts.Hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var first = Projector(shortGate).ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        await courts.Started.Task.WaitAsync(TestContext.Current.CancellationToken);
+        var second = await Projector(shortGate).ListRoundsAsync(GroupId, TestContext.Current.CancellationToken);
+        courts.Hold.SetResult();
+
+        Assert.Empty(second);
+        Assert.Single(await first);
+        Assert.Equal(1, courts.Summaries);
+    }
+
+    private static RebuildBudget Budget() => new(Options.Create(new StatsRebuildOptions()));
+
+    private StatsProjector Projector(GroupRebuildGate? turns = null)
     {
         var parameters = EmbeddedRatingParams.Load();
         var ratings = new RatingProjector(levels, store, parameters, TimeProvider.System, NullLogger<RatingProjector>.Instance);
-        return new StatsProjector(rounds, courts, store, ratings, TimeProvider.System, NullLogger<StatsProjector>.Instance);
+        return new StatsProjector(rounds, courts, store, ratings, Budget(), turns ?? gate, TimeProvider.System, NullLogger<StatsProjector>.Instance);
     }
 
     private static RoundFacts Round() => new(RoundId, RoundState.Scheduled, StartsAt, new DateOnly(2026, 11, 20), Indoor);
@@ -339,8 +418,17 @@ public sealed class StatsProjectorTests
     private sealed class FakeCourts : ICourtSessionResults
     {
         private readonly Dictionary<Guid, CourtStreamHead> heads = [];
+        private int summaries;
 
-        public int Summaries { get; private set; }
+        public int Summaries => Volatile.Read(ref summaries);
+
+        /// <summary>While true, the court cannot be summarized (every build of a snapshot busy).</summary>
+        public bool Busy { get; set; }
+
+        /// <summary>When set, each summary waits for it, after <see cref="Started"/>.</summary>
+        public TaskCompletionSource? Hold { get; set; }
+
+        public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public void Stream(Guid courtSessionId, int eventCount) => Stream(RoundId, courtSessionId, eventCount);
 
@@ -352,10 +440,16 @@ public sealed class StatsProjectorTests
         public Task<IReadOnlyList<CourtStreamHead>> ListOfGroupAsync(Guid groupId, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<CourtStreamHead>>([.. heads.Values]);
 
-        public Task<CourtSessionResults> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken)
+        public async Task<CourtSessionResults?> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken)
         {
-            Summaries++;
-            return Task.FromResult(new CourtSessionResults(stream.EventCount, OneMatch()));
+            _ = Interlocked.Increment(ref summaries);
+            Started.TrySetResult();
+            if (Hold is { } hold)
+            {
+                await hold.Task.WaitAsync(cancellationToken);
+            }
+
+            return Busy ? null : new CourtSessionResults(stream.EventCount, OneMatch());
         }
     }
 

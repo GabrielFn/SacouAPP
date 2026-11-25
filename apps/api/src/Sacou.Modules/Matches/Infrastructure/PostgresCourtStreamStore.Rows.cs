@@ -9,16 +9,6 @@ namespace Sacou.Modules.Matches.Infrastructure;
 /// <summary>The rows a write stores, and the reads of the projections and of the personal data export.</summary>
 internal sealed partial class PostgresCourtStreamStore
 {
-    public async Task<ImmutableArray<StreamEvent>> LoadAsync(Guid courtSessionId, CancellationToken cancellationToken)
-    {
-        var envelopes = await database.CourtEvents.AsNoTracking()
-            .Where(row => row.CourtSessionId == courtSessionId)
-            .OrderBy(row => row.Position)
-            .Select(row => row.Envelope)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return [.. envelopes.Select(envelope => CourtSnapshotReader.Parse(courtSessionId, envelope))];
-    }
-
     private async Task WriteAsync(CourtAppend append, CourtSessionRow session, CourtWriteDecision decision, CancellationToken cancellationToken)
     {
         if (decision.CreatesStream)

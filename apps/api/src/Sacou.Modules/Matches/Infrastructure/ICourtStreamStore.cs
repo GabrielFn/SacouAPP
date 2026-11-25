@@ -178,13 +178,6 @@ internal interface ICourtSessionReader
         Guid groupId, Guid roundId, Guid courtSessionId, long after, int maxEvents, long maxBytes, CancellationToken cancellationToken);
 }
 
-/// <summary>The stored stream in arrival order, through the same parser as a request, for the projections (E3.9). No lock.</summary>
-internal interface ICourtEventStore
-{
-    /// <summary>Empty for a stream that does not exist.</summary>
-    Task<ImmutableArray<StreamEvent>> LoadAsync(Guid courtSessionId, CancellationToken cancellationToken);
-}
-
 /// <summary>One batch a person wrote, for the personal data export (ADR 0060, D16).</summary>
 internal sealed record AccountCourtWrite(Guid CourtSessionId, Guid RoundId, long Batch, Guid DeviceId, DateTimeOffset StartedAt);
 

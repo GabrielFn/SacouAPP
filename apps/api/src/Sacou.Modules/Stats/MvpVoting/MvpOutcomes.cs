@@ -47,7 +47,7 @@ internal static class FinalMvps
 /// players and the balance of that moment, and the count is frozen in <c>stats.mvp_results</c>: a correction of the
 /// scoreboard after it changes the numbers of the after-game, never the winners nor how many voted (ADR 0072, D12).
 /// </summary>
-internal sealed class MvpOutcomes(IMvpVoteStore votes, IMvpResultStore results, TimeProvider time)
+internal sealed class MvpOutcomes(IMvpVoteStore votes, IMvpResultStore results, RebuildBudget budget, GroupRebuildGate gate, TimeProvider time)
 {
     public async Task<RoundMvpVote?> OfRoundAsync(Guid groupId, RoundProjection round, CancellationToken cancellationToken)
     {
@@ -91,14 +91,46 @@ internal sealed class MvpOutcomes(IMvpVoteStore votes, IMvpResultStore results, 
         var frozen = voting.Any(round => round.State == MvpVotingState.Closed)
             ? await results.ListForGroupAsync(groupId, cancellationToken).ConfigureAwait(false)
             : new Dictionary<Guid, MvpTallyResult>();
+        if (voting.Any(round => round.State == MvpVotingState.Closed && !frozen.ContainsKey(round.RoundId)))
+        {
+            frozen = await FreezeClosedAsync(groupId, voting.Where(round => round.State == MvpVotingState.Closed).Select(round => (round.RoundId, round.Ballot)), now, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         foreach (var (roundId, ballot, state) in voting)
         {
-            var result = state != MvpVotingState.Closed ? null
-                : frozen.GetValueOrDefault(roundId) ?? await FreezeAsync(groupId, roundId, ballot, now, cancellationToken).ConfigureAwait(false);
-            outcomes[roundId] = new RoundMvpVote(ballot.Window, state, result);
+            outcomes[roundId] = new RoundMvpVote(ballot.Window, state, state == MvpVotingState.Closed ? frozen.GetValueOrDefault(roundId) : null);
         }
 
         return outcomes;
+    }
+
+    /// <summary>
+    /// The counts of the closed votes, freezing the ones not frozen yet under the group's gate and the request's budget
+    /// (ADR 0081, Part 2; low 1 of E3.18 part 2): the same rules as a rebuild of a round. One left out has no count in
+    /// this read (the MVP by the stats shows, as before the count) and is frozen by the next read.
+    /// </summary>
+    private async Task<IReadOnlyDictionary<Guid, MvpTallyResult>> FreezeClosedAsync(
+        Guid groupId, IEnumerable<(Guid RoundId, MvpBallot Ballot)> closed, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        using var turn = await gate.TryEnterAsync(groupId, cancellationToken).ConfigureAwait(false);
+        var frozen = new Dictionary<Guid, MvpTallyResult>(await results.ListForGroupAsync(groupId, cancellationToken).ConfigureAwait(false));
+        if (turn is null)
+        {
+            return frozen;
+        }
+
+        foreach (var (roundId, ballot) in closed.Where(round => !frozen.ContainsKey(round.RoundId)))
+        {
+            if (!budget.TryTake())
+            {
+                break;
+            }
+
+            frozen[roundId] = await FreezeAsync(groupId, roundId, ballot, now, cancellationToken).ConfigureAwait(false);
+        }
+
+        return frozen;
     }
 
     private async Task<MvpTallyResult> FreezeAsync(Guid groupId, Guid roundId, MvpBallot ballot, DateTimeOffset now, CancellationToken cancellationToken)

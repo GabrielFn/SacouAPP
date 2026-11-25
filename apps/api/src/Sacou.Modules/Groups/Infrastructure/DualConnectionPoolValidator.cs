@@ -21,11 +21,11 @@ internal sealed class DualConnectionPoolValidator(IConfiguration configuration) 
             return ValidateOptionsResult.Fail("The connection string cannot be read to check the pool size.");
         }
 
-        return options.DualConnectionPoolNeed <= poolSize
+        return options.PoolNeed <= poolSize
             ? ValidateOptionsResult.Success
             : ValidateOptionsResult.Fail(
-                $"The pool has {poolSize} connections, but the two-connection routes and the headroom need {options.DualConnectionPoolNeed} " +
-                $"({RateLimitingOptions.SectionName}:DualConnectionConcurrency and DualConnectionHeadroom against Maximum Pool Size).");
+                $"The pool has {poolSize} connections, but the two-connection and court-sync routes and the headroom need {options.PoolNeed} " +
+                $"({RateLimitingOptions.SectionName}:DualConnectionConcurrency, CourtSyncConcurrency and DualConnectionHeadroom against Maximum Pool Size).");
     }
 
     /// <summary>Npgsql's own reading of the string (100 when it does not say); null when the string does not parse.</summary>

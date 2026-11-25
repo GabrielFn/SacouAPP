@@ -69,8 +69,27 @@ public sealed class RateLimitingOptions
     /// <summary>Connections of the pool kept for every other route, on top of the two per running request.</summary>
     public int DualConnectionHeadroom { get; init; }
 
-    /// <summary>The connections the two-connection routes may hold at most, plus the headroom.</summary>
-    public int DualConnectionPoolNeed => (ConnectionsPerDualRequest * DualConnectionConcurrency) + DualConnectionHeadroom;
+    /// <summary>
+    /// How many requests of the <c>court-sync</c> routes (the court's write, takeover, reads and close, and the Stats'
+    /// rebuilding reads) run at once, for everyone together (ADR 0081, Part 2). Each counts as two connections: the
+    /// takeover holds the Matches' and the Groups' at once.
+    /// </summary>
+    public int CourtSyncConcurrency { get; init; }
+
+    /// <summary>How many more of them wait for a turn, oldest first, before a 429.</summary>
+    public int CourtSyncQueue { get; init; }
+
+    /// <summary>How many <c>court-sync</c> requests one user runs at once, taken before the shared gate, as for the two-connection routes.</summary>
+    public int CourtSyncPerUser { get; init; }
+
+    /// <summary>How many more <c>court-sync</c> requests of one user wait for that user's turn, holding no place of the shared gate, before a 429.</summary>
+    public int CourtSyncPerUserQueue { get; init; }
+
+    /// <summary>
+    /// The connections the two-connection routes and the <c>court-sync</c> routes may hold at most, two per running
+    /// request of either, plus the headroom.
+    /// </summary>
+    public int PoolNeed => (ConnectionsPerDualRequest * (DualConnectionConcurrency + CourtSyncConcurrency)) + DualConnectionHeadroom;
 
     /// <summary>Each route policy by name, the global window under <see cref="RateLimitPolicies.Global"/>.</summary>
     public IReadOnlyDictionary<string, WindowLimitOptions?> Windows() => new Dictionary<string, WindowLimitOptions?>(StringComparer.Ordinal)
