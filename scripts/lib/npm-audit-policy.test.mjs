@@ -94,6 +94,11 @@ describe("audit.ignore forms that pnpm audit honors", () => {
     assert.match(failuresOf({ workspaceYaml })[0], /outside audit\.ignore/);
   });
 
+  it("fails on auditConfig.ignoreCves, which has no pair in the exceptions", () => {
+    const workspaceYaml = `${WORKSPACE}auditConfig:\n  ignoreCves:\n    - CVE-2026-12345\n`;
+    assert.match(failuresOf({ workspaceYaml })[0], /outside audit\.ignore/);
+  });
+
   it("ignores a GHSA in a comment", () => {
     assert.deepEqual(failuresOf({ workspaceYaml: `# GHSA-dddd-eeee-ffff\n${WORKSPACE}` }), []);
   });

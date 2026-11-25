@@ -117,8 +117,7 @@ describe("runEndRound (E4.12, question 150)", () => {
 describe("endRoundView", () => {
   test("derives what the screens show from the phase", () => {
     expect(endRoundView({ phase: "idle" })).toEqual({
-      confirming: false,
-      confirmingBody: null,
+      sheet: null,
       busy: false,
       failure: null,
     });
@@ -127,9 +126,10 @@ describe("endRoundView", () => {
       openMatchScore: "12 × 10",
       finishedMatches: 3,
       votingEnabled: false,
+      availability: "open",
     });
-    expect(asking.confirming).toBe(true);
-    expect(asking.confirmingBody).toContain("12 × 10");
+    expect(asking.sheet?.kind).toBe("confirm");
+    expect(asking.sheet?.body).toContain("12 × 10");
     expect(endRoundView({ phase: "closing" }).busy).toBe(true);
   });
 

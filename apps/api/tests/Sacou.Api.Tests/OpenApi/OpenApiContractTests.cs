@@ -24,6 +24,7 @@ public sealed class OpenApiContractTests
         "post /v1/me/notifications/{notificationId}/read MarkNotificationRead",
         "post /v1/me/notifications/read-all MarkAllNotificationsRead",
         "post /v1/groups CreateGroup",
+        "get /v1/app-config GetAppConfig",
         "get /v1/groups ListMyGroups",
         "post /v1/invites/preview PreviewInvite",
         "post /v1/invites/accept AcceptInvite",

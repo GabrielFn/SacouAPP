@@ -28,6 +28,15 @@ As migrações rodam na partida de cada revisão, antes de a porta abrir. Se fal
 
 **Toda migração tem de ser compatível com a versão anterior** (expandir e depois contrair): durante o deploy, a revisão velha e a nova convivem. Renomear ou apagar coluna leva dois deploys: primeiro o código para de usar, depois a migração remove.
 
+## Versão mínima do app e feature flags (E5.3 Parte 2, ADR 0084)
+
+Tudo na seção `AppConfig` de `apps/api/src/Sacou.Api/appsettings.json` (o `appsettings.Staging.json` sobrepõe só o teste). Mudar é um PR e um deploy normal.
+
+- **Subir o mínimo:** (1) gere o APK novo com `android.versionCode` maior em `apps/mobile/app.json`; (2) instale em todos os celulares do piloto; (3) só então suba `AppConfig:MinimumBuild:Android` para esse número e preencha `AppConfig:UpdateUrl:Android` (HTTPS), ou o jogador fica numa tela sem botão. A API passa a responder 426 para quem estiver abaixo; o app mostra "Atualize o Sacou" em até 5 minutos (ou na próxima chamada).
+- **Desligar uma função:** `AppConfig:Features:MvpVote` = `"false"` (a lista fechada está em `AppFeature.cs`; nome desconhecido ou valor que não seja `true`/`false` derruba a partida). As rotas da função passam a responder 404 `api.feature-disabled` e o app esconde a entrada.
+- **Emergência, sem PR:** no console do Cloud Run, edite a revisão com a variável `AppConfig__Features__MvpVote=false` (dois sublinhados). O próximo deploy a desfaz, então abra o PR depois.
+- Conferir: `curl https://<serviço>/v1/app-config` mostra o mínimo e as flags do ambiente.
+
 ## Push (E3.11 Parte 2)
 
 **Limites de requisição no teste:** `appsettings.Staging.json` multiplica por 10 os limites de `RateLimiting` só no `sacou-api-test` (pedido do Gabriel em 21/11/2026, depois de o teste no celular bater em "Muitas tentativas" no cadastro e na exportação). A produção usa os valores de `appsettings.json` (ADR 0062).
@@ -97,4 +106,6 @@ Esperado: US$ 0 (faixa grátis do Cloud Run na `us-east4`, 0,5 GB do Artifact Re
 
 ## Backup
 
-Até a E5.3, só a restauração do Neon Free (6 h de histórico): Neon → projeto → Restore. A produção só recebe jogadores reais depois da E5.3 (condição 2 da revisão do M3).
+Até 6 h atrás, a restauração do Neon Free: Neon → projeto → Restore. De 6 h a 30 dias, o dump diário de cada banco no Cloud Storage (E5.3, [ADR 0082](../arquitetura/adr/0082-backup-diario-do-banco.md)): configuração, ensaio mensal de restauração e restauração de verdade em [`backup.md`](backup.md). A produção só recebe jogadores reais depois da E5.3 (condição 2 da revisão do M3) e do primeiro ensaio de restauração.
+
+O job de backup não passa pelo deploy da API: muda só quando o Gabriel roda de novo `scripts/gcp/setup-backups.sh` (por exemplo, depois de um PR que mexe em `scripts/backup/backup.sh` ou em `deploy/backup/`). Migração nova não pede nada: o dump e a conferência leem as tabelas e as migrações que existirem.

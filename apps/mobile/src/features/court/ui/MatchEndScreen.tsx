@@ -194,7 +194,7 @@ export function MatchEndScreen(props: MatchEndScreenProps) {
         <NextColumn {...props} />
       </View>
       <EndRoundDialog
-        body={props.endRound.confirmingBody}
+        sheet={props.endRound.sheet}
         onConfirm={props.onConfirmEndRound}
         onCancel={props.onCancelEndRound}
       />

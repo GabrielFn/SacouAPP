@@ -1,28 +1,22 @@
 import { apiErrorKindTexts, apiErrorTexts } from "../../strings/api-errors.pt-BR";
 import { apiErrorOf, type ApiError } from "./api-error";
 
+/** The text of every kind of error that has no `code`: a closed table, so a new kind fails the build. */
+const KIND_TEXTS: Readonly<Record<Exclude<ApiError["kind"], "problem">, string>> = {
+  "session-expired": apiErrorKindTexts.sessionExpired,
+  "not-registered": apiErrorKindTexts.notRegistered,
+  "too-large": apiErrorKindTexts.tooLarge,
+  "rate-limited": apiErrorKindTexts.rateLimited,
+  unavailable: apiErrorKindTexts.unavailable,
+  "app-outdated": apiErrorKindTexts.appOutdated,
+  offline: apiErrorKindTexts.offline,
+  "account-changed": apiErrorKindTexts.accountChanged,
+  unexpected: apiErrorKindTexts.unexpected,
+};
+
 /** The text of an error, by `code` for rule errors (D5). A code is never shown as it came. */
 export function apiErrorText(error: ApiError): string {
-  switch (error.kind) {
-    case "problem":
-      return apiErrorTexts[error.code];
-    case "session-expired":
-      return apiErrorKindTexts.sessionExpired;
-    case "not-registered":
-      return apiErrorKindTexts.notRegistered;
-    case "too-large":
-      return apiErrorKindTexts.tooLarge;
-    case "rate-limited":
-      return apiErrorKindTexts.rateLimited;
-    case "unavailable":
-      return apiErrorKindTexts.unavailable;
-    case "offline":
-      return apiErrorKindTexts.offline;
-    case "account-changed":
-      return apiErrorKindTexts.accountChanged;
-    case "unexpected":
-      return apiErrorKindTexts.unexpected;
-  }
+  return error.kind === "problem" ? apiErrorTexts[error.code] : KIND_TEXTS[error.kind];
 }
 
 /** The text for anything a query or mutation threw: what is not an `ApiFailure` reads as unexpected. */

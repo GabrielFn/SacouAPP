@@ -22,6 +22,7 @@ internal sealed class CommonResponsesOperationTransformer : IOpenApiOperationTra
     private static readonly string Unauthorized = Status(StatusCodes.Status401Unauthorized);
     private static readonly string TooManyRequests = Status(StatusCodes.Status429TooManyRequests);
     private static readonly string Unavailable = Status(StatusCodes.Status503ServiceUnavailable);
+    private static readonly string UpgradeRequired = Status(StatusCodes.Status426UpgradeRequired);
     private static readonly string BadRequest = Status(StatusCodes.Status400BadRequest);
     private static readonly string TooLarge = Status(StatusCodes.Status413PayloadTooLarge);
 
@@ -37,6 +38,7 @@ internal sealed class CommonResponsesOperationTransformer : IOpenApiOperationTra
             responses[Unauthorized] = Pipeline("Not signed in, or the ID token was refused.", context.Document);
             responses[TooManyRequests] = WithRetryAfter(Pipeline("Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.", context.Document));
             responses[Unavailable] = WithRetryAfter(Pipeline("The ID token cannot be checked now: try again after Retry-After seconds.", context.Document));
+            responses[UpgradeRequired] = Pipeline("The app's native build is below the minimum (code api.app-outdated, ADR 0084).", context.Document);
         }
 
         if (description.ParameterDescriptions.Any(parameter => parameter.Source == BindingSource.Body))

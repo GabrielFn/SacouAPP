@@ -118,6 +118,8 @@ const PLAIN_DECISIONS: Readonly<Record<PlainKind, SyncDecision>> = {
   "account-changed": { type: "account-changed" },
   "session-expired": BACKOFF,
   "not-registered": BACKOFF,
+  // An old build keeps its points in the log and sends them after the update (ADR 0084).
+  "app-outdated": BACKOFF,
   offline: BACKOFF,
   unexpected: BACKOFF,
 };

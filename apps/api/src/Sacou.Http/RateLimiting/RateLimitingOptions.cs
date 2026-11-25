@@ -50,6 +50,8 @@ public sealed class RateLimitingOptions
 
     /// <summary>The operator's dashboard (E7.2, ADR 0085, D3): each load runs the counts when the cache is old.</summary>
     public WindowLimitOptions? Ops { get; init; }
+    /// <summary>Per client address: the app config is anonymous (ADR 0084).</summary>
+    public WindowLimitOptions? AppConfig { get; init; }
 
     /// <summary>How many requests of the two-connection routes run at once, for everyone together.</summary>
     public int DualConnectionConcurrency { get; init; }
@@ -89,5 +91,6 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.PushDevice] = PushDevice,
         [RateLimitPolicies.RoundPage] = RoundPage,
         [RateLimitPolicies.Ops] = Ops,
+        [RateLimitPolicies.AppConfig] = AppConfig,
     };
 }

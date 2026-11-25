@@ -25,6 +25,7 @@ internal static class GroupRouteGuard
     public static readonly IReadOnlySet<string> RoutesOutsideTheGroupFilter = new HashSet<string>(StringComparer.Ordinal)
     {
         "* /health",
+        "GET /v1/app-config",
         "POST /v1/me",
         "DELETE /v1/me",
         "GET /v1/me/profile",

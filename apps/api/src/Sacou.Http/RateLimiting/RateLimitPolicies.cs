@@ -27,9 +27,14 @@ public static class RateLimitPolicies
 
     /// <summary>The operator's counts (E7.2, ADR 0085, D3): per user, 20 a minute.</summary>
     public const string Ops = "ops";
+    /// <summary>The anonymous app config the app asks before the sign-in (ADR 0084): per client address, as a JSON answer.</summary>
+    public const string AppConfig = "app-config";
 
     /// <summary>The policies whose partition is the client's address (hashed), because their visitor is anonymous.</summary>
-    public static readonly FrozenSet<string> PerClientAddress = FrozenSet.Create(StringComparer.Ordinal, RoundPage);
+    public static readonly FrozenSet<string> PerClientAddress = FrozenSet.Create(StringComparer.Ordinal, RoundPage, AppConfig);
+
+    /// <summary>The policies whose 429 is a short HTML page for a person, not a JSON problem.</summary>
+    public static readonly FrozenSet<string> AnswerWithPage = FrozenSet.Create(StringComparer.Ordinal, RoundPage);
 
     /// <summary>
     /// The routes whose request holds two connections of the pool at once (ADR 0056, D7a): they also share one
