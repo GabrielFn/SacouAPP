@@ -14,6 +14,8 @@ internal static partial class WebPageRules
     [
         "Invite.cshtml",
         "Invite.cshtml.cs",
+        "Ops.cshtml",
+        "Ops.cshtml.cs",
         "Privacy.cshtml",
         "Privacy.cshtml.cs",
         "Round.cshtml",

@@ -14,6 +14,11 @@ export const NO_DROP_IN_CONTEXT: DropInContext = { phrase: "", hasRegulars: true
  * The texts the script writes on the round page and on the invite page. The texts the server renders (screen 01 and the sheet of
  * screen 02) live in `Sacou.Api/Web/WebTexts.cs`; both are pt-BR and centralized.
  */
+/** A share of `0..1` as a whole percent, rounded down so it never exceeds a target the gate failed. */
+const PERCENT = 100;
+/** Absorbs floating-point error (0.29 * 100 = 28.999999999999996) before rounding down. */
+const PERCENT_EPSILON = 1e-9;
+
 export const webStrings = {
   going: (position: number | null) =>
     position === null ? "Você vai." : `Você vai. Sua vaga é a ${String(position)}ª.`,
@@ -68,6 +73,72 @@ export const webStrings = {
     members: (count: number) => (count === 1 ? "1 membro" : `${String(count)} membros`),
     joined: "Você entrou. Baixe o app para ver as rodadas.",
     alreadyMember: "Você já está nesse grupo. Abra o app para ver as rodadas.",
+  },
+  /** The operator's dashboard (`/painel`, E7.2, ADR 0085); the server renders only its first words (`WebTexts.cs`). */
+  ops: {
+    sheetTitle: "Entrar no painel",
+    loading: "Carregando…",
+    denied: "Esta conta não tem acesso ao painel.",
+    unavailable: "Não foi possível carregar o painel.",
+    rateLimited: (seconds: number) =>
+      `Muitas atualizações seguidas. Tente de novo em ${String(seconds)} s.`,
+    refresh: "Atualizar",
+    retry: "Tentar de novo",
+    environment: { test: "Teste", production: "Produção" },
+    updated: (environment: string, time: string) => `${environment} · Atualizado às ${time}`,
+    week: "Semana",
+    users: {
+      title: "Usuários",
+      registered: "Cadastrados",
+      deleted: "Contas excluídas",
+      weeksCaption: "Novos cadastros e exclusões por semana (segunda a domingo)",
+      newColumn: "Novos",
+      deletedColumn: "Excluídas",
+    },
+    none: "—",
+    percent: (share: number) => `${String(Math.floor(share * PERCENT + PERCENT_EPSILON))}%`,
+    groups: {
+      title: "Grupos",
+      total: "Grupos",
+      active: "Ativos (rodada nos últimos 30 dias)",
+    },
+    rounds: {
+      title: "Rodadas",
+      created: "Criadas",
+      held: "Realizadas",
+      closed: "Encerradas",
+      canceled: "Canceladas",
+      weeksCaption: "Rodadas criadas por semana",
+      createdColumn: "Criadas",
+    },
+    gate: {
+      title: "Portão",
+      rate: "Portão (total)",
+      target: "Meta",
+      linkRate: "Só pelo link (total)",
+      meeting: (count: number, goal: number) =>
+        `Grupos que cumprem o portão: ${String(count)} de ${String(goal)}`,
+      weeksCaption:
+        "Confirmados que responderam sozinhos (link ou app), sem os mensalistas, pela semana da rodada",
+      rounds: "Rodadas",
+      confirmed: "Confirmados",
+      gateColumn: "Portão",
+      linkColumn: "Pelo link",
+      targetColumn: "Meta",
+    },
+    byGroup: {
+      title: "Portão por grupo",
+      caption: (weeks: number, target: string) =>
+        `Cumpre: ${String(weeks)} semanas seguidas com rodada e ${target} ou mais em cada uma`,
+      group: "Grupo",
+      held: "Rodadas",
+      confirmed: "Confirmados",
+      gate: "Portão",
+      streak: "Semanas seguidas",
+      meets: "Cumpre",
+      yes: "Sim",
+      no: "Não",
+    },
   },
   /** The window refusal with the day: the avulso waits, the mensalistas already confirm. */
   dropInWindowClosedWhen: (phrase: string, hasRegulars: boolean) =>

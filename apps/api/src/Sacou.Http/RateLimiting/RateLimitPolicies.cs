@@ -25,6 +25,8 @@ public static class RateLimitPolicies
     /// <summary>The anonymous round page (ADR 0070, D6): per client address, never per user.</summary>
     public const string RoundPage = "round-page";
 
+    /// <summary>The operator's counts (E7.2, ADR 0085, D3): per user, 20 a minute.</summary>
+    public const string Ops = "ops";
     /// <summary>The anonymous app config the app asks before the sign-in (ADR 0084): per client address, as a JSON answer.</summary>
     public const string AppConfig = "app-config";
 

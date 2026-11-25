@@ -1,0 +1,60 @@
+@page "/painel"
+@model OpsModel
+@{
+    Layout = null;
+    var firebase = Model.Firebase;
+}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="strict-origin">
+    <title>@WebTexts.OpsTitle</title>
+    @if (Model.Assets is { } assets)
+    {
+        @foreach (var style in assets.Styles)
+        {
+            <link rel="stylesheet" href="@style">
+        }
+        @if (firebase is not null)
+        {
+            <script type="module" src="@assets.Script"></script>
+        }
+    }
+</head>
+<body>
+@* Only the server's fixed words: every number comes from GET /v1/ops/metrics, written by the script with textContent. *@
+<main id="ops-page" class="ops"
+      data-firebase-api-key="@firebase?.ApiKey"
+      data-firebase-auth-domain="@firebase?.AuthDomain"
+      data-firebase-project-id="@firebase?.ProjectId"
+      data-firebase-app-id="@firebase?.AppId">
+    <header class="hero">
+        <div class="brand">
+            <svg class="logo" aria-hidden="true" viewBox="0 0 26 18"><rect x="0" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="0" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="0" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="9.5" y="10" width="7" height="7" rx="1.5" fill="#F6F1E7"/><rect x="19" y="10" width="7" height="7" rx="1.5" fill="#FFC83D"/></svg>
+            <span class="brand-name">@WebTexts.Brand</span>
+            <span class="brand-tag">@WebTexts.OpsTag</span>
+        </div>
+        <h1 class="title">@WebTexts.OpsTitle</h1>
+        <p id="ops-detail" class="when">@(firebase is null ? WebTexts.OpsUnavailable : WebTexts.OpsDetail)</p>
+    </header>
+    <div class="ops-bar">
+        <p id="ops-updated" class="ops-updated" hidden></p>
+        <p id="page-status" class="status" role="status" aria-live="polite" hidden></p>
+        @if (firebase is not null)
+        {
+            <noscript><p class="notice">@WebTexts.OpsNoScript</p></noscript>
+            <div class="ops-buttons">
+                <button type="button" id="ops-sign-in" class="secondary" hidden>@WebTexts.OpsSignIn</button>
+                <button type="button" id="ops-refresh" class="secondary" hidden>@WebTexts.OpsRefresh</button>
+                <button type="button" id="sign-out" class="link" hidden>@WebTexts.SignOut</button>
+            </div>
+        }
+    </div>
+    <div id="ops-sections" class="ops-sections" aria-live="polite"></div>
+    @await Html.PartialAsync("Shared/_SignInSheet", Model.SignInSheet)
+</main>
+</body>
+</html>

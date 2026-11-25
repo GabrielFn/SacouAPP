@@ -125,6 +125,8 @@ jobs:
           expo-secret: sacou-expo-access-token-test
           invoker-account: sacou-tasks-invoker-test
           tasks-queue: sacou-notifications-test
+          # Who opens /painel (ADR 0085, D1): the variable of the test environment, never in the repository.
+          operator-subjects: ${{ vars.SACOU_OPERATOR_UIDS }}
           # The host authorized in Firebase for the round page's web login (ADR 0070); status.url gives another alias.
           public-base-url: https://sacou-api-test-804880427435.us-east4.run.app
           image: ${{ needs.build.outputs.image }}
@@ -164,6 +166,8 @@ jobs:
           expo-secret: sacou-expo-access-token-prod
           invoker-account: sacou-tasks-invoker
           tasks-queue: sacou-notifications
+          # Who opens /painel (ADR 0085, D1): the variable of the production environment, never in the repository.
+          operator-subjects: ${{ vars.SACOU_OPERATOR_UIDS }}
           image: ${{ needs.build.outputs.image }}
           project-id: ${{ vars.GCP_PROJECT_ID }}
           workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}
