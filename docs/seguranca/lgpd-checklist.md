@@ -24,7 +24,7 @@ Estados: `ok` (o código e os documentos atendem), `lacuna Gn` (correção com t
 | III Correção | Tela 27 e `PUT /v1/me/profile` (`SaveMyProfileEndpoint.cs`); o convidado pede ao admin, que corrige pela 21a | ok |
 | IV Anonimização, bloqueio ou eliminação do desnecessário | Retenção da seção 3; o `MemberId` do ex-jogador é pseudonimizado | ok, com a G3 e a G6 |
 | V Portabilidade | O mesmo JSON da exportação (formato `sacou-personal-data`, versão 1), entregue à folha de compartilhar | ok |
-| VI Eliminação | `DELETE /v1/me` (`DeleteMyAccountHandler.cs`), tela 30b; o app apaga o usuário no Firebase. Sobra: o backup por até 30 dias (G1) e os pendentes da quadra no aparelho (G7). Sem o app: página web de exclusão (G2) | lacuna G1, G2, G7 |
+| VI Eliminação | `DELETE /v1/me` (`DeleteMyAccountHandler.cs`), tela 30b; o app apaga o usuário no Firebase. Sobra: o backup por até 30 dias (G1) (os pendentes da quadra no aparelho saem na exclusão feita nele, E6.8). Sem o app: página web de exclusão (G2) | lacuna G1, G2, G7 |
 | VII Informação sobre compartilhamento | Política, seção 5 (operadores) | ok |
 | VIII Possibilidade de não consentir | Não se aplica: nenhuma base é consentimento (pergunta 201) | ok |
 | IX Revogação do consentimento | Não se aplica pelo mesmo motivo; desligar o push é pelo sistema (política, seção 9) | ok |
@@ -43,7 +43,7 @@ Toda linha do inventário tem a coluna `Retenção` com prazo concreto (em dias,
 | Cópia diária do banco (linha "Cópia do banco") | 30 dias; conta apagada depois do dump volta numa restauração até a G1 existir | lacuna G1 |
 | Marca de exclusão (linha "Marca de exclusão") | 60 dias (pergunta 222); hoje sem prazo | lacuna G3 |
 | Apelidos na página `/r` (linha "Perfil do jogador") | Até 7 dias depois da rodada (pergunta 224); hoje para sempre | lacuna G6 |
-| Pontos pendentes de conta apagada no `sacou.db` (linha "Conta dona da sessão da quadra") | Apagados na exclusão feita no aparelho (pergunta 225); hoje ficam | lacuna G7 |
+| Pontos pendentes de conta apagada no `sacou.db` (linha "Conta dona da sessão da quadra") | Apagados na exclusão feita no aparelho (pergunta 225, E6.8); num login posterior com 410 ficam (pergunta 240, risco aceito) | resolvida pela E6.8 |
 | Notificações e entregas | 30 e 7 dias (`NotificationRetention.cs`) | ok |
 | Logs do Cloud Run e da API | 30 dias (retenção padrão do Cloud Logging) | ok |
 | Erros no Sentry | 90 dias (plano grátis) | ok |
@@ -119,5 +119,5 @@ As que mudam código viraram tarefas em [`plano-mvp.md`](../plano-mvp.md) (seç�
 | G4 | "Denunciar" no app (pergunta 221) | E6.6 | teste fechado e produção da Play |
 | G5 | Nota do admin e rating no acesso do titular | nenhuma (pergunta 219, opção 1) | — |
 | G6 | Apelidos da página `/r` escondidos 7 dias depois da rodada (pergunta 224) | E6.7 | não |
-| G7 | Pontos pendentes de uma conta apagada no `sacou.db` (pergunta 225) | E6.8 | não |
+| G7 | Pontos pendentes de uma conta apagada no `sacou.db` (pergunta 225) | E6.8 | sim (resposta 240: o 410 num login posterior não apaga, risco aceito) |
 | G8 | Conferir `targetSdkVersion` 36 no AAB | aceite da E5.4 | envio à Play |
