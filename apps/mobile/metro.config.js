@@ -2,7 +2,8 @@
 // .claude/worktrees/, each with its own node_modules, are kept out: they flooded the watcher and
 // could put a second copy of a module in the bundle.
 const path = require("node:path");
-const { getDefaultConfig } = require("expo/metro-config");
+// Sentry wraps the Expo config to add the debug ids that tie each bundle to its source map (E5.2).
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -25,7 +26,7 @@ function withWorktreesBlocked(blockList, appRoot) {
   return [...(Array.isArray(blockList) ? blockList : [blockList]), worktrees];
 }
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 module.exports = {
   ...config,

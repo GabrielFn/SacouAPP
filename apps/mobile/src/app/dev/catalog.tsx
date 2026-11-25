@@ -3,6 +3,8 @@ import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
 import { DEV_TOOLS_ENABLED } from "../../config/dev-tools";
+import { ErrorTestSection } from "../../features/error-reporting/ui/ErrorTestSection";
+import { useServices } from "../../services/services-context";
 import { strings } from "../../strings/pt-BR";
 import { ThemeProvider, useTheme } from "../../theme/theme-context";
 import type { ThemeName } from "../../theme/themes";
@@ -93,9 +95,11 @@ function ThemeSection({ title }: ThemeSectionProps) {
 }
 
 export default function CatalogScreen() {
+  const { errorReporter } = useServices();
   if (!DEV_TOOLS_ENABLED) return <Redirect href="/" />;
   return (
     <ScrollView>
+      <ErrorTestSection errorReporter={errorReporter} />
       {SHOWN_THEMES.map(({ name, title }) => (
         <ThemeProvider key={name} name={name}>
           <ThemeSection title={title} />

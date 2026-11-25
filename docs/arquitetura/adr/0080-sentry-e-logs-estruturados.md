@@ -1,7 +1,7 @@
 # ADR 0080 — Sentry e logs estruturados
 
-Status: aceita (24/11/2026). Tarefa E5.2 ([plano](../../estado/tarefas/E5.2.md)). Esta versão cobre a **API** (Parte 1);
-a seção do app entra com a Parte 2. Perguntas 208 a 212 com o padrão adotado do plano (região US, sem id de usuário,
+Status: aceita (24/11/2026). Tarefa E5.2 ([plano](../../estado/tarefas/E5.2.md)). Cobre a **API** (Parte 1, D1 a D8) e o
+**app** (Parte 2, D9 a D13). Perguntas 208 a 212 com o padrão adotado do plano (região US, sem id de usuário,
 sem tracing, dois projetos, prova só no teste).
 
 ## Contexto
@@ -58,6 +58,52 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   workflow ainda não passa a entrada: depois de o Gabriel criar `sacou-sentry-dsn-api`, acrescentar
   `sentry-secret: sacou-sentry-dsn-api` nos dois jobs de `deploy-api.yml`. Teste de arquitetura: o DSN só por
   `secretKeyRef`, nunca valor, e a action nunca cita o nome da variável.
+
+## Decisão: app (Parte 2)
+
+- **D9 · Porta e adaptador.** `@sentry/react-native` **8.28.1, versão exata** (a que o `expo install` dá para o
+  SDK 58; o filtro depende do formato do evento). **Dependência nativa: exige APK novo.** A porta `ErrorReporter`
+  (`src/services/error-reporting/`: `captureError(error, { area })` e `crashNatively()`, só para a tela de dev)
+  entra no `Services`; o real é `src/adapters/sentry-error-reporter.ts` (`startErrorReporter` antes de qualquer
+  outro serviço do `_layout.tsx` e `withErrorReporting(RootLayout)`, que é o `Sentry.wrap`), o desligado é
+  `noop-error-reporter.ts` e o falso de teste `fake-error-reporter.ts`. **Só `src/adapters/` importa `@sentry/*`**,
+  o `_layout.tsx` também não (mais estrito que o plano): `@sentry/` entrou no padrão de SDKs do lint, com casos
+  no `lint:regression` (tela, tipo numa fatia e adaptador). DSN em `EXPO_PUBLIC_SENTRY_DSN`: **público** (vai no
+  APK, como todo DSN de cliente), lido em `src/config/sentry.ts`, que aceita só `https://<chave>@<host>/<projeto>`;
+  ausente, vazio ou fora do formato, o Sentry nem inicia (D1). Ambiente em `EXPO_PUBLIC_SENTRY_ENVIRONMENT`
+  (`eas.json`: `development` no perfil de desenvolvimento, `staging` no `preview`; `production` no perfil de loja da
+  E5.4); ausente ou fora do formato, `development`.
+- **D10 · Opções fixas** (`src/adapters/sentry-options.ts`, com teste). `sendDefaultPii: false` (o núcleo marca a
+  opção como obsoleta em favor de `dataCollection`, que o SDK do React Native não aceita: continua sendo a única
+  chave, também no lado nativo); `attachScreenshot`, `attachViewHierarchy` e `reportAccessibilityIdentifier`
+  desligados (a tela e a árvore mostram apelidos); `enableLogs`, `enableCaptureFailedRequests` e
+  `enableAutoPerformanceTracing` desligados; sem replay e sem perfil. **Sem tracing por omissão de
+  `tracesSampleRate`**: o plano pedia 0, mas no SDK qualquer número (0 também) liga as integrações de tracing (início
+  do app, quadros, rotas). `enableAutoSessionTracking` ligado (saúde da versão, sem usuário), `maxBreadcrumbs: 30`.
+  `beforeSend` e `beforeBreadcrumb` passam pelo `scrub-event.ts` (puro, sem o SDK), espelho do D4 por lista
+  permitida: o evento perde `user`, `server_name`, `extra`, tudo do `request` menos URL e método, as tags fora de
+  `area`/`event.origin`/`event.environment` e o nome do aparelho no contexto; URL sem query nem fragmento (o token do
+  convite fica depois do `#`), `/c/...` e `/r/...` (web ou `sacou://`) viram `{code}`, todo GUID vira `[id]`, e
+  e-mail, `Bearer`, JWT e Pix viram `[filtrado]` na mensagem, na exceção e nos breadcrumbs. Breadcrumb de `console`
+  é descartado; HTTP fica com método, status e URL limpa; navegação e deep link só com a rota limpa; toque só com os
+  nomes dos componentes (o `Sentry.wrap` também recebe `extractTextFromChildren: false`, porque o texto de um botão
+  pode ser um apelido); os demais ficam com a mensagem filtrada e sem `data`.
+- **D11 · Mapa de fontes.** Plugin `@sentry/react-native/expo` no `app.json` com `project: sacou-mobile` e a URL;
+  **a organização não fica no repositório**: o build lê `SENTRY_ORG` (variável comum do EAS), para não depender do
+  slug no código. `metro.config.js` usa `getSentryExpoConfig` (ids de depuração no bundle) e mantém o bloqueio das
+  worktrees (teste do Metro). Upload no build do EAS com `SENTRY_AUTH_TOKEN` (variável **secreta do EAS**). Perfil
+  `development` com `SENTRY_DISABLE_AUTO_UPLOAD=true`; o `preview` tem `SENTRY_ALLOW_FAILURE=true`, para um build sem
+  token (antes do passo do Gabriel) não falhar: o upload que falha aparece no log do EAS e a pilha sai sem
+  simbolizar. O `pnpm build` local (`expo export`) não precisa do token. `@sentry/cli` em `allowBuilds: false`: o
+  binário vem no pacote da plataforma (dependência opcional) e o postinstall só baixaria outra cópia.
+- **D12 · Erro proposital.** Na tela de dev `app/dev/catalog.tsx` (só com `EXPO_PUBLIC_DEV_TOOLS=1`), a seção
+  "Erros (Sentry)" com "Enviar erro de teste" (`DeliberateFailure`, mensagem fixa em inglês, tag `area=dev-catalog`)
+  e "Travar o app (teste)" (`Sentry.nativeCrash()` pela porta). Textos em `strings.catalog.errorTest`.
+- **D13 · Cota e lacuna aceita.** O DSN do app é público e pode ser usado para encher a cota grátis: aceito (padrão
+  do Sentry), com o limite de 300 eventos por hora na chave do `sacou-mobile` (passo 3 do roteiro). Uma falha **nativa** (Java/Kotlin/NDK) não passa pelo `beforeSend` do JS: sai com a pilha
+  nativa, o contexto do aparelho sem nome (`sendDefaultPii: false` no lado nativo) e os breadcrumbs já filtrados
+  (o SDK copia para o nativo só o que passou pelo `beforeBreadcrumb`). Os filtros do painel (Data Scrubber e
+  "Prevent Storing of IP Addresses", passo 3 do roteiro) cobrem o resto.
 
 ## Consequências
 
