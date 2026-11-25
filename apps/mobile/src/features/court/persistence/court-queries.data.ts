@@ -71,3 +71,11 @@ export const DELETE_EVENTS_OF_SESSION = "DELETE FROM court_events WHERE court_se
 export const SET_IMPORTED_SESSION = `UPDATE court_sessions SET status = ?, batch = ?, acked_sequence = ?,
   taken_over_batch = NULL, sync_halt = NULL, group_id = ?, round_id = ?, owner_key = ?
   WHERE court_session_id = ?`;
+
+// The deletion of an account (E6.8): its sessions leave the device, the children before the parent.
+const SESSIONS_OF_OWNER = "SELECT court_session_id FROM court_sessions WHERE owner_key = ?";
+export const COUNT_SESSIONS_OF_OWNER =
+  "SELECT COUNT(*) AS value FROM court_sessions WHERE owner_key = ?";
+export const DELETE_REFUSED_OF_OWNER = `DELETE FROM court_refused_events WHERE court_session_id IN (${SESSIONS_OF_OWNER})`;
+export const DELETE_EVENTS_OF_OWNER = `DELETE FROM court_events WHERE court_session_id IN (${SESSIONS_OF_OWNER})`;
+export const DELETE_SESSIONS_OF_OWNER = "DELETE FROM court_sessions WHERE owner_key = ?";

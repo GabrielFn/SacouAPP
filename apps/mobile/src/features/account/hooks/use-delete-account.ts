@@ -4,6 +4,7 @@ import { useReducer, useState } from "react";
 import { errorTextOf } from "../../../services/api/api-error-text";
 import type { AuthProvider } from "../../../services/auth/auth-session";
 import { useServices } from "../../../services/services-context";
+import { useCourtRuntime } from "../../court/hooks/court-runtime-context";
 import {
   asksForPassword,
   deletionOutcomeText,
@@ -41,6 +42,8 @@ export interface DeleteAccountModel {
 /** Screen 30b: the preview of the blockers, what is typed, and the one deletion in flight. */
 export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
   const { sacouApi, authSession, sessionEnder } = useServices();
+  // Screen 30b is inside the DatabaseGate: the log of the court is open (E6.8).
+  const { log } = useCourtRuntime();
   const client = useQueryClient();
   const [state, dispatch] = useReducer(deleteAccountReducer, initialDeleteAccountState);
   const blockers = useQuery(deletionBlockersQuery(sacouApi));
@@ -55,6 +58,7 @@ export function useDeleteAccount(provider: AuthProvider): DeleteAccountModel {
         api: sacouApi,
         auth: authSession,
         ender: sessionEnder,
+        court: log,
         refreshBlockers: () => refreshDeletionBlockers(client),
       },
       provider,
