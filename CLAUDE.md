@@ -55,7 +55,7 @@ Você é o **orquestrador**. Para cada tarefa do backlog, use os subagentes de `
 | `testador` | Sonnet |
 | `desenvolvedor` | Sonnet. **Opus** nas regras do vôlei e do motor (`volley-rules`, `match-engine`) e nas tarefas sensíveis |
 
-Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees).
+Tarefas independentes podem rodar em paralelo, cada uma na sua branch (use worktrees). **No máximo 2 desenvolvedores ao mesmo tempo na mesma área** (API, app ou web), para evitar conflitos no merge (Gabriel, 24/11/2026); o limite total de agentes simultâneos é 5.
 
 ### Skills nas próximas tarefas (pedido do Gabriel, 24/11/2026)
 
@@ -75,8 +75,8 @@ Valem para as tarefas **novas** a partir de 24/11/2026; as que já tinham plano 
 1. **Leitura dirigida.** O brief de cada agente lista exatamente os arquivos e as seções a ler. Ninguém lê a base inteira "por garantia". As pendências herdadas ficam em `docs/estado/pendencias.md`, que só o orquestrador lê inteiro; o agente recebe só as linhas da tarefa.
 2. **Ciclo de correção barato.** Depois de um ciclo reprovado, um único verificador novo confere só o diff da correção e os achados anteriores. O testador só volta se a correção mexer em regra de negócio. Se o histórico do desenvolvedor passar de cerca de 250 mil tokens, a correção vai para um desenvolvedor novo com brief curto, em vez de retomar o antigo.
 3. **Uma revisão por parte depois da primeira.** Em tarefa sensível, a primeira parte tem `revisor` e `revisor-seguranca` separados. Nas partes seguintes, um único agente Opus faz as duas revisões.
-4. **Menos partes.** Só dividir uma tarefa quando o PR passaria de cerca de 1.500 linhas alteradas.
-5. **Entrega completa.** Antes de devolver, o desenvolvedor roda localmente só build, lint, typecheck e os testes das pastas tocadas **depois do último commit**, e espera a CI verde, que roda a bateria completa (Gabriel, 22/11/2026: a bateria completa local levava de 30 a 50 min por agente no HD).
+4. **Partes do tamanho certo.** Dividir quando o PR passaria de cerca de 1.500 linhas alteradas; nas tarefas de motor e de infraestrutura, o corte é de cerca de 800 linhas (Gabriel, 24/11/2026: os desenvolvedores dessas tarefas passavam de 250 mil tokens).
+5. **Entrega no PR aberto, sem esperar a CI** (Gabriel, 24/11/2026). Antes de devolver, o desenvolvedor roda localmente só build, lint, typecheck e os testes das pastas tocadas **depois do último commit**, faz push, abre o PR e **devolve na hora**, sem `gh pr checks --watch` nem espera em segundo plano (cada despertar relia o histórico inteiro do agente). O orquestrador acompanha a CI por um script de shell; se ela falhar, manda o log do erro a um agente **novo** com brief curto (branch, último commit, o erro). A bateria completa continua só na CI (22/11/2026).
 6. **Saídas e relatórios curtos** (skills `bateria` e `sabotagem` em `.claude/skills/`). Comandos com saída resumida (`tail`, modo silencioso); o testador roda só os testes da pasta tocada, os testes novos e as 5 ou 6 sabotagens mais importantes, e deixa a bateria completa para a CI (Gabriel, 18/11/2026); relatórios de até 15 linhas, com achados numerados.
 7. **Retomada sem reler histórico** (pedido do Gabriel, 15/11/2026, depois de ~1 milhão de tokens em 2 minutos). Depois de qualquer pausa (limite do plano, parada pedida, fim de sessão), **nunca retome um agente parado com `SendMessage`**: ele relê o histórico inteiro sem cache. Primeiro veja o estado da branch (`git log`, `gh pr checks`). O passo mecânico (lint, bateria, abrir PR, esperar a CI) o orquestrador faz. O que faltar de trabalho vai para um agente **novo**, com brief curto: branch, último commit e o que falta.
 
