@@ -78,6 +78,10 @@ spec:
               value: us-east4
             - name: NotificationTasks__Queue
               value: ${TASKS_QUEUE}
+            # Who opens /painel (E7.2, ADR 0085, D1): the Firebase UIDs of the GitHub variable SACOU_OPERATOR_UIDS of this
+            # environment, comma-separated. Not a secret; empty lets nobody in.
+            - name: Operations__OperatorSubjects
+              value: "${OPERATOR_SUBJECTS}"
           # The migrations run before the port opens: 24 × 5 s gives them two minutes (ADR 0068, D7).
           startupProbe:
             httpGet:
