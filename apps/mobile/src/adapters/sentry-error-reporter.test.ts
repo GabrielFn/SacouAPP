@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { REDACTED, scrubEvent } from "../services/error-reporting/scrub-event";
+import { ANONYMOUS_USER, REDACTED, scrubEvent } from "../services/error-reporting/scrub-event";
 import { noopErrorReporter } from "./noop-error-reporter";
 import { startErrorReporter } from "./sentry-error-reporter";
 
 const sentry = vi.hoisted(() => ({
   init: vi.fn(),
+  setUser: vi.fn(),
   captureException: vi.fn(),
   nativeCrash: vi.fn(),
   wrap: vi.fn(),
@@ -24,6 +25,7 @@ describe("the Sentry adapter behind the ErrorReporter port (E5.2 part 2)", () =>
     reporter.captureError(new Error("a@b.com"), { area: "x" });
     expect(reporter).toBe(noopErrorReporter);
     expect(sentry.init).not.toHaveBeenCalled();
+    expect(sentry.setUser).not.toHaveBeenCalled();
     expect(sentry.captureException).not.toHaveBeenCalled();
   });
 
@@ -38,6 +40,14 @@ describe("the Sentry adapter behind the ErrorReporter port (E5.2 part 2)", () =>
     expect(sentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
       tags: { area: "court" },
     });
+  });
+
+  test("puts the anonymous user on the scope after init, so native crashes carry it too", () => {
+    startErrorReporter(CONFIG);
+    expect(sentry.setUser).toHaveBeenCalledWith(ANONYMOUS_USER);
+    const initOrder = sentry.init.mock.invocationCallOrder[0] ?? 0;
+    const setUserOrder = sentry.setUser.mock.invocationCallOrder[0] ?? 0;
+    expect(setUserOrder).toBeGreaterThan(initOrder);
   });
 });
 

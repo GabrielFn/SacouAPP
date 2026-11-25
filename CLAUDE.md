@@ -147,8 +147,4 @@ dotnet run --project apps/api/src/Sacou.Api # sobe a API
 pnpm --filter @sacou/mobile start           # sobe o Metro do app
 ```
 
-Ambiente local do Gabriel (Git Bash, sem admin; o C: tem pouco espaço, então caches ficam em D:):
-
-```sh
-export PATH="/d/tools/dotnet:$PATH" NUGET_PACKAGES=/d/tools/nuget-packages TEMP=/d/tmp TMP=/d/tmp
-```
+Ambiente local do Gabriel (Git Bash, máquina de 24/11/2026, só C:): .NET, Node e caches nos caminhos padrão, sem `export`. No `adb`, use `MSYS_NO_PATHCONV=1` para caminhos do aparelho. Build do EAS sai da pasta principal, que tem o `google-services.json` (fora do Git).
