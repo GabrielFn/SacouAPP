@@ -1,7 +1,7 @@
 using System.Globalization;
 using Sacou.Api.Configuration;
 using Sacou.Modules.Identity;
-using Sacou.Modules.Identity.ReapplyDeletions;
+using Sacou.Modules.Identity.Contracts;
 
 namespace Sacou.Api.Operations;
 

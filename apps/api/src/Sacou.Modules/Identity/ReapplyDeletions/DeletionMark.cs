@@ -15,9 +15,3 @@ internal sealed record MarkedAccount(UserId User, AuthSubject Subject)
     /// <summary>Never print the login.</summary>
     public override string ToString() => nameof(MarkedAccount);
 }
-
-/// <summary>
-/// What a run did, only numbers (ADR 0056, D11): the marks read from the current database, those the restored one did
-/// not have, the accounts erased again and the groups left without an admin and with no one to promote.
-/// </summary>
-public sealed record ReapplyDeletionsSummary(int Marks, int NewMarks, int AccountsErased, int GroupsWithoutAdmin, TimeSpan Elapsed);

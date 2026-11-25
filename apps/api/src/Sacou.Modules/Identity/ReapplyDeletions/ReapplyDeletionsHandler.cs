@@ -25,7 +25,7 @@ internal sealed partial class ReapplyDeletionsHandler(
         var started = time.GetTimestamp();
         if (!DeletionMarkRetention.Covers(dumpCreatedAt, time.GetUtcNow()))
         {
-            return Result.Failure<ReapplyDeletionsSummary>(ReapplyDeletionsErrors.DumpOlderThanRetention);
+            return Result.Failure<ReapplyDeletionsSummary>(ReapplyDeletionsRefusals.DumpOlderThanRetention);
         }
 
         var marks = await source.ReadAllAsync(sourceConnectionString, cancellationToken).ConfigureAwait(false);
