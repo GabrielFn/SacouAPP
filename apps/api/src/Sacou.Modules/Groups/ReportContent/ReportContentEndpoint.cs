@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Access;
 using Sacou.Modules.Groups.Domain.Permissions;
 using Sacou.Modules.Groups.Domain.Reports;
@@ -24,6 +25,7 @@ internal static class ReportContentEndpoint
     public static RouteGroupBuilder MapReportContent(this RouteGroupBuilder group)
     {
         group.MapPost(Route, HandleAsync).WithName(Name).RequireGroupPermission(GroupPermission.ReportContent)
+            .RequireRateLimiting(RateLimitPolicies.Report)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
         return group;
