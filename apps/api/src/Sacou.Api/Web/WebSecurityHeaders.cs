@@ -13,6 +13,8 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
 {
     public const string PagePrefix = "/r";
     public const string InvitePagePrefix = "/c";
+    /// <summary>The operator's dashboard (E7.2, ADR 0085): the round page's headers; never stored, never indexed.</summary>
+    public const string OpsPagePrefix = "/painel";
     public const string TermsPrefix = "/termos";
     public const string PrivacyPrefix = "/privacidade";
     public const string AssetsPrefix = "/web";
@@ -39,7 +41,8 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     {
         ArgumentNullException.ThrowIfNull(context);
         var path = context.Request.Path;
-        if (path.StartsWithSegments(PagePrefix, StringComparison.Ordinal) || path.StartsWithSegments(InvitePagePrefix, StringComparison.Ordinal))
+        if (path.StartsWithSegments(PagePrefix, StringComparison.Ordinal) || path.StartsWithSegments(InvitePagePrefix, StringComparison.Ordinal)
+            || path.StartsWithSegments(OpsPagePrefix, StringComparison.OrdinalIgnoreCase))
         {
             context.Response.OnStarting(() => WritePageHeaders(context.Response, policy.Value, PageCache));
         }

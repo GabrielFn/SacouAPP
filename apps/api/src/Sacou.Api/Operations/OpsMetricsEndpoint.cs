@@ -45,13 +45,24 @@ internal static class OpsMetricsEndpoint
         try
         {
             var answer = await cache.GetAsync(reader.ReadAsync, cancellationToken).ConfigureAwait(false);
-            OpsLog.Served(logger, (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds, answer.Cached);
+            var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+            OpsLog.Served(logger, elapsed, answer.Cached);
             return TypedResults.Ok(answer.Value);
         }
         catch (DbException exception)
         {
-            OpsLog.Unavailable(logger, exception.GetType().Name);
-            return ProblemResults.From(Unavailable);
+            return Unreachable(logger, exception);
         }
+        catch (InvalidOperationException exception) when (exception.InnerException is DbException)
+        {
+            // The execution strategy of Npgsql wraps a failure it takes for transient (a timeout, a refused connection).
+            return Unreachable(logger, exception.InnerException);
+        }
+    }
+
+    private static Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult Unreachable(ILogger logger, Exception exception)
+    {
+        OpsLog.Unavailable(logger, exception.GetType().Name);
+        return ProblemResults.From(Unavailable);
     }
 }

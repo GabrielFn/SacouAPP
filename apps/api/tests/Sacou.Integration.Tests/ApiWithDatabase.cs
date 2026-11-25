@@ -227,7 +227,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     {
         const string Section = "RateLimiting";
         const string Roomy = "1000000";
-        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink", "PushDevice"];
+        string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink", "PushDevice", "Ops"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
         limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;

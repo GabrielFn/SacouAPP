@@ -18,6 +18,8 @@ internal static class RoundPageFixture
     public const string Script = "/web/assets/round-HASH.js";
     public const string Style = "/web/assets/round-HASH.css";
     public const string InviteScript = "/web/assets/invite-HASH.js";
+    public const string OpsScript = "/web/assets/ops-HASH.js";
+    public const string OpsStyle = "/web/assets/ops-HASH.css";
     public const string LegalStyle = "/web/assets/legal-HASH.css";
     public const string AuthDomain = "sacou-test.firebaseapp.com";
 
@@ -80,6 +82,8 @@ internal static class RoundPageFixture
         public WebEntry? Round { get; } = new(Script, ImmutableArray.Create(Style));
 
         public WebEntry? Invite { get; } = new(InviteScript, ImmutableArray.Create(Style));
+
+        public WebEntry? Ops { get; } = new(OpsScript, ImmutableArray.Create(Style, OpsStyle));
 
         public string? LegalStyle => RoundPageFixture.LegalStyle;
     }

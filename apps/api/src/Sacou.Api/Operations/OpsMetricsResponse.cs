@@ -8,6 +8,7 @@ namespace Sacou.Api.Operations;
 /// <param name="Environment"><see cref="OpsEnvironments.Test"/> or <see cref="OpsEnvironments.Production"/>.</param>
 /// <param name="GeneratedAt">When the counts were taken; the same while the cache holds them.</param>
 /// <param name="CachedUntil">When a new request counts again.</param>
+/// <param name="Users">The accounts: now, erased, and new and erased in each week shown.</param>
 internal sealed record OpsMetricsResponse(
     string Environment,
     DateTimeOffset GeneratedAt,

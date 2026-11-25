@@ -9,6 +9,8 @@ const ENTRY = fileURLToPath(new URL("src/main.ts", import.meta.url));
 // The invite page (`/c`, ADR 0070, D8): its own entry, the same styles and the same Firebase code.
 const INVITE_ENTRY = fileURLToPath(new URL("src/invite-main.ts", import.meta.url));
 // The legal pages (`/termos`, `/privacidade`, ADR 0083): a style-only entry, the pages have no script.
+// The operator's dashboard (`/painel`, ADR 0085): its own entry, the same sheet and Firebase code, its own style.
+const OPS_ENTRY = fileURLToPath(new URL("src/ops-main.ts", import.meta.url));
 const LEGAL_STYLE = fileURLToPath(new URL("src/styles/legal.css", import.meta.url));
 
 export default defineConfig({
@@ -22,7 +24,9 @@ export default defineConfig({
     assetsInlineLimit: 0,
     modulePreload: false,
     sourcemap: false,
-    rollupOptions: { input: { round: ENTRY, invite: INVITE_ENTRY, legal: LEGAL_STYLE } },
+    rollupOptions: {
+      input: { round: ENTRY, invite: INVITE_ENTRY, ops: OPS_ENTRY, legal: LEGAL_STYLE },
+    },
   },
   test: { environment: "node" },
 });

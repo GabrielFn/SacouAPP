@@ -41,6 +41,7 @@
         <p id="ops-detail" class="when">@(firebase is null ? WebTexts.OpsUnavailable : WebTexts.OpsDetail)</p>
     </header>
     <div class="ops-bar">
+        <p id="ops-updated" class="ops-updated" hidden></p>
         <p id="page-status" class="status" role="status" aria-live="polite" hidden></p>
         @if (firebase is not null)
         {
