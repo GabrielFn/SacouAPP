@@ -89,7 +89,7 @@ Valem para as tarefas **novas** a partir de 24/11/2026; as que já tinham plano 
 2. Dinheiro (qualquer gasto novo).
 3. Irreversível: publicar nas lojas, primeiro deploy em produção, apagar dados reais, algo que afete jogadores do piloto.
 4. Produto: decisão que muda o que o usuário vê ou paga e que os docs não cobrem.
-5. Teste no celular (recorte de foto, vibração, push, tela ligada): entregue o build e um roteiro de teste de 10 minutos.
+5. Teste no celular do que o emulador não cobre (recorte de foto, câmera, vibração, push real, tela ligada, desempenho): entregue o build e um roteiro de teste de 10 minutos.
 6. Tarefa travada 3 ciclos seguidos.
 
 ## Regras de código
@@ -116,7 +116,7 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 3. CI verde: build, lint (avisos como erro), testes TS e .NET.
 4. Respeita a arquitetura (DDD enxuto, fatias verticais, domínio sem infraestrutura, eventos sem dado pessoal, glossário).
 5. Clean Code: nomes claros, funções pequenas, sem números soltos, imutabilidade, sem `any`.
-6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados.
+6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados. **Toda mudança de tela é conferida no emulador Android antes do merge** (Gabriel, 24/11/2026; roteiro em `docs/operacao/teste-no-emulador.md`).
 7. Sem segredos no código nem nos logs.
 8. Base de conhecimento atualizada (progresso, ADR, domínio, segurança quando aplicável).
 
