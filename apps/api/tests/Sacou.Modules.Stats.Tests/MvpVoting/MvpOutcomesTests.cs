@@ -55,6 +55,26 @@ public sealed class MvpOutcomesTests
         Assert.Equal(1, results.Freezes);
     }
 
+    /// <summary>
+    /// Low 1 of E3.18 part 2 (ADR 0081, Part 2): the freezes of the profile and the export spend the request's budget
+    /// of rebuilds; one past it has no count in this read and is frozen by the next.
+    /// </summary>
+    [Fact]
+    public async Task FreezesPastTheBudgetOfTheRequest_WaitForTheNextRead()
+    {
+        votes.Add(Ana, Bia);
+        time.Advance(AfterTheClose - WhileOpen);
+        RoundProjection[] rounds = [Projection(Both, roundId: Guid.NewGuid()), Projection(Both, roundId: Guid.NewGuid())];
+
+        var first = await OneFreezePerRequest().OfRoundsAsync(GroupId, rounds, TestContext.Current.CancellationToken);
+        Assert.Single(first.Values, vote => vote.Result is not null);
+        Assert.Equal(1, results.Freezes);
+
+        var second = await OneFreezePerRequest().OfRoundsAsync(GroupId, rounds, TestContext.Current.CancellationToken);
+        Assert.All(second.Values, vote => Assert.Equal([Bia], vote.Result!.Winners));
+        Assert.Equal(2, results.Freezes);
+    }
+
     [Fact]
     public async Task WhileOpen_NothingIsCounted_NorFrozen()
     {
@@ -238,6 +258,13 @@ public sealed class MvpOutcomesTests
     private Task<RoundMvpVote?> OutcomeAsync(RoundProjection round) =>
         new MvpOutcomes(votes, results, new RebuildBudget(Options.Create(new StatsRebuildOptions())), new GroupRebuildGate(Options.Create(new StatsRebuildOptions())), time).OfRoundAsync(GroupId, round, TestContext.Current.CancellationToken);
 
+    private MvpOutcomes OneFreezePerRequest() => new(
+        votes,
+        results,
+        new RebuildBudget(Options.Create(new StatsRebuildOptions { MaxRebuildsPerRequest = 1 })),
+        new GroupRebuildGate(Options.Create(new StatsRebuildOptions())),
+        time);
+
     private async Task<RoundSummaryReport> SummaryAsync(RoundProjection round) =>
         RoundSummaryReport.From(round, await OutcomeAsync(round));
 
@@ -246,9 +273,11 @@ public sealed class MvpOutcomesTests
         RoundState state = RoundState.Scheduled,
         IReadOnlyList<PlayerSummary>? players = null,
         bool statsMvp = true,
-        bool team = false)
+        bool team = false,
+        Guid? roundId = null)
     {
-        var facts = new RoundFacts(RoundId, state, StartsAt, DateOnly.FromDateTime(StartsAt.UtcDateTime), rules);
+        var id = roundId ?? RoundId;
+        var facts = new RoundFacts(id, state, StartsAt, DateOnly.FromDateTime(StartsAt.UtcDateTime), rules);
         var mvp = team
             ? new MvpSummary(MvpKind.Team, [Ana.Value, Caio.Value], null, 5, 2, 2, 2)
             : new MvpSummary(MvpKind.Player, [Ana.Value], CourtSide.A, 5, 2, 2, 2);
@@ -257,7 +286,7 @@ public sealed class MvpOutcomesTests
             Players = players ?? [Player(Ana, plusMinus: 5, CourtSide.A), Player(Bia, plusMinus: -2, CourtSide.B), Player(Caio, plusMinus: 1)],
             Mvp = statsMvp ? mvp : null,
         };
-        return new RoundProjection(facts, new CourtStreamHead(RoundId, Guid.NewGuid(), EventCount: 10), 10, "hash", summary);
+        return new RoundProjection(facts, new CourtStreamHead(id, Guid.NewGuid(), EventCount: 10), 10, "hash", summary);
     }
 
     private static PlayerSummary Player(MemberId member, int plusMinus, CourtSide? side = null) =>
