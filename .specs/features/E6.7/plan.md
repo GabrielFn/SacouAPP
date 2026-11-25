@@ -1,6 +1,6 @@
 # E6.7 · Apelidos da página `/r` escondidos 7 dias depois do início da rodada
 
-**Approved**: <pendente - o Gabriel aprova ou ajusta a pergunta 238>
+**Approved**: 2026-11-25 - user: "Aprovo os quatro" (respostas 232-235, 238, 240, 241 com a recomendação)
 **Settled mid-build:** none
 **Review:** <pendente>
 **Fix pass:** <pendente>

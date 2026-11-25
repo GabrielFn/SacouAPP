@@ -1,6 +1,6 @@
 # E6.8 · Quadras de uma conta apagada saem do aparelho
 
-**Approved**:
+**Approved**: 2026-11-25 - user: "Aprovo os quatro" (respostas 232-235, 238, 240, 241 com a recomendação)
 **Settled mid-build:** none
 **Review:**
 **Fix pass:**

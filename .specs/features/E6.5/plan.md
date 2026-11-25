@@ -1,6 +1,6 @@
 # E6.5 · Prazo de 60 dias da marca de exclusão
 
-**Approved**: <a escrever quando o Gabriel aprovar>
+**Approved**: 2026-11-25 - user: "Aprovo os quatro" (respostas 232-235, 238, 240, 241 com a recomendação)
 **Settled mid-build:** none
 **Review:** <a escrever quando a revisão for enviada>
 **Fix pass:** <a escrever quando a correção for feita>
