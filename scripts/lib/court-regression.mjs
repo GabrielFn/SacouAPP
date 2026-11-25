@@ -85,6 +85,14 @@ export function courtLintCases(prefix) {
       NO_RESTRICTED_SYNTAX,
     ],
     [`${adapters}firebase.ts`, 'import "@react-native-firebase/auth";\n', CLEAN],
+    // Sentry is behind the ErrorReporter port: adapters only, the root layout too (E5.2, ADR 0080).
+    [`${screen}sentry.tsx`, 'import "@sentry/react-native";\n', NO_RESTRICTED_IMPORTS],
+    [
+      `${groups}sentry-type.ts`,
+      'import type { Event } from "@sentry/core";\n',
+      NO_RESTRICTED_IMPORTS,
+    ],
+    [`${adapters}sentry.ts`, 'import "@sentry/react-native";\n', CLEAN],
     // No fake adapter in a route, the root layout above all (ADR 0057, D10).
     [`${screen}fake.tsx`, 'import "../adapters/fake-auth-session";\n', NO_RESTRICTED_IMPORTS],
     [`${screen}real.tsx`, 'import "../adapters/firebase-auth-session";\n', CLEAN],
