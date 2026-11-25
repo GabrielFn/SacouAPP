@@ -81,7 +81,7 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   `tracesSampleRate`**: o plano pedia 0, mas no SDK qualquer número (0 também) liga as integrações de tracing (início
   do app, quadros, rotas). `enableAutoSessionTracking` ligado (saúde da versão, sem usuário), `maxBreadcrumbs: 30`.
   `beforeSend` e `beforeBreadcrumb` passam pelo `scrub-event.ts` (puro, sem o SDK), espelho do D4 por lista
-  permitida: o evento perde `user`, `server_name`, `extra`, tudo do `request` menos URL e método, as tags fora de
+  permitida: o evento perde `server_name` (o `user` vira o anônimo, D14), `extra`, tudo do `request` menos URL e método, as tags fora de
   `area`/`event.origin`/`event.environment` e o nome do aparelho no contexto; URL sem query nem fragmento (o token do
   convite fica depois do `#`), `/c/...` e `/r/...` (web ou `sacou://`) viram `{code}`, todo GUID vira `[id]`, e
   e-mail, `Bearer`, JWT e Pix viram `[filtrado]` na mensagem, na exceção e nos breadcrumbs. Breadcrumb de `console`
@@ -104,6 +104,30 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   nativa, o contexto do aparelho sem nome (`sendDefaultPii: false` no lado nativo) e os breadcrumbs já filtrados
   (o SDK copia para o nativo só o que passou pelo `beforeBreadcrumb`). Os filtros do painel (Data Scrubber e
   "Prevent Storing of IP Addresses", passo 3 do roteiro) cobrem o resto.
+- **D14 · Usuário anônimo fixo e geo vazia** (25/11/2026, aceite no emulador com o APK `preview`). Os dois eventos
+  (erro JS e falha nativa) chegavam com *Geography: cidade, BR*, mesmo com "Prevent Storing of IP Addresses" e
+  `sendDefaultPii: false`: o JS já manda `sdk.settings.infer_ip: "never"` (o IP não vai para `user.ip_address`), mas o
+  Relay deriva `user.geo` do IP da conexão sempre que o evento chega sem geo (`normalize_user_geoinfo` usa o IP do
+  cliente como alternativa) e só pula a consulta quando `user.geo` já existe. Não há opção do SDK nem do painel que
+  desligue isso. Por isso todo evento leva `ANONYMOUS_USER` (`scrub-event.ts`): `{ id: "[id]", geo: { region:
+  "[filtrado]" } }`, igual em todo aparelho. O `scrubEvent` troca o usuário por ele (antes apagava), e o adaptador chama
+  `Sentry.setUser(ANONYMOUS_USER)` logo depois do `init`; o SDK copia o usuário do escopo para o lado nativo
+  (`scopeSync`). Uma falha nativa Android **não passa pelo `beforeSend` do JS** (é gravada no disco pelo SDK Java na
+  hora da falha e enviada na abertura seguinte pelo nativo), mas o SDK Java aplica o escopo na captura: ela sai com o
+  mesmo usuário. O `id` fixo também impede o SDK Android de pôr o id da instalação (`DefaultAndroidEventProcessor`
+  só preenche um id ausente). O `setUser` com `geo` chega ao nativo desde a correção da issue 6306 do SDK (presente na
+  8.28.1). Contagem de "usuários afetados" fica sempre 1: aceito (pergunta 209, sem id
+  de usuário). **Sem mudança nativa**, mas o APK `preview` leva o bundle do JS: o aceite pede um build novo.
+- **D15 · O que a falha nativa ainda leva, sem código nativo.** O RN 8.28.1 não aceita `beforeSend` nativo por
+  opção: o `RNSentryStart` só lê opções simples do JS, e o único gancho é `RNSentrySDK.init(context, configuração)`
+  em Kotlin/Java no `MainApplication` (plugin do Expo próprio), fora do escopo desta correção. Ficam no evento nativo
+  (fora do filtro do JS): `device.timezone`, `device.locale`/`language`, `app.permissions` (as permissões do
+  manifesto do Sacou e se foram concedidas) e os demais campos técnicos do aparelho, todos sem identificar a pessoa.
+  Uma falha nativa **antes** do `setUser` (no início do app, antes do JS) ainda sai com o id da instalação e **sem `user.geo`**, e o Relay deriva a cidade do IP. As sessões
+  de saúde da versão do SDK Android usam o id da instalação como `did` (a conferir no painel). Se for preciso
+  apagar esses campos, o caminho sem código é a regra de "Advanced Data Scrubbing" no painel do `sacou-mobile`
+  (`Remove`, tipo `Anything`, origem `$user.id || $user.geo || $device.timezone || $device.locale || $device.language || $app.permissions`; o Relay aplica a regra depois da consulta de geo, então ela também cobre a falha anterior ao JS),
+  e o caminho com código é o `beforeSend` nativo pelo `RNSentrySDK.init` (exige APK novo).
 
 ## Consequências
 
