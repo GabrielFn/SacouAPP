@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { REDACTED } from "../services/error-reporting/scrub-event";
+import { ANONYMOUS_USER, REDACTED } from "../services/error-reporting/scrub-event";
 import { sentryOptions } from "./sentry-options";
 
 const CONFIG = { dsn: "https://key@o1.ingest.us.sentry.io/2", environment: "staging" };
@@ -43,6 +43,6 @@ describe("the options of the app's Sentry (E5.2, ADR 0080, D10 and R4)", () => {
       {},
     );
     expect(event?.message).toBe(`for ${REDACTED}`);
-    expect(event?.user).toBeUndefined();
+    expect(event?.user).toEqual(ANONYMOUS_USER);
   });
 });
