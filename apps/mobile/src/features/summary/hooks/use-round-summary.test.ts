@@ -13,7 +13,8 @@ interface RecordedOptions {
   readonly queryFn?: () => unknown;
 }
 
-const state = vi.hoisted<{ summary: unknown; api: unknown }>(() => ({
+const state = vi.hoisted<{ summary: unknown; api: unknown; mvpVote: boolean }>(() => ({
+  mvpVote: true,
   summary: undefined,
   api: undefined,
 }));
@@ -43,6 +44,7 @@ vi.mock("../../groups/queries/use-group-queries", () => ({
   useGroup: () => ({ data: { name: "Quadra" } }),
   useGroupMembers: () => ({ data: [] }),
 }));
+vi.mock("../../app-config/hooks/use-app-config", () => ({ useFeatureOn: () => state.mvpVote }));
 vi.mock("./use-unsent-points", () => ({ useUnsentPoints: () => 0 }));
 vi.mock("./use-minute-tick", () => ({ useMinuteTick: () => 0 }));
 
@@ -80,5 +82,17 @@ describe("the ballot is read only while the voting is open (review finding)", ()
         closesAt: "2026-11-21T00:00:00Z",
       }),
     ).toBe(1);
+  });
+
+  test("with the mvpVote flag off (ADR 0084), even an open voting never calls it", () => {
+    state.mvpVote = false;
+    const calls = useBallotCalls({
+      state: "open",
+      opensAt: "2026-11-20T00:00:00Z",
+      closesAt: "2026-11-21T00:00:00Z",
+    });
+    state.mvpVote = true;
+
+    expect(calls).toBe(0);
   });
 });

@@ -28,6 +28,8 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 {
     private const string KeyId = "integration-key";
 
+    private const string ConnectionStringSetting = "ConnectionStrings:Sacou";
+
     /// <summary>One migrator at a time: every test class migrates the one shared database when it starts, and two runners applying a pending migration together fail on "already exists".</summary>
     private static readonly SemaphoreSlim MigrationGate = new(1, 1);
 
@@ -69,7 +71,9 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 
     internal StubHttpHandler Keys { get; }
 
-    internal string ConnectionString => database.ConnectionString;
+    /// <summary>The database the API uses: the shared one, or the one a test set in <c>ConnectionStrings:Sacou</c> (the backup tests use their own).</summary>
+    internal string ConnectionString =>
+        settings.TryGetValue(ConnectionStringSetting, out var own) && own is not null ? own : database.ConnectionString;
 
     /// <summary>The round page's origin the share links start with (ADR 0070, D1).</summary>
     internal const string PublicBaseUrl = "https://sacou.test";
@@ -161,7 +165,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         ArgumentNullException.ThrowIfNull(builder);
         builder.UseEnvironment("Production");
         builder.UseSetting("Firebase:ProjectId", TestIdToken.ProjectId);
-        builder.UseSetting("ConnectionStrings:Sacou", database.ConnectionString);
+        builder.UseSetting(ConnectionStringSetting, database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.UseSetting("RoundPage:PublicBaseUrl", PublicBaseUrl);
         foreach (var (key, value) in RoomyRateLimits.Concat(settings))

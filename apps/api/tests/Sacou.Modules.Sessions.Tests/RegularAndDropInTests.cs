@@ -117,6 +117,40 @@ public sealed class RegularAndDropInTests
         Assert.Null(round.AttendanceOf(Member(5)));
     }
 
+    [Fact]
+    public void J9_NoActiveRegular_TheWindowDoesNotHold_AndTheDropInConfirmsAtOnce()
+    {
+        var round = NewRound();
+        var early = round.Slot.StartsAt - (3 * Day);
+        var withoutRegulars = Rules(window: true).ForGroup(hasActiveRegular: false);
+
+        Assert.False(withoutRegulars.DropInWindowEnabled);
+        Assert.Equal(AttendanceStatus.Going, StatusOf(Answer(round, withoutRegulars, 1, AttendanceResponse.Going, now: early), 1));
+    }
+
+    [Fact]
+    public void J9_WithAnActiveRegular_TheWindowStillHolds_BeforeItOpensAndNotAfter()
+    {
+        var round = NewRound();
+        var opens = round.Slot.StartsAt - Day;
+        var withRegulars = Rules(window: true, hours: 24).ForGroup(hasActiveRegular: true);
+
+        Assert.Equal(Rules(window: true, hours: 24), withRegulars);
+        Assert.Equal("sessions.drop-in-window-closed", Respond(round, withRegulars, 1, AttendanceResponse.Going, now: opens.AddMinutes(-1)).Error.Code);
+        Assert.True(Respond(round, withRegulars, 1, AttendanceResponse.Going, now: opens).IsSuccess);
+    }
+
+    [Fact]
+    public void J9_NoActiveRegular_AfterTheWindowOpened_StillConfirms_AndAWindowOffStaysOff()
+    {
+        var round = NewRound();
+        var opened = round.Slot.StartsAt - TimeSpan.FromHours(1);
+
+        Assert.True(Respond(round, Rules(window: true).ForGroup(hasActiveRegular: false), 1, AttendanceResponse.Going, now: opened).IsSuccess);
+        Assert.Equal(Rules(window: false), Rules(window: false).ForGroup(hasActiveRegular: false));
+        Assert.Equal(Rules(window: false), Rules(window: false).ForGroup(hasActiveRegular: true));
+    }
+
     private static RoundChange Seed(AttendanceSettings rules, int regulars) =>
         RoundReconciliation.SeedRegulars(NewRound(), rules, [.. Enumerable.Range(1, regulars).Select(Member)], Now);
 }

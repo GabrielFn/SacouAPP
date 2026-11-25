@@ -2,7 +2,12 @@ import { describe, expect, test } from "vitest";
 
 import { endRoundBody } from "./end-round-view";
 
-const BASE = { openMatchScore: null, finishedMatches: 0, votingEnabled: false } as const;
+const BASE = {
+  openMatchScore: null,
+  finishedMatches: 0,
+  votingEnabled: false,
+  availability: "open",
+} as const;
 
 describe("endRoundBody (R101 3a)", () => {
   test("no match finished and nothing in play", () => {

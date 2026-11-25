@@ -244,6 +244,13 @@ Detalhes em `docs/estado/tarefas/E5.1.md`, seções 5 ("O que o Gabriel precisa 
 ## 22/11/2026: defeitos do percurso (R98)
 - **Respostas do Gabriel (22/11):** permissão de notificação = pedir depois do primeiro VOU ou da primeira rodada criada, com uma frase antes do pedido do sistema; Início = rodadas dos **próximos 7 dias** (sem corte de semana); Parte 4 (criar o grupo numa chamada só) = **incluir agora**. rótulo "Avulso" **mantido** (o app já distingue: "Sem conta" para convidado sem conta; "Mensalista" ou "Avulso" para quem tem conta).
 
+## 24/11/2026: M6, perguntas 188 a 212 (padrões adotados; nenhuma trava o código)
+Opções completas nos planos. Todas seguem o padrão até a resposta do Gabriel. As que dependem de conta ou gasto travam só o aceite da tarefa, não o código.
+- **E5.3b** ([plano](tarefas/E5.3b.md), seção de decisões): **188** manter o teto de 20.000 eventos e 8 MiB por stream, agora com snapshot (padrão: manter). **189** quando o teto de 20 reconstruções por leitura corta, `/v1/me/stats` omite as rodadas restantes e completa nas leituras seguintes (padrão).
+- **E5.3** ([plano](tarefas/E5.3.md)): **193** backup no Cloud Storage com Cloud Run Job e Scheduler, em vez do R2 de `decisoes.md` (padrão, R$ 0). **194** papel só de leitura no Neon e segredos `sacou-backup-database-url-*`, que o Gabriel cria (padrão). **195** retenção de 30 dias (padrão). **196** texto e link da tela "Atualize o Sacou", que não está no design (padrão: o da seção D5 do plano). **197** primeira feature flag: `MvpVote` (padrão).
+- **E6.1** ([plano](tarefas/E6.1.md), seção 6): **198** controlador na política: "Gabriel, pessoa física", só o primeiro nome (padrão). **199** canal do encarregado: e-mail novo e gratuito, criado pelo Gabriel (recomendação; conta nova). **200** prazos de retenção propostos (padrão). **201** bases legais: execução de contrato e legítimo interesse, sem consentimento (padrão). **202** idade mínima de 18 anos (padrão). **203** o rascunho vai aos jogadores do piloto antes da revisão jurídica? Recomendação: não; por enquanto, publicado só no ambiente de teste.
+- **E5.2** ([plano](tarefas/E5.2.md), renumeradas de 203–207 por choque com a E6.1): **208** região do Sentry: US (padrão). **209** sem identificar quem teve o erro (padrão). **210** só erros, sem tracing (padrão). **211** dois projetos, ambiente como tag (padrão). **212** aceite só no teste, sem rota de erro em produção (padrão).
+
 ## 23/11/2026: R100 (times na tela do jogador), perguntas 179 a 182 (padrões adotados; nenhuma trava o começo)
 Opções completas na seção 7 de [`docs/estado/tarefas/R100.md`](tarefas/R100.md). O Gabriel aceitou o bloco "Times" (achado 6 da análise do percurso); estas são as decisões que a tela 26 não desenha.
 179. Onde aparecem os times: (1) na 26 e na 06, para todos os membros do grupo, inclusive quem não vai; a página web `/r/…` e o cartão do Início ficam sem times no piloto; (2) também na página web; (3) só para quem confirmou. **Recomendação e padrão: 1.**
@@ -258,3 +265,8 @@ Detalhes em `docs/estado/tarefas/R101.md`, seção 5.
 185. "Não vou mais" com confirmação também na página web `/r`: (1) sim, app e web iguais; (2) só no app. **Recomendação e padrão adotado: 1.**
 186. Texto do "Mandar pro grupo" do resumo com a votação aberta: (1) "Na frente pelo placar: Leo (+7 de saldo). A galera decide o MVP até amanhã, 12h44."; (2) manter "MVP do dia: Leo". **Recomendação e padrão adotado: 1** (o texto do WhatsApp fica, e o provisório viraria definitivo no grupo).
 187. Na tela 11 (fim de partida), "Encerrar rodada" desce para baixo de "Voltar ao início", longe do botão principal (desvio de `FimPartida.dc.html`): (1) sim; (2) manter entre os dois, agora com confirmação. **Recomendação e padrão adotado: 1.**
+
+## 24/11/2026: E5.3 Parte 2 (feature flags e versão mínima), perguntas 196 e 197 (padrões adotados)
+Detalhes no ADR 0084 e em `docs/estado/tarefas/E5.3.md`.
+196. **Tela "Atualize o Sacou"** (não está no design): tela cheia sem saída, "Esta versão não funciona mais. Baixe a nova para continuar.", botão "Baixar a versão nova" com o link da loja da plataforma vindo da API; sem link, sem botão e o texto manda falar com quem organiza o grupo. **Padrão adotado: assim.** Em aberto: qual link usar no piloto (página do teste interno da Play Store e do TestFlight, da E5.4); até lá `UpdateUrl` fica vazio.
+197. **Primeira feature flag:** `MvpVote` (E3.18), ligada nos dois ambientes. **Padrão adotado: só ela.** Outra função que você queira poder desligar entra com uma linha no catálogo e uma no app.

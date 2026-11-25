@@ -31,7 +31,7 @@ Nenhuma existe por padrão. Toda exceção exige inspeção, motivo e revisor; a
 | Falso positivo do gitleaks | Fingerprint global, `arquivo:regra:linha`, em `.gitleaksignore`: com `-m`, o mesmo achado volta no commit de merge, cujo SHA muda a cada execução de PR. `paths` em `.gitleaks.toml` só para arquivo específico, nunca pasta inteira |
 | `gitleaks:allow` na linha | Proibido: `--ignore-gitleaks-allow` faz a linha reprovar mesmo assim |
 | Advisory npm sem correção | `audit.ignore` com o GHSA em `pnpm-workspace.yaml`, par em `scripts/npm-audit-exceptions.json` (`advisory`, `reason`, `expires`) e entrada na tabela abaixo. O pnpm não controla a validade: `pnpm test:tooling` reprova a partir do dia seguinte a `expires` e quando `expires` passa de 180 dias contados da execução, em execução com código |
-| Advisory NuGet sem correção | `<NuGetAuditSuppress>` com a URL e entrada igual em `scripts/nuget-audit-exceptions.json` (`advisory`, `reason`, `expires`). O script controla a validade |
+| Advisory NuGet sem correção | `<NuGetAuditSuppress>` com a URL e entrada igual em `scripts/nuget-audit-exceptions.json` (`advisory`, `reason`, `expires`). O script controla a validade: reprova data impossível e `expires` a mais de 90 dias da execução; `test:tooling` reprova `NuGetAuditSuppress` sem entrada viva (o aviso suprimido some do relatório) e `.csproj` sem `packages.lock.json` (E5.3, ADR 0082) |
 | Sonda da CI | Nenhuma exceção: a regra `sacou-ci-probe` existe só para reprovar, e o valor nunca chega à `main` |
 
 ## Exceções e correções vigentes

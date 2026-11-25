@@ -23,6 +23,7 @@ const NOT_PROGRAMMED: ApiError = { kind: "unexpected", status: 0 };
 function defaults(): Answers {
   const none = apiErr(NOT_PROGRAMMED);
   return {
+    getAppConfig: none,
     signIn: none,
     listMyGroups: none,
     createGroup: none,
@@ -94,6 +95,7 @@ export function createFakeSacouApi(): FakeSacouApi {
   }
 
   const api: SacouApi = {
+    getAppConfig: () => answer("getAppConfig", []),
     signIn: () => answer("signIn", []),
     listMyGroups: () => answer("listMyGroups", []),
     createGroup: (name, templateKey, settings) =>

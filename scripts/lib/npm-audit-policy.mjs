@@ -26,7 +26,8 @@ const EXACT_VERSION = /^\d+\.\d+\.\d+$/;
 const ZOD_ALIAS = /^npm:zod(?:@(.*))?$/;
 const OTHER_PACKAGE_ALIAS_PREFIX = "npm:";
 const MENTIONS_ZOD = /zod/i;
-const ANY_ADVISORY = /ghsa-/i;
+// A GHSA or a CVE anywhere but audit.ignore (auditConfig.ignoreCves, for one) would skip the expiry check.
+const ANY_ADVISORY = /ghsa-|cve-\d{4}-/i;
 const MAX_EXCEPTION_DAYS = 180;
 const MILLISECONDS_PER_DAY = 86_400_000;
 const ISO_DATE_LENGTH = 10;
@@ -48,7 +49,9 @@ function listIgnoredAdvisories(workspace) {
 function findStrayAdvisoryFailures(workspace) {
   const audit = { ...workspace.audit, ignore: undefined };
   return ANY_ADVISORY.test(JSON.stringify({ ...workspace, audit }))
-    ? ["pnpm-workspace.yaml has a GHSA outside audit.ignore, where its expiry is not checked."]
+    ? [
+        "pnpm-workspace.yaml has a GHSA or CVE outside audit.ignore, where its expiry is not checked.",
+      ]
     : [];
 }
 

@@ -66,7 +66,17 @@ internal sealed class RoundGroupState
     public IReadOnlyList<MemberId> RegularsInJoinOrder() =>
         [.. Members.Where(member => member.Type == MemberType.Regular).Select(member => new MemberId(member.MemberId))];
 
-    private static ResolvedRound Resolved(RoundSettings settings) => new(settings, ToDomain(settings.Attendance));
+    /// <summary>Whether any active member is a mensalista: without one the avulsos' window does not hold (ADR 0079, P3).</summary>
+    public bool HasActiveRegular => HasRegular(Members);
+
+    internal static bool HasRegular(IEnumerable<GroupMembership> members) =>
+        members.Any(member => member.Type == MemberType.Regular);
+
+    /// <summary>The attendance rules for the domain, as they hold for this group now.</summary>
+    internal static AttendanceSettings ForGroup(Groups.Contracts.AttendanceRules rules, bool hasActiveRegular) =>
+        ToDomain(rules).ForGroup(hasActiveRegular);
+
+    private ResolvedRound Resolved(RoundSettings settings) => new(settings, ForGroup(settings.Attendance, HasActiveRegular));
 
     internal static AttendanceSettings ToDomain(Groups.Contracts.AttendanceRules rules) => new(
         rules.Enabled,

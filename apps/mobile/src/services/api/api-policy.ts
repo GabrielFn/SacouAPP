@@ -30,6 +30,8 @@ const HTTP = {
   // The per-user rate limit, whatever the code of its body (ADR 0062, D7).
   tooManyRequests: 429,
   unavailable: 503,
+  // The native build is below the minimum, whatever the code of its body (ADR 0084).
+  upgradeRequired: 426,
 } as const;
 
 const RULE_STATUSES: ReadonlySet<number> = new Set([
@@ -125,6 +127,8 @@ export function classifyFailure(answer: RawAnswer, nowMs: number): ApiError {
       return { kind: "rate-limited", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
     case HTTP.unavailable:
       return { kind: "unavailable", retryAfterMs: parseRetryAfter(answer.retryAfter, nowMs) };
+    case HTTP.upgradeRequired:
+      return { kind: "app-outdated" };
     default:
       return RULE_STATUSES.has(answer.status)
         ? ruleError(answer)

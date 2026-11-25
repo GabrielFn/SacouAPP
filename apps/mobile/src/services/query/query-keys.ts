@@ -3,6 +3,8 @@
  * resource and its ID: never a token, a `userId`, an invite token nor typed text.
  */
 export const queryKeys = {
+  /** The minimum build and the flags (ADR 0084): no person's data, persisted so a known answer holds offline. */
+  appConfig: () => ["app-config"] as const,
   me: () => ["me"] as const,
   /** The person's own profile, the one record of the nickname; on disk only the nickname goes (ADR 0057, D9). */
   myProfile: () => ["me", "profile"] as const,

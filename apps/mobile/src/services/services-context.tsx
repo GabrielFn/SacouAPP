@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 
+import type { AppBuild } from "../features/app-config/app-build";
 import type { BatteryMonitor } from "../features/court/ports/battery-monitor";
 import type { BackGuard } from "../features/court/ports/back-guard";
 import type { AppForeground } from "../features/court/ports/app-foreground";
@@ -48,6 +49,8 @@ import type { CacheSession } from "./query/cache-persister";
 import type { SessionEnder } from "./session/end-session";
 
 export interface Services {
+  /** The native build of this binary, for the minimum-build gate and the API headers (ADR 0084). */
+  readonly appBuild: AppBuild;
   readonly fontLoader: FontLoader;
   readonly courtRuntimeOpener: CourtRuntimeOpener;
   /** Names and team colors of the court, from the members cache, so they show offline (E4.7, D7). */

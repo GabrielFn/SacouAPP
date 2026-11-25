@@ -244,6 +244,19 @@ Duas páginas anônimas (`/termos`, `/privacidade`), sem script, sem dado de nin
 | T   | Página em moldura de outro site ou com o caminho refletido | `frame-ancestors 'none'`, `X-Frame-Options: DENY`; a query nunca é refletida (teste) |
 | D   | Abuso das páginas públicas | Política `round-page` por endereço (60 / 60 s), como a `/r` (teste do 61º pedido) |
 
+## 8b. Configuração do app: versão mínima e flags (E5.3 Parte 2, [ADR 0084](../arquitetura/adr/0084-feature-flags-e-versao-minima.md))
+
+Uma rota anônima nova (`GET /v1/app-config`) e dois cabeçalhos do app que a API lê mas nunca trata como prova.
+
+|     | Ameaça | Mitigação |
+| --- | ------ | --------- |
+| D   | Rajada de pedidos à rota anônima | Política `app-config` por endereço (último item do `X-Forwarded-For`, /64 no IPv6): 60 / 60 s; resposta sem banco e `max-age=60` |
+| I   | A rota revelar algo além do necessário | Resposta de objeto fechado: números de build, endereços HTTPS da loja e flags; nada de pessoa, ambiente ou versão da API; teste de esquema fechado |
+| S/T | Cabeçalhos `X-Sacou-App-Build` e `X-Sacou-App-Platform` forjados | Não dão acesso a nada: só podem provocar um 426 a quem os enviou. Valor ausente, repetido, longo (>16), plataforma desconhecida ou número inválido passa sem erro; leitura sem alocar texto grande |
+| T   | `UpdateUrl` levar o jogador a um endereço malicioso | Vem do `appsettings` (PR revisado), só HTTPS validado na partida e de novo no app; abre no navegador/loja, nunca dentro do app |
+| D   | App preso na tela de atualização por engano | O app só bloqueia com resposta conhecida (rede ou cache); sem build legível nunca bloqueia; o mínimo só sobe depois do APK novo instalado (roteiro em `deploy.md`) |
+| E   | Flag desligada ser contornada chamando a rota direto | O gate fica no pipeline e vale para qualquer chamador (404 antes de qualquer leitura de banco); o teste lista as rotas com flag e reprova rota nova sem declaração |
+
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 
 |     | Ameaça                                  | Mitigação                                                                             |
@@ -294,11 +307,11 @@ A rota interna do pump chamada pelo Cloud Tasks e pelo Cloud Scheduler (OIDC do 
 | Resumo com IA (E3.13, pós-piloto)        | I: dados enviados ao provedor              | Provedor ainda não definido ([`perguntas.md`](../estado/perguntas.md), item 4); dados enviados a definir na E3.13 |
 | Resumo com IA (E3.13, pós-piloto)        | T: texto de usuário alterando o resumo     | A definir na E3.13. Falha usa texto padrão (aceite da E3.13)                                                      |
 | Resumo com IA (E3.13, pós-piloto)        | D: custo por uso abusivo                   | Cota por grupo (`revisao-mvp.md:116`)                                                                             |
+| Backups no Cloud Storage (E5.3, ADR 0082) | I: cópia do banco exposta                  | Bucket por ambiente, acesso uniforme, prevenção de acesso público, criptografia padrão; só a conta do job do ambiente lê e grava (`storage.objectUser` só no seu bucket); nenhuma conta de deploy, build ou da API tem papel; 30 dias (pergunta 195)                                       |
 | Sentry da API (E5.2, ADR 0080) | I: dado pessoal enviado a terceiros | Desligado sem `SACOU_SENTRY_DSN`; `SendDefaultPii` desligado; filtro por lista permitida no `BeforeSend` e no `BeforeBreadcrumb` (sem usuário, IP, corpo, query, cookies, cabeçalhos além do `Content-Type`, `extra` nem parâmetros de log; URL trocada pelo modelo da rota; e-mail, JWT, `Bearer` e Pix viram `[filtrado]`; todo GUID da mensagem do log e dos breadcrumbs vira `[id]`, para nenhum `MemberId` sair; logs do EF Core e do Npgsql, que trazem o SQL, nunca viram evento nem breadcrumb, com teste de integração num erro de banco real), com teste de marcadores na requisição real; IP não guardado no painel. **Lacuna:** um apelido solto na mensagem formatada de um log novo passaria; `LoggerMessage` sem apelido (revisão de segurança) |
 | Sentry da API (E5.2) | D: cota grátis esgotada (5 mil erros/mês) ou DSN usado por terceiro | Só erros 500 e logs `Error`; 4xx, `Result` e cancelamentos não viram evento; limite de 300 eventos/hora por chave no painel. O DSN da API é segredo (Secret Manager, `secretKeyRef`, teste de arquitetura) |
 | `GET /dev/fail` (E5.2, ADR 0080, D8) | D: quem tem conta no teste gera 500 à vontade | Só em Development e Staging (404 na produção, teste); login obrigatório e limite global; mensagem fixa sem dado |
 | Logs JSON do Cloud Run (E5.2, ADR 0080, D5) | I: caminho com código de convite ou de rodada no log | Escopos nunca escritos (o de hosting traz `RequestPath`); `Microsoft.AspNetCore` em `Warning`; teste do formatter. PostHog continua pós-piloto |
-| Backups no R2 (E5.3)                     | I: cópia do banco exposta                  | Criptografia e acesso a definir na E5.3; retenção em `perguntas.md`, item 2                                       |
 | CI e repositório                         | I: segredo em commit                       | Varredura de segurança na CI (`varredura-ci.md`)                                                                  |
 
 ## 11. CI e cadeia de suprimentos (E0.4, E0.6, E0.9)
@@ -518,3 +531,18 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 
 `stored-next-match-drafts.ts`: uma leitura que falha vale "sem rascunho", e a tela 11 sorteia de novo quem sai (critério `draw`). Quem abrir o app depois de uma falha de leitura pode ver outro sorteio, e a escolha já feita some. Impacto: só a ordem de saída, sem dado pessoal e sem perda de partida. Aceito no piloto; o rascunho é local e o motor valida o plano na confirmação.
+
+## Backup diário do banco (E5.3 Parte 1, [ADR 0082](../arquitetura/adr/0082-backup-diario-do-banco.md))
+
+Superfície nova: os jobs `sacou-backup-test` e `sacou-backup` (sem porta nem entrada da internet), os buckets `sacou-api-backups-*`, a conta `sacou-backup-trigger` e o papel `sacou_backup` do Neon.
+
+| STRIDE | Ameaça | Barreira | Resta |
+|---|---|---|---|
+| I | URL do banco num log, no manifesto ou na configuração do job | Segredo por `secretKeyRef`; o script nunca imprime a URL e tira das mensagens de erro qualquer linha com a senha; `set -eu` sem `set -x` (`test:tooling`); o teste de integração procura a senha na saída, inclusive no caminho de erro; a senha vai a `psql`, `pg_dump` e `pg_restore` só por `PGPASSWORD`, e a URL dos argumentos vai sem ela (`test:tooling`) | A senha fica no ambiente dos processos do contêiner, que só roda o script |
+| I, S | Conexão sem TLS ou com servidor falso | Fora de `localhost`, `sslmode=verify-full&sslrootcert=system` à força (teste com `sslmode=disable`) | CAs da imagem fixada por digest |
+| T, E | Job comprometido escreve no banco | Papel `sacou_backup` só com `pg_read_all_data` | Se o Neon recusar o `GRANT`, fallback com o papel dono (decisão do Gabriel, D6) |
+| T, D | Apagar ou trocar backups (conta comprometida, erro) | Retenção de 30 dias no bucket: ninguém apaga nem sobrescreve antes; a conta do job só tem `objectUser` no próprio bucket | Retenção sem trava: o dono do projeto pode removê-la (travar é irreversível) |
+| E | Teste lê ou grava a produção | Uma conta, um segredo e um bucket por ambiente; conferido no passo 5 de [`backup.md`](../operacao/backup.md) | `sacou-backup-trigger` inicia os dois jobs (só `run.invoker`, sem segredo nem bucket) e tem `workflows.invoker` no projeto (o Workflows não tem papel por workflow) |
+| T | Imagem trocada no Docker Hub | Imagem por digest, a mesma do teste de integração (`test:tooling`) | A cota anônima do Docker Hub pode falhar o job (R3; alerta) |
+| D, R | Backup quebrado sem ninguém saber | Alerta por e-mail de ausência: nenhuma execução bem-sucedida de um job em 26 h (cobre agendamento que não chama, workflow que falha e job que falha); ensaio de restauração mensal | O alerta só vale para um job que já teve uma execução bem-sucedida (passo 4 de [`backup.md`](../operacao/backup.md)); a cobrança da condição precisa ser conferida pelo Gabriel (ADR 0082, D7) |
+| I | Restauração ressuscita conta excluída | Marca `identity.deleted_accounts` no banco atual diz quem se excluiu depois do dump | **Pendente (condição LGPD):** não há comando de reexclusão. Nenhuma restauração real da produção nem piloto com jogadores reais antes do comando de reexclusão a partir de `identity.deleted_accounts` (ADR 0082, D10) |
