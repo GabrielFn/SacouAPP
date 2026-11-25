@@ -27,6 +27,9 @@ internal static class WebTexts
     public const string Canceled = "Rodada cancelada.";
     public const string Started = "Essa rodada já começou.";
     public const string Ended = "Essa rodada já terminou.";
+
+    // Question 238 (E6.7): in place of the list, 7 days after the round's start.
+    public const string ListExpired = "A lista de quem foi sai da página 7 dias depois da rodada.";
     public const string LinkInvalidTitle = "Link inválido";
     public const string LinkInvalid = "Link inválido ou desativado. Peça um novo para quem organiza.";
     public const string TooManyRequests = "Muitas tentativas. Tente de novo em alguns segundos.";

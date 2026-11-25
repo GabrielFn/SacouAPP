@@ -53,34 +53,41 @@ else
             </div>
             <h1 class="title">@round.GroupName</h1>
             <p class="when">@round.When</p>
-            <p class="format">@round.Format</p>
-            <div class="counts">
-                <div class="count">@round.GoingCount@if (round.Capacity is { } capacity)
-                    {<span class="count-of">/@capacity</span>}</div>
-                <div>
-                    <div class="count-label">@WebTexts.Confirmed</div>
-                    @if (round.Hint is { } hint)
-                    {
-                        <div class="count-hint">@hint</div>
-                    }
-                    @if (round.DropInWindow is { } window)
-                    {
-                        <div class="count-hint" id="drop-in-window">@window</div>
-                    }
+            @if (round.ShowsList)
+            {
+                <p class="format">@round.Format</p>
+                <div class="counts">
+                    <div class="count">@round.GoingCount@if (round.Capacity is { } capacity)
+                        {<span class="count-of">/@capacity</span>}</div>
+                    <div>
+                        <div class="count-label">@WebTexts.Confirmed</div>
+                        @if (round.Hint is { } hint)
+                        {
+                            <div class="count-hint">@hint</div>
+                        }
+                        @if (round.DropInWindow is { } window)
+                        {
+                            <div class="count-hint" id="drop-in-window">@window</div>
+                        }
+                    </div>
+                    <div class="court" aria-hidden="true">
+                        @foreach (var taken in round.Court)
+                        {
+                            <span class="@(taken ? "taken" : "open")"></span>
+                        }
+                    </div>
                 </div>
-                <div class="court" aria-hidden="true">
-                    @foreach (var taken in round.Court)
-                    {
-                        <span class="@(taken ? "taken" : "open")"></span>
-                    }
-                </div>
-            </div>
+            }
         </header>
         <div class="net" aria-hidden="true"></div>
         <section class="lists">
             @if (round.ClosedMessage is { } closed)
             {
                 <p class="closed">@closed</p>
+            }
+            @if (round.ExpiredNote is { } expired)
+            {
+                <p class="notice">@expired</p>
             }
             @foreach (var list in round.Lists)
             {
