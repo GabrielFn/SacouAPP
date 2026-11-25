@@ -19,10 +19,11 @@ internal static class MatchesDatabase
         // One copy of the snapshots per process, checked against the database on every write (ADR 0081).
         services.AddOptions<CourtStreamCacheOptions>().Bind(configuration.GetSection(CourtStreamCacheOptions.SectionName)).ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<CourtStreamCacheOptions>, CourtStreamCacheOptionsValidator>());
+        services.AddOptions<CourtTransactionOptions>().Bind(configuration.GetSection(CourtTransactionOptions.SectionName)).ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<CourtTransactionOptions>, CourtTransactionOptionsValidator>());
         services.AddSingleton<ICourtStreamSnapshots, MemoryCourtStreamSnapshots>();
         services.AddScoped<ICourtSnapshotSource, CourtSnapshotReader>();
         services.AddScoped<ICourtStreamStore, PostgresCourtStreamStore>();
-        services.AddScoped<ICourtEventStore, PostgresCourtStreamStore>();
         services.AddScoped<ICourtWriterReader, PostgresCourtStreamStore>();
         services.AddScoped<ICourtSessionReader, PostgresCourtSessionReader>();
         return services;

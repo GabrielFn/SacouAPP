@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Sessions.Contracts;
 using Sacou.Modules.Sessions.Access;
@@ -19,7 +20,8 @@ internal sealed record CloseRoundResponse(DateTimeOffset ClosedAt, DateTimeOffse
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/close</c> (<c>WriteCourt</c>): "Encerrar rodada", which opens the MVP
 /// vote (ADR 0072, D1). Closing again answers the same <c>closedAt</c>; before the start it is 409
 /// <c>sessions.round-not-started</c> unless a match was already finished (ADR 0076); a cancelled round is 409
-/// <c>sessions.round-canceled</c>. Court events that arrive later still count. <c>no-store</c>.
+/// <c>sessions.round-canceled</c>. Court events that arrive later still count. Under <c>court-sync</c>, since it may
+/// summarize the court; a court that cannot be summarized now is a 503 <c>matches.court-busy</c> (ADR 0081, Part 2). <c>no-store</c>.
 /// </summary>
 internal static class CloseRoundEndpoint
 {
@@ -28,7 +30,9 @@ internal static class CloseRoundEndpoint
 
     public static RouteGroupBuilder MapCloseRound(this RouteGroupBuilder group)
     {
-        group.MapPost(Route, HandleAsync).WithName(Name).RequireCapability(GroupCapability.WriteCourt).WithNoStore();
+        group.MapPost(Route, HandleAsync).WithName(Name).RequireCapability(GroupCapability.WriteCourt)
+            .RequireRateLimiting(RateLimitPolicies.CourtSync)
+            .WithNoStore();
         return group;
     }
 
@@ -36,6 +40,11 @@ internal static class CloseRoundEndpoint
         Guid roundId, HttpContext context, CloseRoundHandler handler, CancellationToken cancellationToken)
     {
         var closed = await handler.HandleAsync(context.RoundAccess(), new RoundId(roundId), cancellationToken).ConfigureAwait(false);
+        if (closed.IsFailure)
+        {
+            UnavailableRetry.Apply(context.Response, closed.Error);
+        }
+
         return closed.ToHttpResult(round => TypedResults.Ok(round));
     }
 }
@@ -47,21 +56,30 @@ internal sealed class CloseRoundHandler(RoundWriter writer, IRoundFacts rounds, 
     {
         ArgumentNullException.ThrowIfNull(access);
         var hasFinishedMatch = await HasFinishedMatchBeforeTheStartAsync(access, id, cancellationToken).ConfigureAwait(false);
+        if (hasFinishedMatch.IsFailure)
+        {
+            return Result.Failure<CloseRoundResponse>(hasFinishedMatch.Error);
+        }
+
         var written = await writer.ExecuteAsync(
-            access, id, GroupCapability.WriteCourt, context => context.Round.Close(context.Now, hasFinishedMatch), cancellationToken)
+            access, id, GroupCapability.WriteCourt, context => context.Round.Close(context.Now, hasFinishedMatch.Value), cancellationToken)
             .ConfigureAwait(false);
         return written.IsSuccess
             ? Result.Success(ToResponse(written.Value.Change.Round))
             : Result.Failure<CloseRoundResponse>(written.Error);
     }
 
-    /// <summary>Asked only before the start, the one case that needs it: the court says if a match was finished (ADR 0076).</summary>
-    private async Task<bool> HasFinishedMatchBeforeTheStartAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
+    /// <summary>
+    /// Asked only of a round not yet closed nor cancelled, before its start, the one case that needs it: the court says
+    /// if a match was finished (ADR 0076). Every other close is decided by the round alone and never summarizes the
+    /// court (M5-M2, ADR 0081 Part 2); the lock re-reads the round, so a round closed in between is still closed once.
+    /// </summary>
+    private async Task<Result<bool>> HasFinishedMatchBeforeTheStartAsync(RoundAccess access, RoundId id, CancellationToken cancellationToken)
     {
         var facts = await rounds.FindAsync(access.GroupId.Value, id.Value, cancellationToken).ConfigureAwait(false);
-        if (facts is null || time.GetUtcNow() >= facts.StartsAt)
+        if (facts is null || facts.ClosedAt is not null || facts.State == RoundState.Canceled || time.GetUtcNow() >= facts.StartsAt)
         {
-            return false;
+            return Result.Success(false);
         }
 
         return await playedMatches.HasFinishedMatchAsync(access.GroupId.Value, id.Value, facts.Summary, cancellationToken).ConfigureAwait(false);

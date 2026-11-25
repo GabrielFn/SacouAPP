@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,12 +12,15 @@ namespace Sacou.Http.RateLimiting;
 
 /// <summary>
 /// The per-user limits of the API (ADR 0062): a global fixed window on every signed-in route, chained with a per-user
-/// and then one shared concurrency limit for the two-connection routes, and a fixed window per route policy. In memory,
-/// one process.
+/// and then one shared concurrency limit for the two-connection routes, the same pair for the <c>court-sync</c> routes
+/// (ADR 0081, Part 2), and a fixed window per route policy. In memory, one process.
 /// </summary>
 public static class RateLimitingExtensions
 {
     private const string DualConnectionPartition = "dual-connection";
+    private const string CourtSyncPartition = "court-sync";
+
+    private static readonly FrozenSet<string> CourtSyncPolicies = FrozenSet.Create(StringComparer.Ordinal, RateLimitPolicies.CourtSync);
 
     public static IServiceCollection AddSacouRateLimiting(this IServiceCollection services, IConfiguration configuration)
     {
@@ -42,8 +46,14 @@ public static class RateLimitingExtensions
         var windows = options.Windows();
         limiter.GlobalLimiter = PartitionedRateLimiter.CreateChained(
             PartitionedRateLimiter.Create<HttpContext, string>(context => UserWindow(context, Required(windows, RateLimitPolicies.Global))),
-            PartitionedRateLimiter.Create<HttpContext, string>(context => DualConnectionPerUser(context, options)),
-            PartitionedRateLimiter.Create<HttpContext, string>(context => DualConnectionGate(context, options)));
+            PartitionedRateLimiter.Create<HttpContext, string>(context => PerUser(
+                context, RateLimitPolicies.DualConnection, options.DualConnectionPerUser, options.DualConnectionPerUserQueue)),
+            PartitionedRateLimiter.Create<HttpContext, string>(context => Gate(
+                context, RateLimitPolicies.DualConnection, DualConnectionPartition, options.DualConnectionConcurrency, options.DualConnectionQueue)),
+            PartitionedRateLimiter.Create<HttpContext, string>(context => PerUser(
+                context, CourtSyncPolicies, options.CourtSyncPerUser, options.CourtSyncPerUserQueue)),
+            PartitionedRateLimiter.Create<HttpContext, string>(context => Gate(
+                context, CourtSyncPolicies, CourtSyncPartition, options.CourtSyncConcurrency, options.CourtSyncQueue)));
         foreach (var policy in windows.Keys.Where(name => name != RateLimitPolicies.Global))
         {
             var window = Required(windows, policy);
@@ -80,31 +90,28 @@ public static class RateLimitingExtensions
     /// Before the shared gate, and acquired first by the chain: the limiters run before the endpoint reads the body, so
     /// without this one an account sending slow bodies could hold every place of the gate. Its waiting requests hold none.
     /// </summary>
-    private static RateLimitPartition<string> DualConnectionPerUser(HttpContext context, RateLimitingOptions options)
+    private static RateLimitPartition<string> PerUser(HttpContext context, FrozenSet<string> policies, int permits, int queue)
     {
-        var key = IsDualConnection(context) ? RateLimitPartitionKey.Of(context.User) : null;
+        var key = HasPolicyIn(context, policies) ? RateLimitPartitionKey.Of(context.User) : null;
         return key is null
             ? RateLimitPartition.GetNoLimiter(string.Empty)
-            : RateLimitPartition.GetConcurrencyLimiter(key, _ => new ConcurrencyLimiterOptions
-            {
-                PermitLimit = options.DualConnectionPerUser,
-                QueueLimit = options.DualConnectionPerUserQueue,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-            });
+            : RateLimitPartition.GetConcurrencyLimiter(key, _ => Concurrency(permits, queue));
     }
 
-    /// <summary>One partition for everyone: the two-connection routes together, never per user.</summary>
-    private static RateLimitPartition<string> DualConnectionGate(HttpContext context, RateLimitingOptions options) =>
-        IsDualConnection(context)
-            ? RateLimitPartition.GetConcurrencyLimiter(DualConnectionPartition, _ => new ConcurrencyLimiterOptions
-            {
-                PermitLimit = options.DualConnectionConcurrency,
-                QueueLimit = options.DualConnectionQueue,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-            })
+    /// <summary>One partition for everyone: the routes of the class together, never per user.</summary>
+    private static RateLimitPartition<string> Gate(HttpContext context, FrozenSet<string> policies, string partition, int permits, int queue) =>
+        HasPolicyIn(context, policies)
+            ? RateLimitPartition.GetConcurrencyLimiter(partition, _ => Concurrency(permits, queue))
             : RateLimitPartition.GetNoLimiter(string.Empty);
 
-    private static bool IsDualConnection(HttpContext context) =>
+    private static ConcurrencyLimiterOptions Concurrency(int permits, int queue) => new()
+    {
+        PermitLimit = permits,
+        QueueLimit = queue,
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+    };
+
+    private static bool HasPolicyIn(HttpContext context, FrozenSet<string> policies) =>
         context.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName is { } policy
-        && RateLimitPolicies.DualConnection.Contains(policy);
+        && policies.Contains(policy);
 }

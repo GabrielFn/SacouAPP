@@ -21,6 +21,14 @@ internal interface ICourtSnapshotSource
 {
     /// <summary>The snapshot of the stream from <paramref name="from"/>, or from nothing when null.</summary>
     Task<ReadSnapshot> ReadAsync(Guid courtSessionId, StreamSnapshot? from, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Only the events after <paramref name="from"/>, never the whole stream: null when its last event is not there any
+    /// more, so it must be built again (under the stream's lock, a 503 instead, ADR 0081 Part 2). Without
+    /// <paramref name="checkLastEvent"/> only its position is checked: for a snapshot this very call built from the
+    /// database a moment ago, whose last event is the stored one by construction.
+    /// </summary>
+    Task<ReadSnapshot?> AdvanceAsync(Guid courtSessionId, StreamSnapshot from, bool checkLastEvent, CancellationToken cancellationToken);
 }
 
 /// <summary>A snapshot read from the database, and how (ADR 0081).</summary>
@@ -44,17 +52,30 @@ internal sealed class CourtSnapshotReader(MatchesDbContext database) : ICourtSna
 
     public async Task<ReadSnapshot> ReadAsync(Guid courtSessionId, StreamSnapshot? from, CancellationToken cancellationToken)
     {
-        var version = from?.Version ?? NoVersion;
-        var rows = await RowsFromAsync(courtSessionId, version, cancellationToken).ConfigureAwait(false);
-        if (from is null || version == NoVersion)
+        if (from is not null && from.Version != NoVersion
+            && await AdvanceAsync(courtSessionId, from, checkLastEvent: true, cancellationToken).ConfigureAwait(false) is { } advanced)
         {
-            return new ReadSnapshot(Advance(StreamSnapshot.Empty, courtSessionId, rows), SnapshotUse.Built);
+            return advanced;
         }
 
-        if (rows.Count == 0 || rows[0].Position != version || !string.Equals(Text(rows[0].EventId), from.LastStoredEventId, StringComparison.Ordinal))
+        var all = await RowsFromAsync(courtSessionId, NoVersion, cancellationToken).ConfigureAwait(false);
+        return new ReadSnapshot(Advance(StreamSnapshot.Empty, courtSessionId, all), SnapshotUse.Built);
+    }
+
+    public async Task<ReadSnapshot?> AdvanceAsync(Guid courtSessionId, StreamSnapshot from, bool checkLastEvent, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(from);
+        var version = from.Version;
+        var rows = await RowsFromAsync(courtSessionId, version, cancellationToken).ConfigureAwait(false);
+        if (version == NoVersion)
         {
-            var all = await RowsFromAsync(courtSessionId, NoVersion, cancellationToken).ConfigureAwait(false);
-            return new ReadSnapshot(Advance(StreamSnapshot.Empty, courtSessionId, all), SnapshotUse.Built);
+            return rows.Count == 0 ? new ReadSnapshot(from, SnapshotUse.Hit) : new ReadSnapshot(Advance(from, courtSessionId, rows), SnapshotUse.Advanced);
+        }
+
+        if (rows.Count == 0 || rows[0].Position != version
+            || (checkLastEvent && !string.Equals(Text(rows[0].EventId), from.LastStoredEventId, StringComparison.Ordinal)))
+        {
+            return null;
         }
 
         var after = rows.Skip(TheCheckedOne).ToList();

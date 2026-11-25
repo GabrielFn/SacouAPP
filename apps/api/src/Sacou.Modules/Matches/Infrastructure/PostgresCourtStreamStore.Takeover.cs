@@ -1,4 +1,3 @@
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Sacou.Modules.Matches.Domain.CourtSessions;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
@@ -28,17 +27,24 @@ internal sealed partial class PostgresCourtStreamStore
         Func<IWrittenStream, Result<CourtTakeoverDecision, CourtWriteError>> decide,
         CancellationToken cancellationToken)
     {
-        // EF opens no transaction for raw SQL by itself: without this one, FOR UPDATE would lock nothing.
-        var transaction = await database.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
-        await using (transaction.ConfigureAwait(false))
+        try
         {
-            var outcome = await TakeOverUnderLockAsync(call, decide, cancellationToken).ConfigureAwait(false);
-            if (outcome.Decided is { IsSuccess: true } decided && decided.Value.OpensBatch)
+            // EF opens no transaction for raw SQL by itself: without this one, FOR UPDATE would lock nothing.
+            var transaction = await BeginBoundedTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await using (transaction.ConfigureAwait(false))
             {
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            }
+                var outcome = await TakeOverUnderLockAsync(call, decide, cancellationToken).ConfigureAwait(false);
+                if (outcome.Decided is { IsSuccess: true } decided && decided.Value.OpensBatch)
+                {
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                }
 
-            return outcome;
+                return outcome;
+            }
+        }
+        catch (Exception exception) when (IsTimeout(exception))
+        {
+            return CourtStreamOutcome<CourtTakeoverDecision>.Refused(CourtStreamRefusal.Busy);
         }
     }
 

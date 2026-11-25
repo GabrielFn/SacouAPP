@@ -1,7 +1,7 @@
 # ADR 0081 — Snapshot em memória do stream da quadra
 
-Status: aceita (24/11/2026, E5.3b Parte 1). Complementa as ADRs 0060 e 0063. A Parte 2 (concorrência no
-`court-sync`, `lock_timeout`, `close` e estatísticas) acrescenta uma seção aqui.
+Status: aceita (24/11/2026, E5.3b Partes 1 e 2). Complementa as ADRs 0060, 0062, 0063, 0071 e 0076. A Parte 2 (concorrência no
+`court-sync`, `lock_timeout`, `close` e estatísticas) está na seção "Parte 2: proteções" no fim.
 
 ## Contexto
 
@@ -89,3 +89,86 @@ cabem nos 512 MiB do Cloud Run com folga.
   `ICourtEventStore`: a leitura a partir da versão é do `ICourtSnapshotSource`, e as estatísticas passam a usar o
   snapshot na Parte 2; (e) o portão vem de uma constante de compilação definida pelo ambiente do build, porque os testes
   de integração não podem ler variável de ambiente (`IntegrationSetupRules`).
+
+## Parte 2: proteções (E5.3b Parte 2)
+
+Fecha o M4-A1 (rotas da quadra), o M5-M2 (`close`), a condição da E3.9 4b (reconstrução das estatísticas), a baixa 1
+da E3.18 Parte 2 (apurações do MVP na leitura) e as condições das revisões da Parte 1.
+
+1. **Concorrência no `court-sync`** (`Sacou.Http/RateLimiting`): o mesmo par de `ConcurrencyLimiter` encadeados das
+   rotas de duas conexões (ADR 0062, D4), por usuário e depois comum, para toda rota com a política `court-sync`
+   (escrita, troca, leituras da quadra, `close`, resumo, cédula, voto, resultado e `/v1/me/stats`):
+   `CourtSyncPerUser` 1 (fila `CourtSyncPerUserQueue` 4) e `CourtSyncConcurrency` 6 (fila `CourtSyncQueue` 12). A
+   conferência do pool na partida (`DualConnectionPoolValidator`) passa a contar **duas conexões por requisição das duas
+   classes** (a troca segura a do Matches e a do Groups ao mesmo tempo): `2 × (DualConnectionConcurrency +
+   CourtSyncConcurrency) + DualConnectionHeadroom ≤ Maximum Pool Size`. Com o pool 30 do Neon, a concorrência das rotas
+   de duas conexões cai de 8 para **7** (`2 × (7 + 6) + 4 = 30`).
+2. **Tempo da transação da quadra** (escrita e troca, `PostgresCourtStreamStore.Timeouts`): logo depois do `BEGIN`,
+   `set_config('lock_timeout' | 'statement_timeout' | 'idle_in_transaction_session_timeout', valor, true)` (o mesmo que
+   `SET LOCAL`, com os valores como parâmetros; seção `CourtTransaction`: 2 s, 5 s e 5 s, validados na partida). Os
+   SQLSTATE `55P03`, `57014` e `25P03`, como quer que o EF os embrulhe, viram **503 `matches.court-busy`** com
+   `Retry-After: 2` (`Sacou.Http.UnavailableRetry`, também na troca e no `close`); nada é gravado. Um cancelamento do
+   próprio cliente (`OperationCanceledException`) não é confundido com timeout.
+3. **Nada do stream inteiro sob a trava** (condição 1 da revisão da Parte 1): `EnsureAsync` devolve o próprio snapshot
+   (`WarmSnapshot`) e a escrita usa esse, sem novo `TryGet` sob a trava; um despejo entre o aquecimento e a trava não
+   muda nada (teste). Sob a trava o snapshot só **avança** (`ICourtSnapshotSource.AdvanceAsync`, posições depois da
+   versão, no máximo `SmallStreamEvents` = 2.000 eventos). Sem cópia válida (adiantada em relação a `event_count`, o
+   `eventId` da versão diferente ou mais de 2.000 eventos depois dela) a escrita responde 503 `matches.court-busy`, a
+   cópia é descartada e a nova tentativa constrói fora da trava. Um snapshot construído pelo próprio aquecimento é
+   conferido só pela posição (acabou de ser lido do banco); sem nenhum (o stream nasceu, ou o chamador virou escritor,
+   depois do aquecimento) avança do vazio, dentro do mesmo teto de 2.000.
+4. **Portão por tamanho** (condição 2): uma construção que lê menos de `SmallStreamEvents` eventos usa um portão próprio
+   (`MaxConcurrentSmallBuilds` 4); só as grandes disputam as 2 vagas de `MaxConcurrentBuilds`. Streams cheios em rodízio
+   esvaziam o cache e ocupam as vagas grandes, mas uma rodada comum (~1.500 eventos) é reconstruída na hora, sem 503
+   (teste). Preferido a reservar vagas por grupo: não precisa saber de quem é o stream e não muda a LRU.
+5. **`close`** (M5-M2): rota sob `court-sync`; o handler lê os fatos e só pergunta à quadra se a rodada está aberta, não
+   cancelada e antes do início. `Round.Close` confere `ClosedAt` antes do início, então fechar de novo devolve o mesmo
+   instante sem quadra (antes, uma partida desfeita depois do primeiro `close` dava 409 no segundo). `IRoundPlayedMatches`
+   devolve `Result<bool>`: quadra sem vez para construir = 503 `matches.court-busy`.
+6. **Resumo pelo snapshot:** `StoreCourtSessionResults.SummarizeAsync` usa `EnsureAsync` (fora de qualquer trava, nos
+   mesmos portões) e `RoundSummaryRules.GetRoundSummary` sobre `snapshot.Head.ToEntries()`, a mesma linha do tempo do
+   replay inteiro. Devolve `null` quando o portão está cheio. `ICourtEventStore.LoadAsync` some (não tem mais uso).
+7. **Estatísticas** (E3.9 4b e E3.18 baixa 1): `RebuildBudget` por requisição (`StatsRebuild:MaxRebuildsPerRequest`
+   20), gasto por cada rodada reconstruída e por cada apuração do MVP congelada, somadas entre os grupos de
+   `/v1/me/stats` e da exportação; `GroupRebuildGate`, um `SemaphoreSlim` por `groupId` no processo (some quando ninguém
+   segura nem espera), com espera de `GroupWaitMilliseconds` 5 s; quem entra relê as linhas, pois outro pode ter
+   reconstruído enquanto esperava. Sem vez, sem orçamento ou com a quadra sem vez, a rodada fica velha e a apuração sem
+   contagem nesta leitura (pergunta 189, opção 1: as próximas leituras completam). Com mais de uma instância vira
+   `pg_try_advisory_lock`; com `maxScale` 1 (ADR 0068) o semáforo basta.
+
+### Medição da Parte 2 (Release, `SACOU_PERF_GATE=1`, máquina de desenvolvimento, 24/11)
+
+| Quente (20.000º) | Frio (19.999º) | Trava no frio | Memória retida por stream cheio |
+|---|---|---|---|
+| mediana **19 ms** (8 a 11 ms com a trava) | 519 a 755 ms | 10 a 14 ms | 23,6 a 25,6 MiB |
+
+Os `SET LOCAL` e o avanço limitado não mudam o caminho quente.
+
+### Pior caso de memória (condição 3), perto dos 512 MiB do Cloud Run
+
+Estimativa a partir dos ~25,6 MiB retidos por stream cheio (A10) e da proporção para os menores:
+
+| Parte | Teto | Memória |
+|---|---|---|
+| Cache | `MaxEvents` 60.000 = 3 streams cheios | ~77 MiB |
+| Snapshots em voo fora do cache | um por requisição `court-sync` em curso (6), despejados no meio | até ~154 MiB |
+| Construções grandes | 2 ao mesmo tempo: linhas lidas (até 8 MiB UTF-8, ~16 MiB em UTF-16) e lixo do parse, além do snapshot já contado | ~50 MiB |
+| Construções pequenas | 4 de menos de 2.000 eventos | ~20 MiB |
+| Caminho sob a trava | 6 avanços de até 2.000 eventos e corpos de 256 KiB | ~17 MiB |
+| Processo (.NET, ASP.NET, EF, pool) | | ~100 MiB |
+| **Total** | | **~420 MiB** |
+
+Cabe nos 512 MiB, com pouca folga, e só com um atacante que escreve 9 streams cheios ao mesmo tempo (cada um exige uma
+rodada própria e o papel de escritor). Se o Cloud Monitoring mostrar a instância acima de 400 MiB (roteiro do
+`deploy.md`), baixar `MaxEvents` para 40.000 ou `CourtSyncConcurrency` para 4 antes de subir a memória.
+
+### Consequências da Parte 2
+
+- O app recebe mais 503 `matches.court-busy` (troca, `close`, frio sem vez, timeout); já espera `Retry-After` (ADR 0067,
+  D3) e o código cai no texto genérico, sem tela nova.
+- Um usuário com várias leituras de quadra ao mesmo tempo (resumo, placar, estatísticas) espera na fila de 4; a sexta
+  ao mesmo tempo é 429.
+- Desvios do plano: (a) a concorrência das rotas de duas conexões cai de 8 para 7, para a conferência do pool contar
+  duas conexões por requisição `court-sync` sem pedir pool maior; (b) `idle_in_transaction_session_timeout` entra junto
+  (condição 4); (c) `Round.Close` passa a conferir `ClosedAt` antes do início; (d) sem cópia válida sob a trava a
+  escrita é 503, e o teste `ARowRewrittenOutsideTheApi` da Parte 1 passa a esperar esse 503 antes da reconstrução.

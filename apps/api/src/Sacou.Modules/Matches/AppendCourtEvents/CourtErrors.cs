@@ -44,11 +44,11 @@ internal static class CourtErrors
     public static readonly Error EventImplausible = Unprocessable(CourtWriteErrorCode.EventImplausible.Code);
     public static readonly Error MemberNotInGroup = Unprocessable(CourtWriteErrorCode.MemberNotInGroup.Code);
 
-    /// <summary>The snapshot of the stream could not be built now (ADR 0081): 503 with <c>Retry-After</c>, which the app waits out.</summary>
+    /// <summary>
+    /// The snapshot of the stream could not be built now, or the stream's transaction ran out of time (ADR 0081): 503 with
+    /// <c>Retry-After</c> (<see cref="Sacou.Http.UnavailableRetry"/>), which the app waits out.
+    /// </summary>
     public static readonly Error CourtBusy = new(Prefix + "court-busy", ErrorKind.Unavailable);
-
-    /// <summary>The <c>Retry-After</c> of <see cref="CourtBusy"/>, in seconds: a build takes a few.</summary>
-    public const int BusyRetryAfterSeconds = 2;
 
     private static readonly ImmutableDictionary<string, Error> ByWriteCode = new[]
     {

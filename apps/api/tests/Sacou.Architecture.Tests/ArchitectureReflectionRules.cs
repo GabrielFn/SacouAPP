@@ -24,11 +24,13 @@ internal static partial class ArchitectureReflectionRules
 
     /// <summary>
     /// Closed list of friends besides the own tests: the Notifications lets the integration tests swap its internal push
-    /// port, which carries the token, for a fake (ADR 0069, D5), so the port never has to be public.
+    /// port, which carries the token, for a fake (ADR 0069, D5), so the port never has to be public; the Matches lets them
+    /// wrap the internal snapshot cache, to evict between the warm-up and the lock (ADR 0081, Part 2).
     /// </summary>
     private static readonly HashSet<(string Assembly, string Friend)> AllowedFriends =
     [
         ("Sacou.Modules.Notifications", "Sacou.Integration.Tests"),
+        ("Sacou.Modules.Matches", "Sacou.Integration.Tests"),
     ];
 
     private const string UserIdSuffix = "UserId";

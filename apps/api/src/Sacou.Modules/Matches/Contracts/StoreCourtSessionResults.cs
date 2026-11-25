@@ -4,18 +4,17 @@ using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Domain.CourtSessions.EventLog;
 using Sacou.Modules.Matches.Domain.CourtSessions.PlayerStatistics;
 using Sacou.Modules.Matches.Domain.CourtSessions.Score;
-using Sacou.Modules.Matches.Domain.CourtSessions.Score.Appliers;
 using Sacou.Modules.Matches.Infrastructure;
 using DomainMvpKind = Sacou.Modules.Matches.Domain.CourtSessions.PlayerStatistics.MvpKind;
 
 namespace Sacou.Modules.Matches.Contracts;
 
 /// <summary>
-/// The stream heads by an indexed read of <c>court_sessions</c>; the summary by the replay of the stored stream through
-/// the same parser as a request (<see cref="ICourtEventStore.LoadAsync"/>). A stored stream that no longer replays was
+/// The stream heads by an indexed read of <c>court_sessions</c>; the summary from the snapshot of the stream (ADR 0081),
+/// built from the stored stream through the same parser as a request. A stored stream that no longer replays was
 /// changed outside the API: it fails closed, like a write.
 /// </summary>
-internal sealed class StoreCourtSessionResults(MatchesDbContext database, ICourtEventStore events) : ICourtSessionResults
+internal sealed class StoreCourtSessionResults(MatchesDbContext database, ICourtStreamSnapshots snapshots) : ICourtSessionResults
 {
     public Task<CourtStreamHead?> FindOfRoundAsync(Guid groupId, Guid roundId, CancellationToken cancellationToken) =>
         database.CourtSessions.AsNoTracking()
@@ -30,24 +29,29 @@ internal sealed class StoreCourtSessionResults(MatchesDbContext database, ICourt
             .Select(session => new CourtStreamHead(session.RoundId, session.Id, session.EventCount))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-    public async Task<CourtSessionResults> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken)
+    public async Task<CourtSessionResults?> SummarizeAsync(CourtStreamHead stream, SummaryRules rules, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(stream);
         ArgumentNullException.ThrowIfNull(rules);
-        var stored = await events.LoadAsync(stream.CourtSessionId, cancellationToken).ConfigureAwait(false);
-        if (stored.IsEmpty)
+        var warm = await snapshots.EnsureAsync(stream.CourtSessionId, stream.EventCount, cancellationToken).ConfigureAwait(false);
+        if (warm.Snapshot is not { } snapshot)
+        {
+            return null;
+        }
+
+        if (snapshot.Version == 0)
         {
             return new CourtSessionResults(0, SessionSummary.Empty);
         }
 
-        var timeline = EventReplayer.ReplayTimeline(
-            ScoreAppliers.Config(stream.CourtSessionId.ToString("D")), stored.Select(item => item.Envelope));
-        if (timeline.IsFailure)
+        // The head of the snapshot is the replay of the whole stored stream, the same timeline a replay here would give.
+        if (snapshot.Head is not { } head)
         {
             throw new CorruptCourtStreamException(stream.CourtSessionId);
         }
 
-        return new CourtSessionResults(stored.Length, SessionSummaryMapping.ToContract(RoundSummaryRules.GetRoundSummary(timeline.Value, OptionsOf(rules))));
+        var timeline = new ReplayedTimeline<CourtSessionState>(head.ToEntries());
+        return new CourtSessionResults(snapshot.Version, SessionSummaryMapping.ToContract(RoundSummaryRules.GetRoundSummary(timeline, OptionsOf(rules))));
     }
 
     /// <summary>The modality goes by its catalog code, the one place the codes live (E3.9 part 3, condition 2).</summary>

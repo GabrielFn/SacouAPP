@@ -1,4 +1,5 @@
 using Sacou.Modules.Groups.Contracts;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Sessions.Contracts;
 
@@ -8,6 +9,9 @@ namespace Sacou.Modules.Sessions.Contracts;
 /// </summary>
 public interface IRoundPlayedMatches
 {
-    /// <summary>True when the stored stream of the round, summarized with <paramref name="rules"/>, has at least one finished match.</summary>
-    Task<bool> HasFinishedMatchAsync(Guid groupId, Guid roundId, SummaryRules rules, CancellationToken cancellationToken);
+    /// <summary>
+    /// True when the stored stream of the round, summarized with <paramref name="rules"/>, has at least one finished
+    /// match. A failure (503 <c>matches.court-busy</c>) when the court cannot be summarized now (ADR 0081, Part 2).
+    /// </summary>
+    Task<Result<bool>> HasFinishedMatchAsync(Guid groupId, Guid roundId, SummaryRules rules, CancellationToken cancellationToken);
 }

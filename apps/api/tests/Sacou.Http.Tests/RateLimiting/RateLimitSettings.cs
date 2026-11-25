@@ -18,6 +18,10 @@ internal static class RateLimitSettings
             [$"{RateLimitingOptions.SectionName}:DualConnectionHeadroom"] = "4",
             [$"{RateLimitingOptions.SectionName}:DualConnectionPerUser"] = "1",
             [$"{RateLimitingOptions.SectionName}:DualConnectionPerUserQueue"] = "4",
+            [$"{RateLimitingOptions.SectionName}:CourtSyncConcurrency"] = "6",
+            [$"{RateLimitingOptions.SectionName}:CourtSyncQueue"] = "12",
+            [$"{RateLimitingOptions.SectionName}:CourtSyncPerUser"] = "1",
+            [$"{RateLimitingOptions.SectionName}:CourtSyncPerUserQueue"] = "4",
         };
         foreach (var section in Sections)
         {

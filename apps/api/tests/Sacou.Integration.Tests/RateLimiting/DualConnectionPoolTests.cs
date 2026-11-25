@@ -30,7 +30,9 @@ public sealed class DualConnectionPoolTests(IntegrationDatabase database)
         await using var api = await StartAsync(new Dictionary<string, string?>(StringComparer.Ordinal)
         {
             ["RateLimiting:DualConnectionConcurrency"] = "1",
-            ["RateLimiting:DualConnectionHeadroom"] = "4",
+            ["RateLimiting:DualConnectionHeadroom"] = "2",
+            // The court-sync routes take two connections each of the pool check too (ADR 0081, Part 2): 2 × (1 + 1) + 2 = 6.
+            ["RateLimiting:CourtSyncConcurrency"] = "1",
             ["RateLimiting:DualConnectionQueue"] = "64",
         });
 

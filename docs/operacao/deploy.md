@@ -90,6 +90,7 @@ Desfazer uma migração não é automático: com dado errado, use a restauraçã
 8. Uma branch descartável que tente `google-github-actions/auth` recebe recusa do STS.
 9. Faturamento → Relatórios: US$ 0,00 no fim do primeiro dia; teto e alerta ativos; Artifact Registry abaixo de 0,5 GB.
 10. Neon depois de 15 min sem uso: a compute aparece como **Suspended**. Se não aparecer, a conexão ociosa a mantém acordada (ADR 0068, D6).
+11. Quadra cheia (M4-A1, E5.3b, ADR 0081), só no `sacou-api-test` e **com os limites do M5-M1 de volta** (`appsettings.Staging.json` sem os ×10): num grupo de teste, encher um stream até perto de 20 mil eventos (lotes de 200 pela rota), cronometrar pelo cliente o 20.000º lote (alvo: abaixo de 500 ms) e, depois de um novo deploy (cache vazio), o primeiro lote (frio, constrói fora da trava; 503 `matches.court-busy` com `Retry-After: 2` é aceito e a nova tentativa passa). No log, `Court events stored.` traz `lockedMs` e `snapshot`. Memória da instância no Cloud Monitoring abaixo de 400 MiB.
 
 Resultados no PR da tarefa ou no diário da sessão.
 

@@ -68,6 +68,20 @@ public sealed class RoundCloseBoundaryTests
         Assert.Equal(first.ClosedAt, again.Round.ClosedAt);
     }
 
+    /// <summary>M5-M2 (ADR 0081, Part 2): closing again never needs the court, so the handler asks it nothing and passes no match.</summary>
+    [Fact]
+    public void ACloseAgainBeforeTheStart_WithoutAskingTheCourt_KeepsTheFirstInstant()
+    {
+        var round = NewRound();
+        var first = round.Close(round.Slot.StartsAt.AddHours(-2), hasFinishedMatch: true).Value.Round;
+
+        var again = first.Close(round.Slot.StartsAt.AddHours(-1), hasFinishedMatch: false);
+
+        Assert.True(again.IsSuccess);
+        Assert.True(again.Value.IsEmpty);
+        Assert.Equal(first.ClosedAt, again.Value.Round.ClosedAt);
+    }
+
     [Fact]
     public void ACancelledRound_StaysCancelled_EvenWithAFinishedMatch()
     {

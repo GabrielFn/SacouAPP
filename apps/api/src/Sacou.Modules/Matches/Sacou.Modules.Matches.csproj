@@ -21,5 +21,7 @@
         <EmbeddedResource Include="../../../../../packages/volley-rules/src/formations/formations.json"
                           LogicalName="Sacou.Modules.Matches.formations.json" />
         <InternalsVisibleTo Include="Sacou.Modules.Matches.Tests" />
+        <!-- Only to wrap the internal snapshot cache and prove a snapshot evicted between the warm-up and the lock (ADR 0081, Part 2); allowed by name in Sacou.Architecture.Tests. -->
+        <InternalsVisibleTo Include="Sacou.Integration.Tests" />
     </ItemGroup>
 </Project>

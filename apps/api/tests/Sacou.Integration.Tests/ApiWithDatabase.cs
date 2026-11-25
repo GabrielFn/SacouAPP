@@ -9,6 +9,7 @@ using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Matches;
 using Sacou.Modules.Matches.Contracts;
+using Sacou.Modules.Matches.Infrastructure;
 using Sacou.Modules.Notifications;
 using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
@@ -49,6 +50,8 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     private Func<NotificationRequest, Task>? afterNotificationRequested;
 
     private Func<Task>? beforePump;
+
+    private Func<Guid, ICourtStreamSnapshots, Task>? afterSnapshotWarmed;
 
     public ApiWithDatabase(IntegrationDatabase database)
         : this(database, new Dictionary<string, string?>())
@@ -121,6 +124,16 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         set => Volatile.Write(ref afterNotificationRequested, value);
     }
 
+    /// <summary>
+    /// Runs right after each warm-up of a court stream's snapshot, before the write takes the stream's lock, with the
+    /// stream and the API's cache (ADR 0081, Part 2), so a test can evict the snapshot or change the stream in between.
+    /// </summary>
+    internal Func<Guid, ICourtStreamSnapshots, Task>? AfterSnapshotWarmed
+    {
+        get => Volatile.Read(ref afterSnapshotWarmed);
+        set => Volatile.Write(ref afterSnapshotWarmed, value);
+    }
+
     /// <summary>Runs before each <see cref="INotificationPump.RunAsync"/>, so a test can make the drain fail after the write's commit.</summary>
     internal Func<Task>? BeforePump
     {
@@ -165,6 +178,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.ConfigureServices(HookCurrentUser);
         builder.ConfigureServices(HookCourtStreamChanged);
         builder.ConfigureServices(HookNotifications);
+        builder.ConfigureServices(HookCourtStreamSnapshots);
         builder.ConfigureServices(services =>
         {
             _ = services.RemoveAll<TimeProvider>();
@@ -212,6 +226,17 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         _ = services.AddScoped<ICourtStreamChanged>(_ => new HookedCourtStreamChanged(() => BeforeCourtStreamChanged));
     }
 
+    /// <summary>Wraps the Matches' snapshot cache (a singleton) in a pass-through that runs <see cref="AfterSnapshotWarmed"/>.</summary>
+    private void HookCourtStreamSnapshots(IServiceCollection services)
+    {
+        var original = services.Single(descriptor => descriptor.ServiceType == typeof(ICourtStreamSnapshots));
+        var implementation = original.ImplementationType ?? throw new InvalidOperationException("ICourtStreamSnapshots is registered by type.");
+        _ = services.Remove(original);
+        _ = services.AddSingleton(implementation);
+        _ = services.AddSingleton<ICourtStreamSnapshots>(provider => new HookedCourtStreamSnapshots(
+            (ICourtStreamSnapshots)provider.GetRequiredService(implementation), () => AfterSnapshotWarmed));
+    }
+
     /// <summary>Wraps the Notifications' request handler and pump in pass-throughs that run <see cref="AfterNotificationRequested"/> and <see cref="BeforePump"/>.</summary>
     private void HookNotifications(IServiceCollection services)
     {
@@ -231,10 +256,15 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
     {
         const string Section = "RateLimiting";
         const string Roomy = "1000000";
+        const string RoomyCourtSyncPerUser = "16";
         string[] windows = ["Global", "SignIn", "Invite", "GroupCreate", "InviteCreate", "Draw", "MemberLevels", "AccountExport", "AccountDelete", "CourtSync", "RoundLink", "PushDevice", "Ops"];
         var limits = windows.ToDictionary(window => $"{Section}:{window}:PermitLimit", _ => (string?)Roomy, StringComparer.Ordinal);
         limits[$"{Section}:DualConnectionQueue"] = Roomy;
         limits[$"{Section}:DualConnectionPerUserQueue"] = Roomy;
+        // Writes of one person at once still race for the stream's lock, as before the court-sync concurrency (ADR 0081, Part 2).
+        limits[$"{Section}:CourtSyncPerUser"] = RoomyCourtSyncPerUser;
+        limits[$"{Section}:CourtSyncPerUserQueue"] = Roomy;
+        limits[$"{Section}:CourtSyncQueue"] = Roomy;
         return limits;
     }
 

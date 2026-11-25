@@ -61,7 +61,8 @@ internal sealed partial record Round(
     /// <summary>
     /// "Encerrar rodada" (ADR 0072, D1): refused once cancelled; before the start it is refused too, unless a match
     /// was already finished (<paramref name="hasFinishedMatch"/>, ADR 0076), and then the end is the tap. Closing again
-    /// keeps the first instant. A tap after the automatic end is stored but does not move the end (the earlier one wins).
+    /// keeps the first instant, whatever the court holds now, so a close again never needs the court (ADR 0081, Part 2).
+    /// A tap after the automatic end is stored but does not move the end (the earlier one wins).
     /// </summary>
     public Result<RoundChange> Close(DateTimeOffset now, bool hasFinishedMatch)
     {
@@ -70,14 +71,18 @@ internal sealed partial record Round(
             return Result.Failure<RoundChange>(RoundErrors.RoundCanceled);
         }
 
+        if (ClosedAt is not null)
+        {
+            return Result.Success(RoundChange.Unchanged(this));
+        }
+
         if (now < Slot.StartsAt && !hasFinishedMatch)
         {
             return Result.Failure<RoundChange>(RoundErrors.RoundNotStarted);
         }
 
-        return Result.Success(ClosedAt is not null
-            ? RoundChange.Unchanged(this)
-            : new RoundChange(this with { ClosedAt = StoredInstant.Of(now) }, [], [new RoundEnded(Id, GroupId)]) { RoundRowChanged = true });
+        return Result.Success(
+            new RoundChange(this with { ClosedAt = StoredInstant.Of(now) }, [], [new RoundEnded(Id, GroupId)]) { RoundRowChanged = true });
     }
 
     /// <summary>
