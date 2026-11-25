@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M5 · Depois do jogo, iniciado em 19/11/2026, **com o código todo na `main` em 21/11/2026** (faltam os passos de contas do Gabriel e o teste no celular). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M6 · Prontidão para o piloto, iniciado em 24/11/2026. M5 fechado em 24/11/2026 ([relatório](relatorios/M5.md)). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
@@ -67,8 +67,15 @@
 | E3.11 | Feita no código | PRs #182, #199, #200 e #198 (outbox e aparelhos; envio pelo Expo com recibos e Cloud Tasks; uma conta invocadora por ambiente; permissão, registro do aparelho, tela de notificações e sino no app). Falta o Gabriel criar as contas e os segredos, ligar no `service.yaml` e o teste no celular. |
 | R97, R98, R99 | Feitas | Correções do percurso no celular (21 a 23/11): partida esquecida e tela de rodadas (ADR 0075), defeitos do percurso, rodada encerrada no app (ADR 0077). |
 | R100 | Feita | PRs #234 e #237, ADR 0078 (times confirmados gravados na rodada e mostrados a todos os membros nas telas 26 e 06). P1 com revisor e segurança Opus separados e testador Sonnet (7 de 8 sabotagens); P2 com revisão única Opus e testador Sonnet (5 de 6, a sobrevivente coberta). Baixos em `pendencias.md`. |
+| R101 | Feita | PRs #242 (app), #239 (página `/r` e API) e #243 (janela só com mensalista ativo, resposta 183), ADR 0079. P1 com revisão única Opus e testador Sonnet (7 de 7 sabotagens); P2 com revisão única Opus e testador (6 de 6); P3 com revisor Opus e testador (5 de 5). Conferida no emulador em 24/11; o defeito D1 (folha de "Encerrar rodada" antes do horário) em correção. |
+| E6.1 | Feita no código | PR #238, ADR 0083 (`/termos` e `/privacidade` servidos pela API, linkados no login do app e da web). Revisor e segurança Opus aprovaram (condições de texto corrigidas pelo orquestrador); testador Sonnet 5 de 5. Falta o Gabriel: perguntas 198 a 203 e revisão jurídica antes da 1.0. |
+| E5.2 | Parte 1 feita | PR #240, ADR 0080 (Sentry e logs JSON na API; Sentry desligado sem DSN). Revisor e segurança Opus, correção com verificador único, testador Sonnet (7 de 7 depois de 2 testes novos). Parte 2 (app, dependência nativa: APK novo) em andamento. Aceite depende da conta do Sentry (roteiro na seção 6 do plano). |
+| E5.3b | Parte 1 feita | PR #241, ADR 0081 (snapshot em memória do stream da quadra: 20.000º evento em ~12 ms na CI). M4-A1 caiu de alto para médio. Parte 2 (proteções, com as condições da segurança) em andamento; bloqueia o piloto. |
+| E5.3 | Em revisão | P1 backups (#244, ADR 0082): revisor e segurança Opus aprovaram com condições (LGPD: reexclusão de contas num banco restaurado), correção em andamento. P2 flags e versão mínima (#245, ADR 0084): revisão única Opus e testador Sonnet (5 de 5), merge assim que a CI passar. |
 
 ## Em andamento
+
+- 24/11/2026: **M5 fechado** (R100 #234/#237, R101 #239/#242/#243, relatório em `relatorios/M5.md`). **M6 começou**: E6.1 (#238), E5.2 P1 (#240) e E5.3b P1 (#241) na `main`; E5.3 P1 (#244) em correção, E5.3 P2 (#245) indo para o merge, E5.2 P2 e E5.3b P2 em desenvolvimento. Máquina nova com teste no emulador. Próximo passo no [diário de 24/11](sessoes/2026-11-24.md).
 
 - 23/11/2026, tarde: **R99 feita** (PR #227, ADR 0077): rodada encerrada uma vez só no Início, telas 06 e 26 com "Encerrada" + "Ver resumo", cartinha relida depois de encerrar, aba Eu sem quebra. Conferida no celular como organizadora e como jogador. Próximo passo no [diário de 23/11](sessoes/2026-11-23.md).
 
