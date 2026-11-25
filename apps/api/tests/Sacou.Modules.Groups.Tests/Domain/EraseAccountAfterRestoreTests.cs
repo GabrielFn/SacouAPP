@@ -72,6 +72,29 @@ public sealed class EraseAccountAfterRestoreTests
         Assert.Equal(founder.Id, Assert.Single(change.ChangedMembers).Id);
     }
 
+    /// <summary>An older guest and an older former member are skipped: the oldest one who is active and has an account wins.</summary>
+    [Fact]
+    public void OlderGuestAndOlderFormerMember_AreSkipped_ForTheNewerPlayerWithAnAccount()
+    {
+        var world = GroupBuilder.WithFounder();
+        var guest = world.Add(GroupRole.Player, hasAccount: false);
+        var former = world.Add(GroupRole.Player, MembershipStatus.Left);
+        var player = Joined(world, GroupRole.Player, hoursAfterFounder: 9);
+        var earlier = GroupBuilder.Now.AddHours(1);
+        world.Replace(world.Group with
+        {
+            Members = world.Group.Members
+                .Replace(world.Group.Members.Single(member => member.Id == guest.Id), guest with { JoinedAt = earlier })
+                .Replace(world.Group.Members.Single(member => member.Id == former.Id), former with { JoinedAt = earlier }),
+        });
+
+        var change = world.Group.EraseAccountAfterRestore(world.Founder.UserId!.Value, Later);
+
+        Assert.Equal(player.Id, Assert.Single(change.Group.ActiveMembers, member => member.IsActiveAdmin).Id);
+        Assert.NotEqual(GroupRole.Admin, change.Group.Members.Single(member => member.Id == guest.Id).Role);
+        Assert.NotEqual(GroupRole.Admin, change.Group.Members.Single(member => member.Id == former.Id).Role);
+    }
+
     [Fact]
     public void AnotherActiveAdmin_NoOneIsPromoted()
     {
