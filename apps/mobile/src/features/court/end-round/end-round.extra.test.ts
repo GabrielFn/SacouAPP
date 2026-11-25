@@ -10,6 +10,8 @@ import { endRoundReducer, INITIAL_END_ROUND, type EndRoundState } from "./end-ro
 import { endRoundView } from "./end-round-view";
 import { runEndRound } from "./run-end-round";
 
+const ASK_IDLE = { openMatchScore: null, finishedMatches: 2, votingEnabled: false } as const;
+const ASK_PLAYING = { openMatchScore: "12 × 10", finishedMatches: 1, votingEnabled: true } as const;
 const SESSION = "c0000000-0000-4000-8000-0000000000c1";
 const TARGET = { courtSessionId: SESSION, groupId: "g1", roundId: "r1" };
 const CLOSED = { closedAt: "2026-11-03T22:00:00Z", endsAt: "2026-11-03T22:00:00Z" };
@@ -75,24 +77,22 @@ describe("end round: extra cases of the acceptance criteria (E4.12 part 2)", () 
     expect(order).toEqual([]);
   });
 
-  test("confirming with a match in play shows its score, and cancelling clears it", () => {
-    const asking = endRoundReducer(INITIAL_END_ROUND, {
-      type: "requested",
-      openMatchScore: "12 × 10",
-    });
-    expect(endRoundView(asking).confirmingScore).toBe("12 × 10");
-    expect(endRoundView(INITIAL_END_ROUND).confirmingScore).toBeNull();
-    expect(endRoundView(endRoundReducer(asking, { type: "cancelled" })).confirmingScore).toBeNull();
+  test("confirming shows what the dialog says, and cancelling clears it", () => {
+    const asking = endRoundReducer(INITIAL_END_ROUND, { type: "requested", ...ASK_PLAYING });
+    expect(endRoundView(asking).confirmingBody).toContain("12 × 10");
+    expect(endRoundView(INITIAL_END_ROUND).confirmingBody).toBeNull();
+    expect(endRoundView(endRoundReducer(asking, { type: "cancelled" })).confirmingBody).toBeNull();
   });
 
-  test("Tentar de novo after a failure repeats the flow, also after a storage failure", () => {
+  test("Tentar de novo after a failure asks again, also after a storage failure", () => {
     const failed: EndRoundState = { phase: "failed", failure: "storage" };
-    expect(endRoundReducer(failed, { type: "requested", openMatchScore: null })).toEqual({
-      phase: "closing",
-    });
-    expect(endRoundReducer(failed, { type: "requested", openMatchScore: "1 × 0" })).toEqual({
+    expect(endRoundReducer(failed, { type: "requested", ...ASK_IDLE })).toEqual({
       phase: "confirming",
-      openMatchScore: "1 × 0",
+      ...ASK_IDLE,
+    });
+    expect(endRoundReducer(failed, { type: "requested", ...ASK_PLAYING })).toEqual({
+      phase: "confirming",
+      ...ASK_PLAYING,
     });
   });
 });

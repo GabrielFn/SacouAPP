@@ -38,6 +38,10 @@ inputs:
   deployer:
     description: E-mail of the deployer service account of this environment
     required: true
+  sentry-secret:
+    description: Secret Manager secret that holds the Sentry DSN of the API; empty deploys with Sentry off (ADR 0080)
+    required: false
+    default: ""
   public-base-url:
     description: Origin of the round's public page (https, no path); empty uses the service's own run.app URL
     required: false
@@ -77,6 +81,7 @@ runs:
         IMAGE: ${{ inputs.image }}
         PROJECT_ID: ${{ inputs.project-id }}
         PUBLIC_BASE_URL: ${{ inputs.public-base-url }}
+        SENTRY_SECRET: ${{ inputs.sentry-secret }}
         REGION: us-east4
       run: |
         set -euo pipefail
@@ -99,12 +104,27 @@ runs:
           echo "The round page base URL is not an https origin: $ROUND_PAGE_BASE_URL"
           exit 1
         fi
-        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE
+        # Sentry (ADR 0080): a secret name, or nothing, and then the block between the markers is dropped.
+        if [[ -n "$SENTRY_SECRET" ]] && ! [[ "$SENTRY_SECRET" =~ ^[a-z0-9-]+$ ]]; then
+          echo "The Sentry secret is not a Secret Manager name: $SENTRY_SECRET"
+          exit 1
+        fi
+        # The release is the image digest, shortened as Git shortens a commit: unique enough, still readable.
+        release_digest_length=12
+        digest="${IMAGE##*@sha256:}"
+        SENTRY_RELEASE="sacou-api@${digest:0:release_digest_length}"
+        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE SENTRY_SECRET SENTRY_RELEASE
         export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         export INVOKER_EMAIL="${INVOKER_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+        template="$RUNNER_TEMP/service.template.yaml"
+        if [[ -n "$SENTRY_SECRET" ]]; then
+          cp deploy/cloud-run/service.yaml "$template"
+        else
+          sed '/# sentry-begin/,/# sentry-end/d' deploy/cloud-run/service.yaml > "$template"
+        fi
         manifest="$RUNNER_TEMP/service.yaml"
-        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${EXPO_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL} ${SERVICE_URL} ${INVOKER_EMAIL} ${PROJECT_ID} ${TASKS_QUEUE}' \
-          < deploy/cloud-run/service.yaml > "$manifest"
+        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${EXPO_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL} ${SERVICE_URL} ${INVOKER_EMAIL} ${PROJECT_ID} ${TASKS_QUEUE} ${SENTRY_SECRET} ${SENTRY_RELEASE}' \
+          < "$template" > "$manifest"
         gcloud run services replace "$manifest" --project="$PROJECT_ID" --region="$REGION" --quiet
         url="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
         echo "url=$url" >> "$GITHUB_OUTPUT"

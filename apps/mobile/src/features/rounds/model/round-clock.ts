@@ -45,14 +45,35 @@ export function localWallTime(round: RoundClockInput, instant: string): Date | n
 
 const two = (value: number) => String(value).padStart(PAD_WIDTH, "0");
 
-/** "sex, 19h": when the drop-ins may answer, in the zone of the round. */
-export function dropInOpensLabel(round: RoundClockInput, opensAt: string): string {
+const MS_PER_DAY = 86_400_000;
+
+/** The calendar day of a wall time read with `getUTC*`, as a number of days. */
+function dayNumber(wall: Date): number {
+  return Math.floor(
+    Date.UTC(wall.getUTCFullYear(), wall.getUTCMonth(), wall.getUTCDate()) / MS_PER_DAY,
+  );
+}
+
+/**
+ * When the drop-ins may answer, in the zone of the round: "hoje, às 20h", "amanhã, às 20h" or, any other
+ * day, the weekday and the date ("na terça, 24/11, às 20h"), since the window may be a week away.
+ * "Today" is the day of `now` in the zone of the round, not of the phone.
+ */
+export function dropInOpensPhrase(round: RoundClockInput, opensAt: string, now: number): string {
   const wall = localWallTime(round, opensAt);
-  if (wall === null) return "";
-  const day = wall.getUTCDay();
-  const weekday = roundsStrings.weekdayShort[day === SUNDAY_JS ? SUNDAY_ISO : day] ?? "";
-  const time = `${two(wall.getUTCHours())}:${two(wall.getUTCMinutes())}`;
-  return `${weekday.toLowerCase()}, ${formatTime(time)}`;
+  const today = localWallTime(round, new Date(now).toISOString());
+  if (wall === null || today === null) return "";
+  const { when } = roundsStrings;
+  const at = when.at(
+    wall.getUTCHours(),
+    formatTime(`${two(wall.getUTCHours())}:${two(wall.getUTCMinutes())}`),
+  );
+  const ahead = dayNumber(wall) - dayNumber(today);
+  if (ahead === 0) return when.day(when.today, at);
+  if (ahead === 1) return when.day(when.tomorrow, at);
+  const weekday = wall.getUTCDay() === SUNDAY_JS ? SUNDAY_ISO : wall.getUTCDay();
+  const date = `${String(wall.getUTCDate())}/${String(wall.getUTCMonth() + MONTH_OFFSET)}`;
+  return when.dated(when.weekdayWithArticle[weekday] ?? "", date, at);
 }
 
 /** True once the instant has come, by the clock of the phone (the server has the last word, risk 4). */

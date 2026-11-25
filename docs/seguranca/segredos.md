@@ -22,8 +22,8 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 | `SACOU_R2_SECRET_ACCESS_KEY` | Cloudflare R2 (fotos, pós-piloto; os backups ficam no Cloud Storage, sem chave, ADR 0082) | Secret Manager; `.env` | E3.14 (pós-piloto) |
 | `SACOU_REVENUECAT_API_KEY` | RevenueCat | Secret Manager; `.env` | E3.15 (pós-piloto) |
 | `SACOU_REVENUECAT_WEBHOOK_AUTH` | RevenueCat; só se a E3.15 usar webhook | Secret Manager; `.env` | E3.15 (pós-piloto) |
-| `SACOU_SENTRY_DSN` | Sentry | Secret Manager; `.env` | E5.2 |
-| `SENTRY_AUTH_TOKEN` | Sentry (envio de símbolos no build) | GitHub Actions | E5.2 |
+| `SACOU_SENTRY_DSN` | Sentry, DSN do projeto `sacou-api` (erros da API, [ADR 0080](../arquitetura/adr/0080-sentry-e-logs-estruturados.md)). Entra no contêiner por `secretKeyRef`, nunca como valor; sem ele, o Sentry fica desligado e a API avisa só com o nome. Um DSN fora do formato para a subida sem mostrar o valor | Secret Manager: `sacou-sentry-dsn-api` (um segredo, lido por `sacou-api-test-run` e `sacou-api-run`); `.env` local opcional (deixe vazio: nada de enviar do computador) | E5.2 Parte 1. `SENTRY_RELEASE` (`sacou-api@<digest>`) é variável comum do deploy, **não é segredo** |
+| `SENTRY_AUTH_TOKEN` | Sentry (envio do mapa de fontes do app no build) | Variável **secreta do EAS** (o build roda no EAS, não no GitHub Actions; plano da E5.2, D11) | E5.2 Parte 2 |
 | `SACOU_POSTHOG_API_KEY` | PostHog | Secret Manager; `.env` | Pós-piloto (ADR 0046) |
 | `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | A definir (nenhuma tela do piloto manda e-mail; a E3.11 não usa) |
 | `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |

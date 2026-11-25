@@ -3,7 +3,6 @@ import {
   parseGroupSettings,
   SETTINGS_CATALOG,
   type GroupSettings,
-  type SettingsBlock,
   type SettingsField,
   type SettingsPath,
   type SettingsValue,
@@ -94,12 +93,20 @@ function attendanceSummary(settings: GroupSettings): string {
   const { attendance, schedule } = settings;
   return [
     attendance.capacityLimited ? summary.limit(attendance.capacity) : summary.noLimit,
-    attendance.regularsEnabled ? summary.regulars : null,
-    attendance.dropInWindowEnabled ? summary.dropIn(attendance.dropInOpensHoursBefore) : null,
+    attendance.waitlistEnabled ? summary.waitlist : null,
     schedule.enabled ? scheduleSummary(schedule.weekday, schedule.startTime) : null,
   ]
     .filter((part): part is string => part !== null)
     .join(SUMMARY_SEPARATOR);
+}
+
+function regularsSummary(settings: GroupSettings): string {
+  const { attendance } = settings;
+  if (!attendance.regularsEnabled) return summary.regularsOff;
+  const dropIn = attendance.dropInWindowEnabled
+    ? [summary.dropIn(attendance.dropInOpensHoursBefore)]
+    : [];
+  return [summary.regularsOn, ...dropIn].join(SUMMARY_SEPARATOR);
 }
 
 function scoringSummary(settings: GroupSettings): string {
@@ -115,7 +122,11 @@ function scoringSummary(settings: GroupSettings): string {
 }
 
 /** The line under the title of an accordion block; "Desligado" while the block is off. */
-export function blockSummary(block: "attendance" | "scoring", settings: GroupSettings): string {
+export function blockSummary(
+  block: "attendance" | "scoring" | "regulars",
+  settings: GroupSettings,
+): string {
+  if (block === "regulars") return regularsSummary(settings);
   if (!settings[block].enabled) return screen.off;
   return block === "attendance" ? attendanceSummary(settings) : scoringSummary(settings);
 }
@@ -146,8 +157,8 @@ export function isProLeaf(path: SettingsPath): boolean {
   return fieldOf(path)?.pro ?? false;
 }
 
-export function isBlockEnabled(block: SettingsBlock, settings: GroupSettings): boolean {
-  return leafOf(settings, `${block}.enabled` as SettingsPath) === true;
+export function isBlockEnabled(path: SettingsPath, settings: GroupSettings): boolean {
+  return leafOf(settings, path) === true;
 }
 
 const HOURS_SUFFIX = "h";

@@ -94,6 +94,10 @@ public sealed class DeploySetupTests
             valueFrom:
               secretKeyRef:
                 name: ${EXPO_SECRET}
+          - name: SACOU_SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                name: ${SENTRY_SECRET}
         startupProbe:
           httpGet:
             path: /health
@@ -225,6 +229,7 @@ public sealed class DeploySetupTests
     [InlineData("/sacou/api@sha256:[0-9a-f]{64}$", "/sacou/api[:@].*$")]
     [InlineData("[[ \"$IMAGE\"", "echo \"$SACOU_DATABASE_URL\"; [[ \"$IMAGE\"")]
     [InlineData("[[ \"$IMAGE\"", "echo \"$SACOU_EXPO_ACCESS_TOKEN\"; [[ \"$IMAGE\"")]
+    [InlineData("[[ \"$IMAGE\"", "echo \"$SACOU_SENTRY_DSN\"; [[ \"$IMAGE\"")]
     public void Action_Violations(string valid, string planted)
     {
         Assert.Contains(valid, ValidAction, StringComparison.Ordinal);
@@ -239,6 +244,7 @@ public sealed class DeploySetupTests
     [InlineData("valueFrom:\n      secretKeyRef:\n        name: ${DATABASE_SECRET}", "value: postgresql://u:p@h/db")]
     [InlineData("cpu-throttling: \"true\"", "cpu-throttling: \"false\"")]
     [InlineData("valueFrom:\n      secretKeyRef:\n        name: ${EXPO_SECRET}", "value: planted-expo-token")]
+    [InlineData("valueFrom:\n      secretKeyRef:\n        name: ${SENTRY_SECRET}", "value: https://planted@sentry.invalid/1")]
     public void Service_Violations(string valid, string planted)
     {
         var service = ValidService.ReplaceLineEndings("\n");

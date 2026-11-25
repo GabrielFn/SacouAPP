@@ -76,11 +76,16 @@ export const courtEndStrings = {
   },
   endRound: {
     title: "Encerrar a rodada?",
-    openMatch: (score: string) =>
-      `A partida em andamento (${score}) não entra no resumo. Encerrar a rodada?`,
+    noMatches: "Nenhuma partida terminou ainda.",
+    oneMatch: "Foi 1 partida.",
+    manyMatches: (count: number) => `Foram ${String(count)} partidas.`,
+    openMatch: (score: string) => `A partida em andamento (${score}) não entra no resumo.`,
+    consequence: "Depois disso não dá para jogar outra nesta rodada.",
+    consequenceWithVoting:
+      "Depois disso não dá para jogar outra nesta rodada, e a votação do MVP abre por 24 h.",
     score: (a: number, b: number) => `${String(a)} × ${String(b)}`,
     confirm: "Encerrar rodada",
-    cancel: "Cancelar",
+    cancel: "Continuar jogando",
     closing: "Encerrando a rodada",
     storageFailed: "Não deu para encerrar a rodada. Tente de novo.",
   },

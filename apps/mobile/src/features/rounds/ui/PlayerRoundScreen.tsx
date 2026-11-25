@@ -129,7 +129,7 @@ export function PlayerRoundScreen({
       <ConfirmSheet
         visible={state.sheet.kind === "leave"}
         title={presence.leaveTitle}
-        body={presence.leaveBody}
+        body={card?.actions.kind === "leave" ? (card.actions.leaveBody ?? "") : ""}
         confirmLabel={presence.leaveConfirm}
         cancelLabel={presence.keep}
         onConfirm={() => {

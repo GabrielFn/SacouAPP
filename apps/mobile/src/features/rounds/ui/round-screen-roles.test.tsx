@@ -35,6 +35,7 @@ vi.mock("../../../ui/Text", () => ({ Text: () => null }));
 vi.mock("../../../ui/BottomSheet", () => ({ BottomSheet: () => null }));
 vi.mock("../../../ui/LoadingState", () => ({ LoadingState: () => null }));
 vi.mock("../../../ui/Icons", () => ({ PlusIcon: () => null }));
+vi.mock("../../../ui/MenuIcons", () => ({ ShareIcon: () => null }));
 vi.mock("./RoundChips", () => ({ RoundChips: () => null }));
 vi.mock("./RoundHeading", () => ({ RoundHeading: () => null, RoundLoading: () => null }));
 vi.mock("./RoundStatsPanel", () => ({ RoundStatsPanel: () => null }));

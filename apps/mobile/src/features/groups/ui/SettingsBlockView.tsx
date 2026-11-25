@@ -12,11 +12,11 @@ import {
 import { queueRuleSummary } from "../model/queue-rule";
 import { scheduleText } from "../model/schedule-text";
 import { leafOf } from "../model/settings-patch";
-import { visibleRows, type BlockSpec, type RowSpec } from "../model/settings-layout";
+import { enabledPathOf, visibleRows, type BlockSpec, type RowSpec } from "../model/settings-layout";
 import { BlockFrame, BlockHeader } from "./BlockParts";
 import { ChoiceRow, HelpLine, QueueRuleRow, SwitchRow, ValueRow } from "./SettingRows";
 
-const { blocks, fields, rotationHelp } = strings.settings;
+const { blocks, fields, regularsHelp, rotationHelp } = strings.settings;
 
 export interface SettingsBlockViewProps {
   readonly spec: BlockSpec;
@@ -42,7 +42,7 @@ const BLOCK_TEXT: BlockTexts = blocks;
 
 function summaryOf(spec: BlockSpec, settings: GroupSettings): string | null {
   if (!spec.accordion) return null;
-  return spec.block === "attendance" || spec.block === "scoring"
+  return spec.block === "attendance" || spec.block === "scoring" || spec.block === "regulars"
     ? blockSummary(spec.block, settings)
     : null;
 }
@@ -51,7 +51,7 @@ function summaryOf(spec: BlockSpec, settings: GroupSettings): string | null {
 export function SettingsBlockView(props: SettingsBlockViewProps) {
   const { spec, settings, editable, expanded, onToggleExpanded, onLeafChange } = props;
   const text = BLOCK_TEXT[spec.block];
-  const enabled = isBlockEnabled(spec.block, settings);
+  const enabled = isBlockEnabled(enabledPathOf(spec), settings);
   const showRows = enabled && (!spec.accordion || expanded);
   return (
     <BlockFrame title={text.title}>
@@ -64,7 +64,7 @@ export function SettingsBlockView(props: SettingsBlockViewProps) {
         editable={editable}
         onToggleExpanded={onToggleExpanded}
         onEnabledChange={(value) => {
-          onLeafChange(`${spec.block}.enabled` as SettingsPath, value);
+          onLeafChange(enabledPathOf(spec), value);
         }}
       />
       {showRows
@@ -72,6 +72,7 @@ export function SettingsBlockView(props: SettingsBlockViewProps) {
             <RowView key={rowKey(row)} row={row} {...props} />
           ))
         : null}
+      {showRows && spec.block === "regulars" ? <HelpLine text={regularsHelp} /> : null}
       {showRows && spec.block === "rotation" ? <HelpLine text={rotationNote(settings)} /> : null}
     </BlockFrame>
   );
