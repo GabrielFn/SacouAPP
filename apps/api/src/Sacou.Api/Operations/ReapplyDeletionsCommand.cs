@@ -100,13 +100,15 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
     {
         DeletionMarkRetention.DumpOlderThanRetentionCode => DumpTooOld,
         ReapplyDeletionsCodes.SourceUnreadable => SourceUnreadable,
-        ReapplyDeletionsCodes.SourceCanWrite or ReapplyDeletionsCodes.TargetAheadOfSource => UsageError,
+        ReapplyDeletionsCodes.SourceCanWrite or ReapplyDeletionsCodes.SourceIsTarget or ReapplyDeletionsCodes.TargetAheadOfSource => UsageError,
         _ => Failed,
     };
 
     /// <summary>
-    /// Criterion 11: the same host, port and database on both sides means the variables were swapped or copied. The
-    /// host is compared without case, as DNS does; another name for the same server is caught by the role and swap guards.
+    /// Criterion 11, before connecting: the same host, port and database on both sides means the variables were copied.
+    /// The host is compared without case, as DNS does. Another name for the same server (<c>localhost</c> and
+    /// <c>127.0.0.1</c>, an IP and its DNS name, a Host with several servers) is caught after connecting, by the identity
+    /// the server gives of each database (<c>identity.deletions-source-is-target</c>).
     /// </summary>
     internal static bool SameDatabase(string target, string source)
     {
@@ -123,6 +125,8 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
         SourceUnreadable => WriteAsync(output, "source unreadable", SourceUnreadable),
         UsageError when string.Equals(code, ReapplyDeletionsCodes.SourceCanWrite, StringComparison.Ordinal) =>
             UsageAsync(output, SourceVariable + " has a role that can write (use the backup's read-only role)"),
+        UsageError when string.Equals(code, ReapplyDeletionsCodes.SourceIsTarget, StringComparison.Ordinal) =>
+            UsageAsync(output, SourceVariable + " points to the restored database"),
         UsageError => UsageAsync(output, "the restored database has marks the source lacks (the two URLs look swapped)"),
         _ => FailedAsync(output, code),
     };

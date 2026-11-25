@@ -9,12 +9,15 @@ internal interface IDeletionMarkSource
     /// Every mark, or <see cref="ReapplyDeletionsRefusals.SourceUnreadable"/> (no connection, no permission, no table)
     /// or <see cref="ReapplyDeletionsRefusals.SourceCanWrite"/> (the role is not the backup's read-only one).
     /// </summary>
-    Task<Result<IReadOnlyList<DeletionMark>>> ReadAllAsync(string connectionString, CancellationToken cancellationToken);
+    Task<Result<SourceMarks>> ReadAllAsync(string connectionString, CancellationToken cancellationToken);
 }
 
 /// <summary>The restored database, the one the API is about to serve (E6.3).</summary>
 internal interface IRestoredAccounts
 {
+    /// <summary>Which database this is, in the form of <see cref="SourceMarks.Database"/> (S2, same-database guard).</summary>
+    Task<string> DatabaseAsync(CancellationToken cancellationToken);
+
     /// <summary>
     /// How many of the database's marks deleted at or after <paramref name="since"/> are not in
     /// <paramref name="sourceMarks"/>: anything but zero means the source is the older database (S2, swap guard).

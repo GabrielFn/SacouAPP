@@ -27,6 +27,9 @@ internal sealed class PostgresRestoredAccounts(IdentityDbContext database) : IRe
         $"SELECT count(*) AS \"Value\" FROM {Marks} " +
         $"WHERE {DeletedAccountConfiguration.DeletedAtColumn} >= @since AND {DeletedAccountConfiguration.SubjectHashColumn} <> ALL(@hashes)";
 
+    public Task<string> DatabaseAsync(CancellationToken cancellationToken) =>
+        database.Database.SqlQueryRaw<string>(DatabaseInstance.Query).SingleAsync(cancellationToken);
+
     public async Task<long> CountMarksMissingFromAsync(IReadOnlyList<DeletionMark> sourceMarks, DateTimeOffset since, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sourceMarks);

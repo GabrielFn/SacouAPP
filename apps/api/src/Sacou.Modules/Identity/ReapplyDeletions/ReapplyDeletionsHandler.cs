@@ -12,7 +12,7 @@ namespace Sacou.Modules.Identity.ReapplyDeletions;
 /// restored one, and each restored account with a mark goes again, with the steps of <c>DELETE /v1/me</c> (ADR 0056,
 /// D7) in an order a failure can resume: the modules erase first (<see cref="ErasureMode.AfterRestore"/>, nothing is
 /// checked: the person already chose to go), then the user and the profile go. A second run finds nothing to do.
-/// Before any write, the source must be readable, read only, and not older than the restored database (S2).
+/// Before any write, the source must be readable, read only, another database than the restored one, and not older than the restored database (S2).
 /// </summary>
 internal sealed partial class ReapplyDeletionsHandler(
     IDeletionMarkSource source,
@@ -38,7 +38,28 @@ internal sealed partial class ReapplyDeletionsHandler(
             return Result.Failure<ReapplyDeletionsSummary>(read.Error);
         }
 
-        var marks = read.Value;
+        try
+        {
+            return await ReapplyAsync(read.Value, now, started, cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbException exception)
+        {
+            // The restored database failed before the erasures (copying the marks, finding the accounts): every step
+            // is idempotent, so the run is interrupted (exit 5) and the next one starts over.
+            TargetFailed(logger, exception.GetType().Name);
+            return Result.Failure<ReapplyDeletionsSummary>(ReapplyDeletionsRefusals.Interrupted);
+        }
+    }
+
+    private async Task<Result<ReapplyDeletionsSummary>> ReapplyAsync(
+        SourceMarks source, DateTimeOffset now, long started, CancellationToken cancellationToken)
+    {
+        var marks = source.Marks;
+        if (string.Equals(await restored.DatabaseAsync(cancellationToken).ConfigureAwait(false), source.Database, StringComparison.Ordinal))
+        {
+            return Result.Failure<ReapplyDeletionsSummary>(ReapplyDeletionsRefusals.SourceIsTarget);
+        }
+
         if (await restored.CountMarksMissingFromAsync(marks, now - DeletionMarkRetention.Period, cancellationToken).ConfigureAwait(false) > 0)
         {
             return Result.Failure<ReapplyDeletionsSummary>(ReapplyDeletionsRefusals.TargetAheadOfSource);
@@ -115,4 +136,7 @@ internal sealed partial class ReapplyDeletionsHandler(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "An account erasure of the reapply failed ({ExceptionType}).")]
     private static partial void EraseFailed(ILogger logger, string exceptionType);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The restored database failed before the erasures of the reapply ({ExceptionType}); running again resumes it.")]
+    private static partial void TargetFailed(ILogger logger, string exceptionType);
 }

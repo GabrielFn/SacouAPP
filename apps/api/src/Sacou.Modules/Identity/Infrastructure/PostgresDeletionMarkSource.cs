@@ -14,21 +14,26 @@ internal sealed class PostgresDeletionMarkSource : IDeletionMarkSource
 {
     private const string ReadOnly = "SET TRANSACTION READ ONLY";
 
-    private const string Writes = "INSERT, UPDATE, DELETE";
+    private const string Writes = "INSERT, UPDATE, DELETE, TRUNCATE";
 
     private const string Users = $"{IdentityDbContext.Schema}.{UserConfiguration.Table}";
 
     private const string Marks = $"{IdentityDbContext.Schema}.{DeletedAccountConfiguration.Table}";
 
-    /// <summary>True when the role may write either table; a superuser or <c>pg_write_all_data</c> counts too.</summary>
+    /// <summary>
+    /// True when the role may write or empty either table (a superuser or <c>pg_write_all_data</c> counts too), is a member
+    /// of the role that owns the tables (it could grant itself the rest) or may create objects in the schema.
+    /// </summary>
     private const string CanWrite =
-        $"SELECT has_table_privilege(current_user, '{Users}', '{Writes}') OR has_table_privilege(current_user, '{Marks}', '{Writes}')";
+        $"SELECT has_table_privilege(current_user, '{Users}', '{Writes}') OR has_table_privilege(current_user, '{Marks}', '{Writes}') " +
+        $"OR pg_has_role(current_user, (SELECT relowner FROM pg_class WHERE oid = '{Users}'::regclass), 'MEMBER') " +
+        $"OR has_schema_privilege(current_user, '{IdentityDbContext.Schema}', 'CREATE')";
 
     private const string SelectMarks =
         $"SELECT {DeletedAccountConfiguration.SubjectHashColumn}, {DeletedAccountConfiguration.DeletedAtColumn} " +
         $"FROM {Marks} ORDER BY {DeletedAccountConfiguration.SubjectHashColumn}";
 
-    public async Task<Result<IReadOnlyList<DeletionMark>>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
+    public async Task<Result<SourceMarks>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
     {
         try
         {
@@ -38,11 +43,11 @@ internal sealed class PostgresDeletionMarkSource : IDeletionMarkSource
         {
             // No connection, a wrong password, no permission or no table: only the code goes out, never the message,
             // which may name the host.
-            return Result.Failure<IReadOnlyList<DeletionMark>>(ReapplyDeletionsRefusals.SourceUnreadable);
+            return Result.Failure<SourceMarks>(ReapplyDeletionsRefusals.SourceUnreadable);
         }
     }
 
-    private static async Task<Result<IReadOnlyList<DeletionMark>>> ReadAsync(string connectionString, CancellationToken cancellationToken)
+    private static async Task<Result<SourceMarks>> ReadAsync(string connectionString, CancellationToken cancellationToken)
     {
         var withoutPool = new NpgsqlConnectionStringBuilder(connectionString) { Pooling = false }.ConnectionString;
         var connection = new NpgsqlConnection(withoutPool);
@@ -56,12 +61,13 @@ internal sealed class PostgresDeletionMarkSource : IDeletionMarkSource
                 if (await ScalarAsync(CanWrite, connection, transaction, cancellationToken).ConfigureAwait(false) is true)
                 {
                     await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                    return Result.Failure<IReadOnlyList<DeletionMark>>(ReapplyDeletionsRefusals.SourceCanWrite);
+                    return Result.Failure<SourceMarks>(ReapplyDeletionsRefusals.SourceCanWrite);
                 }
 
+                var instance = (string)(await ScalarAsync(DatabaseInstance.Query, connection, transaction, cancellationToken).ConfigureAwait(false))!;
                 var marks = await ReadMarksAsync(connection, transaction, cancellationToken).ConfigureAwait(false);
                 await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                return Result.Success(marks);
+                return Result.Success(new SourceMarks(instance, marks));
             }
         }
     }

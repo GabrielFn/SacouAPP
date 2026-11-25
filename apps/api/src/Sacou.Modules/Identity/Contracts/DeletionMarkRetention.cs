@@ -38,6 +38,12 @@ public static class ReapplyDeletionsCodes
     public const string SourceCanWrite = "identity.deletions-source-can-write";
 
     /// <summary>
+    /// The source reached the restored database itself, by another name for its server (<c>localhost</c> and
+    /// <c>127.0.0.1</c>, an IP and its DNS name): the server says so after connecting (exit 2).
+    /// </summary>
+    public const string SourceIsTarget = "identity.deletions-source-is-target";
+
+    /// <summary>
     /// The restored database has a mark, younger than the retention, that the source lacks: marks are only ever added
     /// (the purge of E6.5 takes the older ones), so the source is the older database and the variables were swapped (exit 2).
     /// </summary>
