@@ -2,6 +2,8 @@
 
 Pedido do Gabriel em 24/11/2026: **toda mudança de tela é conferida no emulador antes do merge**, para adiantar o teste no aparelho. O celular fica para o que o emulador não cobre: recorte de foto, câmera, vibração, push real, tela ligada e desempenho. A conferência entra na definição de pronto (item 6 do `CLAUDE.md`).
 
+**Escopo: só o que a tarefa mexeu.** O roteiro cobre as telas e os estados que o PR alterou (e o caminho mínimo para chegar até eles), não o app inteiro. O resto já está coberto pelos testes e pela CI; a regressão geral fica para o percurso completo no fim do marco.
+
 ## Quem faz
 
 O orquestrador manda a conferência a um `testador` (Sonnet) depois da revisão, com um roteiro curto: os passos da tela, o que tem de aparecer (texto exato) e o que capturar. O testador só usa o app e relata; não muda código.

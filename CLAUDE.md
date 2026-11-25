@@ -116,7 +116,7 @@ Conferida pelo revisor e pelo testador, nunca pelo próprio desenvolvedor:
 3. CI verde: build, lint (avisos como erro), testes TS e .NET.
 4. Respeita a arquitetura (DDD enxuto, fatias verticais, domínio sem infraestrutura, eventos sem dado pessoal, glossário).
 5. Clean Code: nomes claros, funções pequenas, sem números soltos, imutabilidade, sem `any`.
-6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados. **Toda mudança de tela é conferida no emulador Android antes do merge** (Gabriel, 24/11/2026; roteiro em `docs/operacao/teste-no-emulador.md`).
+6. No app, regras de `docs/padroes/frontend.md` atendidas. Telas iguais a `design/mvp/`, toque ≥ 44 px, contraste AA, textos pt-BR centralizados. **As telas mexidas pela tarefa são conferidas no emulador Android antes do merge**, só elas e só o que mudou (Gabriel, 24/11/2026; roteiro em `docs/operacao/teste-no-emulador.md`).
 7. Sem segredos no código nem nos logs.
 8. Base de conhecimento atualizada (progresso, ADR, domínio, segurança quando aplicável).
 
