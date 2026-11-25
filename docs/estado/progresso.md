@@ -71,9 +71,11 @@
 | E6.1 | Feita no código | PR #238, ADR 0083 (`/termos` e `/privacidade` servidos pela API, linkados no login do app e da web). Revisor e segurança Opus aprovaram (condições de texto corrigidas pelo orquestrador); testador Sonnet 5 de 5. Falta o Gabriel: perguntas 198 a 203 e revisão jurídica antes da 1.0. |
 | E5.2 | Parte 1 feita | PR #240, ADR 0080 (Sentry e logs JSON na API; Sentry desligado sem DSN). Revisor e segurança Opus, correção com verificador único, testador Sonnet (7 de 7 depois de 2 testes novos). Parte 2 (app, dependência nativa: APK novo) em andamento. Aceite depende da conta do Sentry (roteiro na seção 6 do plano). |
 | E5.3b | Parte 1 feita | PR #241, ADR 0081 (snapshot em memória do stream da quadra: 20.000º evento em ~12 ms na CI). M4-A1 caiu de alto para médio. Parte 2 (proteções, com as condições da segurança) em andamento; bloqueia o piloto. |
-| E5.3 | Em revisão | P1 backups (#244, ADR 0082): revisor e segurança Opus aprovaram com condições (LGPD: reexclusão de contas num banco restaurado), correção em andamento. P2 flags e versão mínima (#245, ADR 0084): revisão única Opus e testador Sonnet (5 de 5), merge assim que a CI passar. |
+| E5.3 | Feita no código | PRs #244 (backups, ADR 0082) e #245 (flags e versão mínima, ADR 0084). Revisores, segurança e testadores aprovaram; falta o Gabriel rodar o roteiro de backup (`docs/operacao/backup.md`) e o ensaio de restauração, e preencher o `UpdateUrl` antes de subir o mínimo. Antes de restauração real ou piloto com jogadores reais: comando de reexclusão de contas (`pendencias.md`). |
 
 ## Em andamento
+
+- 24/11/2026, fim da sessão: na `main` E5.3 inteira (#244, #245); E5.3b P2 (#248) aprovada e testada, merge na CI; E7.2 P1 (#250) com CI verde, falta revisão; E5.2 P2 em andamento em `task/E5.2-p2-sentry-app`. Próximo passo no [diário de 24/11](sessoes/2026-11-24.md).
 
 - 24/11/2026: **M5 fechado** (R100 #234/#237, R101 #239/#242/#243, relatório em `relatorios/M5.md`). **M6 começou**: E6.1 (#238), E5.2 P1 (#240) e E5.3b P1 (#241) na `main`; E5.3 P1 (#244) em correção, E5.3 P2 (#245) indo para o merge, E5.2 P2 e E5.3b P2 em desenvolvimento. Máquina nova com teste no emulador. Próximo passo no [diário de 24/11](sessoes/2026-11-24.md).
 
