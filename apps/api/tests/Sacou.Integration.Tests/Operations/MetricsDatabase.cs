@@ -21,6 +21,9 @@ public abstract class MetricsDatabase(IntegrationDatabase database) : IAsyncLife
 
     internal string ConnectionString { get; private set; } = string.Empty;
 
+    /// <summary>Settings a test class adds to the API (the purge of E6.5 opens the internal routes).</summary>
+    private protected virtual IReadOnlyDictionary<string, string?> MoreSettings { get; } = new Dictionary<string, string?>();
+
     public async ValueTask InitializeAsync()
     {
         await using (var connection = new NpgsqlConnection(database.ConnectionString))
@@ -31,11 +34,12 @@ public abstract class MetricsDatabase(IntegrationDatabase database) : IAsyncLife
         }
 
         ConnectionString = new NpgsqlConnectionStringBuilder(database.ConnectionString) { Database = name }.ConnectionString;
-        api = new ApiWithDatabase(database, new Dictionary<string, string?>(StringComparer.Ordinal)
+        var settings = new Dictionary<string, string?>(MoreSettings, StringComparer.Ordinal)
         {
             ["ConnectionStrings:Sacou"] = ConnectionString,
             ["Operations:OperatorSubjects"] = Operator,
-        });
+        };
+        api = new ApiWithDatabase(database, settings);
         await api.MigrateAsync();
     }
 

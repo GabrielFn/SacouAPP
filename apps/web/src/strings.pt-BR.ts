@@ -90,7 +90,7 @@ export const webStrings = {
     users: {
       title: "Usuários",
       registered: "Cadastrados",
-      deleted: "Contas excluídas",
+      deleted: "Contas excluídas (60 dias)",
       weeksCaption: "Novos cadastros e exclusões por semana (segunda a domingo)",
       newColumn: "Novos",
       deletedColumn: "Excluídas",
