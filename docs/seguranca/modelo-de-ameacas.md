@@ -532,6 +532,21 @@ Substitui as três linhas da tabela da seção 10. A Parte 1 traz o fim da rodad
 | I: o app mostra ou guarda votos (E4.18 Parte 1, tela 12a) | O app não lê a rota `result` (sem `voters`) e o modelo só pega os campos que usa (teste S2 com `voters` e `counts` vazados); varredura dos textos da votação, do resumo e do compartilhamento sem contagem (S1); a cédula (`["groups", g, "rounds", r, "mvp-voting"]`) fica fora da lista de chaves persistidas e o `clearSession` a apaga (S3); o voto confirmado entra só no cache em memória; nada é logado com o candidato ou quem vota (S4); cédula sem pré-seleção, ordem sem relação com votos; recusas sem eco do candidato | Feito (E4.18 Parte 1); testes em `mvp-vote-secrecy.test.ts` (S1 a S5) e `queries/mvp-vote-queries.test.ts` |
 | I: a tela 12 e o "Mandar pro grupo" vazam o voto (E4.18 Parte 2) | A entrada "Você já votou · resultado em 23 h" não leva o nome nem o ID do candidato; o texto compartilhado não traz voto, contagem nem prazo (só o vencedor da votação, "escolhido pela galera"); a cédula só é lida com a votação aberta e continua fora do cache persistido | Feito (E4.18 Parte 2); `mvp-vote-secrecy.test.ts` (S5) e `model/voting-entry.test.ts` |
 
+## 17. Painel do operador (E7.2 Parte 1, [ADR 0085](../arquitetura/adr/0085-painel-do-operador.md))
+
+`GET /painel` (casca anônima, sem dado) e `GET /v1/ops/metrics` (contagens do piloto e o nome de cada grupo, só para os UIDs da lista).
+
+| Ameaça | Controle | Situação |
+|---|---|---|
+| S: alguém se passa pelo operador | Login Firebase com assinatura, emissor, público e validade conferidos (ADR 0036); o `sub` precisa estar em `Operations:OperatorSubjects`, comparação ordinal e exata (testes com `abd`, `ABC`, prefixo e sufixo); lista vazia fecha para todos; e-mail não entra na decisão | Feito |
+| S/E: lista de operadores adulterada ou malformada | A lista fica fora do repositório, na variável `vars.SACOU_OPERATOR_UIDS` de cada environment do GitHub (só quem administra o repositório muda); a ação de deploy recusa caracteres que fechariam a string do YAML; item vazio ou fora do formato derruba a partida, sem mostrar o valor | Feito |
+| I: descobrir que a rota existe ou quem é operador | Conta fora da lista recebe o mesmo 404 de uma rota inexistente (corpo igual, teste); sem token, o 401 de todas as rotas; nenhum log com o `sub` (`ops.denied` só) | Feito |
+| I: vazamento dos agregados e do nome dos grupos | Resposta só com contagens, taxas, instantes, datas de semana, ambiente e nome do grupo (lista fechada por reflexão, `OpsResponseShapeTests`); contratos `*Metrics` sem membro, usuário ou texto além do nome do grupo (`MetricsContractsShapeTests`); `no-store` na rota e na página; fora do OpenAPI do app; corpo nunca logado; a página escreve só com `textContent` (o nome do grupo é texto do admin, possivelmente hostil) e só depois do login; uma resposta antiga não aparece na tela de outra conta (número do pedido) | Feito |
+| I: números de uma conta na sessão de outra no mesmo navegador | Só o passo `ready` guarda números; "Sair" apaga e invalida o pedido em andamento (teste do controlador) | Feito |
+| D: acordar o Neon e rodar as contagens a cada clique | Cache de 60 s compartilhado, semáforo para pedidos simultâneos, limitador `ops` de 20 / 60 s por usuário, tempo limite de 5 s por consulta (503 `ops.unavailable`); a página no `round-page` por endereço | Feito |
+| T: injeção pelas consultas | SQL interpolado do EF (parâmetros), valores de status e origem de `ColumnValues`, query da rota recusada | Feito |
+| R: quem viu o painel | Só `ops.served` com a duração no Cloud Logging, sem identificar o operador; aceito no piloto (um ou dois operadores, a conta do Gabriel) | Aceito |
+
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)
 
 `stored-next-match-drafts.ts`: uma leitura que falha vale "sem rascunho", e a tela 11 sorteia de novo quem sai (critério `draw`). Quem abrir o app depois de uma falha de leitura pode ver outro sorteio, e a escolha já feita some. Impacto: só a ordem de saída, sem dado pessoal e sem perda de partida. Aceito no piloto; o rascunho é local e o motor valida o plano na confirmação.

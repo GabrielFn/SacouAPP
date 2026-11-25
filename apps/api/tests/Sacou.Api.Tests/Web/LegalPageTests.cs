@@ -17,9 +17,9 @@ public sealed class LegalPageTests(SacouApiFactory factory) : IClassFixture<Saco
     private const int PermitLimit = 60;
 
     [Theory]
-    [InlineData(Terms, "Termos de Uso do Sacou", Privacy)]
-    [InlineData(Privacy, "Política de Privacidade do Sacou", Terms)]
-    public async Task Page_IsTheRealText_WithVersionAndDate_WithoutSignIn(string path, string title, string otherPath)
+    [InlineData(Terms, "Termos de Uso do Sacou", Privacy, "Versão 0.1 (rascunho) · atualizada em 24/11/2026")]
+    [InlineData(Privacy, "Política de Privacidade do Sacou", Terms, "Versão 0.2 (rascunho) · atualizada em 25/11/2026")]
+    public async Task Page_IsTheRealText_WithVersionAndDate_WithoutSignIn(string path, string title, string otherPath, string versionLine)
     {
         await using var app = App();
         using var client = app.CreateClient();
@@ -31,7 +31,7 @@ public sealed class LegalPageTests(SacouApiFactory factory) : IClassFixture<Saco
         Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
         Assert.Contains("<html lang=\"pt-BR\">", html, StringComparison.Ordinal);
         Assert.Contains($"<h1>{title}</h1>", html, StringComparison.Ordinal);
-        Assert.Contains("Versão 0.1 (rascunho) · atualizada em 24/11/2026", html, StringComparison.Ordinal);
+        Assert.Contains(versionLine, html, StringComparison.Ordinal);
         Assert.Contains($"<a href=\"{otherPath}\">", html, StringComparison.Ordinal);
         Assert.Contains($"<link rel=\"stylesheet\" href=\"{RoundPageFixture.LegalStyle}\">", html, StringComparison.Ordinal);
         Assert.Contains("<main", html, StringComparison.Ordinal);

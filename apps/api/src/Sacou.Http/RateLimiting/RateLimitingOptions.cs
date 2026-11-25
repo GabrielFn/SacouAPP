@@ -48,6 +48,8 @@ public sealed class RateLimitingOptions
     /// <summary>Per client address, not per user: the round page is anonymous (ADR 0070, D6).</summary>
     public WindowLimitOptions? RoundPage { get; init; }
 
+    /// <summary>The operator's dashboard (E7.2, ADR 0085, D3): each load runs the counts when the cache is old.</summary>
+    public WindowLimitOptions? Ops { get; init; }
     /// <summary>Per client address: the app config is anonymous (ADR 0084).</summary>
     public WindowLimitOptions? AppConfig { get; init; }
 
@@ -107,6 +109,7 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.RoundLink] = RoundLink,
         [RateLimitPolicies.PushDevice] = PushDevice,
         [RateLimitPolicies.RoundPage] = RoundPage,
+        [RateLimitPolicies.Ops] = Ops,
         [RateLimitPolicies.AppConfig] = AppConfig,
     };
 }

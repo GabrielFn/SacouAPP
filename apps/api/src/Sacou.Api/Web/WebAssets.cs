@@ -15,6 +15,9 @@ internal interface IWebAssets
     /// <summary>The entry of the invite page (<c>/c</c>), or null without the build.</summary>
     WebEntry? Invite { get; }
 
+    /// <summary>The entry of the operator's dashboard (<c>/painel</c>, E7.2, ADR 0085), or null without the build.</summary>
+    WebEntry? Ops { get; }
+
     /// <summary>The style of the legal pages (E6.1, ADR 0083), or null without the build (the page is then plain HTML).</summary>
     string? LegalStyle { get; }
 }
@@ -29,6 +32,7 @@ internal sealed class ManifestWebAssets : IWebAssets
     public const string ManifestPath = "web/manifest.json";
     public const string EntryKey = "src/main.ts";
     public const string InviteEntryKey = "src/invite-main.ts";
+    public const string OpsEntryKey = "src/ops-main.ts";
     public const string LegalEntryKey = "src/styles/legal.css";
     public const string PublicPrefix = "/web/";
 
@@ -38,12 +42,15 @@ internal sealed class ManifestWebAssets : IWebAssets
         using var manifest = Read(environment.WebRootFileProvider.GetFileInfo(ManifestPath));
         Round = manifest is null ? null : Parse(manifest.RootElement, EntryKey);
         Invite = manifest is null ? null : Parse(manifest.RootElement, InviteEntryKey);
+        Ops = manifest is null ? null : Parse(manifest.RootElement, OpsEntryKey);
         LegalStyle = manifest is null ? null : ParseFile(manifest.RootElement, LegalEntryKey);
     }
 
     public WebEntry? Round { get; }
 
     public WebEntry? Invite { get; }
+
+    public WebEntry? Ops { get; }
 
     public string? LegalStyle { get; }
 

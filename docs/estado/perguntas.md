@@ -271,6 +271,17 @@ Detalhes no ADR 0084 e em `docs/estado/tarefas/E5.3.md`.
 196. **Tela "Atualize o Sacou"** (não está no design): tela cheia sem saída, "Esta versão não funciona mais. Baixe a nova para continuar.", botão "Baixar a versão nova" com o link da loja da plataforma vindo da API; sem link, sem botão e o texto manda falar com quem organiza o grupo. **Padrão adotado: assim.** Em aberto: qual link usar no piloto (página do teste interno da Play Store e do TestFlight, da E5.4); até lá `UpdateUrl` fica vazio.
 197. **Primeira feature flag:** `MvpVote` (E3.18), ligada nos dois ambientes. **Padrão adotado: só ela.** Outra função que você queira poder desligar entra com uma linha no catálogo e uma no app.
 
+## 25/11/2026: E6.2 (LGPD e exigências da Play), perguntas 219 a 227 (aprovadas com as recomendações)
+Detalhes em `.specs/features/E6.2/plan.md`. **Resposta do Gabriel (25/11): "Aprovo com as recomendações"** — todas seguem a recomendação.
+219. A nota do admin entra no direito de acesso do titular? **Recomendação:** fora do app; responder pelo canal do encarregado, com o advogado.
+220. Exclusão de conta pela web (exigida pela Play no teste fechado): (1) página estática com o passo a passo e o e-mail (~150 linhas); (2) página com login (~700 linhas). **Recomendação: 1.**
+221. Denúncia de conteúdo (apelido, nome do grupo, local, convidado): **Recomendação:** "Denunciar" no app antes do teste fechado; no teste interno, só o canal do encarregado.
+222. Prazo da marca de exclusão (reaplicar exclusões depois de restaurar backup). **Recomendação: 60 dias.**
+223. Histórico do ex-jogador fica enquanto o grupo existir? **Recomendação: sim.**
+224. Esconder os apelidos da página `/r` 7 dias depois da rodada? **Recomendação: sim.**
+225. Apagar do aparelho os pontos pendentes de quem exclui a conta? **Recomendação: sim.**
+226. Conta de teste e grupo de demonstração para o revisor da Play? **Recomendação: sim.**
+227. Começar pelo teste fechado da Play (12 testadores por 14 dias)? **Recomendação: sim**, se houver 12 ou mais pessoas com Android.
 ## 25/11/2026: E6.3 (reexclusão depois de restaurar o backup), perguntas 228 a 231 (plano esperando aprovação)
 Detalhes em `.specs/features/E6.3/plan.md`. Nenhuma trava a S1.
 228. Forma do comando: (1) modo de comando no executável da API (`OperationCommands`), rodado no Cloud Shell pela imagem do ensaio; (2) rota no painel do operador; (3) script SQL. **Recomendação: 1.**
