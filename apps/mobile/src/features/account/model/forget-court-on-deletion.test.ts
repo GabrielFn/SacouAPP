@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { createFakeAuthSession, fakeSessionIdentity } from "../../../adapters/fake-auth-session";
 import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
+import { createFakeErrorReporter } from "../../../adapters/fake-error-reporter";
 import { createFakeSacouApi } from "../../../adapters/fake-sacou-api";
 import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import type { ApiError } from "../../../services/api/api-error";
@@ -200,5 +201,38 @@ describe("the court of the deleted account leaves the device (E6.8)", () => {
     await run(unknown.deps);
     for (const spy of spies) expect(spy).not.toHaveBeenCalled();
     expect(ok.forgotten).toHaveLength(FORGOTTEN);
+  });
+
+  test("T11: forgetSessionsOf answering Err(storage-failed) does not block the deletion", async () => {
+    const spies = spyOnConsole();
+    let calls = 0;
+    const { fake, order, deps } = setup({
+      forget: () => {
+        calls += 1;
+        return Promise.resolve({ ok: false, error: { code: "storage-failed" } });
+      },
+    });
+    fake.respond("deleteMyAccount", apiOk(null));
+    const outcome = await run(deps);
+    expect(calls).toBe(1);
+    expect(outcome).toEqual({ kind: "deleted" });
+    expect(order).toEqual(["deleteMyAccount", "accountKeyOf", "forgetSessionsOf", "endDeleted"]);
+    expect(deletionOutcomeText(outcome)).toBeNull();
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+  });
+
+  test("T11: nothing reaches the error reporter (the flow receives none)", async () => {
+    // DeletionDeps has no ErrorReporter field, so the flow cannot report a forget failure. This
+    // guard keeps that true: a reporter added later must come with a scrubbed context (no owner
+    // key, no count) and its own test.
+    const failing = setup({ forget: () => Promise.reject(new Error("disk")) });
+    expect(Object.keys(failing.deps).sort()).toEqual(
+      ["api", "auth", "court", "ender", "refreshBlockers"].sort(),
+    );
+    const reporter = createFakeErrorReporter();
+    failing.fake.respond("deleteMyAccount", apiOk(null));
+    await run(failing.deps);
+    expect(reporter.captured()).toEqual([]);
+    expect(reporter.nativeCrashes()).toBe(0);
   });
 });
