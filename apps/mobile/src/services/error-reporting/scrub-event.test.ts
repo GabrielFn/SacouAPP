@@ -113,8 +113,60 @@ describe("the event filter (E5.2, ADR 0080, D10)", () => {
   test("keeps only the allowed tags and never the name of the phone", () => {
     expect(scrubbed.tags).toEqual({ area: "dev-catalog", "event.origin": "javascript" });
     expect(scrubbed.contexts).toEqual({
-      device: { name: undefined, model: "Pixel 8" },
+      device: { model: "Pixel 8" },
       os: { name: "Android" },
+    });
+  });
+
+  test("keeps only the allowed contexts and, in each one, only its allowed primitive fields", () => {
+    const result = scrubEvent({
+      contexts: {
+        app: { app_version: "1.0.0", app_memory: 10, in_foreground: true },
+        device: { model: "Pixel 8", name: "Celular da Ana", boot_time: { at: 1 } },
+        react: { version: "19.3.0" },
+        runtime: { name: "Hermes", version: `built by ${EMAIL}` },
+        culture: { locale: "pt-BR", timezone: "America/Sao_Paulo" },
+        profile: { nickname: "Aninha" },
+      },
+    });
+    expect(result.contexts).toEqual({
+      app: { app_version: "1.0.0" },
+      device: { model: "Pixel 8", boot_time: undefined },
+      react: { version: "19.3.0" },
+      runtime: { name: "Hermes", version: `built by ${REDACTED}` },
+    });
+  });
+
+  test("filters the transaction and the log entry", () => {
+    const result = scrubEvent({
+      transaction: `/groups/${GUID}/members/${EMAIL}`,
+      logentry: {
+        message: `token ${JWT} for %s`,
+        params: [EMAIL, GUID, 3, { nickname: "Aninha" }],
+      },
+    });
+    expect(result.transaction).toBe(`/groups/${REDACTED_ID}/members/${REDACTED}`);
+    expect(result.logentry).toEqual({
+      message: `token ${REDACTED} for %s`,
+      params: [REDACTED, REDACTED_ID, 3, undefined],
+    });
+  });
+
+  test("drops the free-form data of the exception mechanism", () => {
+    const result = scrubEvent({
+      exception: {
+        values: [
+          {
+            value: "boom",
+            mechanism: { type: "onerror", handled: false, data: { who: "Aninha" } },
+          },
+        ],
+      },
+    });
+    expect(result.exception.values[0]?.mechanism).toEqual({
+      type: "onerror",
+      handled: false,
+      data: undefined,
     });
   });
 

@@ -16,8 +16,21 @@ export interface ReportedBreadcrumb {
   readonly data?: Readonly<Record<string, unknown>>;
 }
 
+/** How the exception was caught; `data` is free-form, so it never leaves. */
+export interface ReportedMechanism {
+  readonly type?: string;
+  readonly handled?: boolean;
+  readonly data?: Readonly<Record<string, unknown>>;
+}
+
 export interface ReportedException {
   readonly value?: string;
+  readonly mechanism?: ReportedMechanism;
+}
+
+export interface ReportedLogEntry {
+  readonly message?: string;
+  readonly params?: readonly unknown[];
 }
 
 export interface ReportedRequest {
@@ -28,6 +41,8 @@ export interface ReportedRequest {
 /** The shape of a Sentry event that the filter reads; the SDK type fits in it. */
 export interface ReportedEvent {
   readonly message?: string;
+  readonly transaction?: string;
+  readonly logentry?: ReportedLogEntry;
   readonly user?: unknown;
   readonly server_name?: string;
   readonly extra?: Readonly<Record<string, unknown>>;
@@ -60,6 +75,40 @@ const NAVIGATION_CATEGORIES: readonly string[] = ["navigation", "deeplink"];
 const HTTP_DATA_KEYS: readonly string[] = ["method", "status_code"];
 const NAVIGATION_URL_KEYS: readonly string[] = ["from", "to", "url"];
 const CONSOLE_CATEGORY = "console";
+/**
+ * The contexts that may leave and, in each one, the fields known to be safe: versions, model and
+ * screen, never the name the owner gave the phone. Any other context or field is dropped.
+ */
+const ALLOWED_CONTEXT_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  app: ["app_identifier", "app_name", "app_version", "app_build", "build_type", "app_start_time"],
+  os: ["name", "version", "build", "kernel_version", "rooted"],
+  device: [
+    "family",
+    "model",
+    "model_id",
+    "brand",
+    "manufacturer",
+    "arch",
+    "simulator",
+    "orientation",
+    "battery_level",
+    "charging",
+    "online",
+    "low_memory",
+    "memory_size",
+    "free_memory",
+    "storage_size",
+    "free_storage",
+    "screen_density",
+    "screen_dpi",
+    "screen_height_pixels",
+    "screen_width_pixels",
+    "processor_count",
+    "boot_time",
+  ],
+  react: ["version"],
+  runtime: ["name", "version", "raw_description"],
+};
 const TOUCH_CATEGORY = "touch";
 
 /**
@@ -151,13 +200,37 @@ function allowedTags(
   return tags === undefined ? undefined : pick(tags, ALLOWED_TAGS, keep);
 }
 
-/** The device context keeps the model and the system, never the name the owner gave the phone. */
-function withoutDeviceName(
+/** A primitive value, with its text filtered; objects and arrays are dropped. */
+function scrubPrimitive(value: unknown): unknown {
+  if (typeof value === "string") return redactText(value);
+  return typeof value === "number" || typeof value === "boolean" ? value : undefined;
+}
+
+/** Only the allowed contexts and, in each one, only its allowed fields (allow list). */
+function allowedContexts(
   contexts: Readonly<Record<string, unknown>> | undefined,
 ): Readonly<Record<string, unknown>> | undefined {
-  const device = contexts?.device;
-  if (contexts === undefined || !isRecord(device)) return contexts;
-  return { ...contexts, device: { ...device, name: undefined } };
+  if (contexts === undefined) return undefined;
+  return Object.fromEntries(
+    Object.entries(ALLOWED_CONTEXT_FIELDS).flatMap(([name, fields]) => {
+      const context = contexts[name];
+      return isRecord(context) ? [[name, pick(context, fields, scrubPrimitive)]] : [];
+    }),
+  );
+}
+
+/** The mechanism keeps how the error was caught; its free-form `data` is dropped. */
+function scrubMechanism<M extends ReportedMechanism>(mechanism: M | undefined): M | undefined {
+  return mechanism === undefined ? undefined : { ...mechanism, data: undefined };
+}
+
+function scrubLogEntry<L extends ReportedLogEntry>(logentry: L | undefined): L | undefined {
+  if (logentry === undefined) return undefined;
+  return {
+    ...logentry,
+    message: redactOptional(logentry.message),
+    params: logentry.params?.map(scrubPrimitive),
+  };
 }
 
 /** The event as it may leave the phone; the original is not changed. */
@@ -169,6 +242,8 @@ export function scrubEvent<E extends ReportedEvent>(event: E): E {
     extra: undefined,
     request: scrubRequest(event.request),
     message: redactOptional(event.message),
+    transaction: redactOptional(event.transaction),
+    logentry: scrubLogEntry(event.logentry),
     exception:
       event.exception === undefined
         ? undefined
@@ -177,6 +252,7 @@ export function scrubEvent<E extends ReportedEvent>(event: E): E {
             values: event.exception.values?.map((value) => ({
               ...value,
               value: redactOptional(value.value),
+              mechanism: scrubMechanism(value.mechanism),
             })),
           },
     breadcrumbs: event.breadcrumbs?.flatMap((breadcrumb) => {
@@ -184,6 +260,6 @@ export function scrubEvent<E extends ReportedEvent>(event: E): E {
       return scrubbed === null ? [] : [scrubbed];
     }),
     tags: allowedTags(event.tags),
-    contexts: withoutDeviceName(event.contexts),
+    contexts: allowedContexts(event.contexts),
   };
 }
