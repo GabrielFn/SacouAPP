@@ -54,13 +54,14 @@ Toda linha do inventário tem a coluna `Retenção` com prazo concreto (em dias,
 
 | Operador | Dado que recebe | Região | Fonte da região | Estado |
 |---|---|---|---|---|
-| Google Firebase Authentication | E-mail, nome e ID do Google, senha protegida, IP do login (linha "E-mail, senha gerida pelo provedor") | EUA, definida pelo Google | [Firebase, privacidade](https://firebase.google.com/support/privacy) | ok |
+| Google Firebase Authentication | E-mail, nome, URL da foto e ID da conta Google, senha protegida, IP e user agent do login, ID do Firebase Auth (linha "E-mail, senha gerida pelo provedor"; [Firebase, Data safety](https://firebase.google.com/docs/android/play-data-disclosure)) | EUA, definida pelo Google | [Firebase, privacidade](https://firebase.google.com/support/privacy) | ok |
 | Google Cloud Run e Cloud Logging | Toda requisição; logs com IP e user agent por 30 dias (linhas "IP, user agent, caminho" e "Logs da própria API") | `us-east4`, EUA | ADR 0068, resposta 91 | ok |
 | Google Cloud Storage (backup) | Cópia diária de todo o banco (linha "Cópia do banco") | `us-east1`, EUA | ADR 0082; `scripts/gcp/setup-backups.sh` | ok |
 | Neon sobre AWS | Todo o banco (linha "Todos os dados do banco") | `us-east-1`, EUA | ADR 0068 | ok |
-| Sentry | Erros da API, sem usuário, `MemberId` nem IP; 90 dias (linha "Erros da API") | EUA | Pergunta 208; `Sentry.AspNetCore` no `Sacou.Api.csproj` (ADR 0080) | ok |
+| Sentry (API) | Erros da API, sem usuário, `MemberId` nem IP; 90 dias (linha "Erros da API"), projeto `sacou-api` | EUA | Pergunta 208; `Sentry.AspNetCore` no `Sacou.Api.csproj` (ADR 0080) | ok |
+| Sentry (app) | Erros e travamentos do app com versão, modelo e sistema do aparelho, sem usuário, `MemberId` nem IP; 90 dias (linha "Erros e travamentos do app"), projeto `sacou-mobile` | EUA | Perguntas 208 a 210; `@sentry/react-native` no `apps/mobile/package.json` (ADR 0080, D9 a D13) | ok |
 | Expo Push | Token de push e o texto de cada push (linha "Token de push") | EUA, definida pela Expo | [Expo, privacidade](https://expo.dev/privacy) | ok |
-| Google FCM | Token e push, repassados pelo Expo | EUA, definida pelo Google | [Firebase, privacidade](https://firebase.google.com/support/privacy) | ok |
+| Google FCM | Token e push, repassados pelo Expo; o SDK gera o ID de instalação do Firebase (FID) e lê a versão do app ([Firebase, Data safety](https://firebase.google.com/docs/android/play-data-disclosure)) | EUA, definida pelo Google | [Firebase, privacidade](https://firebase.google.com/support/privacy) | ok |
 | GitHub | Só dados de desenvolvedores (linha "Autor e e-mail em commits") | EUA | ADR 0058 | ok |
 | Resend, PostHog, RevenueCat, Cloudflare R2, provedor de IA | Não usados no piloto: nenhum pacote em `apps/` (grep de 25/11/2026); R2 trocado pelo Google Cloud Storage (ADR 0082) | — | ADR 0046 | ok (não usado no piloto) |
 | Apple APNs | Não usado no piloto: só Android (resposta 58) | — | — | ok (não usado no piloto) |

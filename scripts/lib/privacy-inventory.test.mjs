@@ -58,6 +58,19 @@ describe("findInventoryViolations", () => {
     assert.deepEqual(rest, []);
   });
 
+  it("fails a retention undecided anywhere in the cell, in any case", () => {
+    const [middle, upper, ...rest] = findInventoryViolations(
+      inventory([
+        row("Apelido", CONTRACT, "30 dias; o resto a definir"),
+        row("deviceId", CONTRACT, "Enquanto existir, TBD depois"),
+        row("Grupo", CONTRACT, "Enquanto o grupo existir"),
+      ]),
+    );
+    assert.match(middle, /\("Apelido"\): Retenção "30 dias; o resto a definir" is not decided/u);
+    assert.match(upper, /\("deviceId"\): Retenção "Enquanto existir, TBD depois" is not decided/u);
+    assert.deepEqual(rest, []);
+  });
+
   it("fails the old five-column header and a missing table", () => {
     const old = inventory([]).replace(
       HEADER,

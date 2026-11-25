@@ -33,7 +33,7 @@ O canal para falar sobre privacidade está na seção 13.
 
 ### Conta
 
-Para entrar, você usa uma conta Google ou um e-mail e senha. O login é feito pelo Firebase Authentication, do Google, que guarda seu e-mail, seu nome na conta Google, o identificador da conta Google e a senha protegida. A tela Conta do app mostra seu nome e e-mail, e a sessão fica guardada no próprio aparelho até você sair. O Sacou nunca vê sua senha. No nosso banco de dados guardamos só um identificador interno, o identificador da sua conta no Firebase e a data de criação.
+Para entrar, você usa uma conta Google ou um e-mail e senha. O login é feito pelo Firebase Authentication, do Google, que guarda seu e-mail, seu nome e o endereço da foto da conta Google, o identificador da conta Google e a senha protegida. A tela Conta do app mostra seu nome e e-mail, e a sessão fica guardada no próprio aparelho até você sair. O Sacou nunca vê sua senha. No nosso banco de dados guardamos só um identificador interno, o identificador da sua conta no Firebase e a data de criação.
 
 ### Perfil
 
@@ -77,9 +77,9 @@ O app guarda no celular uma cópia dos dados dos seus grupos para funcionar sem 
 
 Quando o app ou o navegador acessa nossos servidores, o Google Cloud registra o endereço IP, o tipo de navegador ou aparelho e o endereço da página acessada. Usamos isso para manter o serviço funcionando e para evitar abuso. Para limitar abusos, também usamos versões embaralhadas e irreversíveis do seu identificador e do seu IP, só na memória do servidor, por no máximo 1 hora. Os pontos enviados por cada celular são ligados a um código aleatório da instalação do app, que não é o número do aparelho. O servidor guarda esse código ligado a você enquanto a partida existir, e o organizador, o co-organizador e quem marca o placar do grupo conseguem ver de qual aparelho veio cada ponto.
 
-Quando acontece um erro nos nossos servidores, o Sentry recebe um relatório técnico do erro, sem seu identificador, seu IP, seu e-mail ou seu apelido. Esse relatório é apagado em 90 dias.
+Quando acontece um erro nos nossos servidores ou no app, o Sentry recebe um relatório técnico do erro (do app, também a versão do app e o modelo e o sistema do celular), sem seu identificador, seu IP, seu e-mail ou seu apelido. Esse relatório é apagado em 90 dias.
 
-> NOTA (E6.2): o Sentry está ativo na API desde a E5.2 (`Sentry.AspNetCore`, ADR 0080); no app ainda não. O Resend (e-mail) não é usado no piloto. O PostHog, a foto da cartinha, o Pix, o resumo com IA e a assinatura ficaram fora do piloto e não entram nesta versão.
+> NOTA (E6.2): o Sentry está ativo na API (`Sentry.AspNetCore`, E5.2 Parte 1) e no app (`@sentry/react-native`, E5.2 Parte 2), ADR 0080. O Resend (e-mail) não é usado no piloto. O PostHog, a foto da cartinha, o Pix, o resumo com IA e a assinatura ficaram fora do piloto e não entram nesta versão.
 
 ## 3. O que não coletamos
 
@@ -103,8 +103,8 @@ Não vendemos seus dados e não os usamos para publicidade. Usamos prestadores d
 - Google (Firebase Authentication e Google Cloud): login, servidores e registros técnicos.
 - Google Cloud Storage, nos Estados Unidos: cópia diária de segurança do banco de dados, guardada por 30 dias.
 - Neon, com servidores da Amazon Web Services: banco de dados.
-- Sentry, nos Estados Unidos: relatórios de erro dos servidores, sem dados que identifiquem você.
-- Expo, Google Firebase Cloud Messaging e Apple Push Notification Service: entrega das notificações.
+- Sentry, nos Estados Unidos: relatórios de erro dos servidores e do app, sem dados que identifiquem você.
+- Expo e Google Firebase Cloud Messaging: entrega das notificações.
 
 > NOTA (E6.2): a cópia diária vai para o Google Cloud Storage em `us-east1` (ADR 0082), não para o Cloudflare R2, que não é usado no piloto. O Resend não é usado no piloto. Lista dos operadores com a fonte da região: seção 4 de `docs/seguranca/lgpd-checklist.md`.
 
@@ -121,15 +121,15 @@ Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na r
 - Conta, perfil e notas de nível sobre você: enquanto sua conta existir. Ao excluir a conta, são apagados na hora.
 - Histórico das rodadas e partidas, estatísticas e votos: enquanto o grupo existir. Depois que você exclui a conta, esse histórico deixa de mostrar seu apelido e aparece como Ex-jogador.
 - Nome de convidado sem conta: até o organizador removê-lo, ou até o grupo ficar sem nenhum membro com conta. Quem nunca mais jogou continua no histórico enquanto o grupo existir.
-- Página da rodada no navegador: os apelidos ficam visíveis para quem tem o link até 7 dias depois da rodada.
+- Página da rodada no navegador: por enquanto, os apelidos ficam visíveis para quem tem o link enquanto a rodada existir. Passarão a ser escondidos 7 dias depois da rodada.
 - Notificações: 30 dias.
 - Registros técnicos de acesso: 30 dias.
 - Relatórios de erro: 90 dias.
-- Cópia no celular: até 7 dias, e é apagada quando você sai da conta. Se você excluir a conta no celular que marcou o placar, os pontos que ainda não foram enviados também são apagados.
-- Cópias de segurança do banco: uma cópia por dia, guardada por 30 dias, além de um histórico de restauração de 6 horas. Se uma cópia for restaurada, as contas excluídas depois dela são excluídas de novo.
-- Depois da exclusão, guardamos por 60 dias só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano e permite excluí-la de novo se uma cópia de segurança for restaurada.
+- Cópia no celular: até 7 dias, e é apagada quando você sai da conta. Os pontos marcados que ainda não foram enviados ficam no celular até o envio, mesmo se você excluir a conta. Passarão a ser apagados junto com a conta, no celular que marcou o placar.
+- Cópias de segurança do banco: uma cópia por dia, guardada por 30 dias, além de um histórico de restauração de 6 horas. Uma conta excluída depois de uma cópia voltaria se essa cópia fosse restaurada; por isso, até termos como excluí-la de novo, não restauramos cópias com dados de jogadores.
+- Depois da exclusão, guardamos só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano. Por enquanto esse código fica sem prazo; passará a ser apagado 60 dias depois da exclusão.
 
-> LACUNA (E6.2, perguntas 222 a 225): os prazos acima são os decididos, mas o código só os cumpre depois das tarefas E6.3 (reexclusão depois de restaurar a cópia), E6.5 (60 dias do código de exclusão), E6.7 (apelidos escondidos 7 dias depois da rodada) e E6.8 (pontos pendentes apagados na exclusão). A versão 1.0 só é publicada depois delas. Fica para o advogado (pergunta 200): se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos; e o prazo do grupo abandonado, que no piloto fica enquanto existir.
+> LACUNA (E6.2, perguntas 222 a 225): os itens acima dizem o que o código faz hoje e, com "passará a", o prazo decidido, que só vale depois das tarefas E6.3 (reexclusão depois de restaurar a cópia), E6.5 (60 dias do código de exclusão), E6.7 (apelidos escondidos 7 dias depois da rodada) e E6.8 (pontos pendentes apagados na exclusão). A versão 1.0 só é publicada depois delas. Fica para o advogado (pergunta 200): se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos; e o prazo do grupo abandonado, que no piloto fica enquanto existir.
 
 ## 8. Por que podemos usar seus dados
 
@@ -192,9 +192,9 @@ Conferir antes do merge da E6.1 e a cada mudança de `docs/seguranca/dados-pesso
 | 2 Página da rodada e convite | "Perfil do jogador" (resposta 126), "Código do link", "Sessão da página web", "Endereço IP de quem abre a página" |
 | 2 Notificações | "Aparelhos do push", "No app (E3.11)", "Notificações e entregas", "Token de push" (serviços externos) |
 | 2 No seu celular | "Cache do servidor no aparelho", "Conta dona da sessão da quadra", "Imagem da cartinha" |
-| 2 Registros técnicos | "Chave do limite de requisições", "IP, user agent, caminho", "ID do celular no envelope", "Escritor de cada lote", "Erros da API" (Sentry) |
+| 2 Registros técnicos | "Chave do limite de requisições", "IP, user agent, caminho", "ID do celular no envelope", "Escritor de cada lote", "Erros da API" e "Erros e travamentos do app" (Sentry) |
 | 3 O que não coletamos | Colunas travadas por teste de modelo em `identity.users` e `player_profiles`; "Imagem da cartinha" (só escrita na galeria) |
-| 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push", "Erros da API" (Sentry), "Cópia do banco" (Google Cloud Storage); seção 4 de `lgpd-checklist.md` |
+| 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push", "Erros da API" e "Erros e travamentos do app" (Sentry), "Cópia do banco" (Google Cloud Storage); seção 4 de `lgpd-checklist.md` |
 | 7 Retenção | Coluna "Retenção" de cada linha (E6.2); "Na exclusão"; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 90 dias do Sentry; 30 dias da "Cópia do banco"; 60 dias da "Marca de exclusão"; 6 h do Neon |
 | 9 Direitos | "Direitos do titular" (exclusão, exportação, Ex-jogador) |
 

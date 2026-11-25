@@ -19,7 +19,7 @@ Quando isto sair, o Gabriel tem num lugar só: o checklist LGPD com base legal, 
 
 ## Shape
 
-Reaproveita o inventário `dados-pessoais.md` como fonte única (o checklist aponta para as linhas dele, não copia) e a tabela de rastreio da política (E6.1); nenhum serviço novo. A única regra que muda resultado é "toda linha do inventário tem base legal e retenção, e nenhuma diz 'a definir na E6.2'", e ela roda num teste do `pnpm test:tooling` (Vitest dos scripts), que a CI já executa.
+Reaproveita o inventário `dados-pessoais.md` como fonte única (o checklist aponta para as linhas dele, não copia) e a tabela de rastreio da política (E6.1); nenhum serviço novo. A única regra que muda resultado é "toda linha do inventário tem base legal e retenção, e nenhuma diz 'a definir na E6.2'", e ela roda num teste do `pnpm test:tooling` (`node --test` dos scripts), que a CI já executa.
 
 1. Entra o inventário `docs/seguranca/dados-pessoais.md` (exists) -> o analista/desenvolvedor confere cada linha contra o código (greps da S1) e acrescenta as colunas **Base legal** e **Retenção** (door 1).
 2. `docs/seguranca/lgpd-checklist.md` (new) - checklist por tema (bases, direitos, retenção, operadores, transferência, encarregado, incidente, crianças), cada item com estado `ok`, `lacuna Gn` ou `decisão do Gabriel`, e o link para a linha do inventário.

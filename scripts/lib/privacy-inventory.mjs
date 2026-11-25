@@ -38,7 +38,7 @@ export const PENDING_SCAN_FILES = Object.freeze([
 ]);
 
 const PENDING_MARKER = /\b(a definir|conferir|a decidir|a registrar|reavaliar) na E6\.2\b/iu;
-const UNDECIDED_RETENTION = /^a definir\b/iu;
+const UNDECIDED_RETENTION = /\b(a definir|tbd)\b/iu;
 const SECTION_PREFIX = "## ";
 const DADO_PREVIEW_LENGTH = 50;
 

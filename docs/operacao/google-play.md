@@ -27,17 +27,18 @@ Regras gerais da resposta:
 | Tipo de dado da Play | Coletado | Compartilhado | Efêmero | Obrigatório ou opcional | Finalidade | Linha do inventário |
 |---|---|---|---|---|---|---|
 | Informações pessoais > E-mail | sim (Firebase Auth) | não | não | obrigatório | Gerenciamento da conta | "E-mail, senha gerida pelo provedor" |
-| Informações pessoais > Nome | sim (apelido) | não | não | obrigatório | Funcionalidade do app, gerenciamento da conta | "Perfil do jogador". O nome do Google fica só no aparelho ("E-mail e nome do provedor no aparelho") e não é coletado |
+| Informações pessoais > Nome | sim (apelido; e o nome da conta Google, que o Firebase Auth guarda no login com o Google) | não | não | obrigatório | Funcionalidade do app, gerenciamento da conta | "Perfil do jogador", "E-mail, senha gerida pelo provedor". O Firebase Auth copia o `displayName` do Google para o usuário ([Firebase, Data safety](https://firebase.google.com/docs/android/play-data-disclosure): "Display name" e "Contact information" do provedor) |
 | Informações pessoais > IDs do usuário | sim (UID do Firebase, `MemberId`) | não | não | obrigatório | Gerenciamento da conta, funcionalidade do app | "Dados de conta guardados na API", "Vínculo com o grupo" |
+| Informações pessoais > Outras informações | sim (URL da foto da conta Google no Firebase Auth; posições e nível autodeclarado do perfil; nota de nível dada pelo Admin ou Co-admin sobre a pessoa) | não | não | opcional (nível autodeclarado; URL da foto só no login com o Google), obrigatório (posições) | Funcionalidade do app (sorteio dos times), gerenciamento da conta | "E-mail, senha gerida pelo provedor", "Posições", "Nível sugerido pelo jogador", "Nota do membro definida pelo Admin ou Co-admin" |
 | Atividade no app > Outro conteúdo gerado pelo usuário | sim (nome do grupo, local, nome do convidado) | não | não | opcional | Funcionalidade do app | "Nome do grupo", "Configuração do grupo", "Convidado sem conta" |
 | Atividade no app > Interações no app | sim (presença, pontos, votos do MVP) | não | não | obrigatório | Funcionalidade do app | "Presença, lista de espera e rodada", "Stream da quadra no servidor", "Votos do MVP do dia" |
-| Informações e desempenho do app > Registros de falhas | sim (só a API, Sentry) | não | não | obrigatório | Análise | "Erros da API" |
-| Informações e desempenho do app > Diagnóstico | sim (logs da API, sem dado do usuário) | não | não | obrigatório | Análise, segurança | "Logs da própria API" |
-| IDs do dispositivo ou outros | sim (token de push, `installation_id`, `deviceId`) | não | não | obrigatório (`deviceId`), opcional (push) | Funcionalidade do app | "Aparelhos do push", "ID do celular no envelope do evento" |
-| Fotos e vídeos > Fotos | não: a imagem da cartinha só existe no aparelho e na folha de compartilhar | — | — | — | — | "Imagem da cartinha" |
-| Localização, contatos, mensagens, finanças, saúde, áudio, arquivos, agenda, histórico da web | não | — | — | — | — | Política, seção 3 |
+| Informações e desempenho do app > Registros de falhas | sim (API e app, Sentry; 90 dias) | não | não | obrigatório | Análise | "Erros da API", "Erros e travamentos do app" |
+| Informações e desempenho do app > Diagnóstico | sim (logs de requisição do Cloud Run com IP, user agent e caminho, 30 dias; IP e user agent do login no Firebase Auth; versão do app, modelo e sistema do aparelho no Sentry do app; logs da API sem dado do usuário) | não | não | obrigatório | Análise, segurança, prevenção de fraude | "IP, user agent, caminho e query", "IP e logs de acesso", "Erros e travamentos do app", "Logs da própria API" |
+| IDs do dispositivo ou outros | sim (token de push, `installation_id`, `deviceId`; ID de instalação do Firebase, o FID, gerado pelo SDK do FCM) | não | não | obrigatório (`deviceId`), opcional (push) | Funcionalidade do app | "Aparelhos do push", "ID do celular no envelope do evento"; [Firebase, Data safety](https://firebase.google.com/docs/android/play-data-disclosure) (Cloud Messaging e Installations) |
+| Fotos e vídeos > Fotos | não: a imagem da cartinha só existe no aparelho e na folha de compartilhar; da foto da conta Google só a URL fica no Firebase Auth (linha "Outras informações") | — | — | — | — | "Imagem da cartinha" |
+| Localização, contatos, mensagens, finanças, saúde, áudio, arquivos, agenda, histórico da web | não (o IP dos logs não é usado para localizar a pessoa) | — | — | — | — | Política, seção 3 |
 
-**Quando mudar:** o Sentry no app (E5.2 Parte 2) muda "Registros de falhas" para incluir o app; a foto, o Pix, o PostHog e a assinatura (fora do piloto, ADR 0046) acrescentam linhas.
+**Quando mudar:** a foto, o Pix, o PostHog e a assinatura (fora do piloto, ADR 0046) acrescentam linhas. Antes de enviar, conferir de novo a [página do Firebase sobre Data safety](https://firebase.google.com/docs/android/play-data-disclosure) (Authentication, Cloud Messaging e Installations), conferida em 25/11/2026.
 
 ## Outras declarações da Play Console
 
