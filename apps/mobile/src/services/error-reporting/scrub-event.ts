@@ -9,6 +9,29 @@ export const REDACTED = "[filtrado]";
 export const REDACTED_ID = "[id]";
 const CODE_SEGMENT = "{code}";
 
+/** The approximate place of a user, as Sentry reads it; the SDK type fits in it. */
+export interface ReportedGeo {
+  readonly city?: string;
+  readonly country_code?: string;
+  readonly region?: string;
+}
+
+/** The user of an event, as Sentry reads it; the SDK type fits in it. */
+export interface ReportedUser {
+  readonly id?: string | number;
+  readonly geo?: ReportedGeo;
+}
+
+/**
+ * The only user any event carries (ADR 0080, D14), the same on every phone. Sentry derives
+ * `user.geo` from the IP of the connection whenever the event has none, even with "Prevent Storing
+ * of IP Addresses" and `sendDefaultPii: false` (Relay `normalize_user_geoinfo` falls back to the
+ * client IP), so a geo that says nothing stops the lookup. The fixed `id` keeps the Android SDK
+ * from filling the installation id (it only fills a missing one). Set on the scope too, so the
+ * native SDK copies it into a native crash, which never passes through `beforeSend`.
+ */
+export const ANONYMOUS_USER: ReportedUser = { id: REDACTED_ID, geo: { region: REDACTED } };
+
 /** The shape of a Sentry breadcrumb that the filter reads; the SDK type fits in it. */
 export interface ReportedBreadcrumb {
   readonly category?: string;
@@ -43,7 +66,7 @@ export interface ReportedEvent {
   readonly message?: string;
   readonly transaction?: string;
   readonly logentry?: ReportedLogEntry;
-  readonly user?: unknown;
+  readonly user?: ReportedUser;
   readonly server_name?: string;
   readonly extra?: Readonly<Record<string, unknown>>;
   readonly request?: ReportedRequest;
@@ -237,7 +260,7 @@ function scrubLogEntry<L extends ReportedLogEntry>(logentry: L | undefined): L |
 export function scrubEvent<E extends ReportedEvent>(event: E): E {
   return {
     ...event,
-    user: undefined,
+    user: ANONYMOUS_USER,
     server_name: undefined,
     extra: undefined,
     request: scrubRequest(event.request),

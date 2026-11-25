@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  ANONYMOUS_USER,
   REDACTED,
   REDACTED_ID,
   redactText,
@@ -53,9 +54,18 @@ describe("the text filter of what goes to Sentry (E5.2, ADR 0080, D10)", () => {
   });
 });
 
+/** What a careless `setUser` or the SDK could put on an event; none of it may leave. */
+const DIRTY_USER = {
+  id: "member-1",
+  email: EMAIL,
+  ip_address: "10.0.0.1",
+  username: "Aninha",
+  geo: { city: "Campinas", country_code: "BR", region: "SP" },
+};
+
 const DIRTY_EVENT: ReportedEvent = {
   message: `failed for ${EMAIL}`,
-  user: { id: "member-1", email: EMAIL, ip_address: "10.0.0.1", username: "Aninha" },
+  user: DIRTY_USER,
   server_name: "Phone of Ana",
   extra: { nickname: "Aninha" },
   request: {
@@ -87,8 +97,8 @@ describe("the event filter (E5.2, ADR 0080, D10)", () => {
   const scrubbed = scrubEvent(DIRTY_EVENT);
   const json = JSON.stringify(scrubbed);
 
-  test("drops the user, the server name, the extras and everything of the request but the route", () => {
-    expect(scrubbed.user).toBeUndefined();
+  test("swaps the user for the anonymous one and drops the server name, the extras and the request but the route", () => {
+    expect(scrubbed.user).toEqual(ANONYMOUS_USER);
     expect(scrubbed.server_name).toBeUndefined();
     expect(scrubbed.extra).toBeUndefined();
     expect(scrubbed.request).toEqual({ url: "https://sacou.app/r/{code}", method: "GET" });
@@ -188,6 +198,28 @@ describe("the event filter (E5.2, ADR 0080, D10)", () => {
     const before = JSON.stringify(DIRTY_EVENT);
     scrubEvent(DIRTY_EVENT);
     expect(JSON.stringify(DIRTY_EVENT)).toBe(before);
+  });
+});
+
+describe("the anonymous user on every event (ADR 0080, D14)", () => {
+  test("has a geo of its own, so Sentry never looks the IP up, and says nothing about the place", () => {
+    expect(ANONYMOUS_USER.geo).toEqual({ region: REDACTED });
+  });
+
+  test("has a fixed id, so the Android SDK never fills the installation id", () => {
+    expect(ANONYMOUS_USER.id).toBe(REDACTED_ID);
+  });
+
+  test("carries no IP, e-mail or name, even when the event came with them", () => {
+    const json = JSON.stringify(scrubEvent(DIRTY_EVENT).user);
+    expect(json).not.toContain("10.0.0.1");
+    expect(json).not.toContain("Campinas");
+    expect(json).not.toContain("Aninha");
+    expect(json).not.toContain("member-1");
+  });
+
+  test("is there even when the event came without a user", () => {
+    expect(scrubEvent<ReportedEvent>({}).user).toEqual(ANONYMOUS_USER);
   });
 });
 
