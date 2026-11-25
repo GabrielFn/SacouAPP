@@ -282,3 +282,9 @@ Detalhes em `.specs/features/E6.2/plan.md`. **Resposta do Gabriel (25/11): "Apro
 225. Apagar do aparelho os pontos pendentes de quem exclui a conta? **Recomendação: sim.**
 226. Conta de teste e grupo de demonstração para o revisor da Play? **Recomendação: sim.**
 227. Começar pelo teste fechado da Play (12 testadores por 14 dias)? **Recomendação: sim**, se houver 12 ou mais pessoas com Android.
+## 25/11/2026: E6.3 (reexclusão depois de restaurar o backup), perguntas 228 a 231 (respondidas e aprovadas em 25/11)
+Detalhes em `.specs/features/E6.3/plan.md`. Nenhuma trava a S1.
+228. Forma do comando: (1) modo de comando no executável da API (`OperationCommands`), rodado no Cloud Shell pela imagem do ensaio; (2) rota no painel do operador; (3) script SQL. **Recomendação: 1.** **Resposta do Gabriel (25/11): 1.**
+229. Origem das marcas se o banco atual se perder de vez: (1) o dump mais novo, com risco residual registrado; (2) cópia diária das marcas noutro lugar. **Recomendação: 1.** **Resposta do Gabriel (25/11): 1.**
+230. Rodar o comando também no Restore do Neon, com a origem no ramo de antes da restauração? **Recomendação: sim** (falta confirmar no console que o Neon cria esse ramo). **Resposta do Gabriel (25/11): não, só depois de restaurar o backup diário.**
+231. Grupo que fica sem Admin porque a restauração desfez a passagem de admin: reexcluir assim mesmo, contar no resumo, e o Gabriel promove à mão se o grupo pedir. **Recomendação: assim** (promover sozinho contraria `grupos.md`; manter a conta viola a LGPD). **Resposta do Gabriel (25/11): promover o membro ativo mais antigo a Admin** (regra nova de domínio, contra a recomendação).
