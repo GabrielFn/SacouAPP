@@ -42,6 +42,10 @@ inputs:
     description: Secret Manager secret that holds the Sentry DSN of the API; empty deploys with Sentry off (ADR 0080)
     required: false
     default: ""
+  operator-subjects:
+    description: Firebase UIDs that open /painel, comma-separated (vars.SACOU_OPERATOR_UIDS of the environment); empty lets nobody in (ADR 0085)
+    required: false
+    default: ""
   public-base-url:
     description: Origin of the round's public page (https, no path); empty uses the service's own run.app URL
     required: false
@@ -82,6 +86,7 @@ runs:
         PROJECT_ID: ${{ inputs.project-id }}
         PUBLIC_BASE_URL: ${{ inputs.public-base-url }}
         SENTRY_SECRET: ${{ inputs.sentry-secret }}
+        OPERATOR_SUBJECTS: ${{ inputs.operator-subjects }}
         REGION: us-east4
       run: |
         set -euo pipefail
@@ -109,11 +114,16 @@ runs:
           echo "The Sentry secret is not a Secret Manager name: $SENTRY_SECRET"
           exit 1
         fi
+        # The operators (ADR 0085, D1): UIDs, commas and spaces only, so the value cannot end the YAML string it goes into.
+        if ! [[ "$OPERATOR_SUBJECTS" =~ ^[A-Za-z0-9_,\ -]*$ ]]; then
+          echo "SACOU_OPERATOR_UIDS must hold Firebase UIDs separated by commas."
+          exit 1
+        fi
         # The release is the image digest, shortened as Git shortens a commit: unique enough, still readable.
         release_digest_length=12
         digest="${IMAGE##*@sha256:}"
         SENTRY_RELEASE="sacou-api@${digest:0:release_digest_length}"
-        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE SENTRY_SECRET SENTRY_RELEASE
+        export SERVICE_NAME ASPNETCORE_ENVIRONMENT DATABASE_SECRET EXPO_SECRET IMAGE ROUND_PAGE_BASE_URL SERVICE_URL PROJECT_ID TASKS_QUEUE SENTRY_SECRET SENTRY_RELEASE OPERATOR_SUBJECTS
         export RUNTIME_ACCOUNT="${RUNTIME_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         export INVOKER_EMAIL="${INVOKER_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
         template="$RUNNER_TEMP/service.template.yaml"
@@ -123,7 +133,7 @@ runs:
           sed '/# sentry-begin/,/# sentry-end/d' deploy/cloud-run/service.yaml > "$template"
         fi
         manifest="$RUNNER_TEMP/service.yaml"
-        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${EXPO_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL} ${SERVICE_URL} ${INVOKER_EMAIL} ${PROJECT_ID} ${TASKS_QUEUE} ${SENTRY_SECRET} ${SENTRY_RELEASE}' \
+        envsubst '${SERVICE_NAME} ${ASPNETCORE_ENVIRONMENT} ${RUNTIME_ACCOUNT} ${DATABASE_SECRET} ${EXPO_SECRET} ${IMAGE} ${ROUND_PAGE_BASE_URL} ${SERVICE_URL} ${INVOKER_EMAIL} ${PROJECT_ID} ${TASKS_QUEUE} ${SENTRY_SECRET} ${SENTRY_RELEASE} ${OPERATOR_SUBJECTS}' \
           < "$template" > "$manifest"
         gcloud run services replace "$manifest" --project="$PROJECT_ID" --region="$REGION" --quiet
         url="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"

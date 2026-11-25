@@ -5,16 +5,18 @@ const WEB_PLATFORM_FILES = [
   `apps/web/src/adapters/**/*.${TS_EXTENSIONS}`,
   "apps/web/src/main.ts",
   "apps/web/src/invite-main.ts",
+  "apps/web/src/ops-main.ts",
 ];
 const WEB_VIEW_FILES = [
   "apps/web/src/dom/**/*.ts",
   "apps/web/src/main.ts",
   "apps/web/src/invite-main.ts",
+  "apps/web/src/ops-main.ts",
 ];
 
 const XSS_MESSAGE = "Write text with textContent; HTML from a string is an XSS (ADR 0070, D5).";
 const PORTS_MESSAGE =
-  "Platform globals only in src/adapters and the entries (src/main.ts, src/invite-main.ts) (ports, frontend.md rule 3).";
+  "Platform globals only in src/adapters and the entries (src/main.ts, src/invite-main.ts, src/ops-main.ts) (ports, frontend.md rule 3).";
 const HTML_PROPERTIES = ["innerHTML", "outerHTML", "insertAdjacentHTML", "srcdoc"];
 const DOCUMENT_WRITERS = ["write", "writeln"];
 const PLATFORM_GLOBALS = [

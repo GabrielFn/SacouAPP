@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Sacou.Api.Configuration;
 using Sacou.Api.Observability;
+using Sacou.Api.Operations;
 using Sacou.Api.OpenApi;
 using Sacou.Api.Web;
 using Sacou.Http;
@@ -55,6 +56,8 @@ builder.Services.AddSacouAppConfig(builder.Configuration);
 builder.Services.AddSacouOpenApi();
 // The round's public page, its login and its files (E3.12, ADR 0070).
 builder.Services.AddSacouWeb(builder.Configuration);
+// The operator's dashboard: its list of UIDs, checked on start, and the 404 for anyone else (E7.2, ADR 0085).
+builder.Services.AddSacouOperations(builder.Configuration);
 
 var app = builder.Build();
 // Says by name when Sentry is off (ADR 0080, D1).
@@ -89,6 +92,8 @@ app.MapSessionsEndpoints();
 app.MapMatchesEndpoints();
 app.MapStatsEndpoints();
 app.MapNotificationsEndpoints();
+// GET /v1/ops/metrics: only the subjects of Operations:OperatorSubjects (E7.2, ADR 0085, D1).
+app.MapSacouOperations();
 // GET /r/{code}: anonymous by design (the WhatsApp robot and whoever has the link), limited per client address (ADR 0070, D6).
 app.MapSacouWeb().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.RoundPage);
 // A deliberate 500, the acceptance test of Sentry: never in Production (ADR 0080, D8).

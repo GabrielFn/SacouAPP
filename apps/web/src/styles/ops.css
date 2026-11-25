@@ -1,0 +1,121 @@
+/*
+ * The operator's dashboard (`/painel`, E7.2, ADR 0085). On top of round.css (its theme, fonts and the sheet of screen
+ * 02). Only relative units: from 360 px to 1920 px the sections flow in columns. Targets at least 2.75rem, contrast AA
+ * (navy on sand and on white, sand on navy).
+ */
+
+.ops {
+  max-width: 80rem;
+  min-height: 100vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ops-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--white);
+  border-bottom: 0.125rem solid var(--navy);
+}
+
+.ops-updated {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ops-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.ops-buttons .secondary {
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0 1.25rem;
+}
+
+.ops-buttons .link {
+  min-height: var(--target);
+}
+
+.ops-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.ops-section {
+  background: var(--white);
+  border: 0.0625rem solid var(--line);
+  border-radius: 0.875rem;
+  padding: 1rem 1.25rem;
+  min-width: 0;
+}
+
+.ops-section h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.625rem;
+}
+
+.ops-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.ops-fact dt {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.ops-fact dd {
+  margin: 0.125rem 0 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 2rem;
+}
+
+.ops-table-wrap {
+  overflow-x: auto;
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ops-table caption {
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--muted);
+  padding-bottom: 0.5rem;
+}
+
+.ops-table th,
+.ops-table td {
+  padding: 0.5rem 0.625rem;
+  border-bottom: 0.0625rem solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ops-table th:first-child,
+.ops-table tr th {
+  text-align: left;
+}
+
+.ops-note {
+  font-weight: 700;
+}

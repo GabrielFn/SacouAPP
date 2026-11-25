@@ -60,6 +60,10 @@ internal static class GroupRouteGuard
         // The terms and the privacy policy (E6.1, ADR 0083): anonymous public text, no data, GET and HEAD only.
         "GET,HEAD termos",
         "GET,HEAD privacidade",
+
+        // The operator's dashboard (E7.2, ADR 0085): the anonymous shell and its counts, by the listed UIDs only, no group id.
+        "GET,HEAD painel",
+        "GET /v1/ops/metrics",
     };
 
     /// <summary>

@@ -19,6 +19,7 @@ using Sacou.Modules.Sessions.DrawTeams;
 using Sacou.Modules.Sessions.GetRound;
 using Sacou.Modules.Sessions.Infrastructure;
 using Sacou.Modules.Sessions.ListRounds;
+using Sacou.Modules.Sessions.Metrics;
 using Sacou.Modules.Sessions.RespondAttendance;
 using Sacou.Modules.Sessions.RoundLinks;
 using Sacou.Modules.Sessions.SetMemberAttendance;
@@ -74,6 +75,8 @@ public static class SessionsModule
         // The round of a court stream, for the Matches (E3.7, ADR 0060, D14).
         services.AddScoped<IRoundDirectory, StoreRoundDirectory>();
         services.AddScoped<IRoundFacts, StoreRoundFacts>();
+        // The operator's dashboard (E7.2, ADR 0085, D2).
+        services.AddScoped<ISessionsMetrics, PostgresSessionsMetrics>();
         return services;
     }
 

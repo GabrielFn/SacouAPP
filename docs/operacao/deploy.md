@@ -51,6 +51,19 @@ Push ligado no deploy em 21/11/2026 (o Gabriel rodou `scripts/gcp/setup-notifica
 
 **Achar o log de um erro:** a tag `trace_id` do evento é o id do meio do `traceId` do ProblemDetails (`00-<trace_id>-<span>-01`). No Cloud Logging (Logs Explorer, projeto `sacou-api`): `trace="projects/sacou-api/traces/<trace_id>"`, ou clique no trace de uma linha para ver as outras da mesma requisição. Cada linha é um JSON com `severity`, `message`, `category`, `eventId` e, quando há, `exception.type` e `exception.stack`. Filtro útil: `severity>=ERROR`.
 
+## Painel do operador (E7.2, ADR 0085)
+
+**Abrir:** `https://<serviço>.run.app/painel` no navegador do PC (no teste, `https://sacou-api-test-804880427435.us-east4.run.app/painel`), entrar com a conta Google ou o e-mail da conta do operador. A página mostra o ambiente ("Teste" ou "Produção"), "Atualizado às HH:MM" e as seções Portão, Portão por grupo, Usuários, Grupos e Rodadas. Os números ficam 60 s em cache: "Atualizar" antes disso mostra os mesmos. Uma conta fora da lista vê "Esta conta não tem acesso ao painel."
+
+**Cadastrar o UID (uma vez por ambiente, Gabriel):**
+
+1. Console do Firebase → Authentication → Users: copie o **User UID** da sua conta (a mesma do login no painel). O UID não vai para o repositório nem para o chat.
+2. GitHub → Settings → Environments → `test` → Environment variables → **Add variable**: nome `SACOU_OPERATOR_UIDS`, valor o UID. Para mais de uma conta, separe por vírgula (`uid1,uid2`; espaços são ignorados).
+3. Repita no environment `production`.
+4. O próximo deploy entrega a lista ao serviço como `Operations__OperatorSubjects`. Para mudar só a lista, rode de novo o workflow `deploy-api` do último commit da `main`. Sem a variável, o serviço sobe com a lista vazia e ninguém entra; com um item fora do formato (vazio, com caractere fora de letras, dígitos, `_` e `-`), o deploy ou a partida falham sem mostrar o valor.
+
+**Produção (pergunta 218):** além da variável, o domínio `*.run.app` do `sacou-api` precisa estar nos domínios autorizados do Firebase Authentication e nos referenciadores HTTP da chave Web (hoje só o do teste está, ADR 0070, D8). Sem isso, a página abre e o login falha.
+
 ## Primeiro deploy de cada serviço
 
 Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".
