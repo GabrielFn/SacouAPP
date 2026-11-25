@@ -12,6 +12,7 @@ import { mvpVoteStrings } from "./mvp-vote.pt-BR";
 import { notificationsStrings } from "./notifications.pt-BR";
 import { profileStrings } from "./profile.pt-BR";
 import { ratingsStrings } from "./ratings.pt-BR";
+import { reportStrings } from "./report.pt-BR";
 import { roundsStrings } from "./rounds.pt-BR";
 import { settingsStrings } from "./settings.pt-BR";
 import { summaryStrings } from "./summary.pt-BR";
@@ -34,6 +35,7 @@ export const strings = {
   members: membersStrings,
   invite: inviteStrings,
   ratings: ratingsStrings,
+  report: reportStrings,
   appName: "Sacou",
   a11y: { createGroup: "Criar grupo", back: "Voltar", logo: "Logo do Sacou" },
   catalog: {

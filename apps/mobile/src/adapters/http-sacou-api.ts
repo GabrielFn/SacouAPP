@@ -243,6 +243,10 @@ export function createHttpSacouApi(options: HttpSacouApiOptions): SacouApi {
       executeEmpty((init) =>
         client.POST("/v1/groups/{groupId}/leave", { ...init, ...group(groupId) }),
       ),
+    reportContent: (groupId, report) =>
+      executeEmpty((init) =>
+        client.POST("/v1/groups/{groupId}/reports", { ...init, ...group(groupId), body: report }),
+      ),
     createInvite: (groupId) =>
       execute((init) =>
         client.POST("/v1/groups/{groupId}/invites", { ...init, ...group(groupId) }),

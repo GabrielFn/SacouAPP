@@ -167,9 +167,14 @@ export interface MemberOptionsSheetProps {
   readonly levelText: string | null;
   readonly onLevel: (target: Member) => void;
   readonly onRemove: (target: Member) => void;
+  /** "Denunciar" on another row, for every role (E6.6). */
+  readonly onReport: (target: Member) => void;
 }
 
-/** The sheet 19c: role, type, the level for admins, "Remover" on another row, "Sair" on the own one. */
+/**
+ * The sheet 19c: role, type, the level for admins, "Remover" on another row, "Sair" on the own one, and "Denunciar"
+ * at the end of every other row (E6.6, question 232).
+ */
 export function MemberOptionsSheet({
   sheet: options,
   pending,
@@ -180,6 +185,7 @@ export function MemberOptionsSheet({
   levelText,
   onLevel,
   onRemove,
+  onReport,
 }: MemberOptionsSheetProps) {
   if (options === null) return null;
   const { target } = options;
@@ -224,6 +230,16 @@ export function MemberOptionsSheet({
           onRemove(target);
         }}
       />
+      {options.canReport ? (
+        <Button
+          label={strings.report.memberAction}
+          variant="dangerText"
+          disabled={pending}
+          onPress={() => {
+            onReport(target);
+          }}
+        />
+      ) : null}
     </BottomSheet>
   );
 }

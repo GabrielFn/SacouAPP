@@ -11,7 +11,7 @@ namespace Sacou.Modules.Groups.Domain.Permissions;
 internal static class RolePermissions
 {
     private static readonly ImmutableHashSet<GroupPermission> EveryMember =
-        [GroupPermission.ViewGroup, GroupPermission.Leave, GroupPermission.RespondAttendance];
+        [GroupPermission.ViewGroup, GroupPermission.Leave, GroupPermission.RespondAttendance, GroupPermission.ReportContent];
 
     private static readonly ImmutableHashSet<GroupPermission> DayToDay = EveryMember.Union(
     [

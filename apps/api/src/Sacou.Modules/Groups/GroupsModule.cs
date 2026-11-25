@@ -28,6 +28,7 @@ using Sacou.Modules.Groups.Metrics;
 using Sacou.Modules.Groups.PreviewInvite;
 using Sacou.Modules.Groups.RemoveMember;
 using Sacou.Modules.Groups.RenameGroup;
+using Sacou.Modules.Groups.ReportContent;
 using Sacou.Modules.Groups.RevokeInvite;
 using Sacou.Modules.Groups.SaveTemplate;
 using Sacou.Modules.Groups.SetMemberLevel;
@@ -54,6 +55,7 @@ public static class GroupsModule
         services.AddScoped<SaveTemplateHandler>();
         services.AddScoped<SetMemberLevelsHandler>();
         services.AddScoped<AddGuestHandler>();
+        services.AddScoped<ReportContentHandler>();
         services.AddSingleton<IInviteTokenGenerator, RandomInviteTokenGenerator>();
         services.AddScoped<IGroupMembership, StoreGroupMembership>();
         services.AddScoped<IGroupJoining, StoreGroupJoining>();
@@ -102,7 +104,8 @@ public static class GroupsModule
             .MapSetMemberLevel()
             .MapSetMemberLevels()
             .MapAddGuest()
-            .MapCorrectGuest();
+            .MapCorrectGuest()
+            .MapReportContent();
         return endpoints;
     }
 

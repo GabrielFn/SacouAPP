@@ -47,6 +47,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `ManageGuests` (adicionar e corrigir convidado sem conta; E3.5) | sim | sim | não | não |
 | `DrawTeams` (sortear os times da rodada, vendo as notas; E3.6, [sorteio.md](sorteio.md)) | sim | sim | não | não |
 | `WriteCourt` (escrever o stream da quadra da rodada, todos os tipos de evento, inclusive o fim manual; E3.7, [ADR 0060](../arquitetura/adr/0060-sincronizacao-do-stream-da-quadra.md)) | sim | sim | sim | não |
+| `ReportContent` (denunciar o apelido de outro membro ou o nome e o local do grupo; E6.6, [operação](../operacao/denuncias.md)) | sim | sim | sim | sim |
 
 \* Recusado se for o último Admin ativo. O Placar não ganha poder nenhum no grupo: o único a mais é escrever a quadra (`WriteCourt`, E3.7); assumir a quadra é da E3.8.
 
@@ -88,6 +89,7 @@ Decisão do Gabriel (pergunta 16, 09/11/2026): o Co-admin faz o dia a dia, mas n
 | `GET /v1/groups/{groupId}/member-levels` | `ManageMemberLevels` | 200 `[{ memberId, adminLevel, reviewed, suggestedLevel }]`, um por membro ativo, na ordem de entrada (E3.17) |
 | `PUT /v1/groups/{groupId}/member-levels/{memberId}` `{ level }` | `ManageMemberLevels` | 200 `{ memberId, adminLevel, reviewed: true }`; `level` nulo é "Não sei" |
 | `PUT /v1/groups/{groupId}/member-levels` `{ levels: [{ memberId, level }] }` | `ManageMemberLevels` | 200 `[{ memberId, adminLevel, reviewed: true }]`, na ordem do pedido; de 1 a 50 itens, tudo ou nada |
+| `POST /v1/groups/{groupId}/reports` `{ reportedMemberId, reason }` | `ReportContent` | 204; `reportedMemberId` nulo denuncia o grupo (nome e local); `reason` é um de `offensiveName`, `hateOrSexual`, `impersonation`, `spam`, sem texto livre; a mesma denúncia de novo dá 204 e fica uma linha só; o alvo pode ter saído, mas precisa ser deste grupo (E6.6) |
 | `POST /v1/invites/preview` `{ token }` | Usuário registrado | 200 `{ groupName, activeMembers, alreadyMember }` |
 | `POST /v1/invites/accept` `{ token }` | Usuário registrado | 201 `{ groupId, memberId }` (entrou ou voltou) ou 200 (já era membro ativo) |
 
@@ -129,3 +131,4 @@ Todo erro sai em `ProblemDetails` com a extensão `code`; o app mostra o texto p
 | `groups.guest-name-invalid` | 400 | Nome do convidado fora da regra do apelido (E3.5) |
 | `groups.guest-invalid` | 400 | Posição do convidado fora das 5, ou `requestId` zerado (E3.5) |
 | `groups.role-needs-account` | 400 | Papel diferente de Jogador para um convidado sem conta (E3.5) |
+| `groups.report-self` | 400 | Denunciar a si mesmo (E6.6) |

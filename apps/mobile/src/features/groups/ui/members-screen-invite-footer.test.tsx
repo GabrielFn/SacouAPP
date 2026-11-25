@@ -8,6 +8,7 @@ const state = vi.hoisted(() => ({
   canInvite: true,
   canRate: false,
   pendingCount: 0,
+  reportSent: false,
 }));
 
 vi.mock("react", async (importOriginal) => ({
@@ -34,6 +35,7 @@ vi.mock("../hooks/use-members-screen", () => ({
     sheet: null,
     state: { sheetMemberId: null },
     dispatch: () => undefined,
+    report: { target: null, sent: state.reportSent },
   }),
 }));
 vi.mock("../../../ui/BackBar", () => ({ BackBar: () => null }));
@@ -59,6 +61,7 @@ vi.mock("./MemberLevelParts", () => ({
   MemberLevelDialog: () => null,
 }));
 vi.mock("./MembersLists", () => ({ InvitesList: () => null, MembersList: () => null }));
+vi.mock("./ReportSheet", () => ({ ReportDialog: () => null }));
 
 type Element = ReactElement<{ children?: unknown }>;
 
@@ -108,5 +111,30 @@ describe("the level is only for admins and co-admins (ADR 0047)", () => {
   test("an admin sees N notas para confirmar and Só admins veem", () => {
     state.canRate = true;
     expect(childNames()).toContain("LevelNotices");
+  });
+});
+
+describe("Denúncia enviada (E6.6)", () => {
+  beforeEach(() => {
+    state.reportSent = false;
+  });
+
+  const noticeShown = (): unknown => {
+    const screen = MembersScreen({ groupId: "g" }) as Element;
+    const children = [screen.props.children].flat(2) as readonly (Element | null | false)[];
+    const notice = children.find(
+      (child) =>
+        child !== null &&
+        child !== false &&
+        typeof child.type === "function" &&
+        child.type.name === "ReportSentNotice",
+    );
+    return (notice as ReactElement<{ visible: boolean }> | undefined)?.props.visible;
+  };
+
+  test("shows the notice only after a report went through", () => {
+    expect(noticeShown()).toBe(false);
+    state.reportSent = true;
+    expect(noticeShown()).toBe(true);
   });
 });

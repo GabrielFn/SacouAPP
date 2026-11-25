@@ -30,6 +30,7 @@ export const apiErrorTexts: Readonly<Record<ApiErrorCode, string>> = {
   "groups.name-invalid": "Escolha um nome de até 60 letras, sem deixar em branco.",
   "groups.regular-needs-account": "Só quem tem conta no Sacou pode ser mensalista.",
   "groups.role-needs-account": "Convidado sem conta só pode ser jogador.",
+  "groups.report-self": "Você não pode denunciar a si mesmo.",
   "groups.settings-invalid":
     "Alguma configuração não é válida. Confira os valores e tente de novo.",
   "groups.template-limit":

@@ -4687,6 +4687,133 @@
         }
       }
     },
+    "/v1/groups/{groupId}/reports": {
+      "post": {
+        "tags": [
+          "ReportContentEndpoint"
+        ],
+        "operationId": "ReportContent",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "A body that does not bind (no code), or a rule refusal (with code).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the ID token was refused.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this user (code api.rate-limited): try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The ID token cannot be checked now: try again after Retry-After seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "The app's native build is below the minimum (code api.app-outdated, ADR 0084).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is over the route's limit."
+          }
+        }
+      }
+    },
     "/v1/groups/{groupId}/rounds": {
       "post": {
         "tags": [
@@ -7714,6 +7841,15 @@
         },
         "additionalProperties": false
       },
+      "ContentReportReason": {
+        "enum": [
+          "offensiveName",
+          "hateOrSexual",
+          "impersonation",
+          "spam"
+        ],
+        "type": "string"
+      },
       "CorrectGuestRequest": {
         "required": [
           "name",
@@ -9192,6 +9328,26 @@
         },
         "additionalProperties": false
       },
+      "ReportContentRequest": {
+        "required": [
+          "reportedMemberId",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reportedMemberId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ContentReportReason"
+          }
+        },
+        "additionalProperties": false
+      },
       "ResolvedRoundLinkResponse": {
         "required": [
           "isOpen",
@@ -10288,6 +10444,7 @@
     "groups.membership-limit",
     "groups.name-invalid",
     "groups.regular-needs-account",
+    "groups.report-self",
     "groups.role-needs-account",
     "groups.settings-invalid",
     "groups.template-limit",
