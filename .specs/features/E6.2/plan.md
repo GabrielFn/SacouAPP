@@ -1,6 +1,6 @@
 # E6.2 · Revisão de LGPD e das exigências das lojas
 
-**Approved**: <escrito quando o Gabriel aprovar - AAAA-MM-DD - user: "palavras dele">
+**Approved**: 2026-11-25 - user: "Aprovo com as recomendações" (perguntas 219 a 227 com a recomendação)
 **Settled mid-build:** none
 **Review:** <escrito quando a revisão for enviada - sent at <hash>>
 **Fix pass:** <escrito quando a correção for feita>
