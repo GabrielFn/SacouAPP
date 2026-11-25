@@ -111,9 +111,30 @@ public sealed class ReapplyDeletionsRefusalTests(IntegrationDatabase database) :
 
             Assert.Equal(ReapplyDeletionsCommand.SourceUnreadable, code);
             Assert.Equal("reapply-deletions: source unreadable", output.Trim());
+            Assert.DoesNotContain(new NpgsqlConnectionStringBuilder(database.ConnectionString).Host!, output, StringComparison.Ordinal);
+            Assert.DoesNotContain(readerPassword, output, StringComparison.Ordinal);
         }
 
         Assert.Equal(0, await BackupTools.CountAsync(TargetConnectionString, CountMarks));
+    }
+
+    /// <summary>
+    /// Criterion 11 after connecting: the restored database itself, by the other name of the server (<c>localhost</c>
+    /// against <c>127.0.0.1</c>) and the read-only role, passes the text guard and is refused with 2 by the server's word.
+    /// </summary>
+    [Fact]
+    public async Task RestoredDatabaseByAnotherHostName_IsAUsageError_WritingNothing()
+    {
+        await MarkAsync(TargetConnectionString, "uid-same-database");
+        var host = new NpgsqlConnectionStringBuilder(database.ConnectionString).Host!;
+        var otherName = string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ? "127.0.0.1" : "localhost";
+
+        var (code, output) = await RunAsync(Url(readerRole, readerPassword, targetName, otherName));
+
+        Assert.Equal(ReapplyDeletionsCommand.UsageError, code);
+        Assert.Contains("points to the restored database", output, StringComparison.Ordinal);
+        Assert.Equal(1, await BackupTools.CountAsync(TargetConnectionString, CountMarks));
+        Assert.DoesNotContain(readerPassword, output, StringComparison.Ordinal);
     }
 
     /// <summary>Criterion 16: a target without the Identity schema is 2, and the command does not create it.</summary>
@@ -189,10 +210,10 @@ public sealed class ReapplyDeletionsRefusalTests(IntegrationDatabase database) :
 
     private string ReaderUrl(string databaseName) => Url(readerRole, readerPassword, databaseName);
 
-    private string Url(string user, string password, string databaseName)
+    private string Url(string user, string password, string databaseName, string? host = null)
     {
         var server = new NpgsqlConnectionStringBuilder(database.ConnectionString);
-        return $"postgresql://{Uri.EscapeDataString(user)}:{Uri.EscapeDataString(password)}@{server.Host}:{server.Port}/{databaseName}?sslmode=disable";
+        return $"postgresql://{Uri.EscapeDataString(user)}:{Uri.EscapeDataString(password)}@{host ?? server.Host}:{server.Port}/{databaseName}?sslmode=disable";
     }
 
     private string WithDatabase(string name) => new NpgsqlConnectionStringBuilder(database.ConnectionString) { Database = name }.ConnectionString;

@@ -44,6 +44,7 @@ public sealed class OperationCommandsTests
     [InlineData(DeletionMarkRetention.DumpOlderThanRetentionCode, ReapplyDeletionsCommand.DumpTooOld)]
     [InlineData(ReapplyDeletionsCodes.SourceUnreadable, ReapplyDeletionsCommand.SourceUnreadable)]
     [InlineData(ReapplyDeletionsCodes.SourceCanWrite, ReapplyDeletionsCommand.UsageError)]
+    [InlineData(ReapplyDeletionsCodes.SourceIsTarget, ReapplyDeletionsCommand.UsageError)]
     [InlineData(ReapplyDeletionsCodes.TargetAheadOfSource, ReapplyDeletionsCommand.UsageError)]
     [InlineData(ReapplyDeletionsCodes.Interrupted, ReapplyDeletionsCommand.Failed)]
     [InlineData("groups.some-failure-of-tomorrow", ReapplyDeletionsCommand.Failed)]
