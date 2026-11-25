@@ -15,3 +15,13 @@ internal sealed record MarkedAccount(UserId User, AuthSubject Subject)
     /// <summary>Never print the login.</summary>
     public override string ToString() => nameof(MarkedAccount);
 }
+
+/// <summary>
+/// The marks of the current database and which database answered (<c>DatabaseInstance</c>): the handler refuses a source
+/// that is the restored database itself, whatever name the URL gave the server.
+/// </summary>
+internal sealed record SourceMarks(string Database, IReadOnlyList<DeletionMark> Marks)
+{
+    /// <summary>Never print the database's identity.</summary>
+    public override string ToString() => nameof(SourceMarks);
+}
