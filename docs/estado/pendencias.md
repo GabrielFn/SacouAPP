@@ -194,3 +194,7 @@
   3. Evento `sessions.waitlist-promoted` sem o agregado (`sessions.attendance.promoted`; exige migração do `CHECK` e da `dedupe_key`) e `visao-geral.md`/ADR 0005 ainda dizendo 7 módulos (são 8). Pequeno.
   4. Formato do token e limites do Expo no domínio (`Notifications/Domain/PushToken.cs`, `NotificationLimits.cs`): levar para `Infrastructure/Expo`. Pequeno, depois do piloto.
   5. App: 114 imports profundos entre features, sem barrel nem regra de lint. Médio, depois do piloto, só para código novo.
+
+## 25/11/2026
+- E7.2 P1 (#250), segurança Opus (baixos): sem token, `/v1/ops/*` responde 401 e rota inexistente 404 (revela a rota; aceitável no piloto); `WebSecurityHeaders.cs` compara `/r` e `/c` com diferença de maiúsculas (`/R/{code}` sai sem CSP; anterior ao PR, tarefa à parte); linha no checklist ASVS para o acesso por lista e o 404. Revisor Opus: `HeldByGroupWeek` lê todo o histórico (cache de 60 s segura no piloto). **Condições para a Parte 2:** `OpsResponseShapeTests` e `MetricsContractsShapeTests` como lista fechada; dado por membro ou texto livre pede nova revisão de segurança e linha no inventário; ação que escreva no painel pede CSRF, idempotência e auditoria.
+- E5.2 P2 (#246): sem DSN, a tela de dev mostra "Erro de teste enviado. Confira no painel do Sentry." mesmo sem enviar (porta no-op). Baixo, só dev: mostrar "Sentry desligado (sem DSN)". `eas.json` sem perfil `production`: a E5.4 põe `EXPO_PUBLIC_SENTRY_ENVIRONMENT=production` e não liga `EXPO_PUBLIC_DEV_TOOLS`.
