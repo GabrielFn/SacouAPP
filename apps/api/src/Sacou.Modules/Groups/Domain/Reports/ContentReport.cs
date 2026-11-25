@@ -27,23 +27,31 @@ internal sealed record ContentReport(
     public static readonly TimeSpan Retention = TimeSpan.FromDays(180);
 
     /// <summary>
-    /// The rules of a report: nobody reports themselves (<c>groups.report-self</c>), and a reported member must have a row
-    /// in this group, in any status (<paramref name="targetInGroup"/>; one who left still shows in the history). A member of
-    /// another group, or an id of nobody, is <c>groups.member-not-found</c>.
+    /// A report of a member's name. Nobody reports themselves (<c>groups.report-self</c>), and the reported member must
+    /// have a row in this group, in any status (one who left still shows in the history): <paramref name="groupMembers"/>
+    /// holds the ids of this group the store found. A member of another group, or an id of nobody, is
+    /// <c>groups.member-not-found</c>.
     /// </summary>
-    public static Result<ContentReport> Create(
-        GroupId group, MemberId reporter, MemberId? reported, bool targetInGroup, ContentReportReason reason, DateTimeOffset now)
+    public static Result<ContentReport> ForMember(
+        GroupId group, MemberId reporter, MemberId reported, IReadOnlySet<Guid> groupMembers, ContentReportReason reason, DateTimeOffset now)
     {
         if (reported == reporter)
         {
             return Result.Failure<ContentReport>(GroupErrors.ReportSelf);
         }
 
-        if (reported is not null && !targetInGroup)
+        if (!groupMembers.Contains(reported.Value))
         {
             return Result.Failure<ContentReport>(GroupErrors.MemberNotFound);
         }
 
-        return Result.Success(new ContentReport(Guid.CreateVersion7(now), group, reporter, reported, reason, now));
+        return Result.Success(New(group, reporter, reported, reason, now));
     }
+
+    /// <summary>A report of the group's name and venue: any active member may make it, so it never fails.</summary>
+    public static ContentReport ForGroup(GroupId group, MemberId reporter, ContentReportReason reason, DateTimeOffset now) =>
+        New(group, reporter, null, reason, now);
+
+    private static ContentReport New(GroupId group, MemberId reporter, MemberId? reported, ContentReportReason reason, DateTimeOffset now) =>
+        new(Guid.CreateVersion7(now), group, reporter, reported, reason, now);
 }

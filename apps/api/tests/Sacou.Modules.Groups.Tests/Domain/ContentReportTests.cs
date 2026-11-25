@@ -11,11 +11,13 @@ public sealed class ContentReportTests
     private static readonly GroupId Group = new(Guid.NewGuid());
     private static readonly MemberId Reporter = new(Guid.NewGuid());
     private static readonly MemberId Target = new(Guid.NewGuid());
+    private static readonly HashSet<Guid> InGroup = [Target.Value, Reporter.Value];
+    private static readonly HashSet<Guid> NoMembers = [];
 
     [Fact]
     public void AMemberOfTheGroup_IsReported_WithOnlyIds()
     {
-        var report = ContentReport.Create(Group, Reporter, Target, targetInGroup: true, ContentReportReason.Impersonation, GroupBuilder.Now);
+        var report = ContentReport.ForMember(Group, Reporter, Target, InGroup, ContentReportReason.Impersonation, GroupBuilder.Now);
 
         Assert.True(report.IsSuccess);
         Assert.Equal(Group, report.Value.GroupId);
@@ -29,16 +31,15 @@ public sealed class ContentReportTests
     [Fact]
     public void TheGroup_IsReported_WithoutAMember()
     {
-        var report = ContentReport.Create(Group, Reporter, null, targetInGroup: false, ContentReportReason.HateOrSexual, GroupBuilder.Now);
+        var report = ContentReport.ForGroup(Group, Reporter, ContentReportReason.HateOrSexual, GroupBuilder.Now);
 
-        Assert.True(report.IsSuccess);
-        Assert.Null(report.Value.Reported);
+        Assert.Null(report.Reported);
     }
 
     [Fact]
     public void Oneself_IsRefused_AsReportSelf()
     {
-        var report = ContentReport.Create(Group, Reporter, Reporter, targetInGroup: true, ContentReportReason.Spam, GroupBuilder.Now);
+        var report = ContentReport.ForMember(Group, Reporter, Reporter, InGroup, ContentReportReason.Spam, GroupBuilder.Now);
 
         Assert.Equal("groups.report-self", report.Error.Code);
     }
@@ -46,7 +47,7 @@ public sealed class ContentReportTests
     [Fact]
     public void AMemberOutsideTheGroup_IsNotFound()
     {
-        var report = ContentReport.Create(Group, Reporter, Target, targetInGroup: false, ContentReportReason.OffensiveName, GroupBuilder.Now);
+        var report = ContentReport.ForMember(Group, Reporter, Target, NoMembers, ContentReportReason.OffensiveName, GroupBuilder.Now);
 
         Assert.Equal("groups.member-not-found", report.Error.Code);
     }

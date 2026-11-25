@@ -19,9 +19,12 @@ internal sealed partial class ReportContentHandler(
     public async Task<Result<ContentReport>> HandleAsync(
         GroupId group, MemberId reporter, MemberId? reported, ContentReportReason reason, CancellationToken cancellationToken)
     {
-        var targetInGroup = reported is { } target
-            && (await groups.FindMembersOfGroupAsync(group, [target.Value], cancellationToken).ConfigureAwait(false)).Contains(target.Value);
-        var report = ContentReport.Create(group, reporter, reported, targetInGroup, reason, time.GetUtcNow());
+        var now = time.GetUtcNow();
+        var report = reported is { } target
+            ? ContentReport.ForMember(
+                group, reporter, target,
+                await groups.FindMembersOfGroupAsync(group, [target.Value], cancellationToken).ConfigureAwait(false), reason, now)
+            : Result.Success(ContentReport.ForGroup(group, reporter, reason, now));
         if (report.IsFailure)
         {
             return report;
