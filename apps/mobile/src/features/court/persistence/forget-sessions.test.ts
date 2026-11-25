@@ -153,6 +153,13 @@ describe.each([
     expect(await snapshotOf(log, [...SESSIONS_OF_A, ...KEPT])).toEqual(before);
   });
 
+  test("T3: an empty key never reaches the SQL, even for a session stored with an empty owner", async () => {
+    const { log } = await open();
+    await log.openSession(SAMPLE, { groupId: GROUP, roundId: ROUND_NONE, ownerKey: "" });
+    expect(await log.forgetSessionsOf("")).toEqual({ ok: true, value: 0 });
+    expect((await log.load(SAMPLE)).ok).toBe(true);
+  });
+
   test("T4: a second call finds nothing more", async () => {
     const { log } = await open();
     await seed(log);
