@@ -14,8 +14,10 @@ export const NO_DROP_IN_CONTEXT: DropInContext = { phrase: "", hasRegulars: true
  * The texts the script writes on the round page and on the invite page. The texts the server renders (screen 01 and the sheet of
  * screen 02) live in `Sacou.Api/Web/WebTexts.cs`; both are pt-BR and centralized.
  */
-/** A share of `0..1` as a whole percent. */
+/** A share of `0..1` as a whole percent, rounded down so it never exceeds a target the gate failed. */
 const PERCENT = 100;
+/** Absorbs floating-point error (0.29 * 100 = 28.999999999999996) before rounding down. */
+const PERCENT_EPSILON = 1e-9;
 
 export const webStrings = {
   going: (position: number | null) =>
@@ -94,7 +96,7 @@ export const webStrings = {
       deletedColumn: "Excluídas",
     },
     none: "—",
-    percent: (share: number) => `${String(Math.round(share * PERCENT))}%`,
+    percent: (share: number) => `${String(Math.floor(share * PERCENT + PERCENT_EPSILON))}%`,
     groups: {
       title: "Grupos",
       total: "Grupos",

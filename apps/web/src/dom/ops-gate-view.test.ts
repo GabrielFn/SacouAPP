@@ -16,7 +16,7 @@ import { opsView } from "./ops-view";
 const metrics = opsMetricsOf(metricsBody()) as OpsMetrics;
 
 describe("ops gate view", () => {
-  it("criterion 19: 4 of 6 is 67%, 3 of 6 by the link is 50%, beside the 60% target", () => {
+  it("criterion 19: 4 of 6 is 66%, 3 of 6 by the link is 50%, beside the 60% target", () => {
     const example = opsMetricsOf(
       metricsBody({
         gate: { ...(metricsBody().gate as object), total: gateCount(1, 6, 4, 3) },
@@ -27,7 +27,7 @@ describe("ops gate view", () => {
 
     expect(section.title).toBe("Portão");
     expect(section.facts).toEqual([
-      { label: "Portão (total)", value: "67%" },
+      { label: "Portão (total)", value: "66%" },
       { label: "Meta", value: "60%" },
       { label: "Só pelo link (total)", value: "50%" },
     ]);
@@ -38,7 +38,7 @@ describe("ops gate view", () => {
 
     expect(rows).toHaveLength(8);
     expect(rows[0]).toEqual(["05/10", "0", "0", "—", "—", "60%"]);
-    expect(rows[1]).toEqual(["12/10", "1", "6", "67%", "50%", "60%"]);
+    expect(rows[1]).toEqual(["12/10", "1", "6", "66%", "50%", "60%"]);
     expect(rateText(null)).toBe("—");
     expect(rateText(0)).toBe("0%");
   });

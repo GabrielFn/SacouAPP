@@ -23,3 +23,4 @@ O Gabriel não tinha como ver se o piloto está funcionando sem abrir o Neon e e
 - Uma métrica nova é um campo novo no contrato do módulo dono do esquema e na resposta, e os dois testes de reflexão obrigam a revisão.
 - A página de produção só funciona depois da pergunta 218 (domínio de produção nos domínios autorizados do Firebase e nos referenciadores da chave Web, e `vars.SACOU_OPERATOR_UIDS` nos dois environments).
 - A Parte 2 (S3: jogo, MVP, notificações, usuários ativos e saúde) acrescenta `IStatsMetrics`, `INotificationsMetrics` e as contagens do Matches no mesmo padrão.
+- Na web (`apps/web`, sem TanStack Query), o reducer da página é o registro único do dado do servidor, como na `/r`.
