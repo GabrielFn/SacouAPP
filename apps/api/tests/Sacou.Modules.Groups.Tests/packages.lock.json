@@ -259,6 +259,19 @@
           "Microsoft.Extensions.Logging.Abstractions": "10.0.14"
         }
       },
+      "Microsoft.Extensions.Http": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "r+mSvm/Ryc/iYcc9zcUG5VP9EBB8PL1rgVU6macEaYk45vmGRk9PntM3aynFKN6s3Q4WW36kedTycIctctpTUQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Diagnostics": "10.0.0",
+          "Microsoft.Extensions.Logging": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0"
+        }
+      },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
         "resolved": "10.0.14",
@@ -422,6 +435,22 @@
         "resolved": "5.0.0",
         "contentHash": "dDoKi0PnDz31yAyETfRntsLArTlVAVzUzCIvvEDsDsucrl33Dl8pIJG06ePTJTI3tGpeyHS9Cq7Foc/s4EeKcg=="
       },
+      "Sentry": {
+        "type": "Transitive",
+        "resolved": "7.0.1",
+        "contentHash": "4hyExeUWArJdiO6VlmwCUHgWPosvasauNpgB6pVP7swuwyahWHRqgWHKwj3t5h18wFezIMte6BmI4dqEzl1TYw=="
+      },
+      "Sentry.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "7.0.1",
+        "contentHash": "id2zlzODGIjoU3jqwl/TJ1awJGvAXyI280FdmIMMsPu5lpEN2PbMzBjujDbu8tsLHmDu+sLHDCPbIy8AdGXJOA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Binder": "10.0.0",
+          "Microsoft.Extensions.Http": "10.0.0",
+          "Microsoft.Extensions.Logging.Configuration": "10.0.0",
+          "Sentry": "7.0.1"
+        }
+      },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
         "resolved": "10.0.14",
@@ -502,7 +531,8 @@
           "Sacou.Modules.Payments": "[1.0.0, )",
           "Sacou.Modules.Sessions": "[1.0.0, )",
           "Sacou.Modules.Stats": "[1.0.0, )",
-          "Sacou.Modules.Summaries": "[1.0.0, )"
+          "Sacou.Modules.Summaries": "[1.0.0, )",
+          "Sentry.AspNetCore": "[7.0.1, 7.0.1]"
         }
       },
       "sacou.http": {
@@ -654,6 +684,15 @@
           "Microsoft.EntityFrameworkCore": "[10.0.4, 11.0.0)",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.4, 11.0.0)",
           "Npgsql": "10.0.3"
+        }
+      },
+      "Sentry.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[7.0.1, 7.0.1]",
+        "resolved": "7.0.1",
+        "contentHash": "FxYSrr9HileJYWR0hWCX3rOdIBYwJpcngOT1oK+TcNenh5Z8m2Sp6kPMUxlminLhnnU4XlTP6RGKEmlfw3AS7Q==",
+        "dependencies": {
+          "Sentry.Extensions.Logging": "7.0.1"
         }
       }
     }

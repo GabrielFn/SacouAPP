@@ -9,6 +9,7 @@ import { endRoundView } from "../../../features/court/end-round/end-round-view";
 import { useEndRound } from "../../../features/court/end-round/use-end-round";
 import {
   endMatchSummary,
+  finishedMatchCount,
   menuSubtitle,
   openMatchScore,
 } from "../../../features/court/model/menu-selectors";
@@ -94,7 +95,10 @@ export default function MenuRoute() {
       endRound={{
         view: endRoundView(endRound.state),
         onAsk: () => {
-          endRound.request(timeline === null ? null : openMatchScore(timeline));
+          endRound.request({
+            openMatchScore: timeline === null ? null : openMatchScore(timeline),
+            finishedMatches: timeline === null ? 0 : finishedMatchCount(timeline),
+          });
         },
         onConfirm: endRound.confirm,
         onCancel: endRound.cancel,

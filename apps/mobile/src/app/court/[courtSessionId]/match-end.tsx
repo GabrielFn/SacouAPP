@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { useCourtRoute } from "../../../features/court/hooks/use-court-route";
 import { useCourtSession } from "../../../features/court/hooks/use-court-session";
+import { finishedMatchCount } from "../../../features/court/model/menu-selectors";
 import { endRoundView } from "../../../features/court/end-round/end-round-view";
 import { useEndRound } from "../../../features/court/end-round/use-end-round";
 import { useMatchEnd } from "../../../features/court/hooks/use-match-end";
@@ -82,8 +83,10 @@ export default function MatchEndRoute() {
       onLeave={route.leave}
       endRound={endRoundView(endRound.state)}
       onEndRound={() => {
-        endRound.request(null);
+        endRound.request({ openMatchScore: null, finishedMatches: finishedMatchCount(timeline) });
       }}
+      onConfirmEndRound={endRound.confirm}
+      onCancelEndRound={endRound.cancel}
     />
   );
 }

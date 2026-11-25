@@ -1,4 +1,4 @@
-import type { SettingsBlock, SettingsPath, SettingsValue } from "@sacou/match-engine";
+import type { SettingsPath, SettingsValue } from "@sacou/match-engine";
 import { useReducer } from "react";
 
 import type { TemplateChoice } from "../../../services/api/sacou-api";
@@ -8,6 +8,7 @@ import {
   initialGroupSettingsFormState,
   type GroupSettingsFormState,
 } from "../model/group-settings-form.reducer";
+import type { LayoutBlock } from "../model/settings-layout";
 import { fieldSheetText } from "../model/group-settings.selectors";
 import { canConfirmSheet, sheetError, type SettingsReady } from "../model/settings-screen-state";
 import { useSettingsData } from "./use-settings-data";
@@ -23,7 +24,7 @@ export interface GroupSettingsScreenModel {
   readonly canConfirmSheet: boolean;
   readonly retry: () => void;
   readonly changeLeaf: (path: SettingsPath, value: SettingsValue) => void;
-  readonly toggleBlock: (block: SettingsBlock) => void;
+  readonly toggleBlock: (block: LayoutBlock) => void;
   readonly openField: (path: ShownPath) => void;
   readonly openSchedule: () => void;
   readonly openPicker: () => void;

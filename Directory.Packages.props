@@ -18,6 +18,8 @@
         <PackageVersion Include="Npgsql" Version="10.0.3" />
         <!-- Aligned with Npgsql 10.0.3 (ADR 0037). -->
         <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="[10.0.3]" />
+        <!-- Errors of the API to Sentry (ADR 0080). Exact: the scrubber depends on the event shape of this version. -->
+        <PackageVersion Include="Sentry.AspNetCore" Version="[7.0.1]" />
         <!-- Exact: the package version sets the pinned Ryuk digest (docs/arquitetura/adr/0020-postgres-local-e-testes-de-integracao.md). -->
         <PackageVersion Include="Testcontainers" Version="[4.16.0]" />
         <PackageVersion Include="Testcontainers.PostgreSql" Version="[4.16.0]" />

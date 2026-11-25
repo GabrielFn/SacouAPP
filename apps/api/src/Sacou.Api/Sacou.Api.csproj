@@ -2,6 +2,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.OpenApi" />
+        <PackageReference Include="Sentry.AspNetCore" />
     </ItemGroup>
     <ItemGroup>
         <!-- The OpenAPI transformers are internal; their tests read them (ADR 0042). -->

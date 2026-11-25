@@ -14,9 +14,21 @@ function highlightSentence(
   return highlight === null ? [] : [sentence(highlight.label, highlight.figure)];
 }
 
+/** "Na frente pelo placar: Leo (+7 de saldo). A galera decide o MVP até amanhã, 12h44." (question 186). */
+function provisionalSentences(mvp: MvpView): readonly string[] {
+  const leading =
+    mvp.detail === null
+      ? share.provisionalNoDetail(mvp.name)
+      : share.provisional(mvp.name, mvp.detail);
+  return mvp.votingDeadline === null
+    ? [leading]
+    : [leading, share.provisionalDeadline(mvp.votingDeadline)];
+}
+
 function mvpSentence(mvp: MvpView | null): readonly string[] {
   if (mvp === null) return [];
   if (mvp.source === "votes") return [share.mvpByVotes(mvp.name)];
+  if (mvp.provisional) return provisionalSentences(mvp);
   return [mvp.detail === null ? share.mvpNoDetail(mvp.name) : share.mvp(mvp.name, mvp.detail)];
 }
 
@@ -31,7 +43,7 @@ function rankingSentence({ rows }: RankingHighlights): readonly string[] {
 /**
  * The text "Mandar pro grupo" hands to the share sheet: the numbers of screen 12, as the screen shows them.
  * Plain text with no link, no rating and no note; a card that is hidden stays out of the text too.
- * Names are nicknames already in the group. Never the vote of the person, a count of votes or a deadline.
+ * Names are nicknames already in the group. Never the vote of the person or a count of votes; the provisional MVP carries the deadline of the voting.
  */
 export function summaryShareText(ready: ReadySummary): string {
   const { mvp, highlights } = ready;

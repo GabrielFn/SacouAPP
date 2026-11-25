@@ -28,11 +28,14 @@ export function roundListText(
   round: Round,
   members: readonly Member[],
   waitlistEnabled: boolean,
+  /** The link of the round (only the manager has it, while the round is open); `null` leaves it out. */
+  link: string | null = null,
 ): string {
   const going = numbered(rosterOf(round.going, members));
   const waitlist = waitlistEnabled ? numbered(rosterOf(round.waitlist, members)) : [];
   const head = [copyList.header(groupName, roundSubtitle(round)), "", confirmedHeading(round)];
   const body = going.length === 0 ? [copyList.nobody] : going;
   const tail = waitlist.length === 0 ? [] : ["", copyList.waitlist, ...waitlist];
-  return [...head, ...body, ...tail].join(LINE_BREAK);
+  const linkLines = link === null ? [] : ["", copyList.confirmHere(link)];
+  return [...head, ...body, ...tail, ...linkLines].join(LINE_BREAK);
 }

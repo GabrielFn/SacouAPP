@@ -64,6 +64,10 @@ describe("the simulated round of the E2.9 (G1 to G5)", () => {
       line: "Laranja · +2 de saldo · 2 vitórias em 3",
       detail: "+2 de saldo, 2 vitórias em 3",
       source: "stats",
+      title: "MVP do dia",
+      accessibility: "MVP do dia: Bia",
+      provisional: false,
+      votingDeadline: null,
       notes: ["Calculado pelo placar"],
     });
     expect(teamsOf(view).mostWins).toMatchObject({

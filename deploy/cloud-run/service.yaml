@@ -51,6 +51,17 @@ spec:
                 secretKeyRef:
                   name: ${EXPO_SECRET}
                   key: latest
+            # sentry-begin: errors to Sentry (ADR 0080, D2). The deploy action drops this block when the environment
+            # has no Sentry secret yet; without the DSN the API runs with Sentry off.
+            - name: SACOU_SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: ${SENTRY_SECRET}
+                  key: latest
+            # The release of the events: the start of the image digest. Not a secret.
+            - name: SENTRY_RELEASE
+              value: ${SENTRY_RELEASE}
+            # sentry-end
             # The OIDC token Cloud Tasks and the daily sweep send (ADR 0069, D10): each pair must be equal, or the API
             # refuses to start. The audience is the service's own URL; the e-mail is the invoker of this environment.
             - name: ServiceCaller__Audience
