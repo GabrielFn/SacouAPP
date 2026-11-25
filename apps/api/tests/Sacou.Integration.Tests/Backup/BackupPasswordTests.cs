@@ -43,7 +43,7 @@ public sealed class BackupPasswordTests(IntegrationDatabase database) : IAsyncLi
         var recorded = (await tools.ReadAsync(Record)).Split('\n');
         Assert.NotEqual(0, dumped.ExitCode);
         Assert.Equal(SpecialPassword, recorded[0]);
-        var arguments = string.Join('\n', recorded.Skip(1));
+        var arguments = string.Join('\n', recorded[1..]);
         Assert.DoesNotContain(SpecialPassword, arguments, StringComparison.Ordinal);
         Assert.DoesNotContain(EncodedPassword, arguments, StringComparison.Ordinal);
         var output = dumped.Stdout + dumped.Stderr;
