@@ -182,7 +182,7 @@ Acrescentadas para a base de conhecimento e a segurança:
 | E5.2 | Sentry e logs estruturados (PostHog: pós-piloto, ADR 0046) | Erro proposital aparece no painel | acessos |
 | E5.3 | Backups diários, limite de requisições, feature flags e versão mínima | Restauração de backup testada | E5.1 |
 | E5.3b | Custo do replay do stream da quadra (revisão da E3.7 Parte 2) | Lote no 20.000º evento abaixo de 500 ms em Release, por snapshot do estado ou teto menor de eventos, com ADR. Bloqueia o piloto | E3.7 |
-| E5.4 | Builds EAS e envio para TestFlight e teste interno | Instalável por convite | acessos das lojas |
+| E5.4 | Builds EAS e envio para TestFlight e teste interno | Instalável por convite. O AAB tem `targetSdkVersion` 36 ou mais (lacuna G8 da E6.2; como conferir em `docs/operacao/google-play.md`) | acessos das lojas |
 
 ### E6 · Conformidade (M6)
 
@@ -190,6 +190,12 @@ Acrescentadas para a base de conhecimento e a segurança:
 |---|---|---|---|
 | E6.1 | Termos de uso e política de privacidade | Publicados e linkados no login | — |
 | E6.2 | Revisão de LGPD e das exigências das lojas | Checklist completo | E3.16 |
+| E6.3 | Reexclusão depois de restaurar o backup (lacuna G1 da E6.2, ADR 0082, D10). ~400 linhas; **sensível** | Um comando (Cloud Run Job ou modo do executável) lê `identity.deleted_accounts` e reaplica o `DELETE /v1/me` de cada marca no banco restaurado; teste de integração: conta apagada depois do dump volta na restauração e some depois do comando, sem tocar nas outras. Bloqueia o piloto com jogadores reais | E5.3 |
+| E6.4 | Página web de exclusão de conta (lacuna G2, pergunta 220, opção 1). ~150 linhas; **sensível** | Página estática `/excluir-conta` (como `/termos`) com o passo a passo do app e o e-mail do encarregado para pedir sem o app; link no Data safety (`docs/operacao/google-play.md`). Bloqueia o teste fechado e a produção da Play, não o teste interno | E6.1, pergunta 199 |
+| E6.5 | Prazo da marca de exclusão (lacuna G3, pergunta 222). ~150 linhas | A varredura diária (ADR 0069) apaga de `identity.deleted_accounts` as marcas com mais de 60 dias; teste com 59 e 61 dias. Não bloqueia | E3.16 |
+| E6.6 | "Denunciar" no app (lacuna G4, pergunta 221). ~400 linhas | Na tela do membro e do grupo, "Denunciar" manda só IDs (grupo, membro, motivo de lista fechada) a uma tabela que o Gabriel lê; "Remover membro" do admin segue como a ação; sem texto livre nem dado pessoal no registro. Bloqueia o teste fechado e a produção da Play | E3.2, E4.5 |
+| E6.7 | Apelidos da página `/r` escondidos depois da rodada (lacuna G6, pergunta 224). ~100 linhas | A página `/r/{código}` mostra a lista de apelidos só até 7 dias depois do início da rodada; depois, só grupo, data e local; teste com 6 e 8 dias. Não bloqueia | E3.12 |
+| E6.8 | Pontos pendentes de uma conta apagada no aparelho (lacuna G7, pergunta 225, M4-B7). ~150 linhas | A exclusão feita no aparelho (tela 30b) apaga do `sacou.db` as sessões da quadra cujo `owner_key` é da conta apagada; as de outras contas ficam (teste). Não bloqueia | E4.3, E4.11 |
 
 ### E7 · Piloto (M7)
 
