@@ -126,7 +126,7 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   Uma falha nativa **antes** do `setUser` (no início do app, antes do JS) ainda sai com o id da instalação e **sem `user.geo`**, e o Relay deriva a cidade do IP. As sessões
   de saúde da versão do SDK Android usam o id da instalação como `did` (a conferir no painel). Se for preciso
   apagar esses campos, o caminho sem código é a regra de "Advanced Data Scrubbing" no painel do `sacou-mobile`
-  (`Remove`, tipo `Anything`, origem `$user.id || $user.geo || $device.timezone || $device.locale || $device.language || $app.permissions`; o Relay aplica a regra depois da consulta de geo, então ela também cobre a falha anterior ao JS),
+  (`Remove`, tipo `Anything`, origem `$user.id || $user.geo || contexts.device.timezone || contexts.device.locale || contexts.device.language || contexts.app.permissions` (o Sentry recusa `$device` e `$app` como tipo; **regra criada no painel em 25/11**); o Relay aplica a regra depois da consulta de geo, então ela também cobre a falha anterior ao JS),
   e o caminho com código é o `beforeSend` nativo pelo `RNSentrySDK.init` (exige APK novo).
 
 ## Consequências
