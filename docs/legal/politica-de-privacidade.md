@@ -6,9 +6,9 @@ Como este arquivo é publicado (plano `docs/estado/tarefas/E6.1.md`): só o trec
 
 # Política de Privacidade do Sacou
 
-Versão: 0.1 (rascunho)
+Versão: 0.2 (rascunho)
 
-Atualizada em: 24/11/2026
+Atualizada em: 25/11/2026
 
 Este texto é um rascunho, ainda sem revisão jurídica. Alguns pontos, como quem responde pelos dados e o canal de contato, ainda podem mudar antes da versão 1.0.
 
@@ -55,7 +55,7 @@ Depois da rodada, quem jogou pode votar no destaque do dia. O voto é secreto: n
 
 Para sortear times equilibrados, o administrador e o co-administrador do grupo podem dar uma nota de nível a cada membro. Você não vê a nota que recebeu, e os outros jogadores também não. Se o organizador não der nota, o sorteio usa o nível que você mesmo sugeriu no perfil, que os organizadores dos seus grupos podem ver. O Sacou também calcula, a partir dos resultados das partidas, uma estimativa de nível de cada jogador, que no piloto não aparece para ninguém e não decide nada.
 
-> NOTA (E6.2): a nota do organizador e a estimativa de nível não entram na exportação dos seus dados (pergunta 42). O advogado deve avaliar se isso é compatível com o direito de acesso (LGPD, art. 18, II) ou se a exportação precisa incluí-las.
+> NOTA (E6.2, pergunta 219): a nota do organizador e a estimativa de nível não entram na exportação dos seus dados (pergunta 42); quem pedir acesso a elas é atendido pelo canal da seção 13. O advogado confirma se isso basta para o direito de acesso (LGPD, art. 18, II).
 
 ### Convidados sem conta
 
@@ -77,7 +77,9 @@ O app guarda no celular uma cópia dos dados dos seus grupos para funcionar sem 
 
 Quando o app ou o navegador acessa nossos servidores, o Google Cloud registra o endereço IP, o tipo de navegador ou aparelho e o endereço da página acessada. Usamos isso para manter o serviço funcionando e para evitar abuso. Para limitar abusos, também usamos versões embaralhadas e irreversíveis do seu identificador e do seu IP, só na memória do servidor, por no máximo 1 hora. Os pontos enviados por cada celular são ligados a um código aleatório da instalação do app, que não é o número do aparelho. O servidor guarda esse código ligado a você enquanto a partida existir, e o organizador, o co-organizador e quem marca o placar do grupo conseguem ver de qual aparelho veio cada ponto.
 
-> CONFERIR antes da versão 1.0: se o Sentry (erros) e o Resend (e-mail) já estiverem ativos (E5.2), acrescentar aqui e na seção 5. Hoje o inventário marca os dois como "a definir". O PostHog, a foto da cartinha, o Pix, o resumo com IA e a assinatura ficaram fora do piloto e não entram nesta versão.
+Quando acontece um erro nos nossos servidores, o Sentry recebe um relatório técnico do erro, sem seu identificador, seu IP, seu e-mail ou seu apelido. Esse relatório é apagado em 90 dias.
+
+> NOTA (E6.2): o Sentry está ativo na API desde a E5.2 (`Sentry.AspNetCore`, ADR 0080); no app ainda não. O Resend (e-mail) não é usado no piloto. O PostHog, a foto da cartinha, o Pix, o resumo com IA e a assinatura ficaram fora do piloto e não entram nesta versão.
 
 ## 3. O que não coletamos
 
@@ -99,10 +101,12 @@ Quando o app ou o navegador acessa nossos servidores, o Google Cloud registra o 
 Não vendemos seus dados e não os usamos para publicidade. Usamos prestadores de serviço que tratam os dados só para fazer o Sacou funcionar:
 
 - Google (Firebase Authentication e Google Cloud): login, servidores e registros técnicos.
+- Google Cloud Storage, nos Estados Unidos: cópia diária de segurança do banco de dados, guardada por 30 dias.
 - Neon, com servidores da Amazon Web Services: banco de dados.
+- Sentry, nos Estados Unidos: relatórios de erro dos servidores, sem dados que identifiquem você.
 - Expo, Google Firebase Cloud Messaging e Apple Push Notification Service: entrega das notificações.
 
-> CONFERIR antes da versão 1.0: Cloudflare R2 (cópia diária do banco, E5.3), Sentry e Resend, se estiverem ativos.
+> NOTA (E6.2): a cópia diária vai para o Google Cloud Storage em `us-east1` (ADR 0082), não para o Cloudflare R2, que não é usado no piloto. O Resend não é usado no piloto. Lista dos operadores com a fonte da região: seção 4 de `docs/seguranca/lgpd-checklist.md`.
 
 Também podemos fornecer dados quando a lei ou uma ordem judicial exigir.
 
@@ -116,15 +120,16 @@ Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na r
 
 - Conta, perfil e notas de nível sobre você: enquanto sua conta existir. Ao excluir a conta, são apagados na hora.
 - Histórico das rodadas e partidas, estatísticas e votos: enquanto o grupo existir. Depois que você exclui a conta, esse histórico deixa de mostrar seu apelido e aparece como Ex-jogador.
-- Nome de convidado sem conta: até o organizador removê-lo, ou até o grupo ficar sem nenhum membro com conta.
-- Página da rodada no navegador: nesta versão, os apelidos continuam visíveis para quem tem o link, mesmo depois de a rodada terminar.
+- Nome de convidado sem conta: até o organizador removê-lo, ou até o grupo ficar sem nenhum membro com conta. Quem nunca mais jogou continua no histórico enquanto o grupo existir.
+- Página da rodada no navegador: os apelidos ficam visíveis para quem tem o link até 7 dias depois da rodada.
 - Notificações: 30 dias.
 - Registros técnicos de acesso: 30 dias.
-- Cópia no celular: até 7 dias, e é apagada quando você sai da conta.
-- Cópias de segurança do banco: o banco guarda um histórico de restauração de 6 horas.
-- Depois da exclusão, guardamos só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano. Nesta versão, esse código é guardado sem prazo definido.
+- Relatórios de erro: 90 dias.
+- Cópia no celular: até 7 dias, e é apagada quando você sai da conta. Se você excluir a conta no celular que marcou o placar, os pontos que ainda não foram enviados também são apagados.
+- Cópias de segurança do banco: uma cópia por dia, guardada por 30 dias, além de um histórico de restauração de 6 horas. Se uma cópia for restaurada, as contas excluídas depois dela são excluídas de novo.
+- Depois da exclusão, guardamos por 60 dias só um código irreversível, sem e-mail nem nome, que impede que a conta seja recriada por engano e permite excluí-la de novo se uma cópia de segurança for restaurada.
 
-> LACUNA (pergunta 200): prazos. Os itens acima descrevem o que o código já faz. Faltam: prazo da cópia diária no Cloudflare R2, se ativa (padrão proposto: 30 dias); prazo do código de exclusão (hoje sem prazo; padrão proposto: 90 dias, com uma limpeza a criar); prazo do convidado que nunca mais jogou e do grupo abandonado (E6.2: o convidado fica enquanto o grupo existir, pergunta 223; o grupo abandonado fica no piloto); e se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos.
+> LACUNA (E6.2, perguntas 222 a 225): os prazos acima são os decididos, mas o código só os cumpre depois das tarefas E6.3 (reexclusão depois de restaurar a cópia), E6.5 (60 dias do código de exclusão), E6.7 (apelidos escondidos 7 dias depois da rodada) e E6.8 (pontos pendentes apagados na exclusão). A versão 1.0 só é publicada depois delas. Fica para o advogado (pergunta 200): se o Marco Civil da Internet (art. 15, guarda de registros por 6 meses) se aplica a um projeto de pessoa física sem fins econômicos; e o prazo do grupo abandonado, que no piloto fica enquanto existir.
 
 ## 8. Por que podemos usar seus dados
 
@@ -145,7 +150,7 @@ Você pode, a qualquer momento:
 - Desligar as notificações nas configurações do celular.
 - Pedir informações, revisão de uma decisão, correção ou eliminação de dados, ou reclamar, pelo canal da seção 13. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
 
-Respondemos aos pedidos em até 15 dias, assim que o canal de contato da seção 12 estiver publicado.
+Respondemos aos pedidos em até 15 dias, assim que o canal de contato da seção 13 estiver publicado.
 
 ## 10. Segurança
 
@@ -187,10 +192,10 @@ Conferir antes do merge da E6.1 e a cada mudança de `docs/seguranca/dados-pesso
 | 2 Página da rodada e convite | "Perfil do jogador" (resposta 126), "Código do link", "Sessão da página web", "Endereço IP de quem abre a página" |
 | 2 Notificações | "Aparelhos do push", "No app (E3.11)", "Notificações e entregas", "Token de push" (serviços externos) |
 | 2 No seu celular | "Cache do servidor no aparelho", "Conta dona da sessão da quadra", "Imagem da cartinha" |
-| 2 Registros técnicos | "Chave do limite de requisições", "IP, user agent, caminho", "ID do celular no envelope", "Escritor de cada lote" |
+| 2 Registros técnicos | "Chave do limite de requisições", "IP, user agent, caminho", "ID do celular no envelope", "Escritor de cada lote", "Erros da API" (Sentry) |
 | 3 O que não coletamos | Colunas travadas por teste de modelo em `identity.users` e `player_profiles`; "Imagem da cartinha" (só escrita na galeria) |
-| 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push" |
-| 7 Retenção | "Na exclusão" de cada linha; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 6 h do Neon |
+| 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push", "Erros da API" (Sentry), "Cópia do banco" (Google Cloud Storage); seção 4 de `lgpd-checklist.md` |
+| 7 Retenção | Coluna "Retenção" de cada linha (E6.2); "Na exclusão"; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 90 dias do Sentry; 30 dias da "Cópia do banco"; 60 dias da "Marca de exclusão"; 6 h do Neon |
 | 9 Direitos | "Direitos do titular" (exclusão, exportação, Ex-jogador) |
 
 ### Pontos que o advogado deve olhar
