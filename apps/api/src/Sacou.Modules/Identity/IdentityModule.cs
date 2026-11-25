@@ -10,6 +10,7 @@ using Sacou.Modules.Identity.ExportMyData;
 using Sacou.Modules.Identity.GetDeletionBlockers;
 using Sacou.Modules.Identity.GetMyProfile;
 using Sacou.Modules.Identity.Infrastructure;
+using Sacou.Modules.Identity.Metrics;
 using Sacou.Modules.Identity.SaveMyProfile;
 using Sacou.Modules.Identity.SignIn;
 
@@ -46,6 +47,8 @@ public static class IdentityModule
         services.AddScoped<DeleteMyAccountHandler>();
         services.AddScoped<IAccountExportSection, AccountExportSection>();
         services.AddScoped<IAccountExportSection, ProfileExportSection>();
+        // The operator's counts (E7.2, ADR 0085, D2).
+        services.AddScoped<IIdentityMetrics, PostgresIdentityMetrics>();
         return services;
     }
 

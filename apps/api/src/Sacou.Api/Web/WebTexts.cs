@@ -69,6 +69,17 @@ internal static class WebTexts
     public const string InviteSheetTitle = "Entrar pra ver o convite";
     public const string InviteSheetBody = "É só uma vez. Depois você confirma as rodadas do grupo com um toque.";
 
+    // The operator's dashboard (E7.2, ADR 0085): the server renders only these words, never a number.
+    public const string OpsTitle = "Painel do Sacou";
+    public const string OpsTag = "Operador";
+    public const string OpsDetail = "Só contagens, sem dado de ninguém.";
+    public const string OpsUnavailable = "O painel não está disponível agora: falta a configuração do login.";
+    public const string OpsNoScript = "Ative o JavaScript para ver o painel.";
+    public const string OpsSignIn = "ENTRAR";
+    public const string OpsRefresh = "Atualizar";
+    public const string OpsSheetTitle = "Entrar no painel";
+    public const string OpsSheetBody = "Só a conta do operador vê os números.";
+
     // The legal pages (E6.1, ADR 0083): their own text comes from docs/legal/, only the frame is here.
     public const string TermsOfUse = "Termos de Uso";
     public const string SeeAlso = "Veja também: ";

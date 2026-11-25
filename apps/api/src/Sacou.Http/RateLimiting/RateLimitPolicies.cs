@@ -25,6 +25,9 @@ public static class RateLimitPolicies
     /// <summary>The anonymous round page (ADR 0070, D6): per client address, never per user.</summary>
     public const string RoundPage = "round-page";
 
+    /// <summary>The operator's counts (E7.2, ADR 0085, D3): per user, 20 a minute.</summary>
+    public const string Ops = "ops";
+
     /// <summary>The policies whose partition is the client's address (hashed), because their visitor is anonymous.</summary>
     public static readonly FrozenSet<string> PerClientAddress = FrozenSet.Create(StringComparer.Ordinal, RoundPage);
 
