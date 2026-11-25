@@ -91,9 +91,11 @@ public sealed partial class OpenApiSchemaTests
         var document = await ContractDocument.ParsedAsync();
 
         Assert.False(document["paths"]!.AsObject().ContainsKey("/health"));
-        Assert.All(OpenApiNodes.Operations(document), operation =>
+        // The app config is the one anonymous operation of the contract: no 401, no 503, and only the limit per address (ADR 0084).
+        Assert.All(OpenApiNodes.Operations(document).Where(operation => (string?)operation.Node["operationId"] != "GetAppConfig"), operation =>
         {
             Assert.Equal(OpenApiNodes.ProblemDetails, OpenApiNodes.ProblemReference(OpenApiNodes.Response(operation.Node, "401")));
+            Assert.Equal(OpenApiNodes.ProblemDetails, OpenApiNodes.ProblemReference(OpenApiNodes.Response(operation.Node, "426")));
             var unavailable = OpenApiNodes.Response(operation.Node, "503");
             Assert.Equal(OpenApiNodes.ProblemDetails, OpenApiNodes.ProblemReference(unavailable));
             Assert.NotNull(unavailable["headers"]?["Retry-After"]);
@@ -136,7 +138,9 @@ public sealed partial class OpenApiSchemaTests
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
             .Where(field => field.FieldType == typeof(Error) && field.IsInitOnly)
             .Select(field => ((Error)field.GetValue(null)!).Code)
-            .Append("api.rate-limited");
+            .Append("api.rate-limited")
+            .Append("api.app-outdated")
+            .Append("api.feature-disabled");
 
         Assert.Equal(declared.Distinct().Order(StringComparer.Ordinal), catalog);
         Assert.Equal(catalog.Distinct().Order(StringComparer.Ordinal), catalog);

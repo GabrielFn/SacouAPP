@@ -244,6 +244,19 @@ Duas páginas anônimas (`/termos`, `/privacidade`), sem script, sem dado de nin
 | T   | Página em moldura de outro site ou com o caminho refletido | `frame-ancestors 'none'`, `X-Frame-Options: DENY`; a query nunca é refletida (teste) |
 | D   | Abuso das páginas públicas | Política `round-page` por endereço (60 / 60 s), como a `/r` (teste do 61º pedido) |
 
+## 8b. Configuração do app: versão mínima e flags (E5.3 Parte 2, [ADR 0084](../arquitetura/adr/0084-feature-flags-e-versao-minima.md))
+
+Uma rota anônima nova (`GET /v1/app-config`) e dois cabeçalhos do app que a API lê mas nunca trata como prova.
+
+|     | Ameaça | Mitigação |
+| --- | ------ | --------- |
+| D   | Rajada de pedidos à rota anônima | Política `app-config` por endereço (último item do `X-Forwarded-For`, /64 no IPv6): 60 / 60 s; resposta sem banco e `max-age=60` |
+| I   | A rota revelar algo além do necessário | Resposta de objeto fechado: números de build, endereços HTTPS da loja e flags; nada de pessoa, ambiente ou versão da API; teste de esquema fechado |
+| S/T | Cabeçalhos `X-Sacou-App-Build` e `X-Sacou-App-Platform` forjados | Não dão acesso a nada: só podem provocar um 426 a quem os enviou. Valor ausente, repetido, longo (>16), plataforma desconhecida ou número inválido passa sem erro; leitura sem alocar texto grande |
+| T   | `UpdateUrl` levar o jogador a um endereço malicioso | Vem do `appsettings` (PR revisado), só HTTPS validado na partida e de novo no app; abre no navegador/loja, nunca dentro do app |
+| D   | App preso na tela de atualização por engano | O app só bloqueia com resposta conhecida (rede ou cache); sem build legível nunca bloqueia; o mínimo só sobe depois do APK novo instalado (roteiro em `deploy.md`) |
+| E   | Flag desligada ser contornada chamando a rota direto | O gate fica no pipeline e vale para qualquer chamador (404 antes de qualquer leitura de banco); o teste lista as rotas com flag e reprova rota nova sem declaração |
+
 ## 9. SignalR, placar ao vivo (pós-piloto, ADR 0046)
 
 |     | Ameaça                                  | Mitigação                                                                             |

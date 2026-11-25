@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
+import { useFeatureOn } from "../../app-config/hooks/use-app-config";
 import { useOnline } from "../../../services/api/use-online";
 import { wallClockNow } from "../../../services/api/wall-clock";
 import { useServices } from "../../../services/services-context";
@@ -27,7 +28,8 @@ export function useRoundSummary(groupId: string, roundId: string): RoundSummaryM
   const { sacouApi, shareSheet, scheduler } = useServices();
   const client = useQueryClient();
   const summary = useQuery(roundSummaryQuery(sacouApi, groupId, roundId));
-  const voting = summary.data?.mvpVoting ?? null;
+  const mvpVoteOn = useFeatureOn("mvpVote");
+  const voting = mvpVoteOn ? (summary.data?.mvpVoting ?? null) : null;
   const ballot = useQuery({
     ...mvpVotingQuery(sacouApi, groupId, roundId),
     enabled: voting?.state === "open",
@@ -49,6 +51,7 @@ export function useRoundSummary(groupId: string, roundId: string): RoundSummaryM
     online,
     unsentPoints,
     ballot: voting?.state === "open" ? ballot.data : undefined,
+    mvpVoteOn,
     nowMs,
   });
   return {

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Sacou.Http;
+using Sacou.Http.AppConfig;
 using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 
@@ -27,9 +28,15 @@ internal static class StatsRouteExtensions
     /// A read of a round to any member of the group (<c>ViewGroup</c>), <c>no-store</c>: it may replay a stale stream
     /// through the <see cref="Projections.StatsProjector"/>, so it is limited by <c>court-sync</c> (ADR 0062).
     /// </summary>
-    public static RouteGroupBuilder MapRoundRead(this RouteGroupBuilder group, string route, string name, Delegate handler)
+    public static RouteGroupBuilder MapRoundRead(this RouteGroupBuilder group, string route, string name, Delegate handler, AppFeature? feature = null)
     {
-        group.MapGet(route, handler).WithName(name).RequireRateLimiting(RateLimitPolicies.CourtSync)
+        var read = group.MapGet(route, handler).WithName(name);
+        if (feature is { } flag)
+        {
+            read.RequireFeature(flag);
+        }
+
+        read.RequireRateLimiting(RateLimitPolicies.CourtSync)
             .RequireCapability(GroupCapability.ViewGroup)
             .WithNoStore();
         return group;

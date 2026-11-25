@@ -6,6 +6,8 @@ import type { ApiResult } from "./api-result";
 
 type Schemas = components["schemas"];
 
+/** The minimum native build, the store pages and the feature flags of the API (ADR 0084): no token, no person's data. */
+export type AppConfig = Schemas["AppConfigResponse"];
 export type MyGroup = Schemas["MyGroupResponse"];
 export type Group = Schemas["GroupResponse"];
 export type Member = Schemas["MemberResponse"];
@@ -126,6 +128,8 @@ export interface MemberRef {
  * this, never `fetch` nor `openapi-fetch`. The ID token is not a parameter: the client adds it.
  */
 export interface SacouApi {
+  /** Anonymous (ADR 0084): asked before the sign-in, with no ID token. */
+  getAppConfig(): Promise<ApiResult<AppConfig>>;
   signIn(): Promise<ApiResult<Schemas["SignInResponse"]>>;
   listMyGroups(): Promise<ApiResult<readonly MyGroup[]>>;
   createGroup(

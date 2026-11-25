@@ -37,6 +37,8 @@ import { buildInviteBaseUrl } from "../config/invite-url";
 import { expoFontLoader } from "../adapters/expo-font-loader";
 import { bindAppStateFocus } from "../adapters/app-state-focus";
 import { expoAppVersion } from "../adapters/expo-app-version";
+import { expoApplicationBuild } from "../adapters/expo-application-build";
+import { AppVersionGate } from "../features/app-config/ui/AppVersionGate";
 import { createExpoCacheStore } from "../adapters/expo-cache-store";
 import { createFirebaseAuthSdk } from "../adapters/firebase-auth-sdk";
 import { createFirebaseAuthSession } from "../adapters/firebase-auth-session";
@@ -115,6 +117,7 @@ const sacouApi = createHttpSacouApi({
   baseUrl: buildApiBaseUrl(__DEV__),
   transport: fetchHttpTransport,
   idTokens: sessionIdTokens(authSession, sessionEnder),
+  appBuild: expoApplicationBuild,
 });
 showPushesInForeground();
 quietKnownDevWarnings(__DEV__);
@@ -122,6 +125,7 @@ bindAppStateFocus();
 void removeExportLeftovers(expoFileShare);
 
 const realServices: Services = {
+  appBuild: expoApplicationBuild,
   fontLoader: expoFontLoader,
   courtRuntimeOpener: expoCourtRuntimeOpener,
   // The names of the members cache, persisted, so the court has them offline (E4.2, E4.7). The sample
@@ -212,10 +216,13 @@ function SessionStack() {
 function FontGate() {
   const { fontLoader } = useServices();
   const loaded = fontLoader.useFontsLoaded();
+  // The version gate needs no database: an app below the minimum never opens the court (ADR 0084).
   return loaded ? (
-    <DatabaseGate>
-      <SessionStack />
-    </DatabaseGate>
+    <AppVersionGate>
+      <DatabaseGate>
+        <SessionStack />
+      </DatabaseGate>
+    </AppVersionGate>
   ) : null;
 }
 

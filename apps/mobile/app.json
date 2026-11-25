@@ -2,6 +2,7 @@
   "expo": {
     "name": "Sacou",
     "slug": "sacou",
+    "version": "0.1.0",
     "scheme": "sacou",
     "orientation": "portrait",
     "plugins": [
@@ -34,6 +35,7 @@
     ],
     "android": {
       "package": "com.sacou.app",
+      "versionCode": 1,
       "googleServicesFile": "./google-services.json",
       "allowBackup": false,
       "permissions": ["android.permission.VIBRATE"],
@@ -51,6 +53,9 @@
         "monochromeImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FF5A1F"
       }
+    },
+    "ios": {
+      "buildNumber": "1"
     },
     "experiments": {
       "typedRoutes": true

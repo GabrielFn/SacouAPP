@@ -189,6 +189,14 @@ export function groupGoneEffects(key: SacouQueryKey, error: unknown): readonly C
 }
 
 /**
+ * A 426 on any call means the minimum moved past this build: the app config is read again, so the gate
+ * learns it (ADR 0084). One place, for queries and mutations alike.
+ */
+export function appOutdatedEffects(error: unknown): readonly CacheEffect[] {
+  return apiErrorOf(error)?.kind === "app-outdated" ? [invalidate(queryKeys.appConfig())] : [];
+}
+
+/**
  * Applies the effects and resolves when every query they invalidated is back: a mutation that returns it
  * from `onSuccess` stays pending until the screen shows the server's answer ("Adicionando…").
  */

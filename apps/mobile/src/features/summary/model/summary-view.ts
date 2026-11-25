@@ -16,6 +16,8 @@ export interface SummaryQueryState {
   readonly error: unknown;
 }
 
+const HIDDEN_VOTING: VotingEntryView = { kind: "hidden" };
+
 export interface SummaryViewInput {
   readonly query: SummaryQueryState;
   readonly groupName: string | null;
@@ -25,6 +27,8 @@ export interface SummaryViewInput {
   readonly unsentPoints: number;
   /** The MVP ballot, read only while the voting is open (the entry to the vote). */
   readonly ballot: MvpBallot | undefined;
+  /** The `mvpVote` flag of the API (ADR 0084): off, the entry to the vote disappears. On when not said. */
+  readonly mvpVoteOn?: boolean;
   /** The wall clock of the phone, for "fecha em 23 h" only. */
   readonly nowMs: number;
 }
@@ -204,7 +208,10 @@ export function summaryView(input: SummaryViewInput): SummaryView {
     header,
     mvp: mvpViewOf(report, members, input.nowMs),
     highlights: highlightsOf(report, members),
-    voting: votingEntryView({ voting: report.mvpVoting, ballot: input.ballot, nowMs: input.nowMs }),
+    voting:
+      input.mvpVoteOn === false
+        ? HIDDEN_VOTING
+        : votingEntryView({ voting: report.mvpVoting, ballot: input.ballot, nowMs: input.nowMs }),
     stale: query.status === "error" || !input.online,
     unsentNote,
   };

@@ -29,6 +29,7 @@ function isPersistedOwnKey(key: SacouQueryKey): boolean {
 
 export function isPersistedKey(key: SacouQueryKey): boolean {
   const [root, groupId] = key;
+  if (root === "app-config") return key.length === 1;
   if (root === "me") return isPersistedOwnKey(key);
   if (root !== "groups") return false;
   if (key.length === 1) return true;

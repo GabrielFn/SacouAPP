@@ -45,6 +45,7 @@ public sealed class RateLimitedRoutesTests(SacouApiFactory factory) : IClassFixt
         { "GET", "/v1/me/export", RateLimitPolicies.AccountExport },
         { "DELETE", "/v1/me", RateLimitPolicies.AccountDelete },
         { "PUT", "/v1/me/push-devices", RateLimitPolicies.PushDevice },
+        { "GET", "/v1/app-config", RateLimitPolicies.AppConfig },
         { "GET", "r/{code}", RateLimitPolicies.RoundPage },
         { "HEAD", "r/{code}", RateLimitPolicies.RoundPage },
         { "GET", "c", RateLimitPolicies.RoundPage },

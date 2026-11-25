@@ -4,6 +4,7 @@ using Sacou.Api.Observability;
 using Sacou.Api.OpenApi;
 using Sacou.Api.Web;
 using Sacou.Http;
+using Sacou.Http.AppConfig;
 using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups;
 using Sacou.Modules.Identity;
@@ -49,6 +50,8 @@ builder.Services
     .AddStatsModule(builder.Configuration);
 // Per-user limits, and the concurrency of the two-connection routes (ADR 0062).
 builder.Services.AddSacouRateLimiting(builder.Configuration);
+// The minimum app build, the store pages and the feature flags of this environment (ADR 0084).
+builder.Services.AddSacouAppConfig(builder.Configuration);
 builder.Services.AddSacouOpenApi();
 // The round's public page, its login and its files (E3.12, ADR 0070).
 builder.Services.AddSacouWeb(builder.Configuration);
@@ -68,12 +71,18 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 // The page's script, styles, fonts and preview image: anonymous files, before the authentication (ADR 0070, D7).
 app.UseSacouWebFiles();
+// An app below the minimum build gets 426 before anything reads its token (ADR 0084).
+app.UseSacouAppBuildGate();
 app.UseAuthentication();
 app.UseAuthorization();
+// A route behind a flag that is off is a 404, after the 401 and before any database read (ADR 0084).
+app.UseSacouFeatureGate();
 // After the authentication: a refused token is a 401 and never spends the quota (ADR 0062, D2).
 app.UseSacouRateLimiting();
 
 app.MapHealthChecks("/health").AllowAnonymous();
+// GET /v1/app-config: anonymous (the app asks before the sign-in), no database, limited per client address (ADR 0084).
+app.MapAppConfig().AllowAnonymous().RequireRateLimiting(RateLimitPolicies.AppConfig);
 app.MapIdentityEndpoints();
 app.MapGroupsEndpoints();
 app.MapSessionsEndpoints();
