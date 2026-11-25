@@ -20,7 +20,9 @@ public interface IPublicRoundSummary
 /// the page reads them without the reconcile of the signed-in read (ADR 0043, D7). <see cref="Going"/> is the list of
 /// who holds a spot, by order of arrival, with no id: a member who left the group is still a line without a name.
 /// <see cref="DropInOpensAt"/> is the instant the avulsos list opens, null with the window off: a rule of the group, not
-/// data of a member (R101, ADR 0079).
+/// data of a member (R101, ADR 0079). <see cref="ListExpired"/> is true from 7 days after <see cref="StartsAt"/> on
+/// (E6.7, question 224): then <see cref="Going"/> is empty, the names were not even read, and the page shows only the
+/// group, the day, the hour, the venue and the state.
 /// </summary>
 public sealed record PublicRoundSummary(
     string GroupName,
@@ -38,7 +40,8 @@ public sealed record PublicRoundSummary(
     int? PointsPerSet,
     bool LoserLeaves,
     ImmutableArray<PublicListEntry> Going,
-    DateTimeOffset? DropInOpensAt = null);
+    DateTimeOffset? DropInOpensAt = null,
+    bool ListExpired = false);
 
 /// <summary>One line of the public list: the first name (null without a profile) and whether it is a mensalista.</summary>
 public sealed record PublicListEntry(string? Nickname, bool Regular);
