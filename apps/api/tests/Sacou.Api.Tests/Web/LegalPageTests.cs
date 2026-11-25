@@ -18,7 +18,7 @@ public sealed class LegalPageTests(SacouApiFactory factory) : IClassFixture<Saco
 
     [Theory]
     [InlineData(Terms, "Termos de Uso do Sacou", Privacy, "Versão 0.1 (rascunho) · atualizada em 24/11/2026")]
-    [InlineData(Privacy, "Política de Privacidade do Sacou", Terms, "Versão 0.2 (rascunho) · atualizada em 25/11/2026")]
+    [InlineData(Privacy, "Política de Privacidade do Sacou", Terms, "Versão 0.3 (rascunho) · atualizada em 25/11/2026")]
     public async Task Page_IsTheRealText_WithVersionAndDate_WithoutSignIn(string path, string title, string otherPath, string versionLine)
     {
         await using var app = App();

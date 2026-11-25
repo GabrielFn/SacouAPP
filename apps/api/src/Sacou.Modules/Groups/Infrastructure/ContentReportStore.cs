@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Groups.Domain.Reports;
 
 namespace Sacou.Modules.Groups.Infrastructure;
@@ -13,9 +14,30 @@ internal interface IContentReportStore
     Task<bool> AddAsync(ContentReport report, CancellationToken cancellationToken);
 }
 
-/// <summary>Parameterized SQL, as every write of the module: <c>ON CONFLICT DO NOTHING</c> on <see cref="ContentReportConfiguration.OnceIndex"/>.</summary>
-internal sealed class PostgresContentReportStore(GroupsDbContext database) : IContentReportStore
+/// <summary>
+/// Parameterized SQL, as every write of the module: <c>ON CONFLICT DO NOTHING</c> on <see cref="ContentReportConfiguration.OnceIndex"/>.
+/// The cleanup deletes in batches of <see cref="CleanUpBatchSize"/>, so one call never holds a long lock.
+/// </summary>
+internal sealed class PostgresContentReportStore(GroupsDbContext database) : IContentReportStore, IContentReportRetention
 {
+    public const int CleanUpBatchSize = 500;
+
+    public async Task CleanUpAsync(DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var before = now - ContentReport.Retention;
+        int deleted;
+        do
+        {
+            deleted = await database.Database.ExecuteSqlAsync(
+                $"""
+                DELETE FROM groups.content_reports WHERE id IN (
+                    SELECT id FROM groups.content_reports WHERE created_at < {before} LIMIT {CleanUpBatchSize})
+                """,
+                cancellationToken).ConfigureAwait(false);
+        }
+        while (deleted == CleanUpBatchSize && !cancellationToken.IsCancellationRequested);
+    }
+
     public async Task<bool> AddAsync(ContentReport report, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(report);

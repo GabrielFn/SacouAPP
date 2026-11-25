@@ -63,7 +63,7 @@ internal interface IGroupStore
     /// member in (any status), locked with <c>FOR UPDATE</c> in ascending id order, then the per-person lock (group
     /// before person, ADR 0040, D7). The groups where <paramref name="isBlocker"/> holds come back and nothing is
     /// written; otherwise <paramref name="erase"/> runs on each locked aggregate, the rows it changed are written and
-    /// the levels <em>about</em> the person's members are deleted (the ones they gave stay). Empty when it ran.
+    /// the levels <em>about</em> the person's members are deleted (the ones they gave stay), with the reports by and about them (E6.6). Empty when it ran.
     /// </summary>
     Task<IReadOnlyList<GroupId>> EraseAccountAsync(
         UserId user, Func<Group, bool> isBlocker, Func<Group, GroupChange> erase, CancellationToken cancellationToken);

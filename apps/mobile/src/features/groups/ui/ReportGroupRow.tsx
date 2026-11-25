@@ -1,8 +1,8 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { strings } from "../../../strings/pt-BR";
 import { useTheme } from "../../../theme/theme-context";
-import { ChevronRightIcon } from "../../../ui/Icons";
+import { Button } from "../../../ui/Button";
 import { Text } from "../../../ui/Text";
 import { useGroupReport } from "../hooks/use-group-report";
 import { ReportSentNotice } from "./ReportSentNotice";
@@ -16,33 +16,19 @@ export interface ReportGroupRowProps {
 
 /** "Denunciar grupo", the last line of screen 18 (E6.6, question 232): opens the sheet of the reasons. */
 export function ReportGroupRow({ onPress }: ReportGroupRowProps) {
-  const { colors, tokens } = useTheme();
+  const { tokens } = useTheme();
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={texts.groupAction}
-      accessibilityHint={texts.groupActionHelp}
-      onPress={onPress}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: tokens.spacing.s,
-        minHeight: tokens.sizes.settingRowMin,
-        paddingHorizontal: tokens.spacing.m,
-        borderRadius: tokens.radii.tile,
-        borderWidth: tokens.borderWidths.thin,
-        borderColor: colors.borderCard,
-        backgroundColor: colors.surface,
-      }}
-    >
-      <View style={{ flex: 1, gap: tokens.spacing.xs }}>
-        <Text variant="bodyStrong" style={{ color: colors.danger }}>
-          {texts.groupAction}
-        </Text>
-        <Text variant="caption">{texts.groupActionHelp}</Text>
-      </View>
-      <ChevronRightIcon color={colors.textMuted} />
-    </Pressable>
+    <View style={{ gap: tokens.spacing.s }}>
+      <Button
+        label={texts.groupAction}
+        variant="dangerOutline"
+        accessibilityHint={texts.groupActionHelp}
+        onPress={onPress}
+      />
+      <Text variant="muted" style={{ textAlign: "center" }}>
+        {texts.groupActionHelp}
+      </Text>
+    </View>
   );
 }
 

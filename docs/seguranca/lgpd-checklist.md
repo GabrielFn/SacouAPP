@@ -1,6 +1,6 @@
 # Checklist LGPD do piloto
 
-Revisão da E6.2 (25/11/2026, plano em [`.specs/features/E6.2/plan.md`](../../.specs/features/E6.2/plan.md)), com as respostas 219 a 227 de [`perguntas.md`](../estado/perguntas.md) aprovadas com a recomendação. **Fonte única dos dados:** o inventário [`dados-pessoais.md`](dados-pessoais.md); este checklist aponta para as linhas dele (pelo nome do `Dado`) e não copia o conteúdo. A política publicada é [`politica-de-privacidade.md`](../legal/politica-de-privacidade.md) (versão 0.2). As respostas da Google Play estão em [`google-play.md`](../operacao/google-play.md).
+Revisão da E6.2 (25/11/2026, plano em [`.specs/features/E6.2/plan.md`](../../.specs/features/E6.2/plan.md)), com as respostas 219 a 227 de [`perguntas.md`](../estado/perguntas.md) aprovadas com a recomendação. **Fonte única dos dados:** o inventário [`dados-pessoais.md`](dados-pessoais.md); este checklist aponta para as linhas dele (pelo nome do `Dado`) e não copia o conteúdo. A política publicada é [`politica-de-privacidade.md`](../legal/politica-de-privacidade.md) (versão 0.3). As respostas da Google Play estão em [`google-play.md`](../operacao/google-play.md).
 
 Estados: `ok` (o código e os documentos atendem), `lacuna Gn` (correção com tarefa na seção 10), `decisão do Gabriel (pergunta N)` (ação ou decisão dele, fora do código). Nada aqui substitui a revisão jurídica (perguntas 2 e 203).
 

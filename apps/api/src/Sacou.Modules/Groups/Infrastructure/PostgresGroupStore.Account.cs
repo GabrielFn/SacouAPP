@@ -108,6 +108,10 @@ internal sealed partial class PostgresGroupStore
 
             Guid[] members = [.. groups.SelectMany(group => group.Members).Where(member => member.UserId == user).Select(member => member.Id.Value)];
             await database.MemberLevels.Where(level => members.Contains(level.MemberId)).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+            // E6.6: the reports the person made and the ones about them go too, in both erasure modes.
+            await database.ContentReports
+                .Where(report => members.Contains(report.ReporterMemberId) || (report.ReportedMemberId != null && members.Contains(report.ReportedMemberId.Value)))
+                .ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return [];
