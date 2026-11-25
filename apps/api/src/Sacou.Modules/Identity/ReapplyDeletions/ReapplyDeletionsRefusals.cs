@@ -1,3 +1,4 @@
+using Sacou.Modules.Identity.Contracts;
 using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Identity.ReapplyDeletions;
@@ -8,5 +9,5 @@ namespace Sacou.Modules.Identity.ReapplyDeletions;
 /// </summary>
 internal static class ReapplyDeletionsRefusals
 {
-    public static readonly Error DumpOlderThanRetention = new("identity.dump-older-than-mark-retention", ErrorKind.Validation);
+    public static readonly Error DumpOlderThanRetention = new(DeletionMarkRetention.DumpOlderThanRetentionCode, ErrorKind.Validation);
 }

@@ -10,6 +10,9 @@ public static class DeletionMarkRetention
 
     public static readonly TimeSpan Period = TimeSpan.FromDays(Days);
 
+    /// <summary>The code of the refusal of a dump older than <see cref="Period"/>: the command tells it from any other failure.</summary>
+    public const string DumpOlderThanRetentionCode = "identity.dump-older-than-mark-retention";
+
     /// <summary>A dump older than the retention may hold people whose marks are gone: reapplying would miss them.</summary>
     public static bool Covers(DateTimeOffset dumpCreatedAt, DateTimeOffset now) => dumpCreatedAt >= now - Period;
 }

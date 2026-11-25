@@ -21,6 +21,7 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
     public const int Succeeded = 0;
     public const int UsageError = 2;
     public const int DumpTooOld = 4;
+    public const int Failed = 5;
 
     private const string DumpCreatedAtOption = "--dump-created-at";
     private const string Prefix = Name + ": ";
@@ -38,6 +39,13 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
             return await UsageAsync(output, "missing or invalid " + DumpCreatedAtOption).ConfigureAwait(false);
         }
 
+        var now = services.GetRequiredService<TimeProvider>().GetUtcNow();
+        if (dumpCreatedAt > now)
+        {
+            // A dump from the future is a wrong manifest or clock: it would pass the retention guard, so it is refused.
+            return await UsageAsync(output, DumpCreatedAtOption + " in the future").ConfigureAwait(false);
+        }
+
         var configuration = services.GetRequiredService<IConfiguration>();
         if (string.IsNullOrWhiteSpace(configuration[DatabaseConnectionSetup.ConnectionStringKey]))
         {
@@ -50,7 +58,7 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
             return await UsageAsync(output, $"{SourceVariable} ({source.Error.Code})").ConfigureAwait(false);
         }
 
-        if (!DeletionMarkRetention.Covers(dumpCreatedAt, services.GetRequiredService<TimeProvider>().GetUtcNow()))
+        if (!DeletionMarkRetention.Covers(dumpCreatedAt, now))
         {
             return await TooOldAsync(output).ConfigureAwait(false);
         }
@@ -59,7 +67,9 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
         var reapplied = await IdentityModule.ReapplyDeletionsAsync(services, source.Value, dumpCreatedAt, cancellationToken).ConfigureAwait(false);
         if (reapplied.IsFailure)
         {
-            return await TooOldAsync(output).ConfigureAwait(false);
+            return string.Equals(reapplied.Error.Code, DeletionMarkRetention.DumpOlderThanRetentionCode, StringComparison.Ordinal)
+                ? await TooOldAsync(output).ConfigureAwait(false)
+                : await FailedAsync(output, reapplied.Error.Code).ConfigureAwait(false);
         }
 
         await output.WriteLineAsync(Prefix + Describe(reapplied.Value)).ConfigureAwait(false);
@@ -87,6 +97,13 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
             $"{Prefix}usage: {Name} {DumpCreatedAtOption} <ISO 8601 with offset>, with {DatabaseUrl.EnvironmentVariable} " +
             $"(the restored database) and {SourceVariable} (the current one, read only): {problem}").ConfigureAwait(false);
         return UsageError;
+    }
+
+    /// <summary>Any other refusal: its code only, never a value. Each step is idempotent, so running again is safe.</summary>
+    private static async Task<int> FailedAsync(TextWriter output, string code)
+    {
+        await output.WriteLineAsync($"{Prefix}failed ({code}); run again").ConfigureAwait(false);
+        return Failed;
     }
 
     private static async Task<int> TooOldAsync(TextWriter output)

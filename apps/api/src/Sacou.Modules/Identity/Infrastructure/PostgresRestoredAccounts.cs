@@ -11,8 +11,16 @@ internal sealed class PostgresRestoredAccounts(IdentityDbContext database) : IRe
 {
     /// <summary>Every mark in one statement; a mark already there keeps its date (ADR 0056, D5).</summary>
     private const string CopyMarks =
-        "INSERT INTO identity.deleted_accounts (subject_hash, deleted_at) SELECT * FROM unnest(@hashes, @deleted_at) " +
-        "ON CONFLICT (subject_hash) DO NOTHING";
+        $"INSERT INTO {Marks} ({DeletedAccountConfiguration.SubjectHashColumn}, {DeletedAccountConfiguration.DeletedAtColumn}) " +
+        $"SELECT * FROM unnest(@hashes, @deleted_at) ON CONFLICT ({DeletedAccountConfiguration.SubjectHashColumn}) DO NOTHING";
+
+    /// <summary>The accounts whose login hashes to a mark, by the column names the model test holds.</summary>
+    private const string MarkedAccounts =
+        $"SELECT {UserConfiguration.IdColumn} AS \"{nameof(MarkedRow.Id)}\", {UserConfiguration.SubjectColumn} AS \"{nameof(MarkedRow.Subject)}\" " +
+        $"FROM {IdentityDbContext.Schema}.{UserConfiguration.Table} " +
+        $"WHERE sha256(convert_to({UserConfiguration.SubjectColumn}, 'UTF8')) IN (SELECT {DeletedAccountConfiguration.SubjectHashColumn} FROM {Marks})";
+
+    private const string Marks = $"{IdentityDbContext.Schema}.{DeletedAccountConfiguration.Table}";
 
     public async Task<int> CopyMarksAsync(IReadOnlyList<DeletionMark> marks, CancellationToken cancellationToken)
     {
@@ -33,11 +41,7 @@ internal sealed class PostgresRestoredAccounts(IdentityDbContext database) : IRe
     /// <summary>The same bytes as <see cref="SubjectHash.Of"/>: SHA-256 of the login in UTF-8 (door 3, a golden test holds them equal).</summary>
     public async Task<IReadOnlyList<MarkedAccount>> FindMarkedAsync(CancellationToken cancellationToken)
     {
-        var rows = await database.Database.SqlQuery<MarkedRow>(
-                $"""
-                SELECT id AS "Id", firebase_uid AS "Subject" FROM identity.users
-                WHERE sha256(convert_to(firebase_uid, 'UTF8')) IN (SELECT subject_hash FROM identity.deleted_accounts)
-                """)
+        var rows = await database.Database.SqlQueryRaw<MarkedRow>(MarkedAccounts)
             .OrderBy(row => row.Id).ToListAsync(cancellationToken).ConfigureAwait(false);
         return [.. rows.Select(ToAccount)];
     }

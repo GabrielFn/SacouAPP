@@ -31,24 +31,25 @@ internal sealed partial class ReapplyDeletionsHandler(
         var marks = await source.ReadAllAsync(sourceConnectionString, cancellationToken).ConfigureAwait(false);
         var newMarks = await restored.CopyMarksAsync(marks, cancellationToken).ConfigureAwait(false);
         var accounts = await restored.FindMarkedAsync(cancellationToken).ConfigureAwait(false);
-        var groupsWithoutAdmin = 0;
+        // A group counts once, however many of its admins went (two admins of one group both marked, say).
+        var groupsWithoutAdmin = new HashSet<Guid>();
         foreach (var account in accounts)
         {
-            groupsWithoutAdmin += await EraseAsync(account, cancellationToken).ConfigureAwait(false);
+            groupsWithoutAdmin.UnionWith(await EraseAsync(account, cancellationToken).ConfigureAwait(false));
         }
 
-        var summary = new ReapplyDeletionsSummary(marks.Count, newMarks, accounts.Count, groupsWithoutAdmin, time.GetElapsedTime(started));
+        var summary = new ReapplyDeletionsSummary(marks.Count, newMarks, accounts.Count, groupsWithoutAdmin.Count, time.GetElapsedTime(started));
         Reapplied(logger, summary.Marks, summary.NewMarks, summary.AccountsErased, summary.GroupsWithoutAdmin);
         return Result.Success(summary);
     }
 
     /// <summary>The groups left without an admin; the mark is there already, so the delete keeps its original date.</summary>
-    private async Task<int> EraseAsync(MarkedAccount account, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<Guid>> EraseAsync(MarkedAccount account, CancellationToken cancellationToken)
     {
-        var withoutAdmin = 0;
+        List<Guid> withoutAdmin = [];
         foreach (var erasure in erasures)
         {
-            withoutAdmin += (await erasure.EraseAsync(account.User.Value, ErasureMode.AfterRestore, cancellationToken).ConfigureAwait(false)).Count;
+            withoutAdmin.AddRange(await erasure.EraseAsync(account.User.Value, ErasureMode.AfterRestore, cancellationToken).ConfigureAwait(false));
         }
 
         await deletedAccounts.DeleteAsync(account.User, account.Subject, time.GetUtcNow(), cancellationToken).ConfigureAwait(false);
