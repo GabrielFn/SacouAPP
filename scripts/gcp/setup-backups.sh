@@ -28,7 +28,7 @@ SCHEDULE_JOB="sacou-backups-daily"
 # 04:00 in Brasília, every day.
 SCHEDULE="0 4 * * *"
 SCHEDULE_TIME_ZONE="America/Sao_Paulo"
-ALERT_POLICY_NAME="Sacou backups failed"
+ALERT_POLICY_NAME="Sacou backup missing"
 ALERT_CHANNEL_NAME="Sacou backups"
 
 BACKUP_SCRIPT_FILE="scripts/backup/backup.sh"
@@ -94,8 +94,9 @@ for index in 0 1; do
     gcloud storage buckets create "gs://${bucket}" --location="$BUCKET_REGION" --default-storage-class=STANDARD \
       --uniform-bucket-level-access --public-access-prevention --retention-period="$RETENTION" --soft-delete-duration=0
   fi
-  gcloud storage buckets update "gs://${bucket}" --retention-period="$RETENTION" --soft-delete-duration=0 \
-    --no-versioning --lifecycle-file="$LIFECYCLE_FILE"
+  # Also on a bucket that already exists: running again restores every protection, whoever changed it.
+  gcloud storage buckets update "gs://${bucket}" --uniform-bucket-level-access --public-access-prevention \
+    --retention-period="$RETENTION" --soft-delete-duration=0 --no-versioning --lifecycle-file="$LIFECYCLE_FILE"
 
   echo "== ${runner_name}: runs ${job}; reads ${secret} only, writes ${bucket} only"
   if ! exists iam service-accounts describe "$runner"; then
@@ -130,7 +131,7 @@ if ! exists scheduler jobs describe "$SCHEDULE_JOB" --location="$REGION"; then
     --http-method=POST --message-body='{}' --oauth-service-account-email="$trigger"
 fi
 
-echo "== Alert by e-mail when a backup fails"
+echo "== Alert by e-mail when no backup job succeeded in 26 h (one condition: ADR 0082, D7)"
 if [ -z "${SACOU_ALERT_EMAIL:-}" ]; then
   echo "   SACOU_ALERT_EMAIL is not set: no alert. Run again with it."
 else
@@ -139,8 +140,14 @@ else
     channel="$(gcloud beta monitoring channels create --display-name="$ALERT_CHANNEL_NAME" --type=email \
       --channel-labels="email_address=${SACOU_ALERT_EMAIL}" --format='value(name)')"
   fi
-  if [ -z "$(gcloud alpha monitoring policies list --filter="displayName=\"${ALERT_POLICY_NAME}\"" --format='value(name)')" ]; then
-    gcloud alpha monitoring policies create --policy-from-file="$ALERT_POLICY_FILE" --notification-channels="$channel"
+  # The policy of the repository with the channel in it, so an update keeps the channel.
+  jq --arg channel "$channel" '. + {notificationChannels: [$channel]}' "$ALERT_POLICY_FILE" >"$work/alert-policy.json"
+  policy="$(gcloud alpha monitoring policies list --filter="displayName=\"${ALERT_POLICY_NAME}\"" --format='value(name)' | head -n 1)"
+  if [ -z "$policy" ]; then
+    gcloud alpha monitoring policies create --policy-from-file="$work/alert-policy.json"
+  else
+    # Running again replaces the condition and the channel with the ones of the repository.
+    gcloud alpha monitoring policies update "$policy" --policy-from-file="$work/alert-policy.json"
   fi
 fi
 

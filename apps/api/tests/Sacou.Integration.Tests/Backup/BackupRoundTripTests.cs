@@ -83,7 +83,7 @@ public sealed class BackupRoundTripTests(IntegrationDatabase database) : IAsyncL
     [Fact]
     public async Task Dump_ThatFailsHalfway_LeavesNoFileWithABackupName()
     {
-        // A role that connects but reads nothing: the session opens and the first count fails.
+        // A role that connects but reads nothing: the session opens, and pg_dump fails without USAGE on the module schemas.
         await BackupTools.ExecuteAsync(tools.SourceConnectionString, "DROP ROLE IF EXISTS backup_blind; CREATE ROLE backup_blind LOGIN");
         var blind = tools.SourceUrl.Replace("postgresql://postgres:", "postgresql://backup_blind:", StringComparison.Ordinal);
 

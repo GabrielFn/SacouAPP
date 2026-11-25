@@ -1,29 +1,25 @@
 {
-  "displayName": "Sacou backups failed",
+  "displayName": "Sacou backup missing",
   "documentation": {
-    "content": "A backup job or the daily workflow failed. Runbook: docs/operacao/backup.md (ADR 0082).",
+    "content": "A backup job had no successful execution in 26 h: the schedule did not call, the workflow failed or the job failed. Runbook: docs/operacao/backup.md (ADR 0082).",
     "mimeType": "text/markdown"
   },
   "combiner": "OR",
   "conditions": [
     {
-      "displayName": "A backup job execution failed",
-      "conditionThreshold": {
-        "filter": "resource.type = \"cloud_run_job\" AND resource.labels.job_name = monitoring.regex.full_match(\"sacou-backup(-test)?\") AND metric.type = \"run.googleapis.com/job/completed_execution_count\" AND metric.labels.result = \"failed\"",
-        "comparison": "COMPARISON_GT",
-        "thresholdValue": 0,
-        "duration": "0s",
-        "aggregations": [{ "alignmentPeriod": "3600s", "perSeriesAligner": "ALIGN_SUM" }]
-      }
-    },
-    {
-      "displayName": "The daily backup workflow failed",
-      "conditionThreshold": {
-        "filter": "resource.type = \"workflows.googleapis.com/Workflow\" AND resource.labels.workflow_id = \"sacou-backups\" AND metric.type = \"workflows.googleapis.com/finished_execution_count\" AND metric.labels.status = \"FAILED\"",
-        "comparison": "COMPARISON_GT",
-        "thresholdValue": 0,
-        "duration": "0s",
-        "aggregations": [{ "alignmentPeriod": "3600s", "perSeriesAligner": "ALIGN_SUM" }]
+      "displayName": "No successful backup job execution in 26 h",
+      "conditionAbsent": {
+        "filter": "resource.type = \"cloud_run_job\" AND resource.labels.job_name = monitoring.regex.full_match(\"sacou-backup(-test)?\") AND metric.type = \"run.googleapis.com/job/completed_execution_count\" AND metric.labels.result = \"succeeded\"",
+        "duration": "93600s",
+        "aggregations": [
+          {
+            "alignmentPeriod": "3600s",
+            "perSeriesAligner": "ALIGN_SUM",
+            "crossSeriesReducer": "REDUCE_SUM",
+            "groupByFields": ["resource.labels.job_name"]
+          }
+        ],
+        "trigger": { "count": 1 }
       }
     }
   ]

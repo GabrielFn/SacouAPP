@@ -10,8 +10,8 @@
 #   backup.sh restore-check <dump> <manifest>
 #     SACOU_RESTORE_DATABASE_URL postgresql://... of an EMPTY database: never restores over tables
 #
-# The URLs carry a password: they live only in the environment and the tools' arguments, never in a log line or the
-# manifest. Never add `set -x`. Every host but localhost and 127.0.0.1 gets sslmode=verify-full against the system CAs,
+# The URLs carry a password: it lives only in the environment (PGPASSWORD, which libpq reads), never in the tools'
+# arguments (anyone on the machine sees those), a log line or the manifest. Never add `set -x`. Every host but localhost and 127.0.0.1 gets sslmode=verify-full against the system CAs,
 # whatever sslmode the URL brings. The manifest holds only table names, row counts, migration ids, the size and the
 # SHA-256: no row content, so no personal data.
 set -eu
@@ -47,6 +47,51 @@ password_of() {
   case "$userinfo" in
     *:*) printf '%s' "${userinfo#*:}" ;;
   esac
+}
+
+# The URL without its password (libpq takes it from PGPASSWORD): user@host instead of user:password@host.
+without_password() {
+  scheme="${1%%://*}"
+  rest="${1#*://}"
+  authority="${rest%%[/?]*}"
+  path_and_query="${rest#"$authority"}"
+  case "$authority" in
+    *@*) userinfo="${authority%@*}" ;;
+    *)
+      printf '%s' "$1"
+      return 0
+      ;;
+  esac
+  printf '%s://%s@%s%s' "$scheme" "${userinfo%%:*}" "${authority##*@}" "$path_and_query"
+}
+
+# Decodes the %XX escapes of a URL part (the password), read from the environment, never an argument.
+percent_decoded() {
+  ENCODED="$1" awk 'BEGIN {
+    text = ENVIRON["ENCODED"]; digits = "0123456789abcdef"; decoded = ""
+    while ((at = index(text, "%")) > 0) {
+      decoded = decoded substr(text, 1, at - 1)
+      high = index(digits, tolower(substr(text, at + 1, 1))) - 1
+      low = index(digits, tolower(substr(text, at + 2, 1))) - 1
+      if (high < 0 || low < 0) { decoded = decoded "%"; text = substr(text, at + 1); continue }
+      decoded = decoded sprintf("%c", high * 16 + low)
+      text = substr(text, at + 3)
+    }
+    printf "%s", decoded text
+  }'
+}
+
+# Sets `url` (secure, without the password) and `secret` (the password, to scrub tool output) from the URL in the
+# variable named $1, and exports PGPASSWORD for every tool that connects.
+connect_to() {
+  eval "given=\${$1}"
+  secured="$(secure_url "$given" "$1")"
+  secret="$(percent_decoded "$(password_of "$secured")")"
+  url="$(without_password "$secured")"
+  if [ -n "$secret" ]; then
+    PGPASSWORD="$secret"
+    export PGPASSWORD
+  fi
 }
 
 # Prints a tool's error output without any line that holds the password (read from the environment, never an argument).
@@ -150,8 +195,7 @@ dump() {
   esac
   directory="$SACOU_BACKUP_DIR"
   if [ ! -d "$directory" ] || [ ! -w "$directory" ]; then fail "SACOU_BACKUP_DIR is not a writable directory"; fi
-  url="$(secure_url "$SACOU_BACKUP_DATABASE_URL" SACOU_BACKUP_DATABASE_URL)"
-  secret="$(password_of "$url")"
+  connect_to SACOU_BACKUP_DATABASE_URL
 
   work="$(mktemp -d)"
   started="$(date -u +%s)"
@@ -233,8 +277,7 @@ restore_check() {
   manifest="$2"
   if [ ! -f "$dump_file" ] || [ ! -f "$manifest" ]; then fail "the dump or the manifest is missing"; fi
   require_env SACOU_RESTORE_DATABASE_URL
-  url="$(secure_url "$SACOU_RESTORE_DATABASE_URL" SACOU_RESTORE_DATABASE_URL)"
-  secret="$(password_of "$url")"
+  connect_to SACOU_RESTORE_DATABASE_URL
   work="$(mktemp -d)"
   started="$(date -u +%s)"
 

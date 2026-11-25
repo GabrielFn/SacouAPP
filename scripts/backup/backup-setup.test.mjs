@@ -25,6 +25,9 @@ const backupTools = read("apps/api/tests/Sacou.Integration.Tests/Backup/BackupTo
 const RETENTION_DAYS = 30;
 const DELETE_AFTER_DAYS = 31;
 const TASK_TIMEOUT_SECONDS = "600";
+// A daily job, plus two hours of slack for a late schedule or a slow run.
+const ALERT_ABSENT_HOURS = 26;
+const SECONDS_PER_HOUR = 3600;
 
 const withoutComments = (source) =>
   source
@@ -122,6 +125,15 @@ describe("backup script", () => {
     }
   });
 
+  it("passes the password in PGPASSWORD and connects with the URL without it", () => {
+    assert.match(script, /^ {2}url="\$\(without_password "\$secured"\)"$/m);
+    assert.match(script, /^ {4}export PGPASSWORD$/m);
+    const connecting = script.split("\n").filter((line) => /--dbname=/.test(line));
+    assert.ok(connecting.length > 0);
+    for (const line of connecting) assert.match(line, /--dbname="\$url"/, line);
+    assert.doesNotMatch(script, /--dbname="\$(secured|given|SACOU_\w+)"/);
+  });
+
   it("restores only with --exit-on-error into one transaction, without owners or privileges", () => {
     assert.match(
       script,
@@ -173,20 +185,31 @@ describe("backup setup", () => {
       setup,
       /--uniform-bucket-level-access --public-access-prevention --retention-period="\$RETENTION" --soft-delete-duration=0/,
     );
+    // Running the setup again restores every protection of an existing bucket, not only the retention.
+    assert.match(
+      setup,
+      /buckets update "gs:\/\/\$\{bucket\}" --uniform-bucket-level-access --public-access-prevention \\\n\s+--retention-period="\$RETENTION" --soft-delete-duration=0 --no-versioning --lifecycle-file=/,
+    );
     assert.match(variableOf("BUCKET_REGION"), /^us-(east1|west1|central1)$/);
   });
 
-  it("starts the jobs the setup creates from one workflow, and alerts on their failure", () => {
+  it("starts the jobs the setup creates from one workflow", () => {
     const init = workflow.main.steps[0].init.assign.find((entry) => "jobs" in entry);
     assert.deepEqual(init.jobs, arrayOf("JOBS"));
-    assert.match(
-      setup,
-      new RegExp(
-        `WORKFLOW="${alert.conditions[1].conditionThreshold.filter.match(/workflow_id = "([^"]+)"/)[1]}"`,
-      ),
-    );
-    assert.match(alert.conditions[0].conditionThreshold.filter, /sacou-backup\(-test\)\?/);
+  });
+
+  it("alerts with one condition when a job has no successful execution in 26 h, and updates it on a rerun", () => {
     assert.equal(alert.displayName, variableOf("ALERT_POLICY_NAME"));
+    assert.equal(alert.conditions.length, 1);
+    const [{ conditionAbsent: absent }] = alert.conditions;
+    assert.match(
+      absent.filter,
+      /job_name = monitoring\.regex\.full_match\("sacou-backup\(-test\)\?"\)/,
+    );
+    assert.match(absent.filter, /metric\.labels\.result = "succeeded"/);
+    assert.equal(absent.duration, `${ALERT_ABSENT_HOURS * SECONDS_PER_HOUR}s`);
+    assert.deepEqual(absent.aggregations[0].groupByFields, ["resource.labels.job_name"]);
+    assert.match(setup, /monitoring policies update "\$policy" --policy-from-file=/);
   });
 });
 

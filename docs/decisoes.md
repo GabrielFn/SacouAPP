@@ -35,7 +35,7 @@ Fonte da verdade quando os outros documentos divergirem. Atualize este arquivo q
 - **Dados pessoais:** nada pessoal nos eventos; tudo aponta para `MemberId`. Exclusão e exportação de conta (LGPD); quem sai vira "Ex-jogador" no histórico.
 - **App:** Expo + TypeScript strict, Expo Router, EAS, TanStack Query, Zustand, React Hook Form + Zod, cliente gerado do OpenAPI (ADR 0042), abas com o `expo-router/ui` e barra própria (ADR 0044), ajustes do grupo salvos na hora e configuração no cache (ADR 0049); criar grupo manda as regras no mesmo `POST`, numa transação (R98 Parte 4), estilos e temas próprios sobre o StyleSheet (Unistyles descartado, ADR 0034), expo-sqlite (log de eventos offline), Reanimated, view-shot, expo-keep-awake/haptics.
 - **Monorepo:** pnpm + Turborepo — `apps/mobile`, `apps/api`, `packages/match-engine` (TS puro), `packages/volley-rules` (formações, faixas, Pix, testes golden).
-- **Serviços:** Cloudflare R2 (fotos, depois do piloto), backup diário no Cloud Storage do Google com Cloud Run Job (ADR 0082, no lugar do R2), RevenueCat e PostHog depois do piloto (ADR 0046), Sentry, Resend, rate limiting nativo do ASP.NET Core, feature flags e versão mínima do app, backup diário, varredura de segurança na CI.
+- **Serviços:** Cloudflare R2 (fotos, depois do piloto), backup diário no Cloud Storage do Google com Cloud Run Job (ADR 0082, no lugar do R2), RevenueCat e PostHog depois do piloto (ADR 0046), Sentry, Resend, rate limiting nativo do ASP.NET Core, feature flags e versão mínima do app, varredura de segurança na CI.
 
 ## Processo
 
