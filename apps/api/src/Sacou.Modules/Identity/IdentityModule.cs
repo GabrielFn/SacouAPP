@@ -16,6 +16,7 @@ using Sacou.Modules.Identity.ReapplyDeletions;
 using Sacou.Modules.Identity.SaveMyProfile;
 using Sacou.Modules.Identity.SignIn;
 using Sacou.Shared.Results;
+using Sacou.Shared.Retention;
 
 namespace Sacou.Modules.Identity;
 
@@ -32,6 +33,9 @@ public static class IdentityModule
 
     /// <summary>The client that fetches the Google signing keys. Public so a test can replace its handler.</summary>
     public const string SigningKeysHttpClientName = "Sacou.Identity.SigningKeys";
+
+    /// <summary>The client that fetches the keys of the Google OIDC tokens of the internal routes. Public so a test can replace its handler.</summary>
+    public const string ServiceCallerKeysHttpClientName = "Sacou.Identity.ServiceCallerKeys";
 
     public static IServiceCollection AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
     {
@@ -56,6 +60,8 @@ public static class IdentityModule
         services.AddSingleton<IDeletionMarkSource, PostgresDeletionMarkSource>();
         services.AddScoped<IRestoredAccounts, PostgresRestoredAccounts>();
         services.AddScoped<ReapplyDeletionsHandler>();
+        // The marks go after 60 days, on the internal pump route's sweep (E6.5, ADR 0086).
+        services.AddScoped<IRetentionCleanup, PostgresDeletionMarkPurge>();
         return services;
     }
 

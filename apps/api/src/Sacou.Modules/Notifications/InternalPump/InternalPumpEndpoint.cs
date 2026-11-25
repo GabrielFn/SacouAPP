@@ -7,6 +7,7 @@ using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
 using Sacou.Modules.Notifications.Infrastructure;
+using Sacou.Shared.Retention;
 
 namespace Sacou.Modules.Notifications.InternalPump;
 
@@ -38,6 +39,7 @@ internal static class InternalPumpEndpoint
         INotificationPump pump,
         INotificationRetention retention,
         TimeProvider time,
+        IEnumerable<IRetentionCleanup> cleanups,
         ILoggerFactory loggers)
     {
         var logger = loggers.CreateLogger(typeof(InternalPumpEndpoint).FullName!);
@@ -50,6 +52,12 @@ internal static class InternalPumpEndpoint
 
         await StepAsync("pump", () => pump.RunAsync(budget.Token), logger).ConfigureAwait(false);
         await StepAsync("cleanup", () => retention.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
+        // The other modules' retentions (ADR 0086): each one its own step, so one failure leaves the others going.
+        foreach (var cleanup in cleanups)
+        {
+            await StepAsync("retention-cleanup", () => cleanup.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
+        }
+
         foreach (var source in all)
         {
             await StepAsync("outbox-cleanup", () => source.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);

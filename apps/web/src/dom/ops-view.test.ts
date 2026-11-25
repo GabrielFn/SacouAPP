@@ -54,7 +54,7 @@ describe("ops view", () => {
     expect(users.title).toBe("Usuários");
     expect(users.facts).toEqual([
       { label: "Cadastrados", value: "31" },
-      { label: "Contas excluídas", value: "2" },
+      { label: "Contas excluídas (60 dias)", value: "2" },
     ]);
     expect(users.table?.headers).toEqual(["Semana", "Novos", "Excluídas"]);
     expect(users.table?.rows).toHaveLength(8);
