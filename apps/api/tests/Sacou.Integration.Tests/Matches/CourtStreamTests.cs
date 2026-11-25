@@ -214,7 +214,10 @@ public sealed class CourtStreamTests(IntegrationDatabase database) : IAsyncLifet
         Assert.Equal(0, await CourtCalls.EventCountAsync(api.ConnectionString, phone.CourtSessionId));
     }
 
-    /// <summary>A9: a row changed by hand fails closed, with nothing of it in the answer or the log.</summary>
+    /// <summary>
+    /// A9: a row written by hand fails closed when it is read, with nothing of it in the answer or the log. With the
+    /// snapshot (ADR 0081), a row is read once: here the one added after it, which the next write reads and parses.
+    /// </summary>
     [Fact]
     public async Task ACorruptRow_IsAGeneric500()
     {
@@ -225,7 +228,13 @@ public sealed class CourtStreamTests(IntegrationDatabase database) : IAsyncLifet
         _ = await CourtCalls.AcceptedAsync(world, A.Admin, round, phone, [phone.MatchStarted(world.MemberIds[A.Admin], world.MemberIds[A.Player])]);
         const string Marker = "corrupt-marker-7f3a";
         await CourtCalls.ExecuteAsync(api.ConnectionString,
-            "UPDATE matches.court_events SET envelope = @text WHERE court_session_id = @id", ("text", $$"""{"{{Marker}}":true}"""), ("id", phone.CourtSessionId));
+            """
+            INSERT INTO matches.court_events (court_session_id, position, event_id, batch, sequence, device_id, schema_version, type, envelope, received_at)
+            VALUES (@id, 2, @eventId, 1, 2, @deviceId, 1, 'PointScored', @text, now());
+            UPDATE matches.court_sessions SET event_count = 2 WHERE id = @id;
+            """,
+            ("text", $$"""{"{{Marker}}":true}"""), ("id", phone.CourtSessionId), ("eventId", Guid.NewGuid()), ("deviceId", phone.DeviceId));
+        phone.ResumeAt(3);
         var logsBefore = api.Logs.Count;
 
         using var response = await CourtCalls.SendAsync(world, A.Admin, round, phone, [phone.Point("a")]);

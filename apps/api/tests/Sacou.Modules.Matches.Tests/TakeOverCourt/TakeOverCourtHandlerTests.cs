@@ -171,11 +171,11 @@ public sealed class TakeOverCourtHandlerTests
         public bool? StillMayWrite { get; private set; }
 
         public Task<CourtStreamOutcome<CourtWriteDecision>> AppendAsync(
-            CourtAppend append, Func<StoredStream, Result<CourtWriteDecision, CourtWriteError>> decide, CancellationToken cancellationToken) =>
+            CourtAppend append, CourtAppendRules rules, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
         public async Task<CourtStreamOutcome<CourtTakeoverDecision>> TakeOverAsync(
-            CourtTakeoverCall call, Func<StoredStream, Result<CourtTakeoverDecision, CourtWriteError>> decide, CancellationToken cancellationToken)
+            CourtTakeoverCall call, Func<IWrittenStream, Result<CourtTakeoverDecision, CourtWriteError>> decide, CancellationToken cancellationToken)
         {
             Calls++;
             StillMayWrite = await call.StillMayWrite(cancellationToken);

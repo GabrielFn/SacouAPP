@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -7,6 +8,7 @@ using Sacou.Http.RateLimiting;
 using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Matches.Access;
 using Sacou.Modules.Matches.Domain.CourtSessions.Writes;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Matches.AppendCourtEvents;
 
@@ -14,7 +16,8 @@ namespace Sacou.Modules.Matches.AppendCourtEvents;
 /// <c>POST /v1/groups/{groupId}/rounds/{roundId}/court-sessions/{courtSessionId}/events</c> <c>{ events }</c>
 /// (<c>AppendCourtEvents</c>): the phone that holds the court sends its events, idempotent by event id (ADR 0060). The
 /// first write creates the stream with batch 1, written by that device and member. Admin, co-admin and scorekeeper.
-/// Each call replays the whole stream under its lock, so it is limited per user by <c>court-sync</c> (ADR 0062).
+/// Each call continues the snapshot of the stream (ADR 0081) and is limited per user by <c>court-sync</c> (ADR 0062);
+/// a snapshot that cannot be built now is a 503 <c>matches.court-busy</c> with <c>Retry-After</c>.
 /// </summary>
 internal static class AppendCourtEventsEndpoint
 {
@@ -44,8 +47,16 @@ internal static class AppendCourtEventsEndpoint
 
         var written = await handler.HandleAsync(context.CourtAccess(), new CourtRoute(roundId, courtSessionId), body.Value, cancellationToken)
             .ConfigureAwait(false);
-        return written.IsSuccess
-            ? TypedResults.Ok(written.Value)
-            : ProblemResults.From(written.Error.Error, written.Error.Extensions);
+        if (written.IsSuccess)
+        {
+            return TypedResults.Ok(written.Value);
+        }
+
+        if (written.Error.Error.Kind == ErrorKind.Unavailable)
+        {
+            context.Response.Headers.RetryAfter = CourtErrors.BusyRetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return ProblemResults.From(written.Error.Error, written.Error.Extensions);
     }
 }

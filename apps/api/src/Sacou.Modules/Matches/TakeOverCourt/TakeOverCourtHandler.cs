@@ -57,7 +57,8 @@ internal sealed class TakeOverCourtHandler(
             return Refuse(CourtProblem.Of(RoundDirectoryErrors.RoundNotFound));
         }
 
-        var call = new CourtTakeoverCall(route.CourtSessionId, access.GroupId, route.RoundId, time.GetUtcNow(), token => StillMayWriteAsync(access, token));
+        var call = new CourtTakeoverCall(
+            route.CourtSessionId, access.GroupId, route.RoundId, time.GetUtcNow(), token => StillMayWriteAsync(access, token), request.Value.DeviceId);
         var callerMemberId = access.MemberId.ToString("D");
         var outcome = await store.TakeOverAsync(call, stored => CourtTakeover.Decide(stored, request.Value, callerMemberId), cancellationToken)
             .ConfigureAwait(false);

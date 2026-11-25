@@ -2,4 +2,4 @@
 // run `pnpm api:contract` after changing the API (ADR 0042).
 
 /** Part of the persisted cache's buster: a cache written against another contract is dropped. */
-export const apiContractHash = "4fe350005d12e5b1";
+export const apiContractHash = "6787b1afe549731c";

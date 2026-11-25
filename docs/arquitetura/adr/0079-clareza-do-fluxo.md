@@ -55,3 +55,22 @@ Cada parte da R101 acrescenta a sua seção.
    `answering` ignora a segunda). Sem o nome do 1º da espera: a página não tem a espera com nomes. O texto da pergunta é
    do servidor (`WebTexts`), como o resto da tela 01.
 6. **Segurança:** superfície anônima; nada de dado pessoal novo; ver `modelo-de-ameacas.md` (linha da prévia e da página pública).
+
+## Parte 3: a janela dos avulsos só vale com mensalista ativo
+
+Pergunta 183, opção 2 (resposta do Gabriel em 23/11/2026). Num grupo sem mensalista todo membro é avulso, e a janela
+travava todo mundo até abrir.
+
+1. **Regra:** enquanto o grupo não tem nenhum membro **ativo** do tipo mensalista (`MemberType.Regular` na lista de
+   `IGroupMembership.ListActiveAsync`), a janela dos avulsos não vale, mesmo com `attendance.dropInWindowEnabled` ligado.
+   Convidado é sempre avulso e não conta. Removido, quem saiu ou quem voltou a avulso deixa de contar na hora.
+2. **Um lugar só:** `AttendanceSettings.ForGroup(hasActiveRegular)` (domínio, puro) devolve as regras com a janela
+   desligada nesse caso. `RoundGroupState` aplica ao resolver a rodada, então o reducer da presença (`AttendanceRules`), o
+   `RoundResponse.DropInOpensAt` (nulo) e a página do link leem o mesmo valor. O resumo público
+   (`StorePublicRoundSummary`) lê os membros ativos pelo mesmo contrato e chama `RoundGroupState.ForGroup`, então o
+   `PublicRoundSummary.DropInOpensAt` da Parte 2 também vem nulo.
+3. **Sem gravação:** a decisão é tomada a cada resposta e a cada leitura, com os membros lidos dentro do lock da rodada
+   na escrita (ADR 0043, D5). Nada muda no banco nem nos ajustes: `RoundSettingsResponse` continua mostrando o que o
+   admin escolheu, e a janela volta sozinha quando alguém vira mensalista.
+4. **Custo:** o resumo público faz uma leitura a mais (membros ativos do grupo), sem dado pessoal na resposta: só o
+   booleano entra na regra. `dados-pessoais.md` e o modelo de ameaças não mudam.

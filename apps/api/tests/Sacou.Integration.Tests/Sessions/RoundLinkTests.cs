@@ -150,12 +150,16 @@ public sealed class RoundLinkTests(IntegrationDatabase database) : IAsyncLifetim
         Assert.Equal("web", (await RoundLinkCalls.AttendanceOfAsync(api.ConnectionString, round, member.Id))!.Value.Channel);
     }
 
-    /// <summary>Case 8: before the avulsos' window the person still comes in, and the answer says both things.</summary>
+    /// <summary>
+    /// Case 8: before the avulsos' window the person still comes in, and the answer says both things. The group has a
+    /// mensalista: without one the window does not hold (ADR 0079, P3).
+    /// </summary>
     [Fact]
     public async Task DropInWindowClosed_StillJoins_AndSaysSo()
     {
         using var client = api.CreateClient();
         var world = await GroupWorld.CreateAsync(api, client);
+        _ = await world.AddPersonAsync(memberType: "regular");
         await RoundCalls.ConfigureAttendanceAsync(world, dropInOpensHoursBefore: 1);
         var (round, code) = await RoundLinkCalls.RoundAsync(world);
 
