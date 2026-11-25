@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Identity.Domain.Users;
 using Sacou.Modules.Identity.Infrastructure;
@@ -121,26 +122,97 @@ public sealed class ReapplyDeletionsHandlerTests
         }
     }
 
+    /// <summary>Criteria 11 and 12 (S2): a source that cannot be read, or whose role can write, is refused before any write.</summary>
+    [Fact]
+    public async Task UnreadableOrWritableSource_IsRefused_BeforeAnyWrite()
+    {
+        restored.Add("uid-a");
+
+        foreach (var refusal in new[] { ReapplyDeletionsRefusals.SourceUnreadable, ReapplyDeletionsRefusals.SourceCanWrite })
+        {
+            var result = await HandleAsync(new FakeSource(refusal), Now.AddDays(-1));
+
+            Assert.Equal(refusal, result.Error);
+        }
+
+        Assert.Equal(0, restored.MarkCount);
+        Assert.Empty(steps);
+    }
+
+    /// <summary>
+    /// The swap guard (S2): a mark of the restored database the source lacks, younger than the retention, means the source
+    /// is the older one. An older mark the source no longer has (the purge of E6.5) does not count.
+    /// </summary>
+    [Theory]
+    [InlineData(RetentionMinutes - 1, false)]
+    [InlineData(RetentionMinutes + 1, true)]
+    public async Task RestoredMarkTheSourceLacks_IsRefusedOnlyWhileTheRetentionKeepsIt(int minutesAgo, bool runs)
+    {
+        restored.AddMark(new DeletionMark([.. Enumerable.Repeat((byte)9, SubjectHash.Length)], Now.AddMinutes(-minutesAgo)));
+        restored.Add("uid-a");
+
+        var result = await HandleAsync(Now.AddDays(-1), Mark(1));
+
+        Assert.Equal(runs, result.IsSuccess);
+        Assert.Equal(runs ? 2 : 1, restored.MarkCount);
+        if (!runs)
+        {
+            Assert.Equal(ReapplyDeletionsRefusals.TargetAheadOfSource, result.Error);
+            Assert.Empty(steps);
+        }
+    }
+
+    /// <summary>Criterion 14: a database failure at the 2nd account of 3 stops the run at 1 of 3; the next run erases the 2 left.</summary>
+    [Fact]
+    public async Task FailureInTheMiddle_StopsThere_AndTheNextRunFinishes()
+    {
+        restored.Add("uid-a");
+        var second = restored.Add("uid-b");
+        restored.Add("uid-c");
+        groups.FailOnCall = 1;
+
+        var interrupted = (await HandleAsync(Now.AddDays(-1), Mark(1))).Value;
+
+        Assert.False(interrupted.IsComplete);
+        Assert.Equal((1, 3), (interrupted.AccountsErased, interrupted.AccountsFound));
+        Assert.DoesNotContain($"delete {second.User.Value}", steps);
+
+        groups.FailOnCall = null;
+        var resumed = (await HandleAsync(Now.AddDays(-1), Mark(1))).Value;
+
+        Assert.True(resumed.IsComplete);
+        Assert.Equal((0, 2, 2), (resumed.NewMarks, resumed.AccountsErased, resumed.AccountsFound));
+    }
+
     private Task<Result<ReapplyDeletionsSummary>> HandleAsync(DateTimeOffset dumpCreatedAt, params DeletionMark[] marks) =>
+        HandleAsync(new FakeSource(marks), dumpCreatedAt);
+
+    private Task<Result<ReapplyDeletionsSummary>> HandleAsync(FakeSource source, DateTimeOffset dumpCreatedAt) =>
         new ReapplyDeletionsHandler(
-                new FakeSource(marks), restored, restored, [notifications, groups], new FixedTimeProvider(Now), NullLogger<ReapplyDeletionsHandler>.Instance)
+                source, restored, restored, [notifications, groups], new FixedTimeProvider(Now), NullLogger<ReapplyDeletionsHandler>.Instance)
             .HandleAsync(Source, dumpCreatedAt, TestContext.Current.CancellationToken);
 
     private static DeletionMark Mark(byte seed) => new([.. Enumerable.Repeat(seed, SubjectHash.Length)], Now.AddDays(-seed));
 
-    private sealed class FakeSource(IReadOnlyList<DeletionMark> marks) : IDeletionMarkSource
+    private sealed class FakeSource : IDeletionMarkSource
     {
-        public Task<IReadOnlyList<DeletionMark>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
+        private readonly Result<IReadOnlyList<DeletionMark>> read;
+
+        public FakeSource(IReadOnlyList<DeletionMark> marks) => read = Result.Success(marks);
+
+        public FakeSource(Error refusal) => read = Result.Failure<IReadOnlyList<DeletionMark>>(refusal);
+
+        public Task<Result<IReadOnlyList<DeletionMark>>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
         {
             Assert.Equal(Source, connectionString);
-            return Task.FromResult(marks);
+            return Task.FromResult(read);
         }
     }
 
     /// <summary>The restored database: its marks, by hash, and its accounts, which any mark matches while they exist.</summary>
     private sealed class FakeRestored(List<string> steps) : IRestoredAccounts, IDeletedAccountStore
     {
-        private readonly HashSet<string> marks = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, DateTimeOffset> marks = new(StringComparer.Ordinal);
         private readonly List<MarkedAccount> accounts = [];
 
         public int MarkCount => marks.Count;
@@ -152,8 +224,16 @@ public sealed class ReapplyDeletionsHandlerTests
             return account;
         }
 
+        public void AddMark(DeletionMark mark) => marks.Add(Convert.ToHexString(mark.SubjectHash), mark.DeletedAt);
+
+        public Task<long> CountMarksMissingFromAsync(IReadOnlyList<DeletionMark> sourceMarks, DateTimeOffset since, CancellationToken cancellationToken)
+        {
+            var inSource = sourceMarks.Select(mark => Convert.ToHexString(mark.SubjectHash)).ToHashSet(StringComparer.Ordinal);
+            return Task.FromResult((long)marks.Count(mark => mark.Value >= since && !inSource.Contains(mark.Key)));
+        }
+
         public Task<int> CopyMarksAsync(IReadOnlyList<DeletionMark> copied, CancellationToken cancellationToken) =>
-            Task.FromResult(copied.Count(mark => marks.Add(Convert.ToHexString(mark.SubjectHash))));
+            Task.FromResult(copied.Count(mark => marks.TryAdd(Convert.ToHexString(mark.SubjectHash), mark.DeletedAt)));
 
         public Task<IReadOnlyList<MarkedAccount>> FindMarkedAsync(CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<MarkedAccount>>(marks.Count == 0 ? [] : [.. accounts.OrderBy(account => account.User.Value)]);
@@ -176,10 +256,18 @@ public sealed class ReapplyDeletionsHandlerTests
         /// <summary>What each call returns, in order; empty once the list runs out.</summary>
         public IReadOnlyList<IReadOnlyList<Guid>> WithoutAdminPerCall { get; set; } = [];
 
+        /// <summary>The 0-based call that fails as a lost connection would; null never fails.</summary>
+        public int? FailOnCall { get; set; }
+
         public Task<IReadOnlyList<Guid>> EraseAsync(Guid userId, ErasureMode mode, CancellationToken cancellationToken)
         {
             var call = Modes.Count;
             Modes.Add(mode);
+            if (call == FailOnCall)
+            {
+                throw new NpgsqlException("connection lost");
+            }
+
             steps.Add($"{module} {userId}");
             return Task.FromResult(call < WithoutAdminPerCall.Count ? WithoutAdminPerCall[call] : (IReadOnlyList<Guid>)[]);
         }

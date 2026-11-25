@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -67,9 +68,25 @@ public static class IdentityModule
         IdentityDatabase.MigrateAsync(services, cancellationToken);
 
     /// <summary>
+    /// Whether the API's database has the Identity schema (E6.3, criterion 16): the reapply runs only on a restored
+    /// backup, so an empty or wrong database is refused before any migration creates the schema from nothing.
+    /// </summary>
+    public static async Task<bool> SchemaExistsAsync(IServiceProvider services, CancellationToken cancellationToken = default)
+    {
+        var scope = services.CreateAsyncScope();
+        await using (scope.ConfigureAwait(false))
+        {
+            var database = scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database;
+            return await database.SqlQuery<bool>($"SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = {IdentityDbContext.Schema}) AS \"Value\"")
+                .SingleAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
     /// Reapplies, to the API's database (a restored backup), the deletions of the database at
     /// <paramref name="sourceConnectionString"/> (E6.3). Called only by the operation command, before the API serves it.
-    /// Refused, writing nothing, when the dump is older than <see cref="DeletionMarkRetention"/>.
+    /// Refused, writing nothing, when the dump is older than <see cref="DeletionMarkRetention"/>, the source is unreadable
+    /// or can write, or the restored database has marks the source lacks (S2).
     /// </summary>
     public static async Task<Result<ReapplyDeletionsSummary>> ReapplyDeletionsAsync(
         IServiceProvider services, string sourceConnectionString, DateTimeOffset dumpCreatedAt, CancellationToken cancellationToken = default)

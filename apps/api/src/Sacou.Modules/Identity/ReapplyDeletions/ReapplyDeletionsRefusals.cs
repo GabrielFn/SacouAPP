@@ -10,4 +10,12 @@ namespace Sacou.Modules.Identity.ReapplyDeletions;
 internal static class ReapplyDeletionsRefusals
 {
     public static readonly Error DumpOlderThanRetention = new(DeletionMarkRetention.DumpOlderThanRetentionCode, ErrorKind.Validation);
+
+    public static readonly Error SourceUnreadable = new(ReapplyDeletionsCodes.SourceUnreadable, ErrorKind.Unavailable);
+
+    public static readonly Error SourceCanWrite = new(ReapplyDeletionsCodes.SourceCanWrite, ErrorKind.Validation);
+
+    public static readonly Error TargetAheadOfSource = new(ReapplyDeletionsCodes.TargetAheadOfSource, ErrorKind.Conflict);
+
+    public static readonly Error Interrupted = new(ReapplyDeletionsCodes.Interrupted, ErrorKind.Unavailable);
 }

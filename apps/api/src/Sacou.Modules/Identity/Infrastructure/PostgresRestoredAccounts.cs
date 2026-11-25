@@ -22,6 +22,22 @@ internal sealed class PostgresRestoredAccounts(IdentityDbContext database) : IRe
 
     private const string Marks = $"{IdentityDbContext.Schema}.{DeletedAccountConfiguration.Table}";
 
+    /// <summary>The recent marks of this database the source lacks; <c>&lt;&gt; ALL</c> of an empty list is true, so all count.</summary>
+    private const string MarksMissingFrom =
+        $"SELECT count(*) AS \"Value\" FROM {Marks} " +
+        $"WHERE {DeletedAccountConfiguration.DeletedAtColumn} >= @since AND {DeletedAccountConfiguration.SubjectHashColumn} <> ALL(@hashes)";
+
+    public async Task<long> CountMarksMissingFromAsync(IReadOnlyList<DeletionMark> sourceMarks, DateTimeOffset since, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(sourceMarks);
+        object[] parameters =
+        [
+            new NpgsqlParameter("since", NpgsqlDbType.TimestampTz) { Value = since },
+            new NpgsqlParameter("hashes", NpgsqlDbType.Array | NpgsqlDbType.Bytea) { Value = sourceMarks.Select(mark => mark.SubjectHash).ToArray() },
+        ];
+        return await database.Database.SqlQueryRaw<long>(MarksMissingFrom, parameters).SingleAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<int> CopyMarksAsync(IReadOnlyList<DeletionMark> marks, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(marks);

@@ -16,6 +16,9 @@ public sealed class OperationCommandProcessTests
 {
     private const string ApiAssembly = "Sacou.Api.dll";
     private const string UnreachableDatabase = "postgres://sacou:sacou@127.0.0.1:1/sacou?sslmode=disable";
+
+    /// <summary>Another database on the same unreachable server: the source must never be the restored database (criterion 11).</summary>
+    private const string UnreachableSource = "postgres://sacou_backup:sacou@127.0.0.1:1/sacou_current?sslmode=disable";
     private static readonly TimeSpan ExitTimeout = TimeSpan.FromSeconds(60);
 
     [Theory]
@@ -28,8 +31,27 @@ public sealed class OperationCommandProcessTests
         held.Start();
         var port = ((IPEndPoint)held.LocalEndpoint).Port;
 
-        var (code, stdout, stderr) = await RunAsync(port, ReapplyDeletionsCommand.Name, "--dump-created-at", dumpCreatedAt);
+        var (code, stdout, stderr) = await RunAsync(port, UnreachableSource, ReapplyDeletionsCommand.Name, "--dump-created-at", dumpCreatedAt);
 
+        AssertOneLine(expectedCode, expectedLine, code, stdout, stderr);
+    }
+
+    /// <summary>Criterion 11: both URLs on the same host, port and database is a usage error, before any connection.</summary>
+    [Fact]
+    public async Task SourceEqualToTheRestoredDatabase_IsAUsageError_BeforeAnyConnection()
+    {
+        using var held = new TcpListener(IPAddress.Loopback, 0);
+        held.Start();
+        var port = ((IPEndPoint)held.LocalEndpoint).Port;
+        var dumpCreatedAt = DateTimeOffset.UtcNow.AddHours(-1).ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture);
+
+        var (code, stdout, stderr) = await RunAsync(port, UnreachableDatabase.Replace("sacou:sacou", "sacou_backup:other", StringComparison.Ordinal), ReapplyDeletionsCommand.Name, "--dump-created-at", dumpCreatedAt);
+
+        AssertOneLine(ReapplyDeletionsCommand.UsageError, @"^reapply-deletions: usage: .*points to the restored database$", code, stdout, stderr);
+    }
+
+    private static void AssertOneLine(int expectedCode, string expectedLine, int code, string stdout, string stderr)
+    {
         Assert.True(expectedCode == code, $"exit {code}: {stderr}");
         var line = Assert.Single(stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
         Assert.Matches(expectedLine, line);
@@ -37,7 +59,7 @@ public sealed class OperationCommandProcessTests
         Assert.DoesNotContain("127.0.0.1", stdout + stderr, StringComparison.Ordinal);
     }
 
-    private static async Task<(int Code, string Stdout, string Stderr)> RunAsync(int port, params string[] arguments)
+    private static async Task<(int Code, string Stdout, string Stderr)> RunAsync(int port, string source, params string[] arguments)
     {
         var start = new ProcessStartInfo(DotnetHost())
         {
@@ -60,7 +82,7 @@ public sealed class OperationCommandProcessTests
         start.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
         start.Environment["ASPNETCORE_URLS"] = $"http://127.0.0.1:{port}";
         start.Environment["SACOU_DATABASE_URL"] = UnreachableDatabase;
-        start.Environment[ReapplyDeletionsCommand.SourceVariable] = UnreachableDatabase;
+        start.Environment[ReapplyDeletionsCommand.SourceVariable] = source;
 
         using var process = Process.Start(start) ?? throw new InvalidOperationException("dotnet did not start.");
         var stdout = process.StandardOutput.ReadToEndAsync(TestContext.Current.CancellationToken);

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Npgsql;
 using Sacou.Api.Configuration;
 using Sacou.Modules.Identity;
 using Sacou.Modules.Identity.Contracts;
@@ -20,6 +21,7 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
 
     public const int Succeeded = 0;
     public const int UsageError = 2;
+    public const int SourceUnreadable = 3;
     public const int DumpTooOld = 4;
     public const int Failed = 5;
 
@@ -58,22 +60,77 @@ public sealed class ReapplyDeletionsCommand(IReadOnlyList<string> arguments) : I
             return await UsageAsync(output, $"{SourceVariable} ({source.Error.Code})").ConfigureAwait(false);
         }
 
+        if (SameDatabase(configuration[DatabaseConnectionSetup.ConnectionStringKey]!, source.Value))
+        {
+            return await UsageAsync(output, SourceVariable + " points to the restored database").ConfigureAwait(false);
+        }
+
         if (!DeletionMarkRetention.Covers(dumpCreatedAt, now))
         {
             return await TooOldAsync(output).ConfigureAwait(false);
+        }
+
+        // Criterion 16: the command reapplies to a restored backup, never builds a database from nothing.
+        if (!await IdentityModule.SchemaExistsAsync(services, cancellationToken).ConfigureAwait(false))
+        {
+            return await UsageAsync(output, DatabaseUrl.EnvironmentVariable + " has no identity schema (not a restored backup)").ConfigureAwait(false);
         }
 
         await DatabaseMigrations.ApplyAsync(services, cancellationToken).ConfigureAwait(false);
         var reapplied = await IdentityModule.ReapplyDeletionsAsync(services, source.Value, dumpCreatedAt, cancellationToken).ConfigureAwait(false);
         if (reapplied.IsFailure)
         {
-            return string.Equals(reapplied.Error.Code, DeletionMarkRetention.DumpOlderThanRetentionCode, StringComparison.Ordinal)
-                ? await TooOldAsync(output).ConfigureAwait(false)
-                : await FailedAsync(output, reapplied.Error.Code).ConfigureAwait(false);
+            return await RefusedAsync(output, reapplied.Error.Code).ConfigureAwait(false);
         }
 
-        await output.WriteLineAsync(Prefix + Describe(reapplied.Value)).ConfigureAwait(false);
+        var summary = reapplied.Value;
+        if (!summary.IsComplete)
+        {
+            await output.WriteLineAsync(string.Create(
+                CultureInfo.InvariantCulture, $"{Prefix}failed after {summary.AccountsErased} of {summary.AccountsFound} accounts; run again")).ConfigureAwait(false);
+            return Failed;
+        }
+
+        await output.WriteLineAsync(Prefix + Describe(summary)).ConfigureAwait(false);
         return Succeeded;
+    }
+
+    /// <summary>The exit code of each refusal of the handler; any code it does not know is a failure to run again (5).</summary>
+    internal static int ExitCodeFor(string code) => code switch
+    {
+        DeletionMarkRetention.DumpOlderThanRetentionCode => DumpTooOld,
+        ReapplyDeletionsCodes.SourceUnreadable => SourceUnreadable,
+        ReapplyDeletionsCodes.SourceCanWrite or ReapplyDeletionsCodes.TargetAheadOfSource => UsageError,
+        _ => Failed,
+    };
+
+    /// <summary>
+    /// Criterion 11: the same host, port and database on both sides means the variables were swapped or copied. The
+    /// host is compared without case, as DNS does; another name for the same server is caught by the role and swap guards.
+    /// </summary>
+    internal static bool SameDatabase(string target, string source)
+    {
+        var restored = new NpgsqlConnectionStringBuilder(target);
+        var current = new NpgsqlConnectionStringBuilder(source);
+        return string.Equals(restored.Host, current.Host, StringComparison.OrdinalIgnoreCase)
+            && restored.Port == current.Port
+            && string.Equals(restored.Database, current.Database, StringComparison.Ordinal);
+    }
+
+    private static Task<int> RefusedAsync(TextWriter output, string code) => ExitCodeFor(code) switch
+    {
+        DumpTooOld => TooOldAsync(output),
+        SourceUnreadable => WriteAsync(output, "source unreadable", SourceUnreadable),
+        UsageError when string.Equals(code, ReapplyDeletionsCodes.SourceCanWrite, StringComparison.Ordinal) =>
+            UsageAsync(output, SourceVariable + " has a role that can write (use the backup's read-only role)"),
+        UsageError => UsageAsync(output, "the restored database has marks the source lacks (the two URLs look swapped)"),
+        _ => FailedAsync(output, code),
+    };
+
+    private static async Task<int> WriteAsync(TextWriter output, string line, int code)
+    {
+        await output.WriteLineAsync(Prefix + line).ConfigureAwait(false);
+        return code;
     }
 
     /// <summary>Exactly <c>--dump-created-at &lt;instant&gt;</c>, the instant with its offset (a bare local time is refused).</summary>
