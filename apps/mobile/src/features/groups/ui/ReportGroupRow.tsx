@@ -19,12 +19,7 @@ export function ReportGroupRow({ onPress }: ReportGroupRowProps) {
   const { tokens } = useTheme();
   return (
     <View style={{ gap: tokens.spacing.s }}>
-      <Button
-        label={texts.groupAction}
-        variant="dangerOutline"
-        accessibilityHint={texts.groupActionHelp}
-        onPress={onPress}
-      />
+      <Button label={texts.groupAction} variant="dangerOutline" onPress={onPress} />
       <Text variant="muted" style={{ textAlign: "center" }}>
         {texts.groupActionHelp}
       </Text>

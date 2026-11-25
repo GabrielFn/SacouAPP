@@ -3,16 +3,23 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { ReportReason } from "../../../services/api/sacou-api";
 import { strings } from "../../../strings/pt-BR";
+import { createScaledTokens } from "../../../theme/scale";
+import { accessibilityFloors, fontScaleCap } from "../../../theme/tokens.data";
 import { ReportSheet, type ReportSheetProps } from "./ReportSheet";
 
-const state = vi.hoisted(() => ({ reason: null as string | null }));
+const state = vi.hoisted(() => ({
+  reason: null as string | null,
+  tokens: {},
+}));
 
 vi.mock("react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react")>()),
   useState: () => [state.reason, () => undefined],
 }));
 vi.mock("react-native", () => ({ View: "View", Pressable: "Pressable", Text: "Text" }));
-vi.mock("../../../theme/theme-context", () => ({ useTheme: () => ({ tokens: {}, colors: {} }) }));
+vi.mock("../../../theme/theme-context", () => ({
+  useTheme: () => ({ tokens: state.tokens, colors: {} }),
+}));
 vi.mock("../../../ui/BottomSheet", () => ({ BottomSheet: () => null }));
 vi.mock("../../../ui/Button", () => ({ Button: () => null }));
 vi.mock("../../../ui/ErrorStrip", () => ({ ErrorStrip: () => null }));
@@ -24,6 +31,12 @@ interface SheetProps {
   readonly children: unknown;
 }
 type Child = ReactElement<Record<string, unknown>> | null;
+interface RowStyle {
+  readonly minHeight: number;
+}
+
+/** The narrow phone, the common one and a small tablet (frontend.md, relative layout). */
+const WIDTHS = [320, 390, 600];
 
 function draw(overrides: Partial<ReportSheetProps> = {}) {
   const props: ReportSheetProps = {
@@ -53,6 +66,7 @@ function draw(overrides: Partial<ReportSheetProps> = {}) {
 
 describe("the sheet Denunciar (E6.6, criteria 2 to 5 and 14)", () => {
   beforeEach(() => {
+    state.tokens = {};
     state.reason = null;
   });
 
@@ -99,4 +113,28 @@ describe("the sheet Denunciar (E6.6, criteria 2 to 5 and 14)", () => {
     expect(failed.button.props.disabled).toBe(false);
     expect(draw().errors).toHaveLength(0);
   });
+
+  test.each(WIDTHS.flatMap((width) => [1, fontScaleCap].map((fontScale) => [width, fontScale])))(
+    "at %d wide and font %d each reason takes its sizes from the tokens, over the touch floor",
+    (windowWidth, fontScale) => {
+      const tokens = createScaledTokens({ windowWidth, fontScale });
+      state.tokens = tokens;
+      const rows = draw().options.map((option) => {
+        const render = option.type as (
+          props: typeof option.props,
+        ) => ReactElement<{ style: RowStyle }>;
+        return render(option.props).props.style;
+      });
+      expect(rows).toHaveLength(Object.keys(strings.report.reasons).length);
+      for (const style of rows) {
+        expect(style).toMatchObject({
+          minHeight: tokens.sizes.minTouchTarget,
+          gap: tokens.spacing.m,
+          paddingVertical: tokens.spacing.s,
+          borderTopWidth: tokens.borderWidths.thin,
+        });
+        expect(style.minHeight).toBeGreaterThanOrEqual(accessibilityFloors.touchTarget);
+      }
+    },
+  );
 });
