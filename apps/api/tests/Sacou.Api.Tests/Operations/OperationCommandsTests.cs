@@ -57,6 +57,8 @@ public sealed class OperationCommandsTests
     [InlineData("Host=db.neon.tech;Port=5433;Database=sacou", "Host=db.neon.tech;Port=5432;Database=sacou", false)]
     [InlineData("Host=other.neon.tech;Port=5432;Database=sacou", "Host=db.neon.tech;Port=5432;Database=sacou", false)]
     [InlineData("Host=db.neon.tech;Port=5432;Database=Sacou", "Host=db.neon.tech;Port=5432;Database=sacou", false)]
+    [InlineData("Host=DB.NEON.TECH;Port=5432;Database=sacou", "Host=db.neon.tech;Port=5432;Database=sacou;Password=x", true)]
+    [InlineData("Host=db.neon.tech;Port=5432;Database=sacou", "Host=db.neon.tech;Port=5432;Database=sacou_replica", false)]
     public void SameDatabase_IsHostPortAndDatabase(string target, string source, bool same) =>
         Assert.Equal(same, ReapplyDeletionsCommand.SameDatabase(target, source));
 
