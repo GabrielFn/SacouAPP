@@ -298,3 +298,21 @@ Detalhes nos `plan.md` de `.specs/features/E6.5` a `E6.8`.
 238. (E6.7) No lugar da lista: **"A lista de quem foi sai da página 7 dias depois da rodada."** (resposta do Gabriel).
 240. (E6.8) Conta apagada em outro aparelho: **não apagar nesse caso**; risco aceito no ADR 0067 (resposta do Gabriel).
 241. (E6.8) Aviso de pontos na tela 30b: **não avisar** (resposta do Gabriel).
+
+## 26/11/2026: conta da Play Console, perguntas 242 a 244 (respondidas pelo Gabriel)
+242. Tipo da conta da Play Console: **pessoal** (resposta do Gabriel). Vale o teste fechado com 12 testadores por 14 dias seguidos antes de pedir a produção.
+243. Situação da conta: **verificada, app `com.sacou.app` ainda não criado no Console** (resposta do Gabriel).
+244. Envio dos builds: **sempre à mão pelo Console** (resposta do Gabriel). O EAS gera o AAB; sem EAS Submit e sem conta de serviço do Google.
+
+## 26/11/2026: E5.4 (builds da Play), perguntas 245 a 247 (respondidas; plano aprovado: "Aprovo as duas fatias")
+245. Para qual API aponta o AAB do teste interno: **esperar o deploy de produção** (resposta do Gabriel, contra a recomendação de apontar para o teste). O AAB só vai para a Play depois do primeiro deploy de produção, que segue sendo aprovação dele.
+246. Assinatura: **Play App Signing (chave do app do Google) e chave de upload no EAS, com cópia baixada pelo Gabriel** (resposta do Gabriel).
+247. Lista do teste interno: **só o Gabriel** (resposta do Gabriel).
+
+## 26/11/2026: E6.4 (página de exclusão de conta), perguntas 250 a 254, e o deploy de produção (respondidas; plano aprovado: "Aprovo com as recomendações")
+248. Primeiro deploy de produção: **logo depois da E5.4 S1** (resposta do Gabriel). O orquestrador prepara o roteiro; o Gabriel roda os comandos de produção. Antes, o e-mail do encarregado (199), porque a E6.4 faz a produção recusar subir sem ele.
+250. Sem o e-mail: página no ar no teste com o aviso; a produção recusa subir sem o valor (recomendação aprovada).
+251. Só vale o pedido enviado do e-mail da conta (recomendação aprovada).
+252. Atendimento em 15 dias e guarda do pedido e da resposta por 5 anos, a conferir com o advogado (recomendação aprovada).
+253. **Tarefa nova E6.9**: comando `delete-account --uid` no executável da API, com a promoção do membro mais antigo (resposta do Gabriel). Bloqueia o teste fechado, não o interno.
+254. Corrigir o M6-B1 (`/R/` e `/C/` sem CSP) no mesmo PR da S1 da E6.4 (recomendação aprovada).

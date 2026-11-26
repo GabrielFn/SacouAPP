@@ -79,7 +79,8 @@
 | E6.7 | Feita | PR #263 (`/r` sem nomes nem contagem 7 dias depois do início). |
 | E6.8 | Feita | PR #262 (sessões da quadra da conta apagada saem do aparelho). |
 | E7.2 | Parte 1 feita | PR #250 (painel do operador e portão da fase 2, ADR 0085), conferido no teste com o login do Gabriel. Parte 2: partidas, MVP, notificações e tabelas largas. |
-| E5.4 | Bloqueada | Depende da conta da Play Console do Gabriel (US$ 25, verificação, 12 testadores). |
+| E5.4 | Desbloqueada (26/11) | Conta pessoal da Play Console verificada (respostas 242 a 244); app ainda não criado no Console. Envio à mão. Plano em `.specs/features/E5.4/`. |
+| E6.4 | A fazer | Página web de exclusão de conta. Faltou no fechamento do M6; bloqueia o teste fechado e a produção da Play, não o teste interno. Depende da pergunta 199 (e-mail do encarregado). Plano em `.specs/features/E6.4/`. |
 
 ## Em andamento
 - 25/11/2026, noite: **M6 quase fechada no código.** Na `main`: E5.2 inteira (#240, #246, #255, #256), E6.2 (#253), E6.3 S1 e S2 (#257, #261), E6.5 (#265), E6.7 (#263), E6.8 (#262), E7.2 P1 (#250). Sentry e backup configurados com o Gabriel. E6.6 (#264) aprovada e testada, esperando só a conferência no emulador. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
