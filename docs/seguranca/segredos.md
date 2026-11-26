@@ -12,6 +12,8 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 
 **Também não são segredos** (E5.2 Parte 2, [ADR 0080](../arquitetura/adr/0080-sentry-e-logs-estruturados.md), D9 e D11): `EXPO_PUBLIC_SENTRY_DSN` (DSN do projeto `sacou-mobile`: todo DSN de cliente vai dentro do APK, e o abuso fica limitado pela cota por chave do painel; variável do EAS com visibilidade "Plain text", nunca no repositório; sem ela o Sentry do app fica desligado), `EXPO_PUBLIC_SENTRY_ENVIRONMENT` (no `eas.json`, por perfil), `SENTRY_ORG` (slug da organização, variável comum do EAS, lida no build) e as chaves de build `SENTRY_DISABLE_AUTO_UPLOAD` e `SENTRY_ALLOW_FAILURE` (no `eas.json`).
 
+**Também não é segredo, de propósito** (E6.4): `SACOU_DATA_PROTECTION_EMAIL`, o e-mail do encarregado de dados, é variável de environment do GitHub (`vars`), não `secrets`: é o contato público da página `/excluir-conta`, então aparecer no log do Actions não expõe nada. Só pode ser um e-mail simples, conferido no deploy e na partida da API.
+
 | Nome proposto | Serviço | Onde fica | Tarefa |
 |---|---|---|---|
 | `POSTGRES_PASSWORD` | Postgres local do `docker-compose.yml`, só desenvolvimento; sem segredo no GitHub Actions (a CI usa o marcador de `.env.example`) | `.env` | E0.6 |
