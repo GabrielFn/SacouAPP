@@ -88,10 +88,11 @@ O dado de produção não sai do Google nem do Neon: tudo no Cloud Shell, num ba
 
    | Saída | O que é | O que fazer |
    |---|---|---|
-   | 2 (`usage: ...`) | Uso errado, dito no fim da linha: variável faltando, `--dump-created-at` inválido ou no futuro, destino sem o esquema `identity` (não é o banco restaurado), origem com papel que escreve (a URL da API no lugar da do `sacou_backup`), origem igual ao destino ou as duas URLs trocadas | Corrija o que a linha diz e rode de novo; nada foi escrito |
-   | 3 (`source unreadable`) | A origem não abre: segredo vazio ou errado, senha, rede, tabela | Confira o `amb` e o segredo (`gcloud secrets versions list sacou-backup-database-url-$amb`) e rode de novo |
+   | 2 (`usage: ...`) | Uso errado, dito no fim da linha: variável faltando ou vazia (segredo vazio ou falha do `gcloud`), `--dump-created-at` inválido ou no futuro, destino sem o esquema `identity` (não é o banco restaurado), origem com papel que escreve (a URL da API no lugar da do `sacou_backup`), origem igual ao destino ou as duas URLs trocadas | Corrija o que a linha diz e rode de novo; nada foi escrito |
+   | 3 (`source unreadable`) | A origem não abre: segredo errado, senha, rede, tabela | Confira o `amb` e o segredo (`gcloud secrets versions list sacou-backup-database-url-$amb`) e rode de novo |
    | 4 (`dump older than the mark retention (60 days)`) | O dump é mais velho que as marcas (60 dias); não acontece com o bucket de 30 dias | Manifesto errado: pare e chame o desenvolvedor |
    | 5 (`failed ...; run again`) | O banco falhou no meio | Rode de novo: cada passo é idempotente e retoma de onde parou. Se repetir, mande só a linha ao desenvolvedor |
+   | Outro código (com pilha de erro) | Exceção não tratada: destino que não abre ou migração que falha | Pare, não copie a saída para lugar nenhum (pode trazer o host) e chame o desenvolvedor |
 
    **Conferência dos Admins** (risco aceito da pergunta 231, [`grupos.md`](../dominio/grupos.md)): quando a conta reexcluída era o único Admin ativo de um grupo, o comando promove o membro ativo mais antigo com conta **do banco restaurado**, que pode não ser quem o grupo tinha escolhido depois do dump. Compare os Admins dos dois bancos (só IDs):
    ```sh
