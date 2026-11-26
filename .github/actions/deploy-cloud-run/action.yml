@@ -124,9 +124,14 @@ runs:
           echo "SACOU_OPERATOR_UIDS must hold Firebase UIDs separated by commas."
           exit 1
         fi
-        # The data protection contact (E6.4): a plain e-mail or nothing, so the value cannot end the YAML string it goes
-        # into; the API checks it again on start and, in Production, refuses to start without it. Never echoed.
-        if ! [[ "$DATA_PROTECTION_EMAIL" =~ ^([A-Za-z0-9._+-]+@[A-Za-z0-9.-]+)?$ ]]; then
+        # The data protection contact (E6.4): required in Production (the page and the Play need the channel), optional
+        # in Staging. A plain e-mail with the same pattern as the API (DataProtectionOptions.cs, after it lowers the case),
+        # so the value cannot end the YAML string it goes into; the API checks it again on start. Never echoed.
+        if [[ "$ASPNETCORE_ENVIRONMENT" == "Production" && -z "$DATA_PROTECTION_EMAIL" ]]; then
+          echo "SACOU_DATA_PROTECTION_EMAIL is required in production."
+          exit 1
+        fi
+        if ! [[ "$DATA_PROTECTION_EMAIL" =~ ^([A-Za-z0-9._+-]+@[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)+)?$ ]]; then
           echo "SACOU_DATA_PROTECTION_EMAIL must be a plain e-mail address."
           exit 1
         fi
