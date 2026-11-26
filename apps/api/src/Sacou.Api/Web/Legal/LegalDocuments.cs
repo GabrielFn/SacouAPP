@@ -1,11 +1,13 @@
 namespace Sacou.Api.Web.Legal;
 
-/// <summary>The two legal texts the API publishes (E6.1, ADR 0083). A fake in the tests, to try hostile content on the page.</summary>
+/// <summary>The legal texts the API publishes (E6.1, ADR 0083; the account deletion page, E6.4). A fake in the tests, to try hostile content on the page.</summary>
 internal interface ILegalDocuments
 {
     LegalDocument Terms { get; }
 
     LegalDocument Privacy { get; }
+
+    LegalDocument AccountDeletion { get; }
 }
 
 /// <summary>Where the raw Markdown of each text comes from: the files of <c>docs/legal/</c>, built into this assembly.</summary>
@@ -33,24 +35,28 @@ internal sealed class EmbeddedLegalDocumentSource : ILegalDocumentSource
 }
 
 /// <summary>
-/// Both texts read once, while the host starts: an invalid one stops the start (<c>WebSetup.ReadSacouLegalDocuments</c>), with
+/// The texts read once, while the host starts: an invalid one stops the start (<c>WebSetup.ReadSacouLegalDocuments</c>), with
 /// the file and the line, never the content.
 /// </summary>
 internal sealed class LegalDocuments : ILegalDocuments
 {
     public const string TermsFile = "termos-de-uso.md";
     public const string PrivacyFile = "politica-de-privacidade.md";
+    public const string AccountDeletionFile = "exclusao-de-conta.md";
 
     public LegalDocuments(ILegalDocumentSource source)
     {
         ArgumentNullException.ThrowIfNull(source);
         Terms = Load(source, TermsFile);
         Privacy = Load(source, PrivacyFile);
+        AccountDeletion = Load(source, AccountDeletionFile);
     }
 
     public LegalDocument Terms { get; }
 
     public LegalDocument Privacy { get; }
+
+    public LegalDocument AccountDeletion { get; }
 
     private static LegalDocument Load(ILegalDocumentSource source, string fileName)
     {

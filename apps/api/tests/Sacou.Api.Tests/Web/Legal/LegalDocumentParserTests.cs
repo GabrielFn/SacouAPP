@@ -190,6 +190,7 @@ public sealed class LegalDocumentParserTests
     [Theory]
     [InlineData(LegalDocuments.TermsFile, "Termos de Uso do Sacou")]
     [InlineData(LegalDocuments.PrivacyFile, "Política de Privacidade do Sacou")]
+    [InlineData(LegalDocuments.AccountDeletionFile, "Excluir sua conta do Sacou")]
     public void TheRealEmbeddedTexts_AreValid_AndCarryNoReviewNote(string fileName, string title)
     {
         var document = Parsed(new EmbeddedLegalDocumentSource().Read(fileName));
@@ -216,7 +217,7 @@ public sealed class LegalDocumentParserTests
         var source = new EmbeddedLegalDocumentSource();
         var folder = Path.Combine(RepositoryRoot(), "docs", "legal");
 
-        foreach (var fileName in new[] { LegalDocuments.TermsFile, LegalDocuments.PrivacyFile })
+        foreach (var fileName in new[] { LegalDocuments.TermsFile, LegalDocuments.PrivacyFile, LegalDocuments.AccountDeletionFile })
         {
             Assert.Equal(
                 File.ReadAllText(Path.Combine(folder, fileName)).ReplaceLineEndings("\n"),

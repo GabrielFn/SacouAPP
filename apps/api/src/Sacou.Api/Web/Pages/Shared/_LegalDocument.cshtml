@@ -1,5 +1,6 @@
 @model LegalPageView
-@* The terms and the privacy policy (E6.1, ADR 0083): plain text from the reader, every value encoded by Razor, no script. *@
+@* The terms, the privacy policy (E6.1, ADR 0083) and the account deletion page (E6.4): plain text from the reader and
+   the settings, every value encoded by Razor, no script. *@
 @{
     var document = Model.Document;
 }
@@ -24,6 +25,20 @@
             <h1>@document.Title</h1>
             <p class="legal-version">@Model.VersionLine</p>
         </header>
+        @if (Model.DeletionRequest is { } request)
+        {
+            <section class="legal-request" aria-labelledby="legal-request-title">
+                <h2 id="legal-request-title">@WebTexts.DeletionRequestTitle</h2>
+                @if (request.Email is { } email && request.MailTo is { } mailTo)
+                {
+                    <p><a href="@mailTo">@email</a></p>
+                }
+                else
+                {
+                    <p>@WebTexts.DeletionRequestUnavailable</p>
+                }
+            </section>
+        }
         @foreach (var block in document.Blocks)
         {
             switch (block)

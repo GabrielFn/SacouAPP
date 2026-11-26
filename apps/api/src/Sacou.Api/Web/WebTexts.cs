@@ -87,6 +87,13 @@ internal static class WebTexts
     public const string TermsOfUse = "Termos de Uso";
     public const string SeeAlso = "Veja também: ";
 
+    // The account deletion page (E6.4): the block to ask without the app, above the text of docs/legal/exclusao-de-conta.md.
+    public const string DeletionRequestTitle = "Pedir sem o app";
+    public const string DeletionRequestUnavailable = "O pedido por e-mail ainda não está disponível. Por enquanto, exclua pelo app.";
+
+    /// <summary>The subject of the <c>mailto:</c>, already percent-encoded: "Excluir minha conta do Sacou".</summary>
+    public const string DeletionRequestSubject = "Excluir%20minha%20conta%20do%20Sacou";
+
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
     private static readonly string[] WeekdaysWithArticle =

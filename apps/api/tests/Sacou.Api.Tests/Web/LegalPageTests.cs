@@ -191,6 +191,8 @@ public sealed class LegalPageTests(SacouApiFactory factory) : IClassFixture<Saco
         public LegalDocument Terms => document;
 
         public LegalDocument Privacy => document;
+
+        public LegalDocument AccountDeletion => document;
     }
 
     private sealed class FakeSource(string content) : ILegalDocumentSource

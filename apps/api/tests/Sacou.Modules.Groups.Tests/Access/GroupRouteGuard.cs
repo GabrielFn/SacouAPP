@@ -61,6 +61,9 @@ internal static class GroupRouteGuard
         "GET,HEAD termos",
         "GET,HEAD privacidade",
 
+        // The account deletion page (E6.4): the same anonymous public text, GET and HEAD only.
+        "GET,HEAD excluir-conta",
+
         // The operator's dashboard (E7.2, ADR 0085): the anonymous shell and its counts, by the listed UIDs only, no group id.
         "GET,HEAD painel",
         "GET /v1/ops/metrics",

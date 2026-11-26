@@ -9,6 +9,8 @@ public sealed class LegalPageRefusalTests(SacouApiFactory factory) : IClassFixtu
     [Theory]
     [InlineData("/termos/x")]
     [InlineData("/privacidade/x")]
+    [InlineData("/excluir-conta/x")]
+    [InlineData("/AccountDeletion")]
     public async Task PathBelowAPage_IsExactly401(string path)
     {
         using var client = factory.CreateClient();
@@ -21,6 +23,7 @@ public sealed class LegalPageRefusalTests(SacouApiFactory factory) : IClassFixtu
     [Theory]
     [InlineData("/termos")]
     [InlineData("/privacidade")]
+    [InlineData("/excluir-conta")]
     public async Task Post_IsExactly401(string path)
     {
         using var client = factory.CreateClient();
