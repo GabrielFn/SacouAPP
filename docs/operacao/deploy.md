@@ -78,7 +78,7 @@ Até a E6.9 (comando do operador, que entra **antes do teste fechado**), o pedid
 
 1. Conferir o pedido: o cabeçalho `Authentication-Results` traz SPF, DKIM e DMARC `pass` no domínio do remetente, e o remetente é o e-mail de uma conta no Firebase (Console → Authentication → Users). Faltou um dos dois: responder pedindo que a pessoa escreva do e-mail da conta, sem apagar nada.
 2. Mandar uma confirmação ao e-mail da conta no Firebase (uma resposta nova, não um "responder" ao pedido) e esperar que ela volte respondida.
-3. **Não apagar à mão** no console do Firebase nem no banco: a exclusão (`DELETE /v1/me`, `apps/api/src/Sacou.Modules/Identity/DeleteMyAccount/DeleteMyAccountHandler.cs`) passa pelos módulos com as travas, confere os bloqueios (único admin), grava a marca de exclusão e faz uma varredura final; não há como repetir isso com segurança por SQL. Até a E6.9, o operador pede à pessoa que entre no app uma vez para excluir (o passo a passo da página) ou espera a E6.9, sempre dentro do prazo de 15 dias.
+3. **Não apagar à mão** no console do Firebase nem no banco: a exclusão (`DELETE /v1/me`, `apps/api/src/Sacou.Modules/Identity/DeleteMyAccount/DeleteMyAccountHandler.cs`) passa pelos módulos com as travas, confere os bloqueios (único admin), grava a marca de exclusão e faz uma varredura final; não há como repetir isso com segurança por SQL. O caminho normal é a E6.9, dentro do prazo de 15 dias: por isso **nenhum jogador real entra na produção antes da E6.9** (a página promete a exclusão sem instalar o app de novo). Se a pessoa preferir e ainda tiver o app, o operador pode indicar o passo a passo da página, sem exigir.
 4. Responder à pessoa quando a conta sumir (o Firebase não lista mais o e-mail).
 
 ## Primeiro deploy de cada serviço
