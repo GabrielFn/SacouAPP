@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sacou.Http.RateLimiting;
+using Sacou.Modules.Groups.Contracts;
 
 namespace Sacou.Modules.Groups.Infrastructure;
 
@@ -19,6 +20,9 @@ internal static class GroupsDatabase
         services.AddScoped<IGroupStore, PostgresGroupStore>();
         services.AddScoped<IGroupSettingsStore, PostgresGroupSettingsStore>();
         services.AddScoped<IMemberLevelStore, PostgresMemberLevelStore>();
+        services.AddScoped<PostgresContentReportStore>();
+        services.AddScoped<IContentReportStore>(provider => provider.GetRequiredService<PostgresContentReportStore>());
+        services.AddScoped<IContentReportRetention>(provider => provider.GetRequiredService<PostgresContentReportStore>());
         // The pool fits the two-connection routes the limiter lets run together, checked on start (ADR 0062, D4).
         services.AddSingleton<IValidateOptions<RateLimitingOptions>>(new DualConnectionPoolValidator(configuration));
         return services;

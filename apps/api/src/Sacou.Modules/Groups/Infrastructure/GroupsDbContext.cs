@@ -22,6 +22,8 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
 
     public DbSet<GuestRow> Guests => Set<GuestRow>();
 
+    public DbSet<ContentReportRow> ContentReports => Set<ContentReportRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -32,5 +34,6 @@ internal sealed class GroupsDbContext(DbContextOptions<GroupsDbContext> options)
         modelBuilder.ApplyConfiguration(new SavedTemplateConfiguration());
         modelBuilder.ApplyConfiguration(new MemberLevelConfiguration());
         modelBuilder.ApplyConfiguration(new GuestConfiguration());
+        modelBuilder.ApplyConfiguration(new ContentReportConfiguration());
     }
 }

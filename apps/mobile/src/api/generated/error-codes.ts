@@ -20,6 +20,7 @@ export const apiErrorCodes = [
   "groups.membership-limit",
   "groups.name-invalid",
   "groups.regular-needs-account",
+  "groups.report-self",
   "groups.role-needs-account",
   "groups.settings-invalid",
   "groups.template-limit",

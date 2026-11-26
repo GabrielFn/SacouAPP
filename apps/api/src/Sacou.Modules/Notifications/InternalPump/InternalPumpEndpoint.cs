@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
+using Sacou.Modules.Groups.Contracts;
 using Sacou.Modules.Identity.Contracts;
 using Sacou.Modules.Notifications.Application;
 using Sacou.Modules.Notifications.Contracts;
@@ -38,6 +39,7 @@ internal static class InternalPumpEndpoint
         IEnumerable<INotificationSource> sources,
         INotificationPump pump,
         INotificationRetention retention,
+        IContentReportRetention reports,
         TimeProvider time,
         IEnumerable<IRetentionCleanup> cleanups,
         ILoggerFactory loggers)
@@ -63,6 +65,9 @@ internal static class InternalPumpEndpoint
             await StepAsync("outbox-cleanup", () => source.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
         }
 
+        // The reports of E6.6 live 180 days (question 234): this route runs on the daily Cloud Scheduler sweep and on each
+        // Cloud Tasks call, and each run deletes the older ones (ADR 0069, D10).
+        await StepAsync("report-cleanup", () => reports.CleanUpAsync(time.GetUtcNow(), budget.Token), logger).ConfigureAwait(false);
         return TypedResults.NoContent();
     }
 

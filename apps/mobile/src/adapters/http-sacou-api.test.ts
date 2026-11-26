@@ -179,6 +179,22 @@ const OPERATIONS: readonly Operation[] = [
     null,
   ],
   [
+    "reportContent",
+    (a) => a.reportContent(GROUP, { reportedMemberId: MEMBER, reason: "impersonation" }),
+    "POST",
+    "/v1/groups/{groupId}/reports",
+    `/v1/groups/${GROUP}/reports`,
+    { reportedMemberId: MEMBER, reason: "impersonation" },
+  ],
+  [
+    "reportContent of the group",
+    (a) => a.reportContent(GROUP, { reportedMemberId: null, reason: "spam" }),
+    "POST",
+    "/v1/groups/{groupId}/reports",
+    `/v1/groups/${GROUP}/reports`,
+    { reportedMemberId: null, reason: "spam" },
+  ],
+  [
     "listMemberLevels",
     (a) => a.listMemberLevels(GROUP),
     "GET",
@@ -351,8 +367,8 @@ afterEach(() => {
 });
 
 describe("every operation builds the request of the contract (H1)", () => {
-  test("the table covers the 35 operations", () => {
-    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(35);
+  test("the table covers the 36 operations", () => {
+    expect(new Set(OPERATIONS.map(([name]) => name.split(" ")[0])).size).toBe(36);
   });
 
   test.each(OPERATIONS)("%s", async (_name, call, method, _template, path, body) => {

@@ -9,7 +9,6 @@ import { LoadingState } from "../../../ui/LoadingState";
 import { Text } from "../../../ui/Text";
 import type { LevelLookup, useMembersScreen } from "../hooks/use-members-screen";
 import { levelBadge } from "../model/member-levels";
-import { memberActions } from "../model/member-actions";
 import { inviteRows, memberName, memberRowModel } from "../model/members.selectors";
 import { InviteRow } from "./InviteRow";
 import { MemberRow } from "./MemberRow";
@@ -52,7 +51,8 @@ export function MembersList({ members, all, levelOf, onLevel, onOptions }: Membe
   return (
     <ListCard>
       {members.map((member) => {
-        const hasSheet = me !== undefined && memberActions(me, member, all) !== null;
+        // Every row has a sheet for who is in the list (E6.6: anyone may report someone else).
+        const hasSheet = me !== undefined;
         return (
           <MemberRow
             key={member.memberId}

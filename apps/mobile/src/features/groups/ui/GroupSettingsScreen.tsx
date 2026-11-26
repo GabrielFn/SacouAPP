@@ -11,6 +11,7 @@ import { useGroupSettingsScreen } from "../hooks/use-group-settings-screen";
 import { templateLabelText } from "../model/group-settings.selectors";
 import { queueRuleHref } from "../navigation";
 import { SETTINGS_SCREEN } from "../model/settings-layout";
+import { GroupReportSection } from "./ReportGroupRow";
 import { SettingsBlockView } from "./SettingsBlockView";
 import { SettingsHeader } from "./SettingsHeader";
 import { SettingsSheets } from "./SettingsSheets";
@@ -75,6 +76,7 @@ export function GroupSettingsScreen({ groupId }: GroupSettingsScreenProps) {
         />
       ))}
       <SettingsSheets model={model} ready={ready} />
+      <GroupReportSection groupId={groupId} />
     </Screen>
   );
 }

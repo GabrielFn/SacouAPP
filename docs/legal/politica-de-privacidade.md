@@ -6,7 +6,7 @@ Como este arquivo é publicado (plano `docs/estado/tarefas/E6.1.md`): só o trec
 
 # Política de Privacidade do Sacou
 
-Versão: 0.2 (rascunho)
+Versão: 0.3 (rascunho)
 
 Atualizada em: 25/11/2026
 
@@ -60,6 +60,10 @@ Para sortear times equilibrados, o administrador e o co-administrador do grupo p
 ### Convidados sem conta
 
 O organizador pode incluir no grupo uma pessoa que não tem o app, digitando um nome ou apelido e, se quiser, a posição. Esse nome aparece para os membros do grupo e, na página pública da rodada, só o primeiro nome. O convidado pode pedir ao organizador ou ao nosso canal (seção 13) para corrigir ou remover o nome.
+
+### Denúncias
+
+Qualquer membro pode denunciar, dentro do app, o apelido de outro membro ou o nome e o local do grupo, escolhendo um de quatro motivos. Guardamos só quem denunciou, quem ou qual grupo foi denunciado, o motivo e a data, sem nenhum texto e sem cópia do nome. Ninguém do grupo fica sabendo quem denunciou. Usamos a denúncia só para analisar o caso e, se for preciso, mudar o nome ofensivo ou remover a conta, como dizem os Termos de Uso.
 
 ### Página da rodada e convite pelo navegador
 
@@ -123,6 +127,7 @@ Nossos servidores e o banco de dados ficam nos Estados Unidos (Google Cloud na r
 - Nome de convidado sem conta: até o organizador removê-lo, ou até o grupo ficar sem nenhum membro com conta. Quem nunca mais jogou continua no histórico enquanto o grupo existir.
 - Página da rodada no navegador: por enquanto, os apelidos ficam visíveis para quem tem o link enquanto a rodada existir. Passarão a ser escondidos 7 dias depois da rodada.
 - Notificações: 30 dias.
+- Denúncias: 180 dias. Ao excluir a conta, as denúncias que você fez e as feitas sobre você são apagadas na hora.
 - Registros técnicos de acesso: 30 dias.
 - Relatórios de erro: 90 dias.
 - Cópia no celular: até 7 dias, e é apagada quando você sai da conta. Os pontos marcados que ainda não foram enviados ficam no celular até o envio, mesmo se você excluir a conta. Passarão a ser apagados junto com a conta, no celular que marcou o placar.
@@ -189,13 +194,14 @@ Conferir antes do merge da E6.1 e a cada mudança de `docs/seguranca/dados-pesso
 | 2 Votação | "Votos do MVP do dia", "Cédula do MVP no aparelho" |
 | 2 Nível e sorteio | "Nível sugerido", "Nota do membro", "Rating OpenSkill", "Sorteio no aparelho" |
 | 2 Convidados | "Convidado sem conta" |
+| 2 Denúncias | "Denúncia de conteúdo" (E6.6) |
 | 2 Página da rodada e convite | "Perfil do jogador" (resposta 126), "Código do link", "Sessão da página web", "Endereço IP de quem abre a página" |
 | 2 Notificações | "Aparelhos do push", "No app (E3.11)", "Notificações e entregas", "Token de push" (serviços externos) |
 | 2 No seu celular | "Cache do servidor no aparelho", "Conta dona da sessão da quadra", "Imagem da cartinha" |
 | 2 Registros técnicos | "Chave do limite de requisições", "IP, user agent, caminho", "ID do celular no envelope", "Escritor de cada lote", "Erros da API" e "Erros e travamentos do app" (Sentry) |
 | 3 O que não coletamos | Colunas travadas por teste de modelo em `identity.users` e `player_profiles`; "Imagem da cartinha" (só escrita na galeria) |
 | 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push", "Erros da API" e "Erros e travamentos do app" (Sentry), "Cópia do banco" (Google Cloud Storage); seção 4 de `lgpd-checklist.md` |
-| 7 Retenção | Coluna "Retenção" de cada linha (E6.2); "Na exclusão"; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 90 dias do Sentry; 30 dias da "Cópia do banco"; 60 dias da "Marca de exclusão"; 6 h do Neon |
+| 7 Retenção | Coluna "Retenção" de cada linha (E6.2); "Na exclusão"; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 180 dias das denúncias (E6.6); 90 dias do Sentry; 30 dias da "Cópia do banco"; 60 dias da "Marca de exclusão"; 6 h do Neon |
 | 9 Direitos | "Direitos do titular" (exclusão, exportação, Ex-jogador) |
 
 ### Pontos que o advogado deve olhar

@@ -16,26 +16,26 @@ public sealed class GroupsSchemaTests(IntegrationDatabase database) : IAsyncLife
     public async ValueTask DisposeAsync() => await api.DisposeAsync();
 
     [Fact]
-    public async Task Migration_CreatesTheSevenTablesWithTheirConstraints()
+    public async Task Migration_CreatesTheEightTablesWithTheirConstraints()
     {
         await using var connection = await OpenAsync();
 
         Assert.Equal(
-            ["__ef_migrations_history", "group_settings", "groups", "guests", "invites", "member_levels", "members", "saved_templates"],
+            ["__ef_migrations_history", "content_reports", "group_settings", "groups", "guests", "invites", "member_levels", "members", "saved_templates"],
             await ReadAsync(connection, "SELECT table_name FROM information_schema.tables WHERE table_schema = 'groups' ORDER BY table_name"));
         Assert.Equal(
             [
-                "ck_group_settings_document", "ck_group_settings_one_template", "ck_group_settings_schema_version", "ck_group_settings_template_key",
+                "ck_content_reports_reason", "ck_group_settings_document", "ck_group_settings_one_template", "ck_group_settings_schema_version", "ck_group_settings_template_key",
                 "ck_groups_name_length", "ck_guests_name", "ck_guests_primary_position", "ck_invites_token_hash_length", "ck_invites_use_count", "ck_member_levels_level", "ck_members_left_at", "ck_members_member_type",
                 "ck_members_role", "ck_members_status", "ck_saved_templates_document", "ck_saved_templates_name_length", "ck_saved_templates_schema_version",
             ],
             await ReadAsync(connection, "SELECT conname FROM pg_constraint WHERE contype = 'c' AND connamespace = 'groups'::regnamespace ORDER BY conname"));
         Assert.Equal(
-            ["ux_guests_group_request", "ux_invites_token_hash", "ux_members_group_user"],
+            ["ux_content_reports_once", "ux_guests_group_request", "ux_invites_token_hash", "ux_members_group_user"],
             await ReadAsync(connection, "SELECT indexname FROM pg_indexes WHERE schemaname = 'groups' AND indexdef LIKE 'CREATE UNIQUE INDEX%' AND indexname LIKE 'ux_%' ORDER BY indexname"));
         Assert.Equal(
             [
-                "fk_group_settings_groups", "fk_group_settings_members", "fk_guests_groups", "fk_guests_members", "fk_invites_groups", "fk_invites_members",
+                "fk_content_reports_groups", "fk_content_reports_reported", "fk_content_reports_reporter", "fk_group_settings_groups", "fk_group_settings_members", "fk_guests_groups", "fk_guests_members", "fk_invites_groups", "fk_invites_members",
                 "fk_member_levels_groups", "fk_member_levels_members", "fk_member_levels_set_by", "fk_members_groups",
                 "fk_saved_templates_groups", "fk_saved_templates_members",
             ],

@@ -22,6 +22,9 @@ export type MemberLevel = Schemas["MemberLevelResponse"];
 export type MemberLevelSet = Schemas["MemberLevelSetResponse"];
 /** A level on the wire: 1.0 to 5.0 by half points, or `null` for "Não sei" (`perfil-e-nota.md`). */
 export type MemberLevelItem = Schemas["SetMemberLevelItem"];
+/** One of the four closed reasons of a report (E6.6, question 233): never free text. */
+export type ReportReason = Schemas["ContentReportReason"];
+export type ContentReportBody = Schemas["ReportContentRequest"];
 
 /** The template to copy onto the group: one of the ready-made ones, or one the group saved. */
 export type TemplateChoice =
@@ -161,6 +164,8 @@ export interface SacouApi {
   ): Promise<ApiResult<Schemas["ChangeMemberTypeResponse"]>>;
   removeMember(member: MemberRef): Promise<ApiResult<null>>;
   leaveGroup(groupId: string): Promise<ApiResult<null>>;
+  /** "Denunciar" (E6.6): a member, or the group with `reportedMemberId: null`; the same report again is the same 204. */
+  reportContent(groupId: string, report: ContentReportBody): Promise<ApiResult<null>>;
   /** Admin and co-admin only (403 for the others): never asked for them, never persisted (ADR 0047). */
   listMemberLevels(groupId: string): Promise<ApiResult<readonly MemberLevel[]>>;
   setMemberLevel(member: MemberRef, level: number | null): Promise<ApiResult<MemberLevelSet>>;

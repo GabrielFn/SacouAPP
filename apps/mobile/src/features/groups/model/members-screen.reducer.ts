@@ -1,9 +1,10 @@
 import type { LevelTenths } from "../../../ui/skill-level";
 
-/** What waits for a "yes" on screen 19: leaving, removing someone, or revoking one invite. */
+/** What waits for a "yes" on screen 19: leaving, removing or reporting someone (E6.6), or revoking one invite. */
 export type MembersConfirm =
   | { readonly kind: "leave" }
   | { readonly kind: "remove"; readonly memberId: string }
+  | { readonly kind: "report"; readonly memberId: string }
   | { readonly kind: "revoke-invite"; readonly inviteId: string };
 
 /**
@@ -33,7 +34,12 @@ export type MembersScreenAction =
   | { readonly type: "level-drafted"; readonly tenths: LevelTenths }
   | { readonly type: "level-closed" }
   | { readonly type: "leave-asked" }
-  | { readonly type: "remove-asked"; readonly memberId: string }
+  /** Removing or reporting one member (E6.6): both wait in the one confirmation slot. */
+  | {
+      readonly type: "member-confirm-asked";
+      readonly kind: "remove" | "report";
+      readonly memberId: string;
+    }
   | { readonly type: "revoke-asked"; readonly inviteId: string }
   | { readonly type: "confirm-closed" };
 
@@ -75,8 +81,8 @@ export function membersScreenReducer(
       return { ...state, level: null };
     case "leave-asked":
       return onlyConfirm({ kind: "leave" });
-    case "remove-asked":
-      return onlyConfirm({ kind: "remove", memberId: action.memberId });
+    case "member-confirm-asked":
+      return onlyConfirm({ kind: action.kind, memberId: action.memberId });
     case "revoke-asked":
       return onlyConfirm({ kind: "revoke-invite", inviteId: action.inviteId });
     case "confirm-closed":
