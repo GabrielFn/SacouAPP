@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { describe, it } from "node:test";
-import { URL } from "node:url";
+import { URL, fileURLToPath } from "node:url";
 
-import { findEasConfigViolations } from "./eas-config.mjs";
+import { findEasConfigViolations, findStoreDotenvViolations } from "./eas-config.mjs";
 
 const EAS_PATH = new URL("../../apps/mobile/eas.json", import.meta.url);
 const APP_PATH = new URL("../../apps/mobile/app.json", import.meta.url);
+const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const PROJECT_ID = "6ebec243-d104-4750-a5a2-8f0ab0e548db";
 
 function readJson(url) {
@@ -54,6 +57,20 @@ function without(object, key) {
 
 function withExpo(change) {
   return { expo: change(validApp().expo) };
+}
+
+function trackedMobileDotenvFiles() {
+  const output = execFileSync("git", ["ls-files", "-z", "--", "apps/mobile/.env*"], {
+    cwd: REPO_ROOT,
+    encoding: "utf8",
+  });
+  return output
+    .split("\0")
+    .filter((path) => path !== "")
+    .map((path) => ({
+      name: basename(path),
+      content: readFileSync(join(REPO_ROOT, path), "utf8"),
+    }));
 }
 
 describe("findEasConfigViolations", () => {
@@ -155,8 +172,43 @@ describe("findEasConfigViolations", () => {
     ]);
   });
 
+  it("fails when production has no update channel", () => {
+    const eas = withProduction((p) => without(p, "channel"));
+    assert.deepEqual(violations(eas), ['production: channel must be "production"']);
+  });
+
+  it("fails when app.json has no EAS project id", () => {
+    const app = withExpo((e) => ({ ...e, extra: {} }));
+    assert.deepEqual(violations(validEas(), app), [
+      'app.json: updates.url must be "https://u.expo.dev/<extra.eas.projectId>"',
+    ]);
+  });
+
   it("fails without updates.url", () => {
     const app = withExpo((e) => without(e, "updates"));
     assert.equal(violations(validEas(), app).length, 1);
+  });
+});
+
+describe("findStoreDotenvViolations", () => {
+  it("passes the dotenv files tracked in apps/mobile", () => {
+    assert.deepEqual(findStoreDotenvViolations(trackedMobileDotenvFiles()), []);
+  });
+
+  it("fails when a tracked .env.production turns on the dev tools or sets the API", () => {
+    const content = "EXPO_PUBLIC_DEV_TOOLS=1\nexport EXPO_PUBLIC_API_URL=http://10.0.2.2:5000\n";
+    assert.deepEqual(findStoreDotenvViolations([{ name: ".env.production", content }]), [
+      "apps/mobile/.env.production: EXPO_PUBLIC_DEV_TOOLS must not be tracked",
+      "apps/mobile/.env.production: EXPO_PUBLIC_API_URL must not be tracked",
+    ]);
+  });
+
+  it("ignores comments, other keys and files the store bundle does not load", () => {
+    const files = [
+      { name: ".env", content: "# EXPO_PUBLIC_DEV_TOOLS=1\nEXPO_PUBLIC_SENTRY_DSN=x\n" },
+      { name: ".env.example", content: "EXPO_PUBLIC_API_URL=\n" },
+      { name: ".env.development", content: "EXPO_PUBLIC_DEV_TOOLS=1\n" },
+    ];
+    assert.deepEqual(findStoreDotenvViolations(files), []);
   });
 });

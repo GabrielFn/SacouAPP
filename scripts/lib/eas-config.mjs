@@ -24,6 +24,42 @@ export const FORBIDDEN_STORE_ENV_KEYS = Object.freeze([
   "SENTRY_ALLOW_FAILURE",
 ]);
 
+// Files the Expo CLI loads on `eas update` and on a local export of the store bundle
+// (dotenv-flow with NODE_ENV=production). A tracked one with these keys would turn
+// on the developer screen or point the store JS to another API (E5.4, review of PR #270).
+export const STORE_DOTENV_FILES = Object.freeze([
+  ".env",
+  ".env.local",
+  ".env.production",
+  ".env.production.local",
+]);
+export const FORBIDDEN_STORE_DOTENV_KEYS = Object.freeze([
+  "EXPO_PUBLIC_DEV_TOOLS",
+  "EXPO_PUBLIC_API_URL",
+]);
+const DOTENV_KEY_PATTERN = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=/;
+
+function dotenvKeys(content) {
+  return content
+    .split(/\r?\n/)
+    .map((line) => DOTENV_KEY_PATTERN.exec(line)?.[1])
+    .filter((key) => key !== undefined);
+}
+
+/**
+ * @param {{ name: string, content: string }[]} files dotenv files tracked in apps/mobile
+ * @returns {string[]} one message per forbidden key in a file the store bundle loads
+ */
+export function findStoreDotenvViolations(files) {
+  return files
+    .filter(({ name }) => STORE_DOTENV_FILES.includes(name))
+    .flatMap(({ name, content }) =>
+      dotenvKeys(content)
+        .filter((key) => FORBIDDEN_STORE_DOTENV_KEYS.includes(key))
+        .map((key) => `apps/mobile/${name}: ${key} must not be tracked`),
+    );
+}
+
 function storeProfileViolations(profile) {
   const env = profile.env ?? {};
   const violations = [];
