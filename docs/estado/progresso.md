@@ -74,7 +74,9 @@
 | E5.3 | Feita no código | PRs #244 (backups, ADR 0082) e #245 (flags e versão mínima, ADR 0084). Revisores, segurança e testadores aprovaram; falta o Gabriel rodar o roteiro de backup (`docs/operacao/backup.md`) e o ensaio de restauração, e preencher o `UpdateUrl` antes de subir o mínimo. Antes de restauração real ou piloto com jogadores reais: comando de reexclusão de contas (`pendencias.md`). |
 
 ## Em andamento
-n- 25/11/2026: **#246 (E5.2 P2, Sentry no app) na `main`**, conferido no emulador. #250 (E7.2 P1) aprovado e testado, esperando a CI (limite do job subindo no #254). E6.2 aprovada pelo Gabriel; #253 em correção dos achados da segurança. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
+- 25/11/2026, noite: **M6 quase fechada no código.** Na `main`: E5.2 inteira (#240, #246, #255, #256), E6.2 (#253), E6.3 S1 e S2 (#257, #261), E6.5 (#265), E6.7 (#263), E6.8 (#262), E7.2 P1 (#250). Sentry e backup configurados com o Gabriel. E6.6 (#264) aprovada e testada, esperando só a conferência no emulador. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
+
+- 25/11/2026: **#246 (E5.2 P2, Sentry no app) na `main`**, conferido no emulador. #250 (E7.2 P1) aprovado e testado, esperando a CI (limite do job subindo no #254). E6.2 aprovada pelo Gabriel; #253 em correção dos achados da segurança. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
 
 - 24/11/2026, fim da sessão: na `main` E5.3 inteira (#244, #245); E5.3b P2 (#248) aprovada e testada, merge na CI; E7.2 P1 (#250) com CI verde, falta revisão; E5.2 P2 em andamento em `task/E5.2-p2-sentry-app`. Próximo passo no [diário de 24/11](sessoes/2026-11-24.md).
 
