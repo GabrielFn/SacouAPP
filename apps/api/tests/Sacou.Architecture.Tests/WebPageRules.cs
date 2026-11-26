@@ -23,6 +23,7 @@ internal static partial class WebPageRules
         "Round.cshtml",
         "Round.cshtml.cs",
         "Shared/_LegalDocument.cshtml",
+        "Shared/_DeletionRequest.cshtml",
         "Shared/_OpenGraph.cshtml",
         "Shared/_SignInSheet.cshtml",
         "Terms.cshtml",
