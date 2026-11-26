@@ -21,7 +21,7 @@ Depois do build, confira as permissões do APK (o `aapt` vem no Android SDK buil
 
 Se o build falhar, mande o link da página do build (ou a última tela de erro) para o orquestrador.
 
-**Antes de cada build:** suba `android.versionCode` em `apps/mobile/app.json` (o `eas.json` usa `appVersionSource: local`, então o número só muda por aqui). Ele é o "build" que a API compara com o mínimo (ADR 0084); um APK com número igual ou menor que o de outro já instalado não o substitui. O `expo-application` entrou na E5.3 Parte 2: o primeiro APK depois dela já traz o número; um APK antigo sem ele nunca é bloqueado.
+**Número do build:** o EAS sobe o `versionCode` sozinho a cada build `preview` ou `production` (`appVersionSource: remote`, ADR 0088); o `android.versionCode` do `app.json` não vale mais. Ele é o "build" que a API compara com o mínimo (ADR 0084); um APK com número igual ou menor que o de outro já instalado não o substitui. O `expo-application` entrou na E5.3 Parte 2: o primeiro APK depois dela já traz o número; um APK antigo sem ele nunca é bloqueado.
 
 ## Roteiro de 10 minutos
 
