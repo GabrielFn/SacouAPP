@@ -71,7 +71,7 @@ internal sealed record OpsGateWeek(DateOnly WeekStart, OpsGateCount Count);
 internal sealed record OpsGateGroup(string Name, OpsGateCount Count, int LongestStreak, bool MeetsGate);
 
 /// <param name="Registered">The accounts now.</param>
-/// <param name="Deleted">The accounts erased, ever.</param>
+/// <param name="Deleted">The accounts erased in the last 60 days: the deletion marks the purge of E6.5 has not taken yet (answer 235).</param>
 /// <param name="Weeks">The <see cref="OpsCalendar.WeekCount"/> weeks, the oldest first, each one present (0 when nothing).</param>
 internal sealed record OpsUsers(int Registered, int Deleted, IReadOnlyList<OpsUserWeek> Weeks);
 

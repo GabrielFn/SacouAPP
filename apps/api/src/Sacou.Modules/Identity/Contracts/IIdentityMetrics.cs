@@ -12,7 +12,7 @@ public interface IIdentityMetrics
 }
 
 /// <param name="Registered">The rows of <c>identity.users</c> now.</param>
-/// <param name="Deleted">Every account erasure, by its mark in <c>identity.deleted_accounts</c>.</param>
+/// <param name="Deleted">The account erasures of the last 60 days, by their marks in <c>identity.deleted_accounts</c> (the purge of E6.5 takes the older ones).</param>
 /// <param name="RegisteredByWeek">New users by the week of <c>created_at</c>, since the period's first week; a week without one is absent.</param>
 /// <param name="DeletedByWeek">Erasures by the week of <c>deleted_at</c>, the same way.</param>
 public sealed record IdentityMetrics(

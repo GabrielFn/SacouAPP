@@ -19,6 +19,7 @@ public sealed class PublicRoundSummaryTests
     private const int IndoorPlayers = 6;
     private const string AnyCode = "AAAAAAAAAAAAAAAAAAAAAA";
     private const bool WithRegular = true;
+    private const int SecondsPerDay = 24 * 60 * 60;
 
     private static readonly IReadOnlyDictionary<Guid, ListName> NoNames = new Dictionary<Guid, ListName>();
 
@@ -173,11 +174,80 @@ public sealed class PublicRoundSummaryTests
         Assert.Equal([new PublicListEntry(Nickname: null, Regular: false)], summary.Going.ToArray());
     }
 
+    /// <summary>E6.7, criterion 1: up to 7 days less a second after the start, the names are on the summary.</summary>
+    [Theory]
+    [InlineData(6 * SecondsPerDay)]
+    [InlineData((7 * SecondsPerDay) - 1)]
+    public void BeforeTheRetention_TheNamesStay(int secondsAfterStart)
+    {
+        var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var now = round.Slot.StartsAt.AddSeconds(secondsAfterStart);
+
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), now, AnaGoing(), WithRegular);
+
+        Assert.False(summary.ListExpired);
+        Assert.Equal([new PublicListEntry("Ana", true)], summary.Going.ToArray());
+    }
+
+    /// <summary>E6.7, criteria 2 and 4: from 7 days after the start on, no name, even when one was handed in.</summary>
+    [Theory]
+    [InlineData(7 * SecondsPerDay)]
+    [InlineData(8 * SecondsPerDay)]
+    public void FromTheRetention_TheListIsEmpty_AndMarkedExpired(int secondsAfterStart)
+    {
+        var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var now = round.Slot.StartsAt.AddSeconds(secondsAfterStart);
+
+        var summary = StorePublicRoundSummary.ToSummary(round, GroupName, Settings(LimitedWithWaitlist), now, AnaGoing(), WithRegular);
+
+        Assert.True(summary.ListExpired);
+        Assert.Empty(summary.Going);
+        Assert.Equal(PublicRoundState.Started, summary.State);
+    }
+
+    /// <summary>E6.7, criterion 2: a canceled round and one that ended expire alike, by the start and not the close.</summary>
+    [Fact]
+    public void CanceledAndEnded_EightDaysAfter_AreExpired()
+    {
+        var going = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var now = going.Slot.StartsAt.AddDays(8);
+        var canceled = going.Cancel().Round;
+        var ended = going.Close(now.AddDays(-1), hasFinishedMatch: true).Value.Round;
+
+        var ofCanceled = StorePublicRoundSummary.ToSummary(canceled, GroupName, Settings(LimitedWithWaitlist), now, AnaGoing(), WithRegular);
+        var ofEnded = StorePublicRoundSummary.ToSummary(ended, GroupName, Settings(LimitedWithWaitlist), now, AnaGoing(), WithRegular);
+
+        Assert.Equal((PublicRoundState.Canceled, true), (ofCanceled.State, ofCanceled.ListExpired));
+        Assert.Equal((PublicRoundState.Ended, true), (ofEnded.State, ofEnded.ListExpired));
+        Assert.Empty(ofCanceled.Going);
+        Assert.Empty(ofEnded.Going);
+    }
+
+    /// <summary>E6.7, criterion 4: after the retention the names are not even read; before it, read once.</summary>
+    [Fact]
+    public async Task NamesOnPage_AreNotRead_FromTheRetentionOn()
+    {
+        var round = Going(RoundFixture.NewRound(), LimitedWithWaitlist, count: 1);
+        var expired = new CountingListNames();
+        var listed = new CountingListNames();
+        var cancellation = TestContext.Current.CancellationToken;
+
+        var none = await StorePublicRoundSummary.NamesOnPageAsync(expired, round, round.Slot.StartsAt.AddDays(7), cancellation);
+        var some = await StorePublicRoundSummary.NamesOnPageAsync(listed, round, round.Slot.StartsAt.AddDays(6), cancellation);
+
+        Assert.Equal(0, expired.Calls);
+        Assert.Empty(none);
+        Assert.Equal(1, listed.Calls);
+        Assert.NotEmpty(some);
+    }
+
     /// <summary>
     /// A closed list: a new field is a decision about what the anonymous page shows, never a side effect. The first names
     /// (<see cref="PublicRoundSummary.Going"/>) are there by the decision of 19/11/2026 (question 126, option 2: the first
     /// names for everyone, as on screen 01); still no id, position, level or money. <see cref="PublicRoundSummary.DropInOpensAt"/>
     /// came with R101 (ADR 0079): a rule of the group (the instant the avulsos' list opens), not data of a member.
+    /// <see cref="PublicRoundSummary.ListExpired"/> came with E6.7: the mark that the names left the page 7 days after
+    /// the start, not data of a member either.
     /// </summary>
     [Fact]
     public void Summary_HasOnlyThePublicFields_AndNoneOfAMember()
@@ -186,6 +256,7 @@ public sealed class PublicRoundSummaryTests
         [
             "GroupName", "LocalDate", "LocalTime", "TimeZone", "StartsAt", "Venue", "State", "Capacity", "GoingCount",
             "WaitlistCount", "WaitlistEnabled", "PlayersPerTeam", "PointsPerSet", "LoserLeaves", "Going", "DropInOpensAt",
+            "ListExpired",
         ];
 
         Assert.Equal(expected.Order(StringComparer.Ordinal), PropertiesOf(typeof(PublicRoundSummary)));
@@ -215,6 +286,21 @@ public sealed class PublicRoundSummaryTests
         new DrawRules(Enabled: false, BalanceByLevel: false, IndoorPlayers),
         format ?? new FormatRules(ScoringEnabled: true, PointsPerSet, QueueEnabled: true),
         new SummaryRules(GameModality.Indoor6x6, MvpEnabled: false, MvpByStats: true, IndividualPoints: false));
+
+    private static Dictionary<Guid, ListName> AnaGoing() => new() { [RoundFixture.Member(1).Value] = new("Ana", Regular: true) };
+
+    /// <summary>Counts the reads, so a test sees that none happened after the retention.</summary>
+    private sealed class CountingListNames : IRoundListNames
+    {
+        public int Calls { get; private set; }
+
+        public Task<IReadOnlyDictionary<Guid, ListName>> FindAsync(
+            Guid groupId, IReadOnlyCollection<Guid> memberIds, CancellationToken cancellationToken)
+        {
+            Calls++;
+            return Task.FromResult<IReadOnlyDictionary<Guid, ListName>>(AnaGoing());
+        }
+    }
 
     private sealed class OneRoundStore(Round? round) : UnsupportedRoundStore
     {

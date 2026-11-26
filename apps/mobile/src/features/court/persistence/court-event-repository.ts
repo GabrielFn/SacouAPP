@@ -18,6 +18,7 @@ import {
   moveCursor,
   readSyncColumns,
 } from "./court-sync-statements";
+import { forgetSessionsOf } from "./forget-statements";
 import { FIRST_BATCH } from "./migrations.data";
 import {
   loadRefused,
@@ -51,6 +52,9 @@ import {
 } from "./row-mapping";
 
 const VALUE_COLUMN = "value";
+/** An empty account key matches no session on purpose: nothing runs (E6.8). */
+const NO_OWNER_KEY = "";
+const NONE_FORGOTTEN = 0;
 
 /** Carries an `Err` out of a transaction so it rolls back; it never leaves this file. */
 class RollbackSignal extends Error {
@@ -276,5 +280,9 @@ export function createCourtEventRepository(database: SqlDatabase, ids: IdGenerat
       guarded(() => atomically(database, (tx) => replaceWithServerStream(tx, stream))),
     markRefusedSeen: (courtSessionId) =>
       guarded(() => atomically(database, (tx) => markRefusedSeen(tx, courtSessionId))),
+    forgetSessionsOf: (ownerKey) =>
+      ownerKey === NO_OWNER_KEY
+        ? Promise.resolve(ok(NONE_FORGOTTEN))
+        : guarded(() => atomically(database, (tx) => forgetSessionsOf(tx, ownerKey))),
   };
 }

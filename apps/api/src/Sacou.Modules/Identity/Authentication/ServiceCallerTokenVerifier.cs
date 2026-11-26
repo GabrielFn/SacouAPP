@@ -22,7 +22,7 @@ internal enum ServiceCallerRejection
 /// <summary>The Google OIDC keys, apart from the Firebase ones: another URL, another cache.</summary>
 internal sealed class ServiceCallerSigningKeys(GoogleSigningKeySource keys) : ISigningKeySource, IDisposable
 {
-    public const string HttpClientName = "Sacou.Identity.ServiceCallerKeys";
+    public const string HttpClientName = IdentityModule.ServiceCallerKeysHttpClientName;
 
     /// <summary>The keys that sign the Google OIDC tokens of service accounts, in the same x509 document shape as Firebase's.</summary>
     public static readonly Uri KeysUri = new("https://www.googleapis.com/oauth2/v1/certs");

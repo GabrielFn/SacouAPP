@@ -165,4 +165,11 @@ export interface CourtEventLog {
   replaceWithServerStream(stream: ServerStreamImport): Promise<CourtLogResult<void>>;
   /** "Entendi" on screen 09c: the refused events stay, only no longer shown (D6). */
   markRefusedSeen(courtSessionId: string): Promise<CourtLogResult<void>>;
+  /**
+   * The deletion of an account (E6.8): in one transaction, every session whose `owner_key` is
+   * `ownerKey` leaves with its events and its refused ones, open or closed, sent or not. The sessions
+   * of other accounts, the ones without an owner and the device ID stay. Answers how many sessions
+   * left; an empty key touches nothing and answers 0.
+   */
+  forgetSessionsOf(ownerKey: string): Promise<CourtLogResult<number>>;
 }

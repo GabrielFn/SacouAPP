@@ -2,7 +2,9 @@ import { MutationObserver } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { createFakeAuthSession, fakeSessionIdentity } from "../../../adapters/fake-auth-session";
+import { createFakeCourtEventLog } from "../../../adapters/fake-court-event-log";
 import { createFakeSacouApi } from "../../../adapters/fake-sacou-api";
+import { createSequentialIdGenerator } from "../../../adapters/fake-sequential-id-generator";
 import type { ApiError } from "../../../services/api/api-error";
 import { apiErr, apiOk } from "../../../services/api/api-result";
 import type { DeletionBlocker } from "../../../services/api/sacou-api";
@@ -57,6 +59,7 @@ function setup() {
     api: fake.api,
     auth,
     ender,
+    court: createFakeCourtEventLog(createSequentialIdGenerator()),
     refreshBlockers: () => {
       refreshed.count += 1;
       return Promise.resolve();

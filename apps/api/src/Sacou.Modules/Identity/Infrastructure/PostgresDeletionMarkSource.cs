@@ -1,21 +1,53 @@
+using System.Data.Common;
 using Npgsql;
 using Sacou.Modules.Identity.ReapplyDeletions;
+using Sacou.Shared.Results;
 
 namespace Sacou.Modules.Identity.Infrastructure;
 
 /// <summary>
 /// The current database, through the backup's read-only role (E6.3, door 2): one connection of its own, outside the API's
-/// pool, and a <c>READ ONLY</c> transaction, so not even a bug here can write to it.
+/// pool, and a <c>READ ONLY</c> transaction, so not even a bug here can write to it. A role that could write is refused
+/// before any mark is read (S2): it is the API's credential, the one the restore must never hold twice.
 /// </summary>
 internal sealed class PostgresDeletionMarkSource : IDeletionMarkSource
 {
     private const string ReadOnly = "SET TRANSACTION READ ONLY";
 
+    private const string Writes = "INSERT, UPDATE, DELETE, TRUNCATE";
+
+    private const string Users = $"{IdentityDbContext.Schema}.{UserConfiguration.Table}";
+
+    private const string Marks = $"{IdentityDbContext.Schema}.{DeletedAccountConfiguration.Table}";
+
+    /// <summary>
+    /// True when the role may write or empty either table (a superuser or <c>pg_write_all_data</c> counts too), is a member
+    /// of the role that owns the tables (it could grant itself the rest) or may create objects in the schema.
+    /// </summary>
+    private const string CanWrite =
+        $"SELECT has_table_privilege(current_user, '{Users}', '{Writes}') OR has_table_privilege(current_user, '{Marks}', '{Writes}') " +
+        $"OR pg_has_role(current_user, (SELECT relowner FROM pg_class WHERE oid = '{Users}'::regclass), 'MEMBER') " +
+        $"OR has_schema_privilege(current_user, '{IdentityDbContext.Schema}', 'CREATE')";
+
     private const string SelectMarks =
         $"SELECT {DeletedAccountConfiguration.SubjectHashColumn}, {DeletedAccountConfiguration.DeletedAtColumn} " +
-        $"FROM {IdentityDbContext.Schema}.{DeletedAccountConfiguration.Table} ORDER BY {DeletedAccountConfiguration.SubjectHashColumn}";
+        $"FROM {Marks} ORDER BY {DeletedAccountConfiguration.SubjectHashColumn}";
 
-    public async Task<IReadOnlyList<DeletionMark>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
+    public async Task<Result<SourceMarks>> ReadAllAsync(string connectionString, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await ReadAsync(connectionString, cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbException)
+        {
+            // No connection, a wrong password, no permission or no table: only the code goes out, never the message,
+            // which may name the host.
+            return Result.Failure<SourceMarks>(ReapplyDeletionsRefusals.SourceUnreadable);
+        }
+    }
+
+    private static async Task<Result<SourceMarks>> ReadAsync(string connectionString, CancellationToken cancellationToken)
     {
         var withoutPool = new NpgsqlConnectionStringBuilder(connectionString) { Pooling = false }.ConnectionString;
         var connection = new NpgsqlConnection(withoutPool);
@@ -25,16 +57,28 @@ internal sealed class PostgresDeletionMarkSource : IDeletionMarkSource
             var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             await using (transaction.ConfigureAwait(false))
             {
-                var readOnly = new NpgsqlCommand(ReadOnly, connection, transaction);
-                await using (readOnly.ConfigureAwait(false))
+                _ = await ScalarAsync(ReadOnly, connection, transaction, cancellationToken).ConfigureAwait(false);
+                if (await ScalarAsync(CanWrite, connection, transaction, cancellationToken).ConfigureAwait(false) is true)
                 {
-                    _ = await readOnly.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                    return Result.Failure<SourceMarks>(ReapplyDeletionsRefusals.SourceCanWrite);
                 }
 
+                var instance = (string)(await ScalarAsync(DatabaseInstance.Query, connection, transaction, cancellationToken).ConfigureAwait(false))!;
                 var marks = await ReadMarksAsync(connection, transaction, cancellationToken).ConfigureAwait(false);
                 await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                return marks;
+                return Result.Success(new SourceMarks(instance, marks));
             }
+        }
+    }
+
+    private static async Task<object?> ScalarAsync(
+        string sql, NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken cancellationToken)
+    {
+        var command = new NpgsqlCommand(sql, connection, transaction);
+        await using (command.ConfigureAwait(false))
+        {
+            return await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 

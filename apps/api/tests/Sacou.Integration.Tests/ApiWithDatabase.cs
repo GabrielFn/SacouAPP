@@ -28,6 +28,12 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
 {
     private const string KeyId = "integration-key";
 
+    private const string ServiceCallerKeyId = "integration-google-oidc";
+
+    private const string ServiceCallerAudience = "https://sacou-api-integration.a.run.app";
+
+    private const string ServiceCallerEmail = "sacou-tasks-invoker@sacou-integration.iam.gserviceaccount.com";
+
     private const string ConnectionStringSetting = "ConnectionStrings:Sacou";
 
     /// <summary>One migrator at a time: every test class migrates the one shared database when it starts, and two runners applying a pending migration together fail on "already exists".</summary>
@@ -65,11 +71,36 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         this.settings = settings;
         Key = TestSigningKey.Create(KeyId);
         Keys = new StubHttpHandler(_ => StubHttpHandler.Json(TestSigningKeys.Document(Key), TimeSpan.FromHours(1)));
+        ServiceCallerKey = TestSigningKey.Create(ServiceCallerKeyId);
+        ServiceCallerKeys = new StubHttpHandler(_ => StubHttpHandler.Json(TestSigningKeys.Document(ServiceCallerKey), TimeSpan.FromHours(1)));
     }
 
     internal TestSigningKey Key { get; }
 
     internal StubHttpHandler Keys { get; }
+
+    /// <summary>The Google key the OIDC tokens of the internal routes are signed with, served behind the real named client.</summary>
+    internal TestSigningKey ServiceCallerKey { get; }
+
+    internal StubHttpHandler ServiceCallerKeys { get; }
+
+    /// <summary>The settings that open the internal routes (ADR 0069, D11) to <see cref="ServiceCallerToken"/>; without them every call is a 401.</summary>
+    internal static IReadOnlyDictionary<string, string?> ServiceCallerSettings { get; } = new Dictionary<string, string?>(StringComparer.Ordinal)
+    {
+        [ServiceCallers.AudienceKey] = ServiceCallerAudience,
+        [ServiceCallers.EmailKey] = ServiceCallerEmail,
+    };
+
+    /// <summary>A Google OIDC token of the accepted caller, as Cloud Tasks and Cloud Scheduler send it, minted by <see cref="Clock"/>.</summary>
+    internal string ServiceCallerToken() =>
+        TestIdToken.Valid(ServiceCallerKey, Clock.GetUtcNow())
+            .With("iss", "https://accounts.google.com")
+            .With("aud", ServiceCallerAudience)
+            .With("email", ServiceCallerEmail)
+            .With("email_verified", true)
+            .Without("firebase")
+            .Without("auth_time")
+            .Sign();
 
     /// <summary>The database the API uses: the shared one, or the one a test set in <c>ConnectionStrings:Sacou</c> (the backup tests use their own).</summary>
     internal string ConnectionString =>
@@ -193,6 +224,10 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
             .AddHttpClient(IdentityModule.SigningKeysHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => Keys)
             .SetHandlerLifetime(Timeout.InfiniteTimeSpan));
+        builder.ConfigureServices(services => services
+            .AddHttpClient(IdentityModule.ServiceCallerKeysHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => ServiceCallerKeys)
+            .SetHandlerLifetime(Timeout.InfiniteTimeSpan));
     }
 
     /// <summary>Wraps the Groups' own membership (whatever type it is) in a pass-through that runs <see cref="BeforeMembershipLookup"/>.</summary>
@@ -273,6 +308,7 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         if (disposing)
         {
             Key.Dispose();
+            ServiceCallerKey.Dispose();
         }
 
         base.Dispose(disposing);

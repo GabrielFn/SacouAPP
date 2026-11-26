@@ -6,7 +6,9 @@ import type {
   AuthProvider,
   AuthSession,
   Reauthentication,
+  SessionIdentity,
 } from "../../../services/auth/auth-session";
+import type { CourtLogResult } from "../../court/ports/court-event-log";
 import type { SessionEnder } from "../../../services/session/end-session";
 import { apiErrorTexts } from "../../../strings/api-errors.pt-BR";
 import { strings } from "../../../strings/pt-BR";
@@ -25,10 +27,19 @@ export type DeletionOutcome =
   | { readonly kind: "reauth-failed"; readonly failure: AuthFailure }
   | { readonly kind: "failed"; readonly error: ApiError };
 
+/**
+ * The court sessions of the deleted account leave the device (E6.8): the real one is the
+ * `CourtEventLog`, the fake one `createFakeCourtEventLog`.
+ */
+export interface CourtAccountForget {
+  forgetSessionsOf(ownerKey: string): Promise<CourtLogResult<number>>;
+}
+
 export interface DeletionDeps {
   readonly api: Pick<SacouApi, "deleteMyAccount">;
-  readonly auth: Pick<AuthSession, "reauthenticate" | "currentSession">;
+  readonly auth: Pick<AuthSession, "reauthenticate" | "currentSession" | "accountKeyOf">;
   readonly ender: Pick<SessionEnder, "endDeleted">;
+  readonly court: CourtAccountForget;
   readonly refreshBlockers: () => Promise<void>;
 }
 
@@ -42,12 +53,30 @@ function isProblem(error: ApiError, code: string): boolean {
   return error.kind === "problem" && error.code === code;
 }
 
+/**
+ * After the 204 and before the session ends, while the identity is still the deleted one (E6.8). The
+ * key of the account that asked, never of one signed in meanwhile; an unknown key forgets nothing.
+ * Never blocks the deletion: the account is already gone on the server, so a failure is dropped,
+ * without a log (the key and the count are personal enough to keep out of it).
+ */
+async function forgetCourtSessions(deps: DeletionDeps, session: SessionIdentity): Promise<void> {
+  try {
+    const ownerKey = await deps.auth.accountKeyOf(session);
+    if (ownerKey !== null) await deps.court.forgetSessionsOf(ownerKey);
+  } catch {
+    // Dropped on purpose: see above.
+  }
+}
+
 async function attemptDeletion(deps: DeletionDeps): Promise<DeletionOutcome> {
   // Read before the call: only the account that asked for the deletion leaves Firebase.
   const session = deps.auth.currentSession();
   const result = await deps.api.deleteMyAccount();
   if (result.ok) {
-    if (session !== null) await deps.ender.endDeleted(session);
+    if (session !== null) {
+      await forgetCourtSessions(deps, session);
+      await deps.ender.endDeleted(session);
+    }
     return { kind: "deleted" };
   }
   if (isProblem(result.error, BLOCKED)) {

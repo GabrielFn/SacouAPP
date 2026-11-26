@@ -288,3 +288,13 @@ Detalhes em `.specs/features/E6.3/plan.md`. Nenhuma trava a S1.
 229. Origem das marcas se o banco atual se perder de vez: (1) o dump mais novo, com risco residual registrado; (2) cópia diária das marcas noutro lugar. **Recomendação: 1.** **Resposta do Gabriel (25/11): 1.**
 230. Rodar o comando também no Restore do Neon, com a origem no ramo de antes da restauração? **Recomendação: sim** (falta confirmar no console que o Neon cria esse ramo). **Resposta do Gabriel (25/11): não, só depois de restaurar o backup diário.**
 231. Grupo que fica sem Admin porque a restauração desfez a passagem de admin: reexcluir assim mesmo, contar no resumo, e o Gabriel promove à mão se o grupo pedir. **Recomendação: assim** (promover sozinho contraria `grupos.md`; manter a conta viola a LGPD). **Resposta do Gabriel (25/11): promover o membro ativo mais antigo a Admin** (regra nova de domínio, contra a recomendação).
+
+## 25/11/2026: E6.5 a E6.8, perguntas 232 a 241 (respondidas e aprovadas: "Aprovo os quatro")
+Detalhes nos `plan.md` de `.specs/features/E6.5` a `E6.8`.
+232. (E6.6) Onde fica "Denunciar": (1) no "⋯" de todo outro membro (folha 19c) e "Denunciar grupo" nos ajustes (tela 18); (2) só no membro; (3) menu novo. **Resposta do Gabriel: 1**, depois de perguntar por que denunciar sem chat (apelido, nome do grupo, local e convidado são texto de usuário visto por outros; política de UGC da Play). Decisão: "fazer o mínimo agora".
+233. (E6.6) Motivos: **4 motivos fechados, sem texto livre** (resposta do Gabriel).
+234. (E6.6) Aviso ao Gabriel: **e-mail de alerta do Cloud Logging (grátis), leitura pelo SQL no Neon, resposta em até 7 dias, denúncia guardada 180 dias** (resposta do Gabriel).
+235. (E6.5) Rótulo do painel: **"Contas excluídas (60 dias)"** (resposta do Gabriel).
+238. (E6.7) No lugar da lista: **"A lista de quem foi sai da página 7 dias depois da rodada."** (resposta do Gabriel).
+240. (E6.8) Conta apagada em outro aparelho: **não apagar nesse caso**; risco aceito no ADR 0067 (resposta do Gabriel).
+241. (E6.8) Aviso de pontos na tela 30b: **não avisar** (resposta do Gabriel).

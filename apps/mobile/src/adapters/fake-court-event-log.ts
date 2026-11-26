@@ -233,5 +233,14 @@ export function createFakeCourtEventLog(ids: IdGenerator): FakeCourtEventLog {
     },
     markRefusedSeen: (courtSessionId) =>
       update(courtSessionId, (session) => ({ ...session, refusedSeen: true })),
+    forgetSessionsOf(ownerKey) {
+      if (ownerKey === "") return Promise.resolve(ok(0));
+      const kept = Object.entries(sessions.value).filter(
+        ([, session]) => session.ownerKey !== ownerKey,
+      );
+      const forgotten = Object.keys(sessions.value).length - kept.length;
+      sessions.value = Object.fromEntries(kept);
+      return Promise.resolve(ok(forgotten));
+    },
   };
 }

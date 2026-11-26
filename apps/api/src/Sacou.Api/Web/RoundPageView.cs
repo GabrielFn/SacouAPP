@@ -21,12 +21,16 @@ internal sealed record RoundPageView(
     string PreviewDescription,
     string? DropInWindow,
     string DropInPhrase,
-    bool HasRegulars)
+    bool HasRegulars,
+    string? ExpiredNote = null)
 {
     private const string DateFormat = "yyyy-MM-dd";
     private const string TimeFormat = "HH:mm";
 
     public bool IsOpen => ClosedMessage is null;
+
+    /// <summary>False once the list left the page (E6.7): no count, no court marks and no format either.</summary>
+    public bool ShowsList => ExpiredNote is null;
 
     public static RoundPageView From(PublicRoundSummary summary, DateTimeOffset now)
     {
@@ -35,6 +39,34 @@ internal sealed record RoundPageView(
         var time = TimeOnly.ParseExact(summary.LocalTime, TimeFormat, CultureInfo.InvariantCulture);
         var day = WebTexts.Day(date);
         var hour = WebTexts.Hour(time);
+        return summary.ListExpired ? Expired(summary, day, hour) : Listed(summary, day, hour, now);
+    }
+
+    /// <summary>
+    /// 7 days after the start (E6.7, question 224): only the group, the day, the hour, the venue and the state, with the
+    /// phrase of question 238. Even a summary that still carried names shows none of them, nor how many went.
+    /// </summary>
+    private static RoundPageView Expired(PublicRoundSummary summary, string day, string hour) => new(
+        summary.GroupName,
+        string.Join(" · ", day, hour, summary.Venue),
+        Format: string.Empty,
+        GoingCount: 0,
+        Capacity: null,
+        Hint: null,
+        ClosedMessageOf(summary.State),
+        Lists: [],
+        Notice: null,
+        Court: [],
+        summary.State == PublicRoundState.Canceled
+            ? string.Join(" · ", day, hour, summary.Venue, WebTexts.Canceled.TrimEnd('.'))
+            : string.Join(" · ", day, hour, summary.Venue),
+        DropInWindow: null,
+        DropInPhrase: string.Empty,
+        HasRegulars: false,
+        WebTexts.ListExpired);
+
+    private static RoundPageView Listed(PublicRoundSummary summary, string day, string hour, DateTimeOffset now)
+    {
         var missing = summary.Capacity is { } capacity ? Math.Max(0, capacity - summary.GoingCount) : (int?)null;
         return new RoundPageView(
             summary.GroupName,

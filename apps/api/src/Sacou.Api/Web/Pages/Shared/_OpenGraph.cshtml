@@ -1,5 +1,5 @@
 @model RoundModel
-@* The WhatsApp preview (ADR 0070, D5): the group's name, the date, the place and the count. Never a nickname, even
+@* The WhatsApp preview (ADR 0070, D5): the group's name, the date, the place and the count (no count 7 days after the start, E6.7). Never a nickname, even
    though the page shows the first names (question 126 keeps the preview without them). Razor encodes every value. *@
 @if (Model.Round is { } round)
 {
