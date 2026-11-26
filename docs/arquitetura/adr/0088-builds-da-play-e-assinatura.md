@@ -1,6 +1,6 @@
-# ADR 0088 · Build da Play: assinatura, contador de versão e app gratuito
+# ADR 0088 · Build da Play: assinatura, contador de versão, app gratuito e atualização pelo ar
 
-**Status:** aceito (26/11/2026), E5.4 S1. **Decidido por:** Gabriel, ao aprovar o plano (respostas 245: esperar a produção, 246: Google + EAS, 247: só ele) ([plano](../../../.specs/features/E5.4/plan.md)), e o desenvolvedor dentro dele. **Emenda:** [ADR 0084](0084-feature-flags-e-versao-minima.md), D9.
+**Status:** aceito (26/11/2026), E5.4 S1 e S2. **Decidido por:** Gabriel, ao aprovar o plano (respostas 245: esperar a produção, 246: Google + EAS, 247: só ele) ([plano](../../../.specs/features/E5.4/plan.md)), e o desenvolvedor dentro dele. **Emenda:** [ADR 0084](0084-feature-flags-e-versao-minima.md), D9.
 
 ## Contexto
 
@@ -12,10 +12,12 @@ O Sacou só chegava ao celular por APK solto (`preview` e `development`), instal
 - **Porta 2 · Contador de `versionCode`.** `eas.json`: `cli.appVersionSource: "remote"` e `autoIncrement: true` no `production` e no `preview`. O EAS guarda um contador só, que sobe a cada build dos dois perfis; antes do primeiro build, `eas build:version:set` com 1 (o maior já usado). O `android.versionCode` do `app.json` fica, ignorado pelo EAS (a CLI avisa). Rejeitado: `local` à mão, que gera AAB recusado quando alguém esquece e repete número entre APK e Play.
 - **Porta 4 · App gratuito.** No "Criar app" da Play Console: **Gratuito**, que não volta a pago. A assinatura futura (ADR 0046) é compra dentro do app.
 - **Perfil `production`:** `environment: "production"` (lê as variáveis do ambiente `production` do EAS), `distribution: "store"`, `android.buildType: "app-bundle"`, `EXPO_PUBLIC_SENTRY_ENVIRONMENT: "production"` e **sem** `EXPO_PUBLIC_DEV_TOOLS`, `SENTRY_DISABLE_AUTO_UPLOAD` nem `SENTRY_ALLOW_FAILURE` (o build falha se os mapas de código não sobem). Conferido por `scripts/lib/eas-config.test.mjs`, no `pnpm test:tooling`.
+- **Porta 3 · Atualização pelo ar (S2, resposta 89).** `expo-updates` (58.0.22, fixo: a 58.0.23 saiu no dia e a política de idade mínima do pnpm a recusa). `app.json`: `runtimeVersion.policy: "fingerprint"` e `updates.url: "https://u.expo.dev/<projectId>"`; `eas.json`: `channel: "production"` no `production` e `"preview"` no `preview` (o `development` usa o cliente de desenvolvimento, sem canal). Padrão `checkAutomatically: ON_LOAD`: baixa na abertura e aplica na seguinte, sem tela de "nova versão". Um binário só aceita JS do mesmo `runtimeVersion`; o fingerprint muda sozinho quando muda a parte nativa (dependência, plugin, `app.json`). Rejeitado: `appVersion`, que exige subir `version` a cada dependência nativa nova e, esquecido, manda JS para um binário sem o módulo e trava o app. **Volta:** se o fingerprint gerado no Windows não bater com o da página do build do EAS (critério 13), trocar para `appVersion` antes de enviar o AAB da S2, registrar aqui e pôr a regra em `docs/padroes/`. Sem assinatura de código do update no piloto (risco aceito no modelo de ameaças).
 - **API do AAB (resposta 245):** o `EXPO_PUBLIC_API_URL` do ambiente `production` do EAS é a API de **produção** (`https://sacou-api-804880427435.us-east4.run.app`, a confirmar no primeiro deploy). O AAB só é gerado e enviado depois do primeiro deploy de produção, que é decisão do Gabriel (resposta 248).
 
 ## Consequências
 
 - O APK solto e o app da Play têm assinaturas diferentes e não se atualizam um sobre o outro: quem tem o APK desinstala antes.
 - O login com o Google no app da Play exige a impressão SHA-1 da chave do Google no Firebase e na restrição da chave de API do Android ([`google-play.md`](../../operacao/google-play.md), "Roteiro do Gabriel").
+- Quem publica no canal `production` muda o JS de todos os aparelhos: só da pasta principal, com 2FA na conta do Expo. Uma mudança só de JS (por exemplo, a URL da API, resposta 89) não precisa de AAB novo; uma mudança nativa precisa, e o update antigo não chega ao binário novo.
 - A versão mínima (ADR 0084) continua lendo o `nativeBuildVersion`, que é o número real do binário.

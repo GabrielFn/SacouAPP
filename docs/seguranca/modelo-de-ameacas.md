@@ -568,7 +568,7 @@ O comando lê as marcas do banco atual (`SACOU_DELETIONS_SOURCE_DATABASE_URL`) e
 | I, D | Origem ilegível (senha errada, sem tabela, sem rede) | Saída 3 com a linha fixa `source unreadable`, sem a mensagem do driver, que pode ter o host (teste de integração procura host e senha na saída) | Feito |
 | D | Falha do banco no meio | Falha ao copiar marcas, achar contas ou apagar uma conta vira saída 5 (`run again`): cada passo é idempotente e a próxima execução retoma de onde parou; o log só tem o tipo da exceção | Feito |
 
-## Build da Play e atualização pelo ar (E5.4, [ADR 0088](../arquitetura/adr/0088-builds-da-play-e-assinatura.md))
+## Build da Play e atualização pelo ar (E5.4 S1 e S2, [ADR 0088](../arquitetura/adr/0088-builds-da-play-e-assinatura.md))
 
 O AAB do perfil `production` é assinado pela chave de upload guardada no EAS; o Google reassina com a chave do app, que só ele guarda (Play App Signing).
 
@@ -577,6 +577,7 @@ O AAB do perfil `production` é assinado pela chave de upload guardada no EAS; o
 | S, T | Chave de upload vazada (conta do Expo invadida ou cópia do Gabriel exposta): alguém envia um AAB como se fosse o Sacou | O envio também exige a conta da Play Console do Gabriel; a chave do app fica só com o Google, e a de upload pode ser trocada pelo suporte da Play ("Solicitar redefinição da chave de upload"). 2FA na conta do Expo e na do Google; a cópia fica no gerenciador de senhas, nunca no repositório nem no chat | **Aceito:** entre o vazamento e a troca, quem tem as duas coisas (chave e Console) publica |
 | D | Chave de upload perdida | Cópia baixada pelo Gabriel; sem ela, a Play redefine a chave de upload sem perder o app (a do app é do Google) | Feito |
 | I | Build da loja com a tela de desenvolvimento ou com os mapas de código fora do Sentry | `scripts/lib/eas-config.test.mjs` (no `pnpm test:tooling`) reprova o perfil `production` com `EXPO_PUBLIC_DEV_TOOLS`, `SENTRY_DISABLE_AUTO_UPLOAD` ou `SENTRY_ALLOW_FAILURE` | Feito |
+| T, E | Canal de atualização (EAS Update): quem tem a conta do Expo publica JS no canal `production` e muda o app em todos os aparelhos sem passar pela Play | 2FA na conta do Expo; o canal `production` só é publicado da pasta principal, pelo Gabriel ou pelo orquestrador; o `runtimeVersion` (fingerprint) impede JS num binário com outra parte nativa; o update vai por HTTPS do `u.expo.dev` | **Aceito no piloto:** sem assinatura de código do update (pede chave própria e rotação); revisar depois do piloto |
 | T | `versionCode` repetido ou menor (AAB recusado; APK que não atualiza) | Contador remoto do EAS com `autoIncrement` no `preview` e no `production` | Feito |
 
 ## Risco aceito no piloto: leitura falha do rascunho da próxima partida (E4.10 Parte 2)

@@ -7,6 +7,14 @@ export const STORE_PROFILE = "production";
 export const PREVIEW_PROFILE = "preview";
 export const STORE_BUILD_TYPE = "app-bundle";
 export const STORE_SENTRY_ENVIRONMENT = "production";
+export const RUNTIME_VERSION_POLICY = "fingerprint";
+const UPDATES_HOST = "https://u.expo.dev/";
+
+// Each store-like profile listens to its own EAS Update channel (E5.4 S2).
+export const PROFILE_CHANNELS = Object.freeze({
+  [PREVIEW_PROFILE]: "preview",
+  [STORE_PROFILE]: "production",
+});
 
 // Keys that are fine on test builds and must never reach the store build:
 // the developer screen switch and the switches that skip the source map upload.
@@ -39,11 +47,30 @@ function storeProfileViolations(profile) {
   return violations;
 }
 
+function channelViolations(profiles) {
+  return Object.entries(PROFILE_CHANNELS)
+    .filter(([name, channel]) => profiles[name] !== undefined && profiles[name].channel !== channel)
+    .map(([name, channel]) => `${name}: channel must be "${channel}"`);
+}
+
+function appViolations(app) {
+  const expo = app.expo ?? {};
+  const violations = [];
+  if (expo.runtimeVersion?.policy !== RUNTIME_VERSION_POLICY) {
+    violations.push(`app.json: runtimeVersion.policy must be "${RUNTIME_VERSION_POLICY}"`);
+  }
+  const projectId = expo.extra?.eas?.projectId;
+  if (projectId === undefined || expo.updates?.url !== `${UPDATES_HOST}${projectId}`) {
+    violations.push(`app.json: updates.url must be "${UPDATES_HOST}<extra.eas.projectId>"`);
+  }
+  return violations;
+}
+
 /**
- * @param {{ eas: object }} config parsed apps/mobile/eas.json
+ * @param {{ eas: object, app: object }} config parsed apps/mobile/eas.json and app.json
  * @returns {string[]} one message per broken rule, empty when the config is valid
  */
-export function findEasConfigViolations({ eas }) {
+export function findEasConfigViolations({ eas, app }) {
   const violations = [];
   if (eas.cli?.appVersionSource !== "remote") {
     violations.push('cli.appVersionSource must be "remote"');
@@ -58,5 +85,6 @@ export function findEasConfigViolations({ eas }) {
   if (profiles[PREVIEW_PROFILE]?.autoIncrement !== true) {
     violations.push(`${PREVIEW_PROFILE}: autoIncrement must be true`);
   }
+  violations.push(...channelViolations(profiles), ...appViolations(app));
   return violations;
 }

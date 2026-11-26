@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { URL } from "node:url";
 
 import { findEasConfigViolations } from "./eas-config.mjs";
 
 const EAS_PATH = new URL("../../apps/mobile/eas.json", import.meta.url);
+const APP_PATH = new URL("../../apps/mobile/app.json", import.meta.url);
+const PROJECT_ID = "6ebec243-d104-4750-a5a2-8f0ab0e548db";
 
 function readJson(url) {
   return JSON.parse(readFileSync(url, "utf8"));
@@ -14,13 +17,24 @@ function validEas() {
   return {
     cli: { appVersionSource: "remote" },
     build: {
-      preview: { autoIncrement: true, android: { buildType: "apk" } },
+      preview: { channel: "preview", autoIncrement: true, android: { buildType: "apk" } },
       production: {
         environment: "production",
+        channel: "production",
         autoIncrement: true,
         android: { buildType: "app-bundle" },
         env: { EXPO_PUBLIC_SENTRY_ENVIRONMENT: "production" },
       },
+    },
+  };
+}
+
+function validApp() {
+  return {
+    expo: {
+      runtimeVersion: { policy: "fingerprint" },
+      updates: { url: `https://u.expo.dev/${PROJECT_ID}` },
+      extra: { eas: { projectId: PROJECT_ID } },
     },
   };
 }
@@ -30,13 +44,21 @@ function withProduction(change) {
   return { ...eas, build: { ...eas.build, production: change(eas.build.production) } };
 }
 
-function violations(eas) {
-  return findEasConfigViolations({ eas });
+function violations(eas, app = validApp()) {
+  return findEasConfigViolations({ eas, app });
+}
+
+function without(object, key) {
+  return Object.fromEntries(Object.entries(object).filter(([name]) => name !== key));
+}
+
+function withExpo(change) {
+  return { expo: change(validApp().expo) };
 }
 
 describe("findEasConfigViolations", () => {
   it("passes the repository eas.json", () => {
-    assert.deepEqual(violations(readJson(EAS_PATH)), []);
+    assert.deepEqual(violations(readJson(EAS_PATH), readJson(APP_PATH)), []);
   });
 
   it("passes a valid config", () => {
@@ -102,7 +124,39 @@ describe("findEasConfigViolations", () => {
 
   it("fails when preview does not increment the version code", () => {
     const eas = validEas();
-    const build = { ...eas.build, preview: { android: { buildType: "apk" } } };
+    const build = { ...eas.build, preview: { ...eas.build.preview, autoIncrement: false } };
     assert.deepEqual(violations({ ...eas, build }), ["preview: autoIncrement must be true"]);
+  });
+
+  it("fails when production listens to the preview update channel", () => {
+    const eas = withProduction((p) => ({ ...p, channel: "preview" }));
+    assert.deepEqual(violations(eas), ['production: channel must be "production"']);
+  });
+
+  it("fails when preview has no update channel", () => {
+    const eas = validEas();
+    const preview = without(eas.build.preview, "channel");
+    assert.deepEqual(violations({ ...eas, build: { ...eas.build, preview } }), [
+      'preview: channel must be "preview"',
+    ]);
+  });
+
+  it("fails when the runtime version follows the app version", () => {
+    const app = withExpo((e) => ({ ...e, runtimeVersion: { policy: "appVersion" } }));
+    assert.deepEqual(violations(validEas(), app), [
+      'app.json: runtimeVersion.policy must be "fingerprint"',
+    ]);
+  });
+
+  it("fails when updates.url points to another EAS project", () => {
+    const app = withExpo((e) => ({ ...e, updates: { url: "https://u.expo.dev/other" } }));
+    assert.deepEqual(violations(validEas(), app), [
+      'app.json: updates.url must be "https://u.expo.dev/<extra.eas.projectId>"',
+    ]);
+  });
+
+  it("fails without updates.url", () => {
+    const app = withExpo((e) => without(e, "updates"));
+    assert.equal(violations(validEas(), app).length, 1);
   });
 });

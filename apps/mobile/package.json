@@ -43,6 +43,7 @@
     "expo-sharing": "58.0.21",
     "expo-sqlite": "58.0.14",
     "expo-status-bar": "58.0.4",
+    "expo-updates": "58.0.22",
     "openapi-fetch": "0.17.0",
     "qrcode-generator": "2.0.4",
     "react": "19.3.0",

@@ -74,6 +74,16 @@ Perfil `production` de `apps/mobile/eas.json` ([ADR 0088](../arquitetura/adr/008
 5. **Envio.** À mão pela Play Console (resposta 244, sem EAS Submit): passo 3 do "Roteiro do Gabriel" no primeiro, e depois Teste interno -> Criar nova versão -> arrastar o AAB.
 6. **Sentry.** O primeiro erro real do app da Play aparece em `sacou-mobile` com ambiente `production` e release `0.1.0 (<versionCode>)`, com pilha simbolizada (o perfil não tem `SENTRY_ALLOW_FAILURE`: o build falha se os mapas não sobem).
 
+## Atualização pelo ar (EAS Update)
+
+O app instalado pela Play escuta o canal `production`; o APK `preview`, o canal `preview` ([ADR 0088](../arquitetura/adr/0088-builds-da-play-e-assinatura.md), porta 3). Só JS e imagens vão por aqui; dependência nativa, plugin ou mudança no `app.json` pedem AAB novo (o `runtimeVersion` muda e o update antigo não chega a ele). Da pasta principal (`apps/mobile/`):
+
+1. **Fingerprint antes do AAB** (uma vez, no primeiro AAB com `expo-updates`; critério 13). `npx expo-updates fingerprint:generate --platform android` mostra o `hash`; ele tem de ser igual ao **Runtime version** da página do build no expo.dev. Diferente: não enviar o AAB; trocar para `"policy": "appVersion"` (porta 3, volta) e gerar outro.
+2. **Publicar.** `eas update --channel production --environment production --message "<o que mudou>"` (o `--environment` pega as mesmas `EXPO_PUBLIC_*` do build).
+3. **Mapas de código no Sentry.** Logo depois, com `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` e `SENTRY_PROJECT=sacou-mobile` no shell (nunca no histórico; `read -rs`): `npx sentry-expo-upload-sourcemaps dist`.
+4. **Conferir** (critérios 14 e 15). No celular com o app da Play: fechar e abrir (baixa), fechar e abrir de novo (aplica) e ver a mudança. Um update publicado para outro `runtimeVersion` não aparece: o app segue com o JS embutido. A página do update no expo.dev mostra quantos aparelhos o baixaram.
+5. **Desfazer.** `eas update:republish` do grupo anterior, ou `eas update:rollback`, no mesmo canal.
+
 ## Roteiro do Gabriel (10 minutos, depois do primeiro AAB)
 
 Pré-requisito: a API de produção publicada (resposta 248) e o AAB conferido nos passos 1 a 4 de "Builds e envio".
