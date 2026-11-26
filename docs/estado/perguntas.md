@@ -298,3 +298,8 @@ Detalhes nos `plan.md` de `.specs/features/E6.5` a `E6.8`.
 238. (E6.7) No lugar da lista: **"A lista de quem foi sai da página 7 dias depois da rodada."** (resposta do Gabriel).
 240. (E6.8) Conta apagada em outro aparelho: **não apagar nesse caso**; risco aceito no ADR 0067 (resposta do Gabriel).
 241. (E6.8) Aviso de pontos na tela 30b: **não avisar** (resposta do Gabriel).
+
+## 26/11/2026: conta da Play Console, perguntas 242 a 244 (respondidas pelo Gabriel)
+242. Tipo da conta da Play Console: **pessoal** (resposta do Gabriel). Vale o teste fechado com 12 testadores por 14 dias seguidos antes de pedir a produção.
+243. Situação da conta: **verificada, app `com.sacou.app` ainda não criado no Console** (resposta do Gabriel).
+244. Envio dos builds: **sempre à mão pelo Console** (resposta do Gabriel). O EAS gera o AAB; sem EAS Submit e sem conta de serviço do Google.
