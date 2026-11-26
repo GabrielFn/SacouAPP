@@ -30,7 +30,7 @@ A CI e o deploy não usam segredo do GitHub (ADR 0004 e [ADR 0068](../arquitetur
 | Chave de upload da Play (keystore, alias e senhas) | Assinatura do AAB enviado à Play; a chave do app é do Google (Play App Signing, [ADR 0088](../arquitetura/adr/0088-builds-da-play-e-assinatura.md)) | Credencial remota do EAS (perfil `production`, gerada no primeiro build) e uma cópia baixada pelo Gabriel (`eas credentials`) no gerenciador de senhas dele. Nunca no repositório, no chat nem num agente | E5.4 |
 | `SACOU_POSTHOG_API_KEY` | PostHog | Secret Manager; `.env` | Pós-piloto (ADR 0046) |
 | `SACOU_RESEND_API_KEY` | Resend | Secret Manager; `.env` | A definir (nenhuma tela do piloto manda e-mail; a E3.11 não usa) |
-| `EXPO_TOKEN` | EAS | GitHub Actions | E5.4 |
+| `EXPO_TOKEN` | EAS | GitHub Actions | E5.4. **Não pode ter permissão de publicar EAS Update** (canal `production` muda o JS de todos os aparelhos e só o Gabriel publica, ADR 0088): criar com o menor papel que o uso pedir e passar por nova revisão de segurança antes de dar qualquer permissão de update |
 | `SACOU_EXPO_ACCESS_TOKEN` | Expo (token de acesso do push, com a segurança reforçada ligada no expo.dev) | Secret Manager: `sacou-expo-access-token-test` e `sacou-expo-access-token-prod`, lidos só pela conta de execução de cada serviço; `.env` local (opcional) | E3.11 Parte 2 ([ADR 0069](../arquitetura/adr/0069-outbox-e-notificacoes.md), D11). Sem ele, o envio fica desligado e a API sobe normalmente (um aviso com o nome, nunca o valor); ainda não ligado no `service.yaml` |
 | `SACOU_PIX_ENCRYPTION_KEY` | Chave de criptografia do Pix | Secret Manager; `.env` | E3.10 (pós-piloto) |
 
