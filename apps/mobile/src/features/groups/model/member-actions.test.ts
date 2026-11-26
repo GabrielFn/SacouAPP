@@ -8,7 +8,7 @@ type Chips = Readonly<Record<GroupRole, ChipState>>;
 
 function chipsOf(me: Member, target: Member, members: readonly Member[]): Chips | null {
   const sheet = memberActions(me, target, members);
-  if (sheet?.roles == null) return null;
+  if (sheet.roles == null) return null;
   return Object.fromEntries(sheet.roles.map((chip) => [chip.role, chip.state])) as Chips;
 }
 
@@ -58,7 +58,7 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
       scorekeeper: "disabled",
       player: "current",
     });
-    expect(sheet?.type).toEqual({ regularBlocked: true });
+    expect(sheet.type).toEqual({ regularBlocked: true });
   });
 
   test("another person's row offers Remover, never Sair (question 30)", () => {
@@ -68,14 +68,14 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
 
   test("an admin removes anyone; a co-admin only Placar and Jogador (RemoveAdmin)", () => {
     const all = [admin, otherAdmin, coAdmin, scorekeeper, player, guest];
-    expect(memberActions(admin, otherAdmin, all)?.canRemove).toBe(true);
-    expect(memberActions(admin, coAdmin, all)?.canRemove).toBe(true);
+    expect(memberActions(admin, otherAdmin, all).canRemove).toBe(true);
+    expect(memberActions(admin, coAdmin, all).canRemove).toBe(true);
     const me = member("c2", "coAdmin", { isMe: true });
     const withMe = [...all, me];
-    expect(memberActions(me, otherAdmin, withMe)?.canRemove).toBe(false);
-    expect(memberActions(me, coAdmin, withMe)?.canRemove).toBe(false);
-    expect(memberActions(me, scorekeeper, withMe)?.canRemove).toBe(true);
-    expect(memberActions(me, guest, withMe)?.canRemove).toBe(true);
+    expect(memberActions(me, otherAdmin, withMe).canRemove).toBe(false);
+    expect(memberActions(me, coAdmin, withMe).canRemove).toBe(false);
+    expect(memberActions(me, scorekeeper, withMe).canRemove).toBe(true);
+    expect(memberActions(me, guest, withMe).canRemove).toBe(true);
   });
 
   test("the own row never offers Remover; only admins see the level, their own included", () => {
@@ -94,10 +94,38 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
     expect(canManageLevels("admin") && canManageLevels("coAdmin")).toBe(true);
   });
 
-  test("Placar and Jogador have no options on someone else's row", () => {
+  test("Placar and Jogador get only Denunciar on someone else's row (E6.6)", () => {
     for (const role of ["scorekeeper", "player"] as const) {
       const me = member("me", role, { isMe: true });
-      expect(memberActions(me, admin, [me, admin])).toBeNull();
+      for (const target of [{ ...admin, isMe: false }, player, guest]) {
+        expect(memberActions(me, target, [me, admin, player, guest])).toEqual({
+          target,
+          roles: null,
+          type: null,
+          canLeave: false,
+          canRemove: false,
+          canReport: true,
+          showsLevel: false,
+          lastAdmin: false,
+        });
+      }
+    }
+  });
+
+  test("admins get Denunciar on every other row, below their own actions (E6.6)", () => {
+    const all = [admin, otherAdmin, coAdmin, scorekeeper, player, guest];
+    for (const target of [otherAdmin, coAdmin, scorekeeper, player, guest]) {
+      expect(memberActions(admin, target, all).canReport).toBe(true);
+      expect(memberActions(admin, target, all).roles).not.toBeNull();
+    }
+    const me = member("c2", "coAdmin", { isMe: true });
+    expect(memberActions(me, { ...admin, isMe: false }, [...all, me]).canReport).toBe(true);
+  });
+
+  test("no role reports its own row (E6.6)", () => {
+    for (const role of ["admin", "coAdmin", "scorekeeper", "player"] as const) {
+      const me = member("me", role, { isMe: true });
+      expect(memberActions(me, me, [admin, me]).canReport).toBe(false);
     }
   });
 
@@ -109,6 +137,7 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
       type: null,
       canLeave: true,
       canRemove: false,
+      canReport: false,
       showsLevel: false,
       lastAdmin: false,
     });
@@ -116,9 +145,9 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
 
   test("the last admin cannot leave nor demote itself", () => {
     const sheet = memberActions(admin, admin, [admin, coAdmin]);
-    expect(sheet?.lastAdmin).toBe(true);
-    expect(sheet?.canLeave).toBe(true);
-    expect(sheet?.roles?.map((chip) => chip.state)).toEqual([
+    expect(sheet.lastAdmin).toBe(true);
+    expect(sheet.canLeave).toBe(true);
+    expect(sheet.roles?.map((chip) => chip.state)).toEqual([
       "current",
       "disabled",
       "disabled",
@@ -128,8 +157,8 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
 
   test("an admin with another admin may demote itself", () => {
     const sheet = memberActions(admin, admin, [admin, otherAdmin]);
-    expect(sheet?.lastAdmin).toBe(false);
-    expect(sheet?.roles?.map((chip) => chip.state)).toEqual([
+    expect(sheet.lastAdmin).toBe(false);
+    expect(sheet.roles?.map((chip) => chip.state)).toEqual([
       "current",
       "enabled",
       "enabled",
@@ -140,9 +169,9 @@ describe("memberActions, the table of answer 16 with chips off instead of missin
   test("a co-admin never demotes itself, but changes its own type", () => {
     const me = { ...coAdmin, isMe: true };
     const sheet = memberActions(me, me, [admin, me]);
-    expect(sheet?.roles?.filter((chip) => chip.state === "enabled")).toEqual([]);
-    expect(sheet?.type).toEqual({ regularBlocked: false });
-    expect(sheet?.canLeave).toBe(true);
+    expect(sheet.roles?.filter((chip) => chip.state === "enabled")).toEqual([]);
+    expect(sheet.type).toEqual({ regularBlocked: false });
+    expect(sheet.canLeave).toBe(true);
   });
 });
 

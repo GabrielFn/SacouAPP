@@ -13,7 +13,7 @@ Escrito na E6.2 (25/11/2026). Respostas para colar na Play Console sem reler o c
 | Verificação de desenvolvedor | Vale no Brasil desde 30/09/2026; o app da Play precisa estar registrado no Console | [Anúncio](https://android-developers.googleblog.com/2026/06/android-developer-verification.html), [Guia](https://developer.android.com/developer-verification/guides) |
 | Conteúdo gerado por usuário | Aceitar os termos antes de criar conteúdo; denunciar conteúdo e usuário dentro do app; bloquear quando houver interação 1:1 | [UGC](https://support.google.com/googleplay/android-developer/answer/9876937), [Denúncia no app](https://support.google.com/googleplay/android-developer/answer/12923286) |
 
-**Onde o Sacou está:** os termos já aparecem no login e no perfil rápido, antes de qualquer conteúdo (tela 02, E6.1); não há conversa 1:1, então bloquear não se aplica; "Denunciar" falta (E6.6) e a página web de exclusão falta (E6.4). As duas bloqueiam o teste fechado, não o interno. Pela resposta 227, o piloto começa no **teste fechado** se houver 12 ou mais pessoas com Android, para o relógio dos 14 dias correr; senão, no teste interno.
+**Onde o Sacou está:** os termos já aparecem no login e no perfil rápido, antes de qualquer conteúdo (tela 02, E6.1); não há conversa 1:1, então bloquear não se aplica; "Denunciar" está feito (E6.6: na folha 19c de todo outro membro e em "Denunciar grupo" no fim da tela 18, com 4 motivos fechados; leitura e prazo em [denuncias.md](denuncias.md)) e a página web de exclusão falta (E6.4), que bloqueia o teste fechado, não o interno. Pela resposta 227, o piloto começa no **teste fechado** se houver 12 ou mais pessoas com Android, para o relógio dos 14 dias correr; senão, no teste interno.
 
 ## Data safety
 

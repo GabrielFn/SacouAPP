@@ -64,4 +64,7 @@ internal static class GroupErrors
 
     /// <summary>Only a player may be without an account: scorekeeper, co-admin and admin need someone with the app (ADR 0053, D8).</summary>
     public static readonly Error RoleNeedsAccount = new("groups.role-needs-account", ErrorKind.Validation);
+
+    /// <summary>Nobody reports themselves (E6.6): the own row has no "Denunciar".</summary>
+    public static readonly Error ReportSelf = new("groups.report-self", ErrorKind.Validation);
 }

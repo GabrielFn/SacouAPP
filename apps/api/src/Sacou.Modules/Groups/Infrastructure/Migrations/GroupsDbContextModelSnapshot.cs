@@ -23,6 +23,57 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.ContentReportRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("ReportedMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reported_member_id");
+
+                    b.Property<Guid>("ReporterMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_member_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_content_reports");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_content_reports_created_at");
+
+                    b.HasIndex("ReportedMemberId")
+                        .HasDatabaseName("ix_content_reports_reported");
+
+                    b.HasIndex("ReporterMemberId")
+                        .HasDatabaseName("ix_content_reports_reporter");
+
+                    b.HasIndex("GroupId", "ReporterMemberId", "ReportedMemberId", "Reason")
+                        .IsUnique()
+                        .HasDatabaseName("ux_content_reports_once");
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("GroupId", "ReporterMemberId", "ReportedMemberId", "Reason"), false);
+
+                    b.ToTable("content_reports", "groups", t =>
+                        {
+                            t.HasCheckConstraint("ck_content_reports_reason", "reason IN ('hate_or_sexual', 'impersonation', 'offensive_name', 'spam')");
+                        });
+                });
+
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GroupRow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -346,6 +397,29 @@ namespace Sacou.Modules.Groups.Infrastructure.Migrations
 
                             t.HasCheckConstraint("ck_saved_templates_schema_version", "schema_version = 1");
                         });
+                });
+
+            modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.ContentReportRow", b =>
+                {
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.GroupRow", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_content_reports_groups");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReportedMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_content_reports_reported");
+
+                    b.HasOne("Sacou.Modules.Groups.Infrastructure.MemberRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_content_reports_reporter");
                 });
 
             modelBuilder.Entity("Sacou.Modules.Groups.Infrastructure.GroupSettingsRow", b =>

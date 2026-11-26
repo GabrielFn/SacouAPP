@@ -119,7 +119,11 @@ describe("the sheet 19a on screen 19 (D9)", () => {
     });
     const rating = membersScreenReducer(options, { type: "level-opened", memberId: "b" });
     expect(rating.sheetMemberId).toBeNull();
-    const removing = membersScreenReducer(rating, { type: "remove-asked", memberId: "b" });
+    const removing = membersScreenReducer(rating, {
+      type: "member-confirm-asked",
+      kind: "remove",
+      memberId: "b",
+    });
     expect(removing).toEqual({
       sheetMemberId: null,
       level: null,

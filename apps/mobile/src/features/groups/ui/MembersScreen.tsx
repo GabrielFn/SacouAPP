@@ -31,6 +31,8 @@ import { groupInviteHref, groupRatingsHref, groupsHref } from "../navigation";
 import { LevelNotices, MemberLevelDialog } from "./MemberLevelParts";
 import { MemberOptionsSheet } from "./MemberOptionsSheet";
 import { InvitesList, MembersList } from "./MembersLists";
+import { ReportSentNotice } from "./ReportSentNotice";
+import { ReportDialog } from "./ReportSheet";
 
 const texts = strings.members;
 
@@ -98,9 +100,11 @@ function MembersDialogs({ model, onLeft }: MembersDialogsProps) {
           dispatch({ type: "level-opened", memberId: target.memberId });
         }}
         onRemove={(target) => {
-          dispatch({ type: "remove-asked", memberId: target.memberId });
+          dispatch({ type: "member-confirm-asked", kind: "remove", memberId: target.memberId });
         }}
+        onReport={model.report.ask}
       />
+      <ReportDialog report={model.report} onClose={closeConfirm} />
       <MemberLevelDialog model={model} />
       <ConfirmSheet
         visible={removed !== null}
@@ -231,6 +235,7 @@ export function MembersScreen({ groupId }: MembersScreenProps) {
         />
       )}
       {screenError === null ? null : <ErrorStrip text={screenError} />}
+      <ReportSentNotice visible={model.report.sent} />
       {shownTab === "invites" ? (
         <InvitesList
           invites={model.invites}

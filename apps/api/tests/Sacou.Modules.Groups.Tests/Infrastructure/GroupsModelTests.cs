@@ -26,6 +26,7 @@ public sealed class GroupsModelTests : IDisposable
     [InlineData(typeof(SavedTemplateRow), "saved_templates", "created_at,created_by_member_id,group_id,id,name,schema_version,settings")]
     [InlineData(typeof(MemberLevelRow), "member_levels", "group_id,level_tenths,member_id,set_at,set_by_member_id")]
     [InlineData(typeof(GuestRow), "guests", "created_at,group_id,member_id,name,primary_position,request_id")]
+    [InlineData(typeof(ContentReportRow), "content_reports", "created_at,group_id,id,reason,reported_member_id,reporter_member_id")]
     public void Tables_KeepExactlyTheirColumns(Type row, string table, string columns)
     {
         var entity = Entity(row);
@@ -118,6 +119,28 @@ public sealed class GroupsModelTests : IDisposable
         Assert.Equal(["group_id", "request_id"], byRequest.Properties.Select(property => property.GetColumnName()));
         Assert.All(guests.GetForeignKeys(), key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
         Assert.Equal(2, guests.GetForeignKeys().Count());
+    }
+
+    /// <summary>
+    /// E6.6, doors 1 and 2: the four reasons, one row per (group, reporter, target, reason) with the group's report (null
+    /// target) counted once too, and a row that follows its group and its members.
+    /// </summary>
+    [Fact]
+    public void ContentReports_PinTheReasons_AndOneRowPerReport()
+    {
+        var reports = Entity(typeof(ContentReportRow));
+        var checks = reports.GetCheckConstraints().ToDictionary(check => check.Name!, check => check.Sql);
+
+        Assert.Equal("reason IN ('hate_or_sexual', 'impersonation', 'offensive_name', 'spam')", checks["ck_content_reports_reason"]);
+        var once = Assert.Single(reports.GetIndexes(), index => index.GetDatabaseName() == ContentReportConfiguration.OnceIndex);
+        Assert.True(once.IsUnique);
+        Assert.False(once.GetAreNullsDistinct());
+        Assert.Equal(
+            ["group_id", "reporter_member_id", "reported_member_id", "reason"],
+            once.Properties.Select(property => property.GetColumnName()));
+        Assert.All(reports.GetForeignKeys(), key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
+        Assert.Equal(3, reports.GetForeignKeys().Count());
+        Assert.True(reports.FindProperty(nameof(ContentReportRow.ReportedMemberId))!.IsNullable);
     }
 
     public void Dispose() => context.Dispose();

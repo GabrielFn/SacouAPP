@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Sacou.Modules.Groups.Domain.Members;
 using Sacou.Modules.Groups.Domain.Permissions;
+using Sacou.Modules.Groups.Domain.Reports;
 
 namespace Sacou.Modules.Groups.Infrastructure;
 
@@ -24,6 +25,12 @@ internal static class ColumnValues
         .Add(MembershipStatus.Active, "active")
         .Add(MembershipStatus.Left, "left")
         .Add(MembershipStatus.Removed, "removed");
+
+    public static readonly ImmutableDictionary<ContentReportReason, string> ReportReasons = ImmutableDictionary<ContentReportReason, string>.Empty
+        .Add(ContentReportReason.OffensiveName, "offensive_name")
+        .Add(ContentReportReason.HateOrSexual, "hate_or_sexual")
+        .Add(ContentReportReason.Impersonation, "impersonation")
+        .Add(ContentReportReason.Spam, "spam");
 
     public static string ActiveStatus => Statuses[MembershipStatus.Active];
 

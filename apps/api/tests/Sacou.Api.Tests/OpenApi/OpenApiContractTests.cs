@@ -37,6 +37,7 @@ public sealed class OpenApiContractTests
         "put /v1/groups/{groupId}/members/{memberId}/type ChangeMemberType",
         "delete /v1/groups/{groupId}/members/{memberId} RemoveGroupMember",
         "post /v1/groups/{groupId}/leave LeaveGroup",
+        "post /v1/groups/{groupId}/reports ReportContent",
         "post /v1/groups/{groupId}/invites CreateGroupInvite",
         "get /v1/groups/{groupId}/invites ListGroupInvites",
         "delete /v1/groups/{groupId}/invites/{inviteId} RevokeGroupInvite",

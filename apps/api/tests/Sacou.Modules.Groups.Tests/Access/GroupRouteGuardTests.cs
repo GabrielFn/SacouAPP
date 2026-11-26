@@ -20,9 +20,9 @@ public sealed class GroupRouteGuardTests
 
     /// <summary>
     /// Get, rename, list members, change role and type, remove, leave, and create, list and revoke invites, and the six
-    /// of the settings and the saved templates, and the three of the admin's levels: the guard must see them, or it checks nothing.
+    /// of the settings and the saved templates, and the three of the admin's levels, and the report of E6.6: the guard must see them, or it checks nothing.
     /// </summary>
-    private const int GroupRoutes = 21;
+    private const int GroupRoutes = 22;
     /// <summary>The nine of the rounds, their close (E3.18, ADR 0072) and the publication of the teams (R100, ADR 0078).</summary>
     private const int RoundRoutes = 11;
 
@@ -94,6 +94,19 @@ public sealed class GroupRouteGuardTests
                 ["PUT /v1/groups/{groupId:guid}/guests/{memberId:guid}"] = GroupPermission.ManageGuests,
             },
             declared);
+    }
+
+    /// <summary>E6.6, door 3: the report route declares <c>ReportContent</c> and nothing else.</summary>
+    [Fact]
+    public async Task RealApi_ReportRouteDeclaresReportContent()
+    {
+        await using var api = new ClosedDatabaseApi(Production);
+        var report = Assert.Single(
+            api.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>(),
+            endpoint => endpoint.RoutePattern.RawText == "/v1/groups/{groupId:guid}/reports");
+
+        Assert.Equal(GroupPermission.ReportContent, Assert.Single(report.Metadata.OfType<GroupPermissionMetadata>()).Permission);
+        Assert.Equal(["POST"], report.Metadata.GetMetadata<IHttpMethodMetadata>()!.HttpMethods);
     }
 
     /// <summary>In Production the closed list is exactly the one of ADR 0040; Development adds only the OpenAPI document.</summary>

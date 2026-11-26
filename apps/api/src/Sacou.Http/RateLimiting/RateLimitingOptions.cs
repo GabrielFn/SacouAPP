@@ -45,6 +45,9 @@ public sealed class RateLimitingOptions
 
     public WindowLimitOptions? PushDevice { get; init; }
 
+    /// <summary>The content report of E6.6 (a member or the group), per user.</summary>
+    public WindowLimitOptions? Report { get; init; }
+
     /// <summary>Per client address, not per user: the round page is anonymous (ADR 0070, D6).</summary>
     public WindowLimitOptions? RoundPage { get; init; }
 
@@ -108,6 +111,7 @@ public sealed class RateLimitingOptions
         [RateLimitPolicies.CourtSync] = CourtSync,
         [RateLimitPolicies.RoundLink] = RoundLink,
         [RateLimitPolicies.PushDevice] = PushDevice,
+        [RateLimitPolicies.Report] = Report,
         [RateLimitPolicies.RoundPage] = RoundPage,
         [RateLimitPolicies.Ops] = Ops,
         [RateLimitPolicies.AppConfig] = AppConfig,

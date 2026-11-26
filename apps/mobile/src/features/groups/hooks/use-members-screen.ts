@@ -20,9 +20,11 @@ import {
   type LevelSheetState,
   type MembersScreenState,
 } from "../model/members-screen.reducer";
-import { canManageInvites } from "../model/members.selectors";
+import { canManageInvites, memberName } from "../model/members.selectors";
+import { reportBody, type ReportFlow, type ReportTarget } from "../model/report";
 import { revokeListedInvite } from "../queries/invite-link-flow";
 import { setLevelMutation } from "../queries/level-mutations";
+import { reportContentMutation } from "../queries/report-mutations";
 import {
   changeRoleMutation,
   changeTypeMutation,
@@ -87,6 +89,25 @@ export interface MembersScreenModel {
   readonly revokeInvite: (inviteId: string) => void;
   readonly removeMember: (target: Member) => void;
   readonly saveLevel: (memberId: string, tenths: LevelTenths) => void;
+  /** The report of E6.6, apart from the member writes: its error shows in its own sheet. */
+  readonly report: ReportModel;
+}
+
+/** "Denunciar" on screen 19 (E6.6): the member is read again from the cache each render. */
+export interface ReportModel extends ReportFlow {
+  readonly ask: (target: Member) => void;
+}
+
+/** The member of the open report sheet, by the id the reducer keeps. */
+export function reportTargetOf(
+  members: readonly Member[] | undefined,
+  confirm: MembersScreenState["confirm"],
+): ReportTarget | null {
+  if (members === undefined || confirm?.kind !== "report") return null;
+  const target = members.find((member) => member.memberId === confirm.memberId);
+  return target === undefined
+    ? null
+    : { kind: "member", memberId: target.memberId, name: memberName(target) };
 }
 
 /** The sheet of the row `memberId`, read again from the members each render. */
@@ -121,6 +142,7 @@ export function useMembersScreen(groupId: string): MembersScreenModel {
   const revoke = useMutation({
     mutationFn: (inviteId: string) => revokeListedInvite(deps, groupId, inviteId),
   });
+  const report = useMemberReport(groupId, members.data, state, dispatch);
   const writes = [role, type, leave, revoke, remove, setLevel];
   const failed = writes.find((write) => write.isError);
   return {
@@ -166,6 +188,37 @@ export function useMembersScreen(groupId: string): MembersScreenModel {
           },
         },
       );
+    },
+    report,
+  };
+}
+
+/** The report of screen 19: the mutation, and the target the reducer keeps by id (E6.6). */
+function useMemberReport(
+  groupId: string,
+  members: readonly Member[] | undefined,
+  state: MembersScreenState,
+  dispatch: (action: MembersScreenAction) => void,
+): ReportModel {
+  const { sacouApi } = useServices();
+  const report = useMutation(reportContentMutation(sacouApi, groupId));
+  const target = reportTargetOf(members, state.confirm);
+  return {
+    target,
+    pending: report.isPending,
+    errorText: report.isError ? errorTextOf(report.error) : null,
+    sent: report.isSuccess,
+    ask: (member) => {
+      report.reset();
+      dispatch({ type: "member-confirm-asked", kind: "report", memberId: member.memberId });
+    },
+    send: (reason) => {
+      if (target === null) return;
+      report.mutate(reportBody(target, reason), {
+        onSuccess: () => {
+          dispatch({ type: "confirm-closed" });
+        },
+      });
     },
   };
 }

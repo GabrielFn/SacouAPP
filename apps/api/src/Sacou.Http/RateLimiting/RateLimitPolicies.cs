@@ -22,6 +22,9 @@ public static class RateLimitPolicies
     /// <summary>The phone registration of the push (E3.11, ADR 0069, D8).</summary>
     public const string PushDevice = "push-device";
 
+    /// <summary>The content report of E6.6: per user, 10 a minute, so one account cannot flood the operator with reports.</summary>
+    public const string Report = "report";
+
     /// <summary>The anonymous round page (ADR 0070, D6): per client address, never per user.</summary>
     public const string RoundPage = "round-page";
 

@@ -27,4 +27,7 @@ internal enum GroupPermission
 
     /// <summary>Writes the court stream of a round (ADR 0046, decision 2; ADR 0060, D5): the scorekeeper's one extra.</summary>
     WriteCourt,
+
+    /// <summary>Reports a member's name or the group's name and venue to the Sacou (E6.6): every active member, any role.</summary>
+    ReportContent,
 }

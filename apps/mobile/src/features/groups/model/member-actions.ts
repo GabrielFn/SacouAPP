@@ -25,6 +25,8 @@ export interface MemberSheet {
   readonly canLeave: boolean;
   /** Another row: "Remover do grupo" (question 30, closed with the names of E3.17). */
   readonly canRemove: boolean;
+  /** Another row, for every role: "Denunciar" (E6.6, question 232). Never on the own row. */
+  readonly canReport: boolean;
   /** "Nota do sorteio": admins and co-admins only, on every row, their own included (ADR 0047). */
   readonly showsLevel: boolean;
   /** The only admin: leaving and demoting itself are off, with "Promova outro admin antes". */
@@ -57,6 +59,7 @@ function ownSheet(me: Member, members: readonly Member[]): MemberSheet {
       type: null,
       canLeave: true,
       canRemove: false,
+      canReport: false,
       showsLevel: false,
       lastAdmin,
     };
@@ -69,19 +72,30 @@ function ownSheet(me: Member, members: readonly Member[]): MemberSheet {
     type: { regularBlocked: !me.hasAccount },
     canLeave: true,
     canRemove: false,
+    canReport: false,
     showsLevel: true,
     lastAdmin,
   };
 }
 
-/** The sheet of a row, or `null` when the row has no "⋯" for who looks (a player on someone else). */
-export function memberActions(
-  me: Member,
-  target: Member,
-  members: readonly Member[],
-): MemberSheet | null {
+/** Placar and Jogador on someone else's row: only "Denunciar" (E6.6). */
+function reportOnlySheet(target: Member): MemberSheet {
+  return {
+    target,
+    roles: null,
+    type: null,
+    canLeave: false,
+    canRemove: false,
+    canReport: true,
+    showsLevel: false,
+    lastAdmin: false,
+  };
+}
+
+/** The sheet of a row: every row has a "⋯", since anyone may report someone else (E6.6). */
+export function memberActions(me: Member, target: Member, members: readonly Member[]): MemberSheet {
   if (target.memberId === me.memberId) return ownSheet(me, members);
-  if (!isAdminRole(me.role)) return null;
+  if (!isAdminRole(me.role)) return reportOnlySheet(target);
   const allowed = allowedForOther(me.role, target.role);
   // A guest without an account is always Jogador (`groups.role-needs-account`).
   return {
@@ -91,6 +105,7 @@ export function memberActions(
     canLeave: false,
     // A co-admin removes only Placar and Jogador (`RemoveMember`); an admin removes anyone (`RemoveAdmin`).
     canRemove: me.role === "admin" || !isAdminRole(target.role),
+    canReport: true,
     showsLevel: true,
     lastAdmin: false,
   };
