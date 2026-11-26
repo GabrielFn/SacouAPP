@@ -36,6 +36,9 @@ internal static partial class WebSetup
         // The terms and the privacy policy (E6.1, ADR 0083): read once, and an invalid text stops the start.
         services.AddSingleton<ILegalDocumentSource, EmbeddedLegalDocumentSource>();
         services.AddSingleton<ILegalDocuments, LegalDocuments>();
+        // The data protection contact of /excluir-conta (E6.4): checked on start, required in Production.
+        services.AddOptions<DataProtectionOptions>().Bind(configuration.GetSection(DataProtectionOptions.SectionName)).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<DataProtectionOptions>, DataProtectionOptionsValidator>();
         return services;
     }
 

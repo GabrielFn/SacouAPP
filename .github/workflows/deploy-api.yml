@@ -128,6 +128,8 @@ jobs:
           tasks-queue: sacou-notifications-test
           # Who opens /painel (ADR 0085, D1): the variable of the test environment, never in the repository.
           operator-subjects: ${{ vars.SACOU_OPERATOR_UIDS }}
+          # The data protection contact of /excluir-conta (E6.4): the variable of the environment, never in the repository.
+          data-protection-email: ${{ vars.SACOU_DATA_PROTECTION_EMAIL }}
           # The host authorized in Firebase for the round page's web login (ADR 0070); status.url gives another alias.
           public-base-url: https://sacou-api-test-804880427435.us-east4.run.app
           image: ${{ needs.build.outputs.image }}
@@ -170,6 +172,8 @@ jobs:
           tasks-queue: sacou-notifications
           # Who opens /painel (ADR 0085, D1): the variable of the production environment, never in the repository.
           operator-subjects: ${{ vars.SACOU_OPERATOR_UIDS }}
+          # The data protection contact of /excluir-conta (E6.4): the variable of the environment, never in the repository.
+          data-protection-email: ${{ vars.SACOU_DATA_PROTECTION_EMAIL }}
           image: ${{ needs.build.outputs.image }}
           project-id: ${{ vars.GCP_PROJECT_ID }}
           workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}

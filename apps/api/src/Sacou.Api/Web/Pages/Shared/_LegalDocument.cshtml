@@ -31,7 +31,14 @@
                 <h2 id="legal-request-title">@WebTexts.DeletionRequestTitle</h2>
                 @if (request.Email is { } email && request.MailTo is { } mailTo)
                 {
+                    <p>@WebTexts.DeletionRequestIntro</p>
                     <p><a href="@mailTo">@email</a></p>
+                    <ul>
+                        @foreach (var step in WebTexts.DeletionRequestSteps)
+                        {
+                            <li>@step</li>
+                        }
+                    </ul>
                 }
                 else
                 {

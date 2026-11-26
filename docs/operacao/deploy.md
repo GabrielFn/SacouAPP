@@ -64,6 +64,14 @@ Push ligado no deploy em 21/11/2026 (o Gabriel rodou `scripts/gcp/setup-notifica
 
 **Produção (pergunta 218):** além da variável, o domínio `*.run.app` do `sacou-api` precisa estar nos domínios autorizados do Firebase Authentication e nos referenciadores HTTP da chave Web (hoje só o do teste está, ADR 0070, D8). Sem isso, a página abre e o login falha.
 
+## Página de exclusão de conta (E6.4)
+
+`/excluir-conta` é o link web de exclusão de conta que a Play pede no Data safety (`docs/operacao/google-play.md`). O texto vem de `docs/legal/exclusao-de-conta.md`, embutido no build como `/termos`; o e-mail do encarregado, para pedir sem o app, vem só da configuração, nunca do código.
+
+Variável (só o nome; não é segredo, o valor aparece na página): `SACOU_DATA_PROTECTION_EMAIL`, variável de **environment** do GitHub (como `SACOU_OPERATOR_UIDS`). O deploy a entrega ao serviço como `DataProtection__ContactEmail`. Vazia no `test`: a página mostra "O pedido por e-mail ainda não está disponível". Com um valor que não é um e-mail simples (letras, dígitos, `. _ + -`, um `@` e um domínio com ponto), o deploy ou a partida falham sem mostrar o valor.
+
+**Antes do primeiro deploy da produção (Gabriel, pergunta 199):** GitHub → Settings → Environments → `production` → Environment variables → **Add variable**: nome `SACOU_DATA_PROTECTION_EMAIL`, valor o e-mail do encarregado. **Sem ela, a API de produção não sobe** (`DataProtection:ContactEmail is required in Production.`) e a revisão nova não recebe tráfego. Pode pôr a mesma variável no environment `test` para conferir a página antes. Para trocar só o e-mail, rode de novo o workflow `deploy-api` do último commit da `main`.
+
 ## Primeiro deploy de cada serviço
 
 Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".
