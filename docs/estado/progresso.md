@@ -1,6 +1,6 @@
 # Progresso
 
-**Marco atual:** M6 · Prontidão para o piloto, iniciado em 24/11/2026. M5 fechado em 24/11/2026 ([relatório](relatorios/M5.md)). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
+**Marco atual:** M6 · Prontidão para o piloto, fechado no código em 26/11/2026 ([relatório](relatorios/M6.md)); falta a E5.4 (conta da Play Console) e os passos do Gabriel. Próximo: M7 · Piloto. M5 fechado em 24/11/2026 ([relatório](relatorios/M5.md)). M4 fechado no código em 19/11/2026 ([relatório](relatorios/M4.md)); produção adiada pelo Gabriel até perto do piloto. M3 fechado em 16/11/2026 ([relatório](relatorios/M3.md)). M2 fechado em 03/11/2026 ([relatório](relatorios/M2.md)). M1 fechado em 01/11/2026 ([relatório](relatorios/M1.md)).
 
 | Tarefa | Status | Observação |
 |---|---|---|
