@@ -199,6 +199,8 @@ public sealed class ApiWithDatabase : WebApplicationFactory<Program>
         builder.UseSetting(ConnectionStringSetting, database.ConnectionString);
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.UseSetting("RoundPage:PublicBaseUrl", PublicBaseUrl);
+        // Required in Production (E6.4); the reserved .test domain, never a real mailbox.
+        builder.UseSetting("DataProtection:ContactEmail", "encarregado@sacou.test");
         foreach (var (key, value) in RoomyRateLimits.Concat(settings))
         {
             builder.UseSetting(key, value);

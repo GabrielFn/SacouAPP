@@ -56,6 +56,8 @@ public sealed class RateLimitedRoutesTests(SacouApiFactory factory) : IClassFixt
         { "HEAD", "termos", RateLimitPolicies.RoundPage },
         { "GET", "privacidade", RateLimitPolicies.RoundPage },
         { "HEAD", "privacidade", RateLimitPolicies.RoundPage },
+        { "GET", "excluir-conta", RateLimitPolicies.RoundPage },
+        { "HEAD", "excluir-conta", RateLimitPolicies.RoundPage },
         { "GET", "painel", RateLimitPolicies.RoundPage },
         { "HEAD", "painel", RateLimitPolicies.RoundPage },
         { "GET", "/v1/ops/metrics", RateLimitPolicies.Ops },

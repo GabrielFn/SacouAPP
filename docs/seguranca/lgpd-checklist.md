@@ -24,7 +24,7 @@ Estados: `ok` (o código e os documentos atendem), `lacuna Gn` (correção com t
 | III Correção | Tela 27 e `PUT /v1/me/profile` (`SaveMyProfileEndpoint.cs`); o convidado pede ao admin, que corrige pela 21a | ok |
 | IV Anonimização, bloqueio ou eliminação do desnecessário | Retenção da seção 3; o `MemberId` do ex-jogador é pseudonimizado | ok, com a G3 e a G6 |
 | V Portabilidade | O mesmo JSON da exportação (formato `sacou-personal-data`, versão 1), entregue à folha de compartilhar | ok |
-| VI Eliminação | `DELETE /v1/me` (`DeleteMyAccountHandler.cs`), tela 30b; o app apaga o usuário no Firebase. Sobra: o backup por até 30 dias (G1) (os pendentes da quadra no aparelho saem na exclusão feita nele, E6.8). Sem o app: página web de exclusão (G2) | lacuna G1, G2, G7 |
+| VI Eliminação | `DELETE /v1/me` (`DeleteMyAccountHandler.cs`), tela 30b; o app apaga o usuário no Firebase. Sobra: o backup por até 30 dias (G1) (os pendentes da quadra no aparelho saem na exclusão feita nele, E6.8). Sem o app: página web `/excluir-conta` (G2, feita no código; falta o e-mail da 199 e o comando da E6.9) | lacuna G1, G2, G7 |
 | VII Informação sobre compartilhamento | Política, seção 5 (operadores) | ok |
 | VIII Possibilidade de não consentir | Não se aplica: nenhuma base é consentimento (pergunta 201) | ok |
 | IX Revogação do consentimento | Não se aplica pelo mesmo motivo; desligar o push é pelo sistema (política, seção 9) | ok |
@@ -78,7 +78,7 @@ Toda linha do inventário tem a coluna `Retenção` com prazo concreto (em dias,
 
 | Item | Estado |
 |---|---|
-| Canal do encarregado (e-mail dedicado): **não existe** até a pergunta 199 ser resolvida. Sem ele, o titular sem o app não tem como pedir nada, e a página de exclusão da G2 não tem para onde mandar | decisão do Gabriel (pergunta 199) |
+| Canal do encarregado (e-mail dedicado): **não existe** até a pergunta 199 ser resolvida. Sem ele, o titular sem o app não tem como pedir nada, e a página de exclusão da G2 não tem para onde mandar (a página `/excluir-conta` da E6.4 já mostra o endereço assim que `SACOU_DATA_PROTECTION_EMAIL` existir no environment) | decisão do Gabriel (pergunta 199) |
 | **A E7 (piloto com jogadores reais) fica bloqueada** até o canal existir e estar na seção 13 da política | decisão do Gabriel (pergunta 199) |
 | Dispensa do encarregado para agente de pequeno porte (Resolução CD/ANPD 2/2022), mantendo o canal | decisão do Gabriel (pergunta 203), com o advogado |
 | Identificação do controlador na política (art. 9, III) | decisão do Gabriel (pergunta 198) |
@@ -114,7 +114,7 @@ As que mudam código viraram tarefas em [`plano-mvp.md`](../plano-mvp.md) (seç�
 | Lacuna | O que falta | Tarefa | Bloqueia |
 |---|---|---|---|
 | G1 | Reexclusão a partir de `identity.deleted_accounts` depois de restaurar o backup (ADR 0082, D10) | E6.3 | piloto com jogadores reais |
-| G2 | Página web de exclusão de conta, estática (pergunta 220, opção 1) | E6.4 | teste fechado e produção da Play |
+| G2 | Página web de exclusão de conta, estática (pergunta 220, opção 1): **feita no código** (E6.4, `/excluir-conta`, com o e-mail do encarregado por configuração); aguardando a pergunta 199 (o e-mail) e a 253 (E6.9, o comando do operador) para o link na Play | E6.4 (feita), E6.9 | teste fechado e produção da Play |
 | G3 | Prazo de 60 dias da marca de exclusão (pergunta 222) | E6.5 | não |
 | G4 | "Denunciar" no app (pergunta 221) | E6.6 | teste fechado e produção da Play |
 | G5 | Nota do admin e rating no acesso do titular | nenhuma (pergunta 219, opção 1) | — |

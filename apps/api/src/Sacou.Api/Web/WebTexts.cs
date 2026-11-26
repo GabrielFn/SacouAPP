@@ -87,6 +87,24 @@ internal static class WebTexts
     public const string TermsOfUse = "Termos de Uso";
     public const string SeeAlso = "Veja também: ";
 
+    // The account deletion page (E6.4): the block to ask without the app, drawn at the end of the section below of
+    // docs/legal/exclusao-de-conta.md. The only source of the rules of the request: the text in docs/legal has none.
+    public const string DeletionRequestSection = "Sem o app";
+    public const string DeletionRequestUnavailable = "O pedido por e-mail ainda não está disponível. Por enquanto, exclua pelo app.";
+    public const string DeletionRequestIntro = "Peça a exclusão por e-mail ao encarregado de dados do Sacou, sem instalar o app de novo:";
+
+    // Question 251: only a request from the account's own e-mail; question 252: an answer within 15 days.
+    public static readonly IReadOnlyList<string> DeletionRequestSteps =
+    [
+        "Envie do mesmo e-mail que você usa para entrar no Sacou.",
+        "Diga o seu apelido no Sacou.",
+        "A exclusão é feita em até 15 dias, e você recebe a confirmação por e-mail.",
+        "Um pedido de outro endereço recebe uma resposta pedindo que você escreva do e-mail da conta.",
+    ];
+
+    /// <summary>The subject of the <c>mailto:</c>, already percent-encoded: "Excluir minha conta do Sacou".</summary>
+    public const string DeletionRequestSubject = "Excluir%20minha%20conta%20do%20Sacou";
+
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
     private static readonly string[] WeekdaysWithArticle =

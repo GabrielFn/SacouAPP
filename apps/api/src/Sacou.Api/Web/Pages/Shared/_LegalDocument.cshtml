@@ -1,7 +1,9 @@
 @model LegalPageView
-@* The terms and the privacy policy (E6.1, ADR 0083): plain text from the reader, every value encoded by Razor, no script. *@
+@* The terms, the privacy policy (E6.1, ADR 0083) and the account deletion page (E6.4): plain text from the reader and
+   the settings, every value encoded by Razor, no script. *@
 @{
     var document = Model.Document;
+    var request = Model.DeletionRequest;
 }
 <!doctype html>
 <html lang="pt-BR">
@@ -24,9 +26,13 @@
             <h1>@document.Title</h1>
             <p class="legal-version">@Model.VersionLine</p>
         </header>
-        @foreach (var block in document.Blocks)
+        @if (request is not null && Model.DeletionRequestAfter == LegalPageView.BeforeTheText)
         {
-            switch (block)
+            @await Html.PartialAsync("_DeletionRequest", request)
+        }
+        @for (var index = 0; index < document.Blocks.Count; index++)
+        {
+            switch (document.Blocks[index])
             {
                 case LegalBlock.Heading { Level: LegalDocumentParser.SectionLevel } heading:
                     <h2>@heading.Text</h2>
@@ -45,6 +51,10 @@
                         }
                     </ul>
                     break;
+            }
+            if (request is not null && index == Model.DeletionRequestAfter)
+            {
+                @await Html.PartialAsync("_DeletionRequest", request)
             }
         }
     </article>

@@ -64,6 +64,23 @@ Push ligado no deploy em 21/11/2026 (o Gabriel rodou `scripts/gcp/setup-notifica
 
 **Produção (pergunta 218):** além da variável, o domínio `*.run.app` do `sacou-api` precisa estar nos domínios autorizados do Firebase Authentication e nos referenciadores HTTP da chave Web (hoje só o do teste está, ADR 0070, D8). Sem isso, a página abre e o login falha.
 
+## Página de exclusão de conta (E6.4)
+
+`/excluir-conta` é o link web de exclusão de conta que a Play pede no Data safety (`docs/operacao/google-play.md`). O texto vem de `docs/legal/exclusao-de-conta.md`, embutido no build como `/termos`; o e-mail do encarregado, para pedir sem o app, vem só da configuração, nunca do código.
+
+Variável (só o nome; não é segredo, o valor aparece na página): `SACOU_DATA_PROTECTION_EMAIL`, variável de **environment** do GitHub (como `SACOU_OPERATOR_UIDS`). O deploy a entrega ao serviço como `DataProtection__ContactEmail`. Vazia no `test`: a página mostra "O pedido por e-mail ainda não está disponível". Com um valor que não é um e-mail simples (letras, dígitos, `. _ + -`, um `@` e um domínio com ponto), o deploy ou a partida falham sem mostrar o valor.
+
+**Antes do primeiro deploy da produção (Gabriel, pergunta 199):** GitHub → Settings → Environments → `production` → Environment variables → **Add variable**: nome `SACOU_DATA_PROTECTION_EMAIL`, valor o e-mail do encarregado. **Sem ela, o deploy da produção para antes** (`SACOU_DATA_PROTECTION_EMAIL is required in production.`), e a própria API também não subiria (`DataProtection:ContactEmail is required in Production.`). Pode pôr a mesma variável no environment `test` para conferir a página antes. Para trocar só o e-mail, rode de novo o workflow `deploy-api` do último commit da `main`.
+
+### Pedido de exclusão por e-mail até a E6.9 (decisão do orquestrador, 26/11/2026)
+
+Até a E6.9 (comando do operador, que entra **antes do teste fechado**), o pedido que chega ao e-mail do encarregado é atendido à mão:
+
+1. Conferir o pedido: o cabeçalho `Authentication-Results` traz SPF, DKIM e DMARC `pass` no domínio do remetente, e o remetente é o e-mail de uma conta no Firebase (Console → Authentication → Users). Faltou um dos dois: responder pedindo que a pessoa escreva do e-mail da conta, sem apagar nada.
+2. Mandar uma confirmação ao e-mail da conta no Firebase (uma resposta nova, não um "responder" ao pedido) e esperar que ela volte respondida.
+3. **Não apagar à mão** no console do Firebase nem no banco: a exclusão (`DELETE /v1/me`, `apps/api/src/Sacou.Modules/Identity/DeleteMyAccount/DeleteMyAccountHandler.cs`) passa pelos módulos com as travas, confere os bloqueios (único admin), grava a marca de exclusão e faz uma varredura final; não há como repetir isso com segurança por SQL. O caminho normal é a E6.9, dentro do prazo de 15 dias: por isso **nenhum jogador real entra na produção antes da E6.9** (a página promete a exclusão sem instalar o app de novo). Se a pessoa preferir e ainda tiver o app, o operador pode indicar o passo a passo da página, sem exigir.
+4. Responder à pessoa quando a conta sumir (o Firebase não lista mais o e-mail).
+
 ## Primeiro deploy de cada serviço
 
 Os dois serviços já existem, públicos e com uma imagem de exemplo do Google, criados por `scripts/gcp/harden-deploy-identities.sh` (cada conta de deploy só tem papel no próprio serviço, e um papel não se dá num serviço que ainda não existe). O primeiro deploy troca a imagem pela da API. Se o `/health` responder 403, confira em Cloud Run → serviço → Segurança se "Permitir acesso público" está marcado e use "Re-run failed jobs".

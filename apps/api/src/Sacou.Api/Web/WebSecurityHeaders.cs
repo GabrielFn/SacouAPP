@@ -6,8 +6,8 @@ namespace Sacou.Api.Web;
 /// The headers of the round page and of its files (ADR 0070, D5 and D7), only on those paths: the API routes keep theirs.
 /// The page: CSP, no referrer (the path carries the code), no index, no frame, the Google window allowed to answer, never
 /// stored (it carries nicknames). The files: no sniffing; the hashed ones cached for a year, the others checked again.
-/// The legal pages (E6.1, ADR 0083): the same headers, a closed CSP with no script, and checked again on each visit
-/// (public text that changes with each deploy).
+/// The legal pages (E6.1, ADR 0083) and the account deletion page (E6.4): the same headers, a closed CSP with no script,
+/// and checked again on each visit (public text that changes with each deploy). Every prefix ignores case, like routing.
 /// </summary>
 internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPolicy policy)
 {
@@ -17,6 +17,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     public const string OpsPagePrefix = "/painel";
     public const string TermsPrefix = "/termos";
     public const string PrivacyPrefix = "/privacidade";
+    public const string AccountDeletionPrefix = "/excluir-conta";
     public const string AssetsPrefix = "/web";
     public const string BrandPrefix = "/brand";
     public const string HashedAssetsPrefix = "/web/assets/";
@@ -48,7 +49,8 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
             context.Response.OnStarting(() => WritePageHeaders(context.Response, policy.Value, PageCache));
         }
         else if (path.StartsWithSegments(TermsPrefix, StringComparison.OrdinalIgnoreCase)
-            || path.StartsWithSegments(PrivacyPrefix, StringComparison.OrdinalIgnoreCase))
+            || path.StartsWithSegments(PrivacyPrefix, StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments(AccountDeletionPrefix, StringComparison.OrdinalIgnoreCase))
         {
             context.Response.OnStarting(() => WritePageHeaders(context.Response, LegalContentSecurityPolicy, LegalPageCache));
         }
