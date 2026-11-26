@@ -79,10 +79,12 @@
 | E6.7 | Feita | PR #263 (`/r` sem nomes nem contagem 7 dias depois do início). |
 | E6.8 | Feita | PR #262 (sessões da quadra da conta apagada saem do aparelho). |
 | E7.2 | Parte 1 feita | PR #250 (painel do operador e portão da fase 2, ADR 0085), conferido no teste com o login do Gabriel. Parte 2: partidas, MVP, notificações e tabelas largas. |
-| E5.4 | Desbloqueada (26/11) | Conta pessoal da Play Console verificada (respostas 242 a 244); app ainda não criado no Console. Envio à mão. Plano em `.specs/features/E5.4/`. |
-| E6.4 | A fazer | Página web de exclusão de conta. Faltou no fechamento do M6; bloqueia o teste fechado e a produção da Play, não o teste interno. Depende da pergunta 199 (e-mail do encarregado). Plano em `.specs/features/E6.4/`. |
+| E5.4 | Feita no código | PR #270, ADR 0088 (perfil `production` com AAB, `versionCode` remoto, Play App Signing + chave de upload no EAS, EAS Update com `runtimeVersion` por fingerprint). Revisor e segurança Opus (correção por desenvolvedor Opus novo, verificador Opus), testador Sonnet 6 de 6. Variáveis dos ambientes do EAS criadas em 26/11. Falta o primeiro build `production`, que espera o primeiro deploy de produção (resposta 248), e o roteiro do Gabriel em `google-play.md`. |
+| E6.4 | Feita no código (PR #271) | Página `/excluir-conta`, e-mail do encarregado por `SACOU_DATA_PROTECTION_EMAIL` (obrigatório na produção). Revisor e segurança Opus, correção por desenvolvedor Opus novo, verificador Opus, testador Sonnet (7 sabotagens, 2 sobreviventes mortas por teste novo). Falta o e-mail (pergunta 199) e a E6.9 (exclusão pedida por e-mail; nenhum jogador real na produção antes dela). |
+| E6.9 | A fazer | Comando `delete-account --uid` do operador (resposta 253), com o controle de e-mail falsificado (SPF/DKIM/DMARC e confirmação pelo e-mail da conta). Sensível, Opus. Entra antes do teste fechado e de jogador real na produção. |
 
 ## Em andamento
+- 26/11/2026: **E5.4 na `main`** (#270) e **E6.4 no PR #271** (merge com a CI verde). Conta pessoal da Play Console verificada (respostas 242 a 244); próximo: primeiro deploy de produção (resposta 248). Próximo passo no [diário de 26/11](sessoes/2026-11-26.md).
 - 25/11/2026, noite: **M6 quase fechada no código.** Na `main`: E5.2 inteira (#240, #246, #255, #256), E6.2 (#253), E6.3 S1 e S2 (#257, #261), E6.5 (#265), E6.7 (#263), E6.8 (#262), E7.2 P1 (#250). Sentry e backup configurados com o Gabriel. E6.6 (#264) aprovada e testada, esperando só a conferência no emulador. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
 
 - 25/11/2026: **#246 (E5.2 P2, Sentry no app) na `main`**, conferido no emulador. #250 (E7.2 P1) aprovado e testado, esperando a CI (limite do job subindo no #254). E6.2 aprovada pelo Gabriel; #253 em correção dos achados da segurança. Próximo passo no [diário de 25/11](sessoes/2026-11-25.md).
