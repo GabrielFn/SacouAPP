@@ -24,7 +24,7 @@ O piloto sobe com APKs instalados à mão. Duas coisas precisam poder mudar sem 
 
 **D8 · Primeira flag (pergunta 197, padrão): `MvpVote`**, ligada nos dois ambientes.
 
-**D9 · Versões.** `app.json` ganha `version` (0.1.0), `android.versionCode` (1) e `ios.buildNumber` ("1"); `eas.json` usa `appVersionSource: local`, então **cada APK que o Gabriel gera sobe o `versionCode`** à mão. O mínimo só sobe depois que o APK novo estiver instalado em todos.
+**D9 · Versões.** `app.json` ganha `version` (0.1.0), `android.versionCode` (1) e `ios.buildNumber` ("1"); `eas.json` usa `appVersionSource: local`, então **cada APK que o Gabriel gera sobe o `versionCode`** à mão. O mínimo só sobe depois que o APK novo estiver instalado em todos. **Emendado pelo [ADR 0088](0088-builds-da-play-e-assinatura.md) (E5.4):** `appVersionSource: remote`, com o contador do EAS subindo sozinho (`autoIncrement`) no `preview` e no `production`; o `versionCode` do `app.json` deixou de valer.
 
 ## Onde mudou o código
 

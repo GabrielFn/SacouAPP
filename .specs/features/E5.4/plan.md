@@ -3,7 +3,7 @@
 > **Depende do Gabriel antes do código:** perguntas 245 (para qual API aponta o primeiro AAB, já que a produção não foi publicada), 246 (quem guarda as chaves de assinatura, decisão de mão única) e 247 (lista de testadores do interno). O primeiro deploy de produção da API **não** faz parte desta tarefa: é decisão irreversível dele (`CLAUDE.md`, "Pare e pergunte", item 3).
 
 **Approved**: 2026-11-26 - user: "Aprovo as duas fatias" (respostas 245: "Esperar a produção"; 246: "Google + EAS"; 247: "Só você")
-**Settled mid-build:** none
+**Settled mid-build:** (1) resposta 245 = esperar a produção: o ambiente `production` do EAS tem `EXPO_PUBLIC_API_URL` da API de **produção** (`https://sacou-api-804880427435.us-east4.run.app`, a confirmar no primeiro deploy), e o primeiro AAB só é gerado depois do primeiro deploy de produção (resposta 248); nada aponta para o teste. (2) O perfil `production` declara `environment: "production"` e `distribution: "store"`, também conferidos pelo teste de configuração. (3) O teste de configuração é `scripts/lib/eas-config.test.mjs`. (4) Lista do interno: só o Gabriel (247).
 **Review:** <a escrever quando a revisão for enviada>
 **Fix pass:** <a escrever depois da correção>
 
@@ -25,7 +25,7 @@ Reusa o projeto EAS existente (`projectId` em `app.json`), o mesmo `google-servi
 2. `.aab` -> conferência do alvo (new: passo documentado com `bundletool dump manifest`, pelo Java do Android Studio) - lê `targetSdkVersion`; menor que 36 trava o envio.
 3. `.aab` -> `Play Console` (exists, conta do Gabriel) - o Gabriel cria o app, aceita a chave de assinatura gerada pelo Google (door 1) e publica no **teste interno** para a lista de e-mails (pergunta 247).
 4. `Play Console` -> impressões SHA-1 e SHA-256 da chave de assinatura do app -> `Firebase` (exists) e a restrição da chave de API do Android no Google Cloud (exists, `segredos.md` linha 11) - sem isso, o login com o Google falha no app instalado pela Play.
-5. testador -> link de inscrição -> Play Store -> app instalado, login com o Google, lista de grupos carregada da API escolhida na pergunta 245.
+5. testador -> link de inscrição -> Play Store -> app instalado, login com o Google, lista de grupos carregada da API de produção (resposta 245).
 6. (S2) `eas update --channel production` -> `EAS Update` (door 3) - o app instalado no canal `production`, com o mesmo `runtimeVersion`, baixa o JS novo na abertura e aplica na abertura seguinte.
 
 ```mermaid
@@ -82,7 +82,7 @@ O primeiro AAB sai do perfil `production`, passa na conferência do alvo, é pub
 5. IF o ambiente `production` do EAS não tem `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_INVITE_BASE_URL`, `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` e `EXPO_PUBLIC_SENTRY_DSN` THEN o build SHALL ser refeito antes do envio (conferência pelo `eas env:list --environment production`, só os nomes no relatório; nenhum valor no repositório)
 6. WHEN o Gabriel segue o roteiro (seção "Roteiro do Gabriel") THEN o app `com.sacou.app` SHALL existir na Play Console, gratuito, com uma versão publicada no **teste interno** e a chave de assinatura do app gerada pelo Google
 7. WHEN um testador da lista abre o link de inscrição com a conta Google da lista, aceita e toca em "Fazer o download no Google Play" THEN a Play Store SHALL instalar o Sacou com o `versionCode` enviado
-8. WHEN esse testador entra com o Google no app instalado pela Play THEN o app SHALL abrir a aba de grupos carregando da API da pergunta 245, sem "Não deu para carregar seus grupos"
+8. WHEN esse testador entra com o Google no app instalado pela Play THEN o app SHALL abrir a aba de grupos carregando da API de produção (resposta 245), sem "Não deu para carregar seus grupos"
    - IF o login devolve `DEVELOPER_ERROR` ou a Firebase recusa a chave THEN falta a impressão SHA-1 da chave do Google no Firebase ou na restrição da chave de API (passo 4 do roteiro)
 9. WHEN o Gabriel tenta abrir a tela de desenvolvimento no app instalado pela Play THEN o app SHALL mandá-lo para o início, sem os botões de erro (`config/dev-tools.ts` lê a chave ausente como desligada; teste existente em `error-test-section.test.tsx`)
 10. WHEN o primeiro erro real do app instalado pela Play chega ao Sentry THEN ele SHALL aparecer em `sacou-mobile` com ambiente `production` e release `0.1.0 (<versionCode>)`, com pilha simbolizada (sem evento até o fim da S1, fica registrado como pendente em `pendencias.md`)
