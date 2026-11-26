@@ -75,20 +75,44 @@ O dado de produção não sai do Google nem do Neon: tudo no Cloud Shell, num ba
    curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/r/AAAAAAAAAAAAAAAAAAAAAA   # 404
    docker rm -f sacou-restore
    ```
-5. Pare o cronômetro e anote o tempo no diário. Limpe **sempre, também se algum passo falhou** (o dump tem dados pessoais): `unset SACOU_RESTORE_DATABASE_URL; rm -f /tmp/<nome>.*; docker rm -f sacou-restore`; no Neon, apague o `sacou_restore`.
+5. **Reexclusão** ([ADR 0087](../arquitetura/adr/0087-comando-de-reexclusao-depois-de-restaurar.md)): o comando `reapply-deletions` apaga do banco restaurado quem se excluiu depois do dump, lendo as marcas de `identity.deleted_accounts` do banco **atual** com o papel `sacou_backup` (só leitura), e aplica antes as migrações do código atual. A URL de origem sai do segredo direto para a variável, sem aparecer na tela nem no histórico; a data do dump sai do `createdAt` do manifesto, nunca digitada:
+   ```sh
+   amb=test   # ou prod, o mesmo do bucket
+   read -rs SACOU_DELETIONS_SOURCE_DATABASE_URL < <(gcloud secrets versions access latest --secret="sacou-backup-database-url-$amb"; echo)
+   export SACOU_DELETIONS_SOURCE_DATABASE_URL
+   created="$(jq -er .createdAt /tmp/<nome>.manifest.json)"
+   SACOU_DATABASE_URL="$SACOU_RESTORE_DATABASE_URL" docker run --rm -e SACOU_DATABASE_URL -e SACOU_DELETIONS_SOURCE_DATABASE_URL \
+     -e RoundPage__PublicBaseUrl=https://sacou.test sacou-api:restore reapply-deletions --dump-created-at "$created"; echo "exit $?"
+   ```
+   Esperado: `reapply-deletions: ok, M marks, N new marks, A accounts erased, G groups left without admin, X s` e `exit 0`. No ensaio, `A` é quem se excluiu desde o dump (pode ser 0). Anote a linha no diário. Os outros códigos, sempre com uma linha só, sem URL nem senha:
+
+   | Saída | O que é | O que fazer |
+   |---|---|---|
+   | 2 (`usage: ...`) | Uso errado, dito no fim da linha: variável faltando ou vazia (segredo vazio ou falha do `gcloud`), `--dump-created-at` inválido ou no futuro, destino sem o esquema `identity` (não é o banco restaurado), origem com papel que escreve (a URL da API no lugar da do `sacou_backup`), origem igual ao destino ou as duas URLs trocadas | Corrija o que a linha diz e rode de novo; nada foi escrito |
+   | 3 (`source unreadable`) | A origem não abre: segredo errado, senha, rede, tabela | Confira o `amb` e o segredo (`gcloud secrets versions list sacou-backup-database-url-$amb`) e rode de novo |
+   | 4 (`dump older than the mark retention (60 days)`) | O dump é mais velho que as marcas (60 dias); não acontece com o bucket de 30 dias | Manifesto errado: pare e chame o desenvolvedor |
+   | 5 (`failed ...; run again`) | O banco falhou no meio | Rode de novo: cada passo é idempotente e retoma de onde parou. Se repetir, mande só a linha ao desenvolvedor |
+   | Outro código (com pilha de erro) | Exceção não tratada: destino que não abre ou migração que falha | Pare, não copie a saída para lugar nenhum (pode trazer o host) e chame o desenvolvedor |
+
+   **Conferência dos Admins** (risco aceito da pergunta 231, [`grupos.md`](../dominio/grupos.md)): quando a conta reexcluída era o único Admin ativo de um grupo, o comando promove o membro ativo mais antigo com conta **do banco restaurado**, que pode não ser quem o grupo tinha escolhido depois do dump. Compare os Admins dos dois bancos (só IDs):
+   ```sh
+   q="SELECT group_id, id FROM groups.members WHERE role = 'admin' AND status = 'active' ORDER BY 1, 2"
+   pg=postgres:18.6-alpine@sha256:9ba53c7d41ea093baf5c1ba635ba5434c4f979880527d49bb7d9237d3193085b
+   docker run --rm -e SACOU_RESTORE_DATABASE_URL -e q "$pg" sh -c 'psql "$SACOU_RESTORE_DATABASE_URL" -XAt -c "$q"' > /tmp/admins-restored.txt
+   docker run --rm -e SACOU_DELETIONS_SOURCE_DATABASE_URL -e q "$pg" sh -c 'psql "$SACOU_DELETIONS_SOURCE_DATABASE_URL" -XAt -c "$q"' > /tmp/admins-current.txt
+   diff /tmp/admins-current.txt /tmp/admins-restored.txt
+   ```
+   Uma linha `>` é um Admin do restaurado que o banco atual não tem (promovido pelo comando ou desfeito pelo dump). No ensaio, só anote quantas. Na restauração de verdade, avise o grupo: o Admin pode passar o papel pelo app. `G` maior que 0 é grupo sem ninguém com conta para promover; fica como está.
+6. Pare o cronômetro e anote o tempo no diário. Limpe **sempre, também se algum passo falhou** (o dump tem dados pessoais): `unset SACOU_RESTORE_DATABASE_URL SACOU_DELETIONS_SOURCE_DATABASE_URL created q; rm -f /tmp/<nome>.* /tmp/admins-*.txt; docker rm -f sacou-restore`; no Neon, apague o `sacou_restore`.
 
 ## Restaurar de verdade
 
-> **Bloqueado na produção (LGPD, ADR 0082, D10):** nenhuma restauração real da produção nem piloto com jogadores reais antes do comando de reexclusão a partir de `identity.deleted_accounts` (passo 3). A restauração do Neon (passo 1) também ressuscita quem se excluiu depois do instante escolhido.
+> **Liberado depois do primeiro ensaio com a reexclusão (LGPD, ADR 0082, D10):** até o passo 5 do ensaio sair com `exit 0` e a linha estar anotada no diário, nenhuma restauração real da produção nem piloto com jogadores reais.
 
-1. **Erro de menos de 6 h:** Neon → Restore, no instante antes do erro. Fim.
-2. Escolha o último dump **antes** do erro (o horário está no nome, em UTC). Faça os passos 1 a 3 do ensaio num banco novo `sacou_restored` do projeto do ambiente.
-3. **Contas excluídas depois do dump** (LGPD, ADR 0082, D10). No banco **atual**, quem se excluiu depois do horário do manifesto (`createdAt`):
-   ```sql
-   SELECT encode(subject_hash, 'hex'), deleted_at FROM identity.deleted_accounts WHERE deleted_at > '<createdAt>';
-   ```
-   Essas contas existem no banco restaurado e precisam ser apagadas de novo antes de o banco voltar à API. **Ainda não há comando para isso** (a exclusão só roda pelo `DELETE /v1/me` da própria pessoa): **pendente**, e é condição para restaurar a produção e para o piloto com jogadores reais (aviso no topo desta seção). Até lá, pare aqui e chame o desenvolvedor.
+1. **Erro de menos de 6 h:** Neon → Restore, no instante antes do erro. Fim. A reexclusão **não** roda aqui (resposta 230): quem se excluiu entre esse instante e agora volta; risco aceito no piloto, pelo tamanho da janela.
+2. Escolha o último dump **antes** do erro (o horário está no nome, em UTC). Faça os passos 1 a 4 do ensaio num banco novo `sacou_restored` do projeto do ambiente.
+3. **Contas excluídas depois do dump** (LGPD, ADR 0082, D10): rode o passo 5 do ensaio (reexclusão e conferência dos Admins) contra o `sacou_restored`, com o `amb` do ambiente. Siga só com `exit 0`. Se passar mais de alguns minutos até o passo 4, rode a reexclusão de novo logo antes (pega quem se excluiu nesse meio-tempo; uma exclusão entre a última execução e a troca fica de fora, risco aceito). Se o banco atual se perdeu, a origem é o dump mais novo restaurado num banco descartável (pergunta 229): leia a URL do `sacou_backup` nesse banco com `read -rs SACOU_DELETIONS_SOURCE_DATABASE_URL` no lugar da linha do segredo.
 4. Troque o banco do serviço: nova versão de `sacou-database-url-<env>` com a URL do papel da API no `sacou_restored` (mesmo `--data-file=-` da configuração, `gcloud secrets versions add`), e uma revisão nova para ler a versão: `gcloud run services update <serviço> --region=us-east4 --update-labels=restored=<AAAAMMDD>`. Confira o `/health` e o roteiro de [`deploy.md`](deploy.md).
 5. Troque o banco do **backup** também, senão o job de amanhã copia o banco antigo: o papel `sacou_backup` é do projeto do Neon e já lê o `sacou_restored`; copie a URL direta dele nesse banco (Connect → papel `sacou_backup`, banco `sacou_restored`) e crie uma versão nova do segredo `sacou-backup-database-url-<env>` (`test` ou `prod`) com a URL dele (`gcloud secrets versions add sacou-backup-database-url-<env> --data-file=-`, cole, Enter e Ctrl-D). O job lê `latest` a cada execução. Rode o job à mão (Cloud Run → Jobs → `sacou-backup-test` ou `sacou-backup` → Executar) e confira o `.dump` e o `.manifest.json` novos no bucket, com as contagens do banco restaurado.
 6. Avise os grupos do que se perdeu entre o horário do dump e o erro (rodadas, presenças, placares).
-7. Guarde o banco antigo até entender o erro; depois, apague-o.
+7. Limpe o Cloud Shell como no passo 6 do ensaio (sem apagar o `sacou_restored`, que agora é o banco do serviço). Guarde o banco antigo até entender o erro; depois, apague-o.

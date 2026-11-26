@@ -99,7 +99,7 @@ Quem: só quem tem as duas URLs (Gabriel, no Cloud Shell, com o Secret Manager).
 
 ## Criteria
 
-### S1: o comando reexclui no banco restaurado quem se excluiu depois do dump (P1) · ~350 linhas
+### S1: o comando reexclui no banco restaurado quem se excluiu depois do dump (P1) · ~350 linhas · **feita** (#257)
 
 Ponta a ponta: argumento, host, handler, as duas exclusões existentes, resumo e o teste de integração com dois bancos reais.
 
@@ -120,7 +120,7 @@ Ponta a ponta: argumento, host, handler, as duas exclusões existentes, resumo e
    - teste: depois do comando, contagens de todas as tabelas da origem iguais às de antes; com o papel só leitura (`pg_read_all_data`) no teste, o comando funciona
 9. The system SHALL rodar o modo de comando sem abrir porta HTTP nem mapear rotas, e o serviço sem argumento SHALL subir como hoje (`/health` 200)
 
-### S2: as recusas e a falha no meio (P1) · ~150 linhas
+### S2: as recusas e a falha no meio (P1) · ~150 linhas · **feita** (#261)
 
 O comando nunca deixa o operador achar que deu certo quando não deu.
 
@@ -136,7 +136,7 @@ O comando nunca deixa o operador achar que deu certo quando não deu.
 15. WHEN o destino tem migrações pendentes do código atual THEN o sistema SHALL aplicá-las antes de ler as contas (as mesmas de `MigrateOnStartup`)
 16. IF o destino não tem o esquema `identity` (banco vazio ou errado) THEN o sistema SHALL sair com 2, sem criar o esquema (o comando nunca cria um banco do zero)
 
-### S3: o roteiro passa a chamar o comando e o bloqueio cai (P1) · ~100 linhas de docs
+### S3: o roteiro passa a chamar o comando e o bloqueio cai (P1) · ~100 linhas de docs · **feita** (ADR 0087; o 0086 ficou com a E6.5)
 
 **Acceptance Criteria**
 
