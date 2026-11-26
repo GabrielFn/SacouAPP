@@ -233,6 +233,7 @@ public sealed class GroupRouteGuardTests
             builder.UseSetting("ConnectionStrings:Sacou", "Host=127.0.0.1;Port=1;Database=sacou;Username=sacou;Timeout=2");
             builder.UseSetting("Database:MigrateOnStartup", "false");
             builder.UseSetting("RoundPage:PublicBaseUrl", "https://sacou.test");
+            builder.UseSetting("DataProtection:ContactEmail", "encarregado@sacou.test");
         }
     }
 }

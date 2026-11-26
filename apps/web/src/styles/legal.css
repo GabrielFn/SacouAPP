@@ -1,7 +1,8 @@
 /*
- * The terms of use and the privacy policy (/termos and /privacidade, E6.1, ADR 0083). Style only: the pages have no
- * script. Only relative units (rem, em, %, vw); links with a 2.75rem target; colours of the app's theme, contrast AA
- * (navy and muted on sand). Fonts served from this host, like the round page: no Google Fonts.
+ * The terms of use, the privacy policy and the account deletion page (/termos, /privacidade and /excluir-conta,
+ * E6.1, ADR 0083, and E6.4). Style only: the pages have no script. Only relative units (rem, em, %, vw); links with
+ * a 2.75rem target; colours of the app's theme, contrast AA (navy and muted on sand). Fonts served from this host,
+ * like the round page: no Google Fonts.
  */
 
 @font-face {
@@ -126,4 +127,22 @@ body {
   min-height: var(--target);
   color: var(--navy);
   font-weight: 600;
+}
+
+/* The account deletion page (/excluir-conta, E6.4): the block to ask without the app, inside the section "Sem o app". */
+.legal-request {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 0.0625rem solid var(--line);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.legal-request a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  color: var(--navy);
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }

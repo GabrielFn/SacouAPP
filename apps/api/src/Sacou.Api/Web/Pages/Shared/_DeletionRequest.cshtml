@@ -1,0 +1,20 @@
+@model DeletionRequestView
+@* The block to ask without the app (E6.4), at the end of the section "Sem o app": the only source of the rules of the
+   request. *@
+<div class="legal-request">
+    @if (Model.Email is { } email && Model.MailTo is { } mailTo)
+    {
+        <p>@WebTexts.DeletionRequestIntro</p>
+        <p><a href="@mailTo">@email</a></p>
+        <ul>
+            @foreach (var step in WebTexts.DeletionRequestSteps)
+            {
+                <li>@step</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>@WebTexts.DeletionRequestUnavailable</p>
+    }
+</div>

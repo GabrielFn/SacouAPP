@@ -236,9 +236,9 @@ Nenhum documento descreve como a API recebe o estado da assinatura; o webhook é
 | I   | Página aberta por `/R/{code}` ou `/C` sem os cabeçalhos (M6-B1): o roteamento ignora maiúsculas, mas a guarda dos cabeçalhos comparava `/r` e `/c` com `Ordinal` | **Resolvido** (correção do parecer do M6): todos os prefixos de `WebSecurityHeaders` comparam com `OrdinalIgnoreCase`; `WebSecurityHeadersCaseTests` confere CSP, `no-store`, `X-Frame-Options`, `Referrer-Policy` e `noindex` em `/R/{code}`, `/C` e `/PAINEL` |
 | I   | Página do convite revelando o grupo a quem não tem o token | A casca não sabe o grupo; o nome e a contagem só vêm da prévia (login e token válido); revogado, expirado, inexistente e malformado dão o mesmo texto; a prévia do WhatsApp é a genérica do Sacou |
 
-## 8a. Termos e política de privacidade (E6.1, [ADR 0083](../arquitetura/adr/0083-documentos-legais-publicados-pela-api.md))
+## 8a. Termos, política e exclusão de conta (E6.1, [ADR 0083](../arquitetura/adr/0083-documentos-legais-publicados-pela-api.md); E6.4)
 
-Duas páginas anônimas (`/termos`, `/privacidade`), sem script, sem dado de ninguém e sem entrada além do caminho.
+Três páginas anônimas (`/termos`, `/privacidade` e `/excluir-conta`), sem script, sem dado de ninguém e sem entrada além do caminho. A `/excluir-conta` mostra o e-mail do encarregado, que vem só da configuração (`DataProtection:ContactEmail`), para pedir a exclusão sem o app.
 
 |     | Ameaça | Mitigação |
 | --- | ------ | --------- |
@@ -247,6 +247,11 @@ Duas páginas anônimas (`/termos`, `/privacidade`), sem script, sem dado de nin
 | I   | Política prometendo menos do que o código faz (LGPD) | Tabela de rastreio no fim da política; quem muda `dados-pessoais.md` confere a política e sobe a versão; a 1.0 não sai com "a definir" (teste) |
 | T   | Página em moldura de outro site ou com o caminho refletido | `frame-ancestors 'none'`, `X-Frame-Options: DENY`; a query nunca é refletida (teste) |
 | D   | Abuso das páginas públicas | Política `round-page` por endereço (60 / 60 s), como a `/r` (teste do 61º pedido) |
+| S/T | Pedido de exclusão forjado por e-mail (alguém pede a exclusão da conta de outra pessoa) | Só vale o pedido enviado do e-mail da conta; de outro endereço, o encarregado responde pedindo que a pessoa escreva do e-mail da conta, e confere antes de apagar (pergunta 251; o comando do operador é a E6.9). Como o From se falsifica, antes de apagar o operador exige no cabeçalho `Authentication-Results` SPF, DKIM e DMARC `pass` no domínio do remetente **e** manda uma confirmação ao e-mail da conta no Firebase, que precisa voltar respondida; sem as duas coisas, não apaga. Até a E6.9, o pedido é atendido à mão (`docs/operacao/deploy.md`, "Página de exclusão de conta") |
+| T   | E-mail da configuração injetando HTML ou outro destinatário no `mailto:` | Validação estrita na partida (letras, dígitos, `. _ + -`, um `@`, domínio com ponto, até 254 caracteres; sem `?`, `&`, `%`, `,`, aspas ou espaço), também no passo de deploy; o Razor codifica o valor; nada da requisição entra no `mailto:` (testes) |
+| I   | Página sem cabeçalhos por caixa diferente no caminho (M6-B1) | Todos os prefixos de `WebSecurityHeaders` com `OrdinalIgnoreCase`; teste de `/EXCLUIR-CONTA`, `/Excluir-Conta`, `/R/` e `/C` |
+| R   | Pedido por e-mail atendido sem registro | O e-mail do pedido e a resposta ficam na caixa do encarregado por 5 anos (pergunta 252, a conferir com o advogado); prazo de atendimento de 15 dias |
+| D   | Produção sem canal para pedir sem o app | A API de produção não sobe sem `DataProtection:ContactEmail` (pergunta 250); a mensagem cita só a chave |
 
 ## 8b. Configuração do app: versão mínima e flags (E5.3 Parte 2, [ADR 0084](../arquitetura/adr/0084-feature-flags-e-versao-minima.md))
 

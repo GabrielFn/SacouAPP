@@ -202,7 +202,7 @@ Conferir antes do merge da E6.1 e a cada mudança de `docs/seguranca/dados-pesso
 | 3 O que não coletamos | Colunas travadas por teste de modelo em `identity.users` e `player_profiles`; "Imagem da cartinha" (só escrita na galeria) |
 | 5 e 6 Operadores e região | "Região de armazenamento" (topo), "Todos os dados do banco", "Token de push", "Erros da API" e "Erros e travamentos do app" (Sentry), "Cópia do banco" (Google Cloud Storage); seção 4 de `lgpd-checklist.md` |
 | 7 Retenção | Coluna "Retenção" de cada linha (E6.2); "Na exclusão"; ADR 0056; 30 dias do Cloud Logging; 30 e 7 dias das notificações; 180 dias das denúncias (E6.6); 90 dias do Sentry; 30 dias da "Cópia do banco"; 60 dias da "Marca de exclusão"; 6 h do Neon |
-| 9 Direitos | "Direitos do titular" (exclusão, exportação, Ex-jogador) |
+| 9 Direitos e 13 Contato | "Direitos do titular" (exclusão, exportação, Ex-jogador); "Pedido de exclusão ou de direitos por e-mail" (E6.4, a página `/excluir-conta`) |
 
 ### Pontos que o advogado deve olhar
 

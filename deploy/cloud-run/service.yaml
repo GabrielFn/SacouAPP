@@ -82,6 +82,10 @@ spec:
             # environment, comma-separated. Not a secret; empty lets nobody in.
             - name: Operations__OperatorSubjects
               value: "${OPERATOR_SUBJECTS}"
+            # The data protection contact on /excluir-conta (E6.4): the GitHub variable SACOU_DATA_PROTECTION_EMAIL of this
+            # environment. Not a secret (it is on a public page); the API refuses to start without it in Production.
+            - name: DataProtection__ContactEmail
+              value: "${DATA_PROTECTION_EMAIL}"
           # The migrations run before the port opens: 24 × 5 s gives them two minutes (ADR 0068, D7).
           startupProbe:
             httpGet:

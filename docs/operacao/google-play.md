@@ -21,7 +21,7 @@ Regras gerais da resposta:
 
 - **Compartilhado:** `não` em todas as linhas. Os operadores (Google, Neon, Sentry, Expo) tratam em nome do Sacou, e a Play não conta prestador de serviço como compartilhamento.
 - **Criptografado em trânsito:** `sim` (TLS do Cloud Run; banco com `VerifyFull`).
-- **Pode pedir exclusão:** `sim`, pelo app (Conta, Excluir conta) e pelo link web da E6.4.
+- **Pode pedir exclusão:** `sim`, pelo app (Conta, Excluir conta) e pelo link web `https://<domínio da API de produção>/excluir-conta` (E6.4), que também mostra o e-mail do encarregado para pedir sem o app.
 - **Coleta obrigatória ou opcional:** como na tabela.
 
 | Tipo de dado da Play | Coletado | Compartilhado | Efêmero | Obrigatório ou opcional | Finalidade | Linha do inventário |
@@ -51,7 +51,7 @@ Regras gerais da resposta:
 | Permissões | `android.permission.VIBRATE` (`app.json`) e `POST_NOTIFICATIONS` (do `expo-notifications`, Android 13 ou mais). As de leitura de mídia e de armazenamento estão em `blockedPermissions` (`apps/mobile/app.json`); a cartinha grava na galeria só com permissão de escrita (ADR 0073) |
 | App de finanças, saúde, notícias ou governo | Não |
 | Política de privacidade (URL) | `https://<domínio da API de produção>/privacidade` (E6.1, ADR 0083), depois da revisão jurídica |
-| Exclusão de conta (URL) | A página da E6.4 |
+| Exclusão de conta (URL) | `https://<domínio da API de produção>/excluir-conta` (E6.4). Informar só depois da pergunta 199 (e-mail do encarregado; sem ele a produção não sobe) e da 253 (E6.9, como o operador apaga a conta pedida por e-mail) |
 
 ## Nível de API alvo
 

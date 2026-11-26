@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Hosting;
 
 namespace Sacou.Api.Tests;
 
@@ -21,6 +22,12 @@ public sealed class SacouApiFactory : WebApplicationFactory<Program>
     /// <summary>Required outside Development (ADR 0070, D1); a test of the start sets it empty or wrong.</summary>
     public string PublicBaseUrl { get; init; } = "https://sacou.test";
 
+    /// <summary>
+    /// Required in Production only (E6.4, question 250); a test of the start sets it empty. The reserved <c>.test</c> domain:
+    /// never a real mailbox.
+    /// </summary>
+    public string ContactEmail { get; init; } = "encarregado@sacou.test";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -29,5 +36,9 @@ public sealed class SacouApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:Sacou", ClosedDatabase);
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.UseSetting("RoundPage:PublicBaseUrl", PublicBaseUrl);
+        if (Environment == Environments.Production)
+        {
+            builder.UseSetting("DataProtection:ContactEmail", ContactEmail);
+        }
     }
 }
