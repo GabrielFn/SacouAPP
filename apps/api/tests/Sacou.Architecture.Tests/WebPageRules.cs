@@ -12,6 +12,8 @@ internal static partial class WebPageRules
     /// <summary>Written by hand: a new page is a decision about what is anonymous, never a side effect (ADR 0040, D4).</summary>
     internal static readonly IReadOnlyList<string> Pages =
     [
+        "AccountDeletion.cshtml",
+        "AccountDeletion.cshtml.cs",
         "Invite.cshtml",
         "Invite.cshtml.cs",
         "Ops.cshtml",
