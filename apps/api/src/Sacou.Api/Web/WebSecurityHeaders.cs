@@ -41,7 +41,8 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
     {
         ArgumentNullException.ThrowIfNull(context);
         var path = context.Request.Path;
-        if (path.StartsWithSegments(PagePrefix, StringComparison.Ordinal) || path.StartsWithSegments(InvitePagePrefix, StringComparison.Ordinal)
+        if (path.StartsWithSegments(PagePrefix, StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments(InvitePagePrefix, StringComparison.OrdinalIgnoreCase)
             || path.StartsWithSegments(OpsPagePrefix, StringComparison.OrdinalIgnoreCase))
         {
             context.Response.OnStarting(() => WritePageHeaders(context.Response, policy.Value, PageCache));
@@ -51,7 +52,7 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
         {
             context.Response.OnStarting(() => WritePageHeaders(context.Response, LegalContentSecurityPolicy, LegalPageCache));
         }
-        else if (path.StartsWithSegments(AssetsPrefix, StringComparison.Ordinal) || path.StartsWithSegments(BrandPrefix, StringComparison.Ordinal))
+        else if (path.StartsWithSegments(AssetsPrefix, StringComparison.OrdinalIgnoreCase) || path.StartsWithSegments(BrandPrefix, StringComparison.OrdinalIgnoreCase))
         {
             // The manifest is the page's map of the build, read from disk: never served.
             if (path.Equals(AssetsPrefix + "/manifest.json", StringComparison.OrdinalIgnoreCase))
@@ -92,9 +93,9 @@ internal sealed class WebSecurityHeaders(RequestDelegate next, ContentSecurityPo
         response.Headers["Referrer-Policy"] = ReferrerPolicy;
         if (response.StatusCode == StatusCodes.Status200OK)
         {
-            response.Headers[HeaderNames.CacheControl] = path.StartsWithSegments(BrandPrefix, StringComparison.Ordinal)
+            response.Headers[HeaderNames.CacheControl] = path.StartsWithSegments(BrandPrefix, StringComparison.OrdinalIgnoreCase)
                 ? BrandCache
-                : path.Value?.StartsWith(HashedAssetsPrefix, StringComparison.Ordinal) == true ? ImmutableCache : UnhashedFileCache;
+                : path.Value?.StartsWith(HashedAssetsPrefix, StringComparison.OrdinalIgnoreCase) == true ? ImmutableCache : UnhashedFileCache;
         }
 
         return Task.CompletedTask;
