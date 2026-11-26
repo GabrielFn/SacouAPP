@@ -210,3 +210,4 @@
 - `expo-updates` está fixo em 58.0.22: subir para 58.0.23 quando a idade mínima de publicação do pnpm deixar (baixo; ADR 0088, porta 3).
 - Critério 10 (primeiro evento do Sentry em `production`, release `0.1.0 (<versionCode>)`) só se confere depois do primeiro build `production`, que espera o primeiro deploy de produção (resposta 248).
 - Depois do merge: rodar os três `eas env:create` de `docs/operacao/google-play.md` ("Variáveis dos ambientes do EAS") e conferir com `eas env:list`; sem eles, o `eas update` sai com o Sentry `development` e o `preview` perde a tela de desenvolvimento.
+- Verificador da correção (26/11, baixos): declarar `environment: "preview"` no perfil `preview` do `eas.json` e testar o campo (hoje depende do padrão implícito do EAS para `distribution: internal`); usar `EXPO_NO_DOTENV=1` e o `grep` dos `.env*` também no `eas update` do `preview` (`google-play.md:85`).
