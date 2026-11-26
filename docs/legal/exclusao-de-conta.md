@@ -2,7 +2,7 @@ RASCUNHO PARA REVISÃO JURÍDICA. Não é a versão final. Escrito pelo desenvol
 
 Como este arquivo é publicado (ADR 0083): só o trecho entre os marcadores `publicar:inicio` e `publicar:fim` vai para `/excluir-conta`. Dentro dele, as linhas que começam com `>` são notas de revisão e **nunca** são publicadas. No trecho publicado valem só títulos (`#`, `##`, `###`), parágrafos e itens `- `, sem negrito, links, tabelas nem HTML.
 
-O e-mail do encarregado **não** está neste texto: ele vem da configuração `DataProtection__ContactEmail` e aparece no bloco "Pedir sem o app", no alto da página (pergunta 250). Os rótulos do passo a passo são copiados de `apps/mobile/src/strings/` (`groups.pt-BR.ts`, `profile.pt-BR.ts`, `account.pt-BR.ts`); os prazos, de `docs/seguranca/dados-pessoais.md`. Mudou um deles, muda aqui também. Os passos em ordem viram itens `- ` porque o leitor recusa listas numeradas.
+O e-mail do encarregado **não** está neste texto: ele vem da configuração `DataProtection__ContactEmail` e aparece, com as regras do pedido, no bloco que a página põe logo depois do parágrafo da seção "Sem o app" (pergunta 250; texto em `WebTexts.cs`, fonte única das regras). Sem o e-mail configurado, o bloco diz que o pedido por e-mail ainda não está disponível. Os rótulos do passo a passo são copiados de `apps/mobile/src/strings/` (`groups.pt-BR.ts`, `profile.pt-BR.ts`, `account.pt-BR.ts`); os prazos, de `docs/seguranca/dados-pessoais.md`. Mudou um deles, muda aqui também. Os passos em ordem viram itens `- ` porque o leitor recusa listas numeradas.
 
 <!-- publicar:inicio -->
 
@@ -17,11 +17,10 @@ Esta página explica como excluir sua conta do Sacou, o app de vôlei, pelo pró
 ## Pelo app
 
 - Abra o Sacou e toque na aba "Eu".
-- Toque em "Configurações".
+- Toque na engrenagem (Configurações), no alto da aba.
 - Em "Excluir conta", toque em "Excluir".
 - Em "Para confirmar, digite EXCLUIR", escreva EXCLUIR.
-- Se você entra com Google, toque em "Excluir minha conta".
-- Se você entra com e-mail e senha, escreva a senha em "Sua senha" e toque em "Confirmar e excluir".
+- Toque em "Excluir minha conta". Se você entra com e-mail e senha e o app pedir, escreva a senha em "Sua senha" e toque em "Confirmar e excluir".
 
 A exclusão acontece na hora. Depois dela, o app volta para a tela de entrada.
 
@@ -29,11 +28,7 @@ A exclusão acontece na hora. Depois dela, o app volta para a tela de entrada.
 
 ## Sem o app
 
-Se você desinstalou o app, perdeu o celular ou não consegue entrar, peça a exclusão por e-mail ao encarregado de dados do Sacou, no endereço indicado no alto desta página. Não é preciso instalar o app de novo.
-
-- Envie o pedido do mesmo e-mail que você usa para entrar no Sacou e diga o seu apelido.
-- Um pedido enviado de outro endereço recebe uma resposta pedindo que você escreva do e-mail da conta. Assim ninguém consegue excluir a conta de outra pessoa.
-- A exclusão é feita em até 15 dias, e você recebe a confirmação por e-mail.
+Se você desinstalou o app, perdeu o celular ou não consegue entrar:
 
 ## O que é apagado
 

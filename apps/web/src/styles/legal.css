@@ -129,17 +129,13 @@ body {
   font-weight: 600;
 }
 
-/* The account deletion page (/excluir-conta, E6.4): the block to ask without the app, above the text. */
+/* The account deletion page (/excluir-conta, E6.4): the block to ask without the app, inside the section "Sem o app". */
 .legal-request {
-  margin: 0 0 1.5rem;
+  margin: 1rem 0 1.5rem;
   padding: 1rem 1.25rem;
   border: 0.0625rem solid var(--line);
   border-radius: 0.75rem;
   background: #fff;
-}
-
-.legal-request h2 {
-  margin-top: 0;
 }
 
 .legal-request a {

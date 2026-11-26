@@ -75,7 +75,7 @@ public sealed class DataProtectionContactTests(SacouApiFactory factory) : IClass
     }
 
     [Fact]
-    public async Task WithTheContact_TheBlockShowsTheAddress_AndTheMailto_BeforeTheText()
+    public async Task WithTheContact_TheBlockShowsTheAddress_AndTheMailto_InTheSectionWithoutTheApp()
     {
         await using var app = App("Encarregado@Exemplo.org");
         using var client = app.CreateClient();
@@ -89,7 +89,10 @@ public sealed class DataProtectionContactTests(SacouApiFactory factory) : IClass
         Assert.DoesNotContain("ZZSUBJECT", html, StringComparison.Ordinal);
         Assert.DoesNotContain("evil.example", html, StringComparison.Ordinal);
         Assert.DoesNotContain(WebTexts.DeletionRequestUnavailable, html, StringComparison.Ordinal);
-        Assert.True(html.IndexOf("mailto:", StringComparison.Ordinal) < html.IndexOf("<h2>Pelo app</h2>", StringComparison.Ordinal));
+        var mailTo = html.IndexOf("mailto:", StringComparison.Ordinal);
+        Assert.True(html.IndexOf("<h2>Sem o app</h2>", StringComparison.Ordinal) < mailTo);
+        Assert.True(mailTo < html.IndexOf("<h2>O que é apagado</h2>", StringComparison.Ordinal));
+        Assert.Single(html.Split("15 dias").Skip(1));
     }
 
     [Theory]

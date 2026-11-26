@@ -66,10 +66,10 @@ public sealed class AccountDeletionPageTests(SacouApiFactory factory) : IClassFi
 
     [Theory]
     [InlineData("toque na aba &quot;Eu&quot;")]
-    [InlineData("Toque em &quot;Configurações&quot;")]
+    [InlineData("Toque na engrenagem (Configurações), no alto da aba.")]
     [InlineData("Em &quot;Excluir conta&quot;, toque em &quot;Excluir&quot;")]
     [InlineData("Em &quot;Para confirmar, digite EXCLUIR&quot;")]
-    [InlineData("toque em &quot;Excluir minha conta&quot;")]
+    [InlineData("Toque em &quot;Excluir minha conta&quot;. Se você entra com e-mail e senha e o app pedir")]
     [InlineData("&quot;Sua senha&quot;")]
     [InlineData("&quot;Confirmar e excluir&quot;")]
     [InlineData("&quot;Escolher outro admin&quot;")]
@@ -107,6 +107,7 @@ public sealed class AccountDeletionPageTests(SacouApiFactory factory) : IClassFi
     [InlineData(Page)]
     [InlineData("/EXCLUIR-CONTA")]
     [InlineData("/Excluir-Conta")]
+    [InlineData("/excluir-conta/")]
     public async Task Page_HasTheLegalHeaders_InAnyCase(string path)
     {
         var (response, _) = await GetAsync(path);
@@ -164,16 +165,41 @@ public sealed class AccountDeletionPageTests(SacouApiFactory factory) : IClassFi
     }
 
     [Fact]
-    public async Task WithoutTheContact_TheBlockSaysTheEmailIsNotAvailable_AndHasNoMailto()
+    public async Task WithoutTheContact_TheSectionWithoutTheApp_SaysTheEmailIsNotAvailable_AndPromisesNothing()
     {
         var (_, html) = await GetAsync(Page);
 
-        Assert.Contains($"<h2 id=\"legal-request-title\">{WebTexts.DeletionRequestTitle}</h2>", html, StringComparison.Ordinal);
+        var block = html.IndexOf("class=\"legal-request\"", StringComparison.Ordinal);
         Assert.Contains(
             "O pedido por e-mail ainda não está disponível. Por enquanto, exclua pelo app.", html, StringComparison.Ordinal);
         Assert.DoesNotContain("mailto:", html, StringComparison.Ordinal);
-        Assert.True(
-            html.IndexOf("legal-request", StringComparison.Ordinal) < html.IndexOf("<h2>Pelo app</h2>", StringComparison.Ordinal));
+        Assert.DoesNotContain("15 dias", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("indicado no alto", html, StringComparison.Ordinal);
+        Assert.True(html.IndexOf("não consegue entrar:", StringComparison.Ordinal) < block);
+        Assert.True(block < html.IndexOf("<h2>O que é apagado</h2>", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task WithoutTheSection_TheBlockComesBeforeTheText()
+    {
+        var document = new LegalDocument(
+            "Título", "0.1", new DateOnly(2026, 11, 26), [new LegalBlock.Heading(2, "Outra"), new LegalBlock.Paragraph("Texto.")]);
+        await using var app = App(services => services.AddSingleton<ILegalDocuments>(new FakeDocuments(document)));
+        using var client = app.CreateClient();
+
+        var html = await client.GetStringAsync(new Uri(Page, UriKind.Relative), TestContext.Current.CancellationToken);
+
+        var block = html.IndexOf("class=\"legal-request\"", StringComparison.Ordinal);
+        Assert.NotEqual(-1, block);
+        Assert.True(block < html.IndexOf("<h2>Outra</h2>", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task TheOtherLegalPages_HaveNoRequestBlock()
+    {
+        var (_, html) = await GetAsync("/privacidade");
+
+        Assert.DoesNotContain("legal-request", html, StringComparison.Ordinal);
     }
 
     [Fact]
