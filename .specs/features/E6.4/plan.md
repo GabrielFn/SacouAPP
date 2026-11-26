@@ -3,7 +3,7 @@
 > **Depende do Gabriel (topo, pedido do brief):** o e-mail do encarregado (pergunta **199**) não existe. Este plano **não** escreve endereço nenhum: o e-mail entra só por configuração (`DataProtection__ContactEmail`), e a API de **produção não sobe** sem ele (pergunta 250). A S1 e a S2 podem ser feitas e ir ao ambiente de teste já; o link no Data safety e o teste fechado da Play esperam a 199 **e** a pergunta 253 (como o operador apaga a conta pedida por e-mail, que hoje não tem mecanismo).
 
 **Approved**: 2026-11-26 - user: "Aprovo com as recomendações" (250, 251, 252 e 254; 253: "Tarefa nova E6.9")
-**Settled mid-build:** none
+**Settled mid-build:** M6-B1 (`/R/` e `/C` com `OrdinalIgnoreCase`) já tinha sido corrigido no #267, com `WebSecurityHeadersCaseTests`: a S1 só acrescentou o `/excluir-conta` ao mesmo padrão. O bloco "Pedir sem o app" fica logo abaixo do cabeçalho, dentro do `article` (antes do texto do documento, critério 19), e não antes do `article`, para não vir antes do título. O `HEAD` é conferido pelo status e pelos cabeçalhos: o servidor de teste não descarta o corpo, o Kestrel sim.
 **Review:** <written when the review is sent - sent at <HEAD short hash>>
 **Fix pass:** <written when the fix pass is made>
 
