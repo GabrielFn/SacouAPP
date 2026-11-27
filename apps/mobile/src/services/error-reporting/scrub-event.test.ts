@@ -295,3 +295,16 @@ describe("the sign-in tags (E5.2b, criterion 15)", () => {
     });
   });
 });
+
+describe("the sign-in tags that are not text (E5.2b, criterion 15)", () => {
+  test("an object or array in an auth tag is dropped, a plain value stays", () => {
+    const event = scrubEvent({
+      tags: {
+        "auth.stage": "firebase-email-sign-in",
+        "auth.code": { email: "ana@x.com" },
+        "auth.detail": ["ana@x.com"],
+      },
+    });
+    expect(event.tags).toEqual({ "auth.stage": "firebase-email-sign-in" });
+  });
+});
