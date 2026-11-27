@@ -12,6 +12,7 @@ import type {
   SignOutReason,
 } from "../services/auth/auth-session";
 import { firebaseFailureOf } from "./auth-failure-codes";
+import type { AuthFailureReporter, AuthStage } from "./auth-failure-report";
 import { createListeners } from "./listeners";
 
 /** The token could not be renewed for lack of network; it carries nothing of the SDK's message. */
@@ -65,6 +66,8 @@ export interface FirebaseAuthSessionDeps {
   readonly sdk: FirebaseAuthSdk;
   /** `null` when the build has no Google client ID: the Google button hides. */
   readonly google: GoogleAccountPicker | null;
+  /** Where an unexpected failure of a sign-in stage goes (E5.2b); it never changes the result. */
+  readonly failures: AuthFailureReporter;
 }
 
 const PROVIDER_IDS: readonly (readonly [string, AuthProvider])[] = [
@@ -79,20 +82,15 @@ function accountOf(user: FirebaseUserView): AccountView {
   return { provider, email: user.email, displayName: user.displayName };
 }
 
-async function attempt(action: () => Promise<void>): Promise<AuthResult> {
-  try {
-    await action();
-    return ok(null);
-  } catch (error) {
-    return err(firebaseFailureOf(error));
-  }
-}
-
 /**
  * The real `AuthSession` over the native Firebase SDK, which keeps the tokens (ADR 0057, D5). The app
  * holds only the snapshot, built from `onAuthStateChanged`, and asks for the ID token on each call.
  */
-export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDeps): AuthSession {
+export function createFirebaseAuthSession({
+  sdk,
+  google,
+  failures,
+}: FirebaseAuthSessionDeps): AuthSession {
   const listeners = createListeners();
   const snapshot: { value: SessionSnapshot } = { value: { status: "unknown" } };
   const currentUser: { value: FirebaseUserView | null } = { value: null };
@@ -109,6 +107,17 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
     return reason;
   }
 
+  async function attempt(stage: AuthStage, action: () => Promise<void>): Promise<AuthResult> {
+    try {
+      await action();
+      return ok(null);
+    } catch (error) {
+      const failure = firebaseFailureOf(error);
+      failures.report({ stage, failure, thrown: { error } });
+      return err(failure);
+    }
+  }
+
   sdk.onAuthStateChanged((user) => {
     snapshot.value =
       user === null
@@ -121,12 +130,16 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
 
   async function reauthenticateWith(proof: Reauthentication): Promise<AuthResult> {
     if (proof.provider === "password") {
-      return attempt(() => sdk.reauthenticateWithPassword(proof.password));
+      return attempt("firebase-reauth-password", () =>
+        sdk.reauthenticateWithPassword(proof.password),
+      );
     }
     if (proof.provider === "apple" || google === null) return err("provider-unavailable");
     const picked = await google.pick();
     if (!picked.ok) return picked;
-    return attempt(() => sdk.reauthenticateWithGoogleIdToken(picked.value));
+    return attempt("firebase-reauth-google", () =>
+      sdk.reauthenticateWithGoogleIdToken(picked.value),
+    );
   }
 
   return {
@@ -137,14 +150,16 @@ export function createFirebaseAuthSession({ sdk, google }: FirebaseAuthSessionDe
       if (google === null) return err("provider-unavailable");
       const picked = await google.pick();
       if (!picked.ok) return picked;
-      return attempt(() => sdk.signInWithGoogleIdToken(picked.value));
+      return attempt("firebase-google-credential", () => sdk.signInWithGoogleIdToken(picked.value));
     },
     // Only Android in the pilot (question 58): the port keeps the provider for the iOS app.
     signInWithApple: () => Promise.resolve(err("provider-unavailable")),
-    signInWithEmail: (email, password) => attempt(() => sdk.signInWithEmail(email, password)),
+    signInWithEmail: (email, password) =>
+      attempt("firebase-email-sign-in", () => sdk.signInWithEmail(email, password)),
     createAccountWithEmail: (email, password) =>
-      attempt(() => sdk.createAccountWithEmail(email, password)),
-    sendPasswordReset: (email) => attempt(() => sdk.sendPasswordReset(email)),
+      attempt("firebase-email-sign-up", () => sdk.createAccountWithEmail(email, password)),
+    sendPasswordReset: (email) =>
+      attempt("firebase-password-reset", () => sdk.sendPasswordReset(email)),
     currentSession: () => currentUser.value?.identity ?? null,
     accountKeyOf: (session) => sdk.accountKeyOf(session),
     async getIdToken({ forceRefresh }) {

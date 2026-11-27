@@ -272,3 +272,39 @@ describe("the breadcrumb filter (E5.2, ADR 0080, D10)", () => {
     ).toEqual({ category: "app.lifecycle", message: `hi ${REDACTED}`, data: undefined });
   });
 });
+
+describe("the sign-in tags (E5.2b, criterion 15)", () => {
+  test("an auth tag keeps its value, filtered; one outside the list is dropped", () => {
+    const event = scrubEvent({
+      tags: {
+        area: "auth",
+        "auth.stage": "google-picker",
+        "auth.code": "ana@x.com",
+        "auth.detail": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1In0",
+        "auth.error_type": "0f8fad5b-d9cb-469f-a165-70867728950e",
+        "auth.email": "ana@x.com",
+        "auth.uid": "uid-99",
+      },
+    });
+    expect(event.tags).toEqual({
+      area: "auth",
+      "auth.stage": "google-picker",
+      "auth.code": REDACTED,
+      "auth.detail": REDACTED,
+      "auth.error_type": REDACTED_ID,
+    });
+  });
+});
+
+describe("the sign-in tags that are not text (E5.2b, criterion 15)", () => {
+  test("an object or array in an auth tag is dropped, a plain value stays", () => {
+    const event = scrubEvent({
+      tags: {
+        "auth.stage": "firebase-email-sign-in",
+        "auth.code": { email: "ana@x.com" },
+        "auth.detail": ["ana@x.com"],
+      },
+    });
+    expect(event.tags).toEqual({ "auth.stage": "firebase-email-sign-in" });
+  });
+});

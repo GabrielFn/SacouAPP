@@ -128,6 +128,30 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   apagar esses campos, o caminho sem código é a regra de "Advanced Data Scrubbing" no painel do `sacou-mobile`
   (`Remove`, tipo `Anything`, origem `$user.id || $user.geo || contexts.device.timezone || contexts.device.locale || contexts.device.language || contexts.app.permissions` (o Sentry recusa `$device` e `$app` como tipo; **regra criada no painel em 25/11**); o Relay aplica a regra depois da consulta de geo, então ela também cobre a falha anterior ao JS),
   e o caminho com código é o `beforeSend` nativo pelo `RNSentrySDK.init` (exige APK novo).
+- **D16 · Falhas inesperadas de login** (E5.2b, 27/11/2026, `.specs/features/E5.2b/plan.md`). Uma falha de login que
+  vira `unexpected`, ou `provider-unavailable` vinda do SDK (`PLAY_SERVICES_NOT_AVAILABLE`, `auth/operation-not-allowed`;
+  pergunta 256), vira um evento. As esperadas (`cancelled`, `offline`, `invalid-credentials`, `email-unavailable`,
+  `weak-password`, `too-many-requests`) e o `provider-unavailable` estático (sem client ID, Apple) não. O
+  `AuthFailureReporter` (`src/adapters/auth-failure-report.ts`) entra por dependência nos dois adaptadores e engole o
+  próprio erro: reportar nunca muda o `AuthResult`. **Tags** (door 1, lista fechada em `ERROR_DETAIL_KEYS`, cada valor
+  ainda por `redactText` no `scrubEvent`): `area=auth`; `auth.stage` (uma das 9 etapas: `google-play-services`,
+  `google-picker`, `google-response`, `firebase-google-credential`, `firebase-email-sign-in`, `firebase-email-sign-up`,
+  `firebase-password-reset`, `firebase-reauth-google`, `firebase-reauth-password`); `auth.failure`; `auth.code` (só um
+  código conhecido: `auth/...` da lista do Firebase, constante da lista do Google Sign-In ou número do Google com até
+  5 dígitos; senão `unrecognized`, sem código `none`); `auth.error_type` (o `name` com maiúscula inicial e até 40
+  caracteres, `non-error` ou `unrecognized`); `auth.detail` (o primeiro `[ CONSTANTE ]` da lista de detalhes do
+  Firebase, como `CONFIGURATION_NOT_FOUND` e `INVALID_CERT_HASH`, ou `[ 10: ]` com até 5 dígitos, pergunta 255); e,
+  só em `google-response`, `auth.google.response_type` e `auth.google.has_id_token`. As três listas ficam em
+  `src/adapters/auth-failure-vocabulary.ts`, porque um padrão de forma sozinho aceitaria um e-mail reescrito
+  (`auth/ana-x-com`, `ANA_SILVA_GMAIL_COM`; revisão do PR #274); um código novo do SDK sai `unrecognized` até entrar
+  na lista. **Erro enviado** (door 2): um `UnexpectedAuthFailure` novo, nunca o original, com `name` = tipo validado,
+  `message` = `"<etapa>: <código>"` e `stack` = só as linhas de quadro reais do original (`at <símbolo> (<arquivo>:
+  <linha>:<coluna>)`, `at <arquivo>:<linha>:<coluna>`, `(native)` e o `address at` do Hermes), cada uma por
+  `redactText`; sem `cause` (o LinkedErrors copiaria o original) nem outra propriedade. Nunca saem a mensagem do SDK, o
+  e-mail, a senha, o `idToken`, o `displayName`, o UID, `userInfo`, `nativeStackAndroid` nem a resposta do Google. O
+  usuário continua o anônimo (D14). Descartados: contexto `contexts.auth` (o filtro derruba contexto fora da lista) e
+  `extra` (apagado inteiro, D10); mandar o original e limpar no `beforeSend` (o `beforeSend` não sabe o que é login e
+  a pilha do Hermes repete a mensagem).
 
 ## Consequências
 

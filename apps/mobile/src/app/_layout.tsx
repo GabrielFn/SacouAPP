@@ -40,6 +40,7 @@ import { expoAppVersion } from "../adapters/expo-app-version";
 import { expoApplicationBuild } from "../adapters/expo-application-build";
 import { AppVersionGate } from "../features/app-config/ui/AppVersionGate";
 import { createExpoCacheStore } from "../adapters/expo-cache-store";
+import { createAuthFailureReporter } from "../adapters/auth-failure-report";
 import { createFirebaseAuthSdk } from "../adapters/firebase-auth-sdk";
 import { createFirebaseAuthSession } from "../adapters/firebase-auth-session";
 import { createGoogleAccountPicker } from "../adapters/google-sign-in";
@@ -95,10 +96,14 @@ const onboardingSkip = createStoredOnboardingSkip(cacheStore);
 const courtThemePreference = createStoredCourtThemePreference(cacheStore);
 const networkStatus = createNetInfoNetworkStatus();
 const googleWebClientId = buildGoogleWebClientId();
+// Unexpected sign-in failures reach Sentry without the SDK message (E5.2b, ADR 0080, D16).
+const authFailures = createAuthFailureReporter(errorReporter);
 // The session lives in the native Firebase SDK; the app only reads it (ADR 0057, D2 and D5).
 const authSession = createFirebaseAuthSession({
   sdk: createFirebaseAuthSdk(),
-  google: googleWebClientId === null ? null : createGoogleAccountPicker(googleWebClientId),
+  google:
+    googleWebClientId === null ? null : createGoogleAccountPicker(googleWebClientId, authFailures),
+  failures: authFailures,
 });
 const cacheSession = createCacheSession(queryClient, cachePersister);
 // The API and the exit of the session need each other: `sacouApi` is read only when a call is made.

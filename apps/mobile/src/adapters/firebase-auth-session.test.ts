@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 
 import type { AuthFailure, SessionIdentity } from "../services/auth/auth-session";
 import { firebaseFailureOf, googleFailureOf, type GoogleStatusCodes } from "./auth-failure-codes";
+import { createAuthFailureReporter } from "./auth-failure-report";
+import { createFakeErrorReporter } from "./fake-error-reporter";
 import {
   createFirebaseAuthSession,
   TokenRenewalOffline,
@@ -11,6 +13,7 @@ import {
   type GoogleAccountPicker,
 } from "./firebase-auth-session";
 
+const quietFailures = createAuthFailureReporter(createFakeErrorReporter());
 const PLANTED_EMAIL = "planted.person@example.com";
 const TOKEN = "firebase-id-token-Lm8";
 const GOOGLE_TOKEN = "google-id-token-Rt2";
@@ -118,7 +121,7 @@ function picker(result: Result<string, AuthFailure> = ok(GOOGLE_TOKEN)): GoogleA
 describe("the Firebase session", () => {
   test("unknown until the SDK answers, then the account without the UID", () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: picker() });
     expect(session.snapshot()).toEqual({ status: "unknown" });
     sdk.change(userView(["google.com"]));
     const snapshot = session.snapshot();
@@ -133,7 +136,7 @@ describe("the Firebase session", () => {
 
   test("the provider comes from the Firebase provider IDs", () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: null });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     sdk.change(userView(["password"]));
     expect(session.snapshot()).toMatchObject({ account: { provider: "password" } });
     sdk.change(userView(["apple.com"]));
@@ -142,7 +145,7 @@ describe("the Firebase session", () => {
 
   test("subscribers hear every change; the snapshot is stable between changes", () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: null });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     const heard: string[] = [];
     session.subscribe(() => heard.push(session.snapshot().status));
     sdk.change(null);
@@ -153,7 +156,7 @@ describe("the Firebase session", () => {
 
   test("the reason of the end: asked, fallen elsewhere, or never open", async () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: null });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     sdk.change(null);
     expect(session.snapshot()).toEqual({ status: "signedOut", reason: null });
     sdk.change(userView(["password"]));
@@ -167,7 +170,7 @@ describe("the Firebase session", () => {
 
   test("getIdToken waits for the SDK, gives null signed out and passes forceRefresh", async () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: null });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     const early = session.getIdToken({ forceRefresh: false });
     sdk.change(null);
     expect(await early).toBeNull();
@@ -180,14 +183,18 @@ describe("the Firebase session", () => {
 
   test("only no network rejects the token; any other refusal of the SDK ends the session", async () => {
     const offlineSdk = fakeSdk();
-    const offline = createFirebaseAuthSession({ sdk: offlineSdk, google: null });
+    const offline = createFirebaseAuthSession({
+      failures: quietFailures,
+      sdk: offlineSdk,
+      google: null,
+    });
     offlineSdk.change(userView(["password"], [], "auth/network-request-failed"));
     const rejected = offline.getIdToken({ forceRefresh: true });
     await expect(rejected).rejects.toBeInstanceOf(TokenRenewalOffline);
     await expect(rejected).rejects.not.toHaveProperty("message", expect.stringContaining("@"));
     for (const code of ["auth/user-token-expired", "auth/user-disabled", "auth/odd"]) {
       const sdk = fakeSdk();
-      const session = createFirebaseAuthSession({ sdk, google: null });
+      const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
       sdk.change(userView(["password"], [], code));
       expect(await session.getIdToken({ forceRefresh: true })).toBeNull();
     }
@@ -195,31 +202,39 @@ describe("the Firebase session", () => {
 
   test("Google: the picker token becomes a Firebase credential", async () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: picker() });
     expect(await session.signInWithGoogle()).toEqual(ok(null));
     expect(sdk.log).toEqual(["google:ok"]);
   });
 
   test("Google: a cancel never reaches Firebase; no client ID means no Google", async () => {
     const sdk = fakeSdk();
-    const cancelled = createFirebaseAuthSession({ sdk, google: picker(err("cancelled")) });
+    const cancelled = createFirebaseAuthSession({
+      failures: quietFailures,
+      sdk,
+      google: picker(err("cancelled")),
+    });
     expect(await cancelled.signInWithGoogle()).toEqual(err("cancelled"));
     expect(sdk.log).toEqual([]);
-    const without = createFirebaseAuthSession({ sdk, google: null });
+    const without = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     expect(without.supports("google")).toBe(false);
     expect(without.supports("password")).toBe(true);
     expect(await without.signInWithGoogle()).toEqual(err("provider-unavailable"));
   });
 
   test("Apple is not offered in the pilot (question 58)", async () => {
-    const session = createFirebaseAuthSession({ sdk: fakeSdk(), google: picker() });
+    const session = createFirebaseAuthSession({
+      failures: quietFailures,
+      sdk: fakeSdk(),
+      google: picker(),
+    });
     expect(session.supports("apple")).toBe(false);
     expect(await session.signInWithApple()).toEqual(err("provider-unavailable"));
   });
 
   test("a refusal is a kind, never the raw message with the e-mail", async () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: null });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: null });
     sdk.failNext("auth/user-not-found");
     const result = await session.signInWithEmail(PLANTED_EMAIL, "senha1");
     expect(result).toEqual(err("invalid-credentials"));
@@ -235,7 +250,7 @@ describe("the Firebase session", () => {
   test("sign-out and forgetting the Google account", async () => {
     const sdk = fakeSdk();
     const google = picker();
-    const session = createFirebaseAuthSession({ sdk, google });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google });
     await session.signOut("signedOut");
     await session.forgetProviderAccount();
     expect(sdk.log).toEqual(["signOut"]);
@@ -288,7 +303,7 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
   test("Google picks the account again and reauthenticates; a new ID token is asked for", async () => {
     const sdk = fakeSdk();
     const forced: boolean[] = [];
-    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: picker() });
     sdk.change(userView(["google.com"], forced));
     expect(await session.reauthenticate({ provider: "google" })).toEqual(ok(null));
     expect(sdk.log).toEqual(["reauth-google:ok"]);
@@ -297,7 +312,11 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
 
   test("a cancelled picker or a wrong password fails without the SDK's message", async () => {
     const sdk = fakeSdk();
-    const cancelled = createFirebaseAuthSession({ sdk, google: picker(err("cancelled")) });
+    const cancelled = createFirebaseAuthSession({
+      failures: quietFailures,
+      sdk,
+      google: picker(err("cancelled")),
+    });
     sdk.change(userView(["password"]));
     expect(await cancelled.reauthenticate({ provider: "google" })).toEqual(err("cancelled"));
     sdk.failNext("auth/wrong-password");
@@ -308,7 +327,11 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
   });
 
   test("Apple, or Google without a client ID, is unavailable", async () => {
-    const session = createFirebaseAuthSession({ sdk: fakeSdk(), google: null });
+    const session = createFirebaseAuthSession({
+      failures: quietFailures,
+      sdk: fakeSdk(),
+      google: null,
+    });
     expect(await session.reauthenticate({ provider: "google" })).toEqual(
       err("provider-unavailable"),
     );
@@ -320,7 +343,7 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
   test("deleteAccount deletes the user, revokes Google and ends as deleted", async () => {
     const sdk = fakeSdk();
     const google = picker();
-    const session = createFirebaseAuthSession({ sdk, google });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google });
     sdk.change(userView(["google.com"]));
     await session.deleteAccount(ACCOUNT_A);
     sdk.change(null);
@@ -332,7 +355,7 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
   test("the session names its account; a deletion for another account touches nothing", async () => {
     const sdk = fakeSdk();
     const google = picker();
-    const session = createFirebaseAuthSession({ sdk, google });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google });
     expect(session.currentSession()).toBeNull();
     sdk.change(userView(["google.com"], [], null, ACCOUNT_B));
     expect(session.currentSession()).toBe(ACCOUNT_B);
@@ -345,7 +368,7 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
   test("the SDK already on another account, before its listener: nothing is touched", async () => {
     const sdk = fakeSdk();
     const google = picker();
-    const session = createFirebaseAuthSession({ sdk, google });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google });
     sdk.change(userView(["google.com"]));
     sdk.moveSilently(ACCOUNT_B);
     await session.deleteAccount(ACCOUNT_A);
@@ -358,12 +381,99 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
 
   test("a refused delete signs out anyway, still as deleted", async () => {
     const sdk = fakeSdk();
-    const session = createFirebaseAuthSession({ sdk, google: picker() });
+    const session = createFirebaseAuthSession({ failures: quietFailures, sdk, google: picker() });
     sdk.change(userView(["password"]));
     sdk.failNext("auth/requires-recent-login");
     await session.deleteAccount(ACCOUNT_A);
     sdk.change(null);
     expect(sdk.log).toEqual(["delete", "signOut"]);
     expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });
+  });
+});
+
+describe("the Firebase session reports its unexpected stages (E5.2b)", () => {
+  function reportingSession(google: GoogleAccountPicker | null = picker()) {
+    const sdk = fakeSdk();
+    const errors = createFakeErrorReporter();
+    const session = createFirebaseAuthSession({
+      sdk,
+      google,
+      failures: createAuthFailureReporter(errors),
+    });
+    const stages = () => errors.captured().map(({ context }) => context?.details?.["auth.stage"]);
+    return { sdk, errors, session, stages };
+  }
+
+  test("an internal error of the Google credential is one event, same result (criteria 1, 8)", async () => {
+    const { sdk, errors, session } = reportingSession();
+    sdk.failNext("auth/internal-error");
+    expect(await session.signInWithGoogle()).toEqual(err("unexpected"));
+    expect(errors.captured().map(({ context }) => context)).toEqual([
+      {
+        area: "auth",
+        details: {
+          "auth.stage": "firebase-google-credential",
+          "auth.failure": "unexpected",
+          "auth.code": "auth/internal-error",
+          "auth.error_type": "Error",
+        },
+      },
+    ]);
+  });
+
+  test("expected failures never become events (criterion 2)", async () => {
+    const { sdk, errors, session } = reportingSession();
+    sdk.failNext("auth/wrong-password");
+    expect(await session.signInWithEmail(PLANTED_EMAIL, "x")).toEqual(err("invalid-credentials"));
+    sdk.failNext("auth/network-request-failed");
+    expect(await session.signInWithGoogle()).toEqual(err("offline"));
+    expect(errors.captured()).toEqual([]);
+  });
+
+  test("a provider the SDK says is off is reported; the static one is not (criterion 3)", async () => {
+    const { sdk, session, stages, errors } = reportingSession(null);
+    sdk.failNext("auth/operation-not-allowed");
+    expect(await session.signInWithEmail(PLANTED_EMAIL, "x")).toEqual(err("provider-unavailable"));
+    expect(await session.signInWithGoogle()).toEqual(err("provider-unavailable"));
+    expect(await session.signInWithApple()).toEqual(err("provider-unavailable"));
+    expect(stages()).toEqual(["firebase-email-sign-in"]);
+    expect(errors.captured()[0]?.context?.details?.["auth.failure"]).toBe("provider-unavailable");
+  });
+
+  test("each e-mail and reauthentication call is its own stage (criterion 7)", async () => {
+    const { sdk, session, stages } = reportingSession();
+    sdk.failNext("auth/internal-error");
+    await session.signInWithEmail(PLANTED_EMAIL, "x");
+    sdk.failNext("auth/internal-error");
+    await session.createAccountWithEmail(PLANTED_EMAIL, "x");
+    sdk.failNext("auth/internal-error");
+    await session.sendPasswordReset(PLANTED_EMAIL);
+    sdk.failNext("auth/internal-error");
+    await session.reauthenticate({ provider: "password", password: "x" });
+    sdk.failNext("auth/internal-error");
+    expect(await session.reauthenticate({ provider: "google" })).toEqual(err("unexpected"));
+    expect(stages()).toEqual([
+      "firebase-email-sign-in",
+      "firebase-email-sign-up",
+      "firebase-password-reset",
+      "firebase-reauth-password",
+      "firebase-reauth-google",
+    ]);
+  });
+
+  test("a reporter that throws does not change the result (criterion 8)", async () => {
+    const sdk = fakeSdk();
+    const session = createFirebaseAuthSession({
+      sdk,
+      google: picker(),
+      failures: createAuthFailureReporter({
+        captureError: () => {
+          throw new Error("sentry down");
+        },
+        crashNatively: () => undefined,
+      }),
+    });
+    sdk.failNext("auth/internal-error");
+    expect(await session.signInWithGoogle()).toEqual(err("unexpected"));
   });
 });
