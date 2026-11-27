@@ -1,11 +1,11 @@
 # E5.2b · Falhas inesperadas de login no Sentry
 
 **Approved**: 2026-11-27 - user: "aprovo" (perguntas 255 a 257 com as recomendações apresentadas: incluir `auth.detail`, reportar `provider-unavailable` do SDK, entrega por EAS Update no canal `production` publicado pelo Gabriel)
-**Settled mid-build:** none
-**Review:** <escrito quando a revisão for enviada - sent at <hash>>
-**Fix pass:** <escrito quando a correção for feita>
+**Settled mid-build:** revisão do PR #274: `auth.code` e `auth.detail` passam a vir de listas fechadas dos SDKs (`auth-failure-vocabulary.ts`), o tipo exige maiúscula inicial e até 40 caracteres e a pilha só leva linhas de quadro reais (critérios 9, 10, 11 e 13)
+**Review:** sent at 4785621f (revisor e revisor-seguranca Opus, aprovado com condições; testador Sonnet 9 de 10 sabotagens, a sobrevivente morta por teste novo em 00991832)
+**Fix pass:** 9fa65d02
 
-> **Depende do Gabriel (perguntas 255 a 257, abaixo em `Assumptions` e `Open questions`):** 255, se o detalhe entre colchetes da mensagem do Firebase (`[ CONFIGURATION_NOT_FOUND ]`, `[ 10: ]`) entra por uma lista fechada de caracteres; 256, se `provider-unavailable` vindo do SDK também é reportado; 257, a publicação no celular (EAS Update no canal `production`, só ele publica). Sem resposta, vale a recomendação de cada uma (autonomia do `CLAUDE.md`), menos a publicação da 257, que é dele.
+> **Respostas 255 a 257 em 27/11 (`perguntas.md`):** 255, incluir `auth.detail`; 256, reportar `provider-unavailable` vindo do SDK; 257, entrega por EAS Update no canal `production`, que fica pendente só da publicação pelo Gabriel.
 
 ## Problem
 
@@ -95,15 +95,15 @@ Quando reporta
 
 O que vai
 
-9. The relatório SHALL levar o código só quando ele casa com `^(auth/[a-z0-9-]{1,60}|-?[0-9]{1,6}|[A-Z][A-Z0-9_]{0,39})$`, depois de `String(code)`; sem código, `none`; fora do padrão, `unrecognized`
-   - `10` (número) → `10`; `"12500"` → `12500`; `"DEVELOPER_ERROR"` → `DEVELOPER_ERROR`; `"auth/internal-error"` → `auth/internal-error`; `"ana@x.com"` → `unrecognized`; `"auth/"` + 61 letras → `unrecognized`; sem `code` → `none`
-10. The relatório SHALL levar como tipo o `name` do erro quando ele casa com `^[A-Za-z][A-Za-z0-9_]{0,59}$`; objeto sem `name` texto → `Error`; valor que não é objeto (texto, número, `undefined` lançado) → `non-error`; fora do padrão → `unrecognized`
+9. The relatório SHALL levar o código, depois de `String(code)`, só quando ele é `auth/` + um código da lista do Firebase, uma constante da lista do Google Sign-In ou casa com `^[0-9]{1,5}$` (listas em `auth-failure-vocabulary.ts`); sem código, `none`; fora disso, `unrecognized`
+   - `10` (número) → `10`; `"12500"` → `12500`; `"DEVELOPER_ERROR"` → `DEVELOPER_ERROR`; `"auth/internal-error"` → `auth/internal-error`; `"ana@x.com"`, `"auth/ana-x-com"`, `"ANA_SILVA_GMAIL_COM"` e `"123456"` → `unrecognized`; sem `code` → `none`
+10. The relatório SHALL levar como tipo o `name` do erro quando ele casa com `^[A-Z][A-Za-z0-9_]{0,39}$`; objeto sem `name` texto → `Error`; valor que não é objeto (texto, número, `undefined` lançado) → `non-error`; fora do padrão → `unrecognized`
     - `TypeError` → `TypeError`; `name: "ana@x.com"` → `unrecognized`; `throw "ana@x.com"` → `non-error`
-11. The relatório SHALL levar da `stack` original só as linhas que casam com `^\s*at\s`, cada uma passada por `redactText`, e nenhuma outra linha; sem `stack` texto ou sem linha de quadro, o `Error` novo fica com a pilha do ponto de captura (o SDK a põe com `attachStacktrace`)
-    - `"Error: falhou ana@x.com\nsegunda ana@x.com\n    at f (index.bundle:1:2)"` → só `"    at f (index.bundle:1:2)"`; o caso forte: `"x\n    at ana@x.com"` → `"    at [filtrado]"`
+11. The relatório SHALL levar da `stack` original só as linhas de quadro reais do V8 e do Hermes (`at <símbolo> (<arquivo>:<linha>:<coluna>)`, `at <arquivo>:<linha>:<coluna>`, `at <símbolo> (native)`, com ou sem `address at`), cada uma passada por `redactText`, e nenhuma outra linha; sem `stack` texto ou sem linha de quadro, o `Error` novo fica com a pilha do ponto de captura (o SDK a põe com `attachStacktrace`)
+    - `"Error: falhou ana@x.com\nsegunda ana@x.com\n    at f (index.bundle:1:2)"` → só `"    at f (index.bundle:1:2)"`; o caso forte: `"x\n    at f (ana@x.com:1:2)"` → `"    at f ([filtrado]:1:2)"`; `"\tat Ana Silva"` (sem local) cai
 12. The evento SHALL ter como exceção o `UnexpectedAuthFailure`: `type` = tipo do critério 10, `value` = `"<etapa>: <código>"` (ex.: `google-picker: 10`), e o objeto não SHALL ter `cause` nem outra propriedade própria além de `name`, `message` e `stack`
-13. WHERE a pergunta 255 é aprovada the relatório SHALL levar `auth.detail` com o primeiro trecho entre colchetes da mensagem do Firebase que casa com `\[\s*([A-Z][A-Z0-9_]{1,59}|[0-9]{1,6}):?\s*\]`, e nada além dele
-    - `"[auth/unknown] An internal error has occurred. [ CONFIGURATION_NOT_FOUND ]"` → `CONFIGURATION_NOT_FOUND`; `"[ 10: ]"` → `10`; `"[ ana@x.com ]"` → sem `auth.detail`; mensagem sem colchetes → sem `auth.detail`; o `[auth/unknown]` não casa (minúsculas e `/`)
+13. WHERE a pergunta 255 é aprovada the relatório SHALL levar `auth.detail` com o primeiro trecho entre colchetes da mensagem do Firebase que casa com `\[\s*([A-Z][A-Z0-9_]{1,39}|[0-9]{1,5}):?\s*\]` e, se constante, está na lista de detalhes do Firebase (`CONFIGURATION_NOT_FOUND`, `INVALID_CERT_HASH`, ...), e nada além dele
+    - `"[auth/unknown] An internal error has occurred. [ CONFIGURATION_NOT_FOUND ]"` → `CONFIGURATION_NOT_FOUND`; `"[ 10: ]"` → `10`; `"[ ana@x.com ]"` e `"[ ANA_SILVA_GMAIL_COM ]"` → sem `auth.detail`; mensagem sem colchetes → sem `auth.detail`; o `[auth/unknown]` não casa (minúsculas e `/`)
 
 O que nunca vai
 
@@ -133,17 +133,17 @@ Arquitetura e documentação
 
 | Assumption | Chosen default | Rationale | Confirmed? |
 | --- | --- | --- | --- |
-| Detalhe entre colchetes da mensagem do Firebase (pergunta 255) | Incluir `auth.detail` só com o padrão fechado do critério 13 | `auth/unknown` e `auth/internal-error` escondem a causa no trecho `[ ... ]`, e o padrão (maiúsculas, dígitos e `_`) não comporta e-mail, nome nem token. Não é a "mensagem filtrada" que ficou de fora | n |
-| `provider-unavailable` vindo do SDK (pergunta 256) | Reportar | `auth/operation-not-allowed` é provedor desligado no console do Firebase, erro de configuração nosso; `PLAY_SERVICES_NOT_AVAILABLE` é raro e diz qual aparelho falha. O estático (sem client ID, Apple) não é reportado | n |
+| Detalhe entre colchetes da mensagem do Firebase (pergunta 255) | Incluir `auth.detail` só com o padrão fechado do critério 13 | `auth/unknown` e `auth/internal-error` escondem a causa no trecho `[ ... ]`, e o padrão (maiúsculas, dígitos e `_`) não comporta e-mail, nome nem token. Não é a "mensagem filtrada" que ficou de fora | y |
+| `provider-unavailable` vindo do SDK (pergunta 256) | Reportar | `auth/operation-not-allowed` é provedor desligado no console do Firebase, erro de configuração nosso; `PLAY_SERVICES_NOT_AVAILABLE` é raro e diz qual aparelho falha. O estático (sem client ID, Apple) não é reportado | y |
 | UID no evento | Nunca | ADR 0057 D2 e ADR 0080 D14; o diagnóstico não precisa saber quem | n |
 | Uma tentativa, um evento | Sem deduplicação no app | O limite de 300 eventos por hora da chave (D13) já segura o abuso; tentativas repetidas mostram a frequência | n |
 | Valor da exceção | `"<etapa>: <código>"` | Título legível no painel e agrupamento por causa, só com valores validados | n |
 
 **Open questions:**
 
-- 255 (`open`, padrão: incluir): ver `Assumptions`.
-- 256 (`open`, padrão: reportar): ver `Assumptions`.
-- 257 (`blocks go-live`): a mudança é só de JS e chega ao celular por EAS Update no canal `production` (E5.4), que só o Gabriel publica; o mapa de fontes do update precisa ser enviado ao Sentry no mesmo passo (`SENTRY_AUTH_TOKEN` local), senão a pilha chega sem simbolizar. **Recomendação:** EAS Update depois do merge, com o roteiro do orquestrador; build novo só se o `runtimeVersion` do AAB instalado não casar.
+- 255 (`answered` em 27/11: incluir): ver `Assumptions`.
+- 256 (`answered` em 27/11: reportar): ver `Assumptions`.
+- 257 (`answered` em 27/11: EAS Update; pendente só da publicação pelo Gabriel, `blocks go-live`): a mudança é só de JS e chega ao celular por EAS Update no canal `production` (E5.4), que só o Gabriel publica; o mapa de fontes do update precisa ser enviado ao Sentry no mesmo passo (`SENTRY_AUTH_TOKEN` local), senão a pilha chega sem simbolizar. **Recomendação:** EAS Update depois do merge, com o roteiro do orquestrador; build novo só se o `runtimeVersion` do AAB instalado não casar.
 
 ## Differences from the source
 

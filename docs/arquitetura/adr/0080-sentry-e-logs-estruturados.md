@@ -136,12 +136,17 @@ congela a CPU fora da requisição (ADR 0068, D2), então um envio em segundo pl
   próprio erro: reportar nunca muda o `AuthResult`. **Tags** (door 1, lista fechada em `ERROR_DETAIL_KEYS`, cada valor
   ainda por `redactText` no `scrubEvent`): `area=auth`; `auth.stage` (uma das 9 etapas: `google-play-services`,
   `google-picker`, `google-response`, `firebase-google-credential`, `firebase-email-sign-in`, `firebase-email-sign-up`,
-  `firebase-password-reset`, `firebase-reauth-google`, `firebase-reauth-password`); `auth.failure`; `auth.code` (só se
-  casa com `auth/...`, número ou constante em maiúsculas; senão `unrecognized`, sem código `none`); `auth.error_type`
-  (o `name` com cara de classe, `non-error` ou `unrecognized`); `auth.detail` (o primeiro `[ CONSTANTE ]` ou `[ 10: ]` da
-  mensagem do Firebase, pergunta 255); e, só em `google-response`, `auth.google.response_type` e
-  `auth.google.has_id_token`. **Erro enviado** (door 2): um `UnexpectedAuthFailure` novo, nunca o original, com `name`
-  = tipo validado, `message` = `"<etapa>: <código>"` e `stack` = só as linhas `at ...` do original, cada uma por
+  `firebase-password-reset`, `firebase-reauth-google`, `firebase-reauth-password`); `auth.failure`; `auth.code` (só um
+  código conhecido: `auth/...` da lista do Firebase, constante da lista do Google Sign-In ou número do Google com até
+  5 dígitos; senão `unrecognized`, sem código `none`); `auth.error_type` (o `name` com maiúscula inicial e até 40
+  caracteres, `non-error` ou `unrecognized`); `auth.detail` (o primeiro `[ CONSTANTE ]` da lista de detalhes do
+  Firebase, como `CONFIGURATION_NOT_FOUND` e `INVALID_CERT_HASH`, ou `[ 10: ]` com até 5 dígitos, pergunta 255); e,
+  só em `google-response`, `auth.google.response_type` e `auth.google.has_id_token`. As três listas ficam em
+  `src/adapters/auth-failure-vocabulary.ts`, porque um padrão de forma sozinho aceitaria um e-mail reescrito
+  (`auth/ana-x-com`, `ANA_SILVA_GMAIL_COM`; revisão do PR #274); um código novo do SDK sai `unrecognized` até entrar
+  na lista. **Erro enviado** (door 2): um `UnexpectedAuthFailure` novo, nunca o original, com `name` = tipo validado,
+  `message` = `"<etapa>: <código>"` e `stack` = só as linhas de quadro reais do original (`at <símbolo> (<arquivo>:
+  <linha>:<coluna>)`, `at <arquivo>:<linha>:<coluna>`, `(native)` e o `address at` do Hermes), cada uma por
   `redactText`; sem `cause` (o LinkedErrors copiaria o original) nem outra propriedade. Nunca saem a mensagem do SDK, o
   e-mail, a senha, o `idToken`, o `displayName`, o UID, `userInfo`, `nativeStackAndroid` nem a resposta do Google. O
   usuário continua o anônimo (D14). Descartados: contexto `contexts.auth` (o filtro derruba contexto fora da lista) e
