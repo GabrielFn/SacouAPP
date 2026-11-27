@@ -7,6 +7,6 @@ apps/api/tests/Sacou.Integration.Tests/Matches/CourtStreamTests.cs:generic-api-k
 apps/api/src/Sacou.Api/appsettings.json:gcp-api-key:12
 # A made-up JWT (payload {"sub":"marcador"}, signature "assinatura") the Sentry scrubber test must turn into [filtrado] (E5.2, ADR 0080), not a token.
 apps/api/tests/Sacou.Api.Tests/Observability/SentryEventScrubberTests.cs:jwt:13
-# A made-up JWT and a made-up UUID the scrubber test puts in the auth.* tags to prove they come out as [filtrado] (E5.2b, ADR 0080 D16), not a token nor a key.
+# A made-up JWT and a made-up UUID the scrubber test puts in the auth.* tags to prove they come out filtered (the JWT as [filtrado], the UUID as [id]) (E5.2b, ADR 0080 D16), not a token nor a key.
 apps/mobile/src/services/error-reporting/scrub-event.test.ts:generic-api-key:283
 apps/mobile/src/services/error-reporting/scrub-event.test.ts:generic-api-key:284
