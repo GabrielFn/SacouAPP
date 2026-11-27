@@ -316,3 +316,4 @@ Detalhes nos `plan.md` de `.specs/features/E6.5` a `E6.8`.
 252. Atendimento em 15 dias e guarda do pedido e da resposta por 5 anos, a conferir com o advogado (recomendação aprovada).
 253. **Tarefa nova E6.9**: comando `delete-account --uid` no executável da API, com a promoção do membro mais antigo (resposta do Gabriel). Bloqueia o teste fechado, não o interno.
 254. Corrigir o M6-B1 (`/R/` e `/C/` sem CSP) no mesmo PR da S1 da E6.4 (recomendação aprovada).
+199 (resposta, 26/11/2026). Canal do encarregado: **e-mail novo e dedicado, `sacouapp.contato@gmail.com`, criado pelo Gabriel** (recomendação seguida; ele chegou a pensar no e-mail pessoal e trocou). É endereço público de contato, não segredo. Fonte única: `SACOU_DATA_PROTECTION_EMAIL` no environment `production`, cadastrado pelo Gabriel; a política de privacidade passa a ler o mesmo valor da configuração, como `/excluir-conta`, em vez do texto fixo "a definir".
