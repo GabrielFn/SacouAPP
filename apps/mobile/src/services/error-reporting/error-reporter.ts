@@ -1,6 +1,25 @@
-/** Which part of the app caught the error: a fixed name, never a value typed by someone. */
+/**
+ * The keys an error may carry besides its area, each one a Sentry tag (E5.2b, ADR 0080, D16). A closed
+ * list: the scrubber lets only these through, and every value still passes through its text filter.
+ */
+export const ERROR_DETAIL_KEYS = [
+  "auth.stage",
+  "auth.failure",
+  "auth.code",
+  "auth.error_type",
+  "auth.detail",
+  "auth.google.response_type",
+  "auth.google.has_id_token",
+] as const;
+
+export type ErrorDetailKey = (typeof ERROR_DETAIL_KEYS)[number];
+
+export type ErrorDetails = Readonly<Partial<Record<ErrorDetailKey, string>>>;
+
+/** Which part of the app caught the error: fixed names and validated values, never typed text. */
 export interface ErrorContext {
   readonly area: string;
+  readonly details?: ErrorDetails;
 }
 
 /**

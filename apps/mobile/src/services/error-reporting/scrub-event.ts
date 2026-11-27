@@ -5,6 +5,8 @@
  * Pure and without the SDK, so the tests run it on plain objects; the original is never changed.
  */
 
+import { ERROR_DETAIL_KEYS } from "./error-reporter";
+
 export const REDACTED = "[filtrado]";
 export const REDACTED_ID = "[id]";
 const CODE_SEGMENT = "{code}";
@@ -92,7 +94,12 @@ const CODE_PATH_PATTERN = /\/(c|r)\/[^/?#\s]+/g;
 const URL_TAIL_PATTERN = /((?:https?|sacou):\/\/[^\s?#]*)[?#]\S*/g;
 const QUERY_OR_FRAGMENT = /[?#]/;
 
-const ALLOWED_TAGS: readonly string[] = ["area", "event.origin", "event.environment"];
+const ALLOWED_TAGS: readonly string[] = [
+  "area",
+  "event.origin",
+  "event.environment",
+  ...ERROR_DETAIL_KEYS,
+];
 const HTTP_CATEGORIES: readonly string[] = ["xhr", "fetch", "http"];
 const NAVIGATION_CATEGORIES: readonly string[] = ["navigation", "deeplink"];
 const HTTP_DATA_KEYS: readonly string[] = ["method", "status_code"];
@@ -220,7 +227,7 @@ function scrubRequest(request: ReportedRequest | undefined): ReportedRequest | u
 function allowedTags(
   tags: Readonly<Record<string, unknown>> | undefined,
 ): Readonly<Record<string, unknown>> | undefined {
-  return tags === undefined ? undefined : pick(tags, ALLOWED_TAGS, keep);
+  return tags === undefined ? undefined : pick(tags, ALLOWED_TAGS, scrubPrimitive);
 }
 
 /** A primitive value, with its text filtered; objects and arrays are dropped. */

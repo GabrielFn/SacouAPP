@@ -23,7 +23,9 @@ export function startErrorReporter(config: SentryConfig | null): ErrorReporter {
     captureError: (error, context) => {
       Sentry.captureException(
         error,
-        context === undefined ? undefined : { tags: { [AREA_TAG]: context.area } },
+        context === undefined
+          ? undefined
+          : { tags: { [AREA_TAG]: context.area, ...context.details } },
       );
     },
     crashNatively: () => {
