@@ -1,6 +1,11 @@
 import type { AuthFailure } from "../services/auth/auth-session";
 import type { ErrorDetails, ErrorReporter } from "../services/error-reporting/error-reporter";
 import { redactText } from "../services/error-reporting/scrub-event";
+import {
+  FIREBASE_AUTH_CODES,
+  FIREBASE_MESSAGE_DETAILS,
+  GOOGLE_SIGN_IN_CODES,
+} from "./auth-failure-vocabulary";
 
 /**
  * The sign-in failures the app did not expect, as they reach Sentry (E5.2b, ADR 0080, D16). Only the
@@ -60,10 +65,18 @@ export const NON_ERROR = "non-error";
 const DEFAULT_ERROR_TYPE = "Error";
 const AUTH_AREA = "auth";
 
-const CODE_PATTERN = /^(auth\/[a-z0-9-]{1,60}|-?[0-9]{1,6}|[A-Z][A-Z0-9_]{0,39})$/;
-const ERROR_TYPE_PATTERN = /^[A-Za-z][A-Za-z0-9_]{0,59}$/;
-const FRAME_PATTERN = /^\s*at\s/;
-const DETAIL_PATTERN = /\[\s*([A-Z][A-Z0-9_]{1,59}|[0-9]{1,6}):?\s*\]/;
+const FIREBASE_CODE_PREFIX = "auth/";
+/** The status codes of Google Play services are small integers (`10`, `12500`, `12501`). */
+const GOOGLE_STATUS_PATTERN = /^[0-9]{1,5}$/;
+/** A class name: capital first and short, so a UID or a token does not fit. */
+const ERROR_TYPE_PATTERN = /^[A-Z][A-Za-z0-9_]{0,39}$/;
+/**
+ * A real frame line of V8 or Hermes: `at <symbol> (<file>:<line>:<column>)`, `at <file>:<line>:<column>`
+ * or `at <symbol> (native)`, with or without Hermes' `address at` before the file.
+ */
+const FRAME_PATTERN =
+  /^\s*at (?:[^()]+ \((?:address at )?(?:[^()\s]+:\d+:\d+|native)\)|(?:address at )?[^()\s]+:\d+:\d+)$/;
+const DETAIL_CANDIDATES = /\[\s*([A-Z][A-Z0-9_]{1,39}|[0-9]{1,5}):?\s*\]/g;
 const LINE_BREAK = /\r?\n/;
 const REPORTED_FAILURES: readonly AuthFailure[] = ["unexpected", "provider-unavailable"];
 
@@ -81,12 +94,20 @@ function propertyOf(error: unknown, key: string): unknown {
     : undefined;
 }
 
-/** The code of the SDK only when it fits a closed shape (criterion 9): an e-mail never does. */
+function isKnownCode(code: string): boolean {
+  if (GOOGLE_STATUS_PATTERN.test(code) || GOOGLE_SIGN_IN_CODES.has(code)) return true;
+  return (
+    code.startsWith(FIREBASE_CODE_PREFIX) &&
+    FIREBASE_AUTH_CODES.has(code.slice(FIREBASE_CODE_PREFIX.length))
+  );
+}
+
+/** The code of the SDK only when it is a known one (criterion 9): a rewritten e-mail never is. */
 export function codeOf(thrown: AuthFailureInput["thrown"]): string {
   const code = propertyOf(thrown?.error, "code");
   if (typeof code !== "string" && typeof code !== "number") return NO_VALUE;
   const text = String(code);
-  return CODE_PATTERN.test(text) ? text : UNRECOGNIZED;
+  return isKnownCode(text) ? text : UNRECOGNIZED;
 }
 
 /** The `name` of the error only when it looks like a class name (criterion 10). */
@@ -98,7 +119,7 @@ export function errorTypeOf(thrown: AuthFailureInput["thrown"]): string {
   return ERROR_TYPE_PATTERN.test(name) ? name : UNRECOGNIZED;
 }
 
-/** Only the `at ...` lines of the stack, each one filtered: the first line repeats the message. */
+/** Only the real frame lines of the stack, each one filtered: the first line repeats the message. */
 export function framesOf(thrown: AuthFailureInput["thrown"]): readonly string[] {
   const stack = propertyOf(thrown?.error, "stack");
   if (typeof stack !== "string") return [];
@@ -108,11 +129,18 @@ export function framesOf(thrown: AuthFailureInput["thrown"]): readonly string[] 
     .map(redactText);
 }
 
-/** The first `[ CODE ]` of the SDK's message (question 255), and nothing else of it. */
+function isKnownDetail(detail: string): boolean {
+  return GOOGLE_STATUS_PATTERN.test(detail) || FIREBASE_MESSAGE_DETAILS.has(detail);
+}
+
+/** The first known `[ CODE ]` of the SDK's message (question 255), and nothing else of it. */
 export function detailOf(thrown: AuthFailureInput["thrown"]): string | null {
   const message = propertyOf(thrown?.error, "message");
   if (typeof message !== "string") return null;
-  return DETAIL_PATTERN.exec(message)?.[1] ?? null;
+  for (const [, candidate] of message.matchAll(DETAIL_CANDIDATES)) {
+    if (candidate !== undefined && isKnownDetail(candidate)) return candidate;
+  }
+  return null;
 }
 
 /** The report of a failed stage, or `null` when the failure is expected (criteria 1 to 3). */

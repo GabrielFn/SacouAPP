@@ -57,7 +57,9 @@ describe("the stack of a failed sign-in (criterion 11)", () => {
   test("only the frame lines leave, each one filtered", () => {
     const stack = `Error: falhou ${EMAIL}\nsegunda ${EMAIL}\n    at f (index.bundle:1:2)`;
     expect(framesOf(thrown({ stack }))).toEqual(["    at f (index.bundle:1:2)"]);
-    expect(framesOf(thrown({ stack: `x\n    at ${EMAIL}` }))).toEqual(["    at [filtrado]"]);
+    expect(framesOf(thrown({ stack: `x\n    at f (${EMAIL}:1:2)` }))).toEqual([
+      "    at f ([filtrado]:1:2)",
+    ]);
   });
 
   test("without a stack text there are no frames, and the new error keeps its own stack", () => {
