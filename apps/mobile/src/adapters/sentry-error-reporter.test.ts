@@ -42,6 +42,17 @@ describe("the Sentry adapter behind the ErrorReporter port (E5.2 part 2)", () =>
     });
   });
 
+  test("the details of the context become tags next to the area (E5.2b)", () => {
+    const reporter = startErrorReporter(CONFIG);
+    reporter.captureError(new Error("boom"), {
+      area: "auth",
+      details: { "auth.stage": "google-picker", "auth.code": "10" },
+    });
+    expect(sentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
+      tags: { area: "auth", "auth.stage": "google-picker", "auth.code": "10" },
+    });
+  });
+
   test("puts the anonymous user on the scope after init, so native crashes carry it too", () => {
     startErrorReporter(CONFIG);
     expect(sentry.setUser).toHaveBeenCalledWith(ANONYMOUS_USER);

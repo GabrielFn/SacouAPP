@@ -390,3 +390,90 @@ describe("reauthentication and deletion (E4.3, part 3)", () => {
     expect(session.snapshot()).toEqual({ status: "signedOut", reason: "deleted" });
   });
 });
+
+describe("the Firebase session reports its unexpected stages (E5.2b)", () => {
+  function reportingSession(google: GoogleAccountPicker | null = picker()) {
+    const sdk = fakeSdk();
+    const errors = createFakeErrorReporter();
+    const session = createFirebaseAuthSession({
+      sdk,
+      google,
+      failures: createAuthFailureReporter(errors),
+    });
+    const stages = () => errors.captured().map(({ context }) => context?.details?.["auth.stage"]);
+    return { sdk, errors, session, stages };
+  }
+
+  test("an internal error of the Google credential is one event, same result (criteria 1, 8)", async () => {
+    const { sdk, errors, session } = reportingSession();
+    sdk.failNext("auth/internal-error");
+    expect(await session.signInWithGoogle()).toEqual(err("unexpected"));
+    expect(errors.captured().map(({ context }) => context)).toEqual([
+      {
+        area: "auth",
+        details: {
+          "auth.stage": "firebase-google-credential",
+          "auth.failure": "unexpected",
+          "auth.code": "auth/internal-error",
+          "auth.error_type": "Error",
+        },
+      },
+    ]);
+  });
+
+  test("expected failures never become events (criterion 2)", async () => {
+    const { sdk, errors, session } = reportingSession();
+    sdk.failNext("auth/wrong-password");
+    expect(await session.signInWithEmail(PLANTED_EMAIL, "x")).toEqual(err("invalid-credentials"));
+    sdk.failNext("auth/network-request-failed");
+    expect(await session.signInWithGoogle()).toEqual(err("offline"));
+    expect(errors.captured()).toEqual([]);
+  });
+
+  test("a provider the SDK says is off is reported; the static one is not (criterion 3)", async () => {
+    const { sdk, session, stages, errors } = reportingSession(null);
+    sdk.failNext("auth/operation-not-allowed");
+    expect(await session.signInWithEmail(PLANTED_EMAIL, "x")).toEqual(err("provider-unavailable"));
+    expect(await session.signInWithGoogle()).toEqual(err("provider-unavailable"));
+    expect(await session.signInWithApple()).toEqual(err("provider-unavailable"));
+    expect(stages()).toEqual(["firebase-email-sign-in"]);
+    expect(errors.captured()[0]?.context?.details?.["auth.failure"]).toBe("provider-unavailable");
+  });
+
+  test("each e-mail and reauthentication call is its own stage (criterion 7)", async () => {
+    const { sdk, session, stages } = reportingSession();
+    sdk.failNext("auth/internal-error");
+    await session.signInWithEmail(PLANTED_EMAIL, "x");
+    sdk.failNext("auth/internal-error");
+    await session.createAccountWithEmail(PLANTED_EMAIL, "x");
+    sdk.failNext("auth/internal-error");
+    await session.sendPasswordReset(PLANTED_EMAIL);
+    sdk.failNext("auth/internal-error");
+    await session.reauthenticate({ provider: "password", password: "x" });
+    sdk.failNext("auth/internal-error");
+    expect(await session.reauthenticate({ provider: "google" })).toEqual(err("unexpected"));
+    expect(stages()).toEqual([
+      "firebase-email-sign-in",
+      "firebase-email-sign-up",
+      "firebase-password-reset",
+      "firebase-reauth-password",
+      "firebase-reauth-google",
+    ]);
+  });
+
+  test("a reporter that throws does not change the result (criterion 8)", async () => {
+    const sdk = fakeSdk();
+    const session = createFirebaseAuthSession({
+      sdk,
+      google: picker(),
+      failures: createAuthFailureReporter({
+        captureError: () => {
+          throw new Error("sentry down");
+        },
+        crashNatively: () => undefined,
+      }),
+    });
+    sdk.failNext("auth/internal-error");
+    expect(await session.signInWithGoogle()).toEqual(err("unexpected"));
+  });
+});
