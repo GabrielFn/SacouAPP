@@ -62,7 +62,7 @@ Push ligado no deploy em 21/11/2026 (o Gabriel rodou `scripts/gcp/setup-notifica
 3. Repita no environment `production`.
 4. O próximo deploy entrega a lista ao serviço como `Operations__OperatorSubjects`. Para mudar só a lista, rode de novo o workflow `deploy-api` do último commit da `main`. Sem a variável, o serviço sobe com a lista vazia e ninguém entra; com um item fora do formato (vazio, com caractere fora de letras, dígitos, `_` e `-`), o deploy ou a partida falham sem mostrar o valor.
 
-**Produção (pergunta 218):** além da variável, o domínio `*.run.app` do `sacou-api` precisa estar nos domínios autorizados do Firebase Authentication e nos referenciadores HTTP da chave Web (hoje só o do teste está, ADR 0070, D8). Sem isso, a página abre e o login falha.
+**Produção (pergunta 218):** além da variável, o domínio `*.run.app` do `sacou-api` precisa estar nos domínios autorizados do Firebase Authentication e nos referenciadores HTTP da chave Web (ADR 0070, D8). Feito pelo Gabriel em 26/11/2026: `sacou-api-804880427435.us-east4.run.app` nos dois lugares. O job `deploy-production` fixa esse host em `public-base-url`, como o teste, porque o `status.url` devolve outro apelido. Sem isso, a página abre e o login falha.
 
 ## Página de exclusão de conta (E6.4)
 
